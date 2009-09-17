@@ -36,7 +36,7 @@ public class MyCacheFactoryBuilder extends DefaultCacheFactoryBuilder {
         if (result != null)
             return result;
 
-        result = "Scope" + classLoader.toString();
+        result = "Scope(" + classLoader.toString() + ")";
         scopeNameMapping.put(classLoader, result);
 
         return result;
