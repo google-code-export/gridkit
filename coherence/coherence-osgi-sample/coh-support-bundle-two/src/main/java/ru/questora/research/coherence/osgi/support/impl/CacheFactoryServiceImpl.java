@@ -11,12 +11,10 @@
 */
 package ru.questora.research.coherence.osgi.support.impl;
 
-import ru.questora.research.coherence.osgi.support.api.CacheFactoryService;
+import ru.questora.research.coherence.osgi.support.api.two.CacheFactoryService;
 import com.tangosol.net.NamedCache;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.run.xml.XmlHelper;
-import com.tangosol.dev.compiler.java.IfStatement;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContextAware;

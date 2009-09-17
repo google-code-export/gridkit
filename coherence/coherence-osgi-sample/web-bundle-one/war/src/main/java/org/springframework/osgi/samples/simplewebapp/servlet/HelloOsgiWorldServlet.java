@@ -59,7 +59,7 @@ public class HelloOsgiWorldServlet extends HttpServlet {
         final String key = "key";
         testCache.put(key, 838);
         out.println("testCache[" + key +"]: <br><pre>" + testCache.getCacheService() + "</pre>");
-        out.println(String.format("testCache[%1] = %2<br>", key, testCache.get(key)));
+        out.println(String.format("testCache[%1s] = %2s<br>", key, testCache.get(key)));
 
         
 //		out.println("<head><title>Hello Osgi World</title></head>");

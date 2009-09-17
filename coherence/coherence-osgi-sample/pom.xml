@@ -14,7 +14,7 @@
         <module>web-bundle-one</module>
         <module>web-bundle-two</module>
         <module>aggregator</module>
-  </modules>
+    </modules>
 
     <properties>
         <project.build.bundle.version>1.0</project.build.bundle.version>
@@ -72,20 +72,11 @@
             </dependency>
 
             <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>${spring.maven.artifact.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!--<dependency>-->
-            <!--<groupId>org.springframework</groupId>-->
-            <!--<artifactId>spring-web-</artifactId>-->
-            <!--<version>${spring.maven.artifact.version}</version>-->
-            <!--<scope>provided</scope>-->
-        <!--</dependency>-->
-
-            
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-web</artifactId>
+                <version>${spring.maven.artifact.version}</version>
+                <scope>provided</scope>
+            </dependency>
 
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -147,7 +138,8 @@
                             <Bundle-Name>${project.build.bundle.name}</Bundle-Name>
                             <Bundle-Vendor>${project.build.bundle.vendor}</Bundle-Vendor>
                             <Export-Package>${project.build.bundle.exportPackage}</Export-Package>
-                            <Import-Package>org.osgi.framework,javax.naming${project.build.bundle.importPackage}</Import-Package>
+                            <Import-Package>org.osgi.framework,javax.naming${project.build.bundle.importPackage}
+                            </Import-Package>
                             <!--<DynamicImport-Package>${project.build.bundle.dynamicImportPackage}</DynamicImport-Package>-->
                             <Bundle-Activator>${project.build.bundle.activator}</Bundle-Activator>
                             <Bundle-Classpath>., lib</Bundle-Classpath>

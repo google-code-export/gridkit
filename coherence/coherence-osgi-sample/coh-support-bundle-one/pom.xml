@@ -9,14 +9,14 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <groupId>ru.questora.research.coherence.osgi</groupId>
-    <artifactId>coh-support-bundle</artifactId>
+    <artifactId>coh-support-bundle-one</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>Coherence Support Bundle 2</name>
+    <name>Coherence Support Bundle 1</name>
     <url>http://maven.apache.org</url>
 
     <properties>
         <project.build.bundle.name>${project.name}</project.build.bundle.name>
-        <project.build.bundle.symbolicName>org.questora.osgi.samples.cohsupport2</project.build.bundle.symbolicName>
+        <project.build.bundle.symbolicName>org.questora.osgi.samples.cohsupport.one</project.build.bundle.symbolicName>
         <project.build.bundle.version>2.0</project.build.bundle.version>
         <project.build.bundle.importPackage>,
             com.tangosol.net,
@@ -25,8 +25,7 @@
             org.springframework.beans;version="${spring.maven.artifact.version}",
             org.springframework.beans.factory;version="${spring.maven.artifact.version}",
             org.springframework.core.io;version="${spring.maven.artifact.version}",
-            org.springframework.context;version="${spring.maven.artifact.version}",
-            javax.naming
+            org.springframework.context;version="${spring.maven.artifact.version}"
         </project.build.bundle.importPackage>
         <!--<project.build.bundle.dynamicImportPackage>com.tangosol.*</project.build.bundle.dynamicImportPackage>-->
         <project.build.bundle.exportPackage>ru.questora.research.coherence.osgi.support.api</project.build.bundle.exportPackage>
