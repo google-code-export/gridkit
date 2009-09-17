@@ -9,8 +9,10 @@
     <packaging>pom</packaging>
     <modules>
         <module>coherence-core-bundle</module>
-        <module>coh-support-bundle</module>
-        <module>web-bundle</module>
+        <module>coh-support-bundle-one</module>
+        <module>coh-support-bundle-two</module>
+        <module>web-bundle-one</module>
+        <module>web-bundle-two</module>
         <module>aggregator</module>
   </modules>
 
@@ -22,6 +24,9 @@
 
         <spring.maven.artifact.version>2.5.6</spring.maven.artifact.version>
         <spring.osgi.maven.artifact.version>1.2.0</spring.osgi.maven.artifact.version>
+
+        <project.postfix1>one</project.postfix1>
+        <project.postfix2>two</project.postfix2>
     </properties>
 
     <dependencies>
@@ -142,7 +147,7 @@
                             <Bundle-Name>${project.build.bundle.name}</Bundle-Name>
                             <Bundle-Vendor>${project.build.bundle.vendor}</Bundle-Vendor>
                             <Export-Package>${project.build.bundle.exportPackage}</Export-Package>
-                            <Import-Package>org.osgi.framework${project.build.bundle.importPackage}</Import-Package>
+                            <Import-Package>org.osgi.framework,javax.naming${project.build.bundle.importPackage}</Import-Package>
                             <!--<DynamicImport-Package>${project.build.bundle.dynamicImportPackage}</DynamicImport-Package>-->
                             <Bundle-Activator>${project.build.bundle.activator}</Bundle-Activator>
                             <Bundle-Classpath>., lib</Bundle-Classpath>
