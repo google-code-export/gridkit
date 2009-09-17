@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>coherence-osgi-sample</artifactId>
+        <groupId>ru.questora.research.coherence.osgi</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <groupId>ru.questora.research.coherence.osgi</groupId>
+    <artifactId>coh-support-bundle</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>Coherence Support Bundle 2</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <project.build.bundle.name>${project.name}</project.build.bundle.name>
+        <project.build.bundle.symbolicName>org.questora.osgi.samples.cohsupport2</project.build.bundle.symbolicName>
+        <project.build.bundle.version>2.0</project.build.bundle.version>
+        <project.build.bundle.importPackage>,
+            com.tangosol.net,
+            com.tangosol.run.xml,
+            org.springframework.core;version="${spring.maven.artifact.version}",
+            org.springframework.beans;version="${spring.maven.artifact.version}",
+            org.springframework.beans.factory;version="${spring.maven.artifact.version}",
+            org.springframework.core.io;version="${spring.maven.artifact.version}",
+            org.springframework.context;version="${spring.maven.artifact.version}",
+            javax.naming
+        </project.build.bundle.importPackage>
+        <!--<project.build.bundle.dynamicImportPackage>com.tangosol.*</project.build.bundle.dynamicImportPackage>-->
+        <project.build.bundle.exportPackage>ru.questora.research.coherence.osgi.support.api</project.build.bundle.exportPackage>
+        <project.build.bundle.activator>ru.questora.research.coherence.osgi.support.Activator</project.build.bundle.activator>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.oracle.coherence</groupId>
+            <artifactId>coherence</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+        </dependency>
+    </dependencies>
+</project>
