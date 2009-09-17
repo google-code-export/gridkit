@@ -16,8 +16,7 @@
 
 package org.springframework.osgi.samples.simplewebapp.servlet;
 
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.BundleContext;
+import com.tangosol.net.NamedCache;
 import ru.questora.coherence.osgi.Activator;
 import ru.questora.research.coherence.osgi.support.api.CacheFactoryService;
 
@@ -27,10 +26,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-
-import com.tangosol.net.NamedCache;
+import java.util.Map;
+import java.util.Set;
 
 public class HelloOsgiWorldServlet extends HttpServlet {
+
+    private final NamedCache testCache;
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         addHelloWorld(resp, req.getMethod());
@@ -48,24 +49,26 @@ public class HelloOsgiWorldServlet extends HttpServlet {
         response.setContentType("text/html");
 
         ServletOutputStream out = response.getOutputStream();
-        out.println("<html>");
-        final BundleContext bundleContext = Activator.getBundleContext();
-        final Object cacheService = bundleContext.getService(bundleContext.getServiceReference(CacheFactoryService.class.getName()));
+        out.println("<html><pre>");
 
-        final NamedCache testCache = ((CacheFactoryService) cacheService).getCache("TestCache");
-        out.println("Cache: <br><pre>" + testCache + "</pre>");
-        out.println("Cache Service: <br><pre>" + testCache.getCacheService() + "</pre>");
+        out.println("Cache: <br>" + testCache + "");
+        out.println("Cache Service: <br>" + testCache.getCacheService() + "");
 
-        final String key = "key";
-        testCache.put(key, 838);
-        out.println("testCache[" + key +"]: <br><pre>" + testCache.getCacheService() + "</pre>");
-        out.println(String.format("testCache[%1s] = %2s<br>", key, testCache.get(key)));
+        for (int i = 0; i < 20; i += 2)
+            testCache.put(i, "val_" + i);
 
-        
+        for (Map.Entry e : (Set<Map.Entry>) testCache.entrySet())
+            out.println(String.format("testCache[%1s] = %2s", e.getKey(), e.getValue()));
+
 //		out.println("<head><title>Hello Osgi World</title></head>");
 //		out.println("<body>");
 //		out.println("<h1>Hello OSGi World</h1>");
 //		out.println("<h2>http method used:" + method + "</h2>");
-        out.println("</body></html>");
+        out.println("</pre></html>");
+    }
+
+    {
+        testCache = ((CacheFactoryService) Activator.getBundleContext().getService(Activator.getBundleContext().getServiceReference(CacheFactoryService.class.getName()))).getCache("TestCache");
+        testCache.clear();
     }
 }
