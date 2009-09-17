@@ -1,7 +1,7 @@
-Web-ContextPath: simple-web-app-two
+Web-ContextPath: simple-web-app-one
 Bundle-ManifestVersion: 2
-Bundle-Name: Simple OSGi War
-Bundle-SymbolicName: org.springframework.osgi.samples.simplewebapp.two
+Bundle-Name: Simple OSGi War 1
+Bundle-SymbolicName: org.questora.osgi.samples.web.one
 Bundle-Activator: ru.questora.coherence.osgi.Activator
 Bundle-ClassPath: WEB-INF/classes
 Import-Package: javax.servlet;version="2.4.0",

@@ -16,10 +16,10 @@
 
 package org.springframework.osgi.samples.simplewebapp.servlet;
 
-import org.osgi.framework.ServiceReference;
+import com.tangosol.net.NamedCache;
 import org.osgi.framework.BundleContext;
 import ru.questora.coherence.osgi.Activator;
-import ru.questora.research.coherence.osgi.support.api.CacheFactoryService;
+import ru.questora.research.coherence.osgi.support.api.two.CacheFactoryService;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -27,8 +27,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-
-import com.tangosol.net.NamedCache;
 
 public class HelloOsgiWorldServlet extends HttpServlet {
 
@@ -58,10 +56,9 @@ public class HelloOsgiWorldServlet extends HttpServlet {
 
         final String key = "key";
         testCache.put(key, 838);
-        out.println("testCache[" + key +"]: <br><pre>" + testCache.getCacheService() + "</pre>");
-        out.println(String.format("testCache[%1] = %2<br>", key, testCache.get(key)));
+        out.println("testCache[" + key + "]: <br><pre>" + testCache.getCacheService() + "</pre>");
+        out.println(String.format("testCache[%1s] = %2s<br>", key, testCache.get(key)));
 
-        
 //		out.println("<head><title>Hello Osgi World</title></head>");
 //		out.println("<body>");
 //		out.println("<h1>Hello OSGi World</h1>");

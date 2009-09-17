@@ -11,13 +11,12 @@
     </parent>
 
     <groupId>ru.questora.research.coherence.osgi</groupId>
-    <artifactId>web-bundle</artifactId>
+    <artifactId>web-bundle-one</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>OSGi Web Application</name>
+    <name>OSGi Web Application 1</name>
     <packaging>pom</packaging>
 
     <modules>
-        <module>logging</module>
         <module>war</module>
         <!-- <module>integration-test</module> -->
     </modules>
@@ -25,7 +24,7 @@
     <dependencies>
         <dependency>
             <groupId>ru.questora.research.coherence.osgi</groupId>
-            <artifactId>coh-support-bundle</artifactId>
+            <artifactId>coh-support-bundle-one</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

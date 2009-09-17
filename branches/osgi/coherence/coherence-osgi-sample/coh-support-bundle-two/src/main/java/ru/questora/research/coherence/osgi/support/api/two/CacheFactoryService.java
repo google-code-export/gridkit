@@ -9,7 +9,7 @@
 * accordance with the terms of the license agreement you entered into
 * with Grid Dynamics.
 */
-package ru.questora.research.coherence.osgi.support.api;
+package ru.questora.research.coherence.osgi.support.api.two;
 
 import com.tangosol.net.NamedCache;
 
