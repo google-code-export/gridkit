@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>ru.questora.research.coherence.osgi</groupId>
+    <artifactId>coherence-osgi-sample</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>OSGi Bundle Base</name>
+    <url>http://www.questora.ru/</url>
+    <packaging>pom</packaging>
+    <modules>
+        <module>coherence-core-bundle</module>
+        <module>coh-support-bundle</module>
+        <module>web-bundle</module>
+    </modules>
+
+    <properties>
+        <project.build.bundle.version>1.0</project.build.bundle.version>
+        <project.build.bundle.vendor>Questora inc</project.build.bundle.vendor>
+        <project.build.bundle.importPackage/>
+
+        <spring.maven.artifact.version>2.5.6</spring.maven.artifact.version>
+        <spring.osgi.maven.artifact.version>1.2.0</spring.osgi.maven.artifact.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi_R4_core</artifactId>
+            <version>1.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi_R4_compendium</artifactId>
+            <version>1.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.oracle.coherence</groupId>
+                <artifactId>coherence</artifactId>
+
+                <version>[3.5,)</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+                <version>${spring.maven.artifact.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>${spring.maven.artifact.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>${spring.maven.artifact.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--<dependency>-->
+            <!--<groupId>org.springframework</groupId>-->
+            <!--<artifactId>spring-web-</artifactId>-->
+            <!--<version>${spring.maven.artifact.version}</version>-->
+            <!--<scope>provided</scope>-->
+        <!--</dependency>-->
+
+            
+
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-beans</artifactId>
+                <version>${spring.maven.artifact.version}</version>
+                <scope>provided</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <!--<version>2.0.2</version>-->
+                    <configuration>
+                        <source>1.6</source>
+                        <target>1.6</target>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-dependencies</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/classes/lib</outputDirectory>
+                            <excludeTransitive>false</excludeTransitive>
+                            <excludeScope>provided</excludeScope>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>false</addClasspath>
+                        </manifest>
+                        <manifestEntries>
+                            <Bundle-Version>${project.build.bundle.version}</Bundle-Version>
+                            <Bundle-SymbolicName>${project.build.bundle.symbolicName}</Bundle-SymbolicName>
+                            <Bundle-Name>${project.build.bundle.name}</Bundle-Name>
+                            <Bundle-Vendor>${project.build.bundle.vendor}</Bundle-Vendor>
+                            <Export-Package>${project.build.bundle.exportPackage}</Export-Package>
+                            <Import-Package>org.osgi.framework${project.build.bundle.importPackage}</Import-Package>
+                            <Bundle-Activator>${project.build.bundle.activator}</Bundle-Activator>
+                            <Bundle-Classpath>., lib</Bundle-Classpath>
+                            <Bundle-ManifestVersion>2</Bundle-ManifestVersion>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<project>
+    <parent>
+        <artifactId>coherence-osgi-sample</artifactId>
+        <groupId>ru.questora.research.coherence.osgi</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.springframework.osgi.samples</groupId>
+    <artifactId>coherence-core-bundle</artifactId>
+    <packaging>jar</packaging>
+    <name>Coherence Core Bundle</name>
+    <url>http://www.springframework.org/osgi</url>
+
+    <properties>
+        <project.build.bundle.name>${project.name}</project.build.bundle.name>
+        <project.build.bundle.symbolicName>org.questora.osgi.samples.corebundle</project.build.bundle.symbolicName>
+        <project.build.bundle.exportPackage>com.tangosol.net</project.build.bundle.exportPackage>
+        <project.build.bundle.activator>org.questora.osgi.samples.corebundle.Activator</project.build.bundle.activator>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.oracle.coherence</groupId>
+            <artifactId>coherence</artifactId>
+        </dependency>
+    </dependencies>
+</project>
