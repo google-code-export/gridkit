@@ -6,7 +6,6 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.springframework.osgi.samples</groupId>
     <artifactId>coherence-core-bundle</artifactId>
     <packaging>jar</packaging>
     <name>Coherence Core Bundle</name>
@@ -15,7 +14,7 @@
     <properties>
         <project.build.bundle.name>${project.name}</project.build.bundle.name>
         <project.build.bundle.symbolicName>org.questora.osgi.samples.corebundle</project.build.bundle.symbolicName>
-        <project.build.bundle.exportPackage>com.tangosol.net</project.build.bundle.exportPackage>
+        <project.build.bundle.exportPackage>com.tangosol.net, com.tangosol.run.xml</project.build.bundle.exportPackage>
         <project.build.bundle.activator>org.questora.osgi.samples.corebundle.Activator</project.build.bundle.activator>
     </properties>
 

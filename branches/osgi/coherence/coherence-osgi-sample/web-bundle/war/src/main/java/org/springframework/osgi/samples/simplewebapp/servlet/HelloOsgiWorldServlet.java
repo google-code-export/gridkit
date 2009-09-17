@@ -16,56 +16,56 @@
 
 package org.springframework.osgi.samples.simplewebapp.servlet;
 
-import com.tangosol.net.CacheFactory;
-import com.tangosol.net.NamedCache;
-
-import java.io.IOException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.BundleContext;
+import ru.questora.coherence.osgi.Activator;
+import ru.questora.research.coherence.osgi.support.api.CacheFactoryService;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
-import ru.questora.coherence.osgi.MyCacheFactoryBuilder;
-import ru.questora.coherence.osgi.Activator;
-import ru.questora.research.coherence.osgi.support.api.CacheFactoryService;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
+import com.tangosol.net.NamedCache;
 
-/**
- * A simple, "hellow world" service running inside OSGi.
- * 
- * @author Costin Leau
- * 
- */
 public class HelloOsgiWorldServlet extends HttpServlet {
 
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		addHelloWorld(resp, req.getMethod());
-	}
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        addHelloWorld(resp, req.getMethod());
+    }
 
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		addHelloWorld(resp, req.getMethod());
-	}
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        addHelloWorld(resp, req.getMethod());
+    }
 
-	public String getServletInfo() {
-		return "Simple Osgi World Servlet";
-	}
+    public String getServletInfo() {
+        return "Simple Osgi World Servlet";
+    }
 
-	private void addHelloWorld(HttpServletResponse response, String method) throws IOException {
-		response.setContentType("text/html");
+    private void addHelloWorld(HttpServletResponse response, String method) throws IOException {
+        response.setContentType("text/html");
 
-		ServletOutputStream out = response.getOutputStream();
-		out.println("<html>");
-        final ServiceReference cacheServiceOsgi = Activator.getBundleContext().getServiceReference(CacheFactoryService.class.getName());
+        ServletOutputStream out = response.getOutputStream();
+        out.println("<html>");
+        final BundleContext bundleContext = Activator.getBundleContext();
+        final Object cacheService = bundleContext.getService(bundleContext.getServiceReference(CacheFactoryService.class.getName()));
 
-        out.println("<pre>" + ((CacheFactoryService)cacheServiceOsgi).getCache("TestCache") + "</pre>");
+        final NamedCache testCache = ((CacheFactoryService) cacheService).getCache("TestCache");
+        out.println("Cache: <br><pre>" + testCache + "</pre>");
+        out.println("Cache Service: <br><pre>" + testCache.getCacheService() + "</pre>");
 
+        final String key = "key";
+        testCache.put(key, 838);
+        out.println("testCache[" + key +"]: <br><pre>" + testCache.getCacheService() + "</pre>");
+        out.println(String.format("testCache[%1] = %2<br>", key, testCache.get(key)));
+
+        
 //		out.println("<head><title>Hello Osgi World</title></head>");
 //		out.println("<body>");
 //		out.println("<h1>Hello OSGi World</h1>");
 //		out.println("<h2>http method used:" + method + "</h2>");
-		out.println("</body></html>");
-	}
+        out.println("</body></html>");
+    }
 }

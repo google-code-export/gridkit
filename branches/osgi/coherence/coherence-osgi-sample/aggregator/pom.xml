@@ -56,6 +56,7 @@
                             <!--<excludeGroupIds>*</excludeGroupIds>-->
                             <includeGroupIds>${project.groupId}</includeGroupIds>
                             <includeTypes>jar,war</includeTypes>
+                            <!--<useSubDirectoryPerArtifact>true</useSubDirectoryPerArtifact>-->
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>false</overWriteSnapshots>
                             <overWriteIfNewer>true</overWriteIfNewer>

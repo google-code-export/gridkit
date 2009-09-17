@@ -18,8 +18,18 @@
         <project.build.bundle.name>${project.name}</project.build.bundle.name>
         <project.build.bundle.symbolicName>org.questora.osgi.samples.cohsupport2</project.build.bundle.symbolicName>
         <project.build.bundle.version>2.0</project.build.bundle.version>
-        <project.build.bundle.importPackage>, org.springframework.core; version="2.5.6", org.springframework.core.io; version="2.5.6", org.springframework.context, javax.naming</project.build.bundle.importPackage>
-        <project.build.bundle.exportPackage>com.tangosol.net, ru.questora.research.coherence.osgi.support.api</project.build.bundle.exportPackage>
+        <project.build.bundle.importPackage>,
+            com.tangosol.net,
+            com.tangosol.run.xml,
+            org.springframework.core;version="${spring.maven.artifact.version}",
+            org.springframework.beans;version="${spring.maven.artifact.version}",
+            org.springframework.beans.factory;version="${spring.maven.artifact.version}",
+            org.springframework.core.io;version="${spring.maven.artifact.version}",
+            org.springframework.context;version="${spring.maven.artifact.version}",
+            javax.naming
+        </project.build.bundle.importPackage>
+        <!--<project.build.bundle.dynamicImportPackage>com.tangosol.*</project.build.bundle.dynamicImportPackage>-->
+        <project.build.bundle.exportPackage>ru.questora.research.coherence.osgi.support.api</project.build.bundle.exportPackage>
         <project.build.bundle.activator>ru.questora.research.coherence.osgi.support.Activator</project.build.bundle.activator>
     </properties>
 
@@ -27,6 +37,7 @@
         <dependency>
             <groupId>com.oracle.coherence</groupId>
             <artifactId>coherence</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
