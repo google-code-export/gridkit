@@ -29,13 +29,7 @@ public class Activator implements BundleActivator {
     private static BundleContext bundleContext;
 
     public void start(BundleContext bundleContext) throws Exception {
-        if (testCache != null)
-            throw new IllegalStateException("testCache must not be set twice");
         this.bundleContext = bundleContext;
-
-        final MyCacheFactoryBuilder builder = new MyCacheFactoryBuilder();
-        CacheFactory.setCacheFactoryBuilder(builder);
-        
     }
 
     public void stop(BundleContext bundleContext) throws Exception {
