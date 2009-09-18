@@ -13,18 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.griddynamics.gridkit.coherence.benchmark.capacity.utils;
+package com.griddynamics.gridkit.coherence.benchmark.capacity.objects.sample;
 
-import java.util.Arrays;
+import java.io.Serializable;
 
 /**
  * @author Alexey Ragozin (aragozin@griddynamics.com)
  */
-public class ArrayUtils {
-	
-	public static <T> T[] append(T[] base, T object) {
-		T[] result = Arrays.copyOf(base, base.length + 1);
-		result[result.length - 1] = object;
-		return result;
-	}
+@SuppressWarnings("serial")
+public class DomainObject implements Serializable {
+
+    private long id;
+    DomainObjAttrib a0;
+    DomainObjAttrib a1;
+    DomainObjAttrib a2;
+    DomainObjAttrib a3;
+    
+    public DomainObject() {
+    }
+
+    public DomainObject(long id) {
+        super();
+        this.id = id;
+    }
+    
+    public DomainObjKey getKey() {
+        return new DomainObjKey(id);
+    }
+    
+    public DomainObjAttrib getA0() {
+        return a0;
+    }
+    
+    public DomainObjAttrib getA1() {
+        return a1;
+    }
 }
