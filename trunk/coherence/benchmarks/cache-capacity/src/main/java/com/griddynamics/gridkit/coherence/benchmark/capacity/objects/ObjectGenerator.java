@@ -13,18 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.griddynamics.gridkit.coherence.benchmark.capacity.utils;
+package com.griddynamics.gridkit.coherence.benchmark.capacity.objects;
 
-import java.util.Arrays;
+import java.util.Map;
 
-/**
- * @author Alexey Ragozin (aragozin@griddynamics.com)
- */
-public class ArrayUtils {
-	
-	public static <T> T[] append(T[] base, T object) {
-		T[] result = Arrays.copyOf(base, base.length + 1);
-		result[result.length - 1] = object;
-		return result;
-	}
+public interface ObjectGenerator<A, B> {
+    
+    public Map<A, B>  generate(long from, long to);
+
 }
