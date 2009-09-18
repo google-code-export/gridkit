@@ -75,6 +75,11 @@ public class ReflectionPofSerializer implements PofSerializer {
         }        
     }
     
+    /**
+     * If you have singleton object in your application. This works similar to readReslve or enumeration serialization logic.
+     * @param name unique name of singleton object
+     * @param object instance of singleton object
+     */
     public static void registerWellKnownObject(String name, Object object) {
         if (WELL_KNOWN_OBJECTS.putIfAbsent(name, object) == null) {
             WELL_KNOWN_OBJECTS_REV.put(object, name);
@@ -395,6 +400,13 @@ public class ReflectionPofSerializer implements PofSerializer {
         }
     }
     
+    /**
+     * WKO object place holder.
+     * Should be included in pof-config.xml if wko is used in application.
+     * 
+     * @author Alexey Ragozin (aragozin@griddynamics.com)
+     *
+     */
     public static class WKO implements Serializable, PortableObject {
 
         private static final long serialVersionUID = 20090715L;
