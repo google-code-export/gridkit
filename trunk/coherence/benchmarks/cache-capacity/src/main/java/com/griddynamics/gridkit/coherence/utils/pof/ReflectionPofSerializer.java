@@ -65,16 +65,6 @@ public class ReflectionPofSerializer implements PofSerializer {
     private final static ConcurrentMap<String, Object> WELL_KNOWN_OBJECTS = new ConcurrentHashMap<String, Object>();  
     private final static ConcurrentMap<Object, String> WELL_KNOWN_OBJECTS_REV = new ConcurrentHashMap<Object, String>();
     
-    public static void enableStatistics(Class<?> type) {
-        String name = type.getName();
-        if (name.startsWith("com.sitronics.foris.core.")) {
-            name = name.substring("com.sitronics.foris.core.".length());
-        }        
-        if (name.startsWith("com.sitronics.foris.")) {
-            name = name.substring("com.sitronics.foris.".length());
-        }        
-    }
-    
     /**
      * If you have singleton object in your application. This works similar to readReslve or enumeration serialization logic.
      * @param name unique name of singleton object
@@ -404,7 +394,7 @@ public class ReflectionPofSerializer implements PofSerializer {
      * WKO object place holder.
      * Should be included in pof-config.xml if wko is used in application.
      * 
-     * @author Alexey Ragozin (aragozin@griddynamics.com)
+     * @author Alexey Ragozin (alexey.ragozin@gmail.com)
      *
      */
     public static class WKO implements Serializable, PortableObject {
