@@ -34,18 +34,22 @@ public class HelloOsgiWorldServlet extends HttpServlet {
     private final NamedCache testCache;
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        addHelloWorld(resp, req.getMethod());
+        process(resp, req);
     }
 
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        addHelloWorld(resp, req.getMethod());
+        final Object key = req.getParameter("key");
+        if (key != null) {
+            testCache.put(key, req.getParameter("val"));
+        }
+        process(resp, req);
     }
 
     public String getServletInfo() {
         return "Simple Osgi World Servlet";
     }
 
-    private void addHelloWorld(HttpServletResponse response, String method) throws IOException {
+    private void process(HttpServletResponse response, HttpServletRequest request) throws IOException {
         response.setContentType("text/html");
 
         ServletOutputStream out = response.getOutputStream();
@@ -54,21 +58,24 @@ public class HelloOsgiWorldServlet extends HttpServlet {
         out.println("Cache: <br>" + testCache + "");
         out.println("Cache Service: <br>" + testCache.getCacheService() + "");
 
-        for (int i = 0; i < 20; i += 2)
-            testCache.put(i, "val_" + i);
-
         for (Map.Entry e : (Set<Map.Entry>) testCache.entrySet())
             out.println(String.format("testCache[%1s] = %2s", e.getKey(), e.getValue()));
 
-//		out.println("<head><title>Hello Osgi World</title></head>");
-//		out.println("<body>");
-//		out.println("<h1>Hello OSGi World</h1>");
-//		out.println("<h2>http method used:" + method + "</h2>");
+        out.println("<h3>Add value to cache</h3><br>");
+        out.println("<form method=post>" +
+                "<input type=text name=\"key\" />" +
+                ": <input type=text name=\"val\" />" +
+                ": <input type=submit value=\"Add Value\" />" +
+                "</form>");
+
         out.println("</pre></html>");
     }
 
     {
-        testCache = ((CacheFactoryService) Activator.getBundleContext().getService(Activator.getBundleContext().getServiceReference(CacheFactoryService.class.getName()))).getCache("TestCache");
+        final CacheFactoryService cacheFactoryService = (CacheFactoryService) Activator.getBundleContext().getService(Activator.getBundleContext().getServiceReference(CacheFactoryService.class.getName()));
+        testCache = cacheFactoryService.getCache("TestCache");
         testCache.clear();
+        for (int i = 0; i < 20; i += 2)
+            testCache.put(i, "val_" + i);
     }
 }
