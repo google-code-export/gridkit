@@ -19,6 +19,7 @@
         <project.build.bundle.symbolicName>org.questora.osgi.samples.cohsupport.two</project.build.bundle.symbolicName>
         <project.build.bundle.version>2.0</project.build.bundle.version>
         <project.build.bundle.importPackage>,
+            org.questora.osgi.samples.corebundle,
             com.tangosol.net,
             com.tangosol.run.xml,
             org.springframework.core;version="${spring.maven.artifact.version}",
@@ -30,8 +31,7 @@
         <!--<project.build.bundle.dynamicImportPackage>com.tangosol.*</project.build.bundle.dynamicImportPackage>-->
         <project.build.bundle.exportPackage>ru.questora.research.coherence.osgi.support.api.two
         </project.build.bundle.exportPackage>
-        <project.build.bundle.activator>ru.questora.research.coherence.osgi.support.Activator
-        </project.build.bundle.activator>
+        <project.build.bundle.activator>org.questora.osgi.samples.corebundle.SupportBundleActivator</project.build.bundle.activator>
     </properties>
 
     <dependencies>

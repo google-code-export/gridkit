@@ -140,8 +140,7 @@
                             <Bundle-Name>${project.build.bundle.name}</Bundle-Name>
                             <Bundle-Vendor>${project.build.bundle.vendor}</Bundle-Vendor>
                             <Export-Package>${project.build.bundle.exportPackage}</Export-Package>
-                            <Import-Package>org.osgi.framework,javax.naming${project.build.bundle.importPackage}
-                            </Import-Package>
+                            <Import-Package>org.osgi.framework,javax.naming${project.build.bundle.importPackage}</Import-Package>
                             <!--<DynamicImport-Package>${project.build.bundle.dynamicImportPackage}</DynamicImport-Package>-->
                             <Bundle-Activator>${project.build.bundle.activator}</Bundle-Activator>
                             <Bundle-Classpath>., lib</Bundle-Classpath>

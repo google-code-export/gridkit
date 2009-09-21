@@ -9,10 +9,14 @@
 * accordance with the terms of the license agreement you entered into
 * with Grid Dynamics.
 */
-package ru.questora.research.coherence.osgi.support;
+package org.questora.osgi.samples.corebundle;
 
+import com.tangosol.net.CacheFactory;
+import com.tangosol.run.xml.XmlHelper;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+
+import java.net.URL;
 
 /**
  * TODO [Need to specify general description of the entity]
@@ -20,15 +24,24 @@ import org.osgi.framework.BundleContext;
  * @author Anton Savelyev
  * @since 1.7
  */
-public class Activator implements BundleActivator {
+public class SupportBundleActivator implements BundleActivator {
 
     @Override
     public void start(BundleContext bundleContext) throws Exception {
-        //To change body of implemented methods use File | Settings | File Templates.
+        final URL cacheConfig = bundleContext.getBundle().getResource("cache-config.xml");
+
+        CacheFactory.getCacheFactoryBuilder().setCacheConfiguration(
+                getClassLoader(bundleContext),
+                XmlHelper.loadXml(cacheConfig)
+        );
+    }
+
+    private ClassLoader getClassLoader(BundleContext bundleContext) throws ClassNotFoundException {
+        return bundleContext.getBundle().loadClass("java.lang.Object").getClassLoader();
     }
 
     @Override
     public void stop(BundleContext bundleContext) throws Exception {
-        //To change body of implemented methods use File | Settings | File Templates.
+        CacheFactory.getCacheFactoryBuilder().releaseAll(getClassLoader(bundleContext));
     }
 }
