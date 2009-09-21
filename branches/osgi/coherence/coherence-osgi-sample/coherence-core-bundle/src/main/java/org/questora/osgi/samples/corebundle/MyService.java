@@ -17,11 +17,10 @@ package org.questora.osgi.samples.corebundle;
 
 /**
  * Interface implemented by the sample service
- * 
+ *
  * @author Adrian Colyer
  */
 public interface MyService {
 
-	String stringValue();
-	
+    String stringValue();
 }

@@ -18,19 +18,17 @@ package org.questora.osgi.samples.corebundle.impl;
 import org.questora.osgi.samples.corebundle.MyService;
 
 /**
- * Implementation of the simple service, returns a hard-coded
- * String value
- * 
+ * Implementation of the simple service, returns a hard-coded String value
+ *
  * @author Adrian Colyer
  */
 public class MyServiceImpl implements MyService {
 
-	/* (non-Javadoc)
-	 * @see org.questora.osgi.samples.corebundle.MyService#stringValue()
-	 */
-	public String stringValue() {
-        
-		return "simple service at your service";
-	}
+    /* (non-Javadoc)
+      * @see org.questora.osgi.samples.corebundle.MyService#stringValue()
+      */
+    public String stringValue() {
 
+        return "simple service at your service";
+    }
 }

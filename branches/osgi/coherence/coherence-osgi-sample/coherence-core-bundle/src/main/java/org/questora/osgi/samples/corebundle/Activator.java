@@ -11,9 +11,9 @@
 */
 package org.questora.osgi.samples.corebundle;
 
+import com.tangosol.net.CacheFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import com.tangosol.net.CacheFactory;
 
 /**
  * TODO [Need to specify general description of the entity]
@@ -30,6 +30,6 @@ public class Activator implements BundleActivator {
 
     @Override
     public void stop(BundleContext bundleContext) throws Exception {
-        
+
     }
 }

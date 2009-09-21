@@ -28,8 +28,10 @@
             org.springframework.context;version="${spring.maven.artifact.version}"
         </project.build.bundle.importPackage>
         <!--<project.build.bundle.dynamicImportPackage>com.tangosol.*</project.build.bundle.dynamicImportPackage>-->
-        <project.build.bundle.exportPackage>ru.questora.research.coherence.osgi.support.api</project.build.bundle.exportPackage>
-        <project.build.bundle.activator>ru.questora.research.coherence.osgi.support.Activator</project.build.bundle.activator>
+        <project.build.bundle.exportPackage>ru.questora.research.coherence.osgi.support.api
+        </project.build.bundle.exportPackage>
+        <project.build.bundle.activator>ru.questora.research.coherence.osgi.support.Activator
+        </project.build.bundle.activator>
     </properties>
 
     <dependencies>

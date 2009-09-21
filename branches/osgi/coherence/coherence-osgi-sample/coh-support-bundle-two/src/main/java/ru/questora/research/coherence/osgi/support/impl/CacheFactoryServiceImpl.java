@@ -11,15 +11,15 @@
 */
 package ru.questora.research.coherence.osgi.support.impl;
 
-import ru.questora.research.coherence.osgi.support.api.two.CacheFactoryService;
-import com.tangosol.net.NamedCache;
 import com.tangosol.net.CacheFactory;
+import com.tangosol.net.NamedCache;
 import com.tangosol.run.xml.XmlHelper;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.Resource;
+import ru.questora.research.coherence.osgi.support.api.two.CacheFactoryService;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -32,12 +32,14 @@ import java.io.IOException;
  */
 public class CacheFactoryServiceImpl implements CacheFactoryService, ApplicationContextAware, DisposableBean {
 
+    private final ClassLoader classLoader = this.getClass().getClassLoader();
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         final Resource coherenceXmlConfigResource = applicationContext.getResource("cache-config.xml");
         try {
             CacheFactory.getCacheFactoryBuilder().setCacheConfiguration(
-                    getMappedClassLoader(),
+                    classLoader,
                     XmlHelper.loadXml(new FileInputStream(coherenceXmlConfigResource.getFile()))
             );
         } catch (IOException e) {
@@ -47,15 +49,11 @@ public class CacheFactoryServiceImpl implements CacheFactoryService, Application
 
     @Override
     public NamedCache getCache(String name) {
-        return CacheFactory.getCache(name, getMappedClassLoader());
-    }
-
-    private ClassLoader getMappedClassLoader() {
-        return this.getClass().getClassLoader();
+        return CacheFactory.getCache(name, classLoader);
     }
 
     @Override
     public void destroy() throws Exception {
-        CacheFactory.getCacheFactoryBuilder().releaseAll(getMappedClassLoader());
+        CacheFactory.getCacheFactoryBuilder().releaseAll(classLoader);
     }
 }

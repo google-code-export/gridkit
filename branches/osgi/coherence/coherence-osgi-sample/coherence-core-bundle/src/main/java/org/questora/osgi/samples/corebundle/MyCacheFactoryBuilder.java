@@ -13,9 +13,6 @@ package org.questora.osgi.samples.corebundle;
 
 import com.tangosol.net.DefaultCacheFactoryBuilder;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * TODO [Need to specify general description of the entity]
  *
@@ -24,21 +21,12 @@ import java.util.Map;
  */
 public class MyCacheFactoryBuilder extends DefaultCacheFactoryBuilder {
 
-    private final Map<ClassLoader, String> scopeNameMapping = new HashMap<ClassLoader, String>();
-
     public MyCacheFactoryBuilder() {
         super(STRATEGY_RENAME_UNIQUELY);
     }
 
     @Override
     protected String getScopeName(ClassLoader classLoader) {
-        String result = scopeNameMapping.get(classLoader);
-        if (result != null)
-            return result;
-
-        result = "Scope(" + classLoader.toString() + ")";
-        scopeNameMapping.put(classLoader, result);
-
-        return result;
+        return "Scope(" + classLoader.toString() + ")";
     }
 }
