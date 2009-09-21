@@ -30,30 +30,12 @@ import java.io.IOException;
  * @author Anton Savelyev
  * @since 1.7
  */
-public class CacheFactoryServiceImpl implements CacheFactoryService, ApplicationContextAware, DisposableBean {
+public class CacheFactoryServiceImpl implements CacheFactoryService {
 
     private final ClassLoader classLoader = this.getClass().getClassLoader();
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        final Resource coherenceXmlConfigResource = applicationContext.getResource("cache-config.xml");
-        try {
-            CacheFactory.getCacheFactoryBuilder().setCacheConfiguration(
-                    classLoader,
-                    XmlHelper.loadXml(new FileInputStream(coherenceXmlConfigResource.getFile()))
-            );
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
     public NamedCache getCache(String name) {
         return CacheFactory.getCache(name, classLoader);
-    }
-
-    @Override
-    public void destroy() throws Exception {
-        CacheFactory.getCacheFactoryBuilder().releaseAll(classLoader);
     }
 }

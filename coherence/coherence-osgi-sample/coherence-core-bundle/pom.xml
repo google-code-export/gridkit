@@ -14,7 +14,7 @@
     <properties>
         <project.build.bundle.name>${project.name}</project.build.bundle.name>
         <project.build.bundle.symbolicName>org.questora.osgi.samples.corebundle</project.build.bundle.symbolicName>
-        <project.build.bundle.exportPackage>com.tangosol.net, com.tangosol.run.xml</project.build.bundle.exportPackage>
+        <project.build.bundle.exportPackage>com.tangosol.net, com.tangosol.run.xml, org.questora.osgi.samples.corebundle</project.build.bundle.exportPackage>
         <project.build.bundle.activator>org.questora.osgi.samples.corebundle.Activator</project.build.bundle.activator>
     </properties>
 
