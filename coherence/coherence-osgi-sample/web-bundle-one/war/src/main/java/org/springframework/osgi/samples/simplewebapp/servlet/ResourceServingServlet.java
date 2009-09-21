@@ -16,6 +16,11 @@
 
 package org.springframework.osgi.samples.simplewebapp.servlet;
 
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,107 +30,96 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 /**
  * Simple servlet that serves resources from its war.
- * 
+ *
  * @author Costin Leau
- * 
  */
 public class ResourceServingServlet extends HttpServlet {
 
-	private static final String SLASH = "/";
-	private static final String RESOURCE_PARAM = "resource";
+    private static final String SLASH = "/";
+    private static final String RESOURCE_PARAM = "resource";
 
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        serveResource(req, resp);
+    }
 
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		serveResource(req, resp);
-	}
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        serveResource(req, resp);
+    }
 
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		serveResource(req, resp);
-	}
+    public String getServletInfo() {
+        return "Resource Serving Servlet";
+    }
 
-	public String getServletInfo() {
-		return "Resource Serving Servlet";
-	}
+    private void serveResource(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-	private void serveResource(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        ServletOutputStream out = response.getOutputStream();
 
-		ServletOutputStream out = response.getOutputStream();
+        String resourceName = request.getParameter(RESOURCE_PARAM);
+        if (resourceName == null || resourceName.trim().length() < 1) {
+            out.println("No resource specified, returning the list of available resources...");
+            listAvailableResources(response);
+        } else {
 
-		String resourceName = request.getParameter(RESOURCE_PARAM);
-		if (resourceName == null || resourceName.trim().length() < 1) {
-			out.println("No resource specified, returning the list of available resources...");
-			listAvailableResources(response);
-		}
+            if (!resourceName.startsWith(SLASH))
+                resourceName = SLASH + resourceName;
 
-		else {
+            URL sourceURL = getServletContext().getResource(resourceName);
 
-			if (!resourceName.startsWith(SLASH))
-				resourceName = SLASH + resourceName;
+            if (sourceURL == null) {
+                out.println("Resource [" + resourceName + "] not found, returning the list of available resources...");
+                listAvailableResources(response);
+            } else {
+                URLConnection connection = sourceURL.openConnection();
+                connection.setUseCaches(false);
+                response.setContentLength(connection.getContentLength());
+                response.setContentType(connection.getContentType());
+                sendStreamToClient(connection.getInputStream(), out);
+            }
+        }
+        out.close();
+    }
 
-			URL sourceURL = getServletContext().getResource(resourceName);
+    private void listAvailableResources(HttpServletResponse response) throws IOException {
+        Set sortedResources = new TreeSet();
 
-			if (sourceURL == null) {
-				out.println("Resource [" + resourceName + "] not found, returning the list of available resources...");
-				listAvailableResources(response);
-			}
-			else {
-				URLConnection connection = sourceURL.openConnection();
-				connection.setUseCaches(false);
-				response.setContentLength(connection.getContentLength());
-				response.setContentType(connection.getContentType());
-				sendStreamToClient(connection.getInputStream(), out);
-			}
-		}
-		out.close();
-	}
+        discoverFolderContent(sortedResources, SLASH);
+        response.setContentType("text/plain");
+        ServletOutputStream out = response.getOutputStream();
+        for (Iterator iterator = sortedResources.iterator(); iterator.hasNext();) {
+            out.println((String) iterator.next());
+        }
+    }
 
-	private void listAvailableResources(HttpServletResponse response) throws IOException {
-		Set sortedResources = new TreeSet();
+    private void discoverFolderContent(Set aggregatedContent, String path) {
+        Set resources = getServletContext().getResourcePaths(path);
+        for (Iterator resourceIterator = resources.iterator(); resourceIterator.hasNext();) {
+            String resource = (String) resourceIterator.next();
+            aggregatedContent.add(resource);
+            if (resource.endsWith(SLASH)) {
+                // recursively add folder
+                discoverFolderContent(aggregatedContent, resource);
+            }
+        }
+    }
 
-		discoverFolderContent(sortedResources, SLASH);
-		response.setContentType("text/plain");
-		ServletOutputStream out = response.getOutputStream();
-		for (Iterator iterator = sortedResources.iterator(); iterator.hasNext();) {
-			out.println((String) iterator.next());
-		}
-	}
-
-	private void discoverFolderContent(Set aggregatedContent, String path) {
-		Set resources = getServletContext().getResourcePaths(path);
-		for (Iterator resourceIterator = resources.iterator(); resourceIterator.hasNext();) {
-			String resource = (String) resourceIterator.next();
-			aggregatedContent.add(resource);
-			if (resource.endsWith(SLASH)) {
-				// recursively add folder
-				discoverFolderContent(aggregatedContent, resource);
-			}
-		}
-	}
-
-	/**
-	 * Copies the bytes from one {@link InputStream} to an {@link OutputStream}.
-	 * 
-	 * @param source
-	 * @param target
-	 * @throws IOException
-	 */
-	private void sendStreamToClient(InputStream source, OutputStream target) throws IOException {
-		try {
-			int i;
-			while ((i = source.read()) != -1)
-				target.write(i);
-			target.flush();
-		}
-		finally {
-			source.close();
+    /**
+     * Copies the bytes from one {@link InputStream} to an {@link OutputStream}.
+     *
+     * @param source
+     * @param target
+     * @throws IOException
+     */
+    private void sendStreamToClient(InputStream source, OutputStream target) throws IOException {
+        try {
+            int i;
+            while ((i = source.read()) != -1)
+                target.write(i);
+            target.flush();
+        }
+        finally {
+            source.close();
 		}
 	}
 }

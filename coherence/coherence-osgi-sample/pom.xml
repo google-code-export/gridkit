@@ -13,6 +13,7 @@
         <module>coh-support-bundle-two</module>
         <module>web-bundle-one</module>
         <module>web-bundle-two</module>
+        <module>service-explorer</module>
         <module>aggregator</module>
     </modules>
 
@@ -97,6 +98,7 @@
                     <configuration>
                         <source>1.6</source>
                         <target>1.6</target>
+                        <debug>true</debug>
                     </configuration>
                 </plugin>
             </plugins>

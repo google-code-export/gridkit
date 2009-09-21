@@ -12,7 +12,6 @@
 package ru.questora.coherence.osgi;
 
 import com.tangosol.net.NamedCache;
-import com.tangosol.net.CacheFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 

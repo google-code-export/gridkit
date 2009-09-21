@@ -31,6 +31,8 @@ import java.util.Set;
 
 public class HelloOsgiWorldServlet extends HttpServlet {
 
+    private static final String CACHE_NAME = "osgi-test-cache";
+
     private final NamedCache testCache;
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -72,8 +74,7 @@ public class HelloOsgiWorldServlet extends HttpServlet {
     }
 
     {
-        final CacheFactoryService cacheFactoryService = (CacheFactoryService) Activator.getBundleContext().getService(Activator.getBundleContext().getServiceReference(CacheFactoryService.class.getName()));
-        testCache = cacheFactoryService.getCache("TestCache");
+        testCache = ((CacheFactoryService) Activator.getBundleContext().getService(Activator.getBundleContext().getServiceReference(CacheFactoryService.class.getName()))).getCache(CACHE_NAME);
         testCache.clear();
         for (int i = 0; i < 20; i += 2)
             testCache.put(i, "val_" + i);
