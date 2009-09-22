@@ -18,6 +18,7 @@ package org.springframework.osgi.samples.simplewebapp.servlet;
 
 import com.tangosol.net.NamedCache;
 import ru.questora.coherence.osgi.Activator;
+import ru.questora.coherence.osgi.domain.Car;
 import ru.questora.research.coherence.osgi.support.api.two.CacheFactoryService;
 
 import javax.servlet.ServletException;
@@ -78,5 +79,7 @@ public class HelloOsgiWorldServlet extends HttpServlet {
         testCache.clear();
         for (int i = 1; i < 20; i += 2)
             testCache.put(i, "val_" + i);
+
+        testCache.put("Porche Cayenne", new Car("Cayenne", 227, "Porche"));
     }
 }
