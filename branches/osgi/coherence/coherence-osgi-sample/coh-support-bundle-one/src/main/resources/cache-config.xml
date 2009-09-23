@@ -74,13 +74,16 @@ Elements" page on the Coherence Wiki (http://wiki.tangosol.com).
             <scheme-name>example-distributed</scheme-name>
             <service-name>DistributedCache</service-name>
 
-            <!-- To use POF serialization for this partitioned service,
-        uncomment the following section -->
-            <!--
             <serializer>
-              <class-name>com.tangosol.io.pof.ConfigurablePofContext</class-name>
+                <class-name>com.tangosol.io.pof.ConfigurablePofContext</class-name>
+                <init-params>
+                    <init-param>
+                        <param-value>pof-config.xml</param-value>
+                        <param-type>String</param-type>
+                    </init-param>
+                </init-params>
             </serializer>
-            -->
+
 
             <backing-map-scheme>
                 <local-scheme>

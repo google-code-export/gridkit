@@ -18,6 +18,7 @@ package org.springframework.osgi.samples.simplewebapp.servlet;
 
 import com.tangosol.net.NamedCache;
 import ru.questora.coherence.osgi.Activator;
+import ru.questora.coherence.osgi.domain.Workstation;
 import ru.questora.research.coherence.osgi.support.api.CacheFactoryService;
 
 import javax.servlet.ServletException;
@@ -57,6 +58,7 @@ public class HelloOsgiWorldServlet extends HttpServlet {
         ServletOutputStream out = response.getOutputStream();
         out.println("<html><pre>");
 
+        out.println("Cluster: <br>" + testCache.getCacheService().getCluster() + "");
         out.println("Cache: <br>" + testCache + "");
         out.println("Cache Service: <br>" + testCache.getCacheService() + "");
 
@@ -78,5 +80,7 @@ public class HelloOsgiWorldServlet extends HttpServlet {
         testCache.clear();
         for (int i = 0; i < 20; i += 2)
             testCache.put(i, "val_" + i);
+
+        testCache.put("myComp", new Workstation(1 << 41, "Indel Core2Duo 3.15 GHz", 2 << 33));
     }
 }

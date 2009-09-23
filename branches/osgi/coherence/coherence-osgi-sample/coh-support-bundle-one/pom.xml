@@ -20,6 +20,7 @@
         <project.build.bundle.version>2.0</project.build.bundle.version>
         <project.build.bundle.importPackage>,
             org.questora.osgi.samples.corebundle,
+            <!--ru.questora.coherence.osgi.domain;resolution=optional,-->
             com.tangosol.net,
             com.tangosol.run.xml,
             org.springframework.core;version="${spring.maven.artifact.version}",
@@ -28,7 +29,7 @@
             org.springframework.core.io;version="${spring.maven.artifact.version}",
             org.springframework.context;version="${spring.maven.artifact.version}"
         </project.build.bundle.importPackage>
-        <!--<project.build.bundle.dynamicImportPackage>com.tangosol.*</project.build.bundle.dynamicImportPackage>-->
+        <project.build.bundle.dynamicImportPackage>, ru.questora.coherence.osgi.domain</project.build.bundle.dynamicImportPackage>
         <project.build.bundle.exportPackage>ru.questora.research.coherence.osgi.support.api
         </project.build.bundle.exportPackage>
         <project.build.bundle.activator>org.questora.osgi.samples.corebundle.SupportBundleActivator</project.build.bundle.activator>
