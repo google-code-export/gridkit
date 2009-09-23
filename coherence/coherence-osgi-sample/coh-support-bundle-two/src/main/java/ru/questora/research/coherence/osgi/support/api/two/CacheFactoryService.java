@@ -20,6 +20,5 @@ import com.tangosol.net.NamedCache;
  * @since 1.7
  */
 public interface CacheFactoryService {
-
     NamedCache getCache(String name);
 }
