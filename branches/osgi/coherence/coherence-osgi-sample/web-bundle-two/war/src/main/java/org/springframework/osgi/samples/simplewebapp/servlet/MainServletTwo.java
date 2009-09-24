@@ -19,7 +19,7 @@ package org.springframework.osgi.samples.simplewebapp.servlet;
 import com.tangosol.net.NamedCache;
 import ru.questora.coherence.osgi.Activator;
 import ru.questora.coherence.osgi.domain.Car;
-import ru.questora.research.coherence.osgi.support.api.two.CacheFactoryService;
+import ru.questora.osgi.samples.service.api.CacheFactoryService;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
-public class HelloOsgiWorldServlet extends HttpServlet {
+public class MainServletTwo extends HttpServlet {
 
     private static final String CACHE_NAME = "osgi-test-cache";
 

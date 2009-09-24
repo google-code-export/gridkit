@@ -3,6 +3,6 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
     
-    <bean name="cacheService" class="ru.questora.research.coherence.osgi.support.impl.CacheFactoryServiceImpl"/>
+    <bean name="cacheService" class="ru.questora.osgi.samples.service.impl.CacheFactoryServiceImpl"/>
 
 </beans>

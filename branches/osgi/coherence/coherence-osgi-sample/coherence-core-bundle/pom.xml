@@ -14,7 +14,15 @@
     <properties>
         <project.build.bundle.name>${project.name}</project.build.bundle.name>
         <project.build.bundle.symbolicName>org.questora.osgi.samples.corebundle</project.build.bundle.symbolicName>
-        <project.build.bundle.exportPackage>com.tangosol.net, com.tangosol.run.xml, com.tangosol.io.pof, org.questora.osgi.samples.corebundle</project.build.bundle.exportPackage>
+        <project.build.bundle.importPackage>, org.springframework.context;version="${spring.maven.artifact.version}"</project.build.bundle.importPackage>
+        <project.build.bundle.exportPackage>
+            com.tangosol.net,
+            com.tangosol.run.xml,
+            com.tangosol.io.pof,
+            org.questora.osgi.samples.corebundle,
+            ru.questora.osgi.samples.service.api,
+            ru.questora.osgi.samples.service.impl
+        </project.build.bundle.exportPackage>
         <project.build.bundle.activator>org.questora.osgi.samples.corebundle.Activator</project.build.bundle.activator>
     </properties>
 
@@ -23,5 +31,14 @@
             <groupId>com.oracle.coherence</groupId>
             <artifactId>coherence</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.oracle.coherence</groupId>
+            <artifactId>coherence</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+
     </dependencies>
 </project>
