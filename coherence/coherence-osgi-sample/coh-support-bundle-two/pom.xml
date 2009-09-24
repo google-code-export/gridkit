@@ -32,7 +32,7 @@
             org.springframework.context;version="${spring.maven.artifact.version}"
         </project.build.bundle.importPackage>
         <project.build.bundle.exportPackage>nopackage</project.build.bundle.exportPackage>
-        <project.build.bundle.activator>org.questora.osgi.samples.corebundle.SupportBundleActivator</project.build.bundle.activator>
+        <project.build.bundle.activator>org.questora.osgi.samples.support.Activator</project.build.bundle.activator>
     </properties>
 
     <dependencies>

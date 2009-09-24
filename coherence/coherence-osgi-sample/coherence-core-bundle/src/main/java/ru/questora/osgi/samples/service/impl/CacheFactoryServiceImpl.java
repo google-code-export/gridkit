@@ -14,9 +14,6 @@ package ru.questora.osgi.samples.service.impl;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.NamedCache;
 import ru.questora.osgi.samples.service.api.CacheFactoryService;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationContext;
-import org.springframework.beans.BeansException;
 
 /**
  * TODO [Need to specify general description of the entity]
@@ -24,19 +21,18 @@ import org.springframework.beans.BeansException;
  * @author Anton Savelyev
  * @since 1.7
  */
-public class CacheFactoryServiceImpl implements CacheFactoryService, ApplicationContextAware {
+public class CacheFactoryServiceImpl implements CacheFactoryService {
 
-    private ClassLoader classLoader = null;
+    private final ClassLoader classLoader;
 
-    @Override
-    public NamedCache getCache(String name) {
-        if(classLoader == null)
-            throw new RuntimeException("Bean Not Initialized");
-        return CacheFactory.getCache(name, classLoader);
+    public CacheFactoryServiceImpl(ClassLoader classLoader) {
+        this.classLoader = classLoader;
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        classLoader = applicationContext.getClassLoader();
+    public NamedCache getCache(String name) {
+        if (classLoader == null)
+            throw new RuntimeException("Bean Not Initialized");
+        return CacheFactory.getCache(name, classLoader);
     }
 }
