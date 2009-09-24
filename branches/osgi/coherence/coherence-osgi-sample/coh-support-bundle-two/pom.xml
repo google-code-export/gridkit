@@ -16,7 +16,7 @@
 
     <properties>
         <project.build.bundle.name>${project.name}</project.build.bundle.name>
-        <project.build.bundle.symbolicName>org.questora.osgi.samples.cohsupport.one</project.build.bundle.symbolicName>
+        <project.build.bundle.symbolicName>org.questora.osgi.samples.cohsupport.two</project.build.bundle.symbolicName>
         <project.build.bundle.version>2.0</project.build.bundle.version>
         <project.build.bundle.importPackage>,
             org.questora.osgi.samples.corebundle,
