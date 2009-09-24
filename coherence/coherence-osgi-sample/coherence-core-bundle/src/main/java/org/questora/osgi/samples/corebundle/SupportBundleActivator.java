@@ -24,7 +24,7 @@ import java.net.URL;
  * @author Anton Savelyev
  * @since 1.7
  */
-public class SupportBundleActivator implements BundleActivator {
+public abstract class SupportBundleActivator implements BundleActivator {
 
     @Override
     public void start(BundleContext bundleContext) throws Exception {
@@ -36,9 +36,7 @@ public class SupportBundleActivator implements BundleActivator {
         );
     }
 
-    private ClassLoader getClassLoader(BundleContext bundleContext) throws ClassNotFoundException {
-        return bundleContext.getBundle().loadClass("java.lang.Object").getClassLoader();
-    }
+    protected abstract ClassLoader getClassLoader(BundleContext bundleContext) throws ClassNotFoundException;
 
     @Override
     public void stop(BundleContext bundleContext) throws Exception {
