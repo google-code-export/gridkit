@@ -18,7 +18,6 @@ Elements" page on the Coherence Wiki (http://wiki.tangosol.com).
     <caching-scheme-mapping>
         <cache-mapping>
             <cache-name>dist-*</cache-name>
-            <cache-name>osgi-test-*</cache-name>
             <scheme-name>example-distributed</scheme-name>
             <init-params>
                 <init-param>
@@ -41,6 +40,10 @@ Elements" page on the Coherence Wiki (http://wiki.tangosol.com).
 
         <cache-mapping>
             <cache-name>repl-*</cache-name>
+            <scheme-name>example-replicated</scheme-name>
+        </cache-mapping>
+        <cache-mapping>
+            <cache-name>osgi-test-*</cache-name>
             <scheme-name>example-replicated</scheme-name>
         </cache-mapping>
 
