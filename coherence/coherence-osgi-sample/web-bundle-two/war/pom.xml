@@ -2,14 +2,14 @@
 <project>
     <parent>
         <groupId>ru.questora.research.coherence.osgi</groupId>
-        <artifactId>web-bundle-one</artifactId>
+        <artifactId>web-bundle-two</artifactId>
         <version>1.0-SNAPSHOT</version>
 
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>ru.questora.research.coherence.osgi</groupId>
-    <artifactId>war-one</artifactId>
-    <name>Spring OSGi Samples: SimpleWebApp - War Bundle</name>
+    <artifactId>war-two</artifactId>
+    <name>Spring OSGi Samples: SimpleWebApp - War Bundle 2</name>
     <url>http://www.springframework.org/osgi</url>
     <packaging>war</packaging>
 
