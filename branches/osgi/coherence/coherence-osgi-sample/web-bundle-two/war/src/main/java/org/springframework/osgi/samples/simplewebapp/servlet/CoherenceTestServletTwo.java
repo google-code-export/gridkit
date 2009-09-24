@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
-public class HelloOsgiWorldServlet extends HttpServlet {
+public class CoherenceTestServletTwo extends HttpServlet {
 
     private static final String CACHE_NAME = "osgi-test-cache";
 

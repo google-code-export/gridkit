@@ -12,14 +12,14 @@
     </welcome-file-list>
 
     <servlet>
-        <servlet-name>HelloOsgiWorldServlet</servlet-name>
+        <servlet-name>CoherenceTestServletOne</servlet-name>
         <servlet-class>
-            org.springframework.osgi.samples.simplewebapp.servlet.HelloOsgiWorldServlet
+            org.springframework.osgi.samples.simplewebapp.servlet.CoherenceTestServletOne
         </servlet-class>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>HelloOsgiWorldServlet</servlet-name>
+        <servlet-name>CoherenceTestServletOne</servlet-name>
         <url-pattern>/helloWorldServlet</url-pattern>
     </servlet-mapping>
 

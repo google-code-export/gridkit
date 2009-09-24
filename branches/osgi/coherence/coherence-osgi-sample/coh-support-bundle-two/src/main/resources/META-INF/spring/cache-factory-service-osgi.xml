@@ -7,7 +7,7 @@
     <osgi:service id="cacheServiceOsgi" ref="cacheService"
                   interface="ru.questora.osgi.samples.service.api.CacheFactoryService">
         <osgi:service-properties>
-            <entry key="applicationId" value="app1"/>
+            <entry key="applicationId" value="app2"/>
         </osgi:service-properties>
     </osgi:service>
 </beans>

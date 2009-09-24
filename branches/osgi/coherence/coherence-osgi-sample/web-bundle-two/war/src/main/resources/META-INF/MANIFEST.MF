@@ -1,7 +1,7 @@
-Web-ContextPath: simple-web-app-one
+Web-ContextPath: simple-web-app-two
 Bundle-ManifestVersion: 2
 Bundle-Name: Simple OSGi War 1
-Bundle-SymbolicName: org.questora.osgi.samples.web.one
+Bundle-SymbolicName: org.questora.osgi.samples.web.two
 Bundle-Activator: ru.questora.coherence.osgi.Activator
 Bundle-ClassPath: WEB-INF/classes
 Export-Package: ru.questora.coherence.osgi.domain

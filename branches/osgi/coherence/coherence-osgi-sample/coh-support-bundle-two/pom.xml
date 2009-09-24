@@ -9,9 +9,9 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <groupId>ru.questora.research.coherence.osgi</groupId>
-    <artifactId>coh-support-bundle-one</artifactId>
+    <artifactId>coh-support-bundle-two</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>Coherence Support Bundle 1</name>
+    <name>Coherence Support Bundle 2</name>
     <url>http://maven.apache.org</url>
 
     <properties>

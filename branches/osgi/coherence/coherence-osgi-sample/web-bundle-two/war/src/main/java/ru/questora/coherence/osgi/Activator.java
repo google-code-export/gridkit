@@ -30,7 +30,7 @@ public class Activator implements BundleActivator {
 
     public void start(final BundleContext bundleContext) throws Exception {
         cacheServiceListener = new Activator.CacheServiceListener(bundleContext);
-        bundleContext.addServiceListener(cacheServiceListener, "(applicationId=app1)");
+        bundleContext.addServiceListener(cacheServiceListener, "(applicationId=app2)");
     }
 
     public void stop(BundleContext bundleContext) throws Exception {
