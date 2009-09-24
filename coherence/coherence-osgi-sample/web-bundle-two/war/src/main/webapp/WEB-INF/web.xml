@@ -12,14 +12,14 @@
     </welcome-file-list>
 
     <servlet>
-        <servlet-name>HelloOsgiWorldServlet</servlet-name>
+        <servlet-name>MainServletTwo</servlet-name>
         <servlet-class>
-            org.springframework.osgi.samples.simplewebapp.servlet.HelloOsgiWorldServlet
+            org.springframework.osgi.samples.simplewebapp.servlet.MainServletTwo
         </servlet-class>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>HelloOsgiWorldServlet</servlet-name>
+        <servlet-name>MainServletTwo</servlet-name>
         <url-pattern>/helloWorldServlet</url-pattern>
     </servlet-mapping>
 </web-app>

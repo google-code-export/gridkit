@@ -19,7 +19,7 @@ package org.springframework.osgi.samples.simplewebapp.servlet;
 import com.tangosol.net.NamedCache;
 import ru.questora.coherence.osgi.Activator;
 import ru.questora.coherence.osgi.domain.Workstation;
-import ru.questora.research.coherence.osgi.support.api.CacheFactoryService;
+import ru.questora.osgi.samples.service.api.CacheFactoryService;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -34,7 +34,7 @@ public class HelloOsgiWorldServlet extends HttpServlet {
 
     private static final String CACHE_NAME = "osgi-test-cache";
 
-    private final NamedCache testCache;
+    private NamedCache testCache = null;
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         process(resp, req);
@@ -53,9 +53,25 @@ public class HelloOsgiWorldServlet extends HttpServlet {
     }
 
     private void process(HttpServletResponse response, HttpServletRequest request) throws IOException {
+        ServletOutputStream out = response.getOutputStream();
+
+        if (testCache == null) {
+            final CacheFactoryService cacheFactoryService = (CacheFactoryService) Activator.getCacheFactoryService();
+            if (cacheFactoryService == null) {
+                out.println("<h1>Cache Service Is Not Registered</h1>");
+                return;
+            }
+
+            testCache = cacheFactoryService.getCache(CACHE_NAME);
+            testCache.clear();
+            for (int i = 0; i < 20; i += 2)
+                testCache.put(i, "val_" + i);
+
+            testCache.put("myComp", new Workstation(1 << 20, "Indel Core2Duo 3.15 GHz", 2 << 12));
+        }
+
         response.setContentType("text/html");
 
-        ServletOutputStream out = response.getOutputStream();
         out.println("<html><pre>");
 
         out.println("Cluster: <br>" + testCache.getCacheService().getCluster() + "");
@@ -73,14 +89,5 @@ public class HelloOsgiWorldServlet extends HttpServlet {
                 "</form>");
 
         out.println("</pre></html>");
-    }
-
-    {
-        testCache = ((CacheFactoryService) Activator.getBundleContext().getService(Activator.getBundleContext().getServiceReference(CacheFactoryService.class.getName()))).getCache(CACHE_NAME);
-        testCache.clear();
-        for (int i = 0; i < 20; i += 2)
-            testCache.put(i, "val_" + i);
-
-        testCache.put("myComp", new Workstation(1 << 41, "Indel Core2Duo 3.15 GHz", 2 << 33));
     }
 }

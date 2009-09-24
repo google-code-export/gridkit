@@ -16,6 +16,7 @@ import com.tangosol.io.pof.PofWriter;
 import com.tangosol.io.pof.PortableObject;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * TODO [Need to specify general description of the entity]
@@ -23,7 +24,7 @@ import java.io.IOException;
  * @author Anton Savelyev
  * @since 1.7
  */
-public class Workstation implements PortableObject {
+public class Workstation implements Serializable, PortableObject {
 
     private String proc;
 

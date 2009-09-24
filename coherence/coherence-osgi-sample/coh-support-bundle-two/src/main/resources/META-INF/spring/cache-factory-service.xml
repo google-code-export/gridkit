@@ -8,6 +8,6 @@ bean. We've kept the osgi definitions in a separate
 configuration file so that this file can easily be used
 for testing outside of an OSGi environment -->
 
-    <bean name="cacheService" class="ru.questora.research.coherence.osgi.support.impl.CacheFactoryServiceImpl"/>
+    <bean name="cacheService" class="ru.questora.osgi.samples.service.impl.CacheFactoryServiceImpl"/>
 
 </beans>

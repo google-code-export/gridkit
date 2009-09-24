@@ -24,7 +24,7 @@
     <dependencies>
         <dependency>
             <groupId>ru.questora.research.coherence.osgi</groupId>
-            <artifactId>coh-support-bundle-one</artifactId>
+            <artifactId>coherence-core-bundle</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

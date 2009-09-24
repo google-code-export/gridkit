@@ -74,15 +74,15 @@ Elements" page on the Coherence Wiki (http://wiki.tangosol.com).
             <scheme-name>example-distributed</scheme-name>
             <service-name>DistributedCache</service-name>
 
-            <serializer>
-                <class-name>com.tangosol.io.pof.ConfigurablePofContext</class-name>
-                <init-params>
-                    <init-param>
-                        <param-value>pof-config.xml</param-value>
-                        <param-type>String</param-type>
-                    </init-param>
-                </init-params>
-            </serializer>
+            <!--<serializer>-->
+                <!--<class-name>com.tangosol.io.pof.ConfigurablePofContext</class-name>-->
+                <!--<init-params>-->
+                    <!--<init-param>-->
+                        <!--<param-value>pof-config.xml</param-value>-->
+                        <!--<param-type>String</param-type>-->
+                    <!--</init-param>-->
+                <!--</init-params>-->
+            <!--</serializer>-->
 
 
             <backing-map-scheme>

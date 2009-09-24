@@ -11,9 +11,10 @@
 */
 package ru.questora.coherence.osgi;
 
-import com.tangosol.net.NamedCache;
+import org.osgi.framework.AllServiceListener;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceEvent;
 
 /**
  * TODO [Need to specify general description of the entity]
@@ -23,23 +24,36 @@ import org.osgi.framework.BundleContext;
  */
 public class Activator implements BundleActivator {
 
-    private static NamedCache testCache;
+    private static Object cacheFactoryService = null;
 
-    private static BundleContext bundleContext;
+    private Activator.CacheServiceListener cacheServiceListener;
 
-    public void start(BundleContext bundleContext) throws Exception {
-        this.bundleContext = bundleContext;
+    public void start(final BundleContext bundleContext) throws Exception {
+        cacheServiceListener = new Activator.CacheServiceListener(bundleContext);
+        bundleContext.addServiceListener(cacheServiceListener, "(applicationId=app1)");
     }
 
     public void stop(BundleContext bundleContext) throws Exception {
-
+        bundleContext.removeServiceListener(cacheServiceListener);
     }
 
-    public static BundleContext getBundleContext() {
-        return bundleContext;
+    public static Object getCacheFactoryService() {
+        return cacheFactoryService;
     }
 
-    public static NamedCache getTestCache() {
-        return testCache;
+    private class CacheServiceListener implements AllServiceListener {
+
+        private final BundleContext bundleContext;
+
+        public CacheServiceListener(BundleContext bundleContext) {
+            this.bundleContext = bundleContext;
+        }
+
+        @Override
+        public void serviceChanged(ServiceEvent serviceEvent) {
+            if (serviceEvent.getType() != ServiceEvent.UNREGISTERING) {
+                cacheFactoryService = bundleContext.getService(serviceEvent.getServiceReference());
+            }
+        }
     }
 }
