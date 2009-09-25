@@ -22,7 +22,7 @@
             org.questora.osgi.samples.corebundle,
             ru.questora.osgi.samples.service.api,
             ru.questora.osgi.samples.service.impl,
-            ru.questora.coherence.osgi.domain,
+            com.griddynamics.research.coherence.osgi.domain,
             com.tangosol.net,
             com.tangosol.run.xml,
             org.springframework.core;version="${spring.maven.artifact.version}",

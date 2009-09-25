@@ -139,7 +139,7 @@ Elements" page on the Coherence Wiki (http://wiki.tangosol.com).
                 <class-name>org.questora.osgi.samples.corebundle.ByValueConfigurablePofContext</class-name>
                 <init-params>
                     <init-param>
-                        <param-value>
+                        <param-value><![CDATA[
                             <![CDATA[
                             <?xml version="1.0"?>
 
@@ -149,12 +149,12 @@ Elements" page on the Coherence Wiki (http://wiki.tangosol.com).
                                 <user-type-list>
                                     <user-type>
                                         <type-id>3000</type-id>
-                                        <class-name>ru.questora.coherence.osgi.domain.Computer</class-name>
+                                        <class-name>com.griddynamics.research.coherence.osgi.domain.Computer</class-name>
                                     </user-type>
                                 </user-type-list>
                             </pof-config>
                             ]]>
-                        </param-value>
+                        ]]></param-value>
                         <param-type>String</param-type>
                     </init-param>
                 </init-params>

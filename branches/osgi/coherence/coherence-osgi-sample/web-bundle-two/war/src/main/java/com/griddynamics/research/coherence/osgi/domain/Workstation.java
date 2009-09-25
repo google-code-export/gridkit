@@ -9,7 +9,7 @@
 * accordance with the terms of the license agreement you entered into
 * with Grid Dynamics.
 */
-package ru.questora.coherence.osgi.domain;
+package com.griddynamics.research.coherence.osgi.domain;
 
 import com.tangosol.io.pof.PofReader;
 import com.tangosol.io.pof.PofWriter;
@@ -24,7 +24,7 @@ import java.io.Serializable;
  * @author Anton Savelyev
  * @since 1.7
  */
-public class Computer implements Serializable, PortableObject {
+public class Workstation implements Serializable, PortableObject {
 
     private String proc;
 
@@ -32,10 +32,10 @@ public class Computer implements Serializable, PortableObject {
 
     private int hardDisk;
 
-    public Computer() {
+    public Workstation() {
     }
 
-    public Computer(int hardDisk, String proc, int ram) {
+    public Workstation(int hardDisk, String proc, int ram) {
         this.hardDisk = hardDisk;
         this.proc = proc;
         this.ram = ram;
@@ -67,7 +67,7 @@ public class Computer implements Serializable, PortableObject {
 
     @Override
     public String toString() {
-        return String.format("Computer [proc = %1s, ram = %2d, HDD = %3d]", proc, ram, hardDisk);
+        return String.format("Workstation [proc = %1s, ram = %2d, HDD = %3d]", proc, ram, hardDisk);
     }
 
     @Override

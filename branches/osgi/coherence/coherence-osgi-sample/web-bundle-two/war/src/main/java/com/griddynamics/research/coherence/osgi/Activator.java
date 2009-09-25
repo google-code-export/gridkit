@@ -9,7 +9,7 @@
 * accordance with the terms of the license agreement you entered into
 * with Grid Dynamics.
 */
-package ru.questora.coherence.osgi;
+package com.griddynamics.research.coherence.osgi;
 
 import org.osgi.framework.AllServiceListener;
 import org.osgi.framework.BundleActivator;
@@ -30,7 +30,7 @@ public class Activator implements BundleActivator {
 
     public void start(final BundleContext bundleContext) throws Exception {
         cacheServiceListener = new Activator.CacheServiceListener(bundleContext);
-        bundleContext.addServiceListener(cacheServiceListener, "(applicationId=app1)");
+        bundleContext.addServiceListener(cacheServiceListener, "(applicationId=app2)");
     }
 
     public void stop(BundleContext bundleContext) throws Exception {
