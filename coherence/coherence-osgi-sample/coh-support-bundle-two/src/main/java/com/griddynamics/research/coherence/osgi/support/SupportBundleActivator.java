@@ -9,7 +9,7 @@
 * accordance with the terms of the license agreement you entered into
 * with Grid Dynamics.
 */
-package org.questora.osgi.samples.support;
+package com.griddynamics.research.coherence.osgi.support;
 
 import org.questora.osgi.samples.corebundle.AbstractSupportBundleActivator;
 import org.osgi.framework.BundleContext;
