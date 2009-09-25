@@ -7,7 +7,7 @@
 
     <servlet>
         <servlet-name>ViewCoherenceServicesServlet</servlet-name>
-        <servlet-class>ru.questora.research.coherence.osgi.ViewCoherenceServicesServlet</servlet-class>
+        <servlet-class>com.griddynamics.research.coherence.osgi.servicelister.ViewCoherenceServicesServlet</servlet-class>
 
     </servlet>
 
