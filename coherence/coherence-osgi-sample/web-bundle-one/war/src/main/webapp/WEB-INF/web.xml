@@ -14,7 +14,7 @@
     <servlet>
         <servlet-name>CoherenceTestServletOne</servlet-name>
         <servlet-class>
-            org.springframework.osgi.samples.simplewebapp.servlet.CoherenceTestServletOne
+            com.griddynamics.research.coherence.osgi.web.servlet.CoherenceTestServletOne
         </servlet-class>
     </servlet>
 

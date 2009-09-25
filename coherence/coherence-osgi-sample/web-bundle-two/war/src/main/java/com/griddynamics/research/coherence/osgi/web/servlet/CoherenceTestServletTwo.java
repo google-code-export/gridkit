@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.osgi.samples.simplewebapp.servlet;
+package com.griddynamics.research.coherence.osgi.web.servlet;
 
 import com.tangosol.net.NamedCache;
-import ru.questora.coherence.osgi.Activator;
-import ru.questora.coherence.osgi.domain.Computer;
+import com.griddynamics.research.coherence.osgi.Activator;
+import com.griddynamics.research.coherence.osgi.domain.Computer;
 import ru.questora.osgi.samples.service.api.CacheFactoryService;
 
 import javax.servlet.ServletException;
