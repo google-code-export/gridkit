@@ -2,7 +2,7 @@
 <project>
     <parent>
         <artifactId>coherence-osgi-sample</artifactId>
-        <groupId>ru.questora.research.coherence.osgi</groupId>
+        <groupId>com.griddynamics.research.coherence.osgi</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -13,7 +13,7 @@
 
     <properties>
         <project.build.bundle.name>${project.name}</project.build.bundle.name>
-        <project.build.bundle.symbolicName>org.questora.osgi.samples.corebundle</project.build.bundle.symbolicName>
+        <project.build.bundle.symbolicName>com.griddynamics.osgi.samples.corebundle</project.build.bundle.symbolicName>
         <project.build.bundle.importPackage>, org.springframework.context;version="${spring.maven.artifact.version}"</project.build.bundle.importPackage>
         <project.build.bundle.exportPackage>
             com.tangosol.net,

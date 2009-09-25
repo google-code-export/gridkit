@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>ru.questora.research.coherence.osgi</groupId>
+    <groupId>com.griddynamics.research.coherence.osgi</groupId>
     <artifactId>coherence-osgi-sample</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>OSGi Bundle Base</name>
-    <url>http://www.questora.ru/</url>
     <packaging>pom</packaging>
     <modules>
         <module>coherence-core-bundle</module>
@@ -19,7 +18,7 @@
 
     <properties>
         <project.build.bundle.version>1.0</project.build.bundle.version>
-        <project.build.bundle.vendor>Questora inc</project.build.bundle.vendor>
+        <project.build.bundle.vendor>Grid Dynamics</project.build.bundle.vendor>
         <project.build.bundle.importPackage/>
         <project.build.bundle.dynamicImportPackage/>
 
