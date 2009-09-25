@@ -74,7 +74,7 @@ public class CoherenceTestServletOne extends HttpServlet {
 
         out.println("<html><pre>");
 
-        out.println("Cluster: <br>" + testCache.getCacheService().getCluster() + "");
+//        out.println("Cluster: <br>" + testCache.getCacheService().getCluster() + "");
         out.println("Cache: <br>" + testCache + "");
         out.println("Cache Service: <br>" + testCache.getCacheService() + "");
 
