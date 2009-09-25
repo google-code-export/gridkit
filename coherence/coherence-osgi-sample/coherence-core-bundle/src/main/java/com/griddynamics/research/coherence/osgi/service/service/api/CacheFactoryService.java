@@ -9,12 +9,9 @@
 * accordance with the terms of the license agreement you entered into
 * with Grid Dynamics.
 */
-package org.questora.osgi.samples.corebundle;
+package com.griddynamics.research.coherence.osgi.service.service.api;
 
-import com.tangosol.io.pof.ConfigurablePofContext;
-import com.tangosol.run.xml.XmlHelper;
-
-import java.io.IOException;
+import com.tangosol.net.NamedCache;
 
 /**
  * TODO [Need to specify general description of the entity]
@@ -22,9 +19,7 @@ import java.io.IOException;
  * @author Anton Savelyev
  * @since 1.7
  */
-public class ByValueConfigurablePofContext extends ConfigurablePofContext {
+public interface CacheFactoryService {
 
-    public ByValueConfigurablePofContext(String config) throws IOException {
-        super(XmlHelper.loadXml(config));
-    }
+    NamedCache getCache(String name);
 }

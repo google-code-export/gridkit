@@ -9,9 +9,9 @@
 * accordance with the terms of the license agreement you entered into
 * with Grid Dynamics.
 */
-package ru.questora.osgi.samples.service.api;
+package com.griddynamics.research.coherence.osgi.corebundle;
 
-import com.tangosol.net.NamedCache;
+import com.tangosol.net.DefaultCacheFactoryBuilder;
 
 /**
  * TODO [Need to specify general description of the entity]
@@ -19,7 +19,14 @@ import com.tangosol.net.NamedCache;
  * @author Anton Savelyev
  * @since 1.7
  */
-public interface CacheFactoryService {
+public class MyCacheFactoryBuilder extends DefaultCacheFactoryBuilder {
 
-    NamedCache getCache(String name);
+    public MyCacheFactoryBuilder() {
+        super(STRATEGY_RENAME_UNIQUELY);
+    }
+
+    @Override
+    protected String getScopeName(ClassLoader classLoader) {
+        return "Scope(" + classLoader.toString() + ")";
+    }
 }
