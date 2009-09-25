@@ -11,13 +11,12 @@
 */
 package org.questora.osgi.samples.support;
 
-import org.questora.osgi.samples.corebundle.SupportBundleActivator;
+import org.questora.osgi.samples.corebundle.AbstractSupportBundleActivator;
 import org.osgi.framework.BundleContext;
-
-import java.util.Properties;
-
 import ru.questora.osgi.samples.service.api.CacheFactoryService;
 import ru.questora.osgi.samples.service.impl.CacheFactoryServiceImpl;
+
+import java.util.Properties;
 
 /**
  * TODO [Need to specify general description of the entity]
@@ -25,7 +24,7 @@ import ru.questora.osgi.samples.service.impl.CacheFactoryServiceImpl;
  * @author Anton Savelyev
  * @since 1.7
  */
-public class Activator extends SupportBundleActivator {
+public class SupportBundleActivator extends AbstractSupportBundleActivator {
 
     private ClassLoader classLoader;
 
@@ -34,7 +33,7 @@ public class Activator extends SupportBundleActivator {
         classLoader = this.getClass().getClassLoader();
 
         final Properties properties = new Properties();
-        properties.setProperty("applicationId", "app2");
+        properties.setProperty("applicationId", "app1");
         bundleContext.registerService(
                 CacheFactoryService.class.getName(),
                 new CacheFactoryServiceImpl(classLoader),

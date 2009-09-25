@@ -78,13 +78,13 @@ Elements" page on the Coherence Wiki (http://wiki.tangosol.com).
             <service-name>DistributedCache</service-name>
 
             <!--<serializer>-->
-                <!--<class-name>com.tangosol.io.pof.ConfigurablePofContext</class-name>-->
-                <!--<init-params>-->
-                    <!--<init-param>-->
-                        <!--<param-value>pof-config.xml</param-value>-->
-                        <!--<param-type>String</param-type>-->
-                    <!--</init-param>-->
-                <!--</init-params>-->
+            <!--<class-name>com.tangosol.io.pof.ConfigurablePofContext</class-name>-->
+            <!--<init-params>-->
+            <!--<init-param>-->
+            <!--<param-value>pof-config.xml</param-value>-->
+            <!--<param-type>String</param-type>-->
+            <!--</init-param>-->
+            <!--</init-params>-->
             <!--</serializer>-->
 
 
@@ -134,6 +134,32 @@ Elements" page on the Coherence Wiki (http://wiki.tangosol.com).
                     <scheme-ref>unlimited-backing-map</scheme-ref>
                 </local-scheme>
             </backing-map-scheme>
+
+            <serializer>
+                <class-name>org.questora.osgi.samples.corebundle.ByValueConfigurablePofContext</class-name>
+                <init-params>
+                    <init-param>
+                        <param-value>
+                            <![CDATA[
+                            <?xml version="1.0"?>
+
+                            <!DOCTYPE pof-config SYSTEM "pof-config.dtd">
+
+                            <pof-config>
+                                <user-type-list>
+                                    <user-type>
+                                        <type-id>3000</type-id>
+                                        <class-name>ru.questora.coherence.osgi.domain.Computer</class-name>
+                                    </user-type>
+                                </user-type-list>
+                            </pof-config>
+                            ]]>
+                        </param-value>
+                        <param-type>String</param-type>
+                    </init-param>
+                </init-params>
+            </serializer>
+
 
             <autostart>true</autostart>
         </replicated-scheme>
