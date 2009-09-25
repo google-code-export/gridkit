@@ -9,11 +9,11 @@
 * accordance with the terms of the license agreement you entered into
 * with Grid Dynamics.
 */
-package ru.questora.osgi.samples.service.impl;
+package com.griddynamics.research.coherence.osgi.corebundle;
 
 import com.tangosol.net.CacheFactory;
-import com.tangosol.net.NamedCache;
-import ru.questora.osgi.samples.service.api.CacheFactoryService;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 
 /**
  * TODO [Need to specify general description of the entity]
@@ -21,18 +21,15 @@ import ru.questora.osgi.samples.service.api.CacheFactoryService;
  * @author Anton Savelyev
  * @since 1.7
  */
-public class CacheFactoryServiceImpl implements CacheFactoryService {
+public class Activator implements BundleActivator {
 
-    private final ClassLoader classLoader;
-
-    public CacheFactoryServiceImpl(ClassLoader classLoader) {
-        this.classLoader = classLoader;
+    @Override
+    public void start(BundleContext bundleContext) throws Exception {
+        CacheFactory.setCacheFactoryBuilder(new MyCacheFactoryBuilder());
     }
 
     @Override
-    public NamedCache getCache(String name) {
-        if (classLoader == null)
-            throw new RuntimeException("Bean Not Initialized");
-        return CacheFactory.getCache(name, classLoader);
+    public void stop(BundleContext bundleContext) throws Exception {
+        
     }
 }

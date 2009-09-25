@@ -9,7 +9,7 @@
 * accordance with the terms of the license agreement you entered into
 * with Grid Dynamics.
 */
-package org.questora.osgi.samples.corebundle;
+package com.griddynamics.research.coherence.osgi.corebundle;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.run.xml.XmlHelper;
