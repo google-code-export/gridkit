@@ -18,6 +18,15 @@ Elements" page on the Coherence Wiki (http://wiki.tangosol.com).
     <caching-scheme-mapping>
         <cache-mapping>
             <cache-name>dist-*</cache-name>
+            <scheme-name>example-distributed</scheme-name>
+            <init-params>
+                <init-param>
+                    <param-name>back-size-limit</param-name>
+                    <param-value>8MB</param-value>
+                </init-param>
+            </init-params>
+        </cache-mapping>
+        <cache-mapping>
             <cache-name>osgi-test-*</cache-name>
             <scheme-name>example-distributed</scheme-name>
             <init-params>
@@ -75,10 +84,12 @@ Elements" page on the Coherence Wiki (http://wiki.tangosol.com).
             <service-name>DistributedCache</service-name>
 
             <serializer>
-                <class-name>com.griddynamics.research.coherence.osgi.corebundle.ByValueConfigurablePofContext</class-name>
+                <class-name>com.griddynamics.research.coherence.osgi.corebundle.ByValueConfigurablePofContext
+                </class-name>
                 <init-params>
                     <init-param>
-                        <param-value><![CDATA[
+                        <param-type>String</param-type>
+                        <param-value>
                             <![CDATA[
                                 <?xml version="1.0"?>
 
@@ -93,8 +104,8 @@ Elements" page on the Coherence Wiki (http://wiki.tangosol.com).
                                     </user-type-list>
                                 </pof-config>
                             ]]>
-                        ]]></param-value>
-                        <param-type>String</param-type>
+                        </param-value>
+
                     </init-param>
                 </init-params>
             </serializer>

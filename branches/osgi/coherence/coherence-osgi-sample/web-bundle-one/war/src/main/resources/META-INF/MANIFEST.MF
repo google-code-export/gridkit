@@ -2,7 +2,7 @@ Web-ContextPath: simple-web-app-one
 Bundle-ManifestVersion: 2
 Bundle-Name: Simple OSGi War 1
 Bundle-SymbolicName: org.questora.osgi.samples.web.one
-Bundle-Activator: com.griddynamics.research.coherence.osgi.Activator
+Bundle-Activator: com.griddynamics.research.coherence.osgi.web.Activator
 Bundle-ClassPath: WEB-INF/classes
 Export-Package: com.griddynamics.research.coherence.osgi.domain
 Import-Package: javax.servlet;version="2.4.0",
