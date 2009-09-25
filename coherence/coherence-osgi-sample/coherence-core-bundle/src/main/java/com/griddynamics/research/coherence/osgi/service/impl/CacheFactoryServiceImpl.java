@@ -9,11 +9,11 @@
 * accordance with the terms of the license agreement you entered into
 * with Grid Dynamics.
 */
-package com.griddynamics.research.coherence.osgi.service.service.impl;
+package com.griddynamics.research.coherence.osgi.service.impl;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.NamedCache;
-import com.griddynamics.research.coherence.osgi.service.service.api.CacheFactoryService;
+import com.griddynamics.research.coherence.osgi.service.api.CacheFactoryService;
 
 /**
  * TODO [Need to specify general description of the entity]

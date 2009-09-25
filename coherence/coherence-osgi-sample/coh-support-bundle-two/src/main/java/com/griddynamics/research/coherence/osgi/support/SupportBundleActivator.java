@@ -16,8 +16,8 @@ import org.osgi.framework.BundleContext;
 
 import java.util.Properties;
 
-import com.griddynamics.research.coherence.osgi.service.service.api.CacheFactoryService;
-import com.griddynamics.research.coherence.osgi.service.service.impl.CacheFactoryServiceImpl;
+import com.griddynamics.research.coherence.osgi.service.api.CacheFactoryService;
+import com.griddynamics.research.coherence.osgi.service.impl.CacheFactoryServiceImpl;
 
 /**
  * TODO [Need to specify general description of the entity]
