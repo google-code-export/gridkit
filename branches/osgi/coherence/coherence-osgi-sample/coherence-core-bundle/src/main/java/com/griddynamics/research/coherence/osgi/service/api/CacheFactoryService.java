@@ -9,7 +9,7 @@
 * accordance with the terms of the license agreement you entered into
 * with Grid Dynamics.
 */
-package com.griddynamics.research.coherence.osgi.service.service.api;
+package com.griddynamics.research.coherence.osgi.service.api;
 
 import com.tangosol.net.NamedCache;
 

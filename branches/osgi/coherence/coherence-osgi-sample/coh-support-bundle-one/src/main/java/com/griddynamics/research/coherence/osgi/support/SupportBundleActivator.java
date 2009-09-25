@@ -13,8 +13,8 @@ package com.griddynamics.research.coherence.osgi.support;
 
 import com.griddynamics.research.coherence.osgi.corebundle.AbstractSupportBundleActivator;
 import org.osgi.framework.BundleContext;
-import com.griddynamics.research.coherence.osgi.service.service.api.CacheFactoryService;
-import com.griddynamics.research.coherence.osgi.service.service.impl.CacheFactoryServiceImpl;
+import com.griddynamics.research.coherence.osgi.service.api.CacheFactoryService;
+import com.griddynamics.research.coherence.osgi.service.impl.CacheFactoryServiceImpl;
 
 import java.util.Properties;
 

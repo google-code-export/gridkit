@@ -19,7 +19,7 @@ package com.griddynamics.research.coherence.osgi.web.servlet;
 import com.tangosol.net.NamedCache;
 import com.griddynamics.research.coherence.osgi.Activator;
 import com.griddynamics.research.coherence.osgi.domain.Computer;
-import com.griddynamics.research.coherence.osgi.service.service.api.CacheFactoryService;
+import com.griddynamics.research.coherence.osgi.service.api.CacheFactoryService;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
