@@ -75,7 +75,7 @@ Elements" page on the Coherence Wiki (http://wiki.tangosol.com).
             <service-name>DistributedCache</service-name>
 
             <serializer>
-                <class-name>org.questora.osgi.samples.corebundle.ByValueConfigurablePofContext</class-name>
+                <class-name>com.griddynamics.research.coherence.osgi.corebundle.ByValueConfigurablePofContext</class-name>
                 <init-params>
                     <init-param>
                         <param-value><![CDATA[

@@ -11,13 +11,13 @@
 */
 package com.griddynamics.research.coherence.osgi.support;
 
-import org.questora.osgi.samples.corebundle.AbstractSupportBundleActivator;
+import com.griddynamics.research.coherence.osgi.corebundle.AbstractSupportBundleActivator;
 import org.osgi.framework.BundleContext;
 
 import java.util.Properties;
 
-import ru.questora.osgi.samples.service.api.CacheFactoryService;
-import ru.questora.osgi.samples.service.impl.CacheFactoryServiceImpl;
+import com.griddynamics.research.coherence.osgi.service.service.api.CacheFactoryService;
+import com.griddynamics.research.coherence.osgi.service.service.impl.CacheFactoryServiceImpl;
 
 /**
  * TODO [Need to specify general description of the entity]
