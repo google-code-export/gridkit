@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>ru.questora.research.coherence.osgi</groupId>
+        <groupId>com.griddynamics.research.coherence.osgi</groupId>
         <artifactId>coherence-osgi-sample</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>ru.questora.research.coherence.osgi</groupId>
+    <groupId>com.griddynamics.research.coherence.osgi</groupId>
     <artifactId>web-bundle-one</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>OSGi Web Application 1</name>
@@ -23,7 +23,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>ru.questora.research.coherence.osgi</groupId>
+            <groupId>com.griddynamics.research.coherence.osgi</groupId>
             <artifactId>coherence-core-bundle</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>

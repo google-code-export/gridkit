@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
     <parent>
-        <groupId>ru.questora.research.coherence.osgi</groupId>
+        <groupId>com.griddynamics.research.coherence.osgi</groupId>
         <artifactId>web-bundle-one</artifactId>
         <version>1.0-SNAPSHOT</version>
 
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>ru.questora.research.coherence.osgi</groupId>
+    <groupId>com.griddynamics.research.coherence.osgi</groupId>
     <artifactId>war-one</artifactId>
     <name>Spring OSGi Samples: SimpleWebApp - War Bundle</name>
     <url>http://www.springframework.org/osgi</url>

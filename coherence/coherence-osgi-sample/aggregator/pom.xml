@@ -5,10 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>coherence-osgi-sample</artifactId>
-        <groupId>ru.questora.research.coherence.osgi</groupId>
+        <groupId>com.griddynamics.research.coherence.osgi</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <groupId>ru.questora.research.coherence.osgi</groupId>
+    <groupId>com.griddynamics.research.coherence.osgi</groupId>
     <artifactId>aggregator</artifactId>
     <name>Aggregation module: All bundles go to it's target/dist girectory</name>
     <packaging>pom</packaging>
@@ -21,34 +21,34 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>ru.questora.research.coherence.osgi</groupId>
+            <groupId>com.griddynamics.research.coherence.osgi</groupId>
             <artifactId>coherence-core-bundle</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>ru.questora.research.coherence.osgi</groupId>
+            <groupId>com.griddynamics.research.coherence.osgi</groupId>
             <artifactId>coh-support-bundle-one</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>ru.questora.research.coherence.osgi</groupId>
+            <groupId>com.griddynamics.research.coherence.osgi</groupId>
             <artifactId>war-one</artifactId>
             <type>war</type>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>ru.questora.research.coherence.osgi</groupId>
+            <groupId>com.griddynamics.research.coherence.osgi</groupId>
             <artifactId>coh-support-bundle-two</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>ru.questora.research.coherence.osgi</groupId>
+            <groupId>com.griddynamics.research.coherence.osgi</groupId>
             <artifactId>war-two</artifactId>
             <type>war</type>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>ru.questora.research.coherence.osgi</groupId>
+            <groupId>com.griddynamics.research.coherence.osgi</groupId>
             <artifactId>service-explorer</artifactId>
             <type>war</type>
             <version>${project.version}</version>
