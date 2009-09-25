@@ -18,7 +18,7 @@ package org.springframework.osgi.samples.simplewebapp.servlet;
 
 import com.tangosol.net.NamedCache;
 import ru.questora.coherence.osgi.Activator;
-import ru.questora.coherence.osgi.domain.Workstation;
+import ru.questora.coherence.osgi.domain.Computer;
 import ru.questora.osgi.samples.service.api.CacheFactoryService;
 
 import javax.servlet.ServletException;
@@ -67,7 +67,7 @@ public class CoherenceTestServletTwo extends HttpServlet {
             for (int i = 0; i < 20; i += 2)
                 testCache.put(i, "val_" + i);
 
-            testCache.put("myComp", new Workstation(1 << 20, "Indel Core2Duo 3.15 GHz", 2 << 12));
+            testCache.put("myComp", new Computer(1 << 20, "Indel Core2Duo 3.15 GHz", 2 << 12));
         }
 
         response.setContentType("text/html");

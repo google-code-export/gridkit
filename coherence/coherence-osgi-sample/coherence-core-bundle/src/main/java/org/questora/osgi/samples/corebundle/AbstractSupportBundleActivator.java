@@ -24,7 +24,7 @@ import java.net.URL;
  * @author Anton Savelyev
  * @since 1.7
  */
-public abstract class SupportBundleActivator implements BundleActivator {
+public abstract class AbstractSupportBundleActivator implements BundleActivator {
 
     @Override
     public void start(BundleContext bundleContext) throws Exception {
