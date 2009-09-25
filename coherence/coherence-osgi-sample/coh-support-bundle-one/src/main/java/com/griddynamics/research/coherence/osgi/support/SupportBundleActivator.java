@@ -11,10 +11,10 @@
 */
 package com.griddynamics.research.coherence.osgi.support;
 
-import org.questora.osgi.samples.corebundle.AbstractSupportBundleActivator;
+import com.griddynamics.research.coherence.osgi.corebundle.AbstractSupportBundleActivator;
 import org.osgi.framework.BundleContext;
-import ru.questora.osgi.samples.service.api.CacheFactoryService;
-import ru.questora.osgi.samples.service.impl.CacheFactoryServiceImpl;
+import com.griddynamics.research.coherence.osgi.service.service.api.CacheFactoryService;
+import com.griddynamics.research.coherence.osgi.service.service.impl.CacheFactoryServiceImpl;
 
 import java.util.Properties;
 
