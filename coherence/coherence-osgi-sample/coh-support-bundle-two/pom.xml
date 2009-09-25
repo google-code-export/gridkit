@@ -16,11 +16,12 @@
 
     <properties>
         <project.build.bundle.name>${project.name}</project.build.bundle.name>
-        <project.build.bundle.symbolicName>org.questora.osgi.samples.cohsupport.two</project.build.bundle.symbolicName>
+        <project.build.bundle.symbolicName>com.griddynamics.research.coherence.osgi.support.two</project.build.bundle.symbolicName>
         <project.build.bundle.version>2.0</project.build.bundle.version>
         <project.build.bundle.importPackage>,
-            org.questora.osgi.samples.corebundle,
-            com.griddynamics.research.coherence.osgi.service.scom.griddynamics.research.coherence.osgi.service.serviceora.osgi.samples.service.impl,
+            com.griddynamics.research.coherence.osgi.corebundle,
+            com.griddynamics.research.coherence.osgi.service.api,
+            com.griddynamics.research.coherence.osgi.service.impl,
             com.griddynamics.research.coherence.osgi.domain,
             com.tangosol.net,
             com.tangosol.run.xml,

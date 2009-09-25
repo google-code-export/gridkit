@@ -19,8 +19,9 @@
             com.tangosol.net,
             com.tangosol.run.xml,
             com.tangosol.io.pof,
-            org.questora.osgi.samples.corebundle,
-            com.griddynamics.research.coherence.osgi.service.scom.griddynamics.research.coherence.osgi.service.serviceora.osgi.samples.service.impl
+            com.griddynamics.research.coherence.osgi.corebundle,
+            com.griddynamics.research.coherence.osgi.service.api,
+            com.griddynamics.research.coherence.osgi.service.impl
         </project.build.bundle.exportPackage>
         <project.build.bundle.activator>com.griddynamics.research.coherence.osgi.corebundle.Activator</project.build.bundle.activator>
     </properties>
