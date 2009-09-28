@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE pof-config SYSTEM "pof-config.dtd">
+
+<pof-config>
+    <user-type-list>
+        <user-type>
+            <type-id>3000</type-id>
+            <class-name>com.griddynamics.research.coherence.osgi.domain.Workstation</class-name>
+        </user-type>
+    </user-type-list>
+</pof-config>

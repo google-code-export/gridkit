@@ -12,10 +12,14 @@
 package com.griddynamics.research.coherence.osgi.corebundle;
 
 import com.tangosol.net.CacheFactory;
+import com.tangosol.run.xml.XmlDocument;
+import com.tangosol.run.xml.XmlElement;
 import com.tangosol.run.xml.XmlHelper;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.net.URL;
 
 /**
@@ -30,13 +34,44 @@ public abstract class AbstractSupportBundleActivator implements BundleActivator 
     public void start(BundleContext bundleContext) throws Exception {
         final URL cacheConfig = bundleContext.getBundle().getResource("cache-config.xml");
 
+        final XmlDocument cacheConfigXml = XmlHelper.loadXml(cacheConfig);
+
+        XmlElement el;
+        for (Object o : cacheConfigXml.getElement("caching-schemes").getElementList()) {
+            el = (XmlElement) o;
+            if ((el = el.getElement("serializer")) != null &&
+                    el.getElement("class-name").getString().contains(ByValueConfigurablePofContext.class.getName())) {
+                for (Object o1 : el.getElement("init-params").getElementList())
+                    if ("String".equalsIgnoreCase(((XmlElement) o1).getElement("param-type").getString())) {
+                        final XmlElement configNameElement = ((XmlElement) o1).getElement("param-value");
+                        String configName;
+                        if ((configName = configNameElement.getString()).contains(".xml")) {
+                            final URL pofConfigResource = bundleContext.getBundle().getResource(configName);
+                            assert pofConfigResource != null;
+                            configNameElement.setString(readFromUrl(pofConfigResource));
+                        }
+                    }
+            }
+        }
+
         CacheFactory.getCacheFactoryBuilder().setCacheConfiguration(
                 getClassLoader(bundleContext),
-                XmlHelper.loadXml(cacheConfig)
+                cacheConfigXml
         );
     }
 
     protected abstract ClassLoader getClassLoader(BundleContext bundleContext) throws ClassNotFoundException;
+
+    private String readFromUrl(URL url) throws IOException {
+        final BufferedInputStream inputStream = new BufferedInputStream(url.openStream());
+        StringBuffer stringBuffer = new StringBuffer();
+        final int bytesAvailable = inputStream.available();
+        byte bytes[] = new byte[bytesAvailable];
+        inputStream.read(bytes);
+        for (byte b : bytes)
+            stringBuffer.append((char) b);
+        return stringBuffer.toString();
+    }
 
     @Override
     public void stop(BundleContext bundleContext) throws Exception {
