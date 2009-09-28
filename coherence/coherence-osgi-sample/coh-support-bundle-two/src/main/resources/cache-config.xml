@@ -137,24 +137,7 @@ Elements" page on the Coherence Wiki (http://wiki.tangosol.com).
                 <init-params>
                     <init-param>
                         <param-type>String</param-type>
-                        <param-value>
-                            <![CDATA[
-
-                                <?xml version="1.0"?>
-
-                                <!DOCTYPE pof-config SYSTEM "pof-config.dtd">
-
-                                <pof-config>
-                                    <user-type-list>
-                                        <user-type>
-                                            <type-id>3000</type-id>
-                                            <class-name>com.griddynamics.research.coherence.osgi.domain.Computer</class-name>
-                                        </user-type>
-                                    </user-type-list>
-                                </pof-config>
-                            ]]>
-                        </param-value>
-
+                        <param-value>pof-config.xml</param-value>
                     </init-param>
                 </init-params>
             </serializer>
