@@ -17,6 +17,7 @@ import com.griddynamics.research.coherence.osgi.service.api.CacheFactoryService;
 import com.griddynamics.research.coherence.osgi.service.impl.CacheFactoryServiceImpl;
 
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 /**
  * TODO [Need to specify general description of the entity]
@@ -31,14 +32,6 @@ public class SupportBundleActivator extends AbstractSupportBundleActivator {
     @Override
     public void start(BundleContext bundleContext) throws Exception {
         classLoader = this.getClass().getClassLoader();
-
-        final Properties properties = new Properties();
-        properties.setProperty("applicationId", "app1");
-        bundleContext.registerService(
-                CacheFactoryService.class.getName(),
-                new CacheFactoryServiceImpl(classLoader),
-                properties);
-
         super.start(bundleContext);
     }
 
