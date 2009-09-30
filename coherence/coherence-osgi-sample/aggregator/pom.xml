@@ -74,6 +74,7 @@
                             <!--<excludeGroupIds>*</excludeGroupIds>-->
                             <includeGroupIds>${project.groupId}</includeGroupIds>
                             <includeTypes>jar,war</includeTypes>
+                            <excludeArtifactIds>coh-support-common</excludeArtifactIds>
                             <!--<useSubDirectoryPerArtifact>true</useSubDirectoryPerArtifact>-->
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>false</overWriteSnapshots>
