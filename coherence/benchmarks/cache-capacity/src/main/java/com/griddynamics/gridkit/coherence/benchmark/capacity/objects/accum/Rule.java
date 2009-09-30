@@ -17,7 +17,7 @@
 import java.io.Serializable;
 
 /**
- * @author Alexey Ragozin (aragozin@griddynamics.com)
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
 public class Rule implements Serializable {
 
