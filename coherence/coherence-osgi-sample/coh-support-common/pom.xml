@@ -8,12 +8,17 @@
         <groupId>com.griddynamics.research.coherence.osgi</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <groupId>com.griddynamics.research.coherence.osgi</groupId>
+    <!--<groupId>com.griddynamics.research.coherence.osgi</groupId>-->
     <artifactId>coh-support-common</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>coh-support-common</name>
     <url>http://maven.apache.org</url>
     <dependencies>
+        <dependency>
+            <groupId>com.griddynamics.research.coherence.osgi</groupId>
+            <artifactId>coherence-core-bundle</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
     </dependencies>
 

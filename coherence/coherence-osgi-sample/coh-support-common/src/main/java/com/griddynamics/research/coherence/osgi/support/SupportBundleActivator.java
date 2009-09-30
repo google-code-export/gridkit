@@ -13,11 +13,6 @@ package com.griddynamics.research.coherence.osgi.support;
 
 import com.griddynamics.research.coherence.osgi.corebundle.AbstractSupportBundleActivator;
 import org.osgi.framework.BundleContext;
-import com.griddynamics.research.coherence.osgi.service.api.CacheFactoryService;
-import com.griddynamics.research.coherence.osgi.service.impl.CacheFactoryServiceImpl;
-
-import java.util.Properties;
-import java.util.ResourceBundle;
 
 /**
  * TODO [Need to specify general description of the entity]
