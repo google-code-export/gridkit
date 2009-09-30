@@ -14,7 +14,8 @@
         <module>web-bundle-two</module>
         <module>service-explorer</module>
         <module>aggregator</module>
-    </modules>
+        <module>coh-support-common</module>
+  </modules>
 
     <properties>
         <project.build.bundle.version>1.0</project.build.bundle.version>
