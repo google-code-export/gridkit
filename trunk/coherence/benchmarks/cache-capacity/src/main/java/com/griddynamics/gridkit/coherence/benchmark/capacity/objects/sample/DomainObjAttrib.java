@@ -18,7 +18,7 @@ package com.griddynamics.gridkit.coherence.benchmark.capacity.objects.sample;
 import java.io.Serializable;
 
 /**
- * @author Alexey Ragozin (aragozin@griddynamics.com)
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
 @SuppressWarnings("serial")
 public class DomainObjAttrib implements Serializable {

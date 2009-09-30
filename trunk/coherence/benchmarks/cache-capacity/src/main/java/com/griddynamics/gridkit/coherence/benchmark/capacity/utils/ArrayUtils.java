@@ -18,7 +18,7 @@ package com.griddynamics.gridkit.coherence.benchmark.capacity.utils;
 import java.util.Arrays;
 
 /**
- * @author Alexey Ragozin (aragozin@griddynamics.com)
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
 public class ArrayUtils {
 	

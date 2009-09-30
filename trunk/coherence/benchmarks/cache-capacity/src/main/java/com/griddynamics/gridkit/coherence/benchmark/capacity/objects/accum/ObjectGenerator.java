@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * @author Alexey Ragozin (aragozin@griddynamics.com)
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
 public class ObjectGenerator {
 

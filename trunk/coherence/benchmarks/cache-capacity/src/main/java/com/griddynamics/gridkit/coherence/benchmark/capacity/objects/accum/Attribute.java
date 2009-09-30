@@ -20,7 +20,7 @@ import java.util.Collection;
 import com.griddynamics.gridkit.coherence.benchmark.capacity.utils.ArrayUtils;
 
 /**
- * @author Alexey Ragozin (aragozin@griddynamics.com)
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
 public class Attribute implements Serializable {
 
