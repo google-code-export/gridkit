@@ -37,6 +37,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.griddynamics.research.coherence.osgi</groupId>
+            <artifactId>coh-support-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.oracle.coherence</groupId>
             <artifactId>coherence</artifactId>
             <scope>provided</scope>
