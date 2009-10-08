@@ -1,0 +1,3 @@
+#summary Coherence capacity benchmark project description
+
+_Project in early stage._
