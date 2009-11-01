@@ -26,7 +26,7 @@
 
         <user-type>
             <type-id>1001</type-id>
-            <class-name>com.griddynamics.gridkit.coherence.benchmark.capacity.objects.sample.DomainObjAttrib</class-name>
+            <class-name>sample.DomainObjAttrib</class-name>
             <serializer>
                 <class-name>com.griddynamics.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
             </serializer>
@@ -34,7 +34,7 @@
 
         <user-type>
             <type-id>1002</type-id>
-            <class-name>com.griddynamics.gridkit.coherence.benchmark.capacity.objects.sample.DomainObject</class-name>
+            <class-name>sample.DomainObject</class-name>
             <serializer>
                 <class-name>com.griddynamics.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
             </serializer>
@@ -42,7 +42,7 @@
 
         <user-type>
             <type-id>1003</type-id>
-            <class-name>com.griddynamics.gridkit.coherence.benchmark.capacity.objects.sample.DomainObjKey</class-name>
+            <class-name>sample.DomainObjKey</class-name>
             <serializer>
                 <class-name>com.griddynamics.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
             </serializer>
