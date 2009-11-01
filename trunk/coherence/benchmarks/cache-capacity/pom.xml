@@ -50,13 +50,15 @@
     </pluginRepositories>
 
     <dependencies>
-    <!-- 
         <dependency>
         	<groupId>com.oracle.coherence</groupId>
         	<artifactId>coherence</artifactId>
+    <!-- 
+        	<version>3.4</version>
         	<version>3.5.1</version>
-        </dependency>        
      -->
+        	<version>3.5.2</version>
+        </dependency>        
     </dependencies>
 
     <build>
