@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE pof-config SYSTEM "pof-config.dtd">
+
+<pof-config>
+
+    <user-type-list>
+
+        <include>coherence-pof-config.xml</include>
+
+    </user-type-list>
+
+    <allow-interfaces>true</allow-interfaces>
+    <allow-subclasses>false</allow-subclasses>
+
+    <!-- 
+        <default-serializer>
+            <class-name>com.griddynamics.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+        </default-serializer>
+     -->
+
+</pof-config>
