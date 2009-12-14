@@ -34,35 +34,42 @@ import com.tangosol.util.ExternalizableHelper;
  * @author akornev@griddynamics.com
  * @since 1.0
  */
-public class BenchmarkCommand implements Command<BenchmarkContext>, PortableObject,
-		ExternalizableLite {
+public class BenchmarkCommand implements Command<BenchmarkContext>,
+		PortableObject, ExternalizableLite {
 
-	private static final int PUSH_TIME_SERIALIZE_INDEX = 0;
 
 	private static final long serialVersionUID = 6101217481255920806L;
-	private long pushTime;
-	private long id;
+	
+	private static final int COMMAND_TIME_INDEX = 0;
+	
+	private BenchmarkCommandTime commandTime;
 	private static long counter;
 
 	/**
 	 * Default constructor. Initialize pushTime of currentTime in millisecond
 	 */
 	public BenchmarkCommand() {
-		pushTime = System.currentTimeMillis();
-		id = (long) (Math.random() * 10000000) + (++counter);
+		long pushTime = System.nanoTime();
+		long id = (long) (Math.random() * 10000000) + (++counter);
+		commandTime = new BenchmarkCommandTime();
+		commandTime.setCommandId(id);
+		commandTime.setPushTime(pushTime);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void execute(ExecutionEnvironment<BenchmarkContext> executionEnvironment) {
+	public void execute(
+			ExecutionEnvironment<BenchmarkContext> executionEnvironment) {
 		BenchmarkContext context = executionEnvironment.getContext();
-		context.addStartTimes(id, pushTime);
+
 		// Invoke execution method.
 		execute();
-
-		context.addEndTimes(id, System.currentTimeMillis());
+		// Save time information
+		commandTime.setEndTime(System.nanoTime());
+		context.addCommandTime(commandTime);
+		
 		executionEnvironment.setContext(context);
 
 	}
@@ -76,7 +83,7 @@ public class BenchmarkCommand implements Command<BenchmarkContext>, PortableObje
 	 */
 	@Override
 	public void readExternal(PofReader reader) throws IOException {
-		pushTime = reader.readLong(PUSH_TIME_SERIALIZE_INDEX);
+		commandTime = (BenchmarkCommandTime) reader.readObject(COMMAND_TIME_INDEX);
 	}
 
 	/**
@@ -84,37 +91,19 @@ public class BenchmarkCommand implements Command<BenchmarkContext>, PortableObje
 	 */
 	@Override
 	public void writeExternal(PofWriter writer) throws IOException {
-		writer.writeLong(PUSH_TIME_SERIALIZE_INDEX, pushTime);
+		writer.writeObject(COMMAND_TIME_INDEX, commandTime);
 	}
 
-	/**
-	 * Get time when command pushed.
-	 * 
-	 * @return time
-	 */
-	public long getPushTime() {
-		return pushTime;
-	}
-
-	/**
-	 * Set time when command pushed.
-	 * 
-	 * @param pushTime
-	 */
-	public void setPushTime(long pushTime) {
-		this.pushTime = pushTime;
-	}
 
 	@Override
 	public void readExternal(DataInput in) throws IOException {
-		pushTime = ExternalizableHelper.readLong(in);
+		commandTime = (BenchmarkCommandTime) ExternalizableHelper.readObject(in);
 
 	}
 
 	@Override
 	public void writeExternal(DataOutput out) throws IOException {
-		ExternalizableHelper.writeLong(out, pushTime);
-
+		ExternalizableHelper.writeObject(out, commandTime);
 	}
 
 }
