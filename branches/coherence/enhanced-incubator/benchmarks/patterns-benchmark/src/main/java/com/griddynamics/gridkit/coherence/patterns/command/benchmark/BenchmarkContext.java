@@ -19,8 +19,8 @@ package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.oracle.coherence.patterns.command.Context;
 import com.tangosol.io.ExternalizableLite;
@@ -35,86 +35,72 @@ import com.tangosol.util.ExternalizableHelper;
  * @author akornev@griddynamics.com
  * @since 1.0
  */
-public class BenchmarkContext implements Context, PortableObject, ExternalizableLite {
-	
-	private static final int START_TIME_INDEX = 0;
-	private static final int END_TIME_INDEX = 1;
+public class BenchmarkContext implements Context, PortableObject,
+		ExternalizableLite {
 
 	private static final long serialVersionUID = 512313983665949196L;
-	private Map<Long, Long> startTimes;
-	private Map<Long, Long> endTimes;
+	
+	private static final int COMMAND_TIME_INDEX = 1;
+	private List<BenchmarkCommandTime> commandTimes;
 
 	/**
 	 * Default constructor initialize start and end times
 	 */
 	public BenchmarkContext() {
-		startTimes = new HashMap<Long, Long>();
-		endTimes = new HashMap<Long, Long>();
+		commandTimes = new ArrayList<BenchmarkCommandTime>();
 	}
 	
 	/**
-	 * Add start time for command with commandId
+	 * Add command time.
 	 * 
-	 * @param commandId - unique command identifier
-	 * @param time - command start time
+	 * @param commandTime - information about command time
 	 */
-	public void addStartTimes(long commandId, long time) {
-		startTimes.put(commandId, time);
+	public void addCommandTime(BenchmarkCommandTime commandTime) {
+		commandTimes.add(commandTime);
 	}
-		
-	/**
-	 * Add end time for command with commandId.
-	 * 
-	 * @param commandId - unique command identifier
-	 * @param time - command end time
-	 */
-	public void addEndTimes(long commandId,long time) {
-		endTimes.put(commandId, time);
-	}
-	
-	/**
-	 * Get commands start times.
-	 * 
-	 * @return startTimes
-	 */
-	public Map<Long, Long> getStartTimes() {
-		return startTimes;
-	}
-	
-	/**
-	 * Get commands end times.
-	 * 
-	 * @return endTimes
-	 */
-	public Map<Long, Long> getEndTimes() {
-		return endTimes;
-	}
-	
 
+	/**
+	 * Get command times
+	 * @return command times
+	 */
+	public List<BenchmarkCommandTime> getCommandTimes() {
+		return commandTimes;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public void readExternal(PofReader reader) throws IOException {
-		startTimes = (Map<Long, Long>) reader.readObject(START_TIME_INDEX);
-		endTimes = (Map<Long, Long>) reader.readObject(END_TIME_INDEX);
+		commandTimes = (List<BenchmarkCommandTime>) reader
+				.readObject(COMMAND_TIME_INDEX);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void writeExternal(PofWriter writer) throws IOException {
-		writer.writeObject(START_TIME_INDEX, startTimes);
-		writer.writeObject(END_TIME_INDEX, endTimes);
+		writer.writeObject(COMMAND_TIME_INDEX, commandTimes);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public void readExternal(DataInput in) throws IOException {
-		startTimes = (Map<Long, Long>) ExternalizableHelper.readObject(in);
-		endTimes = (Map<Long, Long>) ExternalizableHelper.readObject(in);
+		commandTimes = (List<BenchmarkCommandTime>) ExternalizableHelper
+				.readObject(in);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void writeExternal(DataOutput out) throws IOException {
-		ExternalizableHelper.writeObject(out, startTimes);
-		ExternalizableHelper.writeObject(out, endTimes);
+		ExternalizableHelper.writeObject(out, commandTimes);
 	}
-	
+
 }

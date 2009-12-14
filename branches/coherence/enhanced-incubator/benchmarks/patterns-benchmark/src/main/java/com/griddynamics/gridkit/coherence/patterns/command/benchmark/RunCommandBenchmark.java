@@ -16,7 +16,7 @@
 
 package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
 
-import java.util.Map;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -36,8 +36,8 @@ import com.oracle.coherence.patterns.command.ContextConfiguration.ManagementStra
  */
 public class RunCommandBenchmark {
 
-	private static final int THREAD_COUNT = 10;
-	private static final int COMMAND_COUNT = 5;
+	private static final int THREAD_COUNT = 5;
+	private static final int COMMAND_COUNT = 100;
 
 	/**
 	 * Customize coherence and run benchmark
@@ -47,10 +47,11 @@ public class RunCommandBenchmark {
 	public static void main(String[] args) {
 		// Configure coherence
 		System.setProperty("tangosol.pof.config", "pof-config.xml");
-		System.setProperty("tangosol.coherence.cacheconfig", "coherence-commandpattern-cache-config.xml");
-		
+		System.setProperty("tangosol.coherence.cacheconfig",
+				"coherence-commandpattern-cache-config.xml");
+
 		DefaultContextConfiguration contextConfiguration = new DefaultContextConfiguration(
-				ManagementStrategy.COLOCATED);
+				ManagementStrategy.DISTRIBUTED);
 
 		ContextsManager contextsManager = DefaultContextsManager.getInstance();
 		BenchmarkContext context = new BenchmarkContext();
@@ -62,8 +63,6 @@ public class RunCommandBenchmark {
 		CommandSubmitter commandSubmitter = DefaultCommandSubmitter
 				.getInstance();
 
-		commandSubmitter.submitCommand(contextIdentifier, new BenchmarkCommand());
-
 		Executor executor = Executors.newFixedThreadPool(THREAD_COUNT);
 
 		for (int i = 0; i < THREAD_COUNT; i++) {
@@ -71,34 +70,43 @@ public class RunCommandBenchmark {
 					contextIdentifier, COMMAND_COUNT));
 		}
 
-		// Sleep some time when command execute.
-		try {
-			Thread.sleep(100000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		// Get context
-		BenchmarkContext con = (BenchmarkContext) contextsManager
-				.getContext(contextIdentifier);
-		// Get start time map and end time map
-		Map<Long, Long> startTimes = con.getStartTimes();
-		Map<Long, Long> endTimes = con.getEndTimes();
-		
-		// Out benchmark result
-		for (long commandId : startTimes.keySet()) {
-
-			if ((startTimes.get(commandId) != null)
-					&& (endTimes.get(commandId) != null)) {
-				
-				long timeout = endTimes.get(commandId)
-						- startTimes.get(commandId);
-
-				System.out.println("Command with id = " + commandId + " Work "
-						+ timeout);
-
+		// Sleep some time when command executing.
+		List<BenchmarkCommandTime> commandTimes = null;
+		do {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
+			// Get context
+			BenchmarkContext con = (BenchmarkContext) contextsManager
+					.getContext(contextIdentifier);
+
+			commandTimes = con.getCommandTimes();
+		} while (commandTimes.size() < (THREAD_COUNT * COMMAND_COUNT));
+
+		// Out benchmark result
+		long firstTime = 0;
+		long lastTime = 0;
+		for (BenchmarkCommandTime commandTime : commandTimes) {
+
+			// If first command
+			if (firstTime == 0) {
+				firstTime = commandTime.getPushTime();
+			}
+
+			long timeout = (commandTime.getEndTime() - commandTime
+					.getPushTime()) / 1000000;
+
+			// Get last command
+			lastTime = commandTime.getEndTime();
+
+			System.out.println("Command with id = "
+					+ commandTime.getCommandId() + " Work " + timeout);
+
 		}
 
+		System.out.println("For all queue time out "
+				+ ((lastTime - firstTime) / 1000000));
 	}
-
 }
