@@ -29,7 +29,7 @@ import com.oracle.coherence.patterns.command.DefaultContextsManager;
 import com.oracle.coherence.patterns.command.ContextConfiguration.ManagementStrategy;
 
 /**
- * Main test. Submit commands from another threads.
+ * Main test. Submit commands to another threads.
  * 
  * @author akornev@griddynamics.com
  * @since 1.0
