@@ -38,6 +38,8 @@ public class RunCommandBenchmark {
 
 	private static final int THREAD_COUNT = 5;
 	private static final int COMMAND_COUNT = 100;
+	private static final String THREAD_COUNT_PARAM = "thread.count";
+	private static final String COMMAND_COUNT_PARAM = "command.count";
 
 	/**
 	 * Customize coherence and run benchmark
@@ -49,6 +51,24 @@ public class RunCommandBenchmark {
 		System.setProperty("tangosol.pof.config", "pof-config.xml");
 		System.setProperty("tangosol.coherence.cacheconfig",
 				"coherence-commandpattern-cache-config.xml");
+
+		// Get params from system properties
+		int threadCount = 0;
+		if (System.getProperty(THREAD_COUNT_PARAM) != null) {
+			threadCount = Integer.parseInt(System
+					.getProperty(THREAD_COUNT_PARAM));
+		} else {
+			threadCount = THREAD_COUNT;
+		}
+
+		int commandCount = 0;
+		if (System.getProperty(COMMAND_COUNT_PARAM) != null) {
+			commandCount = Integer.parseInt(System
+					.getProperty(COMMAND_COUNT_PARAM));
+
+		} else {
+			commandCount = COMMAND_COUNT;
+		}
 
 		DefaultContextConfiguration contextConfiguration = new DefaultContextConfiguration(
 				ManagementStrategy.DISTRIBUTED);
@@ -63,11 +83,11 @@ public class RunCommandBenchmark {
 		CommandSubmitter commandSubmitter = DefaultCommandSubmitter
 				.getInstance();
 
-		Executor executor = Executors.newFixedThreadPool(THREAD_COUNT);
+		Executor executor = Executors.newFixedThreadPool(threadCount);
 
-		for (int i = 0; i < THREAD_COUNT; i++) {
+		for (int i = 0; i < threadCount; i++) {
 			executor.execute(new BenchmarkCommandSubmitter(commandSubmitter,
-					contextIdentifier, COMMAND_COUNT));
+					contextIdentifier, commandCount));
 		}
 
 		// Sleep some time when command executing.
@@ -83,30 +103,86 @@ public class RunCommandBenchmark {
 					.getContext(contextIdentifier);
 
 			commandTimes = con.getCommandTimes();
-		} while (commandTimes.size() < (THREAD_COUNT * COMMAND_COUNT));
+		} while (commandTimes.size() < (threadCount * commandCount));
 
-		// Out benchmark result
-		long firstTime = 0;
-		long lastTime = 0;
-		for (BenchmarkCommandTime commandTime : commandTimes) {
+		outStatistics(commandTimes);
 
-			// If first command
-			if (firstTime == 0) {
-				firstTime = commandTime.getPushTime();
+	}
+
+	/**
+	 * Out command statistics.
+	 * 
+	 * @param commandTimes
+	 */
+	public static void outStatistics(
+			final List<BenchmarkCommandTime> commandTimes) {
+
+		if ((commandTimes != null) && (!commandTimes.isEmpty())) {
+			// Get first result
+			final long firstTime = commandTimes.get(0).getPushTime();
+			// Get end result
+			final long lastTime = commandTimes.get(commandTimes.size() - 1)
+					.getEndTime();
+
+			long totalTimeOut = 0;
+			long avgTimeout = 0;
+			long maxTimeout = 0;
+			long minTimeout = Long.MAX_VALUE;
+
+			for (BenchmarkCommandTime commandTime : commandTimes) {
+
+				long timeout = (commandTime.getEndTime() - commandTime
+						.getPushTime()) / 1000000;
+
+				// Calc total time out
+				totalTimeOut += timeout;
+
+				// Get max timeout
+				if (maxTimeout < timeout) {
+					maxTimeout = timeout;
+				}
+
+				// Get min timeout
+				if (minTimeout > timeout) {
+					minTimeout = timeout;
+				}
+
+				System.out.println("Command with id = "
+						+ commandTime.getCommandId() + " Work " + timeout);
 			}
 
-			long timeout = (commandTime.getEndTime() - commandTime
-					.getPushTime()) / 1000000;
+			// Calc avg
+			avgTimeout = totalTimeOut / commandTimes.size();
+			// Calc variance
+			long variance = 0;
+			for (BenchmarkCommandTime commandTime : commandTimes) {
 
-			// Get last command
-			lastTime = commandTime.getEndTime();
+				long timeout = (commandTime.getEndTime() - commandTime
+						.getPushTime()) / 1000000;
 
-			System.out.println("Command with id = "
-					+ commandTime.getCommandId() + " Work " + timeout);
+				long var = (avgTimeout - timeout);
+				var *= var;
 
+				variance += var / commandTimes.size();
+			}
+			// Calc standard deviation
+			final double stdDev = Math.sqrt(variance);
+
+			System.out.println("For all queue time out "
+					+ ((lastTime - firstTime) / 1000000));
+
+			final double secondCount = ((double) (lastTime - firstTime)) / 1000000000;
+
+			System.out.println("Throughput op/sec: "
+					+ (commandTimes.size() / secondCount));
+
+			System.out.println("AVG timeout: " + avgTimeout);
+
+			System.out.println("Standard Deviation: " + stdDev);
+
+			System.out.println("Max timeout: " + maxTimeout);
+
+			System.out.println("Min timeout: " + minTimeout);
 		}
-
-		System.out.println("For all queue time out "
-				+ ((lastTime - firstTime) / 1000000));
 	}
 }
