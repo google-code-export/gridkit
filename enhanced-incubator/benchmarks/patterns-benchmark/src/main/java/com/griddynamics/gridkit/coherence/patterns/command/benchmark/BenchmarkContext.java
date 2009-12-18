@@ -17,6 +17,7 @@
 package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
 
 import java.io.DataInput;
+
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,28 +40,33 @@ public class BenchmarkContext implements Context, PortableObject,
 		ExternalizableLite {
 
 	private static final long serialVersionUID = 512313983665949196L;
-	
+
 	private static final int COMMAND_TIME_INDEX = 1;
 	private List<BenchmarkCommandTime> commandTimes;
 
 	/**
-	 * Default constructor initialize start and end times
-	 */
-	public BenchmarkContext() {
-		commandTimes = new ArrayList<BenchmarkCommandTime>();
-	}
-	
-	/**
 	 * Add command time.
 	 * 
-	 * @param commandTime - information about command time
+	 * @param commandTime
+	 *            - information about command time
 	 */
 	public void addCommandTime(BenchmarkCommandTime commandTime) {
+		if (commandTimes == null) {
+			commandTimes = new ArrayList<BenchmarkCommandTime>();
+		} else {
+			// It's need because after deserializing commandTimes is
+			// com.tangosol.util.ImmutableArrayList and it isn't provide to
+			// ability add new elements
+			// TODO: try to find another way
+			commandTimes = new ArrayList<BenchmarkCommandTime>(commandTimes);
+		}
+
 		commandTimes.add(commandTime);
 	}
 
 	/**
 	 * Get command times
+	 * 
 	 * @return command times
 	 */
 	public List<BenchmarkCommandTime> getCommandTimes() {
