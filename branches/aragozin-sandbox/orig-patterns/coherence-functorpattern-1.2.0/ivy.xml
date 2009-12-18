@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+	File: ivy.xml
+
+	Copyright (c) 2009. All Rights Reserved. Oracle Corporation.
+
+	Oracle is a registered trademark of Oracle Corporation and/or its
+	affiliates.
+
+	This software is the confidential and proprietary information of Oracle
+	Corporation. You shall not disclose such confidential and proprietary
+	information and shall use it only in accordance with the terms of the
+	license agreement you entered into with Oracle Corporation.
+ 
+	Oracle Corporation makes no representations or warranties about 
+	the suitability of the software, either express or implied, 
+	including but not limited to the implied warranties of 
+	merchantability, fitness for a particular purpose, or 
+	non-infringement.  Oracle Corporation shall not be liable for 
+	any damages suffered by licensee as a result of using, modifying 
+	or distributing this software or its derivatives.
+
+	This notice may not be removed or altered.
+ -->
+<ivy-module version="2.0" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+            xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">                
+                   
+    <info organisation="oracle" 
+		  module="coherence-functorpattern" 
+		  revision="1.2.0"/>
+	
+	<configurations defaultconfmapping="core">
+		<conf name="core" description="the core library without dependencies or documentation"/>
+		<conf name="src" description="contains both source code and documentation"/>
+		<conf name="test" extends="core" description="dependencies for testing"/>
+	</configurations>
+	
+	<publications>
+		<artifact name="coherence-functorpattern" type="jar" ext="jar" conf="core"/>
+		<artifact name="coherence-functorpattern" type="src" ext="zip" conf="src"/>
+	</publications>
+		
+	<dependencies>
+		<dependency org="oracle" name="coherence" rev="[3.4+,3.5+]" conf="*->core"/>
+		<dependency org="oracle" name="coherence-common" rev="1.4+" conf="*->core"/>
+		<dependency org="oracle" name="coherence-commandpattern" rev="2.4+" conf="*->core"/>
+		
+		<dependency org="org.testng" name="testng" rev="5.8" conf="test->default">
+			<artifact name="testng-5.8-jdk15" type="jar" url="http://repo1.maven.org/maven2/org/testng/testng/5.8/testng-5.8-jdk15.jar"/>
+			<exclude module="junit"/>
+		</dependency>
+	</dependencies>
+</ivy-module>

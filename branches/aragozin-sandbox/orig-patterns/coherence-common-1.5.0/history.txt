@@ -1,0 +1,150 @@
+----------------------------------------------------------------------------------------------------
+Coherence-Common Project History
+----------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------
+Version 1.5.0: 21st October 2009: Brian Oliver
+----------------------------------------------------------------------------------------------------
+
+*)	Resolved INC-200: Introduced the concept of a Tristate to represent TRUE, FALSE and UNDEFINED 
+	values
+	
+*)	Resolved INC-211: Updated to depend on Coherence 3.5.2 (and Coherence 3.4)
+
+----------------------------------------------------------------------------------------------------
+Version 1.4.0: 21st July 2009: Brian Oliver and Christer Fahlgren
+----------------------------------------------------------------------------------------------------
+
+*)	Resolved INC-27: Added FilteringIterator to provide filtering (with Coherence Filters) of 
+	standard Iterators.
+
+*)	Resolved INC-76: Introduced the com.oracle.coherence.common.sequencegenerators package and 
+	clustered implementation to allow generation of sequence numbers in other packages 
+	(this was refactored and removed from the Command Pattern implementation)
+	
+*)	Resolved INC-105: Introduced name-spaces for common caches (like the sequence generators cache)
+
+*)  Resolved INC-66, INC-121 to INC-125: Hardening Ranges implementations to prevent NPEs (in weird use cases)
+	and corrected numerous defects (producing incorrect ranges using union and intersection).
+	
+*)	Resolved INC-126: Introduced automated testng script running during the ant build process
+
+----------------------------------------------------------------------------------------------------
+Version 1.3.0: 30th March 2009: Brian Oliver
+----------------------------------------------------------------------------------------------------
+
+*)	Migrated to use Apache Ivy for dependency management and publishing artifacts 
+	(introduced ivy.xml, removed dependencies.info).  
+	
+	Apart from now using standardized repositories and the potential to integrate
+	with Maven, all Coherence Incubator projects should now (almost) have the same build.xml files!
+
+*)	Added the Range.size() method support to determine how many values are in a Range
+
+*)	Made the AbstractMultiplexingBackingMapListener MapEvent deserialization lazy 
+	(achieved by introducing an internal LazyMapEvent).  This improves performance of some
+	uses of BackingMapListener implementations, but as much as 15% (in lab tests)
+
+*)	Migrated build.xml file to use Apache Ivy 2.0
+
+*)	Added a getString() to the StringBasedIdentifier
+
+*)	Added a getUUID() method to the UUIDBasedIdentifier
+
+*)	Introduced support for Tuples in the com.oracle.coherence.common.tuples package.
+	They are handy for returning type-safe multiple values from methods / entry processors
+
+*)	Introduced support for Leases in the com.oracle.coherence.common.leasing package. At the moment
+	these are predominantly used by the Messaging layer, but will be handy elsewhere.
+
+*)	Introduced the MultiplexingBackingMapListener interface.  Additionally refactored the Cause
+	enumeration out of the AbstractMultiplexingBackingMapListener implementation.
+	
+*)	Introduced the DelegatingMultiplexingBackingMapListener implementation to delegate BackingMapListener 
+	events to objects in the cache that support the MultiplexingBackingMapListener interface.
+	This allows an object to be notified of events happening to itself.
+
+*)	Introduced the concept of a ContiguousRange based on the previous Range implementation.
+
+*)	Introduced an implementation of a SparseRange
+
+----------------------------------------------------------------------------------------------------
+Version 1.2.0: 10th November 2008: Brian Oliver and Simon Bisson
+----------------------------------------------------------------------------------------------------
+
+*)	Removed the MemberAware interface as it was a). inefficient in it's implementation in large
+	clusters AND b). returned incorrect values after n+1 failovers / recovery cycles.  It was
+	only useful for simple demonstrations.
+	
+*)	Refactored the AbstractMultiplexingBackingMapListener to remove dependency on MemberAware
+	(this included changing the Cause enumeration to only provide support for a PartitionManagement 
+	cause, thus removing the need for LoadBalancing and Recovery causes).
+	
+	This significantly improves performance on large clusters when a member fails or partition
+	load-balancing occurs.
+
+*)	Modified the ThreadFactories.newThreadFactory(...) method to support naming created threads
+	and specification of a ThreadGroup.
+	
+	This helps when creating and calling threads on a Coherence Thread (prevents the <warning>s
+	about "calling a CacheFactory on a Service Thread".
+	
+*)	Now correctly displays Ticket.NONE when using Ticket.toString
+
+*)	Added TicketBook.iterate(n) to support iterating over the first "n" Tickets in a TicketBook
+	(without removing them)
+
+*)	Added TicketBook.consume(n) to support removing (ie: consuming) the first "n" Tickets from
+	a TicketBook (without having create an iterator over them).
+	
+*)	Added a logging package to simplify using Coherence-based Logging.
+
+*)	Added deploy target to the build.xml (to simplify deployment to a repository)
+	(thanks Ashish)
+
+----------------------------------------------------------------------------------------------------
+Version 1.1.1: 14th October 2008: Brian Oliver
+----------------------------------------------------------------------------------------------------
+
+*)	Introduced the AdvancedConfigurableCacheFactory to simplify use of Incubator projects
+	(like those that require, include and override other cache configurations from other projects)
+	
+	This introduces the ability to use <introduce-cache-config file="..." /> element that may be
+	used as an immediate child of the <cache-config> element in Coherence Cache Config files.
+
+----------------------------------------------------------------------------------------------------
+Version 1.1.0: 27th September 2008: Brian Oliver
+----------------------------------------------------------------------------------------------------
+
+*)	WARNING: Changed the semantics of the Range class so that it may now represent empty ranges 
+	starting at a specified value.  This change means the constructor Range(long) now constructs 
+	an empty range commencing at the specified value, instead of a singleton range commencing at the 
+	specified value.
+
+*)	Added com.oracle.coherence.common.ranges.Ranges class to help construct Ranges.
+
+*)	WARNING: Moved the Ticket class into the com.oracle.coherence.common.ticketing package.  
+	We're going to be doing more stuff with Tickets in the future, so we should put all of this together.
+	
+*)	Added the TicketBook class to com.oracle.coherence.common.ticketing.  This is used to 
+	efficiently represent ranges of Tickets from the same "issuer".
+	
+*)	Added the TicketAggregator class to com.oracle.coherence.common.ticketing.  This is useful for
+	aggregating (in parallel) Tickets into TicketBooks.
+
+*)	Added support for Coherence 3.4 and Portable Object Format.  Remains backwards compatible with
+	Coherence 3.3.x
+	
+	coherence-common-pof-config.xml contains the required POF type definitions (for Java)
+
+*)	Improved generated javadoc so that it now directly links to the standard 
+	Oracle Coherence 3.4 online documentation.
+
+----------------------------------------------------------------------------------------------------
+Version 1.0.0: 12th August 2008: Brian Oliver
+----------------------------------------------------------------------------------------------------
+
+*)	Created to capture common classes used within the patterns (and other) Coherence-required
+	projects, like the coherence-commandpattern, coherence-functorpattern, coherence-replication etc
+
+*) 	Initial commit to SVN repository

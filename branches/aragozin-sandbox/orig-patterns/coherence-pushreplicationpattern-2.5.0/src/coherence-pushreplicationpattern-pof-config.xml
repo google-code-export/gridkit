@@ -1,0 +1,124 @@
+<!-- 
+	File: coherence-pushreplicationpattern-pof-config.xml
+	
+ 	Copyright (c) 2008-2009. All Rights Reserved. Oracle Corporation.
+
+	Oracle is a registered trademark of Oracle Corporation and/or its
+	affiliates.
+
+	This software is the confidential and proprietary information of Oracle
+	Corporation. You shall not disclose such confidential and proprietary
+	information and shall use it only in accordance with the terms of the
+	license agreement you entered into with Oracle Corporation.
+
+	Oracle Corporation makes no representations or warranties about 
+	the suitability of the software, either express or implied, 
+	including but not limited to the implied warranties of 
+	merchantability, fitness for a particular purpose, or 
+	non-infringement.  Oracle Corporation shall not be liable for 
+	any damages suffered by licensee as a result of using, modifying 
+	or distributing this software or its derivatives.
+
+	This notice may not be removed or altered.
+  -->
+<pof-config>
+	<user-type-list>
+		<!-- coherence-pushreplicationpattern types -->
+		<user-type>
+       		<type-id>13000</type-id>
+       		<class-name>com.oracle.coherence.patterns.pushreplication.EntryOperation</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>13001</type-id>
+       		<class-name>com.oracle.coherence.patterns.pushreplication.DefaultPublishingSubscription</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>13100</type-id>
+       		<class-name>com.oracle.coherence.patterns.pushreplication.publishers.BatchPublisherAdapter</class-name>
+		</user-type>
+		
+		<user-type>
+       		<type-id>13101</type-id>
+       		<class-name>com.oracle.coherence.patterns.pushreplication.publishers.LocalCachePublisher</class-name>
+		</user-type>
+		
+		<user-type>
+       		<type-id>13102</type-id>
+       		<class-name>com.oracle.coherence.patterns.pushreplication.publishers.FilePublisher</class-name>
+		</user-type>
+		
+		<user-type>
+       		<type-id>13103</type-id>
+       		<class-name>com.oracle.coherence.patterns.pushreplication.publishers.NullPublisher</class-name>
+		</user-type>
+		
+		<user-type>
+       		<type-id>13104</type-id>
+       		<class-name>com.oracle.coherence.patterns.pushreplication.publishers.RemoteCachePublisher</class-name>
+		</user-type>
+		
+		<user-type>
+       		<type-id>13105</type-id>
+       		<class-name>com.oracle.coherence.patterns.pushreplication.publishers.RemoteInvocationPublisher</class-name>
+		</user-type>
+		
+		<user-type>
+       		<type-id>13106</type-id>
+       		<class-name>com.oracle.coherence.patterns.pushreplication.publishers.RemoteInvocationPublisher$RemotePublishingAgent</class-name>
+		</user-type>
+		
+		<user-type>
+       		<type-id>13107</type-id>
+       		<class-name>com.oracle.coherence.patterns.pushreplication.publishers.StdErrPublisher</class-name>
+		</user-type>
+		
+		<user-type>
+       		<type-id>13108</type-id>
+       		<class-name>com.oracle.coherence.patterns.pushreplication.publishers.CachePublisher$BruteForceConflictResolver</class-name>
+		</user-type>
+		
+		<user-type>
+       		<type-id>13109</type-id>
+       		<class-name>com.oracle.coherence.patterns.pushreplication.publishers.LocalCachePublisher$EntryOperationProcessor</class-name>
+		</user-type>
+		
+		<user-type>
+       		<type-id>13110</type-id>
+       		<class-name>com.oracle.coherence.patterns.pushreplication.publishers.SafeLocalCachePublisher</class-name>
+		</user-type>
+		
+		<user-type>
+       		<type-id>13111</type-id>
+       		<class-name>com.oracle.coherence.patterns.pushreplication.publishers.SafeLocalCachePublisher$EntryOperationProcessor</class-name>
+		</user-type>
+		
+		<user-type>
+       		<type-id>13112</type-id>
+       		<class-name>com.oracle.coherence.patterns.pushreplication.EntryOperationBatch</class-name>
+		</user-type>
+		
+		<user-type>
+       		<type-id>13113</type-id>
+       		<class-name>com.oracle.coherence.patterns.pushreplication.EntryOperationBatch$EntryOp</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>13114</type-id>
+       		<class-name>com.oracle.coherence.patterns.pushreplication.publishers.FilteringBatchPublisherAdapter</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>13115</type-id>
+       		<class-name>com.oracle.coherence.patterns.pushreplication.publishers.CoalescingBatchPublisherAdapter</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>13200</type-id>
+       		<class-name>com.oracle.coherence.patterns.pushreplication.filters.EntryOperationFilter</class-name>
+		</user-type>
+
+ 	</user-type-list>
+</pof-config>
+ 

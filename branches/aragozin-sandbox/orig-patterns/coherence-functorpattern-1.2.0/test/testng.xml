@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="coherence-functorpattern-tests" verbose="1">
+	<test name="FunctorTests">
+		<classes>
+			<class name="FunctorTests" />
+		</classes>
+	</test>	
+</suite>

@@ -1,0 +1,31 @@
+----------------------------------------------------------------------------------------------------
+Coherence Processing Pattern Project History
+----------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------
+Version 1.1.0: 31st October 2009: Christer Fahlgren
+----------------------------------------------------------------------------------------------------
+
+*)	Upgraded to use coherence-common-1.5.0 
+
+*)  Changed terminology from 1.0; Submitter now called ProcessingSession
+
+*)  Introduced timing details on SubmissionOutcome, retrieve how long time it took to process
+
+*)  Introduced SubmissionOutcomeListener to enable notifications on the progress of a Submission.
+
+*)  Introduce Task, ResumableTask, Executor interfaces to support Task Execution
+
+*)  TaskDispatcher, plugging in to the Dispatcher framework to support Task Execution
+
+*)  Framework improvements to abstract away the implementation details for an Executor/Dispatcher
+
+*)	Resolved INC-211: Updated to depend on Coherence 3.5.2 (and Coherence 3.4)
+
+*) 	Resolved INC-214: Moved Examples into the new Examples project
+ 
+----------------------------------------------------------------------------------------------------
+Version 1.0.0: 14th April 2009: Noah Arliss
+----------------------------------------------------------------------------------------------------
+
+*). Initial commit to SVN repository

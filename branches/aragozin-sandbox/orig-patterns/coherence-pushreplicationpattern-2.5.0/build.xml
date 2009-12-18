@@ -1,0 +1,147 @@
+<project xmlns:ivy="antlib:org.apache.ivy.ant" default="package" basedir=".">
+<!-- 
+	File: build.xml
+
+	Copyright (c) 2009. All Rights Reserved. Oracle Corporation.
+
+	Oracle is a registered trademark of Oracle Corporation and/or its
+	affiliates.
+
+	This software is the confidential and proprietary information of Oracle
+	Corporation. You shall not disclose such confidential and proprietary
+	information and shall use it only in accordance with the terms of the
+	license agreement you entered into with Oracle Corporation.
+ 
+	Oracle Corporation makes no representations or warranties about 
+	the suitability of the software, either express or implied, 
+	including but not limited to the implied warranties of 
+	merchantability, fitness for a particular purpose, or 
+	non-infringement.  Oracle Corporation shall not be liable for 
+	any damages suffered by licensee as a result of using, modifying 
+	or distributing this software or its derivatives.
+
+	This notice may not be removed or altered.
+ -->
+	
+	<target name="properties">
+		<!-- define some useful date properties -->
+		<tstamp>
+			<format property="year" pattern="yyyy"/>
+		</tstamp>
+		
+		<!-- initialize build properties for this project -->
+		<property name="build.offline" value="true"/>
+		
+		<!-- initialize ivy properties for this project -->
+		<ivy:info/>
+
+		<!-- define the location of the source code -->
+		<property name="src" location="src"/>
+
+		<property name="tmp" location=".tmp"/>		
+		
+		<!-- define the temporary build and packaging locations -->
+		<property name="package" location="${tmp}"/>
+		<property name="package.classes.core" location="${package}/classes/core"/>
+		<property name="package.docs" location="${package}/docs"/>
+		<property name="package.docs.api" location="${package.docs}/api"/>
+		<property name="package.lib" location="${package}/lib"/>		
+	</target>
+
+	
+	<target name="dependencies" depends="properties">
+		<!-- resolve the dependenies for this project -->
+		<ivy:resolve/>
+		
+		<!-- retrieve a copy of the dependencies for this project into our lib area -->
+		<ivy:retrieve pattern="${package.lib}/[artifact]-[revision].[ext]"/>
+		
+		<!-- create classpaths for our build based on the dependencies -->
+		<path id="build.classpath">
+			<pathelement path="${java.class.path}/"/>
+			<fileset dir="${package.lib}"/>
+		</path>		
+	</target>
+	
+	
+	<target name="clean" depends="properties">
+		<delete dir="${package}"/>
+	    <mkdir dir="${package}"/>			
+	    <mkdir dir="${package.classes.core}"/>			
+	    <mkdir dir="${package.lib}"/>			
+	    <mkdir dir="${package.docs}"/>			
+	    <mkdir dir="${package.docs.api}"/>			
+	</target>
+	
+	
+	<target name="compile" depends="clean, dependencies">
+		<javac 
+			verbose="off"
+			srcdir="${src}" 
+			destdir="${package.classes.core}" 
+			classpathref="build.classpath" 
+			debug="on" 
+			source="1.5" />	    			
+	</target>
+	
+	
+	<target name="javadoc" depends="clean, dependencies">
+		<javadoc
+			destdir="${package.docs.api}"
+			classpathref="build.classpath"
+			use="true"
+			author="false"
+			windowtitle="${product} ${version}">
+			<packageset dir="${src}" defaultexcludes="yes">
+				<include name="com/oracle/coherence/patterns/pushreplication/**"/>
+			</packageset>
+
+			<doctitle><![CDATA[<h1>${ivy.module} ${ivy.revision}</h1>]]></doctitle>
+			<bottom><![CDATA[<i>Copyright &#169; ${year} Oracle Corporation. All Rights Reserved.</i>]]></bottom>
+			
+		    <link href="http://java.sun.com/j2se/1.5.0/docs/api/" offline="${build.offline}" packagelistLoc="http://java.sun.com/j2se/1.5.0/docs/api/"/>
+		    <link href="http://download.oracle.com/otn_hosted_doc/coherence/350/" offline="${build.offline}" packagelistLoc="http://download.oracle.com/otn_hosted_doc/coherence/350/"/>
+		</javadoc>
+	</target>
+	
+	
+	<target name="package" depends="compile, javadoc">
+		<copy todir="${package.classes.core}" preservelastmodified="true">
+			<fileset dir="${src}">
+				<include name="**/*.properties"/>
+				<include name="**/*.handlers"/>
+				<include name="**/*.schemas"/>
+				<include name="**/*.xml"/>
+				<include name="**/*.dtd"/>
+				<include name="**/*.xsd"/>
+				<include name="**/*.gif"/>
+				<include name="**/*.png"/>
+				<include name="**/*.jpg"/>
+				<include name="**/*.txt"/>
+			</fileset>
+		</copy>
+
+		<jar destfile="${package}/${ivy.module}-${ivy.revision}.jar" basedir="${package.classes.core}">
+			<manifest>
+				<attribute name="Built-By" value="${user.name}"/>
+				<attribute name="Version" value="${ivy.revision}"/>
+				<attribute name="Copyright" value="Copyright ${year} Oracle Corporation. All Rights Reserved"/>
+			</manifest>
+		</jar>
+		
+		<zip destfile="${package}/${ivy.module}-${ivy.revision}-src.zip">
+		    <zipfileset dir="${package.docs}" includes="**/*" prefix="${ivy.module}-${ivy.revision}/docs/"/>
+		    <zipfileset dir="${src}" includes="**/*" prefix="${ivy.module}-${ivy.revision}/src/"/>
+		    <zipfileset dir="${basedir}" includes="history.txt" prefix="${ivy.module}-${ivy.revision}/"/>
+		    <zipfileset dir="${basedir}" includes="build.xml" prefix="${ivy.module}-${ivy.revision}/"/>			
+		    <zipfileset dir="${basedir}" includes="ivy.xml" prefix="${ivy.module}-${ivy.revision}/"/>			
+		</zip>
+	</target>
+
+	<target name="release" depends="package">
+		<ivy:publish resolver="local" status="release" conf="*" overwrite="true">
+			<artifacts pattern="${package}/[artifact]-[revision].[ext]"/>
+			<artifacts pattern="${package}/[artifact]-[revision]-[type].[ext]"/>
+		</ivy:publish>
+	</target>
+</project>

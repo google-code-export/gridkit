@@ -1,0 +1,91 @@
+
+	<!--
+		File: coherence-processingpattern-pof-config.xml Copyright (c) 2009.
+		All Rights Reserved. Oracle Corporation. Oracle is a registered
+		trademark of Oracle Corporation and/or its affiliates. This software
+		is the confidential and proprietary information of Oracle Corporation.
+		You shall not disclose such confidential and proprietary information
+		and shall use it only in accordance with the terms of the license
+		agreement you entered into with Oracle Corporation. Oracle Corporation
+		makes no representations or warranties about the suitability of the
+		software, either express or implied, including but not limited to the
+		implied warranties of merchantability, fitness for a particular
+		purpose, or non-infringement. Oracle Corporation shall not be liable
+		for any damages suffered by licensee as a result of using, modifying
+		or distributing this software or its derivatives. This notice may not
+		be removed or altered.
+	-->
+<pof-config>
+	<user-type-list>
+		<include>coherence-pof-config.xml</include>
+		<include>coherence-common-pof-config.xml</include>
+		
+		<!-- coherence-processingpattern types -->
+		<user-type>
+			<type-id>15001</type-id>
+			<class-name>com.oracle.coherence.patterns.processing.internal.Submission
+			</class-name>
+		</user-type>
+
+		<user-type>
+			<type-id>15002</type-id>
+			<class-name>com.oracle.coherence.patterns.processing.internal.SubmissionResult
+			</class-name>
+		</user-type>
+
+		<user-type>
+			<type-id>15003</type-id>
+			<class-name>com.oracle.coherence.patterns.processing.internal.DefaultSubmissionConfiguration
+			</class-name>
+		</user-type>
+
+		<user-type>
+			<type-id>15004</type-id>
+			<class-name>com.oracle.coherence.patterns.processing.internal.SubmissionKey
+			</class-name>
+		</user-type>
+
+		<user-type>
+			<type-id>15005</type-id>
+			<class-name>com.oracle.coherence.patterns.processing.dispatchers.logging.LoggingDispatcher
+			</class-name>
+		</user-type>
+
+		<user-type>
+			<type-id>15006</type-id>
+			<class-name>com.oracle.coherence.patterns.processing.dispatchers.local.LocalExecutorDispatcher
+			</class-name>
+		</user-type>
+
+		<user-type>
+			<type-id>15007</type-id>
+			<class-name>com.oracle.coherence.patterns.processing.internal.processors.CreateSubmissionResultProcessor
+			</class-name>
+		</user-type>
+
+		<user-type>
+			<type-id>15008</type-id>
+			<class-name>com.oracle.coherence.patterns.processing.internal.processors.DequeueTaskProcessor
+			</class-name>
+		</user-type>
+		
+		<user-type>
+			<type-id>15009</type-id>
+			<class-name>com.oracle.coherence.patterns.processing.internal.processors.DrainToBeExecutedProcessor
+			</class-name>
+		</user-type>
+		
+		<user-type>
+			<type-id>15010</type-id>
+			<class-name>com.oracle.coherence.patterns.processing.internal.processors.EnqueueTaskProcessor
+			</class-name>
+		</user-type>
+
+		<user-type>
+			<type-id>15011</type-id>
+			<class-name>com.oracle.coherence.patterns.processing.internal.task.ExecutorQueue
+			</class-name>
+		</user-type>
+	</user-type-list>
+</pof-config>
+ 

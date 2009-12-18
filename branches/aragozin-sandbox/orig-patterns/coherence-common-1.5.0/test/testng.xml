@@ -1,0 +1,13 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="coherence-common-tests" verbose="1">
+	<test name="RangeUnitTests">
+		<packages>
+			<package name="com.oracle.coherence.common.ranges" />
+		</packages>
+	</test>
+	<test name="TicketUnitTests">
+		<classes>
+			<class name="com.oracle.coherence.common.ticketing.TicketTest" />
+		</classes>
+	</test>	
+</suite>

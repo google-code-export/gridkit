@@ -1,0 +1,118 @@
+<!-- 
+	File: coherence-messagingpattern-pof-config.xml
+	
+ 	Copyright (c) 2008. All Rights Reserved. Oracle Corporation.
+
+	Oracle is a registered trademark of Oracle Corporation and/or its
+	affiliates.
+
+	This software is the confidential and proprietary information of Oracle
+	Corporation. You shall not disclose such confidential and proprietary
+	information and shall use it only in accordance with the terms of the
+	license agreement you entered into with Oracle Corporation.
+
+	Oracle Corporation makes no representations or warranties about 
+	the suitability of the software, either express or implied, 
+	including but not limited to the implied warranties of 
+	merchantability, fitness for a particular purpose, or 
+	non-infringement.  Oracle Corporation shall not be liable for 
+	any damages suffered by licensee as a result of using, modifying 
+	or distributing this software or its derivatives.
+
+	This notice may not be removed or altered.
+  -->
+<pof-config>
+	<user-type-list>
+		<!-- coherence-messagingpattern types -->
+		<user-type>
+       		<type-id>12000</type-id>
+       		<class-name>com.oracle.coherence.patterns.messaging.Message</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>12001</type-id>
+       		<class-name>com.oracle.coherence.patterns.messaging.SubscriptionIdentifier</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>12002</type-id>
+       		<class-name>com.oracle.coherence.patterns.messaging.DefaultSubscriptionConfiguration</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>12010</type-id>
+       		<class-name>com.oracle.coherence.patterns.messaging.Topic</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>12011</type-id>
+       		<class-name>com.oracle.coherence.patterns.messaging.TopicSubscription</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>12012</type-id>
+       		<class-name>com.oracle.coherence.patterns.messaging.TopicSubscriptionConfiguration</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>12015</type-id>
+       		<class-name>com.oracle.coherence.patterns.messaging.Queue</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>12016</type-id>
+       		<class-name>com.oracle.coherence.patterns.messaging.QueueSubscription</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>12020</type-id>
+       		<class-name>com.oracle.coherence.patterns.messaging.commands.SubscribeCommand</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>12021</type-id>
+       		<class-name>com.oracle.coherence.patterns.messaging.commands.UnsubscribeCommand</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>12022</type-id>
+       		<class-name>com.oracle.coherence.patterns.messaging.commands.PublishMessageCommand</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>12023</type-id>
+       		<class-name>com.oracle.coherence.patterns.messaging.commands.RequestMessageCommand</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>12024</type-id>
+       		<class-name>com.oracle.coherence.patterns.messaging.commands.RollbackMessagesCommand</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>12030</type-id>
+       		<class-name>com.oracle.coherence.patterns.messaging.entryprocessors.AcknowledgeSubscriptionMessagesProcessor</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>12031</type-id>
+       		<class-name>com.oracle.coherence.patterns.messaging.entryprocessors.RemoveSubscriberFromMessageProcessor</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>12032</type-id>
+       		<class-name>com.oracle.coherence.patterns.messaging.entryprocessors.DrainSubscriptionMessagesProcessor</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>12033</type-id>
+       		<class-name>com.oracle.coherence.patterns.messaging.entryprocessors.AcknowledgeMessageProcessor</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>12034</type-id>
+       		<class-name>com.oracle.coherence.patterns.messaging.entryprocessors.RequestMessageProcessor</class-name>
+		</user-type>
+ 	</user-type-list>
+</pof-config>
+ 
