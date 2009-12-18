@@ -37,7 +37,7 @@ import com.oracle.coherence.patterns.command.ContextConfiguration.ManagementStra
 public class RunCommandBenchmark {
 
 	private static final int THREAD_COUNT = 5;
-	private static final int COMMAND_COUNT = 100;
+	private static final int COMMAND_COUNT = 10;
 	private static final String THREAD_COUNT_PARAM = "thread.count";
 	private static final String COMMAND_COUNT_PARAM = "command.count";
 
@@ -50,7 +50,8 @@ public class RunCommandBenchmark {
 		// Configure coherence
 		System.setProperty("tangosol.pof.config", "pof-config.xml");
 		System.setProperty("tangosol.coherence.cacheconfig",
-				"coherence-commandpattern-cache-config.xml");
+				"coherence-commandpattern-extend-pof-cache-config.xml");
+		System.setProperty("tangosol.coherence.clusterport", "9001");
 
 		// Get params from system properties
 		int threadCount = 0;

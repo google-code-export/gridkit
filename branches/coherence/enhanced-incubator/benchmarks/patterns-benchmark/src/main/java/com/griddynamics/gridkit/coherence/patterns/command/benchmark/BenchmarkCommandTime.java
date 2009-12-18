@@ -16,7 +16,14 @@
 
 package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
 
-import java.io.Serializable;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
+import com.tangosol.io.ExternalizableLite;
+import com.tangosol.io.pof.PofReader;
+import com.tangosol.io.pof.PofWriter;
+import com.tangosol.io.pof.PortableObject;
 
 /**
  * Entity for saving command benchmark data.
@@ -24,9 +31,15 @@ import java.io.Serializable;
  * @author akornev
  * @since 1.0
  */
-public class BenchmarkCommandTime implements Serializable {
+public class BenchmarkCommandTime implements ExternalizableLite, PortableObject {
 
 	private static final long serialVersionUID = -5289310088868581802L;
+
+	private static final int COMMAND_ID_INDEX = 0;
+
+	private static final int PUSH_TIME_INDEX = 1;
+
+	private static final int END_TIME_INDEX = 2;
 
 	private long commandId;
 	private long pushTime;
@@ -106,6 +119,35 @@ public class BenchmarkCommandTime implements Serializable {
 	 */
 	public void setEndTime(long endTime) {
 		this.endTime = endTime;
+	}
+
+	@Override
+	public void readExternal(DataInput in) throws IOException {
+		commandId = in.readLong();
+		pushTime = in.readLong();
+		endTime = in.readLong();
+		
+	}
+
+	@Override
+	public void writeExternal(DataOutput out) throws IOException {
+		out.writeLong(commandId);
+		out.writeLong(pushTime);
+		out.writeLong(endTime);
+	}
+
+	@Override
+	public void readExternal(PofReader reader) throws IOException {
+		commandId = reader.readLong(COMMAND_ID_INDEX);
+		pushTime = reader.readLong(PUSH_TIME_INDEX);
+		endTime = reader.readLong(END_TIME_INDEX);		
+	}
+
+	@Override
+	public void writeExternal(PofWriter writer) throws IOException {
+		writer.writeLong(COMMAND_ID_INDEX, commandId);
+		writer.writeLong(PUSH_TIME_INDEX, pushTime);
+		writer.writeLong(END_TIME_INDEX, endTime);	
 	}
 
 }
