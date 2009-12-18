@@ -1,0 +1,283 @@
+----------------------------------------------------------------------------------------------------
+Coherence Push Replication Pattern Project History
+----------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------
+Version 2.5.0: 27th October 2009: Noah Arliss, Bob Hankel, Paul Makin, Brian Oliver
+----------------------------------------------------------------------------------------------------
+
+*)	Upgraded to use coherence-common-1.5.0, coherence-commandpattern-2.5.0 and coherence-messagingpattern-2.5.0
+
+*)	Resolved INC-144: Create a set of examples for each deployment topology (mainly active-active)
+
+*)	Resolved INC-211: Updated to depend on Coherence 3.5.2 (and Coherence 3.4)
+
+*) 	Resolved INC-214: Moved Examples into the new Examples project
+
+----------------------------------------------------------------------------------------------------
+Version 2.4.0: 22nd July 2009: Brian Oliver and Noah Arliss
+----------------------------------------------------------------------------------------------------
+
+*)	Upgraded to use coherence-common-1.4.0, coherence-commandpattern-2.4.0 and coherence-messagingpattern-2.4.0
+
+*)  Resolved INC-26: Added support to use batch pushing of data to the back end via write-behind caching. 
+	When enabled ordering is *not* guaranteed. Added EntryOperationBatch as well as implemented storeAll() on the 
+    PublishingCacheStore and SafePublishingCacheStore objects. By setting the write-delay in the
+    coherence-pushreplicationpattern-cache-config or coherence-pushreplicationpattern-pof-cache-config
+    you enable this functionality.
+
+*)	Resolved INC-27: 
+	a). Added FilteringBatchPublisherAdapter to support filtering of EntryOperations prior to them
+	being published.
+	
+	b). Added EntryOperationFilter to simplify registering filters for FilteringBatchPublisherAdapters
+
+	c). Made the EntryOperation implement Map.Entry so that regular Coherence Filters may be used
+	with them.
+
+*)	Resolved INC-29: Added support for coalescing EntryOperations with the CoalescingBatchPublisherAdapter
+
+*)	Resolved INC-91, INC-95: *PublishingCacheStore POF implementations were missing default constructors
+
+*)	Resolved INC-94: Source build did not contain the examples folder (oops)
+
+*)	Resolved INC-97: Refactored BatchPublishers to use Iterator<EntryOperation> instead of List<EntryOperation>
+	when publishing.
+
+----------------------------------------------------------------------------------------------------
+Version 2.3.0: 30th March 2008: Brian Oliver
+----------------------------------------------------------------------------------------------------
+
+*)	Migrated to use Apache Ivy for dependency management and publishing artifacts 
+	(introduced ivy.xml, removed dependencies.info).  
+	
+	Apart from now using standardized repositories and the potential to integrate
+	with Maven, all Coherence Incubator projects should now (almost) have the same build.xml files!
+
+*)	Upgraded to use coherence-common-1.3.0, coherence-commandpattern-2.3.0 
+	and coherence-messagingpattern-2.3.0
+
+*)	Refactored to use the DelegatingMultiplexingBackingMapListener and thus removed the
+	custom PublishingSubscriptionBackingMapListener.  This allows clean co-existance of the 
+	push-replication system and the messaging system.
+
+*)	Resolved issue when PublishingService JMX mBeans were not being unregistered during scale-out,
+	thus creating multiple mBean registrations in the JMX tree (contributed by Nick Gregory)
+
+----------------------------------------------------------------------------------------------------
+Version 2.2.1: 24th November 2008: Brian Oliver
+----------------------------------------------------------------------------------------------------
+
+*)	Upgraded to use coherence-messagingpattern-2.2.1
+
+*)	Added support for "draining" EntryOperations to publish from a PublishingService.
+
+----------------------------------------------------------------------------------------------------
+Version 2.2.0: 10th November 2008: Brian Oliver
+----------------------------------------------------------------------------------------------------
+
+*)	Upgraded to use coherence-common-1.2.0
+
+*) 	Upgraded to use coherence-commandpattern-2.2.0
+
+*) 	Upgraded to use coherence-messagingpattern-2.2.0
+
+*) 	Added the name of the originating site (siteName) and cluster (clusterName) to the EntryOperation 
+	class to permit extensive conflict resolution and perhaps later, site and/or cluster-based 
+	filtering.
+	
+*)	Renamed the com.oracle.coherence.pushreplication.publishers.CachePublisher to 
+	com.oracle.coherence.pushreplication.publishers.LocalCachePublisher to correctly
+	represent the scope of operations being performed.
+
+*)	Defined the interface CachePublisher to standardize the methods for publishing to caches
+	(either locally or remotely)
+
+*)	Defined the interface CachePublisher.ConflictResolver that may be used to control how 
+	EntryOperations are performed when they are published by a CachePublisher.  This allows
+	developers complete control over how EntryOpersions are performed, including the ability
+	to override and resolve potential conflicts with existing cache entries.
+
+*)	Refactored RemoteCachePublisher to inherit it's base implementation from the LocalCachePublisher
+	(an thus support conflict resolution with a CachePublisher.ConflictResolver).
+
+*)	Modified the coherence-pushreplicationpattern-*cache-config.xml so that the 
+	pending-operations-cache is enabled by default (if it's not used it will have little cost anyway).
+
+*)	Renamed SafeCachePublisher to SafeLocalCachePublisher to correctly reflect scope of use.
+
+*)	Enhanced the SafeLocalCachePublisher to allow specification of a CachePublisher.ConflictResolver
+
+*)	Added the protected publishEntryOperation method to the PublishingCacheStore to optimize the 
+	SafePublishingCacheStore implementation
+
+*)	Fixed potential race-condition when multiple sites attempt to perform an
+	EntryOperation on a remote site on the same Entry at *exactly* the same time. The solution
+	required a simple change;
+
+	Always use an Entry Processor (in this case the SafeLocalCachePublisher.EntryOperationProcessor)
+	to update cache entries (and thus ensure exclusive access to individual keys) AND in this
+	Entry Processor this is where we set that the SafeLocalCachePublisher operations are Commencing.
+	(guarantees exclusive access by doing this here)
+
+*) 	Added the ability for Publishers and BatchPublishers to specify the number of consecutive failures
+	before their associated PublishingService is suspended
+
+*)	Added the ability to specify if BatchPublishers automatically start publishing when they are
+	registered (or they start in suspended mode). 
+	
+*)	Added the ability to suspend and resume PublishingServices through JMX.  This allows us to
+	start suspended Publishing services, or suspend them when necessary.
+
+*)	Introduced the PushReplicationManager class (and DefaultPushReplicationManager implementation) to
+	simplify the registration of BatchPublishers - no longer need to use the messaging layer.
+
+*)	Added deploy target to the build.xml (to simplify deployment to a repository)
+	(thanks Ashish)
+		  
+----------------------------------------------------------------------------------------------------
+Version 2.1.1: 14th October 2008: Brian Oliver
+----------------------------------------------------------------------------------------------------
+
+*) 	Upgraded to use coherence-common-1.1.1
+	
+*) 	Upgraded to use coherence-commandpattern-2.1.1
+
+*)	Upgraded to use coherence-messagingpattern-2.1.1
+
+*) 	Added support for the new <introduce-cache-config file="..."/> element when using the 
+	AdvancedConfigurableCacheFactory from coherence-common-1.1.1
+
+----------------------------------------------------------------------------------------------------
+Version 2.1.0: 6th October 2008: Brian Oliver
+----------------------------------------------------------------------------------------------------
+
+*)	Upgraded to use coherence-common-1.1.0
+
+*)	Upgraded to use coherence-commandpattern-2.1.0
+
+*)	Upgraded to use coherence-messagingpattern-2.1.0
+
+*)	Added support for Coherence 3.4 and Portable Object Format.  Remains backwards compatible with
+	Coherence 3.3.x
+
+	coherence-pushreplicationpattern-pof-config.xml contains the required POF type definitions (for Java)
+
+	coherence-pushreplicationpattern-pof-cache-config.xml contains the necessary cache configurations to
+	support POF.
+
+*)	Improved generated javadoc so that it now directly links to the standard 
+	Oracle Coherence 3.4 online documentation.
+
+*)	Renamed pushreplicationpattern-cacheconfig.xml to match the Coherence standard (like POF). It's now
+	called coherence-pushreplicationpattern-cache-config.xml
+	
+*) 	Completed javadoc (for classes that had none!)
+
+*)	Made all simple (non-batch) publishers implement ExternalizableLite and PortableObject
+
+*)	Removed and cleaned up Copyright notices from the Java Class Javadocs as it stuffed up the 
+	@see also rendering
+
+----------------------------------------------------------------------------------------------------
+Version 2.0.2: 15th September 2008: Nicholas Gregory and Brian Oliver
+----------------------------------------------------------------------------------------------------
+
+*) 	Added the concept of a re-entrant aware PublishingCacheStore (called a SafePublishingCacheStore)
+	and RemoteCachePublisher (called a SafeRemoteCachePublisher) to support multi-directional (multi-way)
+	push replication of caches between clusters.  
+	
+	Re-entrancy is a serious challenge for multi-way replication between clusters.
+	
+	Re-entrancy of replication occurs when an operation (insert/update/delete) from one cluster (X)
+	is sent to another cluster (Y) which in turn sends the operation back to (X) and so on. ie: the 
+	execution of the operation in the original cluster (X).  By solving the problem of re-entrancy 
+	two or more clusters may use the push replication pattern to safely replicate information between 
+	themselves.
+	
+	NOTE 1: This solution does not perform any reconciliation of updates between operations performed
+	between clusters.  It is lock-free (ie: has no concurrency control).  Last cache operation wins.
+	
+	Consequently you need to be very careful that your application architecture and data updates
+	don't require locking before updates.
+	
+	NOTE 2: A future version of this implementation may provide a mechanism to perform dynamic reconciliation
+	of operations between clusters.
+	
+	NOTE 3: For reconciling push replication between only two clusters, consult the Coherence Forum
+	for a code example.  That example however does not provide three+ way replication or any 
+	order-of-operation guarantees (from individual clusters).
+	
+	(The approach to resolve re-entrancy for push replication and it's prototype implementation
+	 was cleverly devised by Nicholas Gregory)
+	
+	To use this you must enable SafePublishingCacheStores and the pending-operations- cache mapping
+	(and associated scheme)
+	
+----------------------------------------------------------------------------------------------------
+Version 2.0.1: 22nd August 2008: Brian Oliver and Nicholas Gregory
+----------------------------------------------------------------------------------------------------
+
+*)	Upgraded to use coherence-commandpattern-2.0.1 
+
+*)	Upgraded to use coherence-messagingpattern-2.0.1
+
+*)	Resolved problematic (duplication and overriding) registration of JMX MBeans for 
+	the PublisherService
+
+----------------------------------------------------------------------------------------------------
+Version 2.0.0: 12th August 2008: Brian Oliver and Nicholas Gregory
+----------------------------------------------------------------------------------------------------
+
+*)	Upgraded to use coherence-commandpattern-2.0.0
+
+*) 	Upgraded to use coherence-messagingpattern-2.0.0
+
+*)	Introduced the PublishingServiceMBean and implementation (as contributed by Nick Gregory)
+
+*)	Made the PublishingCacheStore use the DISTRIBUTED management strategy (in the Command Pattern)
+	instead of COLOCATED (as was the approach in v1.x) so that we can cope with high-volumes of 
+	EntryOperations to publish to other sites.  ie: Commands will be distributed across the cluster
+	instead of being colocated on a single JVM.
+
+----------------------------------------------------------------------------------------------------
+Version 1.1.0: 25th June 2008: Brian Oliver 
+----------------------------------------------------------------------------------------------------
+
+*)	Upgraded to use coherence-common-1.0.1
+
+*) 	Upgraded to use coherence-messagingpattern-1.0.1
+
+*)	Updated pushreplication-cacheconfig.xml so that the subscriptions-cache-scheme provides it's 
+	backing-map-listener as a parameter in the cache-mapping section
+   	 
+*)	Removed last remaining trace System.out's from core implementation
+
+*)	Create a new BatchPublisher interface that permits publishing a batch of EntryOperations
+	(as an ordered list).
+	
+*)	Modified the PublishingService so that it only works in a 'batch' mode using BatchPublishers.
+	
+*)	Created a BatchPublisherAdapter class that will adapt a standard (previous) Publisher implementation
+	into one that attempts to publish as a batch.  While this may appear not to improve
+	performance (as the Publisher does the publishing!), the internal implementation may
+	take advantage of the ability to "get" EntryOperations in a batch, and thus improving
+	performance.  Generally however, developers should attempt to use true BatchPublisher implementations
+	and not adapt Publishers.
+	
+*)	Created a RemoteInvocationPublisher (a BatchPublisher) that uses a Remote Invocation Service 
+	to transport "batches" of EntryOperations to a remote site, where by a specified 
+	"remote batch publisher" will be used to perform the publishing locally at the said remote site. 
+	
+*)	Created a CachePublisher (a Publisher) for the purposes of publishing Entry Operations to
+	a local NamedCache.  This is typically used in conjunction with a RemoteInvocationPublisher
+	for publishing to remote caches across a WAN. 
+
+*)	Added example source tree, the build.xml and this history.txt to the source distribution.
+	(thanks to Nick Gregory for spotting this)
+
+----------------------------------------------------------------------------------------------------
+Version 1.0: 18th June 2008: Brian Oliver
+----------------------------------------------------------------------------------------------------
+
+*)	Initial commit to SVN repository

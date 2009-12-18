@@ -1,0 +1,172 @@
+<?xml version="1.0"?>
+<!DOCTYPE cache-config SYSTEM "cache-config.dtd">
+
+<!-- 
+	File: coherence-pushreplicationpattern-cache-config.xml
+	
+ 	Copyright (c) 2008-2009. All Rights Reserved. Oracle Corporation.
+
+	Oracle is a registered trademark of Oracle Corporation and/or its
+	affiliates.
+
+	This software is the confidential and proprietary information of Oracle
+	Corporation. You shall not disclose such confidential and proprietary
+	information and shall use it only in accordance with the terms of the
+	license agreement you entered into with Oracle Corporation.
+
+	Oracle Corporation makes no representations or warranties about 
+	the suitability of the software, either express or implied, 
+	including but not limited to the implied warranties of 
+	merchantability, fitness for a particular purpose, or 
+	non-infringement.  Oracle Corporation shall not be liable for 
+	any damages suffered by licensee as a result of using, modifying 
+	or distributing this software or its derivatives.
+
+	This notice may not be removed or altered.
+  -->
+
+<cache-config>
+	<introduce-cache-config file="coherence-messagingpattern-cache-config.xml" />
+	
+	<caching-scheme-mapping>
+
+		<!-- 
+			NOTE: ALONG WITH THE CACHE-SCHEME-MAPPINGS DEFINED BELOW, 
+			IN ORDER TO USE THE PUSH REPLICATION PATTERN YOU MUST ALSO INCLUDE 
+			THE CACHE-SCHEME-MAPPINGS SECTION FROM THE MESSAGING 
+			FILE messaging-cacheconfig.xml IN YOUR APPLICATION 
+			CACHE-CONFIG.XML
+		-->
+
+		<!-- BEGIN: com.oracle.coherence.patterns.pushreplication
+		
+			 The following section needs to be included in your application 
+		     Cache Configuration file to make use of Push Replication 
+		-->
+
+		<!--
+			This cache-mapping is to be used for caches for which you
+			would like cache operations (store, erase etc) published
+			with Publishers
+		-->	
+		<cache-mapping>
+			<cache-name>publishing-*</cache-name>
+			<scheme-name>distributed-scheme-with-publishing-cachestore</scheme-name>
+		</cache-mapping>
+
+
+		<!--
+			This cache is used to store the state of pending publication 
+			operations on remote caches to stop potential re-entrancy of 
+			replication AND causing conflicting updates of cache entries.
+			 
+			This only applies when using SafeCachePublishers and 
+			SafePublishingCacheStores
+		-->
+		<cache-mapping>
+			<cache-name>pending-operations-*</cache-name>
+			<scheme-name>distributed-scheme-for-pending-operations</scheme-name>
+		</cache-mapping>
+
+		<!-- END: com.oracle.coherence.patterns.pushreplication -->
+	
+	</caching-scheme-mapping>
+
+	<caching-schemes>
+	
+		<!-- 
+			NOTE: ALONG WITH THE CACHE-SCHEMES DEFINED BELOW, IN ORDER 
+			TO USE THE PUSH REPLICATION PATTERN YOU MUST ALSO INCLUDE THE 
+			CACHE-SCHEME-MAPPINGS SECTION FROM THE MESSAGING PATTERN 
+			FILE messaging-cacheconfig.xml IN YOUR APPLICATION 
+			CACHE-CONFIG.XML
+		-->
+
+		<!-- BEGIN: com.oracle.coherence.patterns.pushreplication
+		
+			 The following section needs to be included in your application 
+		     Cache Configuration file to make use of Push Replication 
+		-->
+		<distributed-scheme>
+			<scheme-name>distributed-scheme-with-publishing-cachestore</scheme-name>
+			<service-name>DistributedCacheWithPublishingCacheStore</service-name>
+			
+			<backing-map-scheme>
+				<read-write-backing-map-scheme>
+					<internal-cache-scheme>
+						<local-scheme>
+						</local-scheme>
+					</internal-cache-scheme>
+					
+					<cachestore-scheme>
+						<class-scheme>
+							<!-- If you plan on using multi-way replication, you must use a SafePublishingCacheStore below -->
+							<class-name>com.oracle.coherence.patterns.pushreplication.PublishingCacheStore</class-name>
+							<init-params>
+								<init-param>
+									<param-type>java.lang.String</param-type>
+									<param-value>{cache-name}</param-value>
+								</init-param>
+							</init-params>
+						</class-scheme>
+						<!--  enable store-all unordered batching <write-delay>4s</write-delay>  -->
+					</cachestore-scheme>
+				</read-write-backing-map-scheme>
+			</backing-map-scheme>
+
+			<autostart>true</autostart>
+		</distributed-scheme>
+		
+
+		<!--
+			This cache-scheme is used to store the state of pending publication 
+			operations on remote caches to stop potential re-entrancy of 
+			replication AND causing conflicting updates of cache entries.
+			 
+			This only applies when using SafeCachePublishers and 
+			SafePublishingCacheStores
+		-->
+		<distributed-scheme>
+			<scheme-name>distributed-scheme-for-pending-operations</scheme-name>
+			<service-name>DistributedCacheForPendingOperations</service-name>
+			
+			<backing-map-scheme>
+				<local-scheme>
+				</local-scheme>
+			</backing-map-scheme>
+
+			<autostart>true</autostart>
+		</distributed-scheme>
+
+		
+		<!--
+			The following scheme is required for each remote-site 
+			when using a RemoteInvocationPublisher (or multi-way
+			replication)
+		-->
+		<!--
+		<remote-invocation-scheme> 
+			<scheme-name>remote-site-invocation</scheme-name> 
+			<service-name>ExtendTcpInvocationService</service-name> 
+			<initiator-config> 
+				<tcp-initiator> 
+					<remote-addresses> 
+						<socket-address> 
+							<address>localhost</address> 
+							<port>20000</port> 
+						</socket-address> 
+					</remote-addresses> 
+					<connect-timeout>2s</connect-timeout> 
+				</tcp-initiator> 
+				<outgoing-message-handler> 
+					<request-timeout>5s</request-timeout> 
+				</outgoing-message-handler> 
+			</initiator-config> 
+		</remote-invocation-scheme>  
+		-->
+		<!-- END: com.oracle.coherence.patterns.pushreplication -->
+
+	</caching-schemes>
+		
+</cache-config>
+		

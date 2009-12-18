@@ -1,0 +1,94 @@
+<!-- 
+	File: coherence-commandpattern-pof-config.xml
+	
+ 	Copyright (c) 2008-2009. All Rights Reserved. Oracle Corporation.
+
+	Oracle is a registered trademark of Oracle Corporation and/or its
+	affiliates.
+
+	This software is the confidential and proprietary information of Oracle
+	Corporation. You shall not disclose such confidential and proprietary
+	information and shall use it only in accordance with the terms of the
+	license agreement you entered into with Oracle Corporation.
+
+	Oracle Corporation makes no representations or warranties about 
+	the suitability of the software, either express or implied, 
+	including but not limited to the implied warranties of 
+	merchantability, fitness for a particular purpose, or 
+	non-infringement.  Oracle Corporation shall not be liable for 
+	any damages suffered by licensee as a result of using, modifying 
+	or distributing this software or its derivatives.
+
+	This notice may not be removed or altered.
+  -->
+<pof-config>
+	<user-type-list>		
+		<!-- coherence-commandpattern types -->
+		<user-type>
+       		<type-id>11000</type-id>
+       		<class-name>com.oracle.coherence.patterns.command.DefaultContextConfiguration</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>11100</type-id>
+       		<class-name>com.oracle.coherence.patterns.command.internal.CommandExecutionRequest</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>11101</type-id>
+       		<class-name>com.oracle.coherence.patterns.command.internal.CommandExecutionRequest$Key</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>11102</type-id>
+       		<class-name>com.oracle.coherence.patterns.command.internal.ContextWrapper</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>11103</type-id>
+       		<class-name>com.oracle.coherence.patterns.command.internal.CreateContextProcessor</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>11104</type-id>
+       		<class-name>com.oracle.coherence.patterns.command.internal.SubmitCommandExecutionRequestProcessor</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>11105</type-id>
+       		<class-name>com.oracle.coherence.patterns.command.internal.SubmissionOutcome$Accepted</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>11106</type-id>
+       		<class-name>com.oracle.coherence.patterns.command.internal.SubmissionOutcome$UnknownContext</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>11107</type-id>
+       		<class-name>com.oracle.coherence.patterns.command.internal.ClaimContextProcessor</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>11108</type-id>
+       		<class-name>com.oracle.coherence.patterns.command.internal.UpdateContextProcessor</class-name>
+		</user-type>
+		
+		<user-type>
+       		<type-id>11109</type-id>
+       		<class-name>com.oracle.coherence.patterns.command.internal.CancelCommandProcessor</class-name>
+		</user-type>
+		
+		<user-type>
+       		<type-id>11110</type-id>
+       		<class-name>com.oracle.coherence.patterns.command.internal.StartCommandProcessor</class-name>
+		</user-type>
+
+		<user-type>
+       		<type-id>11200</type-id>
+       		<class-name>com.oracle.coherence.patterns.command.commands.PriorityCommandAdapter</class-name>
+		</user-type>
+
+ 	</user-type-list>
+</pof-config>
+ 

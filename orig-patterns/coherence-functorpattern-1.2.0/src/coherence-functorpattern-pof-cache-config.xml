@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!DOCTYPE cache-config SYSTEM "cache-config.dtd">
+
+<!-- 
+	File: coherence-functorpattern-pof-cache-config.xml
+	
+ 	Copyright (c) 2008. All Rights Reserved. Oracle Corporation.
+
+	Oracle is a registered trademark of Oracle Corporation and/or its
+	affiliates.
+
+	This software is the confidential and proprietary information of Oracle
+	Corporation. You shall not disclose such confidential and proprietary
+	information and shall use it only in accordance with the terms of the
+	license agreement you entered into with Oracle Corporation.
+
+	Oracle Corporation makes no representations or warranties about 
+	the suitability of the software, either express or implied, 
+	including but not limited to the implied warranties of 
+	merchantability, fitness for a particular purpose, or 
+	non-infringement.  Oracle Corporation shall not be liable for 
+	any damages suffered by licensee as a result of using, modifying 
+	or distributing this software or its derivatives.
+
+	This notice may not be removed or altered.
+  -->
+
+<cache-config>
+	<introduce-cache-config file="coherence-commandpattern-pof-cache-config.xml"/>
+	
+	<caching-scheme-mapping>
+
+		<!-- 
+			NOTE: ALONG WITH THE CACHE-SCHEME-MAPPINGS DEFINED BELOW, 
+			IN ORDER TO USE THE FUNCTOR PATTERN YOU MUST ALSO INCLUDE 
+			THE CACHE-SCHEME-MAPPINGS SECTION FROM THE COMMAND PATTERN 
+			FILE commandpattern-cacheconfig.xml IN YOUR APPLICATION 
+			CACHE-CONFIG.XML
+		-->
+
+
+		<!-- BEGIN: com.oracle.coherence.patterns.functor
+		
+			 The following section needs to be included in your application 
+		     Cache Configuration file to make use of the Functor Pattern 
+		-->
+		<cache-mapping>
+			<cache-name>coherence.functorpattern.results</cache-name>
+			<scheme-name>distributed-scheme-with-backing-map-listener</scheme-name>
+		</cache-mapping>
+		<!-- END: com.oracle.coherence.patterns.functor -->
+	
+	</caching-scheme-mapping>
+
+	<caching-schemes>
+
+		<!-- 
+			NOTE: IN ORDER TO USE THE FUNCTOR PATTERN YOU MUST ALSO 
+			INCLUDE THE CACHE-SCHEMES SECTION FROM THE COMMAND PATTERN 
+			FILE commandpattern-cacheconfig.xml IN YOUR APPLICATION 
+			CACHE-CONFIG.XML
+		-->
+
+	</caching-schemes>
+		
+</cache-config>
+		
