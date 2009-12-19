@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
+    <!-- 
   File: coherence-commandpattern-example-pof-config.xml
   
   Copyright (c) 2009. All Rights Reserved. Oracle Corporation.
@@ -23,19 +23,24 @@
   This notice may not be removed or altered.
   -->
 <pof-config>
-  <user-type-list>
-    <include>coherence-pof-config.xml</include>
-    <include>coherence-common-pof-config.xml</include>
-    <include>coherence-commandpattern-pof-config.xml</include>
+    <user-type-list>
+        <include>coherence-pof-config.xml</include>
+        <include>coherence-common-pof-config.xml</include>
+        <include>coherence-commandpattern-pof-config.xml</include>
 
-    <user-type>
-          <type-id>1000</type-id>
-          <class-name>test.command.TestContext</class-name>
-    </user-type>
+        <user-type>
+            <type-id>1000</type-id>
+            <class-name>com.griddynamics.gridkit.coherence.patterns.command.benchmark.BenchmarkCommand</class-name>
+        </user-type>
 
-    <user-type>
-          <type-id>1001</type-id>
-          <class-name>test.command.TestCommand</class-name>
-    </user-type>
-  </user-type-list>
+        <user-type>
+            <type-id>1001</type-id>
+            <class-name>com.griddynamics.gridkit.coherence.patterns.command.benchmark.BenchmarkContext</class-name>
+        </user-type>
+
+        <user-type>
+            <type-id>1002</type-id>
+            <class-name>com.griddynamics.gridkit.coherence.patterns.command.benchmark.BenchmarkCommandTime</class-name>
+        </user-type>
+    </user-type-list>
 </pof-config>

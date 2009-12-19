@@ -36,10 +36,13 @@ import com.oracle.coherence.patterns.command.ContextConfiguration.ManagementStra
  */
 public class RunCommandBenchmark {
 
-	private static final int THREAD_COUNT = 5;
-	private static final int COMMAND_COUNT = 10;
+	private static final int THREAD_COUNT = 1;
+	private static final int COMMAND_COUNT = 5000;
 	private static final String THREAD_COUNT_PARAM = "thread.count";
 	private static final String COMMAND_COUNT_PARAM = "command.count";
+
+	private static int threadCount;
+	private static int commandCount;
 
 	/**
 	 * Customize coherence and run benchmark
@@ -50,11 +53,12 @@ public class RunCommandBenchmark {
 		// Configure coherence
 		System.setProperty("tangosol.pof.config", "pof-config.xml");
 		System.setProperty("tangosol.coherence.cacheconfig",
-				"coherence-commandpattern-extend-pof-cache-config.xml");
+				"coherence-commandpattern-pof-cache-config.xml");
 		System.setProperty("tangosol.coherence.clusterport", "9001");
+		System.setProperty("tangosol.coherence.distributed.localstorage",
+				"false");
 
-		// Get params from system properties
-		int threadCount = 0;
+		threadCount = 0;
 		if (System.getProperty(THREAD_COUNT_PARAM) != null) {
 			threadCount = Integer.parseInt(System
 					.getProperty(THREAD_COUNT_PARAM));
@@ -62,7 +66,7 @@ public class RunCommandBenchmark {
 			threadCount = THREAD_COUNT;
 		}
 
-		int commandCount = 0;
+		commandCount = 0;
 		if (System.getProperty(COMMAND_COUNT_PARAM) != null) {
 			commandCount = Integer.parseInt(System
 					.getProperty(COMMAND_COUNT_PARAM));
@@ -95,7 +99,7 @@ public class RunCommandBenchmark {
 		List<BenchmarkCommandTime> commandTimes = null;
 		do {
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(50);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -105,7 +109,7 @@ public class RunCommandBenchmark {
 
 			commandTimes = con.getCommandTimes();
 		} while (commandTimes.size() < (threadCount * commandCount));
-
+		
 		outStatistics(commandTimes);
 
 	}
@@ -148,8 +152,8 @@ public class RunCommandBenchmark {
 					minTimeout = timeout;
 				}
 
-				System.out.println("Command with id = "
-						+ commandTime.getCommandId() + " Work " + timeout);
+				// System.out.println("Command with id = "
+				// + commandTime.getCommandId() + " Work " + timeout);
 			}
 
 			// Calc avg
@@ -168,22 +172,16 @@ public class RunCommandBenchmark {
 			}
 			// Calc standard deviation
 			final double stdDev = Math.sqrt(variance);
-
-			System.out.println("For all queue time out "
-					+ ((lastTime - firstTime) / 1000000));
-
 			final double secondCount = ((double) (lastTime - firstTime)) / 1000000000;
 
-			System.out.println("Throughput op/sec: "
-					+ (commandTimes.size() / secondCount));
-
-			System.out.println("AVG timeout: " + avgTimeout);
-
+			System.out.println("Total time: " + ((lastTime - firstTime) / 1000000));
+			System.out.println("Threads count: " + threadCount);
+			System.out.println("Commands per thread: " + commandCount);
+			System.out.println("Throughput op/sec: " + (commandTimes.size() / secondCount));
+			System.out.println("AVG latency: " + avgTimeout);
 			System.out.println("Standard Deviation: " + stdDev);
-
-			System.out.println("Max timeout: " + maxTimeout);
-
-			System.out.println("Min timeout: " + minTimeout);
+			System.out.println("Max latency: " + maxTimeout);
+			System.out.println("Min latency: " + minTimeout);
 		}
 	}
 }
