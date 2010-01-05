@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE cache-config SYSTEM "cache-config.dtd">
+
+<cache-config>
+	<introduce-cache-config file="coherence-commandpattern-pof-cache-config.xml"/>
+
+	<caching-scheme-mapping>
+
+		<cache-mapping>
+			<cache-name>warmup</cache-name>
+			<scheme-name>simple-distributed</scheme-name>
+		</cache-mapping>
+
+		<cache-mapping>
+			<cache-name>command-benchmark</cache-name>
+			<scheme-name>simple-distributed</scheme-name>
+		</cache-mapping>
+		
+	</caching-scheme-mapping>
+
+	<caching-schemes>
+	
+		<distributed-scheme>
+			<scheme-name>simple-distributed</scheme-name>
+			<service-name>SimpleDistributedCache</service-name>
+			
+			<serializer>
+  				<class-name>com.tangosol.io.pof.ConfigurablePofContext</class-name>
+			</serializer>
+						
+			<backing-map-scheme>
+				<local-scheme/>
+			</backing-map-scheme>
+			
+			<backup-count>0</backup-count>
+			<autostart>true</autostart>
+		</distributed-scheme>
+
+	</caching-schemes>
+		
+</cache-config>
+		
