@@ -15,6 +15,7 @@
  */
 package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
 
+import com.griddynamics.gridkit.coherence.patterns.command.benchmark.incubator.DumbInvokationCommandFacade;
 import com.griddynamics.gridkit.coherence.patterns.command.benchmark.incubator.IncubatorPatternFacade;
 import com.oracle.coherence.common.identifiers.Identifier;
 import com.oracle.coherence.patterns.command.Command;
@@ -28,6 +29,7 @@ public interface PatternFacade {
 	
 	public static class Helper {		
 		public static PatternFacade create() {
+//			TestHelper.setSysProp("benchmark.facadeClass", DumbInvokationCommandFacade.class.getName());
 			TestHelper.setSysProp("benchmark.facadeClass", IncubatorPatternFacade.class.getName());
 			String name = System.getProperty("benchmark.facadeClass");
 			System.out.println("Pattern implementation: " + name);
