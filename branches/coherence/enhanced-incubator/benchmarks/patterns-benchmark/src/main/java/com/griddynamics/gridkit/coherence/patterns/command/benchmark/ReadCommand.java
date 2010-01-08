@@ -30,7 +30,7 @@ import com.tangosol.io.pof.PortableObject;
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class EmptyCommand implements Command<SimpleTestContext>, PortableObject {
+public class ReadCommand implements Command<SimpleTestContext>, PortableObject {
 
 	private static final long serialVersionUID = 20100105L;
 	
@@ -41,16 +41,16 @@ public class EmptyCommand implements Command<SimpleTestContext>, PortableObject 
 	private String taskHeader = "some random text to increase task size";
 	private Map<?, ?> taskPayload = Collections.EMPTY_MAP;
 
-	public EmptyCommand() {
+	public ReadCommand() {
 		// for POF
 	}
 
-	public EmptyCommand(long execId, String reportBuffer, Map<?, ?> payload) {
+	public ReadCommand(long execId, String reportBuffer, Map<?, ?> payload) {
 		this(execId, reportBuffer);
 		this.taskPayload = payload;
 	}
 	
-	public EmptyCommand(long execId, String reportBuffer) {
+	public ReadCommand(long execId, String reportBuffer) {
 		this.execId = execId;
 		this.reportBuffer = reportBuffer;
 		this.submitMs = System.currentTimeMillis();
@@ -63,13 +63,9 @@ public class EmptyCommand implements Command<SimpleTestContext>, PortableObject 
 	@Override
 	public void execute(ExecutionEnvironment<SimpleTestContext> executionEnvironment) {		
 		// Invoke execution method.
-		execute();
+		executionEnvironment.getContext();
 		// Save time information
 		BenchmarkSupport.reportExecution(reportBuffer, new ExecMark(execId, submitMs, submitNs));
-	}
-
-	private void execute() {
-		// TODO: insert some code
 	}
 
 	@Override
