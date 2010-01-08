@@ -35,7 +35,9 @@ public class CommandTestBench {
 	private int threadCount = 1;
 	private int commandPerThread = 1000;
 	private int contextCount = 1;
+	
 	private Identifier[] contexts;
+	private SpeedLimit speedLimit;
 	private Random rnd;
 	private TaskType taskType;
 
@@ -50,37 +52,48 @@ public class CommandTestBench {
 		TestHelper.setSysProp("tangosol.coherence.clusterport", "9001");
 		TestHelper.setSysProp("tangosol.coherence.distributed.localstorage", "false");
 
-		CacheFactory.getCache("warmup");
+		CacheFactory.getCache("warmup").clear();
 		
-		TestHelper.setSysProp("benchmark.threadCount", "2");
+		TestHelper.setSysProp("benchmark.threadCount", "4");
 		TestHelper.setSysProp("benchmark.commandPerThread", "1000");
-		TestHelper.setSysProp("benchmark.contextCount", "1");
+		TestHelper.setSysProp("benchmark.contextCount", "10");
 		TestHelper.setSysProp("benchmark.command", "empty");
-//		TestHelper.setSysProp("benchmark.command", "update");
+		TestHelper.setSysProp("benchmark.speedLimit", "0");
 		
 		initCommandType();		
 		
 		threadCount = Integer.getInteger("benchmark.threadCount");
 		commandPerThread = Integer.getInteger("benchmark.commandPerThread");
 		contextCount = Integer.getInteger("benchmark.contextCount");
+		
+		Integer limit = Integer.getInteger("benchmark.speedLimit");
+		if (limit > 0) {
+			speedLimit = new SpeedLimit(limit/10, limit);
+		}
 
 		final PatternFacade facade = PatternFacade.Helper.create();
 
 		// warm up run
 		TestHelper.sysout("Warming up ...");
+		for(int n = 0; n != 20; ++n)
 		{
-			Identifier ctx = facade.registerContext("warmup", new SimpleTestContext("warnup"));
+			Identifier[] ctx = new Identifier[contextCount];
+			for(int i = 0; i != ctx.length; ++i) {
+				ctx[i] = facade.registerContext("warmup-" + i, new SimpleTestContext("warnup-" + i));
+			}
 			
-			int taskCount = 100;
+			int taskCount = 500;
 			for(int i = 0; i != taskCount; ++i) {
 				Command<SimpleTestContext> task = createCommand(-1 -i, "warmup");
-				facade.submit(ctx, task);
+				facade.submit(ctx[i % ctx.length], task);
 			}
 	
 			BenchmarkSupport.waitForBuffer("warmup", taskCount * taskType.getMarksPerTask());
+			LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500));
+			CacheFactory.getCache("warmup").clear();
 		}
-		
-		LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500));
+
+		LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1000));
 		
 		TestHelper.sysout("Starting test ...");
 		TestHelper.sysout("Thread count: %d", threadCount);
@@ -106,6 +119,9 @@ public class CommandTestBench {
 				Runnable rn = new Runnable() {
 					@Override
 					public void run() {
+						if (speedLimit != null) {
+							speedLimit.accure();
+						}
 						Command<SimpleTestContext> task = createCommand(id, reportBuffer);
 						facade.submit(ctx, task);
 					}
@@ -132,6 +148,8 @@ public class CommandTestBench {
 		StatHelper.reportStatsMs(stats);
 		TestHelper.sysout("NS statistics");
 		StatHelper.reportStatsNs(stats);
+		
+		System.exit(0);
 	}
 	
 	void initCommandType() {
