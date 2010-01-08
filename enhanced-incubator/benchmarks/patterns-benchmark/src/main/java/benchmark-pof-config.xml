@@ -19,5 +19,15 @@
             <type-id>1002</type-id>
             <class-name>com.griddynamics.gridkit.coherence.patterns.command.benchmark.EmptyCommand</class-name>
         </user-type>
+
+        <user-type>
+            <type-id>1003</type-id>
+            <class-name>com.griddynamics.gridkit.coherence.patterns.command.benchmark.ReadCommand</class-name>
+        </user-type>
+
+        <user-type>
+            <type-id>1004</type-id>
+            <class-name>com.griddynamics.gridkit.coherence.patterns.command.benchmark.UpdateCommand</class-name>
+        </user-type>
     </user-type-list>
 </pof-config>
