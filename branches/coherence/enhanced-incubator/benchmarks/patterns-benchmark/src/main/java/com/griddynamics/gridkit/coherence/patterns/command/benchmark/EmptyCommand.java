@@ -16,82 +16,46 @@
 
 package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
-import com.oracle.coherence.patterns.command.Command;
 import com.oracle.coherence.patterns.command.ExecutionEnvironment;
-import com.tangosol.io.pof.PofReader;
-import com.tangosol.io.pof.PofWriter;
-import com.tangosol.io.pof.PortableObject;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class EmptyCommand implements Command<SimpleTestContext>, PortableObject {
-
+public class EmptyCommand extends BenchmarkCommand
+{
 	private static final long serialVersionUID = 20100105L;
-	
-	private long execId;
-	private String reportBuffer;
-	private long submitMs;
-	private long submitNs;
-	private String taskHeader = "some random text to increase task size";
-	private Map<?, ?> taskPayload = Collections.EMPTY_MAP;
 
-	public EmptyCommand() {
+	public EmptyCommand()
+	{
 		// for POF
 	}
 
-	public EmptyCommand(long execId, String reportBuffer, Map<?, ?> payload) {
-		this(execId, reportBuffer);
-		this.taskPayload = payload;
+	public EmptyCommand(long execId, String reportBuffer, Map<?, ?> payload)
+	{
+		super(execId, reportBuffer, payload);
 	}
 	
-	public EmptyCommand(long execId, String reportBuffer) {
-		this.execId = execId;
-		this.reportBuffer = reportBuffer;
-		this.submitMs = System.currentTimeMillis();
-		this.submitNs = System.nanoTime();
+	public EmptyCommand(long execId, String reportBuffer)
+	{
+		super(execId, reportBuffer);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void execute(ExecutionEnvironment<SimpleTestContext> executionEnvironment) {		
+	public void execute(ExecutionEnvironment<SimpleTestContext> executionEnvironment)
+	{
 		// Invoke execution method.
 		execute();
 		// Save time information
-		BenchmarkSupport.reportExecution(reportBuffer, new ExecMark(execId, submitMs, submitNs));
+		BenchmarkSupport.reportExecution(reportBuffer, new ExecMark(execId, timeStamp));
 	}
 
-	private void execute() {
+	private void execute()
+	{
 		// TODO: insert some code
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public void readExternal(PofReader in) throws IOException {
-		int propId = 0;
-		execId = in.readLong(propId++);
-		submitMs = in.readLong(propId++);
-		submitNs = in.readLong(propId++);
-		reportBuffer = in.readString(propId++);
-		taskHeader = in.readString(propId++);
-		taskPayload = in.readMap(propId++, new HashMap());
-	}
-
-	@Override
-	public void writeExternal(PofWriter out) throws IOException {
-		int propId = 0;
-		out.writeLong(propId++, execId);
-		out.writeLong(propId++, submitMs);
-		out.writeLong(propId++, submitNs);
-		out.writeString(propId++, reportBuffer);
-		out.writeString(propId++, taskHeader);
-		out.writeMap(propId++, taskPayload);
 	}
 }

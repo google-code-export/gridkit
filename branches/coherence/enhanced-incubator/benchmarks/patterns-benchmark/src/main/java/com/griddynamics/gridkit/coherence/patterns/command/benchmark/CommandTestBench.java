@@ -16,201 +16,182 @@
 
 package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
-
-import com.oracle.coherence.common.identifiers.Identifier;
-import com.oracle.coherence.patterns.command.Command;
-import com.tangosol.net.CacheFactory;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class CommandTestBench {
-
-	private int threadCount = 1;
-	private int commandPerThread = 1000;
-	private int contextCount = 1;
-	
-	private Identifier[] contexts;
-	private SpeedLimit speedLimit;
-	private Random rnd;
-	private TaskType taskType;
-
-	public static void main(String[] args) {
+public class CommandTestBench
+{	
+	public static void main(String[] args)
+	{
 		new CommandTestBench().start(args);
 	}
 	
-	public void start(String[] args) {
-		// Configure coherence
+	public static List<CommandBenchmarkParams> prepareBenchmarkParams()
+	{
+		/*--------- Benchmark Configuration ---------*/
+		int opsPerSec = 0;
+		
+		int[] threadCount      = {3,4}; //{1, 2, 3, 5, 10}
+		int[] contextCount     = {5, 10}; //{1, 2, 4, 8, 16}
+		int[] commandPerThread = {5000};
+		
+		String[] taskTypes = {"update"};
+		/*-------------------------------------------*/
+		
+		int benchmarksCount = threadCount.length * contextCount.length * commandPerThread.length * taskTypes.length;
+		
+		List<CommandBenchmarkParams> res = new ArrayList<CommandBenchmarkParams>(benchmarksCount);
+		
+		for(int tc = 0; tc < threadCount.length; ++tc)
+		{
+			for(int cc = 0; cc < contextCount.length; ++cc)
+			{
+				for(int cpt = 0; cpt < commandPerThread.length; ++cpt)
+				{
+					for(int tt = 0; tt < taskTypes.length; ++tt)
+					{
+						res.add(new CommandBenchmarkParams
+								(
+									taskTypes[tt],
+									threadCount[tc],
+									commandPerThread[cpt],
+									contextCount[cc],
+									opsPerSec
+								));
+					}
+				}
+			}
+		}
+		
+		return res;
+	}
+	
+	public static Map<CommandBenchmarkParams, BenchmarkResults> executeBenchmark(PatternFacade facade, Collection<CommandBenchmarkParams> params)
+	{
+		Map<CommandBenchmarkParams, BenchmarkResults> res = new LinkedHashMap<CommandBenchmarkParams, BenchmarkResults>();
+		
+		for(CommandBenchmarkParams param : params)
+		{
+			TestHelper.sysout("Executing benchmark for " + param.toString());
+			
+			CommandBenchmark commandBenchmark = new CommandBenchmark(param, "command-benchmark");
+			
+			BenchmarkResults benchmarkResults = commandBenchmark.execute(facade);
+			
+			res.put(param, benchmarkResults);
+		}
+		
+		return res;
+	}
+	
+	public static void warmUp(final PatternFacade facade)
+	{
+		CommandBenchmarkParams benchmarkParams = new CommandBenchmarkParams("empty", // commandType
+													 							  4, // threadCount
+													 						   1000, // commandPerThread,
+													 						   	  4, // contextCount
+													 						   	  0);// opsPerSec
+		
+		TestHelper.sysout("Warming up ...");
+		
+		CommandBenchmark commandBenchmark = new CommandBenchmark(benchmarkParams, "warmup");
+		
+		for(int n = 0; n != 20; ++n)
+		{
+			commandBenchmark.execute(facade);
+			LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500));
+		}
+		
+		LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1000));
+	}
+
+	public static final double throughputScale = 0.7;
+	
+	static private Map<CommandBenchmarkParams, BenchmarkResults> makeBenchmarkExecutionStage(int start, PatternFacade facade,
+																							 List<CommandBenchmarkParams> benchmarkParams,
+																							 List<StatHelper.StatsCSVRow> resToCSV)
+	{
+		Map<CommandBenchmarkParams, BenchmarkResults> res = executeBenchmark(facade, benchmarkParams);
+		
+		for (Map.Entry<CommandBenchmarkParams, BenchmarkResults> r : res.entrySet())
+		{
+			++start;
+			
+			resToCSV.add(new StatHelper.StatsCSVRow(start,r.getKey(),r.getValue().javaMsResults,      TimeUnit.MILLISECONDS));
+			resToCSV.add(new StatHelper.StatsCSVRow(start,r.getKey(),r.getValue().javaNsResults,      TimeUnit.NANOSECONDS));
+			resToCSV.add(new StatHelper.StatsCSVRow(start,r.getKey(),r.getValue().coherenceMsResults, TimeUnit.DAYS));
+		}
+		
+		return res;
+	}
+	
+	public void start(String[] args)
+	{
 		TestHelper.setSysProp("tangosol.pof.config", "benchmark-pof-config.xml");
 		TestHelper.setSysProp("tangosol.coherence.cacheconfig", "benchmark-pof-cache-config.xml");
 		TestHelper.setSysProp("tangosol.coherence.clusterport", "9001");
 		TestHelper.setSysProp("tangosol.coherence.distributed.localstorage", "false");
-
-		CacheFactory.getCache("warmup").clear();
 		
-		TestHelper.setSysProp("benchmark.threadCount", "4");
-		TestHelper.setSysProp("benchmark.commandPerThread", "1000");
-		TestHelper.setSysProp("benchmark.contextCount", "10");
-		TestHelper.setSysProp("benchmark.command", "empty");
-		TestHelper.setSysProp("benchmark.speedLimit", "0");
-		
-		initCommandType();		
-		
-		threadCount = Integer.getInteger("benchmark.threadCount");
-		commandPerThread = Integer.getInteger("benchmark.commandPerThread");
-		contextCount = Integer.getInteger("benchmark.contextCount");
-		
-		Integer limit = Integer.getInteger("benchmark.speedLimit");
-		if (limit > 0) {
-			speedLimit = new SpeedLimit(limit/10, limit);
-		}
-
 		final PatternFacade facade = PatternFacade.Helper.create();
-
-		// warm up run
-		TestHelper.sysout("Warming up ...");
-		for(int n = 0; n != 20; ++n)
+		
+		warmUp(facade);
+		
+		List<CommandBenchmarkParams> benchmarkParams = prepareBenchmarkParams();
+		//TODO add coherence time
+		List<StatHelper.StatsCSVRow> resToCSV = new ArrayList<StatHelper.StatsCSVRow>(9 * benchmarkParams.size());
+		
+		int i = 0;
+		
+		TestHelper.sysout("Benchmark. Stage I.");
+		Map<CommandBenchmarkParams, BenchmarkResults> res1 = makeBenchmarkExecutionStage(i,facade, benchmarkParams, resToCSV);
+		
+		Collections.shuffle(benchmarkParams);
+		
+		i += benchmarkParams.size();
+		
+		TestHelper.sysout("Benchmark. Stage II.");
+		Map<CommandBenchmarkParams, BenchmarkResults> res2 = makeBenchmarkExecutionStage(i,facade, benchmarkParams, resToCSV);
+		
+		//Calculating average throughput
+		
+		List<CommandBenchmarkParams> speedLimitBenchmarkParams = new ArrayList<CommandBenchmarkParams>(benchmarkParams.size());
+		
+		for (CommandBenchmarkParams p : benchmarkParams)
 		{
-			Identifier[] ctx = new Identifier[contextCount];
-			for(int i = 0; i != ctx.length; ++i) {
-				ctx[i] = facade.registerContext("warmup-" + i, new SimpleTestContext("warnup-" + i));
-			}
+			BenchmarkResults r1 = res1.get(p);
+			BenchmarkResults r2 = res2.get(p);
 			
-			int taskCount = 500;
-			for(int i = 0; i != taskCount; ++i) {
-				Command<SimpleTestContext> task = createCommand(-1 -i, "warmup");
-				facade.submit(ctx[i % ctx.length], task);
-			}
-	
-			BenchmarkSupport.waitForBuffer("warmup", taskCount * taskType.getMarksPerTask());
-			LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500));
-			CacheFactory.getCache("warmup").clear();
-		}
-
-		LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1000));
-		
-		TestHelper.sysout("Starting test ...");
-		TestHelper.sysout("Thread count: %d", threadCount);
-		TestHelper.sysout("Command count: %d (%d per thread)", threadCount * commandPerThread, commandPerThread);
-		TestHelper.sysout("Context count: %d", contextCount);
-		
-		final String reportBuffer = "command-benchmark";
-		CacheFactory.getCache(reportBuffer).clear();
-		rnd = new Random();
-		contexts = new Identifier[contextCount];
-
-		for(int i = 0; i != contextCount; ++i) {
-			contexts[i] = facade.registerContext("ctx-" + i, new SimpleTestContext("ctx-" + i));
+			//TODO ask from type of type get 
+			
+			speedLimitBenchmarkParams.add(new CommandBenchmarkParams(p.getTaskType(),
+																	 p.getThreadCount(),
+																	 p.getCommandPerThread(),
+																	 p.getContextCount(),
+										  (int)((r1.javaMsResults.getThroughput() + r2.javaMsResults.getThroughput()) / 2 * throughputScale)));
 		}
 		
-		ExecutorService service = threadCount == 1 ? null : Executors.newFixedThreadPool(threadCount);
+		i += benchmarkParams.size();
 		
-		for(int i = 0; i != commandPerThread; ++i) {
-			for(int j = 0; j != threadCount; ++j) {
-				final Identifier ctx = contexts[rnd.nextInt(contexts.length)];
-				final long id = j * 10000000 + i;
-				
-				Runnable rn = new Runnable() {
-					@Override
-					public void run() {
-						if (speedLimit != null) {
-							speedLimit.accure();
-						}
-						Command<SimpleTestContext> task = createCommand(id, reportBuffer);
-						facade.submit(ctx, task);
-					}
-				};
-				
-				if (service == null) {
-					rn.run();
-				}
-				else {
-					service.submit(rn);
-				}
-			}
-		}
-
-		Map<Long, ExecMark> stats = BenchmarkSupport.waitForBuffer(reportBuffer, threadCount * commandPerThread * taskType.getMarksPerTask());
-
-		System.out.println();
-		TestHelper.sysout("Done");
-		TestHelper.sysout("Thread count: %d", threadCount);
-		TestHelper.sysout("Command count: %d (%d per thread)", threadCount * commandPerThread, commandPerThread);
-		TestHelper.sysout("Context count: %d", contextCount);
-
-		TestHelper.sysout("MS statistics");
-		StatHelper.reportStatsMs(stats);
-		TestHelper.sysout("NS statistics");
-		StatHelper.reportStatsNs(stats);
+		TestHelper.sysout("Benchmark. Stage III.");
+		Map<CommandBenchmarkParams, BenchmarkResults> res3 = makeBenchmarkExecutionStage(i, facade, speedLimitBenchmarkParams, resToCSV);
 		
-		System.exit(0);
-	}
-	
-	void initCommandType() {
-		String cmdType = System.getProperty("benchmark.command").toLowerCase();
-		if ("empty".equals(cmdType)) {
-			taskType = new EmptyTaskType();
-		}
-		else if ("read".equals(cmdType)) {
-			taskType = new ReadTaskType();
-		}
-		else if ("update".equals(cmdType)) {
-			taskType = new UpdateTaskType();
-		}
-		else throw new RuntimeException("Unknown command type '" + cmdType + "'");
-	}
-	
-	Command<SimpleTestContext> createCommand(long id, String reportBuffer) {
-		return taskType.createCommand(id, reportBuffer);
-	}
-	
-	interface TaskType {
-		public Command<SimpleTestContext> createCommand(long id, String reportBuffer);
-		public int getMarksPerTask();
-	}
-	
-	class EmptyTaskType implements TaskType {
-
-		@Override
-		public Command<SimpleTestContext> createCommand(long id, String reportBuffer) {
-			return new EmptyCommand(id, reportBuffer);
-		}
+		Collections.shuffle(speedLimitBenchmarkParams);
 		
-		@Override
-		public int getMarksPerTask() {			
-			return 1;
-		}
-	}
-
-	class ReadTaskType implements TaskType {
+		i += benchmarkParams.size();
 		
-		@Override
-		public Command<SimpleTestContext> createCommand(long id, String reportBuffer) {
-			return new ReadCommand(id, reportBuffer);
-		}
+		TestHelper.sysout("Benchmark. Stage IV.");
+		Map<CommandBenchmarkParams, BenchmarkResults> res4 = makeBenchmarkExecutionStage(i, facade, speedLimitBenchmarkParams, resToCSV);
 		
-		@Override
-		public int getMarksPerTask() {			
-			return 1;
-		}
-	}
-	
-	class UpdateTaskType implements TaskType {
-		
-		@Override
-		public Command<SimpleTestContext> createCommand(long id, String reportBuffer) {
-			return new UpdateCommand(id, reportBuffer);
-		}
-		
-		@Override
-		public int getMarksPerTask() {			
-			return 1;
-		}
+		StatHelper.storeResultsInCSV("C:\\temp\\a.csv", resToCSV);
 	}
 }
