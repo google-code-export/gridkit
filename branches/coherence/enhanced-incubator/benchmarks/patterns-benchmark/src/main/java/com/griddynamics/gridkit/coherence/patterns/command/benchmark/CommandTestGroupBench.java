@@ -29,11 +29,11 @@ import java.util.concurrent.locks.LockSupport;
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class CommandTestBench
+public class CommandTestGroupBench
 {	
 	public static void main(String[] args)
 	{
-		new CommandTestBench().start(args);
+		new CommandTestGroupBench().start(args);
 	}
 	
 	public static List<CommandBenchmarkParams> prepareBenchmarkParams()
