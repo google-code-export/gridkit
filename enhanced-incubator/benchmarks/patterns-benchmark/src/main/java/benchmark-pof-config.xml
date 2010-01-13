@@ -35,5 +35,15 @@
             <class-name>com.griddynamics.gridkit.coherence.patterns.command.benchmark.incubator.DumbInvokationCommandFacade$CommandProcessor</class-name>
         </user-type>
         
+        <user-type>
+            <type-id>1006</type-id>
+            <class-name>com.griddynamics.gridkit.coherence.patterns.command.benchmark.BenchmarkCommand</class-name>
+        </user-type>
+        
+         <user-type>
+            <type-id>1007</type-id>
+            <class-name>com.griddynamics.gridkit.coherence.patterns.command.benchmark.TimeStamp</class-name>
+        </user-type>
+        
     </user-type-list>
 </pof-config>

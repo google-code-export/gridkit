@@ -21,25 +21,32 @@ import java.util.concurrent.locks.LockSupport;
 
 public class SpeedLimit {
 	
-	private Semaphore semaphore;
-	private int premits;
-	private double delay;
+	private final Semaphore semaphore;
+	private final int premits;
+	private final double delay;
 	
-	public SpeedLimit(int permits, int opsPerSec) {
+	private SpeedLimit(int permits, int opsPerSec) {
 		semaphore = new Semaphore(permits);
 		this.premits = permits;
 		delay = (1d * TimeUnit.SECONDS.toNanos(1)) / opsPerSec; 
+	}
+	
+	public static SpeedLimit createSpeedLimit(int permits, int opsPerSec)
+	{
+		final SpeedLimit res = new SpeedLimit(permits, opsPerSec);
 		
 		Thread th = new Thread() {
 			@Override
 			public void run() {
-				recoverPermissions();
+				res.recoverPermissions();
 			}
 		};
 		
-		th.setName("SpeedLimit[" + this.toString() + "]");
+		th.setName("SpeedLimit[" + res.toString() + "]");
 		th.setDaemon(true);
 		th.start();
+		
+		return res;
 	}
 
 	public void accure() {

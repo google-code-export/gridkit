@@ -69,7 +69,9 @@ public class CascadeCommand implements Command<SimpleTestContext>, PortableObjec
 		ctx.touch();
 		executionEnvironment.setContext(ctx);
 		// Save time information
-		BenchmarkSupport.reportExecution(reportBuffer, new ExecMark(execId, submitMs, submitNs));
+		
+		//TODO restore !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		//BenchmarkSupport.reportExecution(reportBuffer, new ExecMark(execId, submitMs, submitNs));
 	}
 
 	@Override
