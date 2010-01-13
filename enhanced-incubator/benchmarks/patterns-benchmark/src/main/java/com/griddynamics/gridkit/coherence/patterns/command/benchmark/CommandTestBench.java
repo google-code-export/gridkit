@@ -192,6 +192,6 @@ public class CommandTestBench
 		TestHelper.sysout("Benchmark. Stage IV.");
 		Map<CommandBenchmarkParams, BenchmarkResults> res4 = makeBenchmarkExecutionStage(i, facade, speedLimitBenchmarkParams, resToCSV);
 		
-		StatHelper.storeResultsInCSV("C:\\temp\\a.csv", resToCSV);
+		StatHelper.storeResultsInCSV("./command_benchmark_result.csv", resToCSV);
 	}
 }
