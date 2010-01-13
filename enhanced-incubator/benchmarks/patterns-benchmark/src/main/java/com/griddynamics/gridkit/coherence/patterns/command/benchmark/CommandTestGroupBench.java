@@ -93,27 +93,6 @@ public class CommandTestGroupBench
 		
 		return res;
 	}
-	
-	public static void warmUp(final PatternFacade facade)
-	{
-		CommandBenchmarkParams benchmarkParams = new CommandBenchmarkParams("empty", // commandType
-													 							  4, // threadCount
-													 						   1000, // commandPerThread,
-													 						   	  4, // contextCount
-													 						   	  0);// opsPerSec
-		
-		TestHelper.sysout("Warming up ...");
-		
-		CommandBenchmark commandBenchmark = new CommandBenchmark(benchmarkParams, "warmup");
-		
-		for(int n = 0; n != 20; ++n)
-		{
-			commandBenchmark.execute(facade);
-			LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500));
-		}
-		
-		LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1000));
-	}
 
 	public static final double throughputScale = 0.7;
 	
@@ -144,7 +123,7 @@ public class CommandTestGroupBench
 		
 		final PatternFacade facade = PatternFacade.Helper.create();
 		
-		warmUp(facade);
+		CommandTestBench.warmUp(facade);
 		
 		List<CommandBenchmarkParams> benchmarkParams = prepareBenchmarkParams();
 		//TODO add coherence time
