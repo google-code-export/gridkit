@@ -41,8 +41,8 @@ public class CommandTestGroupBench
 		/*--------- Benchmark Configuration ---------*/
 		int opsPerSec = 0;
 		
-		int[] threadCount      = {3,4}; //{1, 2, 3, 5, 10}
-		int[] contextCount     = {5, 10}; //{1, 2, 4, 8, 16}
+		int[] threadCount      = {1};//{1, 2, 3, 5, 10};
+		int[] contextCount     = {5};//{1, 2, 4, 8, 16};
 		int[] commandPerThread = {5000};
 		
 		String[] taskTypes = {"update"};
@@ -98,7 +98,7 @@ public class CommandTestGroupBench
 	
 	static private Map<CommandBenchmarkParams, BenchmarkResults> makeBenchmarkExecutionStage(int start, PatternFacade facade,
 																							 List<CommandBenchmarkParams> benchmarkParams,
-																							 List<StatHelper.StatsCSVRow> resToCSV)
+																							 List<CSVHelper.StatsCSVRow> resToCSV)
 	{
 		Map<CommandBenchmarkParams, BenchmarkResults> res = executeBenchmark(facade, benchmarkParams);
 		
@@ -106,9 +106,9 @@ public class CommandTestGroupBench
 		{
 			++start;
 			
-			resToCSV.add(new StatHelper.StatsCSVRow(start,r.getKey(),r.getValue().javaMsResults,      TimeUnit.MILLISECONDS));
-			resToCSV.add(new StatHelper.StatsCSVRow(start,r.getKey(),r.getValue().javaNsResults,      TimeUnit.NANOSECONDS));
-			resToCSV.add(new StatHelper.StatsCSVRow(start,r.getKey(),r.getValue().coherenceMsResults, TimeUnit.DAYS));
+			resToCSV.add(new CSVHelper.StatsCSVRow(start,r.getKey(),r.getValue().javaMsResults, CSVHelper.StatsCSVRow.TimeMeasuringType.JavaMS));
+			resToCSV.add(new CSVHelper.StatsCSVRow(start,r.getKey(),r.getValue().javaNsResults, CSVHelper.StatsCSVRow.TimeMeasuringType.JavaNS));
+			resToCSV.add(new CSVHelper.StatsCSVRow(start,r.getKey(),r.getValue().coherenceMsResults, CSVHelper.StatsCSVRow.TimeMeasuringType.CoherenceMS));
 		}
 		
 		return res;
@@ -127,7 +127,7 @@ public class CommandTestGroupBench
 		
 		List<CommandBenchmarkParams> benchmarkParams = prepareBenchmarkParams();
 		//TODO add coherence time
-		List<StatHelper.StatsCSVRow> resToCSV = new ArrayList<StatHelper.StatsCSVRow>(9 * benchmarkParams.size());
+		List<CSVHelper.StatsCSVRow> resToCSV = new ArrayList<CSVHelper.StatsCSVRow>(9 * benchmarkParams.size());
 		
 		int i = 0;
 		
@@ -171,6 +171,6 @@ public class CommandTestGroupBench
 		TestHelper.sysout("Benchmark. Stage IV.");
 		Map<CommandBenchmarkParams, BenchmarkResults> res4 = makeBenchmarkExecutionStage(i, facade, speedLimitBenchmarkParams, resToCSV);
 		
-		StatHelper.storeResultsInCSV("./command_benchmark_result.csv", resToCSV);
+		CSVHelper.storeResultsInCSV("./command_benchmark_result.csv", resToCSV);
 	}
 }

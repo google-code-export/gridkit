@@ -1,5 +1,9 @@
 package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
 
+import java.text.NumberFormat;
+import java.util.Locale;
+import java.util.StringTokenizer;
+
 public final class BenchmarkStats
 {
 	private final double totalTime;
@@ -55,12 +59,12 @@ public final class BenchmarkStats
 
 	public String toCSVRow() 
 	{
-		return throughput + ";" + 
-	            totalTime + ";" + 
-	       averageLatency + ";" +
-		  latencyVariance + ";" +
-			   maxLatency + ";" +
-			   minLatency;
+		return CSVHelper.formatDoubleToCSV(throughput) + ";" + 
+			   CSVHelper.formatDoubleToCSV(totalTime) + ";" + 
+			   CSVHelper.formatDoubleToCSV(averageLatency) + ";" +
+			   CSVHelper.formatDoubleToCSV(latencyVariance) + ";" +
+			   CSVHelper.formatDoubleToCSV(maxLatency) + ";" +
+			   CSVHelper.formatDoubleToCSV(minLatency);
 	}
 
 	public static String getCSVHeader()
