@@ -30,22 +30,22 @@ public class StatHelper
 	
 	static final class JavaMsExtractor implements TimeExtractor
 	{
-		public long getExecTime(ExecMark ts)   { return ts.execTS.javaMs; }
-		public long getSubmitTime(ExecMark ts) { return ts.submitTS.javaMs; }
+		public long getExecTime(ExecMark ts)   { return ts.execTS.getJavaMs(); }
+		public long getSubmitTime(ExecMark ts) { return ts.submitTS.getJavaMs(); }
 		public double getScale()               { return 1d; }
 	}
 	
 	static final class CoherenceMsExtractor implements TimeExtractor
 	{
-		public long getExecTime(ExecMark ts)   { return ts.execTS.coherenceMs; }
-		public long getSubmitTime(ExecMark ts) { return ts.submitTS.coherenceMs; }
+		public long getExecTime(ExecMark ts)   { return ts.execTS.getCoherenceMs(); }
+		public long getSubmitTime(ExecMark ts) { return ts.submitTS.getCoherenceMs(); }
 		public double getScale()               { return 1d; }
 	}
 	
 	static final class JavaNsExtractor implements TimeExtractor
 	{
-		public long getExecTime(ExecMark ts)   { return ts.execTS.javaNs; }
-		public long getSubmitTime(ExecMark ts) { return ts.submitTS.javaNs; }
+		public long getExecTime(ExecMark ts)   { return ts.execTS.getJavaNs(); }
+		public long getSubmitTime(ExecMark ts) { return ts.submitTS.getJavaNs(); }
 		public double getScale()               { return 1d / TimeUnit.MILLISECONDS.toNanos(1); }
 	}
 

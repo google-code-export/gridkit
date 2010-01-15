@@ -1,7 +1,11 @@
 package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
 
-public final class CommandBenchmarkParams
+import java.io.Serializable;
+
+public final class CommandBenchmarkParams implements Serializable
 {
+	private static final long serialVersionUID = -680095570543015774L;
+
 	private final String taskType;
 	
 	private final int threadCount;
