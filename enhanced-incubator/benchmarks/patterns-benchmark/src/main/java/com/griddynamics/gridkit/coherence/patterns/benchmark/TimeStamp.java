@@ -1,17 +1,20 @@
-package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
+package com.griddynamics.gridkit.coherence.patterns.benchmark;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import com.tangosol.io.pof.PofReader;
 import com.tangosol.io.pof.PofWriter;
 import com.tangosol.io.pof.PortableObject;
 import com.tangosol.net.CacheFactory;
 
-public final class TimeStamp implements PortableObject
+public final class TimeStamp implements Serializable, PortableObject
 {
-	long javaMs;
-	long javaNs;
-	long coherenceMs;
+	private static final long serialVersionUID = -3016646724383347163L;
+	
+	private long javaMs;
+	private long javaNs;
+	private long coherenceMs;
 	
 	public TimeStamp()
 	{
@@ -27,6 +30,21 @@ public final class TimeStamp implements PortableObject
 		res.coherenceMs = CacheFactory.getSafeTimeMillis();
 		
 		return res;
+	}
+	
+	public long getJavaMs()
+	{
+		return javaMs;
+	}
+
+	public long getJavaNs()
+	{
+		return javaNs;
+	}
+
+	public long getCoherenceMs()
+	{
+		return coherenceMs;
 	}
 
 	@Override
