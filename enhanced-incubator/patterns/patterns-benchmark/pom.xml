@@ -18,8 +18,8 @@
 	<groupId>com.griddynamics.gridkit.coherence.patterns</groupId>
 	<artifactId>enhanced-patterns</artifactId>
 	<packaging>jar</packaging>
+	<name>Enhanced patterns</name>
 	<version>1.0-SNAPSHOT</version>
-	<name>gridkit.command.benchmark</name>
 	<url></url>
 
 	<repositories>
@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>com.oracle.coherence.patterns</groupId>
 			<artifactId>coherence-common</artifactId>
-			<version>1.5.0</version>
+			<version>1.5.0-mod</version>
 		</dependency>
 		<dependency>
 			<groupId>com.oracle.coherence.patterns</groupId>
