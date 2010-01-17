@@ -6,9 +6,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
-import com.griddynamics.gridkit.coherence.patterns.benchmark.CommandExecutionMark;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.FunctorExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.SimpleContext;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.stats.Accamulator;
 import com.oracle.coherence.common.identifiers.Identifier;
 import com.tangosol.net.InvocationObserver;
 import com.tangosol.net.InvocationService;
@@ -21,7 +23,7 @@ public class FunctorBenchmarkDispatcher
 	protected final Object memorySynchronizer = new Object();
 	protected CountDownLatch latch;
 	protected FunctorBenchmarkStats dispatcherResult;
-	protected List<List<CommandExecutionMark>> workersResult;
+	protected List<List<FunctorExecutionMark>> workersResult;
 	
 	public FunctorBenchmarkDispatcher(int contextsCount)
 	{
@@ -35,7 +37,7 @@ public class FunctorBenchmarkDispatcher
 		{
 			latch            = new CountDownLatch(workers.size());
 			dispatcherResult = new FunctorBenchmarkStats();
-			workersResult    = new ArrayList<List<CommandExecutionMark>>();
+			workersResult    = new ArrayList<List<FunctorExecutionMark>>();
 		}
 		
 		for(int i=0; i < contexts.length; ++i)
@@ -61,7 +63,9 @@ public class FunctorBenchmarkDispatcher
 			throw new RuntimeException("FunctorBenchmarkDispatcher has been interrupted");
 		}
 		
-		return null;
+		//Guaranteed by latch.await()
+		calculateExecutionStatistics();
+		return dispatcherResult;
 	}
 	
 	class FunctorBenchmarkObserver implements InvocationObserver
@@ -71,7 +75,7 @@ public class FunctorBenchmarkDispatcher
 		{
 			synchronized (memorySynchronizer)
 			{
-				workersResult.add(Arrays.asList((CommandExecutionMark[])oResult));
+				workersResult.add(Arrays.asList((FunctorExecutionMark[])oResult));
 				dispatcherResult.setMembersCompleated(dispatcherResult.getMembersCompleated()+1);
 			}
 		}
@@ -103,10 +107,58 @@ public class FunctorBenchmarkDispatcher
 			}
 		}
 	}
-	
-	protected static FunctorBenchmarkStats calculateExecutionStatistics(FunctorBenchmarkStats dispatcherResult,
-																		List<List<CommandExecutionMark>> workersResult)
+
+	protected void calculateExecutionStatistics()
 	{
-		return dispatcherResult;
+		dispatcherResult.setJavaMsStats(calculateExecutionStatisticsInternal(new FunctorExecutionMark.JavaMsExtractor()));
+
+		dispatcherResult.setJavaNsStats(calculateExecutionStatisticsInternal(new FunctorExecutionMark.JavaNsExtractor()));
+		
+		dispatcherResult.setCoherenceMsStats(calculateExecutionStatisticsInternal(new FunctorExecutionMark.CoherenceMsExtractor()));
+	}
+	
+	protected FunctorBenchmarkStats.TimeUnitDependStats calculateExecutionStatisticsInternal
+			   (FunctorExecutionMark.FunctorExecutionMarkTimeExtractor te)
+	{	
+		Accamulator  startTime = new Accamulator();
+		Accamulator returnTime = new Accamulator();
+		
+		Accamulator sumbitLatency = new Accamulator();
+		Accamulator returnLatency = new Accamulator();
+		
+		int n = 0;
+		
+		for (List<FunctorExecutionMark> l : workersResult)
+		{
+			for(FunctorExecutionMark m : l)
+			{
+				n++;
+				
+				startTime.add(te.getSubmitTime(m));
+				returnTime.add(te.getReturnTime(m));
+				
+				sumbitLatency.add(te.getExecutionTime(m) - te.getSubmitTime(m));
+				returnLatency.add(te.getReturnTime(m) - te.getSubmitTime(m));
+			}
+		}
+		
+		FunctorBenchmarkStats.TimeUnitDependStats res = new FunctorBenchmarkStats.TimeUnitDependStats();
+		
+		res.totalTime  = returnTime.getMax() - startTime.getMin();
+		res.throughput = n / (res.totalTime / TimeUnit.SECONDS.toMillis(1));
+		
+		res.averageSumbitLatency = sumbitLatency.getMean();
+		res.averageReturnLatency = returnLatency.getMean();
+		
+		res.sumbitLatencyVariance = sumbitLatency.getVariance();
+		res.returnLatencyVariance = returnLatency.getVariance();
+		
+		res.maxSumbitLatency = sumbitLatency.getMax();
+		res.maxReturnLatency = returnLatency.getMax();
+		
+		res.minSumbitLatency = sumbitLatency.getMin();
+		res.minReturnLatency = returnLatency.getMin();
+		
+		return res;
 	}
 }

@@ -9,17 +9,16 @@ public final class FunctorBenchmarkWorkerParams implements Serializable
 	private final String functorType;
 	
 	private final int threadCount;
-	private final int commandPerThread;
+	private final int invocationPerThread;
 	private final int opsPerSec;
 	
-	public FunctorBenchmarkWorkerParams(String taskType, int threadCount,  int commandPerThread,
-												   int contextCount, int opsPerSec)
+	public FunctorBenchmarkWorkerParams(String functorType, int threadCount,  int invocationPerThread, int opsPerSec)
 	{
-		this.functorType         = taskType;
+		this.functorType         = functorType;
 		
-		this.threadCount      = threadCount;
-		this.commandPerThread = commandPerThread;
-		this.opsPerSec        = opsPerSec;
+		this.threadCount         = threadCount;
+		this.invocationPerThread = invocationPerThread;
+		this.opsPerSec           = opsPerSec;
 	}
 
 	public String getFunctorType()
@@ -32,9 +31,9 @@ public final class FunctorBenchmarkWorkerParams implements Serializable
 		return threadCount;
 	}
 
-	public int getCommandPerThread()
+	public int getInvocationPerThread()
 	{
-		return commandPerThread;
+		return invocationPerThread;
 	}
 
 	public int getOpsPerSec()
@@ -46,7 +45,7 @@ public final class FunctorBenchmarkWorkerParams implements Serializable
 	public String toString()
 	{
 		return "FunctorBenchmarkWorkerParams [commandPerThread="
-				+ commandPerThread + ", functorType=" + functorType
+				+ invocationPerThread + ", functorType=" + functorType
 				+ ", opsPerSec=" + opsPerSec + ", threadCount=" + threadCount
 				+ "]";
 	}
@@ -56,7 +55,7 @@ public final class FunctorBenchmarkWorkerParams implements Serializable
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + commandPerThread;
+		result = prime * result + invocationPerThread;
 		result = prime * result
 				+ ((functorType == null) ? 0 : functorType.hashCode());
 		result = prime * result + opsPerSec;
@@ -77,7 +76,7 @@ public final class FunctorBenchmarkWorkerParams implements Serializable
 			return false;
 		}
 		FunctorBenchmarkWorkerParams other = (FunctorBenchmarkWorkerParams) obj;
-		if (commandPerThread != other.commandPerThread) {
+		if (invocationPerThread != other.invocationPerThread) {
 			return false;
 		}
 		if (functorType == null) {

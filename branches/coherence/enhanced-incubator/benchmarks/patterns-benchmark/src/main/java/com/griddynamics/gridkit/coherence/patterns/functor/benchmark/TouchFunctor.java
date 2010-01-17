@@ -8,6 +8,11 @@ public class TouchFunctor extends BenchmarkFunctor
 {
 	private static final long serialVersionUID = 8465156891248807008L;
 
+	public TouchFunctor()
+	{
+		// For POF
+	}
+	
 	public TouchFunctor(long executionID)
 	{
 		super(executionID);
@@ -16,7 +21,7 @@ public class TouchFunctor extends BenchmarkFunctor
 	@Override
 	public CommandExecutionMark execute(ExecutionEnvironment<SimpleContext> executionEnvironment)
 	{
-		CommandExecutionMark res = getCommandExecutionMark();
+		CommandExecutionMark res = startExecution();
 		
 		SimpleContext context = executionEnvironment.getContext();
 		context.touch();

@@ -37,7 +37,7 @@ public abstract class BenchmarkFunctor implements Functor<SimpleContext, Command
 		return this;
 	}
 
-	protected CommandExecutionMark getCommandExecutionMark()
+	protected final CommandExecutionMark startExecution()
 	{
 		CommandExecutionMark res = new CommandExecutionMark(executionID, sumbitTS);
 		res.execute();
