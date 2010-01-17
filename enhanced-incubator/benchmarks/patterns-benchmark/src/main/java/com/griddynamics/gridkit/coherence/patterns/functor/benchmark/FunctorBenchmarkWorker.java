@@ -3,11 +3,13 @@ package com.griddynamics.gridkit.coherence.patterns.functor.benchmark;
 import java.io.Serializable;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import com.griddynamics.gridkit.coherence.patterns.benchmark.CommandExecutionMark;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.FunctorExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.command.benchmark.SpeedLimit;
 import com.oracle.coherence.common.identifiers.Identifier;
 import com.tangosol.net.Invocable;
@@ -37,14 +39,17 @@ public class FunctorBenchmarkWorker implements Invocable, Serializable
 	@Override
 	public void run()
 	{
-		final ConcurrentLinkedQueue<CommandExecutionMark> workerResult = new ConcurrentLinkedQueue<CommandExecutionMark>();
+		//try
+		//{
+		final ConcurrentLinkedQueue<FunctorExecutionMark> workerResult = new ConcurrentLinkedQueue<FunctorExecutionMark>();
 		
 		final Random rnd = new Random(System.currentTimeMillis());
 		
-		//TODO implement
-		final PatternFacade facade = null;
+		final PatternFacade facade = PatternFacade.DefaultFacade.getInstance();
 		
 		final FunctorFactory functorFactory = getFunctorFactoryByName(params.getFunctorType());
+		
+		final CountDownLatch latch = new CountDownLatch(params.getInvocationPerThread() * params.getThreadCount());
 		
 		SpeedLimit sl = null;
 		if (params.getOpsPerSec() > 0) 
@@ -57,7 +62,7 @@ public class FunctorBenchmarkWorker implements Invocable, Serializable
 		ExecutorService service = params.getThreadCount() == 1 ? Executors.newSingleThreadExecutor() 
 															   : Executors.newFixedThreadPool(params.getThreadCount());
 		
-		for(int i = 0; i != params.getCommandPerThread(); ++i)
+		for(int i = 0; i != params.getInvocationPerThread(); ++i)
 		{
 			for(int j = 0; j != params.getThreadCount(); ++j)
 			{
@@ -78,17 +83,20 @@ public class FunctorBenchmarkWorker implements Invocable, Serializable
 						
 						Future<CommandExecutionMark> functorResultFuture = facade.submitFunctor(context, functor.submit());
 						
-						CommandExecutionMark functorResult = null;
 						try
 						{
-							functorResult = functorResultFuture.get();
+							FunctorExecutionMark functorResult = new FunctorExecutionMark(functorResultFuture.get());
+							functorResult.returN();
+							workerResult.add(functorResult);
 						}
 						catch (Exception e)
 						{
 							throw new RuntimeException("Exception when getting result from the functorResultFuture");
 						}
-						
-						workerResult.add(functorResult);
+						finally
+						{
+							latch.countDown();
+						}
 					}
 				};
 				
@@ -96,11 +104,25 @@ public class FunctorBenchmarkWorker implements Invocable, Serializable
 			}
 		}
 		
+		try
+		{
+			latch.await();
+		}
+		catch (InterruptedException ignored)
+		{
+			throw new RuntimeException("FunctorBenchmarkWorker interrupted while latch.await()");
+		}
+		
 		//TODO can i do this?
 		synchronized (this)
 		{
-			this.workerResult = workerResult.toArray(new CommandExecutionMark[0]);
+			this.workerResult = workerResult.toArray(new FunctorExecutionMark[0]);
 		}
+		//}
+		//catch (Throwable t)
+		//{
+		//	System.out.println(t.getMessage());
+		//}
 	}
 	
 	@Override

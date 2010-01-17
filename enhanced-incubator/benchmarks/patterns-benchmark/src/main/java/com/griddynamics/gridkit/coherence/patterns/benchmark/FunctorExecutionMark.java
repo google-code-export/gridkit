@@ -40,7 +40,7 @@ public class FunctorExecutionMark extends CommandExecutionMark
 	{
 		return super.getNextPOFParam() + 1;
 	}
-	
+
 	@Override
 	public void readExternal(PofReader in) throws IOException
 	{
@@ -55,5 +55,25 @@ public class FunctorExecutionMark extends CommandExecutionMark
 		super.writeExternal(out);
 		int propID = super.getNextPOFParam();
 		out.writeObject(propID++, returnTS);
+	}
+	
+	static public interface FunctorExecutionMarkTimeExtractor extends CommandExecutionMarkTimeExtractor
+	{
+		public double getReturnTime(FunctorExecutionMark ts);
+	}
+	
+	static public class JavaMsExtractor extends CommandExecutionMark.JavaMsExtractor implements FunctorExecutionMarkTimeExtractor
+	{
+		public double getReturnTime(FunctorExecutionMark ts) {return ts.returnTS.getJavaMs();};
+	}
+	
+	static public class CoherenceMsExtractor extends CommandExecutionMark.CoherenceMsExtractor implements FunctorExecutionMarkTimeExtractor
+	{
+		public double getReturnTime(FunctorExecutionMark ts) {return ts.returnTS.getCoherenceMs();};
+	}
+	
+	static public class JavaNsExtractor extends CommandExecutionMark.JavaNsExtractor implements FunctorExecutionMarkTimeExtractor
+	{
+		public double getReturnTime(FunctorExecutionMark ts) {return ts.returnTS.getJavaNs() / NStoMS;};
 	}
 }

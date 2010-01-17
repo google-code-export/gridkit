@@ -2,6 +2,7 @@ package com.griddynamics.gridkit.coherence.patterns.benchmark;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.concurrent.TimeUnit;
 
 import com.tangosol.io.pof.PofReader;
 import com.tangosol.io.pof.PofWriter;
@@ -88,5 +89,35 @@ public class CommandExecutionMark implements Serializable, PortableObject
 		out.writeObject(propID++, submitTS);
 		out.writeObject(propID++, executeTS);
 		out.writeObject(propID++, finishTS);
+	}
+	
+	static public interface CommandExecutionMarkTimeExtractor
+	{
+		public double getSubmitTime(CommandExecutionMark ts);
+		public double getExecutionTime(CommandExecutionMark ts);
+		public double getFinishTime(CommandExecutionMark ts);
+	}
+	
+	static public class JavaMsExtractor implements CommandExecutionMarkTimeExtractor
+	{
+		public double getSubmitTime(CommandExecutionMark ts)    {return ts.submitTS.getJavaMs();};
+		public double getExecutionTime(CommandExecutionMark ts) {return ts.executeTS.getJavaMs();};
+		public double getFinishTime(CommandExecutionMark ts)    {return ts.finishTS.getJavaMs();};
+	}
+	
+	static public class CoherenceMsExtractor implements CommandExecutionMarkTimeExtractor
+	{
+		public double getSubmitTime(CommandExecutionMark ts)    {return ts.submitTS.getCoherenceMs();};
+		public double getExecutionTime(CommandExecutionMark ts) {return ts.executeTS.getCoherenceMs();};
+		public double getFinishTime(CommandExecutionMark ts)    {return ts.finishTS.getCoherenceMs();};
+	}
+	
+	static public class JavaNsExtractor implements CommandExecutionMarkTimeExtractor
+	{
+		static final long NStoMS = TimeUnit.MILLISECONDS.toNanos(1);
+		
+		public double getSubmitTime(CommandExecutionMark ts)    {return ts.submitTS.getJavaNs()  / NStoMS;};
+		public double getExecutionTime(CommandExecutionMark ts) {return ts.executeTS.getJavaNs() / NStoMS;};
+		public double getFinishTime(CommandExecutionMark ts)    {return ts.finishTS.getJavaNs()  / NStoMS;};
 	}
 }
