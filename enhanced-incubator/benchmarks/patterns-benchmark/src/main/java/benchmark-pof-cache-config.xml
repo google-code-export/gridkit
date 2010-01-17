@@ -3,6 +3,7 @@
 
 <cache-config>
 	<introduce-cache-config file="coherence-commandpattern-pof-cache-config.xml"/>
+	<introduce-cache-config file="coherence-functorpattern-pof-cache-config.xml"/>
 
 	<caching-scheme-mapping>
 
@@ -21,6 +22,10 @@
 			<scheme-name>context-distributed</scheme-name>
 		</cache-mapping>
 		
+		<cache-mapping>
+			<cache-name>coherence.functorpattern.results</cache-name>
+			<scheme-name>context-distributed</scheme-name>
+		</cache-mapping>
 	</caching-scheme-mapping>
 
 	<caching-schemes>
@@ -56,6 +61,12 @@
 			<backup-count>1</backup-count>
 			<autostart>true</autostart>
 		</distributed-scheme>
+		
+		<invocation-scheme>
+			<scheme-name>functor-benchmark-invocation-service</scheme-name>
+			<service-name>functorBenchmarkInvocationService</service-name>
+			<autostart system-property="tangosol.coherence.invocation.autostart">true</autostart>
+		</invocation-scheme>
 
 	</caching-schemes>
 		
