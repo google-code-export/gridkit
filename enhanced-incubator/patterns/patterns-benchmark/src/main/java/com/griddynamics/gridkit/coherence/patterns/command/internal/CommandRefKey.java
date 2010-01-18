@@ -16,6 +16,11 @@ public class CommandRefKey extends ContextedKey {
 		this.contextKey = contextKey;
 		this.msgUid = msgUid;
 	}
+
+	public CommandRefKey(CommandRef ref) {
+		this.contextKey = ref.contextKey;
+		this.msgUid = ref.msgUid;
+	}
 	
 	@Override
 	public int hashCode() {

@@ -10,6 +10,10 @@ import com.tangosol.io.pof.PofReader;
 import com.tangosol.io.pof.PofWriter;
 import com.tangosol.io.pof.PortableObject;
 
+/**
+ * Helper base class to uniformly handle POF and eternalizeable lite serialization.
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ */
 abstract class AbstractMobileObject implements PortableObject, ExternalizableLite, Serializable {
 
 	private static final long serialVersionUID = 20100109L;

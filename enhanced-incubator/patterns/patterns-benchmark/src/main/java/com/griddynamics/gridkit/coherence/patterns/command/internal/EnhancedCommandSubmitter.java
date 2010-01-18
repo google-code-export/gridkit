@@ -23,7 +23,6 @@ public class EnhancedCommandSubmitter implements CommandSubmitter {
 		schemes = EnhancedPatternsHelper.getSchemes();
 		contextMapping = EnhancedPatternsHelper.getContextMapping();
 		commandIdGenerator = EnhancedPatternsHelper.getCommandIdGenerator();
-		
 	}
 
 	@Override
@@ -54,7 +53,4 @@ public class EnhancedCommandSubmitter implements CommandSubmitter {
 		// TODO not implemented
 		return false;
 	}
-	
-	
-
 }
