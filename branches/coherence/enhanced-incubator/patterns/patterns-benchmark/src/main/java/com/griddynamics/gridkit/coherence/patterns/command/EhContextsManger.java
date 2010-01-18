@@ -9,54 +9,50 @@ import com.tangosol.util.ValueExtractor;
 class EhContextsManger implements ContextsManager {
 
 	@Override
-	public Object extractValueFromContext(Identifier identifier,
-			ValueExtractor valueExtractor) {
-		// TODO Auto-generated method stub
-		return null;
+	public Object extractValueFromContext(Identifier identifier, ValueExtractor valueExtractor) {
+		// TODO impelent ContextsManager
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Context getContext(Identifier identifier) {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO impelent ContextsManager
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Identifier registerContext(Context context,
-			ContextConfiguration contextConfiguration) {
+	public Identifier registerContext(Context context, ContextConfiguration contextConfiguration) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Identifier registerContext(Context context) {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO impelent ContextsManager
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Identifier registerContext(Identifier identifier, Context context,
-			ContextConfiguration contextConfiguration) {
-		// TODO Auto-generated method stub
-		return null;
+	public Identifier registerContext(Identifier identifier, Context context, ContextConfiguration contextConfiguration) {
+		// TODO impelent ContextsManager
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Identifier registerContext(Identifier identifier, Context context) {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO impelent ContextsManager
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Identifier registerContext(String contextName, Context context,
-			ContextConfiguration contextConfiguration) {
-		// TODO Auto-generated method stub
-		return null;
+	public Identifier registerContext(String contextName, Context context, ContextConfiguration contextConfiguration) {
+		// TODO impelent ContextsManager
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Identifier registerContext(String contextName, Context context) {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO impelent ContextsManager
+		throw new UnsupportedOperationException();
 	}
 }

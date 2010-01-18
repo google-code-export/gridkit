@@ -6,8 +6,8 @@ public interface WireFormatIn {
 
 	Object readObject() throws IOException;
 
-	long readLong();
+	long readLong() throws IOException;
 
-	int readInt();
+	int readInt() throws IOException;
 
 }

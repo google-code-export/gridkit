@@ -36,5 +36,4 @@ class MessageOrderingSupport {
 			return new Ticket(lastMilliTime, counter.get());
 		}
 	}
-
 }
