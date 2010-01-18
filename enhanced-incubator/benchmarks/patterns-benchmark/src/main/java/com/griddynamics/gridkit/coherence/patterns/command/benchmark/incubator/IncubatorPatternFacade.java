@@ -35,7 +35,7 @@ public class IncubatorPatternFacade implements PatternFacade {
 	private ManagementStrategy strategy;
 
 	public IncubatorPatternFacade() {
-		TestHelper.setSysProp("benchmark.command-pattern.storeStrategy", ManagementStrategy.COLOCATED.name());
+		TestHelper.setSysProp("benchmark.command-pattern.storeStrategy", ManagementStrategy.DISTRIBUTED.name());
 		String mode = System.getProperty("benchmark.command-pattern.storeStrategy");
 	    strategy = ManagementStrategy.valueOf(mode);
 	}
