@@ -138,7 +138,7 @@ public class FunctorBenchmarkWorker implements Invocable, Serializable
 	{
 		String functor = name.toLowerCase();
 		
-		if ("touch".equals(functor))
+		if ("touch".equalsIgnoreCase(functor))
 		{
 			return new FunctorFactory.TouchFactory();
 		}

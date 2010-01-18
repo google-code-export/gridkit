@@ -41,9 +41,9 @@ public class CommandTestGroupBench
 		/*--------- Benchmark Configuration ---------*/
 		int opsPerSec = 0;
 		
-		int[] threadCount      = {1, 2, 3, 5, 10};
-		int[] contextCount     = {1, 2, 4, 8, 16};
-		int[] commandPerThread = {5000};
+		int[] threadCount      = {1, 2, 5, 10, 20};
+		int[] contextCount     = {5, 10, 25, 50, 100};
+		int[] commandPerThread = {1000};
 		
 		String[] taskTypes = {"update"};
 		/*-------------------------------------------*/
