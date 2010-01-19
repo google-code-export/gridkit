@@ -19,10 +19,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Required;
-
 import com.griddynamics.convergence.demo.utils.cluster.Cluster;
 import com.griddynamics.convergence.demo.utils.cluster.GridHostMap;
 import com.griddynamics.convergence.demo.utils.cluster.ssh.RemoteSshProcess;
@@ -32,18 +28,16 @@ import com.griddynamics.convergence.demo.utils.exec.ExecCommand;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
-public class SshClusterBean implements Cluster, InitializingBean {
+public class SshClusterBean implements Cluster{
 
 	private Map<String, SshManagedHost> hosts = new HashMap<String, SshManagedHost>();
 	private GridHostMap hostMap;
 	private SshSessionFactory sshFactory;
 
-	@Required
 	public void setHostMap(GridHostMap map) {
 		this.hostMap = map;		
 	}
 	
-	@Required @Autowired
 	public void setSshFactory(SshSessionFactory factory) {
 		this.sshFactory = factory;
 	}
