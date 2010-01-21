@@ -22,11 +22,11 @@ public class CommandTestBench
 		
 		TestHelper.sysout("Warming up ...");
 		
-		CommandBenchmark commandBenchmark = new CommandBenchmark(benchmarkParams, "warmup");
+		CommandBenchmark commandBenchmark = new CommandBenchmark("warmup");
 		
 		for(int n = 0; n != 20; ++n)
 		{
-			commandBenchmark.execute(facade);
+			commandBenchmark.execute(facade, benchmarkParams);
 			LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500));
 		}
 		
@@ -62,9 +62,9 @@ public class CommandTestBench
         TestHelper.sysout("Command count: %d (%d per thread)", params.getThreadCount() * params.getCommandPerThread(), params.getCommandPerThread());
         TestHelper.sysout("Context count: %d", params.getContextCount());
 
-		CommandBenchmark commandBenchmark = new CommandBenchmark(params, "command-benchmark");
+		CommandBenchmark commandBenchmark = new CommandBenchmark("command-benchmark");
 		
-		BenchmarkResults benchmarkResults = commandBenchmark.execute(facade);
+		CommandBenchmarkStats benchmarkResults = commandBenchmark.execute(facade, params);
         
 		System.out.println();
         TestHelper.sysout("Done");
@@ -73,13 +73,24 @@ public class CommandTestBench
         TestHelper.sysout("Context count: %d", params.getContextCount());
         
         TestHelper.sysout("----------------Java MS statistics");
-        StatHelper.reportStats(benchmarkResults.javaMsResults);
+        reportStats(benchmarkResults.javaMsStats);
         TestHelper.sysout("----------------Java NS statistics");
-        StatHelper.reportStats(benchmarkResults.javaNsResults);
+        reportStats(benchmarkResults.javaNsStats);
         TestHelper.sysout("----------------Coherenc MS statistics");
-        StatHelper.reportStats(benchmarkResults.coherenceMsResults);
+        reportStats(benchmarkResults.coherenceMsStats);
 
         //TODO add clean up
         System.exit(0);
     }
+    
+    public static void reportStats(CommandBenchmarkStats.TimeUnitDependStats benchmarkStats) 
+	{
+		TestHelper.sysout("Total time [s]:        %014.12f" , benchmarkStats.totalTime);
+		TestHelper.sysout("Throughput [op/s]:     %014.12f" , benchmarkStats.throughput);
+		TestHelper.sysout("Average latency [ms]:  %014.12f" , benchmarkStats.averageLatency);
+		TestHelper.sysout("Latency variance [ms]: %014.12f" , benchmarkStats.latencyVariance);
+		//TestHelper.sysout("Latency stddev /[ms]:   %014.12f" , scale * stdDev);
+		TestHelper.sysout("Max latency [ms]:      %014.12f" , benchmarkStats.maxLatency);
+		TestHelper.sysout("Min latency [ms]:      %014.12f" , benchmarkStats.minLatency);
+	}
 }

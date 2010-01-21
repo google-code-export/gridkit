@@ -30,10 +30,10 @@ public class CSVHelper
 		
 		public final int executionOrder;
 		public final CommandBenchmarkParams params;
-		public final BenchmarkStats stats;
+		public final CommandBenchmarkStats.TimeUnitDependStats stats;
 		public final TimeMeasuringType counterType;
 		
-		public StatsCSVRow(int executionOrder, CommandBenchmarkParams params, BenchmarkStats stats, TimeMeasuringType counterType)
+		public StatsCSVRow(int executionOrder, CommandBenchmarkParams params, CommandBenchmarkStats.TimeUnitDependStats stats, TimeMeasuringType counterType)
 		{
 			this.executionOrder = executionOrder;
 			this.params = params;
@@ -52,7 +52,7 @@ public class CSVHelper
 		public static String getCSVHeader()
 		{
 			return "ExecutionOrder;" + CommandBenchmarkParams.getCSVHeader() + ";" +
-				   BenchmarkStats.getCSVHeader() + ";" + "CounterType";
+			CommandBenchmarkStats.TimeUnitDependStats.getCSVHeader() + ";" + "CounterType";
 		}
 	}
 	

@@ -16,24 +16,17 @@
 
 package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.griddynamics.gridkit.coherence.patterns.benchmark.SimpleContext;
-import com.oracle.coherence.patterns.command.Command;
 import com.oracle.coherence.patterns.command.ExecutionEnvironment;
-import com.tangosol.io.pof.PofReader;
-import com.tangosol.io.pof.PofWriter;
-import com.tangosol.io.pof.PortableObject;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
 public class ReadCommand extends BenchmarkCommand
 {
-	private static final long serialVersionUID = 20100105L;
+	private static final long serialVersionUID = 2865554149213857147L;
 
 	public ReadCommand()
 	{
@@ -55,10 +48,11 @@ public class ReadCommand extends BenchmarkCommand
 	 */
 	@Override
 	public void execute(ExecutionEnvironment<SimpleContext> executionEnvironment)
-	{		
+	{
+		startExecution();
 		// Invoke execution method.
 		executionEnvironment.getContext();
 		// Save time information
-		BenchmarkSupport.reportExecution(reportBuffer, (new ExecMark(executionID, timeStamp)).receive());
+		finishExecution();
 	}
 }

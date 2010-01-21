@@ -18,6 +18,7 @@ package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
 
 import java.util.Map;
 
+import com.griddynamics.gridkit.coherence.patterns.benchmark.CommandExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.SimpleContext;
 import com.oracle.coherence.patterns.command.ExecutionEnvironment;
 
@@ -26,7 +27,7 @@ import com.oracle.coherence.patterns.command.ExecutionEnvironment;
  */
 public class EmptyCommand extends BenchmarkCommand
 {
-	private static final long serialVersionUID = 20100105L;
+	private static final long serialVersionUID = -521075662603194473L;
 
 	public EmptyCommand()
 	{
@@ -49,10 +50,11 @@ public class EmptyCommand extends BenchmarkCommand
 	@Override
 	public void execute(ExecutionEnvironment<SimpleContext> executionEnvironment)
 	{
+		startExecution();
 		// Invoke execution method.
 		execute();
 		// Save time information
-		BenchmarkSupport.reportExecution(reportBuffer, (new ExecMark(executionID, timeStamp)).receive());
+		finishExecution();
 	}
 
 	private void execute()

@@ -163,8 +163,8 @@ public class QueueBenchmarkDispatcher
 		
 		MessageBenchmarkStats.TimeUnitDependStats res = new MessageBenchmarkStats.TimeUnitDependStats();
 		
-		res.totalTime  = receiveTime.getMax() - sendTime.getMin();
-		res.throughput = n / (res.totalTime / TimeUnit.SECONDS.toMillis(1));
+		res.totalTime  = (receiveTime.getMax() - sendTime.getMin()) / TimeUnit.SECONDS.toMillis(1);
+		res.throughput = n / res.totalTime;
 		
 		res.averageLatency  = latency.getMean();
 		res.latencyVariance = latency.getVariance();

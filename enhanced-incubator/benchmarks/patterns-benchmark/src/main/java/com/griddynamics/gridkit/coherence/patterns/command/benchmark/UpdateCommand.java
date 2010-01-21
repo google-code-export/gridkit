@@ -50,12 +50,13 @@ public class UpdateCommand extends BenchmarkCommand
 	 */
 	@Override
 	public void execute(ExecutionEnvironment<SimpleContext> executionEnvironment)
-	{		
+	{
+		startExecution();
 		// Invoke execution method.
 		SimpleContext ctx = executionEnvironment.getContext();
 		ctx.touch();
 		executionEnvironment.setContext(ctx);
 		// Save time information
-		BenchmarkSupport.reportExecution(reportBuffer, (new ExecMark(executionID, timeStamp)).receive());
+		finishExecution();
 	}
 }
