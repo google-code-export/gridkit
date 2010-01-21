@@ -19,12 +19,9 @@ package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
@@ -76,17 +73,17 @@ public class CommandTestGroupBench
 		return res;
 	}
 	
-	public static Map<CommandBenchmarkParams, BenchmarkResults> executeBenchmark(PatternFacade facade, Collection<CommandBenchmarkParams> params)
+	public static Map<CommandBenchmarkParams, CommandBenchmarkStats> executeBenchmark(PatternFacade facade, Collection<CommandBenchmarkParams> params)
 	{
-		Map<CommandBenchmarkParams, BenchmarkResults> res = new LinkedHashMap<CommandBenchmarkParams, BenchmarkResults>();
+		Map<CommandBenchmarkParams, CommandBenchmarkStats> res = new LinkedHashMap<CommandBenchmarkParams, CommandBenchmarkStats>();
 		
 		for(CommandBenchmarkParams param : params)
 		{
 			TestHelper.sysout("Executing benchmark for " + param.toString());
 			
-			CommandBenchmark commandBenchmark = new CommandBenchmark(param, "command-benchmark");
+			CommandBenchmark commandBenchmark = new CommandBenchmark("command-benchmark");
 			
-			BenchmarkResults benchmarkResults = commandBenchmark.execute(facade);
+			CommandBenchmarkStats benchmarkResults = commandBenchmark.execute(facade, param);
 			
 			res.put(param, benchmarkResults);
 		}
@@ -96,19 +93,19 @@ public class CommandTestGroupBench
 
 	public static final double throughputScale = 0.7;
 	
-	static private Map<CommandBenchmarkParams, BenchmarkResults> makeBenchmarkExecutionStage(int start, PatternFacade facade,
+	static private Map<CommandBenchmarkParams, CommandBenchmarkStats> makeBenchmarkExecutionStage(int start, PatternFacade facade,
 																							 List<CommandBenchmarkParams> benchmarkParams,
 																							 List<CSVHelper.StatsCSVRow> resToCSV)
 	{
-		Map<CommandBenchmarkParams, BenchmarkResults> res = executeBenchmark(facade, benchmarkParams);
+		Map<CommandBenchmarkParams, CommandBenchmarkStats> res = executeBenchmark(facade, benchmarkParams);
 		
-		for (Map.Entry<CommandBenchmarkParams, BenchmarkResults> r : res.entrySet())
+		for (Map.Entry<CommandBenchmarkParams, CommandBenchmarkStats> r : res.entrySet())
 		{
 			++start;
 			
-			resToCSV.add(new CSVHelper.StatsCSVRow(start,r.getKey(),r.getValue().javaMsResults, CSVHelper.StatsCSVRow.TimeMeasuringType.JavaMS));
-			resToCSV.add(new CSVHelper.StatsCSVRow(start,r.getKey(),r.getValue().javaNsResults, CSVHelper.StatsCSVRow.TimeMeasuringType.JavaNS));
-			resToCSV.add(new CSVHelper.StatsCSVRow(start,r.getKey(),r.getValue().coherenceMsResults, CSVHelper.StatsCSVRow.TimeMeasuringType.CoherenceMS));
+			resToCSV.add(new CSVHelper.StatsCSVRow(start,r.getKey(),r.getValue().javaMsStats, CSVHelper.StatsCSVRow.TimeMeasuringType.JavaMS));
+			resToCSV.add(new CSVHelper.StatsCSVRow(start,r.getKey(),r.getValue().javaNsStats, CSVHelper.StatsCSVRow.TimeMeasuringType.JavaNS));
+			resToCSV.add(new CSVHelper.StatsCSVRow(start,r.getKey(),r.getValue().coherenceMsStats, CSVHelper.StatsCSVRow.TimeMeasuringType.CoherenceMS));
 		}
 		
 		return res;
@@ -135,19 +132,19 @@ public class CommandTestGroupBench
 		int i = 0;
 		
 		TestHelper.sysout("Benchmark. Stage I.");
-		Map<CommandBenchmarkParams, BenchmarkResults> res1 = makeBenchmarkExecutionStage(i,facade, benchmarkParams, resToCSV);
+		Map<CommandBenchmarkParams, CommandBenchmarkStats> res1 = makeBenchmarkExecutionStage(i,facade, benchmarkParams, resToCSV);
 		
 		Collections.shuffle(benchmarkParams);
 		i += benchmarkParams.size();
 		
 		TestHelper.sysout("Benchmark. Stage II.");
-		Map<CommandBenchmarkParams, BenchmarkResults> res2 = makeBenchmarkExecutionStage(i,facade, benchmarkParams, resToCSV);
+		Map<CommandBenchmarkParams, CommandBenchmarkStats> res2 = makeBenchmarkExecutionStage(i,facade, benchmarkParams, resToCSV);
 		
 		Collections.shuffle(benchmarkParams);
 		i += benchmarkParams.size();
 		
 		TestHelper.sysout("Benchmark. Stage III.");
-		Map<CommandBenchmarkParams, BenchmarkResults> res3 = makeBenchmarkExecutionStage(i,facade, benchmarkParams, resToCSV);
+		Map<CommandBenchmarkParams, CommandBenchmarkStats> res3 = makeBenchmarkExecutionStage(i,facade, benchmarkParams, resToCSV);
 		
 		//Calculating average throughput
 		
@@ -155,11 +152,11 @@ public class CommandTestGroupBench
 		
 		for (CommandBenchmarkParams p : benchmarkParams)
 		{
-			BenchmarkResults r1 = res1.get(p);
-			BenchmarkResults r2 = res2.get(p);
-			BenchmarkResults r3 = res3.get(p);
+			CommandBenchmarkStats r1 = res1.get(p);
+			CommandBenchmarkStats r2 = res2.get(p);
+			CommandBenchmarkStats r3 = res3.get(p);
 			
-			int opsPerSec = (int)((r1.javaMsResults.getThroughput() + r2.javaMsResults.getThroughput() + r3.javaMsResults.getThroughput()) / 3 * throughputScale);
+			int opsPerSec = (int)((r1.coherenceMsStats.throughput + r2.coherenceMsStats.throughput + r3.coherenceMsStats.throughput) / 3 * throughputScale);
 			
 			//TODO ask from type of type get 
 			
@@ -173,19 +170,19 @@ public class CommandTestGroupBench
 		i += benchmarkParams.size();
 		
 		TestHelper.sysout("Benchmark. Stage IV.");
-		Map<CommandBenchmarkParams, BenchmarkResults> res4 = makeBenchmarkExecutionStage(i, facade, speedLimitBenchmarkParams, resToCSV);
+		/* res4 = */ makeBenchmarkExecutionStage(i, facade, speedLimitBenchmarkParams, resToCSV);
 		
 		Collections.shuffle(speedLimitBenchmarkParams);
 		i += benchmarkParams.size();
 		
 		TestHelper.sysout("Benchmark. Stage V.");
-		Map<CommandBenchmarkParams, BenchmarkResults> res5 = makeBenchmarkExecutionStage(i, facade, speedLimitBenchmarkParams, resToCSV);
+		/* res5 = */  makeBenchmarkExecutionStage(i, facade, speedLimitBenchmarkParams, resToCSV);
 		
 		Collections.shuffle(speedLimitBenchmarkParams);
 		i += benchmarkParams.size();
 		
 		TestHelper.sysout("Benchmark. Stage VI.");
-		Map<CommandBenchmarkParams, BenchmarkResults> res6 = makeBenchmarkExecutionStage(i, facade, speedLimitBenchmarkParams, resToCSV);
+		/* res6 = */ makeBenchmarkExecutionStage(i, facade, speedLimitBenchmarkParams, resToCSV);
 		
 		CSVHelper.storeResultsInCSV(outfile, resToCSV);
 		

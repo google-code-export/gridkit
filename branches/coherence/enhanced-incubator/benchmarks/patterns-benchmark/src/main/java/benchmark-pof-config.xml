@@ -8,11 +8,6 @@
 		<include>coherence-messagingpattern-pof-config.xml</include>
 
         <user-type>
-            <type-id>1000</type-id>
-            <class-name>com.griddynamics.gridkit.coherence.patterns.command.benchmark.ExecMark</class-name>
-        </user-type>
-
-        <user-type>
             <type-id>1002</type-id>
             <class-name>com.griddynamics.gridkit.coherence.patterns.command.benchmark.EmptyCommand</class-name>
         </user-type>

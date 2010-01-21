@@ -26,6 +26,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
+import com.griddynamics.gridkit.coherence.patterns.benchmark.CommandExecutionMark;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.NamedCache;
 
@@ -52,17 +53,17 @@ public class BenchmarkSupport {
 					list.add(queue.take());
 					queue.drainTo(list);
 					
-					Map<String, Map<Long, ExecMark>> buf = new HashMap<String, Map<Long,ExecMark>>();
+					Map<String, Map<Long, CommandExecutionMark>> buf = new HashMap<String, Map<Long,CommandExecutionMark>>();
 					
 					for(ExecMarkEnvelop env: list) {
-						Map<Long, ExecMark> map = buf.get(env.cacheName);
+						Map<Long, CommandExecutionMark> map = buf.get(env.cacheName);
 						if (map == null) {
-							buf.put(env.cacheName, map = new HashMap<Long, ExecMark>());
+							buf.put(env.cacheName, map = new HashMap<Long, CommandExecutionMark>());
 						}
-						map.put(env.mark.execId, env.mark);
+						map.put(env.mark.getExecutionID(), env.mark);
 					}
 					
-					for(Map.Entry<String, Map<Long, ExecMark>> entry: buf.entrySet()) {
+					for(Map.Entry<String, Map<Long, CommandExecutionMark>> entry: buf.entrySet()) {
 						NamedCache cache = CacheFactory.getCache(entry.getKey());
 						cache.putAll(entry.getValue());
 					}
@@ -76,15 +77,15 @@ public class BenchmarkSupport {
 	
 	static class ExecMarkEnvelop {
 		String cacheName;
-		ExecMark mark;
+		CommandExecutionMark mark;
 		
-		public ExecMarkEnvelop(String cacheName, ExecMark mark) {
+		public ExecMarkEnvelop(String cacheName, CommandExecutionMark mark) {
 			this.cacheName = cacheName;
 			this.mark = mark;
 		}
 	}
 	
-	public static void reportExecution(String buffer, ExecMark mark) {
+	public static void reportExecution(String buffer, CommandExecutionMark mark) {
 		try {
 			ExecReportSupport.queue.put(new ExecMarkEnvelop(buffer, mark));
 		} catch (InterruptedException e) {
