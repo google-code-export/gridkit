@@ -43,7 +43,7 @@ public class CommandTestGroupBench
 		
 		int[] threadCount      = {1, 2, 5, 10, 20};
 		int[] contextCount     = {5, 10, 25, 50, 100};
-		int[] commandPerThread = {1000};
+		int[] commandPerThread = {10000};
 		
 		String[] taskTypes = {"update"};
 		/*-------------------------------------------*/
@@ -121,6 +121,9 @@ public class CommandTestGroupBench
 		TestHelper.setSysProp("tangosol.coherence.clusterport", "9001");
 		TestHelper.setSysProp("tangosol.coherence.distributed.localstorage", "false");
 		
+		TestHelper.setSysProp("outfile", "out" + System.currentTimeMillis());
+		String outfile = System.getProperty("outfile");
+		
 		final PatternFacade facade = PatternFacade.Helper.create();
 		
 		CommandTestBench.warmUp(facade);
@@ -135,11 +138,16 @@ public class CommandTestGroupBench
 		Map<CommandBenchmarkParams, BenchmarkResults> res1 = makeBenchmarkExecutionStage(i,facade, benchmarkParams, resToCSV);
 		
 		Collections.shuffle(benchmarkParams);
-		
 		i += benchmarkParams.size();
 		
 		TestHelper.sysout("Benchmark. Stage II.");
 		Map<CommandBenchmarkParams, BenchmarkResults> res2 = makeBenchmarkExecutionStage(i,facade, benchmarkParams, resToCSV);
+		
+		Collections.shuffle(benchmarkParams);
+		i += benchmarkParams.size();
+		
+		TestHelper.sysout("Benchmark. Stage III.");
+		Map<CommandBenchmarkParams, BenchmarkResults> res3 = makeBenchmarkExecutionStage(i,facade, benchmarkParams, resToCSV);
 		
 		//Calculating average throughput
 		
@@ -149,6 +157,9 @@ public class CommandTestGroupBench
 		{
 			BenchmarkResults r1 = res1.get(p);
 			BenchmarkResults r2 = res2.get(p);
+			BenchmarkResults r3 = res3.get(p);
+			
+			int opsPerSec = (int)((r1.javaMsResults.getThroughput() + r2.javaMsResults.getThroughput() + r3.javaMsResults.getThroughput()) / 3 * throughputScale);
 			
 			//TODO ask from type of type get 
 			
@@ -156,21 +167,28 @@ public class CommandTestGroupBench
 																	 p.getThreadCount(),
 																	 p.getCommandPerThread(),
 																	 p.getContextCount(),
-										  (int)((r1.javaMsResults.getThroughput() + r2.javaMsResults.getThroughput()) / 2 * throughputScale)));
+																	 opsPerSec));
 		}
-		
-		i += benchmarkParams.size();
-		
-		TestHelper.sysout("Benchmark. Stage III.");
-		Map<CommandBenchmarkParams, BenchmarkResults> res3 = makeBenchmarkExecutionStage(i, facade, speedLimitBenchmarkParams, resToCSV);
-		
-		Collections.shuffle(speedLimitBenchmarkParams);
 		
 		i += benchmarkParams.size();
 		
 		TestHelper.sysout("Benchmark. Stage IV.");
 		Map<CommandBenchmarkParams, BenchmarkResults> res4 = makeBenchmarkExecutionStage(i, facade, speedLimitBenchmarkParams, resToCSV);
 		
-		CSVHelper.storeResultsInCSV("./command_benchmark_result.csv", resToCSV);
+		Collections.shuffle(speedLimitBenchmarkParams);
+		i += benchmarkParams.size();
+		
+		TestHelper.sysout("Benchmark. Stage V.");
+		Map<CommandBenchmarkParams, BenchmarkResults> res5 = makeBenchmarkExecutionStage(i, facade, speedLimitBenchmarkParams, resToCSV);
+		
+		Collections.shuffle(speedLimitBenchmarkParams);
+		i += benchmarkParams.size();
+		
+		TestHelper.sysout("Benchmark. Stage VI.");
+		Map<CommandBenchmarkParams, BenchmarkResults> res6 = makeBenchmarkExecutionStage(i, facade, speedLimitBenchmarkParams, resToCSV);
+		
+		CSVHelper.storeResultsInCSV(outfile, resToCSV);
+		
+		System.exit(0);
 	}
 }
