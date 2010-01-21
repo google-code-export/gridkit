@@ -1,0 +1,219 @@
+package com.griddynamics.gridkit.coherence.patterns.message.benchmark.queue;
+
+import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelper.sysOut;
+
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import com.griddynamics.gridkit.coherence.patterns.benchmark.MessageExecutionMark;
+import com.griddynamics.gridkit.coherence.patterns.command.benchmark.SpeedLimit;
+import com.griddynamics.gridkit.coherence.patterns.message.benchmark.BenchmarkMessage;
+import com.griddynamics.gridkit.coherence.patterns.message.benchmark.PatternFacade;
+import com.oracle.coherence.common.identifiers.Identifier;
+import com.oracle.coherence.patterns.messaging.Subscriber;
+import com.oracle.coherence.patterns.messaging.exceptions.SubscriberInterruptedException;
+import com.tangosol.net.CacheFactory;
+import com.tangosol.net.Invocable;
+import com.tangosol.net.InvocationService;
+import com.tangosol.net.Member;
+
+public final class QueueBenchmarkWorker implements Invocable, Serializable
+{
+	private static final long serialVersionUID = -3397451888740243886L;
+	
+	private final QueueBenchmarkWorkerParams   params;
+	private final Map<Member,List<Identifier>> sendQueuesMap;
+	private final Map<Member,List<Identifier>> receiveQueuesMap;
+
+	public QueueBenchmarkWorker(QueueBenchmarkWorkerParams params,
+								Map<Member, List<Identifier>> sendQueuesMap,
+								Map<Member, List<Identifier>> receiveQueuesMap)
+	{
+		this.params           = params;
+		this.sendQueuesMap    = sendQueuesMap;
+		this.receiveQueuesMap = receiveQueuesMap;
+	}
+
+	private transient Member localMember;
+	
+	private transient PatternFacade facade;
+	
+	private transient Identifier[] sendQueues;
+	private transient Identifier[] receiveQueues;
+	
+	private transient ConcurrentLinkedQueue<MessageExecutionMark> workerResult;
+	
+	private transient SpeedLimit senderSpeedLimit;
+	private transient SpeedLimit receiverSpeedLimit;
+	
+	private transient CountDownLatch  startLatch;
+	private transient CountDownLatch finishLatch;
+	
+	private transient AtomicInteger messagesReceived;
+	
+	@Override
+	public void run()
+	{
+		try
+		{
+			facade = PatternFacade.DefaultFacade.getInstance();
+			
+			workerResult = new ConcurrentLinkedQueue<MessageExecutionMark>();
+			
+			localMember = CacheFactory.getCluster().getLocalMember();
+	
+			   sendQueues = sendQueuesMap.get(localMember).toArray(new Identifier[0]);
+			receiveQueues = receiveQueuesMap.get(localMember).toArray(new Identifier[0]);
+			
+			senderSpeedLimit = null;
+			if (params.getSenderSpeedLimit() != 0)
+			{
+				senderSpeedLimit = SpeedLimit.createSpeedLimit(params.getSenderSpeedLimit() / 10, params.getSenderSpeedLimit());
+			}
+			
+			receiverSpeedLimit = null;
+			if (params.getReceiverSpeedLimit() != 0)
+			{
+				receiverSpeedLimit = SpeedLimit.createSpeedLimit(params.getReceiverSpeedLimit() / 10, params.getReceiverSpeedLimit());
+			}
+			
+			//Latch for count sends and receives
+			startLatch  = new CountDownLatch(params.getSenderThreadsCount() + receiveQueues.length * params.getReceiverThreadsCount());
+			finishLatch = new CountDownLatch(params.getSenderThreadsCount() + 1);
+			
+			ExecutorService sendService    = Executors.newFixedThreadPool(params.getSenderThreadsCount());
+			ExecutorService receiveService = Executors.newFixedThreadPool(receiveQueues.length * params.getReceiverThreadsCount());
+			
+			for(int i = 0; i < params.getSenderThreadsCount(); ++i)
+			{
+				sendService.submit(new Sender(i));
+			}
+			
+			messagesReceived = new AtomicInteger(0);
+			
+			for (int i = 0; i < receiveQueues.length; ++i)
+			{
+				for (int t = 0; t < params.getReceiverThreadsCount(); ++t)
+					receiveService.submit(new Receiver(i));
+			}
+			
+			finishLatch.await();
+			
+			sendService.shutdown();
+			receiveService.shutdownNow();
+		}
+		catch (Throwable t)
+		{
+			sysOut("-------- Exception on QueueBenchmarkWorker.run() --------");
+			t.printStackTrace();
+			System.exit(1);
+		}
+	}
+	
+	@Override
+	public Object getResult()
+	{
+		return workerResult.toArray(new MessageExecutionMark[0]);
+	}
+	
+	private final class Sender implements Callable<Void>
+	{
+		private final long id;
+		
+		public Sender(long id) { this.id = id * 1000000; }
+		
+		@Override
+		public Void call() throws Exception
+		{
+			try
+			{
+				startLatch.countDown();
+				startLatch.await();
+				
+				Random rnd = new Random(System.currentTimeMillis());
+				
+				int messagesCount = params.getMessagesPerThread();
+				
+				while (messagesCount-- > 0)
+				{
+					if (senderSpeedLimit != null)
+						senderSpeedLimit.accure();
+					
+					facade.publishMessage(sendQueues[rnd.nextInt(sendQueues.length)], (new BenchmarkMessage(id + messagesCount)).send());
+				}
+				
+				finishLatch.countDown();
+			}
+			catch (Throwable t)
+			{
+				sysOut("-------- Exception on QueueBenchmarkWorker.Sender.call() --------");
+				t.printStackTrace();
+				System.exit(1);
+			}
+			
+			return null;
+		}
+	}
+	
+	private final class Receiver implements Callable<Void>
+	{
+		private final Subscriber subscriber;
+		private final int queueID;
+		
+		public Receiver(int queueID)
+		{
+			this.queueID    = queueID;
+			this.subscriber = facade.subscribe(receiveQueues[this.queueID]); 
+		}
+
+		@Override
+		public Void call() throws Exception
+		{
+			try
+			{
+				startLatch.countDown();
+				startLatch.await();
+
+				while (true)
+				{
+					if (senderSpeedLimit != null)
+						receiverSpeedLimit.accure();
+					
+					workerResult.add(((BenchmarkMessage)subscriber.getMessage()).receive());
+
+					if (messagesReceived.incrementAndGet() == params.getMessagesPerThread() * params.getSenderThreadsCount())
+					{
+						finishLatch.countDown();
+						return null;
+					}
+				}
+			}
+			catch (SubscriberInterruptedException allMessagesReceived)
+			{
+				sysOut("++++++++ Exiting on QueueBenchmarkWorker.Receiver.call(). All messages received. ++++++++");
+			}
+			catch (Throwable t)
+			{
+				sysOut("-------- Exception on QueueBenchmarkWorker.Receiver.call() --------");
+				t.printStackTrace();
+				System.exit(1);
+			}
+			
+			return null;
+		}
+	}
+	
+	@Override
+	public void init(InvocationService paramInvocationService)
+	{
+		
+	}
+}

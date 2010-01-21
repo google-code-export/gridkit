@@ -1,10 +1,13 @@
 package com.griddynamics.gridkit.coherence.patterns.functor.benchmark;
 
-public class FunctorBenchmarkStats
+import com.griddynamics.gridkit.coherence.patterns.benchmark.stats.InvocationServiceStats;
+
+public class FunctorBenchmarkStats extends InvocationServiceStats
 {
-	protected int membersCompleated;
-	protected int membersFailed;
-	protected int membersLeft;
+	public FunctorBenchmarkStats()
+	{
+		coherenceMsStats  = javaNsStats   = javaMsStats = null;
+	}
 	
 	static public class TimeUnitDependStats
 	{
@@ -42,43 +45,6 @@ public class FunctorBenchmarkStats
 	protected TimeUnitDependStats      javaMsStats;
 	protected TimeUnitDependStats      javaNsStats;
 	protected TimeUnitDependStats coherenceMsStats;
-	
-	public FunctorBenchmarkStats()
-	{
-		membersCompleated = membersFailed = membersLeft = 0;
-		coherenceMsStats  = javaNsStats   = javaMsStats = null;
-	}
-	
-	public int getMembersCompleated()
-	{
-		return membersCompleated;
-	}
-	
-	public void setMembersCompleated(int membersCompleated)
-	{
-		this.membersCompleated = membersCompleated;
-	}
-	
-	public int getMembersFailed()
-	{
-		return membersFailed;
-	}
-	
-	public void setMembersFailed(int membersFailed)
-	{
-		this.membersFailed = membersFailed;
-	}
-	
-	public int getMembersLeft()
-	{
-		return membersLeft;
-	}
-	
-	public void setMembersLeft(int membersLeft)
-	{
-		this.membersLeft = membersLeft;
-	}
-
 
 	public TimeUnitDependStats getJavaMsStats()
 	{
@@ -108,13 +74,5 @@ public class FunctorBenchmarkStats
 	public void setCoherenceMsStats(TimeUnitDependStats coherenceMsStats)
 	{
 		this.coherenceMsStats = coherenceMsStats;
-	}
-
-	@Override
-	public String toString()
-	{
-		return "FunctorBenchmarkStats [membersCompleated=" + membersCompleated
-				+ ", membersFailed=" + membersFailed + ", membersLeft="
-				+ membersLeft + "]";
 	}
 }

@@ -4,7 +4,8 @@
 <cache-config>
 	<introduce-cache-config file="coherence-commandpattern-pof-cache-config.xml"/>
 	<introduce-cache-config file="coherence-functorpattern-pof-cache-config.xml"/>
-
+	<introduce-cache-config file="coherence-messagingpattern-pof-cache-config.xml"/>
+	
 	<caching-scheme-mapping>
 
 		<cache-mapping>

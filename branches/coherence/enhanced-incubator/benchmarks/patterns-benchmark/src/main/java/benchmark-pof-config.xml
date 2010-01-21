@@ -5,6 +5,7 @@
         <include>coherence-common-pof-config.xml</include>
         <include>coherence-commandpattern-pof-config.xml</include>
 		<include>coherence-functorpattern-pof-config.xml</include>
+		<include>coherence-messagingpattern-pof-config.xml</include>
 
         <user-type>
             <type-id>1000</type-id>
@@ -71,5 +72,14 @@
         	<class-name>com.griddynamics.gridkit.coherence.patterns.functor.benchmark.TouchFunctor</class-name>
         </user-type>
         
+        <user-type>
+        	<type-id>1013</type-id>
+        	<class-name>com.griddynamics.gridkit.coherence.patterns.benchmark.MessageExecutionMark</class-name>
+        </user-type>
+        
+        <user-type>
+        	<type-id>1014</type-id>
+        	<class-name>com.griddynamics.gridkit.coherence.patterns.message.benchmark.BenchmarkMessage</class-name>
+        </user-type>
     </user-type-list>
 </pof-config>

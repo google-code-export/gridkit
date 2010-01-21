@@ -3,6 +3,7 @@ package com.griddynamics.gridkit.coherence.patterns.functor.benchmark;
 import java.util.concurrent.Future;
 
 import com.griddynamics.gridkit.coherence.patterns.benchmark.CommandExecutionMark;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.Names;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.SimpleContext;
 import com.oracle.coherence.common.identifiers.Identifier;
 import com.oracle.coherence.patterns.command.ContextsManager;

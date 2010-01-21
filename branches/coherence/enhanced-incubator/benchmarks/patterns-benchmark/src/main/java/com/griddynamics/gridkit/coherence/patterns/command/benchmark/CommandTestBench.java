@@ -14,7 +14,7 @@ public class CommandTestBench
 	{
 		CommandBenchmarkParams benchmarkParams = new CommandBenchmarkParams("empty", // commandType
 													 							  4, // threadCount
-													 						   1000, // commandPerThread,
+													 						   5000, // commandPerThread,
 													 						   	  4, // contextCount
 													 						   	  0);// opsPerSec
 		
