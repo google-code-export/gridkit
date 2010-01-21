@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.griddynamics.gridkit.coherence.patterns.benchmark.SimpleContext;
 import com.oracle.coherence.common.identifiers.Identifier;
 import com.oracle.coherence.patterns.command.Command;
 import com.oracle.coherence.patterns.command.ExecutionEnvironment;
@@ -31,7 +32,7 @@ import com.tangosol.io.pof.PortableObject;
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class CascadeCommand implements Command<SimpleTestContext>, PortableObject {
+public class CascadeCommand implements Command<SimpleContext>, PortableObject {
 
 	private static final long serialVersionUID = 20100105L;
 	
@@ -63,9 +64,9 @@ public class CascadeCommand implements Command<SimpleTestContext>, PortableObjec
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void execute(ExecutionEnvironment<SimpleTestContext> executionEnvironment) {		
+	public void execute(ExecutionEnvironment<SimpleContext> executionEnvironment) {		
 		// Invoke execution method.
-		SimpleTestContext ctx = executionEnvironment.getContext();
+		SimpleContext ctx = executionEnvironment.getContext();
 		ctx.touch();
 		executionEnvironment.setContext(ctx);
 		// Save time information

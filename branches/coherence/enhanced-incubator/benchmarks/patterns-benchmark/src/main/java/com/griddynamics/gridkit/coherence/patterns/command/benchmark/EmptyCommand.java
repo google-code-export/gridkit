@@ -18,6 +18,7 @@ package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
 
 import java.util.Map;
 
+import com.griddynamics.gridkit.coherence.patterns.benchmark.SimpleContext;
 import com.oracle.coherence.patterns.command.ExecutionEnvironment;
 
 /**
@@ -46,12 +47,12 @@ public class EmptyCommand extends BenchmarkCommand
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void execute(ExecutionEnvironment<SimpleTestContext> executionEnvironment)
+	public void execute(ExecutionEnvironment<SimpleContext> executionEnvironment)
 	{
 		// Invoke execution method.
 		execute();
 		// Save time information
-		BenchmarkSupport.reportExecution(reportBuffer, new ExecMark(execId, timeStamp));
+		BenchmarkSupport.reportExecution(reportBuffer, (new ExecMark(executionID, timeStamp)).receive());
 	}
 
 	private void execute()

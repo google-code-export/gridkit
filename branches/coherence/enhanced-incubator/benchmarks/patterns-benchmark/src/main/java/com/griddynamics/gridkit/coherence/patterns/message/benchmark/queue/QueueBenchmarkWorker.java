@@ -14,7 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.griddynamics.gridkit.coherence.patterns.benchmark.MessageExecutionMark;
-import com.griddynamics.gridkit.coherence.patterns.command.benchmark.SpeedLimit;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.SpeedLimit;
 import com.griddynamics.gridkit.coherence.patterns.message.benchmark.BenchmarkMessage;
 import com.griddynamics.gridkit.coherence.patterns.message.benchmark.PatternFacade;
 import com.oracle.coherence.common.identifiers.Identifier;

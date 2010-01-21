@@ -6,27 +6,26 @@ public final class CommandBenchmarkParams implements Serializable
 {
 	private static final long serialVersionUID = -680095570543015774L;
 
-	private final String taskType;
+	private final String command;
 	
 	private final int threadCount;
 	private final int commandPerThread;
 	private final int contextCount;
 	private final int opsPerSec;
 	
-	public CommandBenchmarkParams(String taskType, int threadCount,  int commandPerThread,
-												   int contextCount, int opsPerSec)
+	public CommandBenchmarkParams(String command, int threadCount,  int commandPerThread,
+												  int contextCount, int opsPerSec)
 	{
-		this.taskType         = taskType;
-		
+		this.command          = command;
 		this.threadCount      = threadCount;
 		this.commandPerThread = commandPerThread;
 		this.contextCount     = contextCount;
 		this.opsPerSec        = opsPerSec;
 	}
 
-	public String getTaskType()
+	public String getCommand()
 	{
-		return taskType;
+		return command;
 	}
 
 	public int getThreadCount()
@@ -58,7 +57,7 @@ public final class CommandBenchmarkParams implements Serializable
 		result = prime * result + contextCount;
 		result = prime * result + opsPerSec;
 		result = prime * result
-				+ ((taskType == null) ? 0 : taskType.hashCode());
+				+ ((command == null) ? 0 : command.hashCode());
 		result = prime * result + threadCount;
 		return result;
 	}
@@ -85,11 +84,11 @@ public final class CommandBenchmarkParams implements Serializable
 		if (opsPerSec != other.opsPerSec) {
 			return false;
 		}
-		if (taskType == null) {
-			if (other.taskType != null) {
+		if (command == null) {
+			if (other.command != null) {
 				return false;
 			}
-		} else if (!taskType.equals(other.taskType)) {
+		} else if (!command.equals(other.command)) {
 			return false;
 		}
 		if (threadCount != other.threadCount) {
@@ -103,21 +102,21 @@ public final class CommandBenchmarkParams implements Serializable
 	{
 		return "CommandBenchmarkParams [commandPerThread=" + commandPerThread
 				+ ", contextCount=" + contextCount + ", opsPerSec=" + opsPerSec
-				+ ", taskType=" + taskType + ", threadCount=" + threadCount
+				+ ", command=" + command + ", threadCount=" + threadCount
 				+ "]";
 	}
 	
 	public String toCSVRow()
 	{
-		return taskType + ";" +
-			threadCount + ";" +
-	   commandPerThread + ";" +
-	   	   contextCount + ";" + 
-	   		  opsPerSec;
+		return command + ";" +
+		   threadCount + ";" +
+	  commandPerThread + ";" +
+	   	  contextCount + ";" + 
+	   		 opsPerSec;
 	}
 	
 	public static String getCSVHeader()
 	{
-		return "TaskType;ThreadCount;CommandPerThread;ContextCount;OpsPerSec";
+		return "Command;ThreadCount;CommandPerThread;ContextCount;OpsPerSec";
 	}
 }

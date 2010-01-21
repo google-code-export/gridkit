@@ -5,9 +5,9 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.griddynamics.gridkit.coherence.patterns.command.benchmark.TaskType;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.SimpleContext;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.SpeedLimit;
 import com.oracle.coherence.common.identifiers.Identifier;
-import com.oracle.coherence.patterns.command.Command;
 import com.tangosol.net.CacheFactory;
 
 public class CommandBenchmark
@@ -38,19 +38,18 @@ public class CommandBenchmark
 		
 		CacheFactory.getCache(reportBuffer).clear();
 		
-		final TaskType taskType = getTaskTypeByName(params.getTaskType());
+		final CommandFactory commandFactory = getCommandFactory(params.getCommand());
 		
 		SpeedLimit sl = null;
 		if (params.getOpsPerSec() > 0) 
 		{
-			//TODO ask about precision
-			sl = SpeedLimit.createSpeedLimit(params.getOpsPerSec() / 10, params.getOpsPerSec());
+			sl = SpeedLimit.createSpeedLimit(params.getOpsPerSec());
 		}
 		final SpeedLimit speedLimit = sl;
 		
 		for(int i = 0; i != params.getContextCount(); ++i)
 		{
-			contexts[i] = facade.registerContext("ctx-" + i, new SimpleTestContext("ctx-" + i));
+			contexts[i] = facade.registerContext("ctx-" + i, new SimpleContext("ctx-" + i));
 		}
 		
 		ExecutorService service = params.getThreadCount() == 1 ? Executors.newSingleThreadExecutor() 
@@ -72,9 +71,8 @@ public class CommandBenchmark
 						{
 							speedLimit.accure();
 						}
-						
-						Command<SimpleTestContext> task = taskType.createCommand(id, reportBuffer);
-						facade.submit(ctx, task);
+
+						facade.submit(ctx, commandFactory.createCommand(id, reportBuffer).send());
 					}
 				};
 				
@@ -83,28 +81,26 @@ public class CommandBenchmark
 		}
 
 		@SuppressWarnings("unchecked")
-		Map<Long, ExecMark> stats = BenchmarkSupport.waitForBuffer(reportBuffer, params.getThreadCount() * params.getCommandPerThread() * taskType.getMarksPerTask());
+		Map<Long, ExecMark> stats = BenchmarkSupport.waitForBuffer(reportBuffer, params.getThreadCount() * params.getCommandPerThread() * commandFactory.getMarksPerCommand());
 		
 		return stats;
 	}
 	
-	public static TaskType getTaskTypeByName(String name)
+	public static CommandFactory getCommandFactory(String name)
 	{
-		String cmdType = name.toLowerCase();
-		
-		if ("empty".equals(cmdType))
+		if ("empty".equalsIgnoreCase(name))
 		{
-			return new TaskType.EmptyTaskType();
+			return new CommandFactory.EmptyCommandFactory();
 		}
-		else if ("read".equals(cmdType))
+		else if ("read".equalsIgnoreCase(name))
 		{
-			return new TaskType.ReadTaskType();
+			return new CommandFactory.ReadCommandFactory();
 		}
-		else if ("update".equals(cmdType))
+		else if ("update".equalsIgnoreCase(name))
 		{
-			return new TaskType.UpdateTaskType();
+			return new CommandFactory.UpdateCommandFactory();
 		}
 		else
-			throw new RuntimeException("Unknown command type '" + cmdType + "'");
+			throw new RuntimeException("Unknown command type '" + name + "'");
 	}
 }

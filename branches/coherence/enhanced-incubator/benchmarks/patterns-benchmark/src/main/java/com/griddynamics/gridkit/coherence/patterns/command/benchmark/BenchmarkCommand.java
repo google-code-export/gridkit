@@ -5,39 +5,46 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.griddynamics.gridkit.coherence.patterns.benchmark.SimpleContext;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.TimeStamp;
 import com.oracle.coherence.patterns.command.Command;
 import com.tangosol.io.pof.PofReader;
 import com.tangosol.io.pof.PofWriter;
 import com.tangosol.io.pof.PortableObject;
 
-public abstract class BenchmarkCommand implements Command<SimpleTestContext>, PortableObject
+public abstract class BenchmarkCommand implements Command<SimpleContext>, PortableObject
 {
-	protected long      execId;
+	protected long      executionID;
 	protected String    reportBuffer;
 	protected TimeStamp timeStamp;
 	protected String    taskHeader = "some random text to increase task size";
-	protected Map<?, ?> taskPayload = Collections.EMPTY_MAP;
+	protected Map<?, ?> payload    = Collections.EMPTY_MAP;
 	
 	public BenchmarkCommand()
 	{
 		// for POF
 	}
 
-	public BenchmarkCommand(long execId, String reportBuffer, Map<?, ?> payload)
+	public BenchmarkCommand(long executionID, String reportBuffer, Map<?, ?> payload)
 	{
-		this(execId, reportBuffer);
-		this.taskPayload = payload;
+		this(executionID, reportBuffer);
+		this.payload = payload;
 	}
 	
-	public BenchmarkCommand(long execId, String reportBuffer)
+	public BenchmarkCommand(long executionID, String reportBuffer)
 	{
-		this.execId       = execId;
+		this.executionID  = executionID;
 		this.reportBuffer = reportBuffer;
-		this.timeStamp    = TimeStamp.getCurrentTimeStamp();
+		this.timeStamp    = null;
 	}
 	
-	protected int POFNextParam()
+	public BenchmarkCommand send()
+	{
+		this.timeStamp = TimeStamp.getCurrentTimeStamp();
+		return this;
+	}
+	
+	protected int getNextPOFParam()
 	{
 		return 5;
 	}
@@ -46,21 +53,21 @@ public abstract class BenchmarkCommand implements Command<SimpleTestContext>, Po
 	@SuppressWarnings("unchecked")
 	public void readExternal(PofReader in) throws IOException {
 		int propId = 0;
-		execId = in.readLong(propId++);
-		timeStamp = (TimeStamp)in.readObject(propId++);
+		executionID  = in.readLong(propId++);
+		timeStamp    = (TimeStamp)in.readObject(propId++);
 		reportBuffer = in.readString(propId++);
-		taskHeader = in.readString(propId++);
-		taskPayload = in.readMap(propId++, new HashMap());
+		taskHeader   = in.readString(propId++);
+		payload      = in.readMap(propId++, new HashMap());
 	}
 
 	@Override
 	public void writeExternal(PofWriter out) throws IOException
 	{
 		int propId = 0;
-		out.writeLong(propId++, execId);
+		out.writeLong(propId++, executionID);
 		out.writeObject(propId++, timeStamp);
 		out.writeString(propId++, reportBuffer);
 		out.writeString(propId++, taskHeader);
-		out.writeMap(propId++, taskPayload);
+		out.writeMap(propId++, payload);
 	}
 }

@@ -9,11 +9,11 @@ import com.tangosol.io.pof.PofWriter;
 import com.tangosol.io.pof.PortableObject;
 
 //TODO merge with other ExecutionMarks
-public final class MessageExecutionMark implements Serializable, PortableObject
+public class MessageExecutionMark implements Serializable, PortableObject
 {
 	private static final long serialVersionUID = -5927816782287453309L;
 
-	protected long messageID;
+	protected long executionID;
 	
 	protected TimeStamp    sendTS;
 	protected TimeStamp receiveTS;
@@ -23,11 +23,11 @@ public final class MessageExecutionMark implements Serializable, PortableObject
 		// for POF
 	}
 	
-	public MessageExecutionMark(long messageID, TimeStamp sendTS, TimeStamp receiveTS)
+	public MessageExecutionMark(long executionID, TimeStamp sendTS, TimeStamp receiveTS)
 	{
-		this.messageID = messageID;
-		this.sendTS    = sendTS;
-		this.receiveTS = receiveTS;
+		this.executionID = executionID;
+		this.sendTS      = sendTS;
+		this.receiveTS   = receiveTS;
 	}
 	
 	public TimeStamp getSendTS()
@@ -40,6 +40,11 @@ public final class MessageExecutionMark implements Serializable, PortableObject
 		return receiveTS;
 	}
 	
+	public long getExecutionID()
+	{
+		return executionID;
+	}
+	
 	protected int getNextPOFParam()
 	{
 		return 3;
@@ -48,17 +53,17 @@ public final class MessageExecutionMark implements Serializable, PortableObject
 	@Override
 	public void readExternal(PofReader in) throws IOException
 	{
-		int propID     = 0;
-		this.messageID = in.readLong(propID++);
-		this.sendTS    = (TimeStamp)in.readObject(propID++);
-		this.receiveTS = (TimeStamp)in.readObject(propID++);
+		int propID       = 0;
+		this.executionID = in.readLong(propID++);
+		this.sendTS      = (TimeStamp)in.readObject(propID++);
+		this.receiveTS   = (TimeStamp)in.readObject(propID++);
 	}
 
 	@Override
 	public void writeExternal(PofWriter out) throws IOException
 	{
 		int propID = 0;
-		out.writeLong(propID++,   messageID);
+		out.writeLong(propID++,   executionID);
 		out.writeObject(propID++, sendTS);
 		out.writeObject(propID++, receiveTS);
 	}

@@ -1,5 +1,7 @@
 package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
 
+import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelper.setCoherenceConfig;
+
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
@@ -33,9 +35,7 @@ public class CommandTestBench
     
     public void start(String[] args)
     {
-        TestHelper.setSysProp("tangosol.pof.config", "benchmark-pof-config.xml");
-        TestHelper.setSysProp("tangosol.coherence.cacheconfig", "benchmark-pof-cache-config.xml");
-        TestHelper.setSysProp("tangosol.coherence.clusterport", "9001");
+    	setCoherenceConfig();
         TestHelper.setSysProp("tangosol.coherence.distributed.localstorage", "false");
         
         TestHelper.setSysProp("benchmark.threadCount", "4");
@@ -55,7 +55,7 @@ public class CommandTestBench
         
         PatternFacade facade = PatternFacade.Helper.create();
 
-        warmUp(facade);
+        //warmUp(facade);
         
         TestHelper.sysout("Starting test ...");
         TestHelper.sysout("Thread count: %d", params.getThreadCount());
@@ -79,5 +79,7 @@ public class CommandTestBench
         TestHelper.sysout("----------------Coherenc MS statistics");
         StatHelper.reportStats(benchmarkResults.coherenceMsResults);
 
+        //TODO add clean up
+        System.exit(0);
     }
 }
