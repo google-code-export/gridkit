@@ -18,7 +18,7 @@ public abstract class BenchmarkFunctor implements Functor<SimpleContext, Command
 
 	protected long      executionID;
 	protected String    taskHeader = "some random text to increase functor size";
-	protected TimeStamp sumbitTS;
+	protected TimeStamp sendTS;
 	
 	public BenchmarkFunctor()
 	{
@@ -28,18 +28,18 @@ public abstract class BenchmarkFunctor implements Functor<SimpleContext, Command
 	public BenchmarkFunctor(long executionID)
 	{
 		this.executionID = executionID;
-		this.sumbitTS    = null;
+		this.sendTS    = null;
 	}
 	
-	public BenchmarkFunctor submit()
+	public BenchmarkFunctor send()
 	{
-		sumbitTS = TimeStamp.getCurrentTimeStamp();
+		sendTS = TimeStamp.getCurrentTimeStamp();
 		return this;
 	}
 
 	protected final CommandExecutionMark startExecution()
 	{
-		CommandExecutionMark res = new CommandExecutionMark(executionID, sumbitTS);
+		CommandExecutionMark res = new CommandExecutionMark(executionID, sendTS);
 		res.execute();
 		return res;
 	}
@@ -54,7 +54,7 @@ public abstract class BenchmarkFunctor implements Functor<SimpleContext, Command
 	{
 		int propID = 0;
 		executionID = in.readLong(propID++);
-		sumbitTS    = (TimeStamp)in.readObject(propID++);
+		sendTS      = (TimeStamp)in.readObject(propID++);
 		taskHeader  = in.readString(propID++);
 	}
 
@@ -63,7 +63,7 @@ public abstract class BenchmarkFunctor implements Functor<SimpleContext, Command
 	{
 		int propID = 0;
 		out.writeLong(propID++, executionID);
-		out.writeObject(propID++, sumbitTS);
+		out.writeObject(propID++, sendTS);
 		out.writeString(propID++, taskHeader);
 	}
 }

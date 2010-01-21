@@ -20,8 +20,8 @@ public class FunctorExecutionMark extends CommandExecutionMark
 	{
 		this.executionID = commandMark.executionID;
 		
-		this.submitTS  = commandMark.submitTS;
-		this.executeTS = commandMark.executeTS;
+		this.sendTS    = commandMark.sendTS;
+		this.receiveTS = commandMark.receiveTS;
 		this.finishTS  = commandMark.finishTS;
 		this.returnTS  = null;
 	}

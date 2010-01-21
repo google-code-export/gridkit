@@ -1,5 +1,7 @@
 package com.griddynamics.gridkit.coherence.patterns.functor.benchmark;
 
+import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelper.sysOut;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,38 +35,48 @@ public class FunctorBenchmarkDispatcher
 	public FunctorBenchmarkStats execute(PatternFacade facade,
 										 Map<Member,FunctorBenchmarkWorkerParams> workers)
 	{
-		synchronized (memorySynchronizer)
-		{
-			latch            = new CountDownLatch(workers.size());
-			dispatcherResult = new FunctorBenchmarkStats();
-			workersResult    = new ArrayList<List<FunctorExecutionMark>>();
-		}
-		
-		for(int i=0; i < contexts.length; ++i)
-		{
-			contexts[i] = facade.registerContext("ctx-" + i, new SimpleContext("ctx-" + i));
-		}
-		
-		InvocationService invocationService = facade.getInvocationService();
-		
-		for(Map.Entry<Member, FunctorBenchmarkWorkerParams> worker : workers.entrySet())
-		{
-			invocationService.execute(new FunctorBenchmarkWorker(worker.getValue(), contexts),
-									  Collections.singleton(worker.getKey()),
-									  new FunctorBenchmarkObserver());
-		}
-		
 		try
 		{
-			latch.await();
+			synchronized (memorySynchronizer)
+			{
+				latch            = new CountDownLatch(workers.size());
+				dispatcherResult = new FunctorBenchmarkStats();
+				workersResult    = new ArrayList<List<FunctorExecutionMark>>();
+			}
+			
+			for(int i=0; i < contexts.length; ++i)
+			{
+				contexts[i] = facade.registerContext("ctx-" + i, new SimpleContext("ctx-" + i));
+			}
+			
+			InvocationService invocationService = facade.getInvocationService();
+			
+			for(Map.Entry<Member, FunctorBenchmarkWorkerParams> worker : workers.entrySet())
+			{
+				invocationService.execute(new FunctorBenchmarkWorker(worker.getValue(), contexts),
+										  Collections.singleton(worker.getKey()),
+										  new FunctorBenchmarkObserver());
+			}
+			
+			try
+			{
+				latch.await();
+			}
+			catch (InterruptedException e)
+			{
+				throw new RuntimeException("FunctorBenchmarkDispatcher has been interrupted");
+			}
+			
+			//Guaranteed by latch.await()
+			calculateExecutionStatistics();
 		}
-		catch (InterruptedException e)
+		catch (Throwable t)
 		{
-			throw new RuntimeException("FunctorBenchmarkDispatcher has been interrupted");
+			sysOut("-------- Exception on FunctorBenchmarkStats.execute(...) --------");
+			t.printStackTrace();
+			System.exit(1);
 		}
 		
-		//Guaranteed by latch.await()
-		calculateExecutionStatistics();
 		return dispatcherResult;
 	}
 	
@@ -134,11 +146,11 @@ public class FunctorBenchmarkDispatcher
 			{
 				n++;
 				
-				startTime.add(te.getSubmitTime(m));
+				startTime.add(te.getSendTime(m));
 				returnTime.add(te.getReturnTime(m));
 				
-				sumbitLatency.add(te.getExecutionTime(m) - te.getSubmitTime(m));
-				returnLatency.add(te.getReturnTime(m) - te.getSubmitTime(m));
+				sumbitLatency.add(te.getReceiveTime(m) - te.getSendTime(m));
+				returnLatency.add(te.getReturnTime(m) - te.getSendTime(m));
 			}
 		}
 		

@@ -27,7 +27,13 @@ public class ExecMark implements Serializable, PortableObject
 	{
 		this.execId   = execId;
 		this.submitTS = submitTS;
-		this.execTS   = TimeStamp.getCurrentTimeStamp();
+		this.execTS   = null;
+	}
+	
+	public ExecMark receive()
+	{
+		this.execTS = TimeStamp.getCurrentTimeStamp();
+		return this;
 	}
 
 	@Override

@@ -163,7 +163,7 @@ public class CommandTestGroupBench
 			
 			//TODO ask from type of type get 
 			
-			speedLimitBenchmarkParams.add(new CommandBenchmarkParams(p.getTaskType(),
+			speedLimitBenchmarkParams.add(new CommandBenchmarkParams(p.getCommand(),
 																	 p.getThreadCount(),
 																	 p.getCommandPerThread(),
 																	 p.getContextCount(),

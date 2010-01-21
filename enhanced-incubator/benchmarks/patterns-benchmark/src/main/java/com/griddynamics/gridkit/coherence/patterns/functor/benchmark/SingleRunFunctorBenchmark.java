@@ -50,10 +50,11 @@ public class SingleRunFunctorBenchmark
 		
 		setSysProp("benchmark.functor.threadCount",  "10");
 		setSysProp("benchmark.functor.contextCount", "100");
-		setSysProp("benchmark.functor.memberCount",  "2");
+		setSysProp("benchmark.functor.memberCount",  "1");
 		
 		setSysProp("benchmark.functor.functor"            , "touch");
-		setSysProp("benchmark.functor.opsPerSec"          , "200");
+		//TODO configure invocation service timeout
+		setSysProp("benchmark.functor.opsPerSec"          , "500");
         setSysProp("benchmark.functor.invocationPerThread", "1000");
         
         int threadCount = Integer.getInteger("benchmark.functor.threadCount");
@@ -76,7 +77,7 @@ public class SingleRunFunctorBenchmark
 			throw new RuntimeException("Not enought cluster members to start SingleRunFunctorBenchmark");
 		}
 		
-		warmUp(facade, members);
+		//warmUp(facade, members);
 		
 		int threadCountStep = threadCount / memberCount;
 		int threadCountAdd  = threadCount % memberCount;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
+package com.griddynamics.gridkit.coherence.patterns.benchmark;
 
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +29,11 @@ public class SpeedLimit {
 		semaphore = new Semaphore(permits);
 		this.premits = permits;
 		delay = (1d * TimeUnit.SECONDS.toNanos(1)) / opsPerSec; 
+	}
+	
+	public static SpeedLimit createSpeedLimit(int opsPerSec)
+	{
+		return createSpeedLimit(opsPerSec / 10, opsPerSec);
 	}
 	
 	public static SpeedLimit createSpeedLimit(int permits, int opsPerSec)
