@@ -20,6 +20,8 @@ public abstract class BenchmarkFunctor implements Functor<SimpleContext, Command
 	protected String    taskHeader = "some random text to increase functor size";
 	protected TimeStamp sendTS;
 	
+	protected transient CommandExecutionMark executionMark;
+	
 	public BenchmarkFunctor()
 	{
 		// For POF
@@ -37,11 +39,16 @@ public abstract class BenchmarkFunctor implements Functor<SimpleContext, Command
 		return this;
 	}
 
-	protected final CommandExecutionMark startExecution()
+	protected final void startExecution()
 	{
-		CommandExecutionMark res = new CommandExecutionMark(executionID, sendTS);
-		res.execute();
-		return res;
+		executionMark = new CommandExecutionMark(executionID, sendTS);
+		executionMark.execute();
+	}
+	
+	protected final CommandExecutionMark finishExecution()
+	{
+		executionMark.finish();
+		return executionMark;
 	}
 	
 	protected int getNextPOFParam()

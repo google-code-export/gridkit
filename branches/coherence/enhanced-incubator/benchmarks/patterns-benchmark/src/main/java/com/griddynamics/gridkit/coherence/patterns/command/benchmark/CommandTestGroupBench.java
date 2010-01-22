@@ -16,6 +16,10 @@
 
 package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
 
+import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelper.setCoherenceConfig;
+import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelper.setSysProp;
+import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelper.sysOut;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -79,7 +83,7 @@ public class CommandTestGroupBench
 		
 		for(CommandBenchmarkParams param : params)
 		{
-			TestHelper.sysout("Executing benchmark for " + param.toString());
+			sysOut("Executing benchmark for " + param.toString());
 			
 			CommandBenchmark commandBenchmark = new CommandBenchmark("command-benchmark");
 			
@@ -113,12 +117,10 @@ public class CommandTestGroupBench
 	
 	public void start(String[] args)
 	{
-		TestHelper.setSysProp("tangosol.pof.config", "benchmark-pof-config.xml");
-		TestHelper.setSysProp("tangosol.coherence.cacheconfig", "benchmark-pof-cache-config.xml");
-		TestHelper.setSysProp("tangosol.coherence.clusterport", "9001");
-		TestHelper.setSysProp("tangosol.coherence.distributed.localstorage", "false");
+		setCoherenceConfig();
+		setSysProp("tangosol.coherence.distributed.localstorage", "false");
 		
-		TestHelper.setSysProp("outfile", "out" + System.currentTimeMillis());
+		setSysProp("outfile", "out" + System.currentTimeMillis());
 		String outfile = System.getProperty("outfile");
 		
 		final PatternFacade facade = PatternFacade.Helper.create();
@@ -131,19 +133,19 @@ public class CommandTestGroupBench
 		
 		int i = 0;
 		
-		TestHelper.sysout("Benchmark. Stage I.");
+		sysOut("Benchmark. Stage I.");
 		Map<CommandBenchmarkParams, CommandBenchmarkStats> res1 = makeBenchmarkExecutionStage(i,facade, benchmarkParams, resToCSV);
 		
 		Collections.shuffle(benchmarkParams);
 		i += benchmarkParams.size();
 		
-		TestHelper.sysout("Benchmark. Stage II.");
+		sysOut("Benchmark. Stage II.");
 		Map<CommandBenchmarkParams, CommandBenchmarkStats> res2 = makeBenchmarkExecutionStage(i,facade, benchmarkParams, resToCSV);
 		
 		Collections.shuffle(benchmarkParams);
 		i += benchmarkParams.size();
 		
-		TestHelper.sysout("Benchmark. Stage III.");
+		sysOut("Benchmark. Stage III.");
 		Map<CommandBenchmarkParams, CommandBenchmarkStats> res3 = makeBenchmarkExecutionStage(i,facade, benchmarkParams, resToCSV);
 		
 		//Calculating average throughput
@@ -169,19 +171,19 @@ public class CommandTestGroupBench
 		
 		i += benchmarkParams.size();
 		
-		TestHelper.sysout("Benchmark. Stage IV.");
+		sysOut("Benchmark. Stage IV.");
 		/* res4 = */ makeBenchmarkExecutionStage(i, facade, speedLimitBenchmarkParams, resToCSV);
 		
 		Collections.shuffle(speedLimitBenchmarkParams);
 		i += benchmarkParams.size();
 		
-		TestHelper.sysout("Benchmark. Stage V.");
+		sysOut("Benchmark. Stage V.");
 		/* res5 = */  makeBenchmarkExecutionStage(i, facade, speedLimitBenchmarkParams, resToCSV);
 		
 		Collections.shuffle(speedLimitBenchmarkParams);
 		i += benchmarkParams.size();
 		
-		TestHelper.sysout("Benchmark. Stage VI.");
+		sysOut("Benchmark. Stage VI.");
 		/* res6 = */ makeBenchmarkExecutionStage(i, facade, speedLimitBenchmarkParams, resToCSV);
 		
 		CSVHelper.storeResultsInCSV(outfile, resToCSV);
