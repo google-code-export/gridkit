@@ -15,7 +15,8 @@
  */
 package com.griddynamics.gridkit.coherence.patterns.command.benchmark.incubator;
 
-import com.griddynamics.gridkit.coherence.patterns.command.benchmark.TestHelper;
+import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelper.setSysProp;
+
 import com.griddynamics.gridkit.coherence.patterns.command.benchmark.PatternFacade;
 import com.oracle.coherence.common.identifiers.Identifier;
 import com.oracle.coherence.patterns.command.Command;
@@ -35,7 +36,7 @@ public class IncubatorPatternFacade implements PatternFacade {
 	private ManagementStrategy strategy;
 
 	public IncubatorPatternFacade() {
-		TestHelper.setSysProp("benchmark.command-pattern.storeStrategy", ManagementStrategy.COLOCATED.name());
+		setSysProp("benchmark.command-pattern.storeStrategy", ManagementStrategy.COLOCATED.name());
 		String mode = System.getProperty("benchmark.command-pattern.storeStrategy");
 	    strategy = ManagementStrategy.valueOf(mode);
 	}

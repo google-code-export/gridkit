@@ -90,7 +90,7 @@ public class MessageExecutionMark implements Serializable, PortableObject
 	{
 		static final long NStoMS = TimeUnit.MILLISECONDS.toNanos(1);
 		
-		public double getSendTime(MessageExecutionMark ts)    {return ts.sendTS.getJavaNs()  / NStoMS;};
+		public double getSendTime(MessageExecutionMark ts)    {return ts.sendTS.getJavaNs() / NStoMS;};
 		public double getReceiveTime(MessageExecutionMark ts) {return ts.receiveTS.getJavaNs() / NStoMS;};
 	}
 }

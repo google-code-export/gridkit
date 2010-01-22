@@ -1,12 +1,15 @@
 package com.griddynamics.gridkit.coherence.patterns.functor.benchmark;
 
+import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelper.setCoherenceConfig;
+import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelper.setSysProp;
+import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelper.sysOut;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
-import com.griddynamics.gridkit.coherence.patterns.command.benchmark.TestHelper;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Member;
 
@@ -25,28 +28,20 @@ public class SingleRunFunctorBenchmark
 		
 		FunctorBenchmarkDispatcher dispatcher = new FunctorBenchmarkDispatcher(10);
 		
-		TestHelper.sysout("Starting warm up ...");
+		sysOut("Starting warm up ...");
 		for (int i = 1; i <= 5; ++i)
 		{
 			FunctorBenchmarkStats res = dispatcher.execute(facade, workers);
-			TestHelper.sysout("Run " + i + ": " + res.toString());
+			sysOut("Run " + i + ": " + res.toString());
 			LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1000));
 		}
-		TestHelper.sysout("Warm up ended");
-	}
-	
-	public static void configureCoherence()
-	{
-		// Configure coherence
-		setSysProp("tangosol.pof.config"                        , "benchmark-pof-config.xml");
-		setSysProp("tangosol.coherence.cacheconfig"             , "benchmark-pof-cache-config.xml");
-		setSysProp("tangosol.coherence.clusterport"             , "9001");
-		setSysProp("tangosol.coherence.distributed.localstorage", "false");	
+		sysOut("Warm up ended");
 	}
 	
 	public static void main(String[] args)
 	{
-		configureCoherence();
+		setCoherenceConfig();
+		setSysProp("tangosol.coherence.distributed.localstorage", "false");	
 		
 		setSysProp("benchmark.functor.threadCount",  "10");
 		setSysProp("benchmark.functor.contextCount", "100");
@@ -98,7 +93,7 @@ public class SingleRunFunctorBenchmark
 		
 		FunctorBenchmarkDispatcher dispatcher = new FunctorBenchmarkDispatcher(contextCount);
 		
-		TestHelper.sysout("Starting benchmark up ...");
+		sysOut("Starting benchmark up ...");
 		FunctorBenchmarkStats res = dispatcher.execute(facade, workers);
 		
 		System.out.println("--------------------------------------------------------------------------------");
@@ -110,14 +105,5 @@ public class SingleRunFunctorBenchmark
 		System.out.print("Coherence MS stats");
 		System.out.println(res.getCoherenceMsStats().toString());
 		System.out.println("--------------------------------------------------------------------------------");
-	}
-	
-	private static void setSysProp(String prop, String value)
-	{
-		if (System.getProperty(prop) == null)
-		{
-			System.setProperty(prop, value);
-		}
-		System.out.println("[SysProp] " + prop + ": " + System.getProperty(prop));
 	}
 }

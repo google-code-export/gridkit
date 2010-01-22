@@ -21,14 +21,13 @@ public class TouchFunctor extends BenchmarkFunctor
 	@Override
 	public CommandExecutionMark execute(ExecutionEnvironment<SimpleContext> executionEnvironment)
 	{
-		CommandExecutionMark res = startExecution();
+		startExecution();
 		
 		SimpleContext context = executionEnvironment.getContext();
 		context.touch();
 		executionEnvironment.setContext(context);
 		
-		res.finish();
-		return res;
+		return finishExecution();
 	}
 
 }

@@ -18,7 +18,6 @@ package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
 
 import java.util.Map;
 
-import com.griddynamics.gridkit.coherence.patterns.benchmark.CommandExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.SimpleContext;
 import com.oracle.coherence.patterns.command.ExecutionEnvironment;
 

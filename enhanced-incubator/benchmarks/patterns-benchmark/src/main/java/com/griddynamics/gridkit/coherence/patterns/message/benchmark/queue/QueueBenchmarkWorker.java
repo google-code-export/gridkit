@@ -179,6 +179,7 @@ public final class QueueBenchmarkWorker implements Invocable, Serializable
 		{
 			try
 			{
+				//TODO change latch to barrier
 				startLatch.countDown();
 				startLatch.await();
 

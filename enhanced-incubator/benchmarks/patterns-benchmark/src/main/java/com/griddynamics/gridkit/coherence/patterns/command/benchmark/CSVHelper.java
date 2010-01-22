@@ -13,7 +13,7 @@ import java.util.Locale;
 
 public class CSVHelper
 {
-	private static String frenchSpace = Character.toString((char)160);
+	private static final String frenchSpace = Character.toString((char)160);
 	private static final NumberFormat format = NumberFormat.getInstance(Locale.FRANCE);
 	
 	public static String formatDoubleToCSV(double d)

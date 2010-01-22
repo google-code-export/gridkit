@@ -4,7 +4,6 @@ import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelpe
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -51,12 +50,9 @@ public class FunctorBenchmarkDispatcher
 			
 			InvocationService invocationService = facade.getInvocationService();
 			
-			for(Map.Entry<Member, FunctorBenchmarkWorkerParams> worker : workers.entrySet())
-			{
-				invocationService.execute(new FunctorBenchmarkWorker(worker.getValue(), contexts),
-										  Collections.singleton(worker.getKey()),
-										  new FunctorBenchmarkObserver());
-			}
+			invocationService.execute(new FunctorBenchmarkWorker(workers, contexts),
+									  workers.keySet(),
+									  new FunctorBenchmarkObserver());
 			
 			try
 			{
@@ -89,6 +85,7 @@ public class FunctorBenchmarkDispatcher
 			{
 				workersResult.add(Arrays.asList((FunctorExecutionMark[])oResult));
 				dispatcherResult.setMembersCompleated(dispatcherResult.getMembersCompleated()+1);
+				latch.countDown();
 			}
 		}
 
@@ -98,6 +95,7 @@ public class FunctorBenchmarkDispatcher
 			synchronized (memorySynchronizer)
 			{			
 				dispatcherResult.setMembersFailed(dispatcherResult.getMembersFailed()+1);
+				latch.countDown();
 			}
 		}
 
@@ -107,16 +105,14 @@ public class FunctorBenchmarkDispatcher
 			synchronized (memorySynchronizer)
 			{			
 				dispatcherResult.setMembersLeft(dispatcherResult.getMembersLeft()+1);
+				latch.countDown();
 			}
 		}
 		
 		@Override
 		public void invocationCompleted()
 		{
-			synchronized (memorySynchronizer)
-			{
-				latch.countDown();
-			}
+			
 		}
 	}
 
@@ -156,8 +152,8 @@ public class FunctorBenchmarkDispatcher
 		
 		FunctorBenchmarkStats.TimeUnitDependStats res = new FunctorBenchmarkStats.TimeUnitDependStats();
 		
-		res.totalTime  = returnTime.getMax() - startTime.getMin();
-		res.throughput = n / (res.totalTime / TimeUnit.SECONDS.toMillis(1));
+		res.totalTime  = (returnTime.getMax() - startTime.getMin()) / TimeUnit.SECONDS.toMillis(1);
+		res.throughput = n / res.totalTime;
 		
 		res.averageSumbitLatency = sumbitLatency.getMean();
 		res.averageReturnLatency = returnLatency.getMean();
