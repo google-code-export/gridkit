@@ -1,71 +1,89 @@
 package com.griddynamics.gridkit.coherence.patterns.message.benchmark;
 
-import com.griddynamics.gridkit.coherence.patterns.benchmark.stats.InvocationServiceStats;
-
-public class MessageBenchmarkStats extends InvocationServiceStats
+public class MessageBenchmarkStats
 {
+	private double totalTime;
+	private double throughput;
+	
+	private double averageLatency;
+	
+	private double maxLatency;
+	private double minLatency;
+	
+	private double latencyVariance;
+
 	public MessageBenchmarkStats()
 	{
-		super();
-		javaMsStats = javaNsStats = coherenceMsStats = null;
+		totalTime = 0;  throughput = 0;  averageLatency = 0;
+		maxLatency = 0; minLatency = 0; latencyVariance = 0;
 	}
-	
-	static public class TimeUnitDependStats
+
+	public double getTotalTime()
 	{
-		public double totalTime;
-		public double throughput;
-		
-		public double averageLatency;
-		
-		public double maxLatency;
-		public double minLatency;
-		
-		public double latencyVariance;
-		
-		@Override
-		public String toString()
-		{
-			return "TimeUnitDependStats \n[\n\ttotalTime="
-					+ totalTime + "\n\tthroughput="
-					+ throughput + "\n\taverageLatency="
-					+ averageLatency + "\n\tmaxLatency="
-					+ maxLatency + "\n\tminLatency="
-					+ minLatency + "\n\tlatencyVariance="
-					+ latencyVariance + "\n]";
-		}
+		return totalTime;
 	}
-	
-	protected TimeUnitDependStats      javaMsStats;
-	protected TimeUnitDependStats      javaNsStats;
-	protected TimeUnitDependStats coherenceMsStats;
-	
-	public TimeUnitDependStats getJavaMsStats()
+
+	public void setTotalTime(double totalTime)
 	{
-		return javaMsStats;
+		this.totalTime = totalTime;
 	}
-	
-	public void setJavaMsStats(TimeUnitDependStats javaMsStats)
+
+	public double getThroughput()
 	{
-		this.javaMsStats = javaMsStats;
+		return throughput;
 	}
-	
-	public TimeUnitDependStats getJavaNsStats()
+
+	public void setThroughput(double throughput)
 	{
-		return javaNsStats;
+		this.throughput = throughput;
 	}
-	
-	public void setJavaNsStats(TimeUnitDependStats javaNsStats)
+
+	public double getAverageLatency()
 	{
-		this.javaNsStats = javaNsStats;
+		return averageLatency;
 	}
-	
-	public TimeUnitDependStats getCoherenceMsStats()
+
+	public void setAverageLatency(double averageLatency)
 	{
-		return coherenceMsStats;
+		this.averageLatency = averageLatency;
 	}
-	
-	public void setCoherenceMsStats(TimeUnitDependStats coherenceMsStats)
+
+	public double getMaxLatency()
 	{
-		this.coherenceMsStats = coherenceMsStats;
+		return maxLatency;
+	}
+
+	public void setMaxLatency(double maxLatency)
+	{
+		this.maxLatency = maxLatency;
+	}
+
+	public double getMinLatency()
+	{
+		return minLatency;
+	}
+
+	public void setMinLatency(double minLatency)
+	{
+		this.minLatency = minLatency;
+	}
+
+	public double getLatencyVariance()
+	{
+		return latencyVariance;
+	}
+
+	public void setLatencyVariance(double latencyVariance)
+	{
+		this.latencyVariance = latencyVariance;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "MessageBenchmarkSimStats [averageLatency=" + averageLatency
+				+ ", latencyVariance=" + latencyVariance + ", maxLatency="
+				+ maxLatency + ", minLatency=" + minLatency + ", throughput="
+				+ throughput + ", totalTime=" + totalTime + "]";
 	}
 }

@@ -30,11 +30,12 @@ public final class QueueBenchmarkWorker implements Invocable, Serializable
 {
 	private static final long serialVersionUID = -3397451888740243886L;
 	
-	private final QueueBenchmarkWorkerParams   params;
+	private final QueueBenchmarkParams params;
+	
 	private final Map<Member,List<Identifier>> sendQueuesMap;
 	private final Map<Member,List<Identifier>> receiveQueuesMap;
 
-	public QueueBenchmarkWorker(QueueBenchmarkWorkerParams params,
+	public QueueBenchmarkWorker(QueueBenchmarkParams params,
 								Map<Member, List<Identifier>> sendQueuesMap,
 								Map<Member, List<Identifier>> receiveQueuesMap)
 	{

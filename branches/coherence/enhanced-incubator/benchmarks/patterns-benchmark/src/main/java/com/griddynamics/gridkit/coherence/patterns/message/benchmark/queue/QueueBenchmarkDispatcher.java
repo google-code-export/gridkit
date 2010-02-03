@@ -11,37 +11,32 @@ import com.griddynamics.gridkit.coherence.patterns.benchmark.Dispatcher;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.MessageExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.stats.Accamulator;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.stats.InvocationServiceStats;
-import com.griddynamics.gridkit.coherence.patterns.message.benchmark.MessageBenchmarkSimStats;
+import com.griddynamics.gridkit.coherence.patterns.message.benchmark.MessageBenchmarkStats;
 import com.griddynamics.gridkit.coherence.patterns.message.benchmark.PatternFacade;
 import com.oracle.coherence.common.identifiers.Identifier;
 import com.tangosol.net.Invocable;
 import com.tangosol.net.Member;
 
 public class QueueBenchmarkDispatcher extends Dispatcher<MessageExecutionMark,
-														 InvocationServiceStats<MessageBenchmarkSimStats>>
+														 InvocationServiceStats<MessageBenchmarkStats>,
+														 QueueBenchmarkParams>
 {
 	protected Map<Member,List<Identifier>> sendQueuesMap;
 	protected Map<Member,List<Identifier>> receiveQueuesMap;
-	
-	protected final int queuesCount;
-	
-	protected final QueueBenchmarkWorkerParams params;
 	
 	protected final PatternFacade facade;
 	
 	protected Invocable invocableWorker;
 	
-	public QueueBenchmarkDispatcher(int queuesCount, QueueBenchmarkWorkerParams params, Set<Member> members, PatternFacade facade)
+	public QueueBenchmarkDispatcher(Set<Member> members, PatternFacade facade)
 	{
 		super(members, facade.getInvocationService());
-		
-		this.queuesCount = queuesCount;
-		this.params      = params;
-		this.facade      = facade;
+
+		this.facade = facade;
 	}
 	
 	@Override
-	protected void prepare() throws Exception
+	protected void prepare(QueueBenchmarkParams benchmarkParams) throws Exception
 	{
 		sendQueuesMap    = new HashMap<Member, List<Identifier>>();
 		receiveQueuesMap = new HashMap<Member, List<Identifier>>();
@@ -54,9 +49,9 @@ public class QueueBenchmarkDispatcher extends Dispatcher<MessageExecutionMark,
 			int sender   = i - 1;
 			int receiver = i % membersList.size();
 	
-			List<Identifier> queues = new ArrayList<Identifier>(queuesCount);
+			List<Identifier> queues = new ArrayList<Identifier>(benchmarkParams.getQueuesCount());
 				
-			for(int q = 0; q < queuesCount; ++q)
+			for(int q = 0; q < benchmarkParams.getQueuesCount(); ++q)
 			{
 				Identifier queue = facade.createQueue("queue_from_" + sender + "_to_" + receiver + "_N_" + q);
 				
@@ -67,7 +62,7 @@ public class QueueBenchmarkDispatcher extends Dispatcher<MessageExecutionMark,
 			receiveQueuesMap.put(membersList.get(receiver), queues);
 		}
 			
-		invocableWorker = new QueueBenchmarkWorker(params, sendQueuesMap, receiveQueuesMap);
+		invocableWorker = new QueueBenchmarkWorker(benchmarkParams, sendQueuesMap, receiveQueuesMap);
 	}
 	
 	protected void calculateExecutionStatistics()
@@ -81,7 +76,7 @@ public class QueueBenchmarkDispatcher extends Dispatcher<MessageExecutionMark,
 		dispatcherResult.setExecutionMarksProcessed(getDispatcherResultSise());
 	}
 	
-	protected MessageBenchmarkSimStats calculateExecutionStatisticsInternal(MessageExecutionMark.MessageExecutionMarkTimeExtractor te)
+	protected MessageBenchmarkStats calculateExecutionStatisticsInternal(MessageExecutionMark.MessageExecutionMarkTimeExtractor te)
 	{
 		Accamulator     latency = new Accamulator();
 		
@@ -103,7 +98,7 @@ public class QueueBenchmarkDispatcher extends Dispatcher<MessageExecutionMark,
 			}
 		}
 		
-		MessageBenchmarkSimStats res = new MessageBenchmarkSimStats();
+		MessageBenchmarkStats res = new MessageBenchmarkStats();
 		
 		res.setTotalTime((receiveTime.getMax() - sendTime.getMin()) / TimeUnit.SECONDS.toMillis(1));
 		res.setThroughput(n / res.getTotalTime());
@@ -123,9 +118,9 @@ public class QueueBenchmarkDispatcher extends Dispatcher<MessageExecutionMark,
 	}
 	
 	@Override
-	protected InvocationServiceStats<MessageBenchmarkSimStats> createDispatcherResult()
+	protected InvocationServiceStats<MessageBenchmarkStats> createDispatcherResult()
 	{
-		return new InvocationServiceStats<MessageBenchmarkSimStats>();
+		return new InvocationServiceStats<MessageBenchmarkStats>();
 	}
 
 	@Override

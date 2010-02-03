@@ -12,70 +12,63 @@ import com.griddynamics.gridkit.coherence.patterns.benchmark.Dispatcher;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.MessageExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.stats.Accamulator;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.stats.InvocationServiceStats;
-import com.griddynamics.gridkit.coherence.patterns.message.benchmark.MessageBenchmarkSimStats;
+import com.griddynamics.gridkit.coherence.patterns.message.benchmark.MessageBenchmarkStats;
 import com.griddynamics.gridkit.coherence.patterns.message.benchmark.PatternFacade;
 import com.oracle.coherence.common.identifiers.Identifier;
 import com.tangosol.net.Invocable;
 import com.tangosol.net.Member;
 
 public class TopicBenchmarkDispatcher extends Dispatcher<MessageExecutionMark,
-														 InvocationServiceStats<MessageBenchmarkSimStats>>
+														 InvocationServiceStats<MessageBenchmarkStats>,
+														 TopicBenchmarkParams>
 {
-	protected final int topicsCount;
-	protected final int topicsPerMember;
-	
-	protected final TopicBenchmarkWorkerParams workerParams;
-	
 	protected final PatternFacade facade;
 	
 	protected Invocable invocableWorker;
 	
-	public TopicBenchmarkDispatcher(int topicsCount, int topicsPerMember, TopicBenchmarkWorkerParams workerParams,
-									Set<Member> members, PatternFacade facade)
+	public TopicBenchmarkDispatcher(Set<Member> members, PatternFacade facade)
 	{
 		super(members, facade.getInvocationService());
 		
-		if ((topicsCount < 1) || (topicsPerMember < 1) || (topicsCount < topicsPerMember + 1))
-		{
-			throw new IllegalArgumentException("Wrong topicsCount(" + topicsCount + ") or topicsPerMember(" + topicsPerMember + ")");
-		}
-		
-		this.topicsCount     = topicsCount;
-		this.topicsPerMember = topicsPerMember;
-		this.workerParams    = workerParams;
-		this.facade          = facade;
+		this.facade = facade;
 	}
 
 	@Override
-	protected void prepare() throws Exception
+	protected void prepare(TopicBenchmarkParams benchmarkParams) throws Exception
 	{
-		List<Identifier> topics = new ArrayList<Identifier>(topicsCount);
+		if ((benchmarkParams.getTopicsCount() < 1) || (benchmarkParams.getTopicsPerMember() < 1) ||
+			(benchmarkParams.getTopicsCount() < benchmarkParams.getTopicsPerMember() + 1))
+		{
+			throw new IllegalArgumentException("Wrong topicsCount(" + benchmarkParams.getTopicsCount() + ") or topicsPerMember(" + benchmarkParams.getTopicsPerMember() + ")");
+		}
 		
-		for (int i = 0; i < topicsCount; ++i)
+		List<Identifier> topics = new ArrayList<Identifier>(benchmarkParams.getTopicsCount());
+		
+		for (int i = 0; i < benchmarkParams.getTopicsCount(); ++i)
 		{
 			topics.add(facade.createTopic("topic-"+i));
 		}
 		
-		Map<Member, List<Identifier>> workDistribution = distributeTopics(topics);
+		Map<Member, List<Identifier>> workDistribution = distributeTopics(topics, benchmarkParams);
 		
-		invocableWorker = new TopicBenchmarkWorker(workerParams, topics, workDistribution);
+		invocableWorker = new TopicBenchmarkWorker(benchmarkParams, topics, workDistribution);
 	}
 	
-	protected Map<Member, List<Identifier>> distributeTopics(List<Identifier> topics)
+	protected Map<Member, List<Identifier>> distributeTopics(List<Identifier> topics, TopicBenchmarkParams benchmarkParams)
 	{
 		Map<Member, List<Identifier>> result = new HashMap<Member, List<Identifier>>();
 		
-		List<Integer> load = new ArrayList<Integer>(topicsCount);
-		for (int i = 0; i < topicsCount; ++i)
+		List<Integer> load = new ArrayList<Integer>(benchmarkParams.getTopicsCount());
+		for (int i = 0; i < benchmarkParams.getTopicsCount(); ++i)
 		{
 			load.add(0);
 		}
 		
 		for(Member m : members)
 		{
-			List<Integer> indexes = findMinimalValues(load);
+			List<Integer> indexes = findMinimalValues(load, benchmarkParams);
 			
-			List<Identifier> m_receive = new ArrayList<Identifier>(topicsPerMember);
+			List<Identifier> m_receive = new ArrayList<Identifier>(benchmarkParams.getTopicsPerMember());
 			
 			for (Integer i : indexes)
 			{
@@ -89,14 +82,14 @@ public class TopicBenchmarkDispatcher extends Dispatcher<MessageExecutionMark,
 		return result;
 	}
 	
-	protected List<Integer> findMinimalValues(List<Integer> l)
+	protected List<Integer> findMinimalValues(List<Integer> l, TopicBenchmarkParams benchmarkParams)
 	{
-		List<Integer> res = new ArrayList<Integer>(topicsPerMember);
+		List<Integer> res = new ArrayList<Integer>(benchmarkParams.getTopicsPerMember());
 		
 		List<Integer>        list = new ArrayList<Integer>(l);
 		List<Integer> sorted_list = new ArrayList<Integer>(l); Collections.sort(sorted_list);
 		
-		for(int i = 0; i < topicsPerMember; ++i)
+		for(int i = 0; i < benchmarkParams.getTopicsPerMember(); ++i)
 		{
 			Integer min = sorted_list.get(0);
 			sorted_list.remove(0);
@@ -122,7 +115,7 @@ public class TopicBenchmarkDispatcher extends Dispatcher<MessageExecutionMark,
 		dispatcherResult.setExecutionMarksProcessed(getDispatcherResultSise());
 	}
 
-	protected MessageBenchmarkSimStats calculateExecutionStatisticsInternal(MessageExecutionMark.MessageExecutionMarkTimeExtractor te)
+	protected MessageBenchmarkStats calculateExecutionStatisticsInternal(MessageExecutionMark.MessageExecutionMarkTimeExtractor te)
 	{
 		Accamulator     latency = new Accamulator();
 		
@@ -144,7 +137,7 @@ public class TopicBenchmarkDispatcher extends Dispatcher<MessageExecutionMark,
 			}
 		}
 		
-		MessageBenchmarkSimStats res = new MessageBenchmarkSimStats();
+		MessageBenchmarkStats res = new MessageBenchmarkStats();
 		
 		res.setTotalTime((receiveTime.getMax() - sendTime.getMin()) / TimeUnit.SECONDS.toMillis(1));
 		res.setThroughput(n / res.getTotalTime());
@@ -158,9 +151,9 @@ public class TopicBenchmarkDispatcher extends Dispatcher<MessageExecutionMark,
 	}
 
 	@Override
-	protected InvocationServiceStats<MessageBenchmarkSimStats> createDispatcherResult()
+	protected InvocationServiceStats<MessageBenchmarkStats> createDispatcherResult()
 	{
-		return new InvocationServiceStats<MessageBenchmarkSimStats>();
+		return new InvocationServiceStats<MessageBenchmarkStats>();
 	}
 
 	@Override

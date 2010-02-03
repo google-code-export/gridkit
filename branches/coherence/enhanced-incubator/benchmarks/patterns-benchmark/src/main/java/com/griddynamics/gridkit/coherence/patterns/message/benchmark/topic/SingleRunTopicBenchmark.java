@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.griddynamics.gridkit.coherence.patterns.benchmark.stats.InvocationServiceStats;
-import com.griddynamics.gridkit.coherence.patterns.message.benchmark.MessageBenchmarkSimStats;
+import com.griddynamics.gridkit.coherence.patterns.message.benchmark.MessageBenchmarkStats;
 import com.griddynamics.gridkit.coherence.patterns.message.benchmark.PatternFacade;
 import com.tangosol.net.Member;
 
@@ -35,25 +35,25 @@ public class SingleRunTopicBenchmark
 		setSysProp("benchmark.topic.topicsCount", "6");
 		setSysProp("benchmark.topic.topicsPerMember", "3");
 		
-		TopicBenchmarkWorkerParams params = new TopicBenchmarkWorkerParams
-		(
-			Integer.getInteger("benchmark.topic.senderThreadsCount"),
-			Integer.getInteger("benchmark.topic.receiverThreadsCount"),
-			Integer.getInteger("benchmark.topic.messagesPerThread"),
-			Integer.getInteger("benchmark.topic.senderSpeedLimit")
-		);
+		TopicBenchmarkParams benchmarkParams = new TopicBenchmarkParams();
+		
+		benchmarkParams.setSenderThreadsCount(Integer.getInteger("benchmark.topic.senderThreadsCount"));
+		benchmarkParams.setReceiverThreadsCount(Integer.getInteger("benchmark.topic.receiverThreadsCount"));
+		benchmarkParams.setMessagesPerThread(Integer.getInteger("benchmark.topic.messagesPerThread"));
+		benchmarkParams.setSenderSpeedLimit(Integer.getInteger("benchmark.topic.senderSpeedLimit"));
+		
+		benchmarkParams.setTopicsCount(Integer.getInteger("benchmark.topic.topicsCount"));
+		benchmarkParams.setTopicsPerMember(Integer.getInteger("benchmark.topic.topicsPerMember"));
 		
 		PatternFacade facade = PatternFacade.DefaultFacade.getInstance();
 		
 		Set<Member> members = getOtherInvocationServiceMembers(facade.getInvocationService());
 		
-		TopicBenchmarkDispatcher dispatcher = new TopicBenchmarkDispatcher(Integer.getInteger("benchmark.topic.topicsCount"),
-																		   Integer.getInteger("benchmark.topic.topicsPerMember"),
-																		   params, members, facade);
+		TopicBenchmarkDispatcher dispatcher = new TopicBenchmarkDispatcher(members, facade);
 		
 		sysOut("Starting up SingleRunTopicBenchmark ...");
 		
-		InvocationServiceStats<MessageBenchmarkSimStats> res = dispatcher.execute();
+		InvocationServiceStats<MessageBenchmarkStats> res = dispatcher.execute(benchmarkParams);
 		
 		sysOut("SingleRunTopicBenchmark results:");
 		System.out.println("--------------------------------------------------------------------------------");

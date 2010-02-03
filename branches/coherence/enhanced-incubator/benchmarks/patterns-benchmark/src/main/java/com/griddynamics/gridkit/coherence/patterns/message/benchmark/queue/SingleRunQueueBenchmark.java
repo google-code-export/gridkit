@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.griddynamics.gridkit.coherence.patterns.benchmark.stats.InvocationServiceStats;
-import com.griddynamics.gridkit.coherence.patterns.message.benchmark.MessageBenchmarkSimStats;
+import com.griddynamics.gridkit.coherence.patterns.message.benchmark.MessageBenchmarkStats;
 import com.griddynamics.gridkit.coherence.patterns.message.benchmark.PatternFacade;
 import com.tangosol.net.Member;
 
@@ -35,25 +35,25 @@ public class SingleRunQueueBenchmark
 		
 		setSysProp("benchmark.queue.queuesCount", "3");
 		
-		QueueBenchmarkWorkerParams params = new QueueBenchmarkWorkerParams
-		(
-			Integer.getInteger("benchmark.queue.senderThreadsCount"),
-			Integer.getInteger("benchmark.queue.receiverThreadsCount"),
-			Integer.getInteger("benchmark.queue.messagesPerThread"),
-			Integer.getInteger("benchmark.queue.senderSpeedLimit"),
-			Integer.getInteger("benchmark.queue.receiverSpeedLimit")
-		);
+		QueueBenchmarkParams benchmarkParams = new QueueBenchmarkParams();
+		
+		benchmarkParams.setSenderThreadsCount(Integer.getInteger("benchmark.queue.senderThreadsCount"));
+		benchmarkParams.setReceiverThreadsCount(Integer.getInteger("benchmark.queue.receiverThreadsCount"));
+		benchmarkParams.setMessagesPerThread(Integer.getInteger("benchmark.queue.messagesPerThread"));
+		benchmarkParams.setSenderSpeedLimit(Integer.getInteger("benchmark.queue.senderSpeedLimit"));
+		benchmarkParams.setReceiverSpeedLimit(Integer.getInteger("benchmark.queue.receiverSpeedLimit"));
+		
+		benchmarkParams.setQueuesCount(Integer.getInteger("benchmark.queue.queuesCount"));
 		
 		PatternFacade facade = PatternFacade.DefaultFacade.getInstance();
 		
 		Set<Member> members = getOtherInvocationServiceMembers(facade.getInvocationService());
 		
-		QueueBenchmarkDispatcher dispatcher = new QueueBenchmarkDispatcher(Integer.getInteger("benchmark.queue.queuesCount"),
-																		   params, members, facade);
+		QueueBenchmarkDispatcher dispatcher = new QueueBenchmarkDispatcher(members, facade);
 		
 		sysOut("Starting up SingleRunQueueBenchmark ...");
 		
-		InvocationServiceStats<MessageBenchmarkSimStats> res = dispatcher.execute();
+		InvocationServiceStats<MessageBenchmarkStats> res = dispatcher.execute(benchmarkParams);
 		
 		sysOut("SingleRunQueueBenchmark results:");
 		System.out.println("--------------------------------------------------------------------------------");
