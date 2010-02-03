@@ -16,6 +16,8 @@ public interface PatternFacade
 	
 	public Identifier createQueue(String queueName);
 	
+	public Identifier createTopic(String topicName);
+	
 	public Subscriber subscribe(Identifier destination);
 	
 	public static class DefaultFacade implements PatternFacade
@@ -56,6 +58,12 @@ public interface PatternFacade
 		public Subscriber subscribe(Identifier destination)
 		{
 			return messagingSession.subscribe(destination);
+		}
+
+		@Override
+		public Identifier createTopic(String topicName)
+		{
+			return messagingSession.createTopic(topicName);
 		}
 	}
 }

@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.griddynamics.gridkit.coherence.patterns.benchmark.CommandExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.SimpleContext;
-import com.griddynamics.gridkit.coherence.patterns.benchmark.SpeedLimit;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.speedlimit.SpeedLimit;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.stats.Accamulator;
 import com.oracle.coherence.common.identifiers.Identifier;
 import com.tangosol.net.CacheFactory;
@@ -57,12 +57,7 @@ public class CommandBenchmark
 			
 			final CommandFactory commandFactory = getCommandFactory(params.getCommand());
 			
-			SpeedLimit sl = null;
-			if (params.getOpsPerSec() > 0) 
-			{
-				sl = SpeedLimit.createSpeedLimit(params.getOpsPerSec());
-			}
-			final SpeedLimit speedLimit = sl;
+			final SpeedLimit speedLimit = SpeedLimit.SpeedLimitHelper.getSpeedLimit(params.getOpsPerSec());
 			
 			for(int i = 0; i != params.getContextCount(); ++i)
 			{
@@ -94,10 +89,7 @@ public class CommandBenchmark
 							Identifier ctx = contexts[rnd.nextInt(contexts.length)];
 							long id = threadNumber * 10000000 + c;
 							
-							if (speedLimit != null)
-							{
-								speedLimit.accure();
-							}
+							speedLimit.accure();
 	
 							facade.submit(ctx, commandFactory.createCommand(id, reportBuffer).send());
 						}

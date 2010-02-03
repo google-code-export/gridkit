@@ -1,8 +1,9 @@
-package com.griddynamics.gridkit.coherence.patterns.message.benchmark.queue;
+package com.griddynamics.gridkit.coherence.patterns.message.benchmark.topic;
 
 import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelper.sysOut;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -25,41 +26,44 @@ import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Invocable;
 import com.tangosol.net.InvocationService;
 import com.tangosol.net.Member;
+import com.tangosol.util.WrapperException;
 
-public final class QueueBenchmarkWorker implements Invocable, Serializable
+public class TopicBenchmarkWorker implements Invocable, Serializable
 {
-	private static final long serialVersionUID = -3397451888740243886L;
+	private static final long serialVersionUID = -5536673473796824919L;
+
+	private final TopicBenchmarkWorkerParams params;
+	private final List<Identifier> allTopics;
+	private final Map<Member,List<Identifier>> allReceiveTopics;
 	
-	private final QueueBenchmarkWorkerParams   params;
-	private final Map<Member,List<Identifier>> sendQueuesMap;
-	private final Map<Member,List<Identifier>> receiveQueuesMap;
-
-	public QueueBenchmarkWorker(QueueBenchmarkWorkerParams params,
-								Map<Member, List<Identifier>> sendQueuesMap,
-								Map<Member, List<Identifier>> receiveQueuesMap)
-	{
-		this.params           = params;
-		this.sendQueuesMap    = sendQueuesMap;
-		this.receiveQueuesMap = receiveQueuesMap;
-	}
-
 	private transient Member localMember;
 	
 	private transient PatternFacade facade;
 	
-	private transient Identifier[] sendQueues;
-	private transient Identifier[] receiveQueues;
+	private transient List<Identifier> sendTopics;
+	private transient List<Identifier> receiveTopics;
 	
 	private transient ConcurrentLinkedQueue<MessageExecutionMark> workerResult;
 	
 	private transient SpeedLimit senderSpeedLimit;
-	private transient SpeedLimit receiverSpeedLimit;
 	
 	private transient CyclicBarrier startBarrier;
 	private transient CountDownLatch finishLatch;
 	
-	private transient AtomicInteger messagesReceived;
+	private transient int poisonPillsToReceive;
+	private transient AtomicInteger poisonPillsReceived;
 	
+	//TODO private final static long startWaitTimeOut = 10;
+	
+	public TopicBenchmarkWorker(TopicBenchmarkWorkerParams params,
+								List<Identifier> allTopics,
+								Map<Member, List<Identifier>> allReceiveTopics)
+	{
+		this.params           = params;
+		this.allTopics        = allTopics;
+		this.allReceiveTopics = allReceiveTopics;
+	}
+
 	@Override
 	public void run()
 	{
@@ -70,31 +74,35 @@ public final class QueueBenchmarkWorker implements Invocable, Serializable
 			workerResult = new ConcurrentLinkedQueue<MessageExecutionMark>();
 			
 			localMember = CacheFactory.getCluster().getLocalMember();
-	
-			   sendQueues = sendQueuesMap.get(localMember).toArray(new Identifier[0]);
-			receiveQueues = receiveQueuesMap.get(localMember).toArray(new Identifier[0]);
 			
-			senderSpeedLimit   = SpeedLimit.SpeedLimitHelper.getSpeedLimit(params.getSenderSpeedLimit());
-			receiverSpeedLimit = SpeedLimit.SpeedLimitHelper.getSpeedLimit(params.getReceiverSpeedLimit());
+			receiveTopics = allReceiveTopics.get(localMember);
 			
-			//Latch for count sends and receives
-			startBarrier = new CyclicBarrier(params.getSenderThreadsCount() + receiveQueues.length * params.getReceiverThreadsCount());
+			sendTopics = new ArrayList<Identifier>(allTopics);
+			sendTopics.removeAll(receiveTopics);
+			
+			senderSpeedLimit = SpeedLimit.SpeedLimitHelper.getSpeedLimit(params.getSenderSpeedLimit());
+			
+			startBarrier = new CyclicBarrier(receiveTopics.size() * params.getReceiverThreadsCount() + params.getSenderThreadsCount());
 			finishLatch  = new CountDownLatch(params.getSenderThreadsCount() + 1);
 			
+			poisonPillsReceived  = new AtomicInteger(0); // last factor is member count in benchmark
+			poisonPillsToReceive = receiveTopics.size() * params.getSenderThreadsCount() * params.getReceiverThreadsCount() * allReceiveTopics.size();
+			
 			ExecutorService sendService    = Executors.newFixedThreadPool(params.getSenderThreadsCount());
-			ExecutorService receiveService = Executors.newFixedThreadPool(receiveQueues.length * params.getReceiverThreadsCount());
+			ExecutorService receiveService = Executors.newFixedThreadPool(receiveTopics.size() * params.getReceiverThreadsCount());
 			
 			for(int i = 0; i < params.getSenderThreadsCount(); ++i)
 			{
 				sendService.submit(new Sender(i));
 			}
 			
-			messagesReceived = new AtomicInteger(0);
-			
-			for (int i = 0; i < receiveQueues.length; ++i)
+			for (int i = 0; i < receiveTopics.size(); ++i)
 			{
 				for (int t = 0; t < params.getReceiverThreadsCount(); ++t)
+				{
+					System.out.println("Sending reciver " + (i+t));
 					receiveService.submit(new Receiver(i));
+				}
 			}
 			
 			finishLatch.await();
@@ -104,7 +112,7 @@ public final class QueueBenchmarkWorker implements Invocable, Serializable
 		}
 		catch (Throwable t)
 		{
-			sysOut("-------- Exception on QueueBenchmarkWorker.run() --------");
+			sysOut("-------- Exception on TopicBenchmarkWorker.run() --------");
 			t.printStackTrace();
 			System.exit(1);
 		}
@@ -137,14 +145,20 @@ public final class QueueBenchmarkWorker implements Invocable, Serializable
 				{
 					senderSpeedLimit.accure();
 					
-					facade.publishMessage(sendQueues[rnd.nextInt(sendQueues.length)], (new BenchmarkMessage(id + messagesCount)).send());
+					facade.publishMessage(sendTopics.get(rnd.nextInt(sendTopics.size())), (new BenchmarkMessage(id + messagesCount)).send());
+				}
+				
+				//Sending poison pills
+				for (Identifier t : allTopics)
+				{
+					facade.publishMessage(t, (new BenchmarkMessage(0, true)).send());
 				}
 				
 				finishLatch.countDown();
 			}
 			catch (Throwable t)
 			{
-				sysOut("-------- Exception on QueueBenchmarkWorker.Sender.call() --------");
+				sysOut("-------- Exception on TopicBenchmarkWorker.Sender.call() --------");
 				t.printStackTrace();
 				System.exit(1);
 			}
@@ -156,12 +170,12 @@ public final class QueueBenchmarkWorker implements Invocable, Serializable
 	private final class Receiver implements Callable<Void>
 	{
 		private final Subscriber subscriber;
-		private final int queueID;
+		private final int topicID;
 		
-		public Receiver(int queueID)
+		public Receiver(int topicID)
 		{
-			this.queueID    = queueID;
-			this.subscriber = facade.subscribe(receiveQueues[this.queueID]); 
+			this.topicID    = topicID;
+			this.subscriber = facade.subscribe(receiveTopics.get(this.topicID));
 		}
 
 		@Override
@@ -169,28 +183,41 @@ public final class QueueBenchmarkWorker implements Invocable, Serializable
 		{
 			try
 			{
-				startBarrier.await();
-
+				//TODO maybe pause is needed to wait other members to subscribe
+				startBarrier.await();		
+				
 				while (true)
-				{
-					receiverSpeedLimit.accure();
+				{	
+					BenchmarkMessage m = (BenchmarkMessage)subscriber.getMessage();
 					
-					workerResult.add(((BenchmarkMessage)subscriber.getMessage()).receive());
-
-					if (messagesReceived.incrementAndGet() == params.getMessagesPerThread() * params.getSenderThreadsCount())
+					workerResult.add(m.receive());
+					
+					if (m.isPoisonPill())
 					{
-						finishLatch.countDown();
-						return null;
+						int i = poisonPillsReceived.incrementAndGet();
+						
+						System.out.println("Recived pill " + i + " needed " + poisonPillsToReceive);
+						
+						if (i == poisonPillsToReceive)
+						{
+							finishLatch.countDown();
+							return null;
+						}
 					}
 				}
 			}
+			catch (WrapperException allMessagesReceived)
+			{
+				sysOut("1+++++++ Exiting on TopicBenchmarkWorker.Receiver.call(). All messages received. ++++++++");
+			}
 			catch (SubscriberInterruptedException allMessagesReceived)
 			{
-				sysOut("++++++++ Exiting on QueueBenchmarkWorker.Receiver.call(). All messages received. ++++++++");
+				sysOut("2+++++++ Exiting on TopicBenchmarkWorker.Receiver.call(). All messages received. ++++++++");
 			}
 			catch (Throwable t)
 			{
-				sysOut("-------- Exception on QueueBenchmarkWorker.Receiver.call() --------");
+				sysOut(t.getClass().toString());
+				sysOut("-------- Exception on TopicBenchmarkWorker.Receiver.call() --------");
 				t.printStackTrace();
 				System.exit(1);
 			}

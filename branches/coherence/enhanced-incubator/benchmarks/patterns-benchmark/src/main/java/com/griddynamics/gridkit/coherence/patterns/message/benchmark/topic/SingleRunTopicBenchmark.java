@@ -1,4 +1,4 @@
-package com.griddynamics.gridkit.coherence.patterns.message.benchmark.queue;
+package com.griddynamics.gridkit.coherence.patterns.message.benchmark.topic;
 
 import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelper.getOtherInvocationServiceMembers;
 import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelper.setCoherenceConfig;
@@ -13,49 +13,49 @@ import com.griddynamics.gridkit.coherence.patterns.message.benchmark.MessageBenc
 import com.griddynamics.gridkit.coherence.patterns.message.benchmark.PatternFacade;
 import com.tangosol.net.Member;
 
-public class SingleRunQueueBenchmark
+public class SingleRunTopicBenchmark
 {
 	public static void warmUp(PatternFacade facade, List<Member> members)
 	{
 		
 	}
-	
+
 	public static void main(String[] args)
 	{
 		setCoherenceConfig();
 		setSysProp("tangosol.coherence.distributed.localstorage", "false");
 		
-		setSysProp("benchmark.queue.senderThreadsCount",   "2");
-		setSysProp("benchmark.queue.receiverThreadsCount", "2");
+		setSysProp("benchmark.topic.senderThreadsCount",   "2");
+		setSysProp("benchmark.topic.receiverThreadsCount", "2");
 		
-		setSysProp("benchmark.queue.messagesPerThread", "250");
+		setSysProp("benchmark.topic.messagesPerThread", "250");
 		
-		setSysProp("benchmark.queue.senderSpeedLimit",   "0");
-		setSysProp("benchmark.queue.receiverSpeedLimit", "0");
+		setSysProp("benchmark.topic.senderSpeedLimit", "1000");
 		
-		setSysProp("benchmark.queue.queuesCount", "3");
+		setSysProp("benchmark.topic.topicsCount", "6");
+		setSysProp("benchmark.topic.topicsPerMember", "3");
 		
-		QueueBenchmarkWorkerParams params = new QueueBenchmarkWorkerParams
+		TopicBenchmarkWorkerParams params = new TopicBenchmarkWorkerParams
 		(
-			Integer.getInteger("benchmark.queue.senderThreadsCount"),
-			Integer.getInteger("benchmark.queue.receiverThreadsCount"),
-			Integer.getInteger("benchmark.queue.messagesPerThread"),
-			Integer.getInteger("benchmark.queue.senderSpeedLimit"),
-			Integer.getInteger("benchmark.queue.receiverSpeedLimit")
+			Integer.getInteger("benchmark.topic.senderThreadsCount"),
+			Integer.getInteger("benchmark.topic.receiverThreadsCount"),
+			Integer.getInteger("benchmark.topic.messagesPerThread"),
+			Integer.getInteger("benchmark.topic.senderSpeedLimit")
 		);
 		
 		PatternFacade facade = PatternFacade.DefaultFacade.getInstance();
 		
 		Set<Member> members = getOtherInvocationServiceMembers(facade.getInvocationService());
 		
-		QueueBenchmarkDispatcher dispatcher = new QueueBenchmarkDispatcher(Integer.getInteger("benchmark.queue.queuesCount"),
+		TopicBenchmarkDispatcher dispatcher = new TopicBenchmarkDispatcher(Integer.getInteger("benchmark.topic.topicsCount"),
+																		   Integer.getInteger("benchmark.topic.topicsPerMember"),
 																		   params, members, facade);
 		
-		sysOut("Starting up SingleRunQueueBenchmark ...");
+		sysOut("Starting up SingleRunTopicBenchmark ...");
 		
 		InvocationServiceStats<MessageBenchmarkSimStats> res = dispatcher.execute();
 		
-		sysOut("SingleRunQueueBenchmark results:");
+		sysOut("SingleRunTopicBenchmark results:");
 		System.out.println("--------------------------------------------------------------------------------");
 		System.out.println(res.toString());
 		System.out.print("Java MS stats");

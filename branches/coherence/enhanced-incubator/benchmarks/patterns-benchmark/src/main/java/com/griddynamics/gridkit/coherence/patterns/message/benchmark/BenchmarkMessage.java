@@ -19,6 +19,8 @@ public class BenchmarkMessage implements Serializable, PortableObject
 	
 	protected TimeStamp sendTS;
 	
+	protected boolean isPoisonPill;
+	
 	public BenchmarkMessage()
 	{
 		// For POF
@@ -26,8 +28,14 @@ public class BenchmarkMessage implements Serializable, PortableObject
 	
 	public BenchmarkMessage(long messageID)
 	{
-		this.messageID = messageID;
-		this.sendTS    = null;
+		this(messageID, false);
+	}
+	
+	public BenchmarkMessage(long messageID, boolean isPoisonPill)
+	{
+		this.messageID    = messageID;
+		this.sendTS       = null;
+		this.isPoisonPill = isPoisonPill;
 	}
 
 	public TimeStamp getSendTS()
@@ -51,6 +59,11 @@ public class BenchmarkMessage implements Serializable, PortableObject
 		return messageID;
 	}
 
+	public boolean isPoisonPill()
+	{
+		return isPoisonPill;
+	}
+
 	protected int getNextPOFParam()
 	{
 		return 3;
@@ -63,6 +76,7 @@ public class BenchmarkMessage implements Serializable, PortableObject
 		messageID     = in.readLong(propID++);
 		messageHeader = in.readString(propID++);
 		sendTS        = (TimeStamp)in.readObject(propID++);
+		isPoisonPill  = in.readBoolean(propID++);
 	}
 
 	@Override
@@ -72,6 +86,7 @@ public class BenchmarkMessage implements Serializable, PortableObject
 		out.writeLong(propID++,   messageID);
 		out.writeString(propID++, messageHeader);
 		out.writeObject(propID++, sendTS);
+		out.writeBoolean(propID++, isPoisonPill);
 	}
 }
 

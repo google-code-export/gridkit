@@ -1,14 +1,17 @@
 package com.griddynamics.gridkit.coherence.patterns.benchmark.stats;
 
-public class InvocationServiceStats
+public class InvocationServiceStats<T> extends TimeDependStats<T>
 {
 	protected int membersCompleated;
 	protected int membersFailed;
 	protected int membersLeft;
 	
+	protected int executionMarksProcessed;
+	
 	public InvocationServiceStats()
 	{
-		membersCompleated = membersFailed = membersLeft = 0;
+		super();
+		membersCompleated = membersFailed = membersLeft = executionMarksProcessed = 0;
 	}
 	
 	public int getMembersCompleated()
@@ -40,12 +43,23 @@ public class InvocationServiceStats
 	{
 		this.membersLeft = membersLeft;
 	}
-	
+
+	public int getExecutionMarksProcessed()
+	{
+		return executionMarksProcessed;
+	}
+
+	public void setExecutionMarksProcessed(int executionMarksProcessed)
+	{
+		this.executionMarksProcessed = executionMarksProcessed;
+	}
+
 	@Override
 	public String toString()
 	{
-		return "FunctorBenchmarkStats [membersCompleated=" + membersCompleated
-				+ ", membersFailed=" + membersFailed + ", membersLeft="
-				+ membersLeft + "]";
+		return "InvocationServiceStats [executionMarksProcessed="
+				+ executionMarksProcessed + ", membersCompleated="
+				+ membersCompleated + ", membersFailed=" + membersFailed
+				+ ", membersLeft=" + membersLeft + "]";
 	}
 }
