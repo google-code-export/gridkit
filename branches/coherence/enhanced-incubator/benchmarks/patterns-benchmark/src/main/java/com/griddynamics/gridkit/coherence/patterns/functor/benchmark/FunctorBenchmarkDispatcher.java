@@ -1,119 +1,44 @@
 package com.griddynamics.gridkit.coherence.patterns.functor.benchmark;
 
-import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelper.sysOut;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import com.griddynamics.gridkit.coherence.patterns.benchmark.FunctorExecutionMark;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.Dispatcher;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.SimpleContext;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.executionmark.FunctorExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.stats.Accamulator;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.stats.InvocationServiceStats;
 import com.oracle.coherence.common.identifiers.Identifier;
-import com.tangosol.net.InvocationObserver;
-import com.tangosol.net.InvocationService;
+import com.tangosol.net.Invocable;
 import com.tangosol.net.Member;
 
-public class FunctorBenchmarkDispatcher
+public class FunctorBenchmarkDispatcher extends Dispatcher<FunctorExecutionMark,
+														   InvocationServiceStats<FunctorBenchmarkStats>,
+														   FunctorBenchmarkParams>
 {
-	protected final Identifier[] contexts;
+	protected final PatternFacade facade;
 	
-	protected final Object memorySynchronizer = new Object();
-	protected CountDownLatch latch;
-	protected FunctorBenchmarkStats dispatcherResult;
-	protected List<List<FunctorExecutionMark>> workersResult;
+	protected Invocable invocableWorker;
 	
-	public FunctorBenchmarkDispatcher(int contextsCount)
+	public FunctorBenchmarkDispatcher(Set<Member> members, PatternFacade facade)
 	{
-		this.contexts = new Identifier[contextsCount];
+		super(members,facade.getInvocationService());
+		this.facade = facade;
 	}
 	
-	public FunctorBenchmarkStats execute(PatternFacade facade,
-										 Map<Member,FunctorBenchmarkWorkerParams> workers)
+	@Override
+	protected void prepare(FunctorBenchmarkParams benchmarkParams) throws Exception
 	{
-		try
+		Identifier[] contexts = new Identifier[benchmarkParams.getContextsCount()];
+		
+		for(int i=0; i < contexts.length; ++i)
 		{
-			synchronized (memorySynchronizer)
-			{
-				latch            = new CountDownLatch(workers.size());
-				dispatcherResult = new FunctorBenchmarkStats();
-				workersResult    = new ArrayList<List<FunctorExecutionMark>>();
-			}
-			
-			for(int i=0; i < contexts.length; ++i)
-			{
-				contexts[i] = facade.registerContext("ctx-" + i, new SimpleContext("ctx-" + i));
-			}
-			
-			InvocationService invocationService = facade.getInvocationService();
-			
-			invocationService.execute(new FunctorBenchmarkWorker(workers, contexts),
-									  workers.keySet(),
-									  new FunctorBenchmarkObserver());
-			
-			try
-			{
-				latch.await();
-			}
-			catch (InterruptedException e)
-			{
-				throw new RuntimeException("FunctorBenchmarkDispatcher has been interrupted");
-			}
-			
-			//Guaranteed by latch.await()
-			calculateExecutionStatistics();
-		}
-		catch (Throwable t)
-		{
-			sysOut("-------- Exception on FunctorBenchmarkStats.execute(...) --------");
-			t.printStackTrace();
-			System.exit(1);
+			contexts[i] = facade.registerContext("ctx-" + i, new SimpleContext("ctx-" + i));
 		}
 		
-		return dispatcherResult;
-	}
-	
-	class FunctorBenchmarkObserver implements InvocationObserver
-	{
-		@Override
-		public void memberCompleted(Member member, Object oResult)
-		{
-			synchronized (memorySynchronizer)
-			{
-				workersResult.add(Arrays.asList((FunctorExecutionMark[])oResult));
-				dispatcherResult.setMembersCompleated(dispatcherResult.getMembersCompleated()+1);
-				latch.countDown();
-			}
-		}
-
-		@Override
-		public void memberFailed(Member member, Throwable eFailure)
-		{
-			synchronized (memorySynchronizer)
-			{			
-				dispatcherResult.setMembersFailed(dispatcherResult.getMembersFailed()+1);
-				latch.countDown();
-			}
-		}
-
-		@Override
-		public void memberLeft(Member member)
-		{
-			synchronized (memorySynchronizer)
-			{			
-				dispatcherResult.setMembersLeft(dispatcherResult.getMembersLeft()+1);
-				latch.countDown();
-			}
-		}
-		
-		@Override
-		public void invocationCompleted()
-		{
-			
-		}
+		invocableWorker = new FunctorBenchmarkWorker(benchmarkParams, contexts);
 	}
 
 	protected void calculateExecutionStatistics()
@@ -123,10 +48,11 @@ public class FunctorBenchmarkDispatcher
 		dispatcherResult.setJavaNsStats(calculateExecutionStatisticsInternal(new FunctorExecutionMark.JavaNsExtractor()));
 		
 		dispatcherResult.setCoherenceMsStats(calculateExecutionStatisticsInternal(new FunctorExecutionMark.CoherenceMsExtractor()));
+		
+		dispatcherResult.setExecutionMarksProcessed(getDispatcherResultSise());
 	}
 	
-	protected FunctorBenchmarkStats.TimeUnitDependStats calculateExecutionStatisticsInternal
-			   (FunctorExecutionMark.FunctorExecutionMarkTimeExtractor te)
+	protected FunctorBenchmarkStats calculateExecutionStatisticsInternal(FunctorExecutionMark.FunctorExecutionMarkTimeExtractor te)
 	{	
 		Accamulator  startTime = new Accamulator();
 		Accamulator returnTime = new Accamulator();
@@ -150,7 +76,7 @@ public class FunctorBenchmarkDispatcher
 			}
 		}
 		
-		FunctorBenchmarkStats.TimeUnitDependStats res = new FunctorBenchmarkStats.TimeUnitDependStats();
+		FunctorBenchmarkStats res = new FunctorBenchmarkStats();
 		
 		res.totalTime  = (returnTime.getMax() - startTime.getMin()) / TimeUnit.SECONDS.toMillis(1);
 		res.throughput = n / res.totalTime;
@@ -168,5 +94,23 @@ public class FunctorBenchmarkDispatcher
 		res.minReturnLatency = returnLatency.getMin();
 		
 		return res;
+	}
+
+	@Override
+	protected Invocable getInvocableWorker()
+	{
+		return invocableWorker;
+	}
+	
+	@Override
+	protected InvocationServiceStats<FunctorBenchmarkStats> createDispatcherResult()
+	{
+		return new InvocationServiceStats<FunctorBenchmarkStats>();
+	}
+
+	@Override
+	protected List<List<FunctorExecutionMark>> createWorkersResult()
+	{
+		return new ArrayList<List<FunctorExecutionMark>>();
 	}
 }

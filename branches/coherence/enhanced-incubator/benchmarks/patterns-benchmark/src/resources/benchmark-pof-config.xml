@@ -44,12 +44,12 @@
         
         <user-type>
         	<type-id>1009</type-id>
-        	<class-name>com.griddynamics.gridkit.coherence.patterns.benchmark.CommandExecutionMark</class-name>
+        	<class-name>com.griddynamics.gridkit.coherence.patterns.benchmark.executionmark.CommandExecutionMark</class-name>
         </user-type>
 
         <user-type>
         	<type-id>1010</type-id>
-        	<class-name>com.griddynamics.gridkit.coherence.patterns.benchmark.FunctorExecutionMark</class-name>
+        	<class-name>com.griddynamics.gridkit.coherence.patterns.benchmark.executionmark.FunctorExecutionMark</class-name>
         </user-type>
         
         <user-type>
@@ -64,7 +64,7 @@
         
         <user-type>
         	<type-id>1013</type-id>
-        	<class-name>com.griddynamics.gridkit.coherence.patterns.benchmark.MessageExecutionMark</class-name>
+        	<class-name>com.griddynamics.gridkit.coherence.patterns.benchmark.executionmark.MessageExecutionMark</class-name>
         </user-type>
         
         <user-type>

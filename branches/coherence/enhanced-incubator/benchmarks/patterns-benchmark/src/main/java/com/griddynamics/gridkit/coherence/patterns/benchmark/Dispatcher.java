@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
+import com.griddynamics.gridkit.coherence.patterns.benchmark.executionmark.MessageExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.stats.InvocationServiceStats;
 import com.tangosol.net.Invocable;
 import com.tangosol.net.InvocationObserver;

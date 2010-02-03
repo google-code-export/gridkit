@@ -3,9 +3,9 @@ package com.griddynamics.gridkit.coherence.patterns.functor.benchmark;
 import java.io.IOException;
 import java.io.Serializable;
 
-import com.griddynamics.gridkit.coherence.patterns.benchmark.CommandExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.SimpleContext;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.TimeStamp;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.executionmark.CommandExecutionMark;
 import com.oracle.coherence.patterns.functor.Functor;
 import com.tangosol.io.pof.PofReader;
 import com.tangosol.io.pof.PofWriter;

@@ -5,7 +5,6 @@ import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelpe
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -14,34 +13,26 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import com.griddynamics.gridkit.coherence.patterns.benchmark.CommandExecutionMark;
-import com.griddynamics.gridkit.coherence.patterns.benchmark.FunctorExecutionMark;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.executionmark.CommandExecutionMark;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.executionmark.FunctorExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.speedlimit.SpeedLimit;
 import com.oracle.coherence.common.identifiers.Identifier;
-import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Invocable;
 import com.tangosol.net.InvocationService;
-import com.tangosol.net.Member;
 
 public class FunctorBenchmarkWorker implements Invocable, Serializable
 {
 	private static final long serialVersionUID = -1526686068548324036L;
 	
 	protected final Identifier[] contexts;
-	protected final Map<Member, FunctorBenchmarkWorkerParams> paramsMap;
+	protected final FunctorBenchmarkParams benchmarkParams;
 	
 	protected transient CommandExecutionMark[] workerResult;
 	
-	public FunctorBenchmarkWorker(Map<Member, FunctorBenchmarkWorkerParams> paramsMap, Identifier[] contexts)
+	public FunctorBenchmarkWorker(FunctorBenchmarkParams benchmarkParams, Identifier[] contexts)
 	{
-		this.contexts  = contexts;
-		this.paramsMap = paramsMap;
-	}
-	
-	@Override
-	public void init(InvocationService service)
-	{
-		// TODO Auto-generated method stub
+		this.contexts        = contexts;
+		this.benchmarkParams = benchmarkParams;
 	}
 
 	@Override
@@ -49,25 +40,23 @@ public class FunctorBenchmarkWorker implements Invocable, Serializable
 	{
 		try
 		{
-			final FunctorBenchmarkWorkerParams params = paramsMap.get(CacheFactory.getCluster().getLocalMember());
-			
 			final ConcurrentLinkedQueue<FunctorExecutionMark> workerResult = new ConcurrentLinkedQueue<FunctorExecutionMark>();
 			
 			final Random rnd = new Random(System.currentTimeMillis());
 			
 			final PatternFacade facade = PatternFacade.DefaultFacade.getInstance();
 			
-			final FunctorFactory functorFactory = getFunctorFactoryByName(params.getFunctorType());
+			final FunctorFactory functorFactory = getFunctorFactoryByName(benchmarkParams.getFunctorType());
 			
-			final SpeedLimit speedLimit = SpeedLimit.SpeedLimitHelper.getSpeedLimit(params.getOpsPerSec());
+			final SpeedLimit speedLimit = SpeedLimit.SpeedLimitHelper.getSpeedLimit(benchmarkParams.getOpsPerSec());
 			
-			ExecutorService service = params.getThreadCount() == 1 ? Executors.newSingleThreadExecutor() 
-																   : Executors.newFixedThreadPool(params.getThreadCount());
+			ExecutorService service = benchmarkParams.getThreadCount() == 1 ? Executors.newSingleThreadExecutor() 
+																			: Executors.newFixedThreadPool(benchmarkParams.getThreadCount());
 			
-			List<Callable<Void>> workers = new ArrayList<Callable<Void>>(params.getThreadCount());
-			final CyclicBarrier  barrier = new CyclicBarrier(params.getThreadCount());
+			List<Callable<Void>> workers = new ArrayList<Callable<Void>>(benchmarkParams.getThreadCount());
+			final CyclicBarrier  barrier = new CyclicBarrier(benchmarkParams.getThreadCount());
 			
-			for(int j = 0; j != params.getThreadCount(); ++j)
+			for(int j = 0; j != benchmarkParams.getThreadCount(); ++j)
 			{
 				final long exID = j * 10000000;
 				
@@ -80,7 +69,7 @@ public class FunctorBenchmarkWorker implements Invocable, Serializable
 						{
 							barrier.await();
 							
-							for(int i = 0; i != params.getInvocationPerThread(); ++i)
+							for(int i = 0; i != benchmarkParams.getInvocationPerThread(); ++i)
 							{
 								long executionID = exID + i;
 								Identifier context = contexts[rnd.nextInt(contexts.length)];
@@ -113,7 +102,7 @@ public class FunctorBenchmarkWorker implements Invocable, Serializable
 
 			service.invokeAll(workers);
 			
-			synchronized (paramsMap)
+			synchronized (benchmarkParams)
 			{
 				this.workerResult = workerResult.toArray(new FunctorExecutionMark[0]);
 			}
@@ -129,7 +118,7 @@ public class FunctorBenchmarkWorker implements Invocable, Serializable
 	@Override
 	public Object getResult()
 	{
-		synchronized (paramsMap)
+		synchronized (benchmarkParams)
 		{
 			return workerResult;
 		}
@@ -137,13 +126,17 @@ public class FunctorBenchmarkWorker implements Invocable, Serializable
 
 	public static FunctorFactory getFunctorFactoryByName(String name)
 	{
-		String functor = name.toLowerCase();
-		
-		if ("touch".equalsIgnoreCase(functor))
+		if ("touch".equalsIgnoreCase(name))
 		{
 			return new FunctorFactory.TouchFactory();
 		}
 		else
-			throw new RuntimeException("Unknown functor type '" + functor + "'");
+			throw new RuntimeException("Unknown functor type '" + name + "'");
+	}
+	
+	@Override
+	public void init(InvocationService service)
+	{
+
 	}
 }

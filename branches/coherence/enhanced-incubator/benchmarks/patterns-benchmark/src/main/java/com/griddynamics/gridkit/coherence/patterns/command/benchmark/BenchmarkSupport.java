@@ -26,7 +26,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
-import com.griddynamics.gridkit.coherence.patterns.benchmark.CommandExecutionMark;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.executionmark.CommandExecutionMark;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.NamedCache;
 

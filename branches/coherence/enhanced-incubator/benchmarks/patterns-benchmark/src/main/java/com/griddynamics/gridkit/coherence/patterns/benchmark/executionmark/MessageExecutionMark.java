@@ -1,9 +1,10 @@
-package com.griddynamics.gridkit.coherence.patterns.benchmark;
+package com.griddynamics.gridkit.coherence.patterns.benchmark.executionmark;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
+import com.griddynamics.gridkit.coherence.patterns.benchmark.TimeStamp;
 import com.tangosol.io.pof.PofReader;
 import com.tangosol.io.pof.PofWriter;
 import com.tangosol.io.pof.PortableObject;

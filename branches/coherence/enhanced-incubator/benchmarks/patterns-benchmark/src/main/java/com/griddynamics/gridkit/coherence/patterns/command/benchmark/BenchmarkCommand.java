@@ -6,9 +6,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.griddynamics.gridkit.coherence.patterns.benchmark.CommandExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.SimpleContext;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.TimeStamp;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.executionmark.CommandExecutionMark;
 import com.oracle.coherence.patterns.command.Command;
 import com.tangosol.io.pof.PofReader;
 import com.tangosol.io.pof.PofWriter;
