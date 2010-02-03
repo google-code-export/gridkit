@@ -32,7 +32,8 @@ public class TopicBenchmarkWorker implements Invocable, Serializable
 {
 	private static final long serialVersionUID = -5536673473796824919L;
 
-	private final TopicBenchmarkWorkerParams params;
+	private final TopicBenchmarkParams params;
+	
 	private final List<Identifier> allTopics;
 	private final Map<Member,List<Identifier>> allReceiveTopics;
 	
@@ -55,7 +56,7 @@ public class TopicBenchmarkWorker implements Invocable, Serializable
 	
 	//TODO private final static long startWaitTimeOut = 10;
 	
-	public TopicBenchmarkWorker(TopicBenchmarkWorkerParams params,
+	public TopicBenchmarkWorker(TopicBenchmarkParams params,
 								List<Identifier> allTopics,
 								Map<Member, List<Identifier>> allReceiveTopics)
 	{

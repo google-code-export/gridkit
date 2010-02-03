@@ -14,7 +14,8 @@ import com.tangosol.net.InvocationService;
 import com.tangosol.net.Member;
 
 public abstract class Dispatcher<M extends MessageExecutionMark,
-								 S extends InvocationServiceStats<?>>
+								 S extends InvocationServiceStats<?>,
+								 P extends BenchmarkParams>
 {
 	protected final Object memorySynchronizer = new Object();
 	
@@ -30,7 +31,7 @@ public abstract class Dispatcher<M extends MessageExecutionMark,
 	
 	protected abstract Invocable getInvocableWorker();
 	
-	protected abstract void prepare() throws Exception;
+	protected abstract void prepare(P benchmarkParams) throws Exception;
 	
 	public Dispatcher(Set<Member> members, InvocationService invocationService)
 	{
@@ -39,11 +40,11 @@ public abstract class Dispatcher<M extends MessageExecutionMark,
 		this.invocationService = invocationService;
 	}
 	
-	public S execute()
+	public S execute(P benchmarkParams)
 	{
 		try
 		{
-			prepare();
+			prepare(benchmarkParams);
 			
 			synchronized (memorySynchronizer)
 			{
