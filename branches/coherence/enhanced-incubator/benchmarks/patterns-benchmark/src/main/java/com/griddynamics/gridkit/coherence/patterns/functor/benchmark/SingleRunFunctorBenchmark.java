@@ -55,8 +55,7 @@ public class SingleRunFunctorBenchmark
 	//TODO configure invocation service timeout
 	public static void main(String[] args)
 	{
-		setCoherenceConfig();
-		setSysProp("tangosol.coherence.distributed.localstorage", "false");	
+		setCoherenceConfig(false);
 		
 		setSysProp("benchmark.functor.threadCount", "5");
 		setSysProp("benchmark.functor.functor", "touch");

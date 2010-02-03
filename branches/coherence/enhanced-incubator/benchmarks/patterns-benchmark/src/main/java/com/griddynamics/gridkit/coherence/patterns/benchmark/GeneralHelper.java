@@ -21,8 +21,6 @@ import com.tangosol.net.CacheFactory;
 import com.tangosol.net.InvocationService;
 import com.tangosol.net.Member;
 
-
-
 public class GeneralHelper
 {
 	public static void setSysProp(String prop, String value)
@@ -39,12 +37,17 @@ public class GeneralHelper
 		System.out.println(String.format("[%1$tH:%1$tM:%1$tS.%1$tL] ", System.currentTimeMillis()) + String.format(text, args));
 	}
 	
-	public static void setCoherenceConfig()
+	public static void setCoherenceConfig(boolean localstorage)
 	{
 		// Configure coherence
 		setSysProp("tangosol.pof.config"           , "benchmark-pof-config.xml");
 		setSysProp("tangosol.coherence.cacheconfig", "benchmark-pof-cache-config.xml");
 		setSysProp("tangosol.coherence.clusterport", "9001");
+		
+		if (localstorage)
+			setSysProp("tangosol.coherence.distributed.localstorage", "true");
+		else
+			setSysProp("tangosol.coherence.distributed.localstorage", "false");
 	}
 	
 	public static Set<Member> getOtherInvocationServiceMembers(InvocationService is)

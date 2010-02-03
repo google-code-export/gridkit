@@ -37,8 +37,7 @@ public class SingleRunTopicBenchmark
 
 	public static void main(String[] args)
 	{
-		setCoherenceConfig();
-		setSysProp("tangosol.coherence.distributed.localstorage", "false");
+		setCoherenceConfig(false);
 		
 		setSysProp("benchmark.topic.senderThreadsCount",   "2");
 		setSysProp("benchmark.topic.receiverThreadsCount", "2");

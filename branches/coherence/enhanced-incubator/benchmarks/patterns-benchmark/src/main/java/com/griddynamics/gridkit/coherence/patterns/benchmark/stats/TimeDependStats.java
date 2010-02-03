@@ -20,7 +20,7 @@ import java.util.Map;
 
 public class TimeDependStats<T>
 {
-	static enum TimeMeasure {JavaMS, JavaNS, CoherenceMS};
+	public static enum TimeMeasure {JavaMS, JavaNS, CoherenceMS};
 	
 	protected Map<TimeMeasure, T> results = new EnumMap<TimeMeasure, T>(TimeMeasure.class);
 	
