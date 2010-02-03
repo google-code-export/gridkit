@@ -116,8 +116,7 @@ public class CommandTestGroupBench
 	
 	public void start(String[] args)
 	{
-		setCoherenceConfig();
-		setSysProp("tangosol.coherence.distributed.localstorage", "false");
+		setCoherenceConfig(false);
 		
 		setSysProp("outfile", "out" + System.currentTimeMillis());
 		String outfile = System.getProperty("outfile");
@@ -177,7 +176,7 @@ public class CommandTestGroupBench
 		i += benchmarkParams.size();
 		
 		sysOut("Benchmark. Stage V.");
-		/* res5 = */  makeBenchmarkExecutionStage(i, facade, speedLimitBenchmarkParams, resToCSV);
+		/* res5 = */ makeBenchmarkExecutionStage(i, facade, speedLimitBenchmarkParams, resToCSV);
 		
 		Collections.shuffle(speedLimitBenchmarkParams);
 		i += benchmarkParams.size();

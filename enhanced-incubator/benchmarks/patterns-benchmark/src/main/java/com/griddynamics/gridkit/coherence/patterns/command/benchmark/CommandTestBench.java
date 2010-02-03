@@ -52,8 +52,7 @@ public class CommandTestBench
     
     public void start(String[] args)
     {
-    	setCoherenceConfig();
-        setSysProp("tangosol.coherence.distributed.localstorage", "false");
+    	setCoherenceConfig(false);
         
         setSysProp("benchmark.threadCount", "4");
         setSysProp("benchmark.commandPerThread", "1000");
