@@ -3,8 +3,8 @@ package com.griddynamics.gridkit.coherence.patterns.message.benchmark;
 import java.io.IOException;
 import java.io.Serializable;
 
-import com.griddynamics.gridkit.coherence.patterns.benchmark.MessageExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.TimeStamp;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.executionmark.MessageExecutionMark;
 import com.tangosol.io.pof.PofReader;
 import com.tangosol.io.pof.PofWriter;
 import com.tangosol.io.pof.PortableObject;

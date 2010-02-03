@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import com.griddynamics.gridkit.coherence.patterns.benchmark.Dispatcher;
-import com.griddynamics.gridkit.coherence.patterns.benchmark.MessageExecutionMark;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.executionmark.MessageExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.stats.Accamulator;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.stats.InvocationServiceStats;
 import com.griddynamics.gridkit.coherence.patterns.message.benchmark.MessageBenchmarkStats;
@@ -139,13 +139,13 @@ public class TopicBenchmarkDispatcher extends Dispatcher<MessageExecutionMark,
 		
 		MessageBenchmarkStats res = new MessageBenchmarkStats();
 		
-		res.setTotalTime((receiveTime.getMax() - sendTime.getMin()) / TimeUnit.SECONDS.toMillis(1));
-		res.setThroughput(n / res.getTotalTime());
+		res.totalTime  = (receiveTime.getMax() - sendTime.getMin()) / TimeUnit.SECONDS.toMillis(1);
+		res.throughput = n / res.totalTime;
 		
-		res.setAverageLatency (latency.getMean());
-		res.setLatencyVariance(latency.getVariance());
-		res.setMinLatency     (latency.getMin());
-		res.setMaxLatency     (latency.getMax());
+		res.averageLatency  = latency.getMean();
+		res.latencyVariance = latency.getVariance();
+		res.minLatency      = latency.getMin();
+		res.maxLatency      = latency.getMax();
 		
 		return res;
 	}

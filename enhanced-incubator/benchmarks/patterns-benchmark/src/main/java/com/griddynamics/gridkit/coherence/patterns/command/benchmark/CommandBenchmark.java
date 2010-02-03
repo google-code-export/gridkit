@@ -12,8 +12,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import com.griddynamics.gridkit.coherence.patterns.benchmark.CommandExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.SimpleContext;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.executionmark.CommandExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.speedlimit.SpeedLimit;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.stats.Accamulator;
 import com.oracle.coherence.common.identifiers.Identifier;

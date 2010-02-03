@@ -1,7 +1,7 @@
 package com.griddynamics.gridkit.coherence.patterns.functor.benchmark;
 
-import com.griddynamics.gridkit.coherence.patterns.benchmark.CommandExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.SimpleContext;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.executionmark.CommandExecutionMark;
 import com.oracle.coherence.patterns.command.ExecutionEnvironment;
 
 public class TouchFunctor extends BenchmarkFunctor
