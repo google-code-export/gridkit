@@ -16,7 +16,7 @@ import java.util.concurrent.Future;
 
 import com.griddynamics.gridkit.coherence.patterns.benchmark.CommandExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.FunctorExecutionMark;
-import com.griddynamics.gridkit.coherence.patterns.benchmark.SpeedLimit;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.speedlimit.SpeedLimit;
 import com.oracle.coherence.common.identifiers.Identifier;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Invocable;
@@ -27,8 +27,8 @@ public class FunctorBenchmarkWorker implements Invocable, Serializable
 {
 	private static final long serialVersionUID = -1526686068548324036L;
 	
-	protected Identifier[] contexts;
-	protected Map<Member, FunctorBenchmarkWorkerParams> paramsMap;
+	protected final Identifier[] contexts;
+	protected final Map<Member, FunctorBenchmarkWorkerParams> paramsMap;
 	
 	protected transient CommandExecutionMark[] workerResult;
 	
@@ -59,12 +59,7 @@ public class FunctorBenchmarkWorker implements Invocable, Serializable
 			
 			final FunctorFactory functorFactory = getFunctorFactoryByName(params.getFunctorType());
 			
-			SpeedLimit sl = null;
-			if (params.getOpsPerSec() > 0) 
-			{
-				sl = SpeedLimit.createSpeedLimit(params.getOpsPerSec());
-			}
-			final SpeedLimit speedLimit = sl;
+			final SpeedLimit speedLimit = SpeedLimit.SpeedLimitHelper.getSpeedLimit(params.getOpsPerSec());
 			
 			ExecutorService service = params.getThreadCount() == 1 ? Executors.newSingleThreadExecutor() 
 																   : Executors.newFixedThreadPool(params.getThreadCount());
@@ -90,10 +85,7 @@ public class FunctorBenchmarkWorker implements Invocable, Serializable
 								long executionID = exID + i;
 								Identifier context = contexts[rnd.nextInt(contexts.length)];
 							
-								if (speedLimit != null)
-								{
-									speedLimit.accure();
-								}
+								speedLimit.accure();
 									
 								BenchmarkFunctor functor = functorFactory.createFunctor(executionID);
 									
@@ -121,7 +113,6 @@ public class FunctorBenchmarkWorker implements Invocable, Serializable
 
 			service.invokeAll(workers);
 			
-			//TODO can i do this?
 			synchronized (paramsMap)
 			{
 				this.workerResult = workerResult.toArray(new FunctorExecutionMark[0]);
