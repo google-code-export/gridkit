@@ -26,6 +26,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.griddynamics.gridkit.coherence.patterns.benchmark.stats.InvocationServiceStats;
+
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
@@ -60,14 +62,17 @@ public class CommandTestGroupBench
 				{
 					for(int tt = 0; tt < taskTypes.length; ++tt)
 					{
-						res.add(new CommandBenchmarkParams
-								(
-									taskTypes[tt],
-									threadCount[tc],
-									commandPerThread[cpt],
-									contextCount[cc],
-									opsPerSec
-								));
+						CommandBenchmarkParams benchmarkParams = new CommandBenchmarkParams();
+
+				        benchmarkParams.setCommand(taskTypes[tt]);
+				        benchmarkParams.setThreadCount(threadCount[tc]);
+				        benchmarkParams.setCommandPerThread(commandPerThread[cpt]);
+				        benchmarkParams.setOpsPerSec(opsPerSec);
+				        
+				        benchmarkParams.setReportBuffer("command-benchmark");
+				        benchmarkParams.setContextCount(contextCount[cc]);
+				        
+				        res.add(benchmarkParams);
 					}
 				}
 			}
@@ -76,17 +81,17 @@ public class CommandTestGroupBench
 		return res;
 	}
 	
-	public static Map<CommandBenchmarkParams, CommandBenchmarkStats> executeBenchmark(PatternFacade facade, Collection<CommandBenchmarkParams> params)
+	public static Map<CommandBenchmarkParams, InvocationServiceStats<CommandBenchmarkStats>> executeBenchmark(PatternFacade facade, Collection<CommandBenchmarkParams> params)
 	{
-		Map<CommandBenchmarkParams, CommandBenchmarkStats> res = new LinkedHashMap<CommandBenchmarkParams, CommandBenchmarkStats>();
+		Map<CommandBenchmarkParams, InvocationServiceStats<CommandBenchmarkStats>> res = new LinkedHashMap<CommandBenchmarkParams, InvocationServiceStats<CommandBenchmarkStats>>();
 		
 		for(CommandBenchmarkParams param : params)
 		{
 			sysOut("Executing benchmark for " + param.toString());
 			
-			CommandBenchmark commandBenchmark = new CommandBenchmark("command-benchmark");
+			CommandBenchmark commandBenchmark = new CommandBenchmark();
 			
-			CommandBenchmarkStats benchmarkResults = commandBenchmark.execute(facade, param);
+			InvocationServiceStats<CommandBenchmarkStats> benchmarkResults = commandBenchmark.execute(facade, param);
 			
 			res.put(param, benchmarkResults);
 		}
@@ -96,19 +101,19 @@ public class CommandTestGroupBench
 
 	public static final double throughputScale = 0.7;
 	
-	static private Map<CommandBenchmarkParams, CommandBenchmarkStats> makeBenchmarkExecutionStage(int start, PatternFacade facade,
+	static private Map<CommandBenchmarkParams, InvocationServiceStats<CommandBenchmarkStats>> makeBenchmarkExecutionStage(int start, PatternFacade facade,
 																							 List<CommandBenchmarkParams> benchmarkParams,
 																							 List<CSVHelper.StatsCSVRow> resToCSV)
 	{
-		Map<CommandBenchmarkParams, CommandBenchmarkStats> res = executeBenchmark(facade, benchmarkParams);
+		Map<CommandBenchmarkParams, InvocationServiceStats<CommandBenchmarkStats>> res = executeBenchmark(facade, benchmarkParams);
 		
-		for (Map.Entry<CommandBenchmarkParams, CommandBenchmarkStats> r : res.entrySet())
+		for (Map.Entry<CommandBenchmarkParams, InvocationServiceStats<CommandBenchmarkStats>> r : res.entrySet())
 		{
 			++start;
 			
-			resToCSV.add(new CSVHelper.StatsCSVRow(start,r.getKey(),r.getValue().javaMsStats, CSVHelper.StatsCSVRow.TimeMeasuringType.JavaMS));
-			resToCSV.add(new CSVHelper.StatsCSVRow(start,r.getKey(),r.getValue().javaNsStats, CSVHelper.StatsCSVRow.TimeMeasuringType.JavaNS));
-			resToCSV.add(new CSVHelper.StatsCSVRow(start,r.getKey(),r.getValue().coherenceMsStats, CSVHelper.StatsCSVRow.TimeMeasuringType.CoherenceMS));
+			resToCSV.add(new CSVHelper.StatsCSVRow(start,r.getKey(),r.getValue().getJavaMsStats(), CSVHelper.StatsCSVRow.TimeMeasuringType.JavaMS));
+			resToCSV.add(new CSVHelper.StatsCSVRow(start,r.getKey(),r.getValue().getJavaNsStats(), CSVHelper.StatsCSVRow.TimeMeasuringType.JavaNS));
+			resToCSV.add(new CSVHelper.StatsCSVRow(start,r.getKey(),r.getValue().getCoherenceMsStats(), CSVHelper.StatsCSVRow.TimeMeasuringType.CoherenceMS));
 		}
 		
 		return res;
@@ -132,19 +137,19 @@ public class CommandTestGroupBench
 		int i = 0;
 		
 		sysOut("Benchmark. Stage I.");
-		Map<CommandBenchmarkParams, CommandBenchmarkStats> res1 = makeBenchmarkExecutionStage(i,facade, benchmarkParams, resToCSV);
+		Map<CommandBenchmarkParams, InvocationServiceStats<CommandBenchmarkStats>> res1 = makeBenchmarkExecutionStage(i,facade, benchmarkParams, resToCSV);
 		
 		Collections.shuffle(benchmarkParams);
 		i += benchmarkParams.size();
 		
 		sysOut("Benchmark. Stage II.");
-		Map<CommandBenchmarkParams, CommandBenchmarkStats> res2 = makeBenchmarkExecutionStage(i,facade, benchmarkParams, resToCSV);
+		Map<CommandBenchmarkParams, InvocationServiceStats<CommandBenchmarkStats>> res2 = makeBenchmarkExecutionStage(i,facade, benchmarkParams, resToCSV);
 		
 		Collections.shuffle(benchmarkParams);
 		i += benchmarkParams.size();
 		
 		sysOut("Benchmark. Stage III.");
-		Map<CommandBenchmarkParams, CommandBenchmarkStats> res3 = makeBenchmarkExecutionStage(i,facade, benchmarkParams, resToCSV);
+		Map<CommandBenchmarkParams, InvocationServiceStats<CommandBenchmarkStats>> res3 = makeBenchmarkExecutionStage(i,facade, benchmarkParams, resToCSV);
 		
 		//Calculating average throughput
 		
@@ -152,19 +157,22 @@ public class CommandTestGroupBench
 		
 		for (CommandBenchmarkParams p : benchmarkParams)
 		{
-			CommandBenchmarkStats r1 = res1.get(p);
-			CommandBenchmarkStats r2 = res2.get(p);
-			CommandBenchmarkStats r3 = res3.get(p);
+			InvocationServiceStats<CommandBenchmarkStats> r1 = res1.get(p);
+			InvocationServiceStats<CommandBenchmarkStats> r2 = res2.get(p);
+			InvocationServiceStats<CommandBenchmarkStats> r3 = res3.get(p);
 			
-			int opsPerSec = (int)((r1.coherenceMsStats.throughput + r2.coherenceMsStats.throughput + r3.coherenceMsStats.throughput) / 3 * throughputScale);
+			int opsPerSec = (int)((r1.getCoherenceMsStats().throughput + r2.getCoherenceMsStats().throughput + r3.getCoherenceMsStats().throughput) / 3 * throughputScale);
 			
 			//TODO ask from type of type get 
+			CommandBenchmarkParams slbp = new CommandBenchmarkParams();
 			
-			speedLimitBenchmarkParams.add(new CommandBenchmarkParams(p.getCommand(),
-																	 p.getThreadCount(),
-																	 p.getCommandPerThread(),
-																	 p.getContextCount(),
-																	 opsPerSec));
+	        slbp.setCommand(p.getCommand());
+	        slbp.setThreadCount(p.getThreadCount());
+	        slbp.setCommandPerThread(p.getCommandPerThread());
+	        slbp.setOpsPerSec(opsPerSec);
+	        
+	        slbp.setReportBuffer("command-benchmark");
+	        slbp.setContextCount(p.getContextCount());
 		}
 		
 		i += benchmarkParams.size();

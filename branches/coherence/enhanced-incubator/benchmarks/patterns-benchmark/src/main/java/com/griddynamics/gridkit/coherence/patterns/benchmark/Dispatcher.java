@@ -18,6 +18,7 @@ package com.griddynamics.gridkit.coherence.patterns.benchmark;
 import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelper.sysOut;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -36,18 +37,19 @@ public abstract class Dispatcher<M extends MessageExecutionMark,
 	protected final Object memorySynchronizer = new Object();
 	
 	protected S              dispatcherResult;
-	protected List<List<M>>  workersResult;
+	protected List<Collection<M>>  workersResult;
 	protected CountDownLatch latch;
 	
 	protected final Set<Member>       members;
 	protected final InvocationService invocationService;
 	
-	protected abstract S             createDispatcherResult();
-	protected abstract List<List<M>> createWorkersResult();
+	protected abstract S                   createDispatcherResult();
+	protected abstract List<Collection<M>> createWorkersResult();
 	
 	protected abstract Invocable getInvocableWorker();
 	
-	protected abstract void prepare(P benchmarkParams) throws Exception;
+	protected void prepare(P benchmarkParams) throws Exception {};
+	protected void after(P benchmarkParams) throws Exception {};
 	
 	public Dispatcher(Set<Member> members, InvocationService invocationService)
 	{
@@ -73,6 +75,8 @@ public abstract class Dispatcher<M extends MessageExecutionMark,
 
 			latch.await();
 
+			after(benchmarkParams);
+			
 			//Guaranteed by latch.await()
 			calculateExecutionStatistics();
 		}
@@ -92,7 +96,7 @@ public abstract class Dispatcher<M extends MessageExecutionMark,
 	{
 		int n = 0;
 		
-		for (List<M> l : workersResult)
+		for (Collection<M> l : workersResult)
 		{
 			n += l.size();
 		}

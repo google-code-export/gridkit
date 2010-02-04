@@ -21,12 +21,15 @@ import com.griddynamics.gridkit.coherence.patterns.command.benchmark.incubator.I
 import com.oracle.coherence.common.identifiers.Identifier;
 import com.oracle.coherence.patterns.command.Command;
 import com.oracle.coherence.patterns.command.Context;
+import com.tangosol.net.InvocationService;
 
 public interface PatternFacade {
 
 	public Identifier registerContext(String name, Context ctx);
 	
 	public <T extends Context> Identifier submit(Identifier id, Command<T> command);
+	
+	public InvocationService getInvocationService();
 	
 	public static class Helper {		
 		public static PatternFacade create() {

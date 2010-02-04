@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
+package com.griddynamics.gridkit.coherence.patterns.command.benchmark.commands;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -24,6 +24,7 @@ import java.util.Map;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.SimpleContext;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.TimeStamp;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.executionmark.CommandExecutionMark;
+import com.griddynamics.gridkit.coherence.patterns.command.benchmark.BenchmarkSupport;
 import com.oracle.coherence.patterns.command.Command;
 import com.tangosol.io.pof.PofReader;
 import com.tangosol.io.pof.PofWriter;

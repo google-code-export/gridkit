@@ -93,12 +93,13 @@ public class BenchmarkSupport {
 			System.exit(1);
 		}
 	}
-	public static Map waitForBuffer(String cache, int totalSize) {
+	@SuppressWarnings("unchecked")
+	public static Map waitForBuffer(String cache, long totalSize) {
 		return waitForBuffers(Collections.singletonList(cache), totalSize);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Map waitForBuffers(Collection<String> cacheList, int totalSize) {
+	public static Map waitForBuffers(Collection<String> cacheList, long totalSize) {
 		NamedCache[] caches = new NamedCache[cacheList.size()];
 		int n = 0;
 		for(String name: cacheList) {

@@ -16,6 +16,7 @@
 package com.griddynamics.gridkit.coherence.patterns.message.benchmark.topic;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -139,7 +140,7 @@ public class TopicBenchmarkDispatcher extends Dispatcher<MessageExecutionMark,
 		
 		int n = 0;
 		
-		for (List<MessageExecutionMark> l : workersResult)
+		for (Collection<MessageExecutionMark> l : workersResult)
 		{
 			for(MessageExecutionMark m : l)
 			{
@@ -172,9 +173,9 @@ public class TopicBenchmarkDispatcher extends Dispatcher<MessageExecutionMark,
 	}
 
 	@Override
-	protected List<List<MessageExecutionMark>> createWorkersResult()
+	protected List<Collection<MessageExecutionMark>> createWorkersResult()
 	{
-		return new ArrayList<List<MessageExecutionMark>>();
+		return new ArrayList<Collection<MessageExecutionMark>>();
 	}
 
 	@Override
