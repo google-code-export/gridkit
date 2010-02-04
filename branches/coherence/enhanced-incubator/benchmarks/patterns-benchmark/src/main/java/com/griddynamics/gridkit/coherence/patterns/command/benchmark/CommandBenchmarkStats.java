@@ -15,7 +15,9 @@
  */
 package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
 
-final class CommandBenchmarkStats
+import com.griddynamics.gridkit.coherence.patterns.benchmark.csv.CSVHelper;
+
+public class CommandBenchmarkStats
 {
 	public double totalTime;
 		

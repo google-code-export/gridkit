@@ -132,6 +132,8 @@ public class TopicBenchmarkWorker implements Invocable, Serializable
 			t.printStackTrace();
 			System.exit(1);
 		}
+		
+		System.gc();
 	}
 	
 	@Override

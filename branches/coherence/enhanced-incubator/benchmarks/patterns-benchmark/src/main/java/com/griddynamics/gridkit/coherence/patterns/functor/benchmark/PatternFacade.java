@@ -34,7 +34,7 @@ public interface PatternFacade
 	public Identifier registerContext(String name, SimpleContext ctx);
 	public InvocationService getInvocationService();
 	
-	public static class DefaultFacade implements PatternFacade
+	public static class DefaultFacade extends com.griddynamics.gridkit.coherence.patterns.benchmark.PatternFacade implements PatternFacade
 	{
 		static private final DefaultFacade instance = new DefaultFacade();
 		
@@ -48,6 +48,7 @@ public interface PatternFacade
 		
 		private DefaultFacade()
 		{
+			super();
 			contextsManager  = DefaultContextsManager.getInstance();
 			functorSubmitter = DefaultFunctorSubmitter.getInstance();
 		}
@@ -61,7 +62,7 @@ public interface PatternFacade
 		@Override
 		public Identifier registerContext(String name, SimpleContext ctx)
 		{
-			return contextsManager.registerContext(name, ctx);
+			return contextsManager.registerContext(name, ctx, conf);
 		}
 
 		@Override

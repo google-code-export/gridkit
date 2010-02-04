@@ -9,17 +9,17 @@
 
         <user-type>
             <type-id>1002</type-id>
-            <class-name>com.griddynamics.gridkit.coherence.patterns.command.benchmark.EmptyCommand</class-name>
+            <class-name>com.griddynamics.gridkit.coherence.patterns.command.benchmark.commands.EmptyCommand</class-name>
         </user-type>
 
         <user-type>
             <type-id>1003</type-id>
-            <class-name>com.griddynamics.gridkit.coherence.patterns.command.benchmark.ReadCommand</class-name>
+            <class-name>com.griddynamics.gridkit.coherence.patterns.command.benchmark.commands.ReadCommand</class-name>
         </user-type>
 
         <user-type>
             <type-id>1004</type-id>
-            <class-name>com.griddynamics.gridkit.coherence.patterns.command.benchmark.UpdateCommand</class-name>
+            <class-name>com.griddynamics.gridkit.coherence.patterns.command.benchmark.commands.UpdateCommand</class-name>
         </user-type>
 
         <user-type>
@@ -29,7 +29,7 @@
         
         <user-type>
             <type-id>1006</type-id>
-            <class-name>com.griddynamics.gridkit.coherence.patterns.command.benchmark.BenchmarkCommand</class-name>
+            <class-name>com.griddynamics.gridkit.coherence.patterns.command.benchmark.commands.BenchmarkCommand</class-name>
         </user-type>
         
          <user-type>

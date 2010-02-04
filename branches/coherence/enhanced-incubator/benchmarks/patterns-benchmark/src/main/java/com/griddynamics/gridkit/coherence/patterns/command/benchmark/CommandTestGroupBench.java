@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.griddynamics.gridkit.coherence.patterns.benchmark.csv.CSVHelper;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.stats.InvocationServiceStats;
 
 /**
@@ -126,7 +127,7 @@ public class CommandTestGroupBench
 		setSysProp("outfile", "out" + System.currentTimeMillis());
 		String outfile = System.getProperty("outfile");
 		
-		final PatternFacade facade = PatternFacade.Helper.create();
+		final PatternFacade facade = PatternFacade.DefaultFacade.getInstance();
 		
 		CommandTestBench.warmUp(facade);
 		

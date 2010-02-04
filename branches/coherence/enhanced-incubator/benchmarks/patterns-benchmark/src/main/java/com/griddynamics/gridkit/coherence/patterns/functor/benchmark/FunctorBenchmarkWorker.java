@@ -128,6 +128,8 @@ public class FunctorBenchmarkWorker implements Invocable, Serializable
 			t.printStackTrace();
 			System.exit(1);
 		}
+		
+		System.gc();
 	}
 	
 	@Override

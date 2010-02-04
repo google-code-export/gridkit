@@ -76,7 +76,7 @@ public class CommandTestBench
         benchmarkParams.setReportBuffer("command-benchmark");
         benchmarkParams.setContextCount(Integer.getInteger("benchmark.contextCount"));
         
-        PatternFacade facade = PatternFacade.Helper.create();
+        PatternFacade facade = PatternFacade.DefaultFacade.getInstance();
 
         //warmUp(facade);
         

@@ -35,7 +35,7 @@ public interface PatternFacade
 	
 	public Subscriber subscribe(Identifier destination);
 	
-	public static class DefaultFacade implements PatternFacade
+	public static class DefaultFacade extends com.griddynamics.gridkit.coherence.patterns.benchmark.PatternFacade implements PatternFacade
 	{
 		static private final DefaultFacade instance = new DefaultFacade();
 		
@@ -48,13 +48,14 @@ public interface PatternFacade
 		
 		private DefaultFacade()
 		{
+			super();
 			messagingSession = DefaultMessagingSession.getInstance();
 		}
 		
 		@Override
 		public Identifier createQueue(String queueName)
 		{
-			return messagingSession.createQueue(queueName);
+			return messagingSession.createQueue(queueName, conf);
 		}
 
 		@Override
@@ -78,7 +79,7 @@ public interface PatternFacade
 		@Override
 		public Identifier createTopic(String topicName)
 		{
-			return messagingSession.createTopic(topicName);
+			return messagingSession.createTopic(topicName, conf);
 		}
 	}
 }
