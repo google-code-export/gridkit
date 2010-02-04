@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.griddynamics.gridkit.coherence.patterns.benchmark.Dispatcher;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.executionmark.MessageExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.speedlimit.SpeedLimit;
 import com.griddynamics.gridkit.coherence.patterns.message.benchmark.BenchmarkMessage;
@@ -133,7 +134,8 @@ public class TopicBenchmarkWorker implements Invocable, Serializable
 			System.exit(1);
 		}
 		
-		System.gc();
+		if (Dispatcher.gcInWorker)
+			System.gc();
 	}
 	
 	@Override

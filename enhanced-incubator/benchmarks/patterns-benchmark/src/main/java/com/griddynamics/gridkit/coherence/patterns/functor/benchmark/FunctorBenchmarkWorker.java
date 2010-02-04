@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import com.griddynamics.gridkit.coherence.patterns.benchmark.Dispatcher;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.executionmark.CommandExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.executionmark.FunctorExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.speedlimit.SpeedLimit;
@@ -129,7 +130,8 @@ public class FunctorBenchmarkWorker implements Invocable, Serializable
 			System.exit(1);
 		}
 		
-		System.gc();
+		if (Dispatcher.gcInWorker)
+			System.gc();
 	}
 	
 	@Override

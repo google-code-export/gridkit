@@ -26,6 +26,7 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.griddynamics.gridkit.coherence.patterns.benchmark.Dispatcher;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.executionmark.CommandExecutionMark;
 import com.griddynamics.gridkit.coherence.patterns.benchmark.speedlimit.SpeedLimit;
 import com.griddynamics.gridkit.coherence.patterns.command.benchmark.commands.CommandFactory;
@@ -124,7 +125,8 @@ public class CommandBenchmarkWorker implements Invocable, Serializable
 			System.exit(1);
 		}
 		
-		System.gc();
+		if (Dispatcher.gcInWorker)
+			System.gc();
 	}
 	
 	@Override

@@ -15,6 +15,7 @@
  */
 package com.griddynamics.gridkit.coherence.patterns.benchmark;
 
+import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelper.setSysProp;
 import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelper.sysOut;
 
 import java.util.Arrays;
@@ -34,6 +35,18 @@ public abstract class Dispatcher<M extends MessageExecutionMark,
 								 S extends InvocationServiceStats<?>,
 								 P extends BenchmarkParams>
 {
+	static public final boolean gcInWorker;
+	static public final boolean gcInDispatcher;
+	
+	static
+	{
+		setSysProp("benchmark.command-pattern.gc-in-worker",     "false");
+		setSysProp("benchmark.command-pattern.gc-in-dispatcher", "false");
+		
+		gcInWorker     = Boolean.getBoolean("benchmark.command-pattern.gc-in-worker");
+		gcInDispatcher = Boolean.getBoolean("benchmark.command-pattern.gc-in-dispatcher");
+	}
+	
 	protected final Object memorySynchronizer = new Object();
 	
 	protected S              dispatcherResult;
@@ -88,7 +101,10 @@ public abstract class Dispatcher<M extends MessageExecutionMark,
 		}
 		
 		workersResult = null;
-		System.gc();
+		
+		if (gcInDispatcher)
+			System.gc();
+		
 		return dispatcherResult;
 	}
 	
