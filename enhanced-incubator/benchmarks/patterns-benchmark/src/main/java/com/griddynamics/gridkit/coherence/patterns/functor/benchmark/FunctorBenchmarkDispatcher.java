@@ -16,6 +16,7 @@
 package com.griddynamics.gridkit.coherence.patterns.functor.benchmark;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -77,7 +78,7 @@ public class FunctorBenchmarkDispatcher extends Dispatcher<FunctorExecutionMark,
 		
 		int n = 0;
 		
-		for (List<FunctorExecutionMark> l : workersResult)
+		for (Collection<FunctorExecutionMark> l : workersResult)
 		{
 			for(FunctorExecutionMark m : l)
 			{
@@ -124,8 +125,8 @@ public class FunctorBenchmarkDispatcher extends Dispatcher<FunctorExecutionMark,
 	}
 
 	@Override
-	protected List<List<FunctorExecutionMark>> createWorkersResult()
+	protected List<Collection<FunctorExecutionMark>> createWorkersResult()
 	{
-		return new ArrayList<List<FunctorExecutionMark>>();
+		return new ArrayList<Collection<FunctorExecutionMark>>();
 	}
 }

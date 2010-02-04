@@ -22,6 +22,8 @@ import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelpe
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
+import com.griddynamics.gridkit.coherence.patterns.benchmark.stats.InvocationServiceStats;
+
 public class CommandTestBench
 {
     public static void main(String[] args)
@@ -31,15 +33,19 @@ public class CommandTestBench
 
 	public static void warmUp(final PatternFacade facade)
 	{
-		CommandBenchmarkParams benchmarkParams = new CommandBenchmarkParams("empty", // commandType
-													 							  4, // threadCount
-													 						   5000, // commandPerThread,
-													 						   	  4, // contextCount
-													 						   	  0);// opsPerSec
+		CommandBenchmarkParams benchmarkParams = new CommandBenchmarkParams();
+		
+        benchmarkParams.setCommand("empty");
+        benchmarkParams.setThreadCount(4);
+        benchmarkParams.setCommandPerThread(5000);
+        benchmarkParams.setOpsPerSec(0);
+        
+        benchmarkParams.setReportBuffer("warmup");
+        benchmarkParams.setContextCount(4);
 		
 		sysOut("Warming up ...");
 		
-		CommandBenchmark commandBenchmark = new CommandBenchmark("warmup");
+		CommandBenchmark commandBenchmark = new CommandBenchmark();
 		
 		for(int n = 0; n != 20; ++n)
 		{
@@ -58,48 +64,50 @@ public class CommandTestBench
         setSysProp("benchmark.commandPerThread", "1000");
         setSysProp("benchmark.contextCount", "10");
         setSysProp("benchmark.command", "empty");
-        setSysProp("benchmark.speedLimit", "0");
+        setSysProp("benchmark.speedLimit", "1400");
 
-        CommandBenchmarkParams params = new CommandBenchmarkParams
-											(
-												System.getProperty("benchmark.command"),
-												Integer.getInteger("benchmark.threadCount"),
-												Integer.getInteger("benchmark.commandPerThread"),
-												Integer.getInteger("benchmark.contextCount"),
-												Integer.getInteger("benchmark.speedLimit")
-											);
+        CommandBenchmarkParams benchmarkParams = new CommandBenchmarkParams();
+										
+        benchmarkParams.setCommand(System.getProperty("benchmark.command"));
+        benchmarkParams.setThreadCount(Integer.getInteger("benchmark.threadCount"));
+        benchmarkParams.setCommandPerThread(Integer.getInteger("benchmark.commandPerThread"));
+        benchmarkParams.setOpsPerSec(Integer.getInteger("benchmark.speedLimit"));
+        
+        benchmarkParams.setReportBuffer("command-benchmark");
+        benchmarkParams.setContextCount(Integer.getInteger("benchmark.contextCount"));
         
         PatternFacade facade = PatternFacade.Helper.create();
 
         //warmUp(facade);
         
         sysOut("Starting test ...");
-        sysOut("Thread count: %d", params.getThreadCount());
-        sysOut("Command count: %d (%d per thread)", params.getThreadCount() * params.getCommandPerThread(), params.getCommandPerThread());
-        sysOut("Context count: %d", params.getContextCount());
+        sysOut("Thread count: %d", benchmarkParams.getThreadCount());
+        sysOut("Command count: %d (%d per thread)", benchmarkParams.getThreadCount() * benchmarkParams.getCommandPerThread(), benchmarkParams.getCommandPerThread());
+        sysOut("Context count: %d", benchmarkParams.getContextCount());
 
-		CommandBenchmark commandBenchmark = new CommandBenchmark("command-benchmark");
+		CommandBenchmark commandBenchmark = new CommandBenchmark();
 		
-		CommandBenchmarkStats benchmarkResults = commandBenchmark.execute(facade, params);
+		InvocationServiceStats<CommandBenchmarkStats> benchmarkResults = commandBenchmark.execute(facade, benchmarkParams);
         
 		System.out.println();
         sysOut("Done");
-        sysOut("Thread count: %d", params.getThreadCount());
-        sysOut("Command count: %d (%d per thread)", params.getThreadCount() * params.getCommandPerThread(), params.getCommandPerThread());
-        sysOut("Context count: %d", params.getContextCount());
+        sysOut("Thread count: %d", benchmarkParams.getThreadCount());
+        sysOut("Command count: %d (%d per thread)", benchmarkParams.getThreadCount() * benchmarkParams.getCommandPerThread(), benchmarkParams.getCommandPerThread());
+        sysOut("Context count: %d", benchmarkParams.getContextCount());
+        sysOut("Marks processed: %d", benchmarkResults.getExecutionMarksProcessed());
         
         sysOut("----------------Java MS statistics");
-        reportStats(benchmarkResults.javaMsStats);
+        reportStats(benchmarkResults.getJavaMsStats());
         sysOut("----------------Java NS statistics");
-        reportStats(benchmarkResults.javaNsStats);
+        reportStats(benchmarkResults.getJavaNsStats());
         sysOut("----------------Coherenc MS statistics");
-        reportStats(benchmarkResults.coherenceMsStats);
+        reportStats(benchmarkResults.getCoherenceMsStats());
 
         //TODO add clean up
         System.exit(0);
     }
     
-    public static void reportStats(CommandBenchmarkStats.TimeUnitDependStats benchmarkStats) 
+    public static void reportStats(CommandBenchmarkStats benchmarkStats) 
 	{
 		sysOut("Total time [s]:        %014.12f" , benchmarkStats.totalTime);
 		sysOut("Throughput [op/s]:     %014.12f" , benchmarkStats.throughput);

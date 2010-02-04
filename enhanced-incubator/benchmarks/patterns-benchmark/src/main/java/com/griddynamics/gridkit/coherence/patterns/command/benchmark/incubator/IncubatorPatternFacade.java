@@ -17,6 +17,7 @@ package com.griddynamics.gridkit.coherence.patterns.command.benchmark.incubator;
 
 import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelper.setSysProp;
 
+import com.griddynamics.gridkit.coherence.patterns.benchmark.Names;
 import com.griddynamics.gridkit.coherence.patterns.command.benchmark.PatternFacade;
 import com.oracle.coherence.common.identifiers.Identifier;
 import com.oracle.coherence.patterns.command.Command;
@@ -28,6 +29,8 @@ import com.oracle.coherence.patterns.command.DefaultCommandSubmitter;
 import com.oracle.coherence.patterns.command.DefaultContextConfiguration;
 import com.oracle.coherence.patterns.command.DefaultContextsManager;
 import com.oracle.coherence.patterns.command.ContextConfiguration.ManagementStrategy;
+import com.tangosol.net.CacheFactory;
+import com.tangosol.net.InvocationService;
 
 public class IncubatorPatternFacade implements PatternFacade {
 
@@ -50,6 +53,12 @@ public class IncubatorPatternFacade implements PatternFacade {
 	@Override
 	public <T extends Context> Identifier submit(Identifier id, Command<T> command) {
 		return submitter.submitCommand(id, command);
+	}
+
+	@Override
+	public InvocationService getInvocationService()
+	{
+		return (InvocationService)CacheFactory.getService(Names.invocationService);
 	}
 	
 	

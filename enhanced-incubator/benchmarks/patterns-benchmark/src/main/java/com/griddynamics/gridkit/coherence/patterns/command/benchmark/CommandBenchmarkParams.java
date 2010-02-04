@@ -17,26 +17,24 @@ package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
 
 import java.io.Serializable;
 
-public final class CommandBenchmarkParams implements Serializable
+import com.griddynamics.gridkit.coherence.patterns.benchmark.BenchmarkParams;
+
+public final class CommandBenchmarkParams implements Serializable, BenchmarkParams
 {
 	private static final long serialVersionUID = -680095570543015774L;
 
-	private final String command;
+	//------------ Worker parameters ------------//
+	private String command;
+	private String reportBuffer;
 	
-	private final int threadCount;
-	private final int commandPerThread;
-	private final int contextCount;
-	private final int opsPerSec;
+	private int threadCount;
+	private int commandPerThread;
+	private int opsPerSec;
+	//-------------------------------------------//
 	
-	public CommandBenchmarkParams(String command, int threadCount,  int commandPerThread,
-												  int contextCount, int opsPerSec)
-	{
-		this.command          = command;
-		this.threadCount      = threadCount;
-		this.commandPerThread = commandPerThread;
-		this.contextCount     = contextCount;
-		this.opsPerSec        = opsPerSec;
-	}
+	//---------- Dispatcher parameters ----------//
+	private int contextCount;
+	//-------------------------------------------//
 
 	public String getCommand()
 	{
@@ -61,6 +59,41 @@ public final class CommandBenchmarkParams implements Serializable
 	public int getOpsPerSec()
 	{
 		return opsPerSec;
+	}
+	
+	public void setCommand(String command)
+	{
+		this.command = command;
+	}
+
+	public void setThreadCount(int threadCount)
+	{
+		this.threadCount = threadCount;
+	}
+
+	public void setCommandPerThread(int commandPerThread)
+	{
+		this.commandPerThread = commandPerThread;
+	}
+
+	public void setOpsPerSec(int opsPerSec)
+	{
+		this.opsPerSec = opsPerSec;
+	}
+
+	public void setContextCount(int contextCount)
+	{
+		this.contextCount = contextCount;
+	}
+	
+	public String getReportBuffer()
+	{
+		return reportBuffer;
+	}
+
+	public void setReportBuffer(String reportBuffer)
+	{
+		this.reportBuffer = reportBuffer;
 	}
 
 	@Override

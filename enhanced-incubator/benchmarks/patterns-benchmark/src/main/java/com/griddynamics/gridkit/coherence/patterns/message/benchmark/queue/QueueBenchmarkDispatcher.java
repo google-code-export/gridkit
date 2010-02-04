@@ -16,6 +16,7 @@
 package com.griddynamics.gridkit.coherence.patterns.message.benchmark.queue;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,7 +101,7 @@ public class QueueBenchmarkDispatcher extends Dispatcher<MessageExecutionMark,
 		
 		int n = 0;
 		
-		for (List<MessageExecutionMark> l : workersResult)
+		for (Collection<MessageExecutionMark> l : workersResult)
 		{
 			for(MessageExecutionMark m : l)
 			{
@@ -139,8 +140,8 @@ public class QueueBenchmarkDispatcher extends Dispatcher<MessageExecutionMark,
 	}
 
 	@Override
-	protected List<List<MessageExecutionMark>> createWorkersResult()
+	protected List<Collection<MessageExecutionMark>> createWorkersResult()
 	{
-		return new ArrayList<List<MessageExecutionMark>>();
+		return new ArrayList<Collection<MessageExecutionMark>>();
 	}
 }

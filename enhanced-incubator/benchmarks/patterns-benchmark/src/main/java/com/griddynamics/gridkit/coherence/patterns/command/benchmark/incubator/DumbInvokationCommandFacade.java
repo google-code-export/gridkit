@@ -30,6 +30,7 @@ import com.tangosol.io.pof.PofReader;
 import com.tangosol.io.pof.PofWriter;
 import com.tangosol.io.pof.PortableObject;
 import com.tangosol.net.CacheFactory;
+import com.tangosol.net.InvocationService;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.InvocableMap.Entry;
 import com.tangosol.util.processor.AbstractProcessor;
@@ -137,5 +138,11 @@ public class DumbInvokationCommandFacade implements PatternFacade {
 			int propId = 0;
 			out.writeObject(propId++, command);
 		}
+	}
+
+	@Override
+	public InvocationService getInvocationService() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
