@@ -61,7 +61,7 @@ public class CommandBenchmarkWorker implements Invocable, Serializable
 			
 			final SpeedLimit speedLimit = SpeedLimit.SpeedLimitHelper.getSpeedLimit(benchmarkParams.getOpsPerSec());
 			
-			final PatternFacade facade = PatternFacade.Helper.create();
+			final PatternFacade facade = PatternFacade.DefaultFacade.getInstance();
 			
 			final int workerID = workerIDs.get(CacheFactory.getCluster().getLocalMember());
 			
@@ -123,6 +123,8 @@ public class CommandBenchmarkWorker implements Invocable, Serializable
 			t.printStackTrace();
 			System.exit(1);
 		}
+		
+		System.gc();
 	}
 	
 	@Override

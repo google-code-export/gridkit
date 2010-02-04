@@ -87,6 +87,8 @@ public abstract class Dispatcher<M extends MessageExecutionMark,
 			System.exit(1);
 		}
 		
+		workersResult = null;
+		System.gc();
 		return dispatcherResult;
 	}
 	

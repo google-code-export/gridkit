@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
+package com.griddynamics.gridkit.coherence.patterns.benchmark.csv;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -26,6 +26,9 @@ import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.Locale;
 
+import com.griddynamics.gridkit.coherence.patterns.command.benchmark.CommandBenchmarkParams;
+import com.griddynamics.gridkit.coherence.patterns.command.benchmark.CommandBenchmarkStats;
+
 public class CSVHelper
 {
 	private static final String frenchSpace = Character.toString((char)160);
@@ -36,9 +39,9 @@ public class CSVHelper
 		return format.format(d).replaceAll(frenchSpace, "");
 	}
 	
-	static final class StatsCSVRow
+	public static final class StatsCSVRow
 	{
-		static enum TimeMeasuringType
+		public static enum TimeMeasuringType
 		{
 			JavaMS, JavaNS, CoherenceMS
 		}
