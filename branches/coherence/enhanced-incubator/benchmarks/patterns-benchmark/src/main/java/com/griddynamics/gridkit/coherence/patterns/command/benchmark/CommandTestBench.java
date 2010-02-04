@@ -64,7 +64,7 @@ public class CommandTestBench
         setSysProp("benchmark.commandPerThread", "1000");
         setSysProp("benchmark.contextCount", "10");
         setSysProp("benchmark.command", "empty");
-        setSysProp("benchmark.speedLimit", "1400");
+        setSysProp("benchmark.speedLimit", "0");
 
         CommandBenchmarkParams benchmarkParams = new CommandBenchmarkParams();
 										
