@@ -44,9 +44,9 @@ public class CommandTestGroupBench
 		/*--------- Benchmark Configuration ---------*/
 		int opsPerSec = 0;
 		
-		int[] threadCount      = {1, 2, 5, 10, 20};
-		int[] contextCount     = {5, 10, 25, 50, 100};
-		int[] commandPerThread = {10000};
+		int[] threadCount      = {5};//{1, 2, 5, 10, 20};
+		int[] contextCount     = {100};//{5, 10, 25, 50, 100};
+		int[] commandPerThread = {5000};//{10000};
 		
 		String[] taskTypes = {"update"};
 		/*-------------------------------------------*/
@@ -124,12 +124,15 @@ public class CommandTestGroupBench
 	{
 		setCoherenceConfig(false);
 		
-		setSysProp("outfile", "out" + System.currentTimeMillis());
+		setSysProp("benchmark.command-pattern.gc-in-worker",     "true");
+		setSysProp("benchmark.command-pattern.gc-in-dispatcher", "true");
+		
+		setSysProp("outfile", "out_file_" + System.currentTimeMillis() + ".csv");
 		String outfile = System.getProperty("outfile");
 		
 		final PatternFacade facade = PatternFacade.DefaultFacade.getInstance();
 		
-		CommandTestBench.warmUp(facade);
+		//CommandTestBench.warmUp(facade);
 		
 		List<CommandBenchmarkParams> benchmarkParams = prepareBenchmarkParams();
 		//TODO add coherence time
@@ -174,6 +177,8 @@ public class CommandTestGroupBench
 	        
 	        slbp.setReportBuffer("command-benchmark");
 	        slbp.setContextCount(p.getContextCount());
+	        
+	        speedLimitBenchmarkParams.add(slbp);
 		}
 		
 		i += benchmarkParams.size();
