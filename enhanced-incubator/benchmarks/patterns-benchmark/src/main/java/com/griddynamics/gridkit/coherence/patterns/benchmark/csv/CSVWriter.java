@@ -90,7 +90,7 @@ public final class CSVWriter
 	{
         try
         {
-			out.write(n + row.toCSVRow() + "\n");
+			out.write(n + ";" + row.toCSVRow() + "\n");
 		}
         catch (IOException e)
         {
@@ -102,7 +102,7 @@ public final class CSVWriter
 	{
         try
         {
-			out.write(n + row + "\n");
+			out.write(n + ";" + row + "\n");
 		}
         catch (IOException e)
         {

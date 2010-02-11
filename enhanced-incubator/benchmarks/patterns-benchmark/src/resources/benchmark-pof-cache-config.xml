@@ -66,7 +66,8 @@
 		<invocation-scheme>
 			<scheme-name>functor-benchmark-invocation-service</scheme-name>
 			<service-name>functorBenchmarkInvocationService</service-name>
-			<autostart>true</autostart>
+			<autostart system-property="benchmark.backend.start-ic">true</autostart>
+			<thread-count>1</thread-count>
 			<request-timeout>0</request-timeout>
 		</invocation-scheme>
 

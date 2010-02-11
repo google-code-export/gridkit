@@ -19,12 +19,12 @@ import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelpe
 
 import com.tangosol.net.DefaultCacheServer;
 
-public class Backend
+public class DumbBackend
 {
 	public static void main(String[] args)
 	{
-		setCoherenceConfig(true);
-		
+		setCoherenceConfig(false);
+		System.setProperty("tangosol.coherence.cacheconfig", "benchmark-pof-cache-empty-config.xml");
 		DefaultCacheServer.main(args);
 	}
 }

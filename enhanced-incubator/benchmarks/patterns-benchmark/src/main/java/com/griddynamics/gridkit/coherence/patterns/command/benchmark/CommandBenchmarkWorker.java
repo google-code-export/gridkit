@@ -34,17 +34,16 @@ import com.oracle.coherence.common.identifiers.Identifier;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Invocable;
 import com.tangosol.net.InvocationService;
-import com.tangosol.net.Member;
 
 public class CommandBenchmarkWorker implements Invocable, Serializable
 {
 	private static final long serialVersionUID = 4861617501489064620L;
 
-	protected final CommandBenchmarkParams benchmarkParams;
-	protected final Identifier[] contexts;
-	protected final Map<Member, Integer> workerIDs;
+	protected CommandBenchmarkParams benchmarkParams;
+	protected Identifier[] contexts;
+	protected Map<Integer, Integer> workerIDs;
 	
-	public CommandBenchmarkWorker(CommandBenchmarkParams benchmarkParams, Identifier[] contexts, Map<Member, Integer> workerIDs)
+	public CommandBenchmarkWorker(CommandBenchmarkParams benchmarkParams, Identifier[] contexts, Map<Integer, Integer> workerIDs)
 	{
 		this.contexts        = contexts;
 		this.workerIDs       = workerIDs;
@@ -64,7 +63,7 @@ public class CommandBenchmarkWorker implements Invocable, Serializable
 			
 			final PatternFacade facade = PatternFacade.DefaultFacade.getInstance();
 			
-			final int workerID = workerIDs.get(CacheFactory.getCluster().getLocalMember());
+			final int workerID = workerIDs.get(CacheFactory.getCluster().getLocalMember().getId());
 			
 			ExecutorService service = Executors.newFixedThreadPool(benchmarkParams.getThreadCount());
 			
