@@ -44,6 +44,8 @@ public class GeneralHelper
 		setSysProp("tangosol.coherence.cacheconfig", "benchmark-pof-cache-config.xml");
 		setSysProp("tangosol.coherence.clusterport", "9001");
 		
+		setSysProp("benchmark.backend.start-ic", "true");
+		
 		if (localstorage)
 			setSysProp("tangosol.coherence.distributed.localstorage", "true");
 		else

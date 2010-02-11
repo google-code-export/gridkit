@@ -40,11 +40,11 @@ public abstract class Dispatcher<M extends MessageExecutionMark,
 	
 	static
 	{
-		setSysProp("benchmark.command-pattern.gc-in-worker",     "false");
-		setSysProp("benchmark.command-pattern.gc-in-dispatcher", "false");
+		setSysProp("benchmark.gc-in-worker",     "false");
+		setSysProp("benchmark.gc-in-dispatcher", "false");
 		
-		gcInWorker     = Boolean.getBoolean("benchmark.command-pattern.gc-in-worker");
-		gcInDispatcher = Boolean.getBoolean("benchmark.command-pattern.gc-in-dispatcher");
+		gcInWorker     = Boolean.getBoolean("benchmark.gc-in-worker");
+		gcInDispatcher = Boolean.getBoolean("benchmark.gc-in-dispatcher");
 	}
 	
 	protected final Object memorySynchronizer = new Object();

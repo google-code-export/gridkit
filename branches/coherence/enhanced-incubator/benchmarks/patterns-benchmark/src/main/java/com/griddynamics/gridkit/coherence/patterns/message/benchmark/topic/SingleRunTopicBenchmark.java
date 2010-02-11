@@ -20,8 +20,9 @@ import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelpe
 import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelper.setSysProp;
 import static com.griddynamics.gridkit.coherence.patterns.benchmark.GeneralHelper.sysOut;
 
-import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 
 import com.griddynamics.gridkit.coherence.patterns.benchmark.stats.InvocationServiceStats;
 import com.griddynamics.gridkit.coherence.patterns.message.benchmark.MessageBenchmarkStats;
@@ -30,8 +31,30 @@ import com.tangosol.net.Member;
 
 public class SingleRunTopicBenchmark
 {
-	public static void warmUp(PatternFacade facade, List<Member> members)
+	public static void warmUp(PatternFacade facade, Set<Member> members)
 	{
+		TopicBenchmarkParams benchmarkParams = new TopicBenchmarkParams();
+		
+		benchmarkParams.setSenderThreadsCount(2);
+		benchmarkParams.setReceiverThreadsCount(2);
+		benchmarkParams.setMessagesPerThread(250);
+		benchmarkParams.setSenderSpeedLimit(0);
+		
+		benchmarkParams.setTopicsCount(12);
+		benchmarkParams.setTopicsPerMember(3);
+		
+		for (int i = 1; i <= 5; ++i)
+		{
+			sysOut("Warming up (stage " + i + " started)");
+			
+			TopicBenchmarkDispatcher dispatcher = new TopicBenchmarkDispatcher(members, facade);
+			dispatcher.execute(benchmarkParams);
+			
+			sysOut("Warming up (waiting...)");
+			LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(1));
+		}
+		
+		return;
 		
 	}
 
@@ -39,14 +62,17 @@ public class SingleRunTopicBenchmark
 	{
 		setCoherenceConfig(false);
 		
+		System.setProperty("benchmark.gc-in-worker",     "true");
+		System.setProperty("benchmark.gc-in-dispatcher", "true");
+		
 		setSysProp("benchmark.topic.senderThreadsCount",   "2");
 		setSysProp("benchmark.topic.receiverThreadsCount", "2");
 		
 		setSysProp("benchmark.topic.messagesPerThread", "250");
 		
-		setSysProp("benchmark.topic.senderSpeedLimit", "1000");
+		setSysProp("benchmark.topic.senderSpeedLimit", "0");
 		
-		setSysProp("benchmark.topic.topicsCount", "6");
+		setSysProp("benchmark.topic.topicsCount", "12");
 		setSysProp("benchmark.topic.topicsPerMember", "3");
 		
 		TopicBenchmarkParams benchmarkParams = new TopicBenchmarkParams();
@@ -62,6 +88,8 @@ public class SingleRunTopicBenchmark
 		PatternFacade facade = PatternFacade.DefaultFacade.getInstance();
 		
 		Set<Member> members = getOtherInvocationServiceMembers(facade.getInvocationService());
+		
+		warmUp(facade, members);
 		
 		TopicBenchmarkDispatcher dispatcher = new TopicBenchmarkDispatcher(members, facade);
 		

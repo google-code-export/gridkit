@@ -60,12 +60,12 @@ public class CommandBenchmarkDispatcher extends Dispatcher<CommandExecutionMark,
 			contexts[i] = facade.registerContext("ctx-" + i, new SimpleContext("ctx-" + i));
 		}
 		
-		Map<Member, Integer> workerIDs = new HashMap<Member, Integer>();
+		Map<Integer, Integer> workerIDs = new HashMap<Integer, Integer>();
 		
 		int i = 0;
 		for (Member m : members)
 		{
-			workerIDs.put(m, i++);
+			workerIDs.put(m.getId(), i++);
 		}
 		
 		invocableWorker = new CommandBenchmarkWorker(benchmarkParams, contexts, workerIDs);

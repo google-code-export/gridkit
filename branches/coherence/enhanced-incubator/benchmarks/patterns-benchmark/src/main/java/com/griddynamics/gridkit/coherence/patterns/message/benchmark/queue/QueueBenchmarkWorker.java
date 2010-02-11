@@ -214,6 +214,10 @@ public final class QueueBenchmarkWorker implements Invocable, Serializable
 				t.printStackTrace();
 				System.exit(1);
 			}
+			finally
+			{
+				subscriber.unsubscribe();
+			}
 			
 			return null;
 		}

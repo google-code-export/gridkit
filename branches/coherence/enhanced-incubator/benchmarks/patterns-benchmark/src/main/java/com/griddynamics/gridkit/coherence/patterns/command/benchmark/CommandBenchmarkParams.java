@@ -18,11 +18,23 @@ package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
 import java.io.Serializable;
 
 import com.griddynamics.gridkit.coherence.patterns.benchmark.BenchmarkParams;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.csv.CSVRow;
 
-public final class CommandBenchmarkParams implements Serializable, BenchmarkParams
+public final class CommandBenchmarkParams implements Serializable, BenchmarkParams, CSVRow
 {
 	private static final long serialVersionUID = -680095570543015774L;
 
+	public CommandBenchmarkParams() {}
+	public CommandBenchmarkParams(CommandBenchmarkParams bp)
+	{
+		command          = bp.command;
+		reportBuffer     = bp.reportBuffer;
+		threadCount      = bp.threadCount;
+		commandPerThread = bp.commandPerThread;
+		opsPerSec        = bp.opsPerSec;
+		contextCount     = bp.contextCount;
+	}
+	
 	//------------ Worker parameters ------------//
 	private String command;
 	private String reportBuffer;
@@ -94,55 +106,6 @@ public final class CommandBenchmarkParams implements Serializable, BenchmarkPara
 	public void setReportBuffer(String reportBuffer)
 	{
 		this.reportBuffer = reportBuffer;
-	}
-
-	@Override
-	public int hashCode()
-	{
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + commandPerThread;
-		result = prime * result + contextCount;
-		result = prime * result + opsPerSec;
-		result = prime * result
-				+ ((command == null) ? 0 : command.hashCode());
-		result = prime * result + threadCount;
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (!(obj instanceof CommandBenchmarkParams)) {
-			return false;
-		}
-		CommandBenchmarkParams other = (CommandBenchmarkParams) obj;
-		if (commandPerThread != other.commandPerThread) {
-			return false;
-		}
-		if (contextCount != other.contextCount) {
-			return false;
-		}
-		if (opsPerSec != other.opsPerSec) {
-			return false;
-		}
-		if (command == null) {
-			if (other.command != null) {
-				return false;
-			}
-		} else if (!command.equals(other.command)) {
-			return false;
-		}
-		if (threadCount != other.threadCount) {
-			return false;
-		}
-		return true;
 	}
 
 	@Override

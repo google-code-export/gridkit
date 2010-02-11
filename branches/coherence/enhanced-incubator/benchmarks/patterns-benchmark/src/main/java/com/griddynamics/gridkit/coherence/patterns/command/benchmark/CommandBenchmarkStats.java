@@ -16,8 +16,9 @@
 package com.griddynamics.gridkit.coherence.patterns.command.benchmark;
 
 import com.griddynamics.gridkit.coherence.patterns.benchmark.csv.CSVHelper;
+import com.griddynamics.gridkit.coherence.patterns.benchmark.csv.CSVRow;
 
-public class CommandBenchmarkStats
+public class CommandBenchmarkStats implements CSVRow, Cloneable
 {
 	public double totalTime;
 		
