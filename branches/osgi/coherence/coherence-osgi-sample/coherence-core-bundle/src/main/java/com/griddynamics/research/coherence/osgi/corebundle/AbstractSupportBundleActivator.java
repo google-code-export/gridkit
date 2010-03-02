@@ -42,6 +42,8 @@ public abstract class AbstractSupportBundleActivator implements BundleActivator 
 
         final XmlDocument cacheConfigXml = XmlHelper.loadXml(cacheConfig);
 
+        // POF config are not get loaded from right classloader
+        // so we have to do some config.xml waving to inject POF config
         XmlElement el;
         for (Object o : cacheConfigXml.getElement("caching-schemes").getElementList()) {
             el = (XmlElement) o;
