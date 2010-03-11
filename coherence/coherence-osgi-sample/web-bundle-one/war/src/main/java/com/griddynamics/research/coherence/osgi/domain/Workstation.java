@@ -70,14 +70,12 @@ public class Workstation implements Serializable, PortableObject {
         return String.format("Computer [proc = %1s, ram = %2d, HDD = %3d]", proc, ram, hardDisk);
     }
 
-    @Override
     public void readExternal(PofReader pofReader) throws IOException {
         setProc(pofReader.readString(0));
         setRam(pofReader.readInt(1));
         setHardDisk(pofReader.readInt(2));
     }
 
-    @Override
     public void writeExternal(PofWriter pofWriter) throws IOException {
         pofWriter.writeString(0, proc);
         pofWriter.writeInt(1, ram);

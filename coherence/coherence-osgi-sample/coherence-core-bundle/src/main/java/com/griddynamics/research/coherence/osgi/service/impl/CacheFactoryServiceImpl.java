@@ -29,7 +29,6 @@ public class CacheFactoryServiceImpl implements CacheFactoryService {
         this.classLoader = classLoader;
     }
 
-    @Override
     public NamedCache getCache(String name) {
         if (classLoader == null)
             throw new RuntimeException("Bean Not Initialized");
