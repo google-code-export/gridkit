@@ -36,7 +36,6 @@ import java.util.Locale;
  */
 public abstract class AbstractSupportBundleActivator implements BundleActivator {
 
-    @Override
     public void start(BundleContext bundleContext) throws Exception {
         final URL cacheConfig = bundleContext.getBundle().getResource("cache-config.xml");
 

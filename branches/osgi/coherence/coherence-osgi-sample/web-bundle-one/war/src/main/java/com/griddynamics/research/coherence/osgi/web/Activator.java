@@ -49,7 +49,6 @@ public class Activator implements BundleActivator {
             this.bundleContext = bundleContext;
         }
 
-        @Override
         public void serviceChanged(ServiceEvent serviceEvent) {
             if (serviceEvent.getType() != ServiceEvent.UNREGISTERING) {
                 cacheFactoryService = bundleContext.getService(serviceEvent.getServiceReference());

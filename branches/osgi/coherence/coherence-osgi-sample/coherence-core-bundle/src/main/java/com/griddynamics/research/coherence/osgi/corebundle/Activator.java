@@ -23,12 +23,10 @@ import org.osgi.framework.BundleContext;
  */
 public class Activator implements BundleActivator {
 
-    @Override
     public void start(BundleContext bundleContext) throws Exception {
         CacheFactory.setCacheFactoryBuilder(new MyCacheFactoryBuilder());
     }
 
-    @Override
     public void stop(BundleContext bundleContext) throws Exception {
         
     }
