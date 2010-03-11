@@ -92,7 +92,6 @@ public abstract class AbstractSupportBundleActivator implements BundleActivator 
         return stringBuffer.toString();
     }
 
-    @Override
     public void stop(BundleContext bundleContext) throws Exception {
         CacheFactory.getCacheFactoryBuilder().releaseAll(getClassLoader(bundleContext));
     }
