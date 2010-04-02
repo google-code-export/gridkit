@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE pof-config SYSTEM "pof-config.dtd">
+<pof-config>
+    <user-type-list>
+        <!-- coherence POF user types -->
+        <include>coherence-pof-config.xml</include>
+        <!-- com.tangosol.examples package -->
+        <!--<user-type>-->
+            <!--<type-id>1002</type-id>-->
+            <!--<class-name>com.tangosol.examples.model.Contact</class-name>-->
+        <!--</user-type>-->
+        <user-type>
+            <type-id>1003</type-id>
+            <class-name>com.griddynamics.coherence.Address</class-name>
+        </user-type>
+        <!--<user-type>-->
+            <!--<type-id>1004</type-id>-->
+            <!--<class-name>com.tangosol.examples.model.Phone</class-name>-->
+        <!--</user-type>-->
+    </user-type-list>
+    <allow-interfaces>true</allow-interfaces>
+    <allow-subclasses>true</allow-subclasses>
+</pof-config>

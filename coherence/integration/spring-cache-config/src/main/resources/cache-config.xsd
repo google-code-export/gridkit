@@ -1,0 +1,1226 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xs:schema xmlns="http://www.griddynamics.com/schema/coherence-spring" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://www.griddynamics.com/schema/coherence-spring"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+  <xs:element name="acceptor-config">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice>
+          <xs:element ref="jms-acceptor" />
+          <xs:element ref="tcp-acceptor" />
+        </xs:choice>
+        <xs:element ref="outgoing-message-handler" minOccurs="0" />
+        <xs:element ref="use-filters" minOccurs="0" />
+        <xs:element ref="serializer" minOccurs="0" />
+        <xs:element ref="connection-limit" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="address">
+    <xs:complexType mixed="true">
+      <xs:attribute name="system-property" type="xs:string" use="optional" />
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="address-provider">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice>
+          <xs:element ref="class-name" />
+          <xs:sequence>
+            <xs:element ref="class-factory-name" />
+            <xs:element ref="method-name" />
+          </xs:sequence>
+        </xs:choice>
+        <xs:element ref="init-params" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="async">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="async-limit">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="async-store-manager">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="class-name" minOccurs="0" />
+        <xs:element ref="init-params" minOccurs="0" />
+        <xs:choice>
+          <xs:element ref="custom-store-manager" />
+          <xs:element ref="lh-file-manager" />
+          <xs:element ref="bdb-store-manager" />
+          <xs:element ref="nio-file-manager" />
+          <xs:element ref="nio-memory-manager" />
+        </xs:choice>
+        <xs:element ref="async-limit" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="authorized-hosts">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="host-address" minOccurs="0" maxOccurs="unbounded" />
+        <xs:element ref="host-range" minOccurs="0" maxOccurs="unbounded" />
+        <xs:element ref="host-filter" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="auto-adjust">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="autostart">
+    <xs:complexType mixed="true">
+      <xs:attribute name="system-property" type="xs:string" use="optional" />
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="back-scheme">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="distributed-scheme" />
+        <xs:element ref="replicated-scheme" />
+        <xs:element ref="optimistic-scheme" />
+        <xs:element ref="local-scheme" />
+        <xs:element ref="disk-scheme" />
+        <xs:element ref="external-scheme" />
+        <xs:element ref="paged-external-scheme" />
+        <xs:element ref="overflow-scheme" />
+        <xs:element ref="class-scheme" />
+        <xs:element ref="remote-cache-scheme" />
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="backing-map-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="partitioned" minOccurs="0" />
+        <xs:choice>
+          <xs:element ref="local-scheme" />
+          <xs:element ref="disk-scheme" />
+          <xs:element ref="external-scheme" />
+          <xs:element ref="paged-external-scheme" />
+          <xs:element ref="overflow-scheme" />
+          <xs:element ref="class-scheme" />
+          <xs:element ref="overflow-scheme" />
+          <xs:element ref="read-write-backing-map-scheme" />
+          <xs:element ref="versioned-backing-map-scheme" />
+        </xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="backup-count">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="backup-count-after-writebehind">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="backup-storage">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="type" />
+        <xs:choice>
+          <xs:sequence>
+            <xs:element ref="initial-size" minOccurs="0" />
+            <xs:element ref="maximum-size" minOccurs="0" />
+            <xs:element ref="directory" minOccurs="0" />
+          </xs:sequence>
+          <xs:element ref="class-name" minOccurs="0" />
+          <xs:element ref="scheme-name" minOccurs="0" />
+        </xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="bdb-store-manager">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="class-name" minOccurs="0" />
+        <xs:element ref="init-params" minOccurs="0" />
+        <xs:element ref="directory" minOccurs="0" />
+        <xs:element ref="store-name" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="bundle-config">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="operation-name" />
+        <xs:element ref="preferred-size" minOccurs="0" />
+        <xs:element ref="delay-millis" minOccurs="0" />
+        <xs:element ref="thread-threshold" minOccurs="0" />
+        <xs:element ref="auto-adjust" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="cache-config">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="caching-scheme-mapping" />
+        <xs:element ref="caching-schemes" />
+      </xs:sequence>
+      <xs:attribute name="id" type="xs:string" use="required"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="cache-mapping">
+    <xs:complexType>
+        <xs:sequence>
+        <xs:element ref="cache-name" />
+        <xs:element ref="scheme-name" />
+        <xs:element ref="init-params" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="cache-name">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="cache-name-suffix">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="cache-service-proxy">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="enabled" minOccurs="0" />
+        <xs:element ref="lock-enabled" minOccurs="0" />
+        <xs:element ref="read-only" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="cachestore-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="scheme-name" minOccurs="0" />
+        <xs:element ref="scheme-ref" minOccurs="0" />
+        <xs:choice>
+          <xs:element ref="class-scheme" />
+          <xs:element ref="remote-cache-scheme" />
+        </xs:choice>
+        <xs:element ref="operation-bundling" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="cachestore-timeout">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="caching-scheme-mapping">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="cache-mapping" maxOccurs="unbounded" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="caching-schemes">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="distributed-scheme" minOccurs="0"/>
+        <xs:element ref="replicated-scheme" minOccurs="0"/>
+        <xs:element ref="optimistic-scheme" minOccurs="0"/>
+        <xs:element ref="local-scheme" minOccurs="0"/>
+        <xs:element ref="disk-scheme" minOccurs="0"/>
+        <xs:element ref="external-scheme" minOccurs="0"/>
+        <xs:element ref="paged-external-scheme" minOccurs="0"/>
+        <xs:element ref="overflow-scheme" minOccurs="0"/>
+        <xs:element ref="class-scheme" minOccurs="0"/>
+        <xs:element ref="near-scheme" minOccurs="0"/>
+        <xs:element ref="versioned-near-scheme" minOccurs="0"/>
+        <xs:element ref="overflow-scheme" minOccurs="0"/>
+        <xs:element ref="invocation-scheme" minOccurs="0"/>
+        <xs:element ref="read-write-backing-map-scheme" minOccurs="0"/>
+        <xs:element ref="versioned-backing-map-scheme" minOccurs="0"/>
+        <xs:element ref="remote-invocation-scheme" minOccurs="0"/>
+        <xs:element ref="proxy-scheme" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="class-factory-name">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="class-name">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="class-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="scheme-name" minOccurs="0" />
+        <xs:element ref="scheme-ref" minOccurs="0" />
+        <!-- >xs:choice>
+          <xs:element ref="class-name" />
+          <xs:sequence>
+            <xs:element ref="class-factory-name" />
+            <xs:element ref="method-name" />
+          </xs:sequence>
+        </xs:choice-->
+        <xs:element ref="init-params" minOccurs="0" />
+        <xs:element ref="listener" minOccurs="0" />
+      </xs:sequence >
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="connect-timeout">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="connection-limit">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="custom-store-manager">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="class-name" />
+        <xs:element ref="init-params" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="delay-millis">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="directory">
+    <xs:complexType mixed="true">
+      <xs:attribute name="system-property" type="xs:string" use="optional" />
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="disk-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="scheme-name" minOccurs="0" />
+        <xs:element ref="scheme-ref" minOccurs="0" />
+        <xs:element ref="class-name" minOccurs="0" />
+        <xs:element ref="init-params" minOccurs="0" />
+        <xs:element ref="file-manager" minOccurs="0" />
+        <xs:choice>
+          <xs:element ref="root-directory" />
+          <xs:element ref="directory" />
+        </xs:choice>
+        <xs:element ref="file-name" minOccurs="0" />
+        <xs:element ref="high-units" minOccurs="0" />
+        <xs:element ref="initial-size" minOccurs="0" />
+        <xs:element ref="maximum-size" minOccurs="0" />
+        <xs:element ref="page-limit" minOccurs="0" />
+        <xs:element ref="page-duration" minOccurs="0" />
+        <xs:element ref="listener" minOccurs="0" />
+        <xs:element ref="async" minOccurs="0" />
+        <xs:element ref="async-limit" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="distributed-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="scheme-name" minOccurs="0" />
+        <xs:element ref="scheme-ref" minOccurs="0" />
+        <xs:element ref="service-name" minOccurs="0" />
+        <xs:element ref="serializer" minOccurs="0" />
+        <xs:element ref="thread-count" minOccurs="0" />
+        <xs:element ref="standard-lease-milliseconds" minOccurs="0" />
+        <xs:element ref="lease-granularity" minOccurs="0" />
+        <xs:element ref="local-storage" minOccurs="0" />
+        <xs:element ref="partition-count" minOccurs="0" />
+        <xs:element ref="transfer-threshold" minOccurs="0" />
+        <xs:element ref="backup-count" minOccurs="0" />
+        <xs:element ref="backup-count-after-writebehind" minOccurs="0" />
+        <xs:element ref="backup-storage" minOccurs="0" />
+        <xs:element ref="key-associator" minOccurs="0" />
+        <xs:element ref="key-partitioning" minOccurs="0" />
+        <xs:element ref="partition-listener" minOccurs="0" />
+        <xs:element ref="task-hung-threshold" minOccurs="0" />
+        <xs:element ref="task-timeout" minOccurs="0" />
+        <xs:element ref="request-timeout" minOccurs="0" />
+        <xs:element ref="guardian-timeout" minOccurs="0" />
+        <xs:element ref="operation-bundling" minOccurs="0" />
+        <xs:element ref="backing-map-scheme" minOccurs="0" />
+        <xs:element ref="listener" minOccurs="0" />
+        <xs:element ref="autostart" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="enabled">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="eviction-policy">
+    <xs:complexType mixed="true">
+      <xs:choice>
+        <xs:element ref="class-scheme" />
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="expiry-delay">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="expiry-enabled">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="external-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="scheme-name" minOccurs="0" />
+        <xs:element ref="scheme-ref" minOccurs="0" />
+        <xs:element ref="class-name" minOccurs="0" />
+        <xs:element ref="init-params" minOccurs="0" />
+        <xs:choice>
+          <xs:element ref="async-store-manager" />
+          <xs:choice>
+            <xs:element ref="custom-store-manager" />
+            <xs:element ref="lh-file-manager" />
+            <xs:element ref="bdb-store-manager" />
+            <xs:element ref="nio-file-manager" />
+            <xs:element ref="nio-memory-manager" />
+          </xs:choice>
+        </xs:choice>
+        <xs:element ref="high-units" minOccurs="0" />
+        <xs:element ref="unit-calculator" minOccurs="0" />
+        <xs:element ref="unit-factor" minOccurs="0" />
+        <xs:element ref="expiry-delay" minOccurs="0" />
+        <xs:element ref="listener" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="file-manager">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="file-name">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="filter-name">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="flush-delay">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="from-address">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="front-scheme">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="local-scheme" />
+        <xs:element ref="disk-scheme" />
+        <xs:element ref="external-scheme" />
+        <xs:element ref="paged-external-scheme" />
+        <xs:element ref="overflow-scheme" />
+        <xs:element ref="class-scheme" />
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="guardian-timeout">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="heartbeat-interval">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="heartbeat-timeout">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="high-units">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="host-address">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="host-filter">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="class-name" />
+        <xs:element ref="init-params" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="host-range">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="from-address" />
+        <xs:element ref="to-address" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="init-param">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice>
+          <xs:element ref="param-name" />
+          <xs:element ref="param-type" />
+        </xs:choice>
+        <xs:element ref="param-value" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="init-params">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="init-param" minOccurs="0" maxOccurs="unbounded" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="initial-size">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="initiator-config">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice>
+          <xs:element ref="jms-initiator" />
+          <xs:element ref="tcp-initiator" />
+        </xs:choice>
+        <xs:element ref="outgoing-message-handler" minOccurs="0" />
+        <xs:element ref="use-filters" minOccurs="0" />
+        <xs:element ref="serializer" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="internal-cache-scheme">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="local-scheme" />
+        <xs:element ref="disk-scheme" />
+        <xs:element ref="external-scheme" />
+        <xs:element ref="paged-external-scheme" />
+        <xs:element ref="overflow-scheme" />
+        <xs:element ref="class-scheme" />
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="invalidation-strategy">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="invocation-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="scheme-name" minOccurs="0" />
+        <xs:element ref="scheme-ref" minOccurs="0" />
+        <xs:element ref="service-name" minOccurs="0" />
+        <xs:element ref="serializer" minOccurs="0" />
+        <xs:element ref="thread-count" minOccurs="0" />
+        <xs:element ref="task-hung-threshold" minOccurs="0" />
+        <xs:element ref="task-timeout" minOccurs="0" />
+        <xs:element ref="request-timeout" minOccurs="0" />
+        <xs:element ref="guardian-timeout" minOccurs="0" />
+        <xs:element ref="autostart" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="invocation-service-proxy">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="enabled" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="jms-acceptor">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="queue-connection-factory-name" />
+        <xs:element ref="queue-name" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="jms-initiator">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="queue-connection-factory-name" />
+        <xs:element ref="queue-name" />
+        <xs:element ref="connect-timeout" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="keep-alive-enabled">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="key-associator">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="class-name" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="key-partitioning">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="class-name" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="lease-granularity">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="lh-file-manager">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="class-name" minOccurs="0" />
+        <xs:element ref="init-params" minOccurs="0" />
+        <xs:element ref="directory" minOccurs="0" />
+        <xs:element ref="file-name" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="linger-timeout">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="listen-backlog">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="listener">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="class-scheme" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="local-address">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="address" minOccurs="0" />
+        <xs:element ref="port" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="local-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="scheme-name" minOccurs="0" />
+        <xs:element ref="scheme-ref" minOccurs="0" />
+        <xs:element ref="class-name" minOccurs="0" />
+        <xs:element ref="service-name" minOccurs="0" />
+        <xs:element ref="init-params" minOccurs="0" />
+        <xs:element ref="eviction-policy" minOccurs="0" />
+        <xs:element ref="high-units" minOccurs="0" />
+        <xs:element ref="low-units" minOccurs="0" />
+        <xs:element ref="unit-calculator" minOccurs="0" />
+        <xs:element ref="unit-factor" minOccurs="0" />
+        <xs:element ref="expiry-delay" minOccurs="0" />
+        <xs:element ref="flush-delay" minOccurs="0" />
+        <xs:element ref="cachestore-scheme" minOccurs="0" />
+        <xs:element ref="pre-load" minOccurs="0" />
+        <xs:element ref="listener" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="local-storage">
+    <xs:complexType mixed="true">
+      <xs:attribute name="system-property" type="xs:string" use="optional" />
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="lock-enabled">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="low-units">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="manage-transient">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="maximum-size">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="method-name">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="miss-cache-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="local-scheme" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="near-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="scheme-name" minOccurs="0" />
+        <xs:element ref="scheme-ref" minOccurs="0" />
+        <xs:element ref="class-name" minOccurs="0" />
+        <xs:element ref="init-params" minOccurs="0" />
+        <xs:element ref="front-scheme" minOccurs="0" />
+        <xs:element ref="back-scheme" minOccurs="0" />
+        <xs:element ref="invalidation-strategy" minOccurs="0" />
+        <xs:element ref="listener" minOccurs="0" />
+        <xs:element ref="autostart" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="nio-file-manager">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="class-name" minOccurs="0" />
+        <xs:element ref="init-params" minOccurs="0" />
+        <xs:element ref="initial-size" minOccurs="0" />
+        <xs:element ref="maximum-size" minOccurs="0" />
+        <xs:element ref="directory" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="nio-memory-manager">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="class-name" minOccurs="0" />
+        <xs:element ref="init-params" minOccurs="0" />
+        <xs:element ref="initial-size" minOccurs="0" />
+        <xs:element ref="maximum-size" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="operation-bundling" type="xs:string">
+    <!--xs:complexType>
+      <xs:sequence>
+        <xs:element ref="bundle-config" maxOccurs="unbounded" />
+      </xs:sequence>
+    </xs:complexType-->
+  </xs:element>
+
+  <xs:element name="operation-name">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="optimistic-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="scheme-name" minOccurs="0" />
+        <xs:element ref="scheme-ref" minOccurs="0" />
+        <xs:element ref="service-name" minOccurs="0" />
+        <xs:element ref="serializer" minOccurs="0" />
+        <xs:element ref="request-timeout" minOccurs="0" />
+        <xs:element ref="guardian-timeout" minOccurs="0" />
+        <xs:element ref="backing-map-scheme" minOccurs="0" />
+        <xs:element ref="listener" minOccurs="0" />
+        <xs:element ref="autostart" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="outgoing-message-handler">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="heartbeat-interval" minOccurs="0" />
+        <xs:element ref="heartbeat-timeout" minOccurs="0" />
+        <xs:element ref="request-timeout" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="overflow-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="scheme-name" minOccurs="0" />
+        <xs:element ref="scheme-ref" minOccurs="0" />
+        <xs:element ref="class-name" minOccurs="0" />
+        <xs:element ref="init-params" minOccurs="0" />
+        <xs:element ref="front-scheme" minOccurs="0" />
+        <xs:element ref="back-scheme" minOccurs="0" />
+        <xs:element ref="miss-cache-scheme" minOccurs="0" />
+        <xs:element ref="expiry-enabled" minOccurs="0" />
+        <xs:element ref="expiry-delay" minOccurs="0" />
+        <xs:element ref="listener" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="page-duration">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="page-limit">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="paged-external-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="scheme-name" minOccurs="0" />
+        <xs:element ref="scheme-ref" minOccurs="0" />
+        <xs:element ref="class-name" minOccurs="0" />
+        <xs:element ref="init-params" minOccurs="0" />
+        <xs:choice>
+          <xs:element ref="async-store-manager" />
+          <xs:choice>
+            <xs:element ref="custom-store-manager" />
+            <xs:element ref="lh-file-manager" />
+            <xs:element ref="bdb-store-manager" />
+            <xs:element ref="nio-file-manager" />
+            <xs:element ref="nio-memory-manager" />
+          </xs:choice>
+        </xs:choice>
+        <xs:element ref="page-limit" minOccurs="0" />
+        <xs:element ref="page-duration" minOccurs="0" />
+        <xs:element ref="listener" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="param-name">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="param-type">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="param-value">
+    <xs:complexType mixed="true">
+      <xs:attribute name="system-property" type="xs:string" use="optional" />
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="partition-count">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="partition-listener">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="class-name" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="partitioned">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="port">
+    <xs:complexType mixed="true">
+      <xs:attribute name="system-property" type="xs:string" use="optional" />
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="pre-load">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="preferred-size">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="proxy-config">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="cache-service-proxy" minOccurs="0" />
+        <xs:element ref="invocation-service-proxy" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="proxy-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="scheme-name" minOccurs="0" />
+        <xs:element ref="scheme-ref" minOccurs="0" />
+        <xs:element ref="service-name" minOccurs="0" />
+        <xs:element ref="thread-count" minOccurs="0" />
+        <xs:element ref="task-hung-threshold" minOccurs="0" />
+        <xs:element ref="task-timeout" minOccurs="0" />
+        <xs:element ref="request-timeout" minOccurs="0" />
+        <xs:element ref="guardian-timeout" minOccurs="0" />
+        <xs:element ref="acceptor-config" minOccurs="0" />
+        <xs:element ref="proxy-config" minOccurs="0" />
+        <xs:element ref="autostart" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="queue-connection-factory-name">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="queue-name">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="read-only">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="read-write-backing-map-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="scheme-name" minOccurs="0" />
+        <xs:element ref="scheme-ref" minOccurs="0" />
+        <xs:element ref="class-name" minOccurs="0" />
+        <xs:element ref="init-params" minOccurs="0" />
+        <xs:element ref="internal-cache-scheme" minOccurs="0" />
+        <xs:element ref="miss-cache-scheme" minOccurs="0" />
+        <xs:element ref="cachestore-scheme" minOccurs="0" />
+        <xs:element ref="read-only" minOccurs="0" />
+        <xs:choice>
+          <xs:element ref="write-delay" />
+          <xs:element ref="write-delay-seconds" />
+        </xs:choice>
+        <xs:element ref="write-batch-factor" minOccurs="0" />
+        <xs:element ref="write-requeue-threshold" minOccurs="0" />
+        <xs:element ref="refresh-ahead-factor" minOccurs="0" />
+        <xs:element ref="cachestore-timeout" minOccurs="0" />
+        <xs:element ref="rollback-cachestore-failures" minOccurs="0" />
+        <xs:element ref="listener" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="receive-buffer-size">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="refresh-ahead-factor">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="remote-addresses">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="socket-address" maxOccurs="unbounded" />
+        <xs:element ref="address-provider" />
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="remote-cache-scheme" type="xs:string">
+    <!-- xs:complexType>
+      <xs:sequence>
+        <xs:element ref="scheme-name" minOccurs="0" />
+        <xs:element ref="scheme-ref" minOccurs="0" />
+        <xs:element ref="service-name" minOccurs="0" />
+        <xs:element ref="operation-bundling" minOccurs="0" />
+        <xs:element ref="initiator-config" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType-->
+  </xs:element>
+
+  <xs:element name="remote-invocation-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="scheme-name" minOccurs="0" />
+        <xs:element ref="scheme-ref" minOccurs="0" />
+        <xs:element ref="service-name" minOccurs="0" />
+        <xs:element ref="initiator-config" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="replicated-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="scheme-name" minOccurs="0" />
+        <xs:element ref="scheme-ref" minOccurs="0" />
+        <xs:element ref="service-name" minOccurs="0" />
+        <xs:element ref="serializer" minOccurs="0" />
+        <xs:element ref="standard-lease-milliseconds" minOccurs="0" />
+        <xs:element ref="lease-granularity" minOccurs="0" />
+        <xs:element ref="request-timeout" minOccurs="0" />
+        <xs:element ref="guardian-timeout" minOccurs="0" />
+        <xs:element ref="backing-map-scheme" minOccurs="0" />
+        <xs:element ref="listener" minOccurs="0" />
+        <xs:element ref="autostart" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="request-timeout">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="reuse-address">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="rollback-cachestore-failures">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="root-directory">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="scheme-name">
+    <xs:complexType mixed="true">
+      <xs:attribute name="system-property" type="xs:string" use="optional" />
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="scheme-ref">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="send-buffer-size">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="serializer">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="class-name" />
+        <xs:element ref="init-params" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="service-name">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="socket-address">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="address" />
+        <xs:element ref="port" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="standard-lease-milliseconds">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="store-name">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="task-hung-threshold">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="task-timeout">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="tcp-acceptor">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:choice>
+          <xs:element ref="local-address" />
+          <xs:element ref="address-provider" />
+        </xs:choice>
+        <xs:element ref="reuse-address" minOccurs="0" />
+        <xs:element ref="keep-alive-enabled" minOccurs="0" />
+        <xs:element ref="tcp-delay-enabled" minOccurs="0" />
+        <xs:element ref="receive-buffer-size" minOccurs="0" />
+        <xs:element ref="send-buffer-size" minOccurs="0" />
+        <xs:element ref="listen-backlog" minOccurs="0" />
+        <xs:element ref="linger-timeout" minOccurs="0" />
+        <xs:element ref="authorized-hosts" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="tcp-delay-enabled">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="tcp-initiator">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="local-address" minOccurs="0" />
+        <xs:element ref="remote-addresses" />
+        <xs:element ref="reuse-address" minOccurs="0" />
+        <xs:element ref="keep-alive-enabled" minOccurs="0" />
+        <xs:element ref="tcp-delay-enabled" minOccurs="0" />
+        <xs:element ref="receive-buffer-size" minOccurs="0" />
+        <xs:element ref="send-buffer-size" minOccurs="0" />
+        <xs:element ref="connect-timeout" minOccurs="0" />
+        <xs:element ref="linger-timeout" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="thread-count">
+    <xs:complexType mixed="true">
+      <xs:attribute name="system-property" type="xs:string" use="optional" />
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="thread-threshold">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="to-address">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="transfer-threshold">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="type">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="unit-calculator">
+    <xs:complexType mixed="true">
+      <!--<xs:choice>-->
+        <!--<xs:element ref="class-scheme" />-->
+      <!--</xs:choice>-->
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="unit-factor">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="use-filters">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="filter-name" minOccurs="0" maxOccurs="unbounded" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="version-persistent-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="cache-name-suffix" minOccurs="0" />
+        <xs:choice>
+          <xs:element ref="replicated-scheme" />
+          <xs:element ref="distributed-scheme" />
+        </xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="version-transient-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="cache-name-suffix" minOccurs="0" />
+        <xs:choice>
+          <xs:element ref="replicated-scheme" />
+          <xs:element ref="distributed-scheme" />
+        </xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="versioned-backing-map-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="scheme-name" minOccurs="0" />
+        <xs:element ref="scheme-ref" minOccurs="0" />
+        <xs:element ref="class-name" minOccurs="0" />
+        <xs:element ref="init-params" minOccurs="0" />
+        <xs:element ref="internal-cache-scheme" minOccurs="0" />
+        <xs:element ref="miss-cache-scheme" minOccurs="0" />
+        <xs:element ref="cachestore-scheme" minOccurs="0" />
+        <xs:element ref="read-only" minOccurs="0" />
+        <xs:choice>
+          <xs:element ref="write-delay" />
+          <xs:element ref="write-delay-seconds" />
+        </xs:choice>
+        <xs:element ref="write-batch-factor" minOccurs="0" />
+        <xs:element ref="write-requeue-threshold" minOccurs="0" />
+        <xs:element ref="refresh-ahead-factor" minOccurs="0" />
+        <xs:element ref="rollback-cachestore-failures" minOccurs="0" />
+        <xs:element ref="version-persistent-scheme" minOccurs="0" />
+        <xs:element ref="version-transient-scheme" minOccurs="0" />
+        <xs:element ref="manage-transient" minOccurs="0" />
+        <xs:element ref="listener" minOccurs="0" />
+        <xs:element ref="autostart" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="versioned-near-scheme">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="scheme-name" minOccurs="0" />
+        <xs:element ref="scheme-ref" minOccurs="0" />
+        <xs:element ref="class-name" minOccurs="0" />
+        <xs:element ref="init-params" minOccurs="0" />
+        <xs:element ref="front-scheme" minOccurs="0" />
+        <xs:element ref="back-scheme" minOccurs="0" />
+        <xs:element ref="version-transient-scheme" minOccurs="0" />
+        <xs:element ref="listener" minOccurs="0" />
+        <xs:element ref="autostart" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="write-batch-factor">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="write-delay">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="write-delay-seconds">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+  <xs:element name="write-requeue-threshold">
+    <xs:complexType mixed="true" />
+  </xs:element>
+
+</xs:schema>
