@@ -12,30 +12,27 @@
         </property>
     </bean>
 
-
-    <!--Creating ValueExtractor for indexies-->
-    <bean id="extractor_1" class="com.tangosol.util.extractor.ReflectionExtractor">
-        <constructor-arg index="0" value="getCity"/>
-    </bean>
-
     <!--Connecting ValueExtractor to NamedCache.
     We need to invoke addIndex method on NamedCache, but it is not setter and has arguments.
     This is why we should use MethodInvokingFactoryBean
     This is a little bit bulky, but it is only classic spring style-->
-    <bean id="extractorSetter" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+    <bean id="extractorSetter" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean" depends-on="cache_1">
         <property name="targetObject" ref="cache_1"/>
         <property name="targetMethod" value="addIndex"/>
         <property name="arguments">
             <list>
-                <ref local="extractor_1"/>
+                <bean class="com.tangosol.util.extractor.ReflectionExtractor">
+                    <constructor-arg index="0" value="getCity"/>
+                </bean>
                 <value>true</value>
                 <null/>
             </list>
         </property>
     </bean>
 
+
     <!--Connection ContinuousQuery to NamedCache-->
-    <bean id="continuousQuery_1" class="com.tangosol.net.cache.ContinuousQueryCache">
+    <bean id="continuousQuery_1" class="com.tangosol.net.cache.ContinuousQueryCache" depends-on="cache_1">
         <constructor-arg index="0" ref="cache_1"/>
         <constructor-arg>
             <bean class="com.tangosol.util.filter.EqualsFilter">
@@ -49,19 +46,22 @@
     </bean>
 
     <!--Creating our NamedCache-->
-    <bean id="cache_1" factory-bean="test" factory-method="ensureCache">
+    <bean id="cache_1" factory-bean="configurableCacheFactory" factory-method="ensureCache" scope="prototype">
         <constructor-arg type="java.lang.String" value="dist-test"/>
         <constructor-arg type="java.lang.ClassLoader">
-            <null/>
+        <null/>
         </constructor-arg>
     </bean>
 
-    <bean id="serializer_1" class="com.tangosol.io.pof.ConfigurablePofContext" scope="prototype">
-        <constructor-arg index="0" value="contacts-pof-config.xml"/>
+    <!--Creating simple custom cache store that just puts entities to map-->
+    <bean id="entityCacheStore" class="com.tangosol.net.cache.MapCacheStore" scope="prototype">
+        <constructor-arg index="0">
+            <bean class="java.util.HashMap"/>
+        </constructor-arg>
     </bean>
 
     <!--Coherence configuration-->
-    <coherence:cache-config id="test">
+    <coherence:cache-config id="configurableCacheFactory">
         <coherence:caching-scheme-mapping>
             <coherence:cache-mapping>
                 <coherence:cache-name>*</coherence:cache-name>
@@ -73,7 +73,6 @@
                 <coherence:scheme-name>ExamplesPartitionedPofScheme</coherence:scheme-name>
                 <coherence:service-name>PartitionedPofCache</coherence:service-name>
                 <coherence:serializer>
-                    <!--<coherence:class-name>spring-bean:serializer_1</coherence:class-name>-->
                     <coherence:class-name>com.tangosol.io.pof.ConfigurablePofContext</coherence:class-name>
                     <coherence:init-params>
                         <coherence:init-param>
@@ -83,15 +82,37 @@
                     </coherence:init-params>
                 </coherence:serializer>
                 <coherence:backing-map-scheme>
-                    <coherence:local-scheme>
 
-                        <!--This is example of configuring through property placeholder-->
+                    <!--<coherence:local-scheme>-->
 
-                        <coherence:high-units>${simple.scheme.name.config}</coherence:high-units>
-                        <coherence:unit-calculator>binary</coherence:unit-calculator>
-                    </coherence:local-scheme>
+                    <!--&lt;!&ndash;This is an example of configuring through property placeholder&ndash;&gt;-->
+
+                    <!--<coherence:high-units>${simple.scheme.name.config}</coherence:high-units>-->
+                    <!--<coherence:unit-calculator>binary</coherence:unit-calculator>-->
+                    <!--</coherence:local-scheme>-->
+
+                    <coherence:read-write-backing-map-scheme>
+                        <coherence:internal-cache-scheme>
+                            <coherence:local-scheme/>
+                        </coherence:internal-cache-scheme>
+                        <coherence:cachestore-scheme>
+                            <coherence:class-scheme>
+                                <!--This an example how to access spring beans from coherence configuration-->
+                                <coherence:class-name>spring-bean:entityCacheStore</coherence:class-name>
+                                <!--<coherence:init-params>-->
+                                <!--<coherence:init-param>-->
+                                <!--<coherence:param-name>setEntityName</coherence:param-name>-->
+                                <!--<coherence:param-value>{cache-name}</coherence:param-value>-->
+                                <!--</coherence:init-param>-->
+                                <!--</coherence:init-params>-->
+                            </coherence:class-scheme>
+                        </coherence:cachestore-scheme>
+                        <!--<coherence:write-delay>5s</coherence:write-delay>-->
+                    </coherence:read-write-backing-map-scheme>
+
                 </coherence:backing-map-scheme>
-                <coherence:autostart>true</coherence:autostart>
+                <!--This is an example of configuring through property placeholder-->
+                <coherence:autostart>${autostart}</coherence:autostart>
             </coherence:distributed-scheme>
         </coherence:caching-schemes>
     </coherence:cache-config>
