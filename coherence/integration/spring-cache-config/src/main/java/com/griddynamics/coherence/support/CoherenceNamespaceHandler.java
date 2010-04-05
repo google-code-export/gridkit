@@ -2,13 +2,11 @@ package com.griddynamics.coherence.support;
 
 import java.io.ByteArrayOutputStream;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import com.griddynamics.coherence.support.SpringDefaultConfigurableCacheFactory;
 import com.sun.org.apache.xerces.internal.dom.DOMImplementationImpl;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;

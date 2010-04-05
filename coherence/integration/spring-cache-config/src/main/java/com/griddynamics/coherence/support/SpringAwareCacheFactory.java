@@ -4,16 +4,21 @@ import com.tangosol.net.BackingMapManagerContext;
 import com.tangosol.net.DefaultConfigurableCacheFactory;
 
 import com.tangosol.net.Service;
+import com.tangosol.net.cache.MapCacheStore;
 import com.tangosol.run.xml.*;
 
 import com.tangosol.util.ClassHelper;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
@@ -52,7 +57,6 @@ public class SpringAwareCacheFactory
 
     SpringAwareCacheFactory(String xmlConfig) throws IOException {
         super(new SimpleParser().parseXml(xmlConfig));
-System.out.println("Constructor");
     }
 
     /**
@@ -136,7 +140,6 @@ System.out.println("Constructor");
     @Override
     public Object instantiateAny(CacheInfo info, XmlElement xmlClass,
                                  BackingMapManagerContext context, ClassLoader loader) {
-System.out.println("instantiateAny");
        if (translateSchemeType(xmlClass.getName()) != SCHEME_CLASS) {
             throw new IllegalArgumentException(
                     "Invalid class definition: " + xmlClass);
@@ -155,7 +158,6 @@ System.out.println("instantiateAny");
                 xmlConfig = new SimpleElement("config");
                 XmlHelper.transformInitParams(xmlConfig, xmlParams);
             }
-
             Object oBean = getBeanFactory().getBean(sBeanName);
 
             if (xmlConfig != null) {
@@ -178,14 +180,6 @@ System.out.println("instantiateAny");
             return super.instantiateAny(info, xmlClass, context, loader);
         }
     }
-    public Service ensureService(XmlElement xmlSchema){
-        System.out.println("ensureService(XmlElement xmlSchema)");
-        SimpleDocument simpleDocument = new SimpleDocument();
-        simpleDocument.fromXml(xmlSchema);
-        System.out.println(XmlHelper.toString(simpleDocument));
-        return super.ensureService(xmlSchema);
-    }
-
 
     /**
      * Get the Spring BeanFactory used by this CacheFactory
@@ -204,6 +198,7 @@ System.out.println("instantiateAny");
      */
     public void setBeanFactory(BeanFactory beanFactory) {
         m_beanFactory = beanFactory;
+        Object oBean = getBeanFactory().getBean("entityCacheStore");
     }
 
 

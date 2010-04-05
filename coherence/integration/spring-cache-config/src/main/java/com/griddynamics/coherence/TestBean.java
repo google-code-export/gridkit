@@ -1,6 +1,7 @@
 package com.griddynamics.coherence;
 
 import com.tangosol.net.NamedCache;
+import com.tangosol.net.cache.MapCacheStore;
 import com.tangosol.run.xml.SimpleParser;
 import com.tangosol.util.Filter;
 import com.tangosol.util.QueryMap;
@@ -12,18 +13,24 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 public class TestBean {
 
     public static void main(String[] args) {
+//        MapCacheStore cacheStore = new MapCacheStore(new HashMap());
+
+
+
         ApplicationContext factory = new ClassPathXmlApplicationContext("app-context.xml");
 
         System.out.println("*************************************************************");
         System.out.print("Getting NamedCahce bean...   ");
         NamedCache namedCache = (NamedCache) factory.getBean("cache_1");
         System.out.println("OK");
+
 
 //        System.out.print("Putting value to cache...   ");
 //        namedCache.put("key", "value");
