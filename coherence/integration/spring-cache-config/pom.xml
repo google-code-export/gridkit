@@ -22,7 +22,7 @@
         <dependency>
             <groupId>com.oracle.coherence</groupId>
             <artifactId>coherence</artifactId>
-            <version>3.5.3</version>
+            <version>3.5.3b465</version>
         </dependency>
     </dependencies>
     <build>
