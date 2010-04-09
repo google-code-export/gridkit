@@ -42,3 +42,7 @@ If we need to maintain several Spring context, we have to options:
 In this case each AC will define own {{{SpringCacheFactory}}} but they all will delegate their work to singleton {{{RootSpringCacheFactory}}} set as Coherence default {{{CacheFactory}}}. In this scenario we can support Cohiguration configuartion isolation using namespaces (approach similar to CoherenceInOSGi POC). When request for {{{NamedCache}} are comming from {{{CacheService}}}, {{{RootSpringCacheFactory}}} may use namespace information to find right AC to configure a cache.
 
 _BTW such approach can bring even more benefits in OSGi environment (it is much more flexible than tie caches to {{{ClassLoader}}}s), but it is a long term target_
+
+==Handling local/dev profile==
+Once every pieces of cache configuration is in Spring context. Bean definintion override feature of Spring can be used to maintain local/dev configuration. Technicaly you have to define *-dev.xml Spring AC override definition of beans in it, and load it after real AC. 
+So you may swith between real and dev configuration by adding and removing *-dev.xml from Spring contexts.
