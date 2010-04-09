@@ -26,8 +26,19 @@ There will be single {{{CacheFactory}}} bean (which will also install itself as 
 
 No direct access to {{{CacheFactory}}} from code should be used.
 
+==Cache creation work flow
 There are 2 scenarios how {{{NamedCache}}} could be initialized.
 ===Initializing {{{NamedCache}}} bean in context===
 {{{NamedCache}}} bean will have all required configuration pieces provided by Spring as dependencies. In {{{afterPropertiesSet}}} method {{{NamedCache}}} bean will access {{{CacheFactory}}} bean (which is also should be injected). {{{NamedCache}}} bean will provided required xml pieces to factory and it will create Coherence {{{NamedCache}}} instance.
 ===Initializing {{{NamedCache}}} by {{{CacheService}}}===
 When cache is created on single Coherence node, cache services from other nodes will automatically try to create a cache with same name (in particular distributed cache will be initialized simultaniously on all nodes). When request for cache creation comes from Coherence itself, {{{SpringCacheFactory}}} should lookup bean with same name in Spring AC (there should be naming convention for {{{NamedCache}}} beans and corresponding Coherence caches). {{{SpringCacheFactory}}} will accure {{{NamedCache}}} bean with all its configration and will be able to create Coherence cache instance.
+
+==Dealing with multiple context==
+If we need to maintain several Spring context, we have to options:
+ * *Delegate to Spring machinery*. If we can provide coherence bean visibility at Spring level it will automatically solve problem.
+ * *Context isolation*. If we need to have trully independent Spring context, we can use approach below.
+
+===Isolated Spring context and Coherence configuration===
+In this case each AC will define own {{{SpringCacheFactory}}} but they all will delegate their work to singleton {{{RootSpringCacheFactory}}} set as Coherence default {{{CacheFactory}}}. In this scenario we can support Cohiguration configuartion isolation using namespaces (approach similar to CoherenceInOSGi POC). When request for {{{NamedCache}} are comming from {{{CacheService}}}, {{{RootSpringCacheFactory}}} may use namespace information to find right AC to configure a cache.
+
+_BTW such approach can bring even more benefits in OSGi environment (it is much more flexible than tie caches to {{{ClassLoader}}}s), but it is a long term target_
