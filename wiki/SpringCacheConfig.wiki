@@ -11,6 +11,7 @@ We are going to use custom namespace in Spring to allow Coherence specific eleme
  * use Spring IoC for coherence plugins such as {{{CacheStore}}} or {{{MapListeners}}}
  * allow to configure cache indexes at configuration level (in Spring context file)
  * allow to easily switch schema for cache using property (e.g. force all caches to use local  schema by single property)
+ * handle multiple Spring AC having Coherence configuration
 
 = Details =
 
