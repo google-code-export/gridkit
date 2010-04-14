@@ -1,0 +1,119 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:coherence="http://www.griddynamics.com/schema/coherence-spring"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                     http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+                     http://www.griddynamics.com/schema/coherence-spring
+                     http://www.griddynamics.com/schema/coherence-spring/coherence.xsd">
+
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location">
+            <value>classpath:app.properties</value>
+        </property>
+    </bean>
+
+    <!--Connecting ValueExtractor to NamedCache.
+    We need to invoke addIndex method on NamedCache, but it is not setter and has arguments.
+    This is why we should use MethodInvokingFactoryBean
+    This is a little bit bulky, but it is only classic spring style-->
+    <bean id="extractorSetter" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean" depends-on="cache_1">
+        <property name="targetObject" ref="cache_1"/>
+        <property name="targetMethod" value="addIndex"/>
+        <property name="arguments">
+            <list>
+                <bean class="com.tangosol.util.extractor.ReflectionExtractor">
+                    <constructor-arg index="0" value="getCity"/>
+                </bean>
+                <value>true</value>
+                <null/>
+            </list>
+        </property>
+    </bean>
+
+
+    <!--Connection ContinuousQuery to NamedCache-->
+    <bean id="continuousQuery_1" class="com.tangosol.net.cache.ContinuousQueryCache" depends-on="cache_1">
+        <constructor-arg index="0" ref="cache_1"/>
+        <constructor-arg>
+            <bean class="com.tangosol.util.filter.EqualsFilter">
+                <constructor-arg index="0" value="getCity"/>
+                <constructor-arg index="1" value="Saratov"/>
+            </bean>
+        </constructor-arg>
+        <constructor-arg>
+            <bean class="com.griddynamics.coherence.AddressMapListener"/>
+        </constructor-arg>
+    </bean>
+
+    <!--Creating our NamedCache-->
+    <bean id="cache_1" factory-bean="configurableCacheFactory" factory-method="ensureCache" scope="prototype">
+        <constructor-arg type="java.lang.String" value="dist-test"/>
+        <constructor-arg type="java.lang.ClassLoader">
+        <null/>
+        </constructor-arg>
+    </bean>
+
+    <!--Creating simple custom cache store that just puts entities to map-->
+    <bean id="entityCacheStore" class="com.tangosol.net.cache.MapCacheStore" scope="prototype">
+        <constructor-arg index="0">
+            <bean class="java.util.HashMap"/>
+        </constructor-arg>
+    </bean>
+
+    <!--Coherence configuration-->
+    <coherence:cache-config id="configurableCacheFactory">
+        <coherence:caching-scheme-mapping>
+            <coherence:cache-mapping>
+                <coherence:cache-name>*</coherence:cache-name>
+                <coherence:scheme-name>ExamplesPartitionedPofScheme</coherence:scheme-name>
+            </coherence:cache-mapping>
+        </coherence:caching-scheme-mapping>
+        <coherence:caching-schemes>
+            <coherence:distributed-scheme>
+                <coherence:scheme-name>ExamplesPartitionedPofScheme</coherence:scheme-name>
+                <coherence:service-name>PartitionedPofCache</coherence:service-name>
+                <coherence:serializer>
+                    <coherence:class-name>com.tangosol.io.pof.ConfigurablePofContext</coherence:class-name>
+                    <coherence:init-params>
+                        <coherence:init-param>
+                            <coherence:param-type>String</coherence:param-type>
+                            <coherence:param-value>contacts-pof-config.xml</coherence:param-value>
+                        </coherence:init-param>
+                    </coherence:init-params>
+                </coherence:serializer>
+                <coherence:backing-map-scheme>
+
+                    <!--<coherence:local-scheme>-->
+
+                    <!--&lt;!&ndash;This is an example of configuring through property placeholder&ndash;&gt;-->
+
+                    <!--<coherence:high-units>${simple.scheme.name.config}</coherence:high-units>-->
+                    <!--<coherence:unit-calculator>binary</coherence:unit-calculator>-->
+                    <!--</coherence:local-scheme>-->
+
+                    <coherence:read-write-backing-map-scheme>
+                        <coherence:internal-cache-scheme>
+                            <coherence:local-scheme/>
+                        </coherence:internal-cache-scheme>
+                        <coherence:cachestore-scheme>
+                            <coherence:class-scheme>
+                                <!--This an example how to access spring beans from coherence configuration-->
+                                <coherence:class-name>spring-bean:entityCacheStore</coherence:class-name>
+                                <!--<coherence:init-params>-->
+                                <!--<coherence:init-param>-->
+                                <!--<coherence:param-name>setEntityName</coherence:param-name>-->
+                                <!--<coherence:param-value>{cache-name}</coherence:param-value>-->
+                                <!--</coherence:init-param>-->
+                                <!--</coherence:init-params>-->
+                            </coherence:class-scheme>
+                        </coherence:cachestore-scheme>
+                        <!--<coherence:write-delay>5s</coherence:write-delay>-->
+                    </coherence:read-write-backing-map-scheme>
+
+                </coherence:backing-map-scheme>
+                <!--This is an example of configuring through property placeholder-->
+                <coherence:autostart>${autostart}</coherence:autostart>
+            </coherence:distributed-scheme>
+        </coherence:caching-schemes>
+    </coherence:cache-config>
+</beans>

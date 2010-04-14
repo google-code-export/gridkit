@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE cache-config SYSTEM "cache-config.dtd">
+
+<cache-config>
+    <caching-scheme-mapping>
+
+        <cache-mapping>
+            <cache-name>pool-*</cache-name>
+            <scheme-name system-property="benchmark-default-scheme">simple-distributed-scheme</scheme-name>
+        </cache-mapping>
+
+        <cache-mapping>
+            <cache-name>out-pool</cache-name>
+            <scheme-name system-property="benchmark-default-scheme">simple-distributed-scheme</scheme-name>
+        </cache-mapping>
+
+        <cache-mapping>
+            <cache-name>in-pool</cache-name>
+            <scheme-name system-property="benchmark-default-scheme">simple-distributed-scheme</scheme-name>
+        </cache-mapping>
+
+    </caching-scheme-mapping>
+
+    <caching-schemes>
+
+        <local-scheme>
+            <scheme-name>local-scheme</scheme-name>
+        </local-scheme>
+
+        <distributed-scheme>
+            <scheme-name>simple-distributed-scheme</scheme-name>
+            <backing-map-scheme>
+                <local-scheme/>
+            </backing-map-scheme>
+            <backup-count>0</backup-count>
+            <thread-count system-property="event-benchmark-thread-count">o</thread-count>            
+        </distributed-scheme>
+        
+        <replicated-scheme>
+            <scheme-name>simple-replicated-scheme</scheme-name>
+            <backing-map-scheme>
+                <local-scheme/>
+            </backing-map-scheme>
+        </replicated-scheme>
+
+        <distributed-scheme>
+            <scheme-name>external-distributed-scheme</scheme-name>
+            <backing-map-scheme>
+                <external-scheme>
+                    <nio-memory-manager/>
+                </external-scheme>
+            </backing-map-scheme>
+            <backup-count>0</backup-count>            
+        </distributed-scheme>
+        
+        <invocation-scheme>
+            <service-name>event-remote-control-service</service-name>
+            <thread-count>4</thread-count>
+        </invocation-scheme>
+
+    </caching-schemes>
+
+</cache-config>

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE cache-config SYSTEM "cache-config.dtd">
+
+<cache-config>
+	<caching-scheme-mapping>
+		<cache-mapping>
+			<cache-name>dumb-cache</cache-name>
+			<scheme-name>dumb-scheme</scheme-name>
+		</cache-mapping>
+	</caching-scheme-mapping>
+	
+	<caching-schemes>
+		<distributed-scheme>
+			<scheme-name>dumb-scheme</scheme-name>
+			<service-name>DumbSchemeService</service-name>
+			<autostart>true</autostart>
+		</distributed-scheme>
+	</caching-schemes>
+</cache-config>
