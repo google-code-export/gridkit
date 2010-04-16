@@ -1,6 +1,5 @@
 package com.griddynamics.coherence.integration.spring;
 
-import java.util.Iterator;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
@@ -8,6 +7,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import com.griddynamics.coherence.integration.spring.config.CacheMapping;
+import com.griddynamics.coherence.integration.spring.config.CachingScheme;
+import com.griddynamics.coherence.integration.spring.config.ContextBean;
 import com.tangosol.net.BackingMapManagerContext;
 import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.run.xml.SimpleElement;
@@ -15,9 +17,11 @@ import com.tangosol.run.xml.XmlElement;
 import com.tangosol.run.xml.XmlHelper;
 import com.tangosol.util.ClassHelper;
 
+/**
+ * @author Dmitri Babaev
+ */
 public class ContextCacheFactory extends DefaultConfigurableCacheFactory
 		implements ApplicationContextAware, InitializingBean {
-    private static final String SPRING_BEAN_PREFIX = "spring-bean:";
     
 	private ApplicationContext context;
 
@@ -27,11 +31,8 @@ public class ContextCacheFactory extends DefaultConfigurableCacheFactory
 	}
 
 	public void afterPropertiesSet() throws Exception {
-		Map<String, CacheMapping> cacheMappings = context
-				.getBeansOfType(CacheMapping.class);
-
-		Map<String, CachingScheme> cachingSchemes = context
-				.getBeansOfType(CachingScheme.class);
+		Map<String, CacheMapping> cacheMappings = context.getBeansOfType(CacheMapping.class);
+		Map<String, CachingScheme> cachingSchemes = context.getBeansOfType(CachingScheme.class);
 	}
 
 	@Override
@@ -43,8 +44,8 @@ public class ContextCacheFactory extends DefaultConfigurableCacheFactory
 		}
 		String sClass = xmlClass.getSafeElement("class-name").getString();
 
-		if (sClass.startsWith(SPRING_BEAN_PREFIX)) {
-			String sBeanName = sClass.substring(SPRING_BEAN_PREFIX.length());
+		if (sClass.startsWith(ContextBean.SPRING_BEAN_PREFIX)) {
+			String sBeanName = sClass.substring(ContextBean.SPRING_BEAN_PREFIX.length());
 
 			azzert(sBeanName != null && sBeanName.length() > 0,
 					"Bean name required");
@@ -58,9 +59,8 @@ public class ContextCacheFactory extends DefaultConfigurableCacheFactory
 			Object oBean = this.context.getBean(sBeanName);
 
 			if (xmlConfig != null) {
-				for (Iterator iter = xmlConfig.getElementList().iterator(); iter
-						.hasNext();) {
-					XmlElement xmlElement = (XmlElement) iter.next();
+				for (Object obj : xmlConfig.getElementList()) {
+					XmlElement xmlElement = (XmlElement) obj;
 
 					String sMethod = xmlElement.getName();
 					String sParam = xmlElement.getString();
