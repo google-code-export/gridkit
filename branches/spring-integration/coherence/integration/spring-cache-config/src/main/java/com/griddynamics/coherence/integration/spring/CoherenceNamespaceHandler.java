@@ -75,7 +75,7 @@ public class CoherenceNamespaceHandler extends NamespaceHandlerSupport {
 //    		if (exists(element, "lazy") || getBoolean(element,"@lazy")) {
 //    			builder.setLazyInit(true);
 //    		}
-    		String scheme = getString("@scheme");
+    		String scheme = getString(element, "@scheme");
     		builder.addConstructorArgReference(scheme);
     	}
     }
@@ -110,7 +110,7 @@ public class CoherenceNamespaceHandler extends NamespaceHandlerSupport {
     }
 
     static String getString(Element element, String path) {
-    	
+    	return null;
     }
 
 //    static boolean getBoolean(Element element, String path) {
