@@ -2,17 +2,20 @@ package com.griddynamics.coherence.support;
 
 import java.io.ByteArrayOutputStream;
 
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import com.sun.org.apache.xerces.internal.dom.DOMImplementationImpl;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class CoherenceNamespaceHandler extends NamespaceHandlerSupport {
 
@@ -27,7 +30,7 @@ public class CoherenceNamespaceHandler extends NamespaceHandlerSupport {
     private static class CoherenceBeanDefinitionParser extends
             AbstractSimpleBeanDefinitionParser {
 
-        protected Class getBeanClass(Element element) {
+        protected Class<?> getBeanClass(Element element) {
 //            return SpringDefaultConfigurableCacheFactory.class;
             return SpringAwareCacheFactory.class;
         }
@@ -42,8 +45,7 @@ public class CoherenceNamespaceHandler extends NamespaceHandlerSupport {
 //                ByteArrayOutputStream out = new ByteArrayOutputStream();
 //                transformer.transform(new DOMSource(element), new StreamResult(out));
 
-                DOMImplementation domImpl = new DOMImplementationImpl();
-                Document doc = domImpl.createDocument(null, null, null);
+                Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
 
                 Node root = doc.adoptNode(element);
                 deletePrefixRecursive(root);

@@ -1,27 +1,18 @@
 package com.griddynamics.coherence.support;
 
-import com.tangosol.net.BackingMapManagerContext;
-import com.tangosol.net.DefaultConfigurableCacheFactory;
-
-import com.tangosol.net.Service;
-import com.tangosol.net.cache.MapCacheStore;
-import com.tangosol.run.xml.*;
-
-import com.tangosol.util.ClassHelper;
-
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.AbstractApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.context.support.FileSystemXmlApplicationContext;
+import com.tangosol.net.BackingMapManagerContext;
+import com.tangosol.net.DefaultConfigurableCacheFactory;
+import com.tangosol.run.xml.SimpleElement;
+import com.tangosol.run.xml.SimpleParser;
+import com.tangosol.run.xml.XmlElement;
+import com.tangosol.run.xml.XmlHelper;
+import com.tangosol.util.ClassHelper;
 
 
 /**
@@ -137,7 +128,8 @@ public class SpringAwareCacheFactory
      * @see DefaultConfigurableCacheFactory#instantiateAny(
      *CacheInfo, XmlElement, BackingMapManagerContext, ClassLoader)
      */
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public Object instantiateAny(CacheInfo info, XmlElement xmlClass,
                                  BackingMapManagerContext context, ClassLoader loader) {
        if (translateSchemeType(xmlClass.getName()) != SCHEME_CLASS) {
@@ -198,7 +190,7 @@ public class SpringAwareCacheFactory
      */
     public void setBeanFactory(BeanFactory beanFactory) {
         m_beanFactory = beanFactory;
-        Object oBean = getBeanFactory().getBean("entityCacheStore");
+        //Object oBean = getBeanFactory().getBean("entityCacheStore");
     }
 
 

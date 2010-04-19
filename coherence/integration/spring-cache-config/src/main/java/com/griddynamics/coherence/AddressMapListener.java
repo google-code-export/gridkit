@@ -12,7 +12,7 @@ import com.tangosol.util.MapEvent;
  */
 public class AddressMapListener extends AbstractMapListener {
     public void entryInserted(MapEvent event) {
-        Address address = (Address) event.getNewEntry().getValue();
+        Address address = (Address) event.getNewValue();
         System.out.println("Map listener detected new arrival:\n"+address);
     }
 }
