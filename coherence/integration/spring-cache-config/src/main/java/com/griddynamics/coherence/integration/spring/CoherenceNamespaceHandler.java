@@ -21,8 +21,8 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.w3c.dom.Element;
 
-import com.griddynamics.coherence.integration.spring.config2.DistributeCacheServiceDefinition;
-import com.griddynamics.coherence.integration.spring.config2.DistributedSchemeBean;
+import com.griddynamics.coherence.integration.spring.config.DistributeCacheServiceDefinition;
+import com.griddynamics.coherence.integration.spring.config.DistributedSchemeBean;
 import com.tangosol.net.NamedCache;
 
 /**

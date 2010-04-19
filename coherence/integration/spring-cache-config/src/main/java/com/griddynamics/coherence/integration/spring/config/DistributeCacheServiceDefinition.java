@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.griddynamics.coherence.integration.spring.config2;
+package com.griddynamics.coherence.integration.spring.config;
 
 import com.griddynamics.coherence.integration.spring.CoherenceServiceDefinition;
 import com.tangosol.run.xml.XmlElement;
