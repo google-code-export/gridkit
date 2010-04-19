@@ -45,6 +45,6 @@ public class DistributedSchemeBean implements CoherenceCacheScheme, BeanNameAwar
 	
 	@Override
 	public XmlElement getXmlConfig(String scope) {
-		
+		return null;
 	}
 }
