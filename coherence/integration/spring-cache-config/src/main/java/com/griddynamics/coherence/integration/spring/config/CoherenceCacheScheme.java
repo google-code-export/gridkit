@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.griddynamics.coherence.integration.spring;
+package com.griddynamics.coherence.integration.spring.config;
 
-import com.tangosol.run.xml.XmlElement;
 
 /**
+ * Marker interface.
+ * 
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public interface XmlConfiguartionBean {
-	public XmlElement getXmlConfig(String scope);	
+public interface CoherenceCacheScheme extends XmlConfiguartionBean {
+
+	public String getSchemeName();
+	
 }
