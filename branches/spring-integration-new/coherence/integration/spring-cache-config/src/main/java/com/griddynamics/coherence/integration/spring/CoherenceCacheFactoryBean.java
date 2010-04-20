@@ -20,6 +20,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import com.griddynamics.coherence.integration.spring.config.CoherenceCacheScheme;
 import com.tangosol.net.NamedCache;
 import com.tangosol.net.Service;
 

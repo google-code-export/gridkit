@@ -15,6 +15,8 @@
  */
 package com.griddynamics.coherence.integration.spring;
 
+import com.griddynamics.coherence.integration.spring.config.XmlConfiguartionBean;
+
 /**
  * Marker interface.
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)

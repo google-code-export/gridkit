@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.griddynamics.coherence.integration.spring.config.CoherenceCacheScheme;
 import com.tangosol.net.BackingMapManagerContext;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Cluster;

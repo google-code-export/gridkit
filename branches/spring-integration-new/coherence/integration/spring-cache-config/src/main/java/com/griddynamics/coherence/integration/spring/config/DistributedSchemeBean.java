@@ -17,7 +17,6 @@ package com.griddynamics.coherence.integration.spring.config;
 
 import org.springframework.beans.factory.BeanNameAware;
 
-import com.griddynamics.coherence.integration.spring.CoherenceCacheScheme;
 import com.tangosol.run.xml.XmlElement;
 
 /**
