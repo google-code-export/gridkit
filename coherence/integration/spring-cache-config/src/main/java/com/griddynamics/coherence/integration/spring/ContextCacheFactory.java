@@ -1,29 +1,32 @@
 package com.griddynamics.coherence.integration.spring;
 
 import java.util.Collections;
-import java.util.HashMap;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import com.griddynamics.coherence.integration.spring.config.CacheScheme;
+import com.griddynamics.coherence.integration.spring.config.CacheSchemeResolver;
+import com.griddynamics.coherence.integration.spring.config.DistributedScheme;
 import com.tangosol.net.BackingMapManagerContext;
-import com.tangosol.net.ConfigurableCacheFactory;
 import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
-import com.tangosol.net.Service;
+import com.tangosol.run.xml.SimpleElement;
 import com.tangosol.run.xml.XmlElement;
 import com.tangosol.run.xml.XmlHelper;
 
-public class ContextCacheFactory implements ConfigurableCacheFactory, ApplicationContextAware {
+/**
+ * @author Dmitri Babaev
+ */
+public class ContextCacheFactory implements CacheFactory, ApplicationContextAware {
 	private static final char SCOPE_SEPARATOR = '$';
-	private static final String SPRING_BEAN_PREFIX = "spring:";
 	
 	private FactoryDelegate factory = new FactoryDelegate();
 	private String scopeName;
 	private ApplicationContext applicationContext;
+	private CacheSchemeResolver cacheSchemeResolver;
 	
 	public void setScopeName(String scopeName) {
 		if (scopeName == null) {
@@ -46,28 +49,8 @@ public class ContextCacheFactory implements ConfigurableCacheFactory, Applicatio
 		return p < 0 ? sCacheName : sCacheName.substring(p + 1);
 	}
 
-	public NamedCache ensureCache(String cacheName, ClassLoader loader) {
-		return factory.ensureCache(decorate(cacheName), loader);
-	}
-	
-	public Service ensureService(String serviceName) {
-		return factory.ensureService(decorate(serviceName));
-	}
-	
-	public void destroyCache(NamedCache cache) {
-		factory.destroyCache(cache);
-	}
-	
-	public void releaseCache(NamedCache cache) {
-		factory.releaseCache(cache);
-	}
-	
-	public XmlElement getConfig() {
-		throw new UnsupportedOperationException("Configuration is Spring driven");
-	}
-
-	public void setConfig(XmlElement xmlConfig) {
-		throw new UnsupportedOperationException("Cannot set XML, configuration is Spring driven");
+	public NamedCache newCache(String cacheName) {
+		return factory.ensureCache(decorate(cacheName), null);
 	}
 	
 	public void setApplicationContext(ApplicationContext applicationContext)
@@ -75,13 +58,13 @@ public class ContextCacheFactory implements ConfigurableCacheFactory, Applicatio
 		this.applicationContext = applicationContext;
 	}
 	
-	private BeanDefinition findSchemeDefinitionForCache(String cacheName) {
-		String name = extractName(cacheName);
-		//DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) applicationContext.getBeanFactory();
-		return null;
+	@Required
+	public void setCacheSchemeResolver(CacheSchemeResolver cacheSchemeResolver) {
+		this.cacheSchemeResolver = cacheSchemeResolver;
 	}
 	
 	class FactoryDelegate extends DefaultConfigurableCacheFactory {
+		
 		public FactoryDelegate() {
 			// need to pass an XML element otherwise it will try to load one
 			super(XmlHelper.loadXml("<cache-config></cache-config>"));
@@ -98,10 +81,9 @@ public class ContextCacheFactory implements ConfigurableCacheFactory, Applicatio
 			//DefaultConfigurableCacheFactory.ensureCache --> resolveScheme
 			//DefaultConfigurableCacheFactory.Manager.instantiateBackingMap --> resolveScheme
 			
-			BeanDefinition schemeDefinition = findSchemeDefinitionForCache(cacheInfo.getCacheName());
-			
-			XmlElement xml = XmlHelper.loadXml("<cache-config></cache-config>");			
-			return xml;
+			CacheScheme cacheScheme = cacheSchemeResolver.getSchemeByCacheName(extractName(cacheInfo.getCacheName()));
+			XmlElement schemeDefinition = XmlUtils.buildCacheSchemeConfig(cacheScheme);
+			return schemeDefinition;
 		}
 		
 		@Override
@@ -116,8 +98,8 @@ public class ContextCacheFactory implements ConfigurableCacheFactory, Applicatio
 			}
 			String sClass = xmlClass.getSafeElement("class-name").getString();
 
-			if (sClass.startsWith(SPRING_BEAN_PREFIX)) {
-				String sBeanName = sClass.substring(SPRING_BEAN_PREFIX.length());
+			if (sClass.startsWith(XmlUtils.SPRING_BEAN_PREFIX)) {
+				String sBeanName = sClass.substring(XmlUtils.SPRING_BEAN_PREFIX.length());
 				azzert(sBeanName != null && sBeanName.length() > 0, "Bean name required");
 
 				// Handling bean applicationContext
