@@ -8,9 +8,9 @@ public class DistributedScheme extends CacheScheme {
 	private String backingMapId;
 	private String listenerId;
 	
-	private int threadCount = 5;
+	private Integer threadCount;
 	
-	public void setThreadCount(int threadCount) {
+	public void setThreadCount(Integer threadCount) {
 		this.threadCount = threadCount;
 	}
 	
@@ -26,7 +26,7 @@ public class DistributedScheme extends CacheScheme {
 		this.serializerId = serializerId;
 	}
 	
-	public int getThreadCount() {
+	public Integer getThreadCount() {
 		return threadCount;
 	}
 	

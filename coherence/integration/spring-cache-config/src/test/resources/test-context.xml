@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+	<bean id="cacheFactory" class="com.griddynamics.coherence.integration.spring.ContextCacheFactory">
+		<property name="scopeName" value="test" />
+		<property name="cacheSchemeResolver">
+			<bean class="com.griddynamics.coherence.integration.spring.config.SimpleContextSchemeReslover">
+				<property name="cacheSchemes">
+					<map>
+						<entry key="simpleDistributedCache" value="simpleDistributed" />
+					</map>
+				</property>
+			</bean>
+		</property>
+	</bean>
+	
+	<bean id="simpleDistributedCache" class="com.griddynamics.coherence.integration.spring.config.NamedCacheFactory"
+		autowire="byType" scope="prototype" />
+		
+	<bean id="simpleDistributed" class="com.griddynamics.coherence.integration.spring.config.DistributedScheme">
+		<property name="backingMapId">
+			<idref local="localMap"/>
+		</property>
+	</bean>
+	
+	<bean id="localMap" class="com.tangosol.net.cache.LocalCache">
+		<property name="highUnits" value="1000" />
+		<property name="evictionType" value="0" />
+	</bean>
+		
+</beans>
