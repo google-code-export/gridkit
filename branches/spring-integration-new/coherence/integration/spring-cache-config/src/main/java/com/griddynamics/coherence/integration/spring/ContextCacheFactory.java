@@ -9,11 +9,9 @@ import org.springframework.context.ApplicationContextAware;
 
 import com.griddynamics.coherence.integration.spring.config.CacheScheme;
 import com.griddynamics.coherence.integration.spring.config.CacheSchemeResolver;
-import com.griddynamics.coherence.integration.spring.config.DistributedScheme;
 import com.tangosol.net.BackingMapManagerContext;
 import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
-import com.tangosol.run.xml.SimpleElement;
 import com.tangosol.run.xml.XmlElement;
 import com.tangosol.run.xml.XmlHelper;
 

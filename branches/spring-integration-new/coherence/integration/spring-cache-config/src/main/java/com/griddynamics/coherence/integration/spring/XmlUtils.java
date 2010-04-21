@@ -20,11 +20,25 @@ public class XmlUtils {
 		
 		cacheScheme.getServiceName();
 		schemeEl.addElement("service-name").setString(cacheScheme.getServiceName());
-		schemeEl.addElement("backing-map-scheme").setString(cacheScheme.getServiceName());
-		return null;
+		addBeanReference(schemeEl.addElement("backing-map-scheme"), cacheScheme.getBackingMapId());
+		
+		if (cacheScheme.getListenerId() != null)
+			addBeanReference(schemeEl.addElement("listener"), cacheScheme.getListenerId());
+		
+		if (cacheScheme.getSerializerId() != null)
+			addBeanReference(schemeEl.addElement("serializer"), cacheScheme.getSerializerId());
+		
+		if (cacheScheme.getThreadCount() != null)
+			schemeEl.addElement("thread-count").setInt(cacheScheme.getThreadCount());
+			
+		return schemeEl;
 	}
 	
 	static public String decorateBeanId(String beanId) {
 		return SPRING_BEAN_PREFIX+beanId;
+	}
+	
+	static public void addBeanReference(XmlElement element, String beanId) {
+		element.addElement("class-scheme").addElement("class-name").setString(decorateBeanId(beanId));
 	}
 }
