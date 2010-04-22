@@ -1,7 +1,6 @@
 package com.griddynamics.coherence.integration.spring.config;
 
 import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.beans.factory.annotation.Required;
 
 /**
  * @author Dmitri Babaev
