@@ -12,7 +12,17 @@ public class ReadingNode {
 		ApplicationContext context = new GenericXmlApplicationContext("classpath:/test-context.xml");
 		NamedCache cache = context.getBean("simpleDistributedCache", NamedCache.class);
 		
-		System.out.println(String.format("'%s'", cache.get("aaa")));
+		Object res = null;
+		while (res == null) {
+			res = cache.get("aaa");
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				break;
+			}
+		}
+		
+		System.out.println(String.format("'%s'", res));
 		
 		while (true) {
 			try {
