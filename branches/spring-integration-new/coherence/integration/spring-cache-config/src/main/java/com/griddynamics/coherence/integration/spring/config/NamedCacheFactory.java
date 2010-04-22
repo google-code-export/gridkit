@@ -1,21 +1,18 @@
 package com.griddynamics.coherence.integration.spring.config;
 
-import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Required;
 
-import com.griddynamics.coherence.integration.spring.CacheFactory;
 import com.tangosol.net.NamedCache;
 
 /**
  * @author Dmitri Babaev
  */
-public class NamedCacheFactory implements FactoryBean<NamedCache>, BeanNameAware {
-	private String cacheName;
-	private CacheFactory cacheFactory;
+public class NamedCacheFactory implements FactoryBean<NamedCache> {
+	private CacheDefinition cacheDefinition;
 
 	public NamedCache getObject() throws Exception {
-		return cacheFactory.newCache(cacheName);
+		return cacheDefinition.newCache();
 	}
 	
 	public Class<?> getObjectType() {
@@ -26,12 +23,8 @@ public class NamedCacheFactory implements FactoryBean<NamedCache>, BeanNameAware
 		return true;
 	}
 	
-	public void setBeanName(String cacheName) {
-		this.cacheName = cacheName;
-	}
-	
 	@Required
-	public void setCacheFactory(CacheFactory cacheFactory) {
-		this.cacheFactory = cacheFactory;
+	public void setCacheDefinition(CacheDefinition cacheDefinition) {
+		this.cacheDefinition = cacheDefinition;
 	}
 }

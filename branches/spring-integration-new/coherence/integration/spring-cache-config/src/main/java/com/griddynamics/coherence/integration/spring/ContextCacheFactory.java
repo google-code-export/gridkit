@@ -3,12 +3,11 @@ package com.griddynamics.coherence.integration.spring;
 import java.util.Collections;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import com.griddynamics.coherence.integration.spring.config.CacheDefinition;
 import com.griddynamics.coherence.integration.spring.config.CacheScheme;
-import com.griddynamics.coherence.integration.spring.config.CacheSchemeResolver;
 import com.tangosol.net.BackingMapManagerContext;
 import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
@@ -24,7 +23,6 @@ public class ContextCacheFactory implements CacheFactory, ApplicationContextAwar
 	private FactoryDelegate factory = new FactoryDelegate();
 	private String scopeName;
 	private ApplicationContext applicationContext;
-	private CacheSchemeResolver cacheSchemeResolver;
 	
 	public void setScopeName(String scopeName) {
 		if (scopeName == null) {
@@ -56,11 +54,6 @@ public class ContextCacheFactory implements CacheFactory, ApplicationContextAwar
 		this.applicationContext = applicationContext;
 	}
 	
-	@Required
-	public void setCacheSchemeResolver(CacheSchemeResolver cacheSchemeResolver) {
-		this.cacheSchemeResolver = cacheSchemeResolver;
-	}
-	
 	class FactoryDelegate extends DefaultConfigurableCacheFactory {
 		
 		public FactoryDelegate() {
@@ -79,7 +72,7 @@ public class ContextCacheFactory implements CacheFactory, ApplicationContextAwar
 			//DefaultConfigurableCacheFactory.ensureCache --> resolveScheme
 			//DefaultConfigurableCacheFactory.Manager.instantiateBackingMap --> resolveScheme
 			
-			CacheScheme cacheScheme = cacheSchemeResolver.getSchemeByCacheName(extractName(cacheInfo.getCacheName()));
+			CacheScheme cacheScheme = applicationContext.getBean(extractName(cacheInfo.getCacheName()), CacheDefinition.class).getCacheScheme();
 			XmlElement schemeDefinition = XmlUtils.buildCacheSchemeConfig(cacheScheme);
 			return schemeDefinition;
 		}

@@ -5,29 +5,27 @@
 
 	<bean id="cacheFactory" class="com.griddynamics.coherence.integration.spring.ContextCacheFactory">
 		<property name="scopeName" value="test" />
-		<property name="cacheSchemeResolver">
-			<bean class="com.griddynamics.coherence.integration.spring.config.SimpleContextSchemeReslover">
-				<property name="cacheSchemes">
-					<map>
-						<entry key="simpleDistributedCache" value="simpleDistributed" />
-					</map>
-				</property>
-			</bean>
-		</property>
 	</bean>
 	
-	<bean id="simpleDistributedCache" class="com.griddynamics.coherence.integration.spring.config.NamedCacheFactory"
-		autowire="byType" scope="prototype" />
+	<bean id="simpleDistributedCache" class="com.griddynamics.coherence.integration.spring.config.NamedCacheFactory" lazy-init="true">
+		<property name="cacheDefinition" ref="simpleDistributed" />
+	</bean>
 		
-	<bean id="simpleDistributed" class="com.griddynamics.coherence.integration.spring.config.DistributedScheme">
+	<bean id="simpleDistributed" class="com.griddynamics.coherence.integration.spring.config.CacheDefinition" autowire="byType">
+		<property name="cacheScheme" ref="simpleDistributedScheme" />
+	</bean>
+		
+	<bean id="simpleDistributedScheme" class="com.griddynamics.coherence.integration.spring.config.DistributedScheme">
 		<property name="backingMapId">
 			<idref local="localMap"/>
 		</property>
 	</bean>
 	
-	<bean id="localMap" class="com.tangosol.net.cache.LocalCache">
+	<bean id="localMap" class="com.tangosol.net.cache.LocalCache" scope="prototype">
 		<property name="highUnits" value="1000" />
 		<property name="evictionType" value="0" />
+		<property name="expiryDelay" value="30000" />
+		<property name="flushDelay" value="60000" />
 	</bean>
 		
 </beans>
