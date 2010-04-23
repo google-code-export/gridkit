@@ -3,6 +3,9 @@ package com.griddynamics.coherence.integration.spring;
 import com.tangosol.util.MapEvent;
 import com.tangosol.util.MapListener;
 
+/**
+ * @author Dmitri Babaev
+ */
 public class PrintingListener implements MapListener {
 
 	public void entryDeleted(MapEvent paramMapEvent) {

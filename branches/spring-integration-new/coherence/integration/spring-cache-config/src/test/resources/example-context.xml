@@ -19,6 +19,9 @@
 		<property name="backingMapId">
 			<idref local="rwBackingMap"/>
 		</property>
+		<property name="listenerId">
+			<idref local="printingListener"/>
+		</property>
 	</bean>
 	
 	<bean id="localMap" class="com.griddynamics.coherence.integration.spring.config.LocalCacheFactory" scope="prototype">
@@ -40,6 +43,8 @@
 			</bean>
 		</constructor-arg>
 	</bean>
+	
+	<bean id="printingListener" class="com.griddynamics.coherence.integration.spring.PrintingListener" />
 	
 	<bean id="rwBackingMap" class="com.griddynamics.coherence.integration.spring.config.ReadWriteBackingMapDefinition">
 		<property name="loader" ref="cacheStore" />
