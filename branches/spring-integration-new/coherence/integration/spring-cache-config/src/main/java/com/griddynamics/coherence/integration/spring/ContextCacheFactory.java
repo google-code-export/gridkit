@@ -6,6 +6,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import com.griddynamics.coherence.integration.spring.config.BackingMapFactory;
 import com.griddynamics.coherence.integration.spring.config.CacheDefinition;
 import com.griddynamics.coherence.integration.spring.config.CacheScheme;
 import com.tangosol.net.BackingMapManagerContext;
@@ -90,11 +91,16 @@ public class ContextCacheFactory implements CacheFactory, ApplicationContextAwar
 			String sClass = xmlClass.getSafeElement("class-name").getString();
 
 			if (sClass.startsWith(XmlUtils.SPRING_BEAN_PREFIX)) {
-				String sBeanName = sClass.substring(XmlUtils.SPRING_BEAN_PREFIX.length());
-				azzert(sBeanName != null && sBeanName.length() > 0, "Bean name required");
+				String beanName = sClass.substring(XmlUtils.SPRING_BEAN_PREFIX.length());
+				azzert(beanName != null && beanName.length() > 0, "Bean name required");
 
 				// Handling bean applicationContext
-				Object bean = applicationContext.getBean(sBeanName);
+				Object bean = applicationContext.getBean(beanName);
+				
+				if (bean instanceof BackingMapFactory) {
+					bean = ((BackingMapFactory) bean).newBackingMap(context);
+				}
+				
 				return bean;
 			} else {
 				return super.instantiateAny(info, xmlClass, context, loader);
