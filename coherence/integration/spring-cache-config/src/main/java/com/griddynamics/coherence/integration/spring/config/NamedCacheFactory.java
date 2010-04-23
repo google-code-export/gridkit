@@ -21,7 +21,7 @@ public class NamedCacheFactory implements FactoryBean<NamedCache> {
 	}
 	
 	public boolean isSingleton() {
-		return true;
+		return false;
 	}
 	
 	@Required

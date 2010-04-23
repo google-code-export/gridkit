@@ -13,7 +13,13 @@ public class WritingNode {
 		ApplicationContext context = new GenericXmlApplicationContext("classpath:/test-context.xml");
 		NamedCache cache = context.getBean("simpleDistributedCache", NamedCache.class);
 		
-		cache.put("aaa", "bbb");
+		String res = (String) cache.get("aaa");
+		System.out.println(String.format("'%s'", res));
+		
+		cache.put("aaa", res+"b");
+		
+		res = (String) cache.get("aaa");
+		System.out.println(String.format("'%s'", res));
 		
 		while (true) {
 			try {
