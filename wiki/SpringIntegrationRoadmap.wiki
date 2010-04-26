@@ -1,0 +1,9 @@
+#summary Coherence Spring integration roadmap
+#labels Phase-Requirements,Phase-Design
+
+= Feature roadmap =
+
+ * Define coherence services as a Spring beans
+ * Eliminate DefaultConfigurableCacheFactory
+ * Implement all common configuration scenarios with Spring configuration
+ * Create custom tags to simplify the configuration process
