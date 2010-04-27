@@ -2,25 +2,20 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
-
-	<bean id="cacheFactory" class="com.griddynamics.coherence.integration.spring.ContextCacheFactory">
-		<property name="scopeName" value="test" />
+       
+	<bean id="distributedService" class="com.griddynamics.coherence.integration.spring.config.DistributedServiceFactory" lazy-init="true">
+		<property name="serviceType" value="DistributedCache" />
 	</bean>
 	
 	<bean id="simpleDistributedCache" class="com.griddynamics.coherence.integration.spring.config.NamedCacheFactory" lazy-init="true">
 		<property name="cacheDefinition" ref="simpleDistributed" />
 	</bean>
 		
-	<bean id="simpleDistributed" class="com.griddynamics.coherence.integration.spring.config.SchemeCacheDefinition" autowire="byType">
-		<property name="cacheScheme" ref="simpleDistributedScheme" />
+	<bean id="simpleDistributed" class="com.griddynamics.coherence.integration.spring.config.ServiceCacheDefinition">
+		<property name="cacheService" ref="distributedService" />
+		<property name="backingMapFactory" ref="rwBackingMap" />
 	</bean>
 		
-	<bean id="simpleDistributedScheme" class="com.griddynamics.coherence.integration.spring.config.DistributedScheme">
-		<property name="backingMapId">
-			<idref local="rwBackingMap"/>
-		</property>
-	</bean>
-	
 	<bean id="localMap" class="com.griddynamics.coherence.integration.spring.config.LocalCacheFactory" scope="prototype">
 		<property name="highUnits" value="1000" />
 		<property name="evictionType" value="HYBRID" />
@@ -45,5 +40,5 @@
 		<property name="loader" ref="cacheStore" />
 		<property name="internalMap" ref="localMap" />
 	</bean>
-	
+		
 </beans>
