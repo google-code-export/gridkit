@@ -1,6 +1,7 @@
-package com.griddynamics.coherence.integration.spring.config;
+package com.griddynamics.coherence.integration.spring;
 
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Required;
 
 import com.tangosol.net.BackingMapManagerContext;
@@ -13,11 +14,11 @@ import com.tangosol.util.ObservableMap;
 /**
  * @author Dmitri Babaev
  */
-public class ServiceCacheDefinition implements BeanNameAware, CacheDefinition {
+public class ServiceCacheDefinition implements BeanNameAware, CacheDefinition, InitializingBean {
 	private String cacheName;
 	private CacheService service;
 	private MapListener mapListener;
-	private BackingMapDefinition backingMapFactory;
+	private BackingMapDefinition backingMapDefinition;
 	private ObservableMap backingMap;
 	
 	public NamedCache newCache() {
@@ -45,16 +46,16 @@ public class ServiceCacheDefinition implements BeanNameAware, CacheDefinition {
 	}
 	
 	public void setBackingMapFactory(BackingMapDefinition backingMapFactory) {
-		this.backingMapFactory = backingMapFactory;
+		this.backingMapDefinition = backingMapFactory;
 	}
 	
 	public void setBackingMap(ObservableMap backingMap) {
 		this.backingMap = backingMap;
 	}
 	
-	public BackingMapDefinition getBackingMapFactory() {
-		if (backingMapFactory != null)
-			return backingMapFactory;
+	public BackingMapDefinition getBackingMapDefinition() {
+		if (backingMapDefinition != null)
+			return backingMapDefinition;
 		
 		if (backingMap != null) {
 			return new BackingMapDefinition() {
@@ -65,5 +66,9 @@ public class ServiceCacheDefinition implements BeanNameAware, CacheDefinition {
 		}
 		
 		throw new IllegalStateException("backing map or backing map factory is not set");
+	}
+	
+	public void afterPropertiesSet() throws Exception {
+		((ContextBackingMapManager)service.getBackingMapManager()).registerBackingMapDefinition(cacheName, getBackingMapDefinition());
 	}
 }

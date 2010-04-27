@@ -1,4 +1,4 @@
-package com.griddynamics.coherence.integration.spring.config;
+package com.griddynamics.coherence.integration.spring;
 
 import com.tangosol.net.NamedCache;
 
