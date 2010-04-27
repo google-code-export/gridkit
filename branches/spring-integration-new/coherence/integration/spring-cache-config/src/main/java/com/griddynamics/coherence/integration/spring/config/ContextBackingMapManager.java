@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.context.ApplicationContext;
 
 import com.tangosol.net.AbstractBackingMapManager;
+import com.tangosol.util.ObservableMap;
 
 /**
  * @author Dmitri Babaev
@@ -16,7 +17,9 @@ public class ContextBackingMapManager extends AbstractBackingMapManager {
 		this.applicationContext = applicationContext;
 	}
 
-	public Map<?, ?> instantiateBackingMap(String paramString) {
-		return null;
+	public Map<?, ?> instantiateBackingMap(String cacheName) {
+		BackingMapFactory bmf = applicationContext.getBean(cacheName, ServiceCacheDefinition.class).getBackingMapFactory();
+		ObservableMap res = bmf.newBackingMap(getContext());
+		return res;
 	}
 }

@@ -1,4 +1,4 @@
-package com.griddynamics.coherence.integration.spring;
+package com.griddynamics.coherence.integration.spring.scheme;
 
 import static org.junit.Assert.*;
 
@@ -18,7 +18,7 @@ public class CacheStoreTest {
 	@Before
 	public void setUp() {
 		System.setProperty("tangosol.coherence.wka", "localhost");
-		applicationContext = new ClassPathXmlApplicationContext("test-context.xml");
+		applicationContext = new ClassPathXmlApplicationContext("scheme/test-context.xml");
 	}
 	
 	@Test
