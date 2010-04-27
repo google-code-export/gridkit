@@ -17,7 +17,7 @@ public class ServiceCacheDefinition implements BeanNameAware, CacheDefinition {
 	private String cacheName;
 	private CacheService service;
 	private MapListener mapListener;
-	private BackingMapFactory backingMapFactory;
+	private BackingMapDefinition backingMapFactory;
 	private ObservableMap backingMap;
 	
 	public NamedCache newCache() {
@@ -44,7 +44,7 @@ public class ServiceCacheDefinition implements BeanNameAware, CacheDefinition {
 		this.service = service;
 	}
 	
-	public void setBackingMapFactory(BackingMapFactory backingMapFactory) {
+	public void setBackingMapFactory(BackingMapDefinition backingMapFactory) {
 		this.backingMapFactory = backingMapFactory;
 	}
 	
@@ -52,12 +52,12 @@ public class ServiceCacheDefinition implements BeanNameAware, CacheDefinition {
 		this.backingMap = backingMap;
 	}
 	
-	public BackingMapFactory getBackingMapFactory() {
+	public BackingMapDefinition getBackingMapFactory() {
 		if (backingMapFactory != null)
 			return backingMapFactory;
 		
 		if (backingMap != null) {
-			return new BackingMapFactory() {
+			return new BackingMapDefinition() {
 				public ObservableMap newBackingMap(BackingMapManagerContext context) {
 					return backingMap;
 				}

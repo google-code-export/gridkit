@@ -6,6 +6,6 @@ import com.tangosol.util.ObservableMap;
 /**
  * @author Dmitri Babaev
  */
-public interface BackingMapFactory {
+public interface BackingMapDefinition {
 	ObservableMap newBackingMap(BackingMapManagerContext context);
 }
