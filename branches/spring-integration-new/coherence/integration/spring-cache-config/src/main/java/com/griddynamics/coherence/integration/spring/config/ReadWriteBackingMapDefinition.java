@@ -10,7 +10,7 @@ import com.tangosol.util.ObservableMap;
 /**
  * @author Dmitri Babaev
  */
-public class ReadWriteBackingMapDefinition implements BackingMapFactory {
+public class ReadWriteBackingMapDefinition implements BackingMapDefinition {
 	private ObservableMap internalMap;
 	private Map<?, ?> missesMap;
 	private CacheLoader loader;

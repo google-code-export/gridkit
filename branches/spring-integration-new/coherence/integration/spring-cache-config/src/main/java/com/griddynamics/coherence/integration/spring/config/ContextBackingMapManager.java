@@ -18,7 +18,7 @@ public class ContextBackingMapManager extends AbstractBackingMapManager {
 	}
 
 	public Map<?, ?> instantiateBackingMap(String cacheName) {
-		BackingMapFactory bmf = applicationContext.getBean(cacheName, ServiceCacheDefinition.class).getBackingMapFactory();
+		BackingMapDefinition bmf = applicationContext.getBean(cacheName, ServiceCacheDefinition.class).getBackingMapFactory();
 		ObservableMap res = bmf.newBackingMap(getContext());
 		return res;
 	}
