@@ -1,4 +1,4 @@
-package com.griddynamics.coherence.integration.spring.config;
+package com.griddynamics.coherence.integration.spring;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;

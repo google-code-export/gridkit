@@ -3,15 +3,15 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
        
-	<bean id="distributedService" class="com.griddynamics.coherence.integration.spring.config.DistributedServiceFactory" lazy-init="true">
+	<bean id="distributedService" class="com.griddynamics.coherence.integration.spring.DistributedServiceFactory" lazy-init="true">
 		<property name="serviceType" value="DistributedCache" />
 	</bean>
 	
-	<bean id="simpleDistributedCache" class="com.griddynamics.coherence.integration.spring.config.NamedCacheFactory" lazy-init="true">
+	<bean id="simpleDistributedCache" class="com.griddynamics.coherence.integration.spring.NamedCacheFactory" lazy-init="true">
 		<property name="cacheDefinition" ref="simpleDistributed" />
 	</bean>
 		
-	<bean id="simpleDistributed" class="com.griddynamics.coherence.integration.spring.config.ServiceCacheDefinition">
+	<bean id="simpleDistributed" class="com.griddynamics.coherence.integration.spring.ServiceCacheDefinition">
 		<property name="cacheService" ref="distributedService" />
 		<property name="backingMapFactory" ref="rwBackingMap" />
 		<property name="mapListener" ref="historyListener" />
@@ -23,7 +23,7 @@
 		<property name="history" ref="cacheEvents" />
 	</bean>
 		
-	<bean id="localMap" class="com.griddynamics.coherence.integration.spring.config.LocalCacheFactory" scope="prototype">
+	<bean id="localMap" class="com.griddynamics.coherence.integration.spring.LocalCacheFactory" scope="prototype">
 		<property name="highUnits" value="1000" />
 		<property name="evictionType" value="HYBRID" />
 		<property name="expiryDelayMillis" value="30000" />
@@ -43,7 +43,7 @@
 		</constructor-arg>
 	</bean>
 	
-	<bean id="rwBackingMap" class="com.griddynamics.coherence.integration.spring.config.ReadWriteBackingMapDefinition">
+	<bean id="rwBackingMap" class="com.griddynamics.coherence.integration.spring.ReadWriteBackingMapDefinition">
 		<property name="loader" ref="cacheStore" />
 		<property name="internalMap" ref="localMap" />
 	</bean>
