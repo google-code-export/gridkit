@@ -14,6 +14,13 @@
 	<bean id="simpleDistributed" class="com.griddynamics.coherence.integration.spring.config.ServiceCacheDefinition">
 		<property name="cacheService" ref="distributedService" />
 		<property name="backingMapFactory" ref="rwBackingMap" />
+		<property name="mapListener" ref="historyListener" />
+	</bean>
+	
+	<bean id="cacheEvents" class="java.util.ArrayList" />
+	
+	<bean id="historyListener" class="com.griddynamics.coherence.integration.spring.HistoryListener" scope="prototype">
+		<property name="history" ref="cacheEvents" />
 	</bean>
 		
 	<bean id="localMap" class="com.griddynamics.coherence.integration.spring.config.LocalCacheFactory" scope="prototype">
