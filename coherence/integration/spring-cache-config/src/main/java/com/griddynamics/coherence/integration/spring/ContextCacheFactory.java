@@ -7,7 +7,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import com.griddynamics.coherence.integration.spring.config.BackingMapFactory;
-import com.griddynamics.coherence.integration.spring.config.CacheDefinition;
+import com.griddynamics.coherence.integration.spring.config.SchemeCacheDefinition;
 import com.griddynamics.coherence.integration.spring.config.CacheScheme;
 import com.tangosol.net.BackingMapManagerContext;
 import com.tangosol.net.DefaultConfigurableCacheFactory;
@@ -73,7 +73,7 @@ public class ContextCacheFactory implements CacheFactory, ApplicationContextAwar
 			//DefaultConfigurableCacheFactory.ensureCache --> resolveScheme
 			//DefaultConfigurableCacheFactory.Manager.instantiateBackingMap --> resolveScheme
 			
-			CacheScheme cacheScheme = applicationContext.getBean(extractName(cacheInfo.getCacheName()), CacheDefinition.class).getCacheScheme();
+			CacheScheme cacheScheme = applicationContext.getBean(extractName(cacheInfo.getCacheName()), SchemeCacheDefinition.class).getCacheScheme();
 			XmlElement schemeDefinition = XmlUtils.buildCacheSchemeConfig(cacheScheme);
 			return schemeDefinition;
 		}

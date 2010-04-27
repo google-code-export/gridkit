@@ -5,6 +5,9 @@ import com.griddynamics.coherence.integration.spring.config.DistributedScheme;
 import com.tangosol.run.xml.SimpleElement;
 import com.tangosol.run.xml.XmlElement;
 
+/**
+ * @author Dmitri Babaev
+ */
 public class XmlUtils {
 	public static final String SPRING_BEAN_PREFIX = "spring:";
 	

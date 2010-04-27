@@ -11,13 +11,16 @@
 		<property name="cacheDefinition" ref="simpleDistributed" />
 	</bean>
 		
-	<bean id="simpleDistributed" class="com.griddynamics.coherence.integration.spring.config.CacheDefinition" autowire="byType">
+	<bean id="simpleDistributed" class="com.griddynamics.coherence.integration.spring.config.SchemeCacheDefinition" autowire="byType">
 		<property name="cacheScheme" ref="simpleDistributedScheme" />
 	</bean>
 		
 	<bean id="simpleDistributedScheme" class="com.griddynamics.coherence.integration.spring.config.DistributedScheme">
 		<property name="backingMapId">
 			<idref local="rwBackingMap"/>
+		</property>
+		<property name="listenerId">
+			<idref local="printingListener"/>
 		</property>
 	</bean>
 	
@@ -40,6 +43,8 @@
 			</bean>
 		</constructor-arg>
 	</bean>
+	
+	<bean id="printingListener" class="com.griddynamics.coherence.integration.spring.PrintingListener" />
 	
 	<bean id="rwBackingMap" class="com.griddynamics.coherence.integration.spring.config.ReadWriteBackingMapDefinition">
 		<property name="loader" ref="cacheStore" />
