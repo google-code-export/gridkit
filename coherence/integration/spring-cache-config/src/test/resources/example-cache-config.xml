@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE cache-config SYSTEM "cache-config.dtd">
+
+<cache-config>
+	<caching-scheme-mapping>
+		<cache-mapping>
+				<cache-name>simpleDistributedCache</cache-name>
+				<scheme-name>simpleDistributedNearCache</scheme-name>
+		</cache-mapping>
+	</caching-scheme-mapping>
+
+	<caching-schemes>
+	
+		<near-scheme>
+			<scheme-name>simpleDistributedNearCache</scheme-name>
+	
+			<front-scheme>
+				<local-scheme>
+					<eviction-policy>HYBRID</eviction-policy>
+					<high-units>10000</high-units>
+				</local-scheme>
+			</front-scheme>
+	
+			<back-scheme>
+				<distributed-scheme>
+					<scheme-ref>simpleDistributed</scheme-ref>
+				</distributed-scheme>
+			</back-scheme>
+	
+			<invalidation-strategy>present</invalidation-strategy>
+		</near-scheme>
+	
+		<distributed-scheme>
+			<scheme-name>simpleDistributed</scheme-name>
+			<service-name>distributedService</service-name>
+			
+			<listener>
+				<class-scheme>
+					<class-name>com.griddynamics.coherence.integration.spring.PrintingListener</class-name>
+				</class-scheme>
+			</listener>
+
+			<backing-map-scheme>
+				<read-write-backing-map-scheme>
+					<internal-cache-scheme>
+						<local-scheme>
+							<eviction-policy>HYBRID</eviction-policy>
+							<high-units>1000</high-units>
+							<expiry-delay>30s</expiry-delay>
+							<flush-delay>60s</flush-delay>
+						</local-scheme>
+					</internal-cache-scheme>
+
+					<cachestore-scheme>
+						<class-scheme>
+							<class-name>com.tangosol.net.cache.MapCacheStore</class-name>
+						</class-scheme>
+					</cachestore-scheme>
+				</read-write-backing-map-scheme>
+			</backing-map-scheme>
+		</distributed-scheme>
+	
+	</caching-schemes>
+</cache-config>
