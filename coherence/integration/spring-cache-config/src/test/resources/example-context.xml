@@ -19,13 +19,6 @@
 		<property name="backingMapFactory" ref="rwBackingMap" />
 	</bean>
 		
-	<bean id="localMap" class="com.griddynamics.coherence.integration.spring.LocalCacheFactory" scope="prototype">
-		<property name="highUnits" value="1000" />
-		<property name="evictionType" value="HYBRID" />
-		<property name="expiryDelayMillis" value="30000" />
-		<property name="flushDelayMillis" value="60000" />
-	</bean>
-	
 	<bean id="cacheStore" class="com.tangosol.net.cache.MapCacheStore" scope="prototype">
 		<constructor-arg>
 			<bean class="java.util.HashMap">
@@ -41,7 +34,25 @@
 	
 	<bean id="rwBackingMap" class="com.griddynamics.coherence.integration.spring.ReadWriteBackingMapDefinition">
 		<property name="loader" ref="cacheStore" />
-		<property name="internalMap" ref="localMap" />
+		<property name="internalMap">
+			<bean class="com.griddynamics.coherence.integration.spring.LocalCacheFactory">
+				<property name="highUnits" value="1000" />
+				<property name="evictionType" value="HYBRID" />
+				<property name="expiryDelayMillis" value="30000" />
+				<property name="flushDelayMillis" value="60000" />
+			</bean>
+		</property>
+	</bean>
+	
+	<bean id="simpleDistributedNearCache" class="com.griddynamics.coherence.integration.spring.NearCacheFactory" lazy-init="true">
+		<property name="frontMap">
+			<bean class="com.griddynamics.coherence.integration.spring.LocalCacheFactory">
+				<property name="highUnits" value="10000" />
+				<property name="evictionType" value="HYBRID" />
+			</bean>
+		</property>
+		<property name="backingCacheDefinition" ref="simpleDistributed"/>
+		<property name="invalidationStrategy" value="present" />
 	</bean>
 	
 </beans>

@@ -11,7 +11,7 @@ public class CacheNode {
 		System.setProperty("tangosol.coherence.wka", "localhost");
 		
 		ApplicationContext context = new ClassPathXmlApplicationContext("example-context.xml");
-		NamedCache cache = context.getBean("simpleDistributedCache", NamedCache.class);
+		NamedCache cache = context.getBean("simpleDistributedNearCache", NamedCache.class);
 		
 		String res = (String) cache.get("aaa");
 		System.out.println(String.format("'%s'", res));
