@@ -3,7 +3,6 @@
 
 = Feature roadmap =
 
- * Define coherence services as a Spring beans
  * Eliminate DefaultConfigurableCacheFactory and use Spring context instead of it
  * Implement all common configuration scenarios with Spring configuration
  * Create custom tags to simplify the configuration process
