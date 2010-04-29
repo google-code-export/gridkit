@@ -1,5 +1,7 @@
 package com.griddynamics.coherence.integration.spring;
 
+import java.util.List;
+
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Required;
@@ -15,6 +17,8 @@ import com.tangosol.run.xml.XmlElement;
 public class ServiceFactory implements FactoryBean<Service>, BeanNameAware {
 	private String serviceName;
 	private ServiceType serviceType;
+	private String serializerClass;
+	private List<Object> serializerInitParams;
 	
 	public Service getObject() throws Exception {
 		Cluster cluster = com.tangosol.net.CacheFactory.ensureCluster();
@@ -24,7 +28,23 @@ public class ServiceFactory implements FactoryBean<Service>, BeanNameAware {
 	}
 	
 	protected XmlElement generateServiceDescription() {
-		return CacheFactory.getServiceConfig(serviceType.toString());
+		XmlElement config = CacheFactory.getServiceConfig(serviceType.toString());
+		
+		if (serializerClass != null) {
+			XmlElement serializerEl = config.ensureElement("serializer");
+			serializerEl.addElement("class-name").setString(serializerClass);
+			
+			if (!serializerInitParams.isEmpty()) {
+				XmlElement paramsEl = serializerEl.addElement("init-params");
+				for (Object param : serializerInitParams) {
+					XmlElement paramEl = paramsEl.addElement("init-param");
+					paramEl.addElement("param-type").setString(param.getClass().getName());
+					paramEl.addElement("param-value").setString(param.toString());
+				}
+			}
+		}
+		
+		return config;
 	}
 	
 	public Class<?> getObjectType() {
@@ -42,5 +62,13 @@ public class ServiceFactory implements FactoryBean<Service>, BeanNameAware {
 	@Required
 	public void setServiceType(ServiceType serviceType) {
 		this.serviceType = serviceType;
+	}
+	
+	public void setSerializerClass(String serializerClass) {
+		this.serializerClass = serializerClass;
+	}
+	
+	public void setSerializerInitParams(List<Object> serializerInitParams) {
+		this.serializerInitParams = serializerInitParams;
 	}
 }
