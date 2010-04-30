@@ -21,12 +21,12 @@ public class ContextConfigurationTest {
 	@Before
 	public void setUp() {
 		System.setProperty("tangosol.coherence.wka", "localhost");
-		applicationContext = new ClassPathXmlApplicationContext("test-context.xml");
+		applicationContext = new ClassPathXmlApplicationContext("config/test-context.xml");
 	}
 	
 	@Test
 	public void cacheStoreReadWrite() {
-		NamedCache cache = applicationContext.getBean("simpleDistributedCache", NamedCache.class);
+		NamedCache cache = applicationContext.getBean("distributedStoreCache", NamedCache.class);
 		assertEquals("12323", cache.get("aaa"));
 		assertEquals("asdsad", cache.get("bbb"));
 		
@@ -35,14 +35,33 @@ public class ContextConfigurationTest {
 	}
 	
 	@Test
+	public void nearCacheTest() {
+		NamedCache cache = applicationContext.getBean("distributedNearCache", NamedCache.class);
+	
+		cache.put("aaa", "4232");
+		assertEquals("4232", cache.get("aaa"));
+	}
+	
+	@Test
 	public void mapListener() {
-		NamedCache cache = applicationContext.getBean("simpleDistributedCache", NamedCache.class);
+		NamedCache cache = applicationContext.getBean("dstributedHistoryCache", NamedCache.class);
 		List<?> events = applicationContext.getBean("cacheEvents", List.class);
 		cache.clear();
 		events.clear();
 		
 		cache.put("aaa", "4232");
 		cache.put("aaa", "asd1");
+		
+		assertEquals(1, cache.size());
+		
+		for (int i = 0; i < 3; ++i) {
+			if (events.size() < 2)
+				try {
+					Thread.sleep(50);
+				} catch (InterruptedException e) {
+					break;
+				}
+		}
 		
 		assertEquals(2, events.size());
 		assertEquals(((MapEvent)events.get(0)).getKey(), "aaa");

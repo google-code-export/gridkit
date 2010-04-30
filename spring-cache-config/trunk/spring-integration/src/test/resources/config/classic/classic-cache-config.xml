@@ -19,7 +19,7 @@
 			<service-name>DistributedCache</service-name>
 			
 			<serializer>
-				<class-name>com.griddynamics.coherence.integration.spring.MockSerializer</class-name>
+				<class-name>com.griddynamics.coherence.integration.spring.classic.MockSerializer</class-name>
  			</serializer>
 			
 			<backing-map-scheme>

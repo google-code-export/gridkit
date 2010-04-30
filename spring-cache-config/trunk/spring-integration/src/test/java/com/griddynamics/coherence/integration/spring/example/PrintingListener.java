@@ -1,4 +1,4 @@
-package com.griddynamics.coherence.integration.spring;
+package com.griddynamics.coherence.integration.spring.example;
 
 import com.tangosol.util.MapEvent;
 import com.tangosol.util.MapListener;

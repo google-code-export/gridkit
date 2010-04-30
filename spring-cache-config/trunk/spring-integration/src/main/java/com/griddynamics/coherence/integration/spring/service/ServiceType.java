@@ -1,4 +1,4 @@
-package com.griddynamics.coherence.integration.spring;
+package com.griddynamics.coherence.integration.spring.service;
 
 /**
  * @author Dmitri Babaev

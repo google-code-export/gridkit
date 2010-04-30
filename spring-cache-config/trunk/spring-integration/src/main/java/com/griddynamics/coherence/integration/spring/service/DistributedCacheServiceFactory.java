@@ -1,11 +1,11 @@
-package com.griddynamics.coherence.integration.spring;
+package com.griddynamics.coherence.integration.spring.service;
 
 import com.tangosol.run.xml.XmlElement;
 
 /**
  * @author Dmitri Babaev
  */
-public class DistributedServiceFactory extends CacheServiceFactory {
+public class DistributedCacheServiceFactory extends CacheServiceFactory {
 	private Integer threadCount;
 
 	protected XmlElement generateServiceDescription() {

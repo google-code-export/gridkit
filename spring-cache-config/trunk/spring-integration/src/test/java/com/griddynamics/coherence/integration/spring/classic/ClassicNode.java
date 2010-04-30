@@ -1,4 +1,4 @@
-package com.griddynamics.coherence.integration.spring;
+package com.griddynamics.coherence.integration.spring.classic;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.NamedCache;
@@ -10,7 +10,7 @@ public class ClassicNode {
 	
 	public static void main(String[] args) {
 		System.setProperty("tangosol.coherence.wka", "localhost");
-		System.setProperty("tangosol.coherence.cacheconfig", "classic-cache-config.xml");
+		System.setProperty("tangosol.coherence.cacheconfig", "config/classic/classic-cache-config.xml");
 
 		NamedCache cache = CacheFactory.getCache("test");
 		

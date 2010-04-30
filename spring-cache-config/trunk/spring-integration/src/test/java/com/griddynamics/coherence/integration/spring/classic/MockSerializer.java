@@ -1,4 +1,4 @@
-package com.griddynamics.coherence.integration.spring;
+package com.griddynamics.coherence.integration.spring.classic;
 
 import java.io.IOException;
 

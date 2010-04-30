@@ -1,9 +1,10 @@
-package com.griddynamics.coherence.integration.spring;
+package com.griddynamics.coherence.integration.spring.service;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import com.griddynamics.coherence.integration.spring.ContextBackingMapManager;
 import com.tangosol.net.CacheService;
 
 /**
