@@ -4,9 +4,11 @@ import static org.junit.Assert.*;
 
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.tangosol.net.NamedCache;
@@ -16,12 +18,17 @@ import com.tangosol.util.MapEvent;
  * @author Dmitri Babaev
  */
 public class ContextConfigurationTest {
-	private ApplicationContext applicationContext;
+	private ConfigurableApplicationContext applicationContext;
 
 	@Before
 	public void setUp() {
 		System.setProperty("tangosol.coherence.wka", "localhost");
 		applicationContext = new ClassPathXmlApplicationContext("config/test-context.xml");
+	}
+	
+	@After
+	public void shutdown() {
+		applicationContext.close();
 	}
 	
 	@Test

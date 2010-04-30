@@ -5,4 +5,7 @@ package com.griddynamics.coherence.integration.spring.service;
  */
 public class InvocationServiceFactory extends ServiceFactory {
 
+	public ServiceType getServiceType() {
+		return ServiceType.Invocation;
+	}
 }

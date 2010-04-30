@@ -4,7 +4,8 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
        
 	<bean id="distributedService" class="com.griddynamics.coherence.integration.spring.service.DistributedCacheServiceFactory" lazy-init="true">
-		<property name="serviceType" value="DistributedCache" />
+		<property name="threadCount" value="5" />
+		<property name="partitionCount" value="251" />
 	</bean>
 	
 	<bean id="distributedStoreCache" class="com.griddynamics.coherence.integration.spring.NamedCacheFactory" lazy-init="true">

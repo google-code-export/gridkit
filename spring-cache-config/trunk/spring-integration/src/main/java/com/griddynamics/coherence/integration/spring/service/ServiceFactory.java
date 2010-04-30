@@ -1,10 +1,11 @@
 package com.griddynamics.coherence.integration.spring.service;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Required;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Cluster;
@@ -14,21 +15,42 @@ import com.tangosol.run.xml.XmlElement;
 /**
  * @author Dmitri Babaev
  */
-public class ServiceFactory implements FactoryBean<Service>, BeanNameAware {
+public abstract class ServiceFactory implements FactoryBean<Service>, BeanNameAware, DisposableBean {
 	private String serviceName;
-	private ServiceType serviceType;
+	private Service service;
+	
 	private String serializerClass;
 	private List<Object> serializerInitParams;
 	
 	public Service getObject() throws Exception {
-		Cluster cluster = com.tangosol.net.CacheFactory.ensureCluster();
-		Service service = cluster.ensureService(serviceName, serviceType.toString());
-		service.configure(generateServiceDescription());
+		if (service == null) { 
+			service = getService();
+			
+			if (!service.isRunning())
+				service.start();
+		}
+		
 		return service;
 	}
 	
+	protected Service getService() {
+		Cluster cluster = CacheFactory.ensureCluster();
+		Service service = cluster.ensureService(serviceName, getServiceType().toString());
+		service.configure(generateServiceDescription());
+		
+		return service;
+	}
+
+	public void destroy() throws Exception {
+		service.shutdown();
+	}
+
+	public abstract ServiceType getServiceType();
+
 	protected XmlElement generateServiceDescription() {
-		XmlElement config = CacheFactory.getServiceConfig(serviceType.toString());
+		XmlElement config = CacheFactory.getServiceConfig(getServiceType().toString());
+		
+		overrideServiceProperties(config);
 		
 		if (serializerClass != null) {
 			XmlElement serializerEl = config.ensureElement("serializer");
@@ -52,16 +74,11 @@ public class ServiceFactory implements FactoryBean<Service>, BeanNameAware {
 	}
 	
 	public boolean isSingleton() {
-		return false;
+		return true;
 	}
 	
 	public void setBeanName(String name) {
 		serviceName = name;
-	}
-	
-	@Required
-	public void setServiceType(ServiceType serviceType) {
-		this.serviceType = serviceType;
 	}
 	
 	public void setSerializerClass(String serializerClass) {
@@ -70,5 +87,23 @@ public class ServiceFactory implements FactoryBean<Service>, BeanNameAware {
 	
 	public void setSerializerInitParams(List<Object> serializerInitParams) {
 		this.serializerInitParams = serializerInitParams;
+	}
+	
+	private void overrideServiceProperties(XmlElement config) {
+		for (Field field : this.getClass().getDeclaredFields()) {
+			ServiceProperty sp = field.getAnnotation(ServiceProperty.class);
+			if (sp == null) continue;
+			
+			Object val = null;
+			try {
+				val = field.get(this);
+			} catch (IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
+			
+			if (val == null) continue;
+			
+			config.ensureElement(sp.value()).setString(val.toString());
+		}
 	}
 }

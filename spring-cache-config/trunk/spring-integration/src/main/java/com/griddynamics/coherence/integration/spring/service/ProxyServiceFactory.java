@@ -5,4 +5,7 @@ package com.griddynamics.coherence.integration.spring.service;
  */
 public class ProxyServiceFactory extends ServiceFactory {
 
+	public ServiceType getServiceType() {
+		return ServiceType.Proxy;
+	}
 }

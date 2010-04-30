@@ -3,9 +3,7 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-	<bean id="distributedService" class="com.griddynamics.coherence.integration.spring.service.DistributedCacheServiceFactory" lazy-init="true">
-		<property name="serviceType" value="DistributedCache" />
-	</bean>
+	<bean id="distributedService" class="com.griddynamics.coherence.integration.spring.service.DistributedCacheServiceFactory" lazy-init="true" />
 	
 	<bean id="simpleDistributedCache" class="com.griddynamics.coherence.integration.spring.NamedCacheFactory" lazy-init="true">
 		<property name="cacheDefinition" ref="simpleDistributed" />

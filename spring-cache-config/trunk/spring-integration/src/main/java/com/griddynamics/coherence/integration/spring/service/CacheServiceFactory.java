@@ -10,11 +10,11 @@ import com.tangosol.net.CacheService;
 /**
  * @author Dmitri Babaev
  */
-public class CacheServiceFactory extends ServiceFactory implements ApplicationContextAware {
+public abstract class CacheServiceFactory extends ServiceFactory implements ApplicationContextAware {
 	private ApplicationContext applicationContext;
 
-	public CacheService getObject() throws Exception {
-		CacheService service = (CacheService)super.getObject();
+	public CacheService getService() {
+		CacheService service = (CacheService)super.getService();
 		service.setBackingMapManager(new ContextBackingMapManager(applicationContext));
 		return service;
 	}

@@ -11,5 +11,5 @@ public enum ServiceType {
 	Invocation,
 	Proxy,
 	RemoteCache,
-	RemoteInvocation;
+	RemoteInvocation
 }
