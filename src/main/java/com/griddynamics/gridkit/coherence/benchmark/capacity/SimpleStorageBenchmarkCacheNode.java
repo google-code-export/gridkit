@@ -29,7 +29,7 @@ import com.tangosol.util.Filter;
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class SimpleStorageBenchmark {
+public class SimpleStorageBenchmarkCacheNode {
 	
 	static void println() {
 	    System.out.println();
@@ -44,13 +44,13 @@ public class SimpleStorageBenchmark {
 	    System.setProperty("tangosol.pof.enabled", "true");
 	    System.setProperty("tangosol.pof.config", "capacity-benchmark-pof-config.xml");
 	    System.setProperty("tangosol.coherence.cacheconfig", "capacity-benchmark-cache-config.xml");
-	    System.setProperty("tangosol.coherence.distributed.localstorage", "false");
+	    System.setProperty("tangosol.coherence.distributed.localstorage", "true");
 	    
 //	    System.setProperty("benchmark-default-scheme", "local-scheme");	    
 //	    System.setProperty("benchmark-default-scheme", "local-hashmap-scheme");
 //	    System.setProperty("benchmark-default-scheme", "local-juc-hashmap-scheme");
-	    System.setProperty("benchmark-default-scheme", "simple-distributed-scheme");
-//	    System.setProperty("benchmark-default-scheme", "simple-distributed-quorum-scheme");
+//	    System.setProperty("benchmark-default-scheme", "simple-distributed-scheme");
+	    System.setProperty("benchmark-default-scheme", "simple-distributed-quorum-scheme");
 //	    System.setProperty("benchmark-default-scheme", "external-distributed-scheme");
 //	    System.setProperty("benchmark-default-scheme", "partitioned-true-external-distributed-scheme");
 //	    System.setProperty("benchmark-default-scheme", "partitioned-false-external-distributed-scheme");
@@ -59,55 +59,8 @@ public class SimpleStorageBenchmark {
 	    
 		try {
 			final NamedCache cache = CacheFactory.getCache("objects");
-			final ObjectGenerator<?, ?> generator = new SimpleDomainObjGenerator();
-		
-//			cache.addIndex(new ReflectionExtractor("getA0"), false, null);
-//			cache.addIndex(new ReflectionExtractor("getAs"), false, null);			
-			
-//			System.out.println(CacheFactory.getClusterConfig().toString());
-			
-			long objectCount = 1000000;
-//			long objectCount = 10000;
-			
-			long rangeStart = 1000000;
-			long rangeFinish = 1000000 + objectCount;
-			
-			println("Loading " + objectCount + " objects ...");
-			int putSize = 100;
-			long blockTs = System.nanoTime();
-			long blockStart = rangeStart;
-			for(long i = rangeStart;  i < rangeFinish; i += putSize) {
-			    if (i % 100000 == 0) {
-			        String stats = "";
-			        if (i > blockStart) {
-			            long blockSize = i - blockStart;
-			            long blockTime = System.nanoTime() - blockTs;
-			            double avg = (((double)blockSize) / blockTime) * TimeUnit.SECONDS.toNanos(1);
-			            stats = " block " + blockSize + " in " + TimeUnit.NANOSECONDS.toMillis(blockTime) + "ms, AVG: " + avg + " put/sec, " + avg/putSize + " tx/sec, batchSize " + putSize;
-			        }
-			        println("Done " + (i - rangeStart) + stats);
-		            blockTs = System.nanoTime();
-		            blockStart = i;
-			    }
-			    long j = Math.min(rangeFinish, i + putSize);
-			    cache.putAll(generator.generate(i, j));
-			}			
-			
-			println("Loaded " + cache.size() + " objects");
-			System.gc();
-			println("Mem. usage " + ManagementFactory.getMemoryMXBean().getHeapMemoryUsage());
 
-//			checkAccess(cache, new EqualsFilter("getA0", new DomainObjAttrib("?")));
-//			checkAccess(cache, new EqualsFilter("getAs", Collections.EMPTY_LIST));
-//			checkAccess(cache, new ContainsAnyFilter("getAs", Collections.singleton(new DomainObjAttrib("?"))));
-			
-//			ContinuousQueryCache view = new ContinuousQueryCache(cache, new EqualsFilter("getHashSegment", 0), true);
-//			System.out.println("View size " + view.size());
-//			
-//			view.addIndex(new ReflectionExtractor("getA0"), false, null);
-//            checkAccess(view, new EqualsFilter("getA0", new DomainObjAttrib("?")));
-//            checkAccess(view, new EqualsFilter("getA1", new DomainObjAttrib("?")));
-
+			println("Cache node has started");
 			
 			while(true) {
 				Thread.sleep(1000);

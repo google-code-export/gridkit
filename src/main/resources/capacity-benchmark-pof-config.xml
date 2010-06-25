@@ -22,7 +22,10 @@
 
     <user-type-list>
 
+        <include>txn-pof-config.xml</include>
+<!-- 
         <include>coherence-pof-config.xml</include>
+ -->
 
         <user-type>
             <type-id>1001</type-id>
