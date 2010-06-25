@@ -22,7 +22,7 @@
     <caching-scheme-mapping>
 
         <cache-mapping>
-            <cache-name>objects</cache-name>
+            <cache-name>objects*</cache-name>
             <scheme-name system-property="benchmark-default-scheme"></scheme-name>
         </cache-mapping>
 
@@ -84,6 +84,23 @@
         </near-scheme>
 
         <near-scheme>
+            <scheme-name>near-distributed-scheme</scheme-name>
+            <front-scheme>
+                <local-scheme>
+                    <high-units>1000000</high-units>
+                </local-scheme>
+            </front-scheme>
+            <back-scheme>
+                <distributed-scheme>
+                    <backing-map-scheme>
+                		<local-scheme />
+            		</backing-map-scheme>
+            		<backup-count>0</backup-count>
+                </distributed-scheme>
+            </back-scheme>
+        </near-scheme>
+
+        <near-scheme>
             <scheme-name>replicated-near-scheme</scheme-name>
             <front-scheme>
                 <local-scheme>
@@ -123,9 +140,11 @@
             <backing-map-scheme>
                 <partitioned>false</partitioned>
                 <external-scheme>
+                <!-- 
                     <high-units>4000</high-units>
                     <unit-calculator>BINARY</unit-calculator>
                     <unit-factor>1048576</unit-factor>
+                 -->
                     <nio-memory-manager/>
                 </external-scheme>
             </backing-map-scheme>
@@ -137,14 +156,101 @@
             <backing-map-scheme>
                 <partitioned>true</partitioned>
                 <external-scheme>
+                <!-- 
                     <high-units>4000</high-units>
                     <unit-calculator>BINARY</unit-calculator>
                     <unit-factor>1048576</unit-factor>
+                 -->
                     <nio-memory-manager/>
                 </external-scheme>
             </backing-map-scheme>
             <backup-count>0</backup-count>
         </distributed-scheme>
+        
+        <transactional-scheme>
+        	<scheme-name>transactional-scheme</scheme-name>
+        </transactional-scheme>
+        
+        <near-scheme>
+        	<scheme-name>near-transactional-scheme</scheme-name>
+            <front-scheme>
+                <local-scheme/>
+            </front-scheme>
+            <back-scheme>
+                <transactional-scheme/>
+            </back-scheme>
+        </near-scheme>
+
+        <distributed-scheme>
+            <scheme-name>simple-distributed-quorum-scheme</scheme-name>
+            <backing-map-scheme>
+                <local-scheme />
+            </backing-map-scheme>
+            <partitioned-quorum-policy-scheme>
+				<write-quorum>3</write-quorum>
+			</partitioned-quorum-policy-scheme>
+            <backup-count>0</backup-count>
+        </distributed-scheme>
+
+        <distributed-scheme>
+            <scheme-name>read-through-distributed-scheme</scheme-name>
+            <backing-map-scheme>
+                <read-write-backing-map-scheme>
+                	<internal-cache-scheme><local-scheme/></internal-cache-scheme>
+                	<cachestore-scheme>
+                		<class-scheme><class-name>sample.SimpleCacheLoader</class-name></class-scheme>
+                		<operation-bundling>
+                			<bundle-config>
+                				<operation-name>load</operation-name>
+                				<prefered-size>20</prefered-size>
+                				<thread-threshold>0</thread-threshold>
+                			</bundle-config>
+                		</operation-bundling>
+                	</cachestore-scheme>
+                </read-write-backing-map-scheme>
+            </backing-map-scheme>
+            <backup-count>0</backup-count>
+            <partition-count>2</partition-count>
+            <!-- 
+       		<operation-bundling>
+       			<bundle-config>
+       				<operation-name>get</operation-name>
+       				<prefered-size>128</prefered-size>
+       				<thread-threshold>1</thread-threshold>
+       			</bundle-config>
+       		</operation-bundling>
+             -->
+       		<thread-count>2</thread-count>
+        </distributed-scheme>
+
+        <near-scheme>
+        	<scheme-name>read-through-transactional-scheme</scheme-name>
+            <front-scheme>
+                <local-scheme/>
+            </front-scheme>
+            <back-scheme>
+                <read-write-backing-map-scheme>
+                	<scheme-ref>read-through-transactional-backing-map</scheme-ref>
+                </read-write-backing-map-scheme>
+            </back-scheme>
+        </near-scheme>
+
+        <read-write-backing-map-scheme>
+            <scheme-name>read-through-transactional-backing-map</scheme-name>
+        	<internal-cache-scheme><transactional-scheme/></internal-cache-scheme>
+        	<cachestore-scheme>
+        		<class-scheme><class-name>sample.SimpleCacheLoader</class-name></class-scheme>
+        		<!-- 
+        		<operation-bundling>
+        			<bundle-config>
+        				<operation-name>load</operation-name>
+        				<prefered-size>20</prefered-size>
+        				<thread-threshold>0</thread-threshold>
+        			</bundle-config>
+        		</operation-bundling>
+        		 -->
+        	</cachestore-scheme>
+        </read-write-backing-map-scheme>
 
     </caching-schemes>
 

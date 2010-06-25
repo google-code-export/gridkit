@@ -63,20 +63,21 @@ public class SimpleConcurrencyBenchMark {
 //	    System.setProperty("benchmark-default-scheme", "simple-distributed-scheme");
 //	    System.setProperty("benchmark-default-scheme", "simple-near-scheme");
 //	    System.setProperty("benchmark-default-scheme", "external-distributed-scheme");
-//	    System.setProperty("benchmark-default-scheme", "simple-replicated-scheme");
-	    System.setProperty("benchmark-default-scheme", "simple-optimistic-scheme");
+	    System.setProperty("benchmark-default-scheme", "simple-replicated-scheme");
+//	    System.setProperty("benchmark-default-scheme", "simple-optimistic-scheme");
 //	    System.setProperty("benchmark-default-scheme", "hash-map-replicated-scheme");
 //	    System.setProperty("benchmark-default-scheme", "replicated-near-scheme");
+//	    System.setProperty("benchmark-default-scheme", "transactional-scheme");
 	    
 	    //ExecutorService executor = Executors.newCachedThreadPool();
 	    
 		try {
 			final NamedCache cache = CacheFactory.getCache("objects");
-//			final Map map = cache;
+			final Map map = cache;
 //			final Map map = new ContinuousQueryCache(cache, new ClassFilter(DomainObject.class), true);
 //			final Map map = new ConcurrentHashMap();
 //			final Map map = new HashMap();
-			final Map map = new ConcurrentSkipListMap();
+//			final Map map = new ConcurrentSkipListMap();
 //			final Map map = Collections.synchronizedMap(new HashMap());
 			final ObjectGenerator<?, ?> generator = new SimpleDomainObjGenerator();
 		
@@ -84,21 +85,33 @@ public class SimpleConcurrencyBenchMark {
 //			cache.addIndex(new ReflectionExtractor("getAs"), false, null);			
 			
 //			long objectCount = 1000000;
-			long objectCount = 100000;
+			long objectCount = 10000;
 			
 			long rangeStart = 0;
-			long rangeFinish = objectCount;
+			long rangeFinish = rangeStart + objectCount;
 			
-			println("Loading " + objectCount + " objects ...");
-			for(long i = rangeStart;  i < rangeFinish; i += 100) {
-			    if (i % 100000 == 0) {
-			        println("Done " + (i - rangeStart));
-			    }
-			    long j = Math.min(rangeFinish, i + 100);
-			    map.putAll(generator.generate(i, j));
-			}			
-			
-			println("Loaded " + cache.size() + " objects");
+            println("Loading " + objectCount + " objects ...");
+            int putSize = 1;
+            long blockTs = System.nanoTime();
+            long blockStart = rangeStart;
+            for(long i = rangeStart;  i < rangeFinish; i += putSize) {
+                if (i % 100 == 0) {
+                    String stats = "";
+                    if (i > blockStart) {
+                        long blockSize = i - blockStart;
+                        long blockTime = System.nanoTime() - blockTs;
+                        double avg = (((double)blockSize) / blockTime) * TimeUnit.SECONDS.toNanos(1);
+                        stats = " block " + blockSize + " in " + TimeUnit.NANOSECONDS.toMillis(blockTime) + "ms, avg " + avg + " put/sec, batchSize " + putSize;
+                    }
+                    println("Done " + (i - rangeStart) + stats);
+                    blockTs = System.nanoTime();
+                    blockStart = i;
+                }
+                long j = Math.min(rangeFinish, i + putSize);
+                cache.putAll(generator.generate(i, j));
+            }           
+            
+            println("Loaded " + cache.size() + " objects");
 			System.gc();
 			println("Mem. usage " + ManagementFactory.getMemoryMXBean().getHeapMemoryUsage());
 
@@ -123,7 +136,7 @@ public class SimpleConcurrencyBenchMark {
 			
 			println("Starting access threads");
 
-			testHotSpot(map, 100000);
+			testHotSpot(map, 10000);
 			testHotSpot(map, 1000);
 			testHotSpot(map, 100);
 			testHotSpot(map, 10);
@@ -160,7 +173,7 @@ public class SimpleConcurrencyBenchMark {
 
     private static void testHotSpot(Map map, int hotSpot) throws InterruptedException {
         ExecutorService executor = Executors.newCachedThreadPool();
-        for(int i = 0; i != 16; ++i) {
+        for(int i = 0; i != 8; ++i) {
             executor.execute(new AccessThread(map, hotSpot, 1, 0, 100));
             if (i == 0) {
                 Thread.sleep(5000);
