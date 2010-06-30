@@ -15,7 +15,7 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.griddynamics.openspaces.convergence.examples.dademo</groupId>
+    <groupId>com.googlecode.gridkit</groupId>
     <artifactId>grid-fabric</artifactId>
     <name>grid-fabric</name>
     <version>1.0-SNAPSHOT</version>
@@ -38,11 +38,6 @@
             <artifactId>log4j</artifactId>
             <version>1.2.14</version>
         </dependency>
-        <dependency>
-            <groupId>com.google.code.protoj</groupId>
-            <artifactId>protoj</artifactId>
-            <version>1.9.0</version>
-        </dependency>
     </dependencies>
     <repositories>
         <repository>
@@ -51,6 +46,21 @@
             <url>http://gridkit.googlecode.com/svn/repo</url>
         </repository>
     </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>mc-release</id>
+            <name>maven-license-plugin repository of releases</name>
+            <url>http://mc-repo.googlecode.com/svn/maven2/releases</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </pluginRepository>
+    </pluginRepositories>
+
     <build>
         <plugins>
             <plugin>
@@ -61,6 +71,37 @@
                     <target>1.6</target>
                 </configuration>
             </plugin>
+			
+			<!-- usage: http://code.google.com/p/maven-license-plugin/wiki/HowTo -->
+			<!-- 
+			<plugin> 
+				<artifactId>maven-license-plugin</artifactId>
+				<groupId>com.mathieucarbou.mojo</groupId>
+				<configuration>
+					<header>etc/header.txt</header>
+					<excludes>
+						<exclude>**/driver.properties</exclude>
+						<exclude>**/*.className</exclude>
+						<exclude>**/*.png</exclude>
+						<exclude>**/resources/etc/*</exclude>
+					</excludes>
+					<includes>
+						<include>**/src/**</include>
+						<include>**/pom.xml</include>
+					</includes>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>test</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			 -->
+			
         </plugins>
     </build>
+    
 </project>
