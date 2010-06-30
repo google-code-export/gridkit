@@ -13,23 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.griddynamics.convergence.demo.utils.cluster;
+package com.googlecode.gridkit.fabric.exec.ssh;
 
-import com.googlecode.gridkit.fabric.exec.ProcessExecutor;
+import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 
+public interface ConnectionSource {
 
-public interface Cluster {
+	public Socket getConnection() throws InterruptedException;
+	public Socket getConnection(long timeout, TimeUnit units) throws InterruptedException;
 
-	public Host[] getNodes();
-	public Host getHost(String address);
-	
-	public interface Host extends ProcessExecutor {
-
-		public String getHostname();
-		
-//		public InputStream remoteRead(String remoteFile) throws IOException;
-//		public OutputStream remoteWrite(String remoteFile, boolean append) throws IOException;
-//		public boolean remoteDelete(String remoteFile) throws IOException;
-		
-	}
 }

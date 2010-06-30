@@ -13,23 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.griddynamics.convergence.demo.utils.cluster;
+package com.googlecode.gridkit.fabric.remoting;
 
-import com.googlecode.gridkit.fabric.exec.ProcessExecutor;
+import java.io.Serializable;
 
+public class RemoteRef implements Serializable {
 
-public interface Cluster {
-
-	public Host[] getNodes();
-	public Host getHost(String address);
+	private static final long serialVersionUID = 20080415L;
 	
-	public interface Host extends ProcessExecutor {
+	private RemoteInstance identity;
 
-		public String getHostname();
-		
-//		public InputStream remoteRead(String remoteFile) throws IOException;
-//		public OutputStream remoteWrite(String remoteFile, boolean append) throws IOException;
-//		public boolean remoteDelete(String remoteFile) throws IOException;
-		
+	public RemoteRef(RemoteInstance identity) {
+		this.identity = identity;
+	}
+
+	public RemoteInstance getIdentity() {
+		return identity;
+	}
+
+	public String toString() {
+		return identity.toString();
 	}
 }
