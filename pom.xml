@@ -59,6 +59,13 @@
     -->
         	<version>3.6-DPR4</version>
         </dependency>
+
+        <dependency>
+        	<groupId>org.apache.lucene</groupId>
+        	<artifactId>lucene-core</artifactId>
+        	<version>3.0.2</version>
+        </dependency>
+
         <dependency>
         	<groupId>junit</groupId>
         	<artifactId>junit</artifactId>
