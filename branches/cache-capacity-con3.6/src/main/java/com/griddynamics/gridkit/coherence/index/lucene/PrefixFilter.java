@@ -51,7 +51,7 @@ public class PrefixFilter implements IndexAwareFilter {
 
                         @Override
                         public void collect(int doc) throws IOException {
-                            Binary binary = new Binary(searcher.doc(doc).getField("value").getBinaryValue());
+                            Binary binary = new Binary(searcher.doc(doc).getField("key").getBinaryValue());
                             keysToRetain.add(binary);
                         }
 

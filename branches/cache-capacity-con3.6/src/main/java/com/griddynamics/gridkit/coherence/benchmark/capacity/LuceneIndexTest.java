@@ -6,6 +6,7 @@ import com.griddynamics.gridkit.coherence.index.ngram.ContainsSubstringFilter;
 import com.griddynamics.gridkit.coherence.index.ngram.NGramExtractor;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.NamedCache;
+import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -44,6 +45,9 @@ public class LuceneIndexTest {
         LuceneExtractor extractor = new LuceneExtractor(null);
         cache.addIndex(extractor, false, null);
 
+        cache.put("ABC", "ABCsss");
+
+/*
         for (int i = 0; i < 1000; i++) {
             cache.put("ABC" + i, "ABC" + i);
         }
@@ -51,8 +55,9 @@ public class LuceneIndexTest {
         cache.put("ABCff", "dd");
         cache.put("ABCsddds", "dfsf");
         cache.put("ABCsdfsd", "sgfsd");
+*/
 
-        int i = cache.keySet(new PrefixFilter("AB")).size();
-        System.out.println(i);
+        int keyCount = cache.keySet(new PrefixFilter("ABC")).size();
+        Assert.assertEquals(1, keyCount);
     }
 }
