@@ -1,5 +1,6 @@
 package com.griddynamics.gridkit.coherence.index.lucene;
 
+import com.tangosol.util.Binary;
 import com.tangosol.util.BinaryEntry;
 import com.tangosol.util.MapIndex;
 import com.tangosol.util.ValueExtractor;
@@ -7,12 +8,14 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.store.RAMDirectory;
 
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.Map;
-import java.io.IOException;
 
 /**
  * @author Alexander Solovyov
@@ -55,12 +58,17 @@ public class LuceneMapIndex implements MapIndex {
     }
 
     public void insert(Map.Entry entry) {
-        Document doc = new Document();
         String value = (String) extractor.extract(entry.getValue());
+        
         if (value != null) {
+            Document doc = new Document();
+
             doc.add(new Field("value", value, Field.Store.YES, Field.Index.ANALYZED));
 
             if (entry instanceof BinaryEntry) {
+                Binary key = ((BinaryEntry) entry).getBinaryKey();
+                Binary binary = new Binary(key.toByteArray());
+
                 doc.add(new Field("key", ((BinaryEntry)entry).getBinaryKey().toByteArray(), Field.Store.YES));
             }
             else {
@@ -79,11 +87,21 @@ public class LuceneMapIndex implements MapIndex {
     }
 
     public void update(Map.Entry entry) {
-        // TODO: check again
+        delete(entry);
         insert(entry);
     }
 
     public void delete(Map.Entry entry) {
+        try {
+            String value = (String) extractor.extract(entry.getValue());
+
+            IndexReader reader = IndexReader.open(directory);
+            reader.deleteDocuments(new Term("value", value));
+            
+            reader.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         // TODO: check again
         throw new UnsupportedOperationException();
     }
