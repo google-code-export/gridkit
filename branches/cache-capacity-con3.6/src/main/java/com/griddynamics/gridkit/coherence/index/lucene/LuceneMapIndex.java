@@ -72,7 +72,7 @@ public class LuceneMapIndex implements MapIndex {
             }
 
             try {
-                IndexWriter writer = new IndexWriter(directory, analyzer, true, IndexWriter.MaxFieldLength.UNLIMITED);
+                IndexWriter writer = new IndexWriter(directory, analyzer, IndexWriter.MaxFieldLength.UNLIMITED);
                 writer.addDocument(doc);
                 writer.optimize();
                 writer.close();
