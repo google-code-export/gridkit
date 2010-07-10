@@ -1,6 +1,5 @@
 package com.griddynamics.gridkit.coherence.index.lucene;
 
-import com.tangosol.util.Binary;
 import com.tangosol.util.BinaryEntry;
 import com.tangosol.util.MapIndex;
 import com.tangosol.util.ValueExtractor;
@@ -44,12 +43,12 @@ public class LuceneMapIndex implements MapIndex {
     }
 
     public Map getIndexContents() {
-        // TODO: check again
+        // TODO: is it needed?? hardly supported by Lucene
         throw new UnsupportedOperationException();
     }
 
     public Object get(Object o) {
-        // TODO: check again
+        // TODO: check for optimization. Maybe not needed at all
         return NO_VALUE;
     }
 
@@ -66,9 +65,6 @@ public class LuceneMapIndex implements MapIndex {
             doc.add(new Field("value", value, Field.Store.YES, Field.Index.ANALYZED));
 
             if (entry instanceof BinaryEntry) {
-                Binary key = ((BinaryEntry) entry).getBinaryKey();
-                Binary binary = new Binary(key.toByteArray());
-
                 doc.add(new Field("key", ((BinaryEntry)entry).getBinaryKey().toByteArray(), Field.Store.YES));
             }
             else {
@@ -102,8 +98,6 @@ public class LuceneMapIndex implements MapIndex {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        // TODO: check again
-        throw new UnsupportedOperationException();
     }
 
     public RAMDirectory getDirectory() {
