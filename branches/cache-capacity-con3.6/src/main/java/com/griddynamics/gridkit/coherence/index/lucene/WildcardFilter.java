@@ -1,6 +1,6 @@
 package com.griddynamics.gridkit.coherence.index.lucene;
 
-import com.tangosol.util.Binary;
+import com.tangosol.util.ExternalizableHelper;
 import com.tangosol.util.Filter;
 import com.tangosol.util.ValueExtractor;
 import com.tangosol.util.filter.IndexAwareFilter;
@@ -9,7 +9,10 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Alexander Solovyov
@@ -37,13 +40,12 @@ public class WildcardFilter implements IndexAwareFilter {
     public Filter applyIndex(Map map, final Set set) {
         try {
             LuceneMapIndex index = (LuceneMapIndex) map.get(extractor);
-            final IndexSearcher searcher = index.getIndexSearcher();
-            Query query = new WildcardQuery(new Term("value", wildcard));
 
-            final Collection<Binary> keysToRetain = new ArrayList<Binary>();
+            final IndexSearcher searcher = index.getIndexSearcher();
+            final Collection keysToRetain = new ArrayList();
 
             searcher.search(
-                    query,
+                    new WildcardQuery(new Term(LuceneMapIndex.VALUE, wildcard)),
                     new Collector() {
                         @Override
                         public void setScorer(Scorer scorer) throws IOException {
@@ -51,8 +53,9 @@ public class WildcardFilter implements IndexAwareFilter {
 
                         @Override
                         public void collect(int doc) throws IOException {
-                            Binary binary = new Binary(searcher.doc(doc).getField("key").getBinaryValue());
-                            keysToRetain.add(binary);
+                            keysToRetain.add(
+                                    ExternalizableHelper.fromByteArray(
+                                        searcher.doc(doc).getField(LuceneMapIndex.KEY).getBinaryValue()));
                         }
 
                         @Override
