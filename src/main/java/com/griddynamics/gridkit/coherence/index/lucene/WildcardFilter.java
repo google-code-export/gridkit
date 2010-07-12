@@ -37,7 +37,7 @@ public class WildcardFilter implements IndexAwareFilter {
     public Filter applyIndex(Map map, final Set set) {
         try {
             LuceneMapIndex index = (LuceneMapIndex) map.get(extractor);
-            final IndexSearcher searcher = new IndexSearcher(index.getDirectory());
+            final IndexSearcher searcher = index.getIndexSearcher();
             Query query = new WildcardQuery(new Term("value", wildcard));
 
             final Collection<Binary> keysToRetain = new ArrayList<Binary>();
