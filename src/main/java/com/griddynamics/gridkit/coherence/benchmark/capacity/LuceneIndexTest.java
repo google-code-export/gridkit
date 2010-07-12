@@ -45,22 +45,34 @@ public class LuceneIndexTest {
         LuceneExtractor extractor = new LuceneExtractor(null);
         cache.addIndex(extractor, false, null);
 
-//        cache.put("ABCdfd", "ABCsss");
-//        cache.put("ABCdfd222", "ABCssseee");
-
-        for (int i = 0; i < 1000; i++) {
-            cache.put("ABC" + i, "ABC" + i);
-        }
-
         cache.put("ABCff", "dd");
         cache.put("ABCsddds", "dfsf");
         cache.put("ABCsdfsd", "sgfsd");
 
-        for (int i = 0; i < 500; i++) {
+        long insert = System.currentTimeMillis();
+
+        for (int i = 0; i < 1000000; i++) {
+            cache.put("ABC" + i, "ABC" + i);
+        }
+
+        System.out.println("INSERT " + (System.currentTimeMillis() - insert));
+
+/*
+        long delete = System.currentTimeMillis();
+
+        for (int i = 0; i < 500000; i++) {
             cache.remove("ABC" + i);
         }
 
+        System.out.println("DELETE " + (System.currentTimeMillis() - delete));
+*/
+
+        long search = System.currentTimeMillis();
+
         int keyCount = cache.keySet(new WildcardFilter("AB*")).size();
-        Assert.assertEquals(500, keyCount);
+
+        System.out.println("SEARCH " + (System.currentTimeMillis() - search));
+
+        Assert.assertEquals(1000000, keyCount);
     }
 }
