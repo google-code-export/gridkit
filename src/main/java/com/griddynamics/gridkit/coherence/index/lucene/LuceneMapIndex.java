@@ -62,6 +62,7 @@ public class LuceneMapIndex implements MapIndex {
         if (value != null) {
             Document doc = new Document();
 
+            doc.add(new Field("value-key", value, Field.Store.NO, Field.Index.NOT_ANALYZED));
             doc.add(new Field("value", value, Field.Store.YES, Field.Index.ANALYZED));
 
             if (entry instanceof BinaryEntry) {
@@ -88,15 +89,15 @@ public class LuceneMapIndex implements MapIndex {
     }
 
     public void delete(Map.Entry entry) {
-        try {
-            String value = (String) extractor.extract(entry.getValue());
-
-            IndexReader reader = IndexReader.open(directory);
-            reader.deleteDocuments(new Term("value", value));
-            
-            reader.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        String value = (String) extractor.extract(entry.getValue());
+        if (value != null) {
+            try {
+                IndexReader reader = IndexReader.open(directory);
+                reader.deleteDocuments(new Term("value-key", value));
+                reader.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
