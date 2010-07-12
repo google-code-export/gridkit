@@ -10,6 +10,7 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.RAMDirectory;
 
 import java.io.IOException;
@@ -25,6 +26,7 @@ public class LuceneMapIndex implements MapIndex {
 
     private RAMDirectory directory = new RAMDirectory();
     private Analyzer analyzer = new WhitespaceAnalyzer();
+    private IndexSearcher indexSearcher;
 
     public LuceneMapIndex(ValueExtractor extractor) {
         this.extractor = extractor;
@@ -43,12 +45,10 @@ public class LuceneMapIndex implements MapIndex {
     }
 
     public Map getIndexContents() {
-        // TODO: is it needed?? hardly supported by Lucene
         throw new UnsupportedOperationException();
     }
 
     public Object get(Object o) {
-        // TODO: check for optimization. Maybe not needed at all
         return NO_VALUE;
     }
 
@@ -73,10 +73,10 @@ public class LuceneMapIndex implements MapIndex {
             }
 
             try {
-                IndexWriter writer = new IndexWriter(directory, analyzer, IndexWriter.MaxFieldLength.UNLIMITED);
+                IndexWriter writer = getIndexWriter();
                 writer.addDocument(doc);
-                writer.optimize();
                 writer.close();
+                indexSearcher = null;
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -95,6 +95,7 @@ public class LuceneMapIndex implements MapIndex {
                 IndexReader reader = IndexReader.open(directory);
                 reader.deleteDocuments(new Term("value-key", value));
                 reader.close();
+                indexSearcher = null;
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -107,5 +108,24 @@ public class LuceneMapIndex implements MapIndex {
 
     public Analyzer getAnalyzer() {
         return analyzer;
+    }
+
+    public IndexSearcher getIndexSearcher() {
+        if (indexSearcher == null) {
+            try {
+                IndexWriter writer = getIndexWriter();
+                writer.optimize();
+                writer.close();
+                indexSearcher = new IndexSearcher(directory);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return indexSearcher;
+    }
+
+    private IndexWriter getIndexWriter() throws IOException {
+        return new IndexWriter(directory, analyzer, IndexWriter.MaxFieldLength.UNLIMITED);
     }
 }
