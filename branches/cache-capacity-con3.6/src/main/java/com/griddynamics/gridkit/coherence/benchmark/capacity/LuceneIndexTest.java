@@ -56,7 +56,11 @@ public class LuceneIndexTest {
         cache.put("ABCsddds", "dfsf");
         cache.put("ABCsdfsd", "sgfsd");
 
+        for (int i = 0; i < 500; i++) {
+            cache.remove("ABC" + i);
+        }
+
         int keyCount = cache.keySet(new PrefixFilter("AB")).size();
-        Assert.assertEquals(1000, keyCount);
+        Assert.assertEquals(500, keyCount);
     }
 }
