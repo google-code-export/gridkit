@@ -15,18 +15,18 @@ import java.util.*;
  * @author Alexander Solovyov
  */
 
-public class PrefixFilter implements IndexAwareFilter {
+public class WildcardFilter implements IndexAwareFilter {
 
     private ValueExtractor extractor;
-    private String prefix;
+    private String wildcard;
 
-    public PrefixFilter(String prefix) {
-        this(null, prefix);
+    public WildcardFilter(String wildcard) {
+        this(null, wildcard);
     }
 
-    public PrefixFilter(ValueExtractor extractor, String prefix) {
+    public WildcardFilter(ValueExtractor extractor, String wildcard) {
         this.extractor = new LuceneExtractor(extractor);
-        this.prefix = prefix;
+        this.wildcard = wildcard;
     }
 
     public int calculateEffectiveness(Map map, Set set) {
@@ -38,7 +38,7 @@ public class PrefixFilter implements IndexAwareFilter {
         try {
             LuceneMapIndex index = (LuceneMapIndex) map.get(extractor);
             final IndexSearcher searcher = new IndexSearcher(index.getDirectory());
-            Query query = new WildcardQuery(new Term("value", prefix + "*"));
+            Query query = new WildcardQuery(new Term("value", wildcard));
 
             final Collection<Binary> keysToRetain = new ArrayList<Binary>();
 
@@ -79,6 +79,6 @@ public class PrefixFilter implements IndexAwareFilter {
 
     public boolean evaluate(Object o) {
         String text = (String) extractor.extract(o);
-        return text != null && text.startsWith(prefix);
+        return text != null && text.startsWith(wildcard);
     }
 }
