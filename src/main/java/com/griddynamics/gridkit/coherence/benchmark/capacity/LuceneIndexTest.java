@@ -1,7 +1,7 @@
 package com.griddynamics.gridkit.coherence.benchmark.capacity;
 
 import com.griddynamics.gridkit.coherence.index.lucene.LuceneExtractor;
-import com.griddynamics.gridkit.coherence.index.lucene.PrefixFilter;
+import com.griddynamics.gridkit.coherence.index.lucene.WildcardFilter;
 import com.griddynamics.gridkit.coherence.index.ngram.ContainsSubstringFilter;
 import com.griddynamics.gridkit.coherence.index.ngram.NGramExtractor;
 import com.tangosol.net.CacheFactory;
@@ -60,7 +60,7 @@ public class LuceneIndexTest {
             cache.remove("ABC" + i);
         }
 
-        int keyCount = cache.keySet(new PrefixFilter("AB")).size();
+        int keyCount = cache.keySet(new WildcardFilter("AB*")).size();
         Assert.assertEquals(500, keyCount);
     }
 }
