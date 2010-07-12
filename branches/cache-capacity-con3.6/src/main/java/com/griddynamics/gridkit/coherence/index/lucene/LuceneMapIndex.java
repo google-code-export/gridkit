@@ -1,9 +1,9 @@
 package com.griddynamics.gridkit.coherence.index.lucene;
 
 import com.tangosol.util.BinaryEntry;
+import com.tangosol.util.ExternalizableHelper;
 import com.tangosol.util.MapIndex;
 import com.tangosol.util.ValueExtractor;
-import com.tangosol.util.ExternalizableHelper;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
@@ -32,7 +32,11 @@ public class LuceneMapIndex implements MapIndex {
 
     private RAMDirectory directory = new RAMDirectory();
     private Analyzer analyzer = new WhitespaceAnalyzer();
+
     private IndexSearcher indexSearcher;
+
+    private IndexWriter indexWriter;
+    private IndexReader indexReader;
 
     public LuceneMapIndex(ValueExtractor extractor) {
         this.extractor = extractor;
@@ -74,10 +78,14 @@ public class LuceneMapIndex implements MapIndex {
             doc.add(new Field(KEY, ExternalizableHelper.toByteArray(getEntryKey(entry)), Field.Store.YES));
 
             try {
-                IndexWriter writer = getIndexWriter();
-                writer.addDocument(doc);
-                writer.close();
-                indexSearcher = null;
+
+                if (indexWriter == null) {
+                    indexWriter = new IndexWriter(directory, analyzer, IndexWriter.MaxFieldLength.UNLIMITED);
+                    indexSearcher = null;
+                }
+
+                indexWriter.addDocument(doc);
+                
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -93,10 +101,14 @@ public class LuceneMapIndex implements MapIndex {
         String value = (String) extractor.extract(entry.getValue());
         if (value != null) {
             try {
-                IndexReader reader = IndexReader.open(directory);
-                reader.deleteDocuments(new Term(INDEX_KEY, value));
-                reader.close();
-                indexSearcher = null;
+
+                if (indexReader == null) {
+                    indexReader = IndexReader.open(directory);
+                    indexSearcher = null;
+                }
+
+                indexReader.deleteDocuments(new Term(INDEX_KEY, value));
+
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -114,9 +126,17 @@ public class LuceneMapIndex implements MapIndex {
     public IndexSearcher getIndexSearcher() {
         if (indexSearcher == null) {
             try {
-                IndexWriter writer = getIndexWriter();
-                writer.optimize();
-                writer.close();
+
+                if (indexWriter != null) {
+                    indexWriter.optimize();
+                    indexWriter.close();
+                    indexWriter = null;
+                }
+
+                if (indexReader != null) {
+                    indexReader.close();
+                }
+                
                 indexSearcher = new IndexSearcher(directory);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -124,10 +144,6 @@ public class LuceneMapIndex implements MapIndex {
         }
 
         return indexSearcher;
-    }
-
-    private IndexWriter getIndexWriter() throws IOException {
-        return new IndexWriter(directory, analyzer, IndexWriter.MaxFieldLength.UNLIMITED);
     }
 
     private Object getEntryKey(Map.Entry entry) {
