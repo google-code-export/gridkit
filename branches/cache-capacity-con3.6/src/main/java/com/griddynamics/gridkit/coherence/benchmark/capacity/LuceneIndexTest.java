@@ -21,7 +21,16 @@ public class LuceneIndexTest {
         System.setProperty("tangosol.pof.enabled", "true");
         System.setProperty("tangosol.pof.config", "capacity-benchmark-pof-config.xml");
         System.setProperty("tangosol.coherence.cacheconfig", "capacity-benchmark-cache-config.xml");
-        System.setProperty("benchmark-default-scheme", "simple-distributed-scheme");
+
+//      System.setProperty("benchmark-default-scheme", "local-scheme");
+//      System.setProperty("benchmark-default-scheme", "local-hashmap-scheme");
+//      System.setProperty("benchmark-default-scheme", "local-juc-hashmap-scheme");
+      System.setProperty("benchmark-default-scheme", "simple-distributed-scheme");
+//      System.setProperty("benchmark-default-scheme", "external-distributed-scheme");
+//      System.setProperty("benchmark-default-scheme", "partitioned-true-external-distributed-scheme");
+//      System.setProperty("benchmark-default-scheme", "partitioned-false-external-distributed-scheme");
+//      System.setProperty("benchmark-default-scheme", "simple-replicated-scheme");
+//      System.setProperty("benchmark-default-scheme", "transactional-scheme");
     }
 
     @Test
@@ -68,8 +77,17 @@ public class LuceneIndexTest {
 */
 
         long search = System.currentTimeMillis();
-
         int keyCount = cache.keySet(new WildcardFilter("AB*")).size();
+/*
+        Collection result = new ArrayList();
+        for (Object o : cache.entrySet()) {
+            Map.Entry entry = (Map.Entry) o;
+            String value = (String) entry.getValue();
+            if (value.indexOf("AB") != -1) {
+                result.add(entry.getKey());
+            }
+        }
+*/
 
         System.out.println("SEARCH " + (System.currentTimeMillis() - search));
 
