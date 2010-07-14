@@ -16,7 +16,9 @@ import org.apache.lucene.store.RAMDirectory;
 
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author Alexander Solovyov
@@ -26,11 +28,14 @@ public class LuceneMapIndex implements MapIndex {
     public static final String KEY = "key";
     public static final String VALUE = "value";
 
-    private static final String INDEX_KEY = "value-key";    
+    private static final String DOCUMENT_ID = "document-id";
 
     private final ValueExtractor extractor;
 
     private RAMDirectory directory = new RAMDirectory();
+
+    private final Map<Object, String> keyToDocumentId = new HashMap<Object, String>();
+
     private Analyzer analyzer = new WhitespaceAnalyzer();
 
     private IndexSearcher indexSearcher;
@@ -72,10 +77,15 @@ public class LuceneMapIndex implements MapIndex {
         if (value != null) {
             Document doc = new Document();
 
-            doc.add(new Field(INDEX_KEY, value, Field.Store.NO, Field.Index.NOT_ANALYZED));
+            Object key = getEntryKey(entry);
+            String documentId = UUID.randomUUID().toString();
+
+            keyToDocumentId.put(key, documentId);
+
+            doc.add(new Field(DOCUMENT_ID, value, Field.Store.NO, Field.Index.NOT_ANALYZED));
             doc.add(new Field(VALUE, value, Field.Store.YES, Field.Index.ANALYZED));
 
-            doc.add(new Field(KEY, ExternalizableHelper.toByteArray(getEntryKey(entry)), Field.Store.YES));
+            doc.add(new Field(KEY, ExternalizableHelper.toByteArray(key), Field.Store.YES));
 
             try {
 
@@ -107,7 +117,10 @@ public class LuceneMapIndex implements MapIndex {
                     indexSearcher = null;
                 }
 
-                indexReader.deleteDocuments(new Term(INDEX_KEY, value));
+                indexReader.deleteDocuments(
+                        new Term(
+                                DOCUMENT_ID,
+                                keyToDocumentId.get(getEntryKey(entry))));
 
             } catch (IOException e) {
                 throw new RuntimeException(e);
