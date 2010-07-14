@@ -135,6 +135,7 @@ public class LuceneMapIndex implements MapIndex {
 
                 if (indexReader != null) {
                     indexReader.close();
+                    indexReader = null;
                 }
                 
                 indexSearcher = new IndexSearcher(directory);
