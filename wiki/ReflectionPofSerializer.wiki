@@ -8,7 +8,7 @@ But there is a simple way to get best of both worlds. In a recent project I have
 
 Some people believe that reflection is slow. I have performed simple speed tests between Java reflection, a handmade POF serializer, and a reflection-based POF serializer—a very simple single threaded test doing serialization and deserialization of an object in a loop.
 
-== PofExtractor support ==
+== {{{PofExtractor}}} support ==
 
 Cohernce 3.5 has introduced major improvment for partitioned cache, which allow access to stored objects without deserialization [http://coherence.oracle.com/display/COH35UG/PofExtractors+and+PofUpdaters POF Extractors] 
 . But using this technique requires much codeing and results are hard to justify (practice has shown what in some cases it's faster to desireialize object than parse it's binary presentation).
