@@ -50,6 +50,14 @@
                 <class-name>com.griddynamics.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
             </serializer>
         </user-type>
+
+        <user-type>
+            <type-id>1004</type-id>
+            <class-name>com.griddynamics.gridkit.coherence.benchmark.capacity.LuceneIndexTest$Key</class-name>
+            <serializer>
+                <class-name>com.griddynamics.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
     </user-type-list>
 
     <allow-interfaces>true</allow-interfaces>
