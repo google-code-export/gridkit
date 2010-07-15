@@ -27,6 +27,8 @@ public class LuceneMapIndex implements MapIndex {
     public static final String KEY = "key";
     public static final String VALUE = "value";
 
+    private static final String DOCUMENT_ID = "document-id";
+
     private final ValueExtractor extractor;
 
     private RAMDirectory directory = new RAMDirectory();
@@ -72,8 +74,12 @@ public class LuceneMapIndex implements MapIndex {
         if (value != null) {
             Document doc = new Document();
 
-            doc.add(new Field(KEY, getBase64Key(entry), Field.Store.YES, Field.Index.NOT_ANALYZED));
+            byte[] byteArrayKey = getByteArrayKey(entry);
+
+            doc.add(new Field(DOCUMENT_ID, toBase64(byteArrayKey), Field.Store.NO, Field.Index.NOT_ANALYZED));
             doc.add(new Field(VALUE, value, Field.Store.YES, Field.Index.ANALYZED));
+
+            doc.add(new Field(KEY, byteArrayKey, Field.Store.YES));
 
             try {
 
@@ -105,7 +111,8 @@ public class LuceneMapIndex implements MapIndex {
                     indexSearcher = null;
                 }
 
-                indexReader.deleteDocuments(new Term(KEY, getBase64Key(entry)));
+                indexReader.deleteDocuments(
+                        new Term(DOCUMENT_ID, toBase64(getByteArrayKey(entry))));
 
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -154,9 +161,13 @@ public class LuceneMapIndex implements MapIndex {
         }
     }
 
-    private String getBase64Key(Map.Entry entry) {
+    private byte[] getByteArrayKey(Map.Entry entry) {
         Object key = getEntryKey(entry);
 
-        return new String(Base64OutputStream.encode(ExternalizableHelper.toByteArray(key)));
+        return ExternalizableHelper.toByteArray(key);
+    }
+
+    private String toBase64(byte[] bytes) {
+        return new String(Base64OutputStream.encode(bytes));
     }
 }

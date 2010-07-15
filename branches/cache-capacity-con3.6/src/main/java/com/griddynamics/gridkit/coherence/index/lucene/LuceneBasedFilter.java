@@ -1,6 +1,5 @@
 package com.griddynamics.gridkit.coherence.index.lucene;
 
-import com.tangosol.io.Base64InputStream;
 import com.tangosol.util.ExternalizableHelper;
 import com.tangosol.util.Filter;
 import com.tangosol.util.ValueExtractor;
@@ -55,8 +54,7 @@ public abstract class LuceneBasedFilter implements IndexAwareFilter {
                         public void collect(int doc) throws IOException {
                             keysToRetain.add(
                                     ExternalizableHelper.fromByteArray(
-                                            Base64InputStream.decode(
-                                                    searcher.doc(doc).getField(LuceneMapIndex.KEY).stringValue().toCharArray())));
+                                            searcher.doc(doc).getField(LuceneMapIndex.KEY).getBinaryValue()));
                         }
 
                         @Override

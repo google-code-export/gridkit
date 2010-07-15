@@ -6,9 +6,10 @@ import com.griddynamics.gridkit.coherence.index.ngram.ContainsSubstringFilter;
 import com.griddynamics.gridkit.coherence.index.ngram.NGramExtractor;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.NamedCache;
-import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.Serializable;
 
 /**
  * @author Alexander Solovyov
@@ -62,6 +63,7 @@ public class LuceneIndexTest {
 
         for (int i = 0; i < 1000000; i++) {
             cache.put("ABC" + i, "ABC" + i);
+            // cache.put(new Key("ABC" + i, 512), "ABC" + i);
         }
 
         System.out.println("INSERT " + (System.currentTimeMillis() - insert));
@@ -91,6 +93,39 @@ public class LuceneIndexTest {
 
         System.out.println("SEARCH " + (System.currentTimeMillis() - search));
 
-        Assert.assertEquals(1000000, keyCount);
+        search = System.currentTimeMillis();
+        cache.keySet(new WildcardFilter("AB*")).size();
+
+        System.out.println("SEARCH " + (System.currentTimeMillis() - search));
+        search = System.currentTimeMillis();
+        cache.keySet(new WildcardFilter("AB*")).size();
+
+        System.out.println("SEARCH " + (System.currentTimeMillis() - search));
+        search = System.currentTimeMillis();
+        cache.keySet(new WildcardFilter("AB*")).size();
+
+        System.out.println("SEARCH " + (System.currentTimeMillis() - search));
+        search = System.currentTimeMillis();
+        cache.keySet(new WildcardFilter("AB*")).size();
+
+        System.out.println("SEARCH " + (System.currentTimeMillis() - search));
+        search = System.currentTimeMillis();
+        cache.keySet(new WildcardFilter("AB*")).size();
+
+        System.out.println("SEARCH " + (System.currentTimeMillis() - search));
+
+    }
+
+    public static class Key implements Serializable {
+        private String id;
+        private byte[] data;
+
+        public Key() {
+        }
+
+        private Key(String id, int dataSize) {
+            this.id = id;
+            this.data = new byte[dataSize];
+        }
     }
 }
