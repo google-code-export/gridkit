@@ -29,4 +29,4 @@ You can checkout project sources for SVN url [https://gridkit.googlecode.com/svn
  * Create of bunch of usage examples
  * Robust validation for extraction path in ReflectionPofExtractor
  * Index element access in RefectionPofExtractor
- * PofUpdater support
+ * {{{PofUpdater}}} support
