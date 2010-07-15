@@ -1,0 +1,32 @@
+#summary ReflectionPofSerializer project page
+
+= Overview =
+
+People developing distributed Java applications know the importance of wire formats for objects. Native Java serialization has only one advantage—it is built in. It is relatively slow, not very compact, and has other quirks. Starting with version 3.2, Oracle Coherence is offering its own proprietary binary wire format for objects — [http://coherence.oracle.com/display/COH35UG/The+Portable+Object+Format POF serialization]. POF is not only cross platform, but also much more compact and faster compared to built-in serialization. Both compactness and speed are extremely important for data grid application. The only disadvantage of POF is that you should write custom serialization/deserialization code for each of your mobile objects. Not only domain objects stored in cache should have serializers, but also entry processors, aggregators, etc. The amount of code you have to write may look daunting and force you to stick with built-in Java serialization.
+
+But there is a simple way to get best of both worlds. In a recent project I have implemented a generic POF serializer. It uses reflection and doesn't require any changes in code, although you still need to register classes in coherence-pof-config.xml. Still it offers the advantages of the POF format – compact object size and performance. While performance is a bit degraded from using reflection (but still much faster than Java serialization), the sizes of serialized objects are similar to a handmade POF serializer.
+
+Some people believe that reflection is slow. I have performed simple speed tests between Java reflection, a handmade POF serializer, and a reflection-based POF serializer—a very simple single threaded test doing serialization and deserialization of an object in a loop.
+
+== PofExtractor support ==
+
+Cohernce 3.5 has introduced major improvment for partitioned cache, which allow access to stored objects without deserialization [http://coherence.oracle.com/display/COH35UG/PofExtractors+and+PofUpdaters POF Extractors] 
+. But using this technique requires much codeing and results are hard to justify (practice has shown what in some cases it's faster to desireialize object than parse it's binary presentation).
+
+Support for [http://coherence.oracle.com/display/COH35UG/PofExtractors+and+PofUpdaters POF Extractors] has been included as [ReflectionPofExtractor] class which can be used for filtering and indexing in conjunction with {{{ReflectionPofExtractor}}}
+
+== Well Known Objects (WKO) feature ==
+TODO
+
+= Releases =
+
+Lastest version is 0.5
+
+You can checkout project sources for SVN url [https://gridkit.googlecode.com/svn/releases/reflection-pof-serializer-0.5]
+
+= Road map =
+
+ * Create of bunch of usage examples
+ * Robust validation for extraction path in ReflectionPofExtractor
+ * Index element access in RefectionPofExtractor
+ * PofUpdater support
