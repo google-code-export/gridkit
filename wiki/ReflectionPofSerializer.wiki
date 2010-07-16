@@ -20,9 +20,9 @@ TODO
 
 = Releases =
 
-Lastest version is 0.5
+Lastest version is 0.5.1
 
-You can checkout project sources for SVN url [https://gridkit.googlecode.com/svn/releases/reflection-pof-serializer-0.5]
+You can checkout project sources for SVN url [https://gridkit.googlecode.com/svn/releases/reflection-pof-serializer-0.5.1]
 
 = Road map =
 
