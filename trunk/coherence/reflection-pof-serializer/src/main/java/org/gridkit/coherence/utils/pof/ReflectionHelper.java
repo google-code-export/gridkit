@@ -38,7 +38,8 @@ class ReflectionHelper {
     }
 
     public static String getTail(String path) {
-        return path.indexOf('.') > 0 ? path.substring(path.indexOf('.') + 1) : null;
+        return path == null ? null 
+                : path.indexOf('.') > 0 ? path.substring(path.indexOf('.') + 1) : null;
     }
     
     public static int getIndex(String path) {
