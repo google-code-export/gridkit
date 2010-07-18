@@ -1,6 +1,6 @@
 #summary RoadMap for SpringCacheConfigProject
 
-= Configuration options support =
+= Coherence {{{cache-config.xml}} configuration options support =
 
 == {{{<local-scheme>}}} ==
  * {{{<local-scheme><service-name>}}} - TODO
