@@ -1,0 +1,90 @@
+#summary RoadMap for SpringCacheConfigProject
+
+= Configuration options support =
+
+== {{{<local-scheme>}}} ==
+ * {{{<local-scheme><service-name>}}} - TODO
+ * {{{<local-scheme><listener>}}} - TODO
+ * {{{<local-scheme><cachestore-scheme}}} - TODO
+ * {{{<local-scheme><eviction-policy>}}}
+  * HYBRID - *Done*
+  * LRU - *Done*
+  * LFU - *Done*
+  * custom policy - TODO
+ * {{{<local-scheme><high-units>}}} - *Done*
+ * {{{<local-scheme><low-units>}}} - *Done*
+ * {{{<local-scheme><unit-calculator>}}} - *Done*, Spring bean support
+ * {{{<local-scheme><unit-factor>}}} - TODO
+ * {{{<local-scheme><expiry-delay>}}} - *Done*, improvement pending
+ * {{{<local-scheme><flush-delay>}}} - *Done*, improvement pending
+== {{{<external-scheme>}}} ==
+TODO
+== {{{<page-external-scheme>}}} ==
+TODO
+== {{{<distributed-scheme>}}} ==
+ * {{{<distributed-scheme><service-name>}}} - *Done*
+ * {{{<distributed-scheme><serializer>}}} - *Done*, Spring bean support
+ * {{{<distributed-scheme><listener>}}} - TODO
+ * {{{<distributed-scheme><backing-map-scheme>}}} - *Done*, Spring bean support
+  * {{{<distributed-scheme><backing-map-scheme><partitioned>}}} - TODO
+ * {{{<distributed-scheme><partition-count>}}} - *Done*
+ * {{{<distributed-scheme><key-associator>}}} - *Done*, Spring bean support
+ * {{{<distributed-scheme><key-partitioning>}}} - *Done*, Spring bean support
+ * {{{<distributed-scheme><partition-listener>}}} - *Done*, Spring bean support, improvement pending
+ * {{{<distributed-scheme><backup-count>}}} - *Done*
+ * {{{<distributed-scheme><backup-count-after-writebehind>}}} - *Done*
+ * {{{<distributed-scheme><backup-storage>}}} - TODO
+ * {{{<distributed-scheme><thread-count>}}} - *Done*
+ * {{{<distributed-scheme><lease-granularity>}}} - *Done*
+ * {{{<distributed-scheme><transfer-threshold>}}} - *Done*
+ * {{{<distributed-scheme><local-storage>}}} - *Done*
+ * {{{<distributed-scheme><autostart>}}} - *Done*
+ * {{{<distributed-scheme><task-hung-threshold>}}} - *Done*
+ * {{{<distributed-scheme><task-timeout>}}} - *Done*
+ * {{{<distributed-scheme><request-timeout>}}} - *Done*
+ * {{{<distributed-scheme><operation-bundling>}}} - TODO
+== {{{<transactional-scheme>}}} ==
+TODO
+== {{{<replicated-scheme>}}} ==
+Partial support, details to be elaborated
+== {{{<optimistic-scheme>}}} ==
+Partial support, details to be elaborated
+== {{{<near-scheme>}}} ==
+TODO
+== {{{<versioned-near-scheme>}}} ==
+Will not support
+== {{{<overflow-scheme>}}} ==
+TODO
+== {{{<invocation-scheme>}}} ==
+TODO
+== {{{<read-write-backing-map-scheme>}}} ==
+ * {{{<read-write-backing-map-scheme><listener>}}} - TODO
+ * {{{<read-write-backing-map-scheme><cachestore-scheme>}}} - *Done*, Spring bean support
+ * {{{<read-write-backing-map-scheme><cachestore-timeout>}}} - TODO
+ * {{{<read-write-backing-map-scheme><internal-cache-scheme>}}} - *Done*, Spring bean support
+ * {{{<read-write-backing-map-scheme><miss-cache-scheme>}}} - *Done*, Spring bean support
+ * {{{<read-write-backing-map-scheme><read-only>}}} - *Done*
+ * {{{<read-write-backing-map-scheme><write-delay>}}} - *Done*, improvement pending
+ * {{{<read-write-backing-map-scheme><write-batch-factor>}}} - TODO
+ * {{{<read-write-backing-map-scheme><write-requeue-threshold>}}} - TODO
+ * {{{<read-write-backing-map-scheme><refresh-ahead-factor>}}} - *Done*
+ * {{{<read-write-backing-map-scheme><rollback-cachestore-failures>}}} - TODO
+
+
+== {{{<versioned-backing-map-scheme>}}} ==
+*Under question*
+== {{{<remote-cache-scheme>}}} ==
+TODO
+== {{{<class-scheme>}}} :)==
+Spring IoC power unleashed
+== {{{<disk-scheme>}}} ==
+Will not support
+
+
+== Enhanced options ==
+ * Configure map indexes - TODO
+ * Continious query front tier - TODO
+
+= Non configuration features =
+ * JMX registration - TODO
+ * Class loader dispatch semantic - TODO
