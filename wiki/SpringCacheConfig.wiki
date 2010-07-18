@@ -1,4 +1,5 @@
 #summary SpringCacheConfig project - configuration of Coherence via Spring
+#labels Featured
 
 = Introduction =
 TODO
