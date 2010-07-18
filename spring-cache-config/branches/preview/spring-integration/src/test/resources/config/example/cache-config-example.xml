@@ -1,0 +1,365 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE cache-config SYSTEM "cache-config.dtd">
+
+<cache-config>
+
+	<caching-scheme-mapping>
+
+		<cache-mapping>
+			<cache-name>near-*</cache-name>
+			<scheme-name>default-near</scheme-name>
+		</cache-mapping>
+		<cache-mapping>
+			<cache-name>near-product</cache-name>
+			<scheme-name>product-default-near</scheme-name>
+		</cache-mapping>
+		<cache-mapping>
+			<cache-name>near-upc</cache-name>
+			<scheme-name>upc-default-near</scheme-name>
+		</cache-mapping>
+		<cache-mapping>
+			<cache-name>near-category</cache-name>
+			<scheme-name>category-default-near</scheme-name>
+		</cache-mapping>
+        <cache-mapping>
+			<cache-name>near-product-thumbnail</cache-name>
+			<scheme-name>thumbnail-default-near</scheme-name>
+		</cache-mapping>
+		<cache-mapping>
+			<cache-name>dist-*</cache-name>
+			<scheme-name>default-distributed</scheme-name>
+		</cache-mapping>
+
+		<cache-mapping>
+			<cache-name>exp-*</cache-name>
+			<scheme-name>expirable-distributed</scheme-name>
+		</cache-mapping>
+
+		<cache-mapping>
+			<cache-name>exp-near-*</cache-name>
+			<scheme-name>expirable-near</scheme-name>
+		</cache-mapping>
+
+		<cache-mapping>
+			<cache-name>replicated-*</cache-name>
+			<scheme-name>default-replicated</scheme-name>
+		</cache-mapping>
+
+
+	</caching-scheme-mapping>
+
+	<caching-schemes>
+
+		<near-scheme>
+			<scheme-name>default-near</scheme-name>
+
+			<front-scheme>
+				<local-scheme>
+					<eviction-policy>HYBRID</eviction-policy>
+					<high-units>0</high-units>
+					<!--<expiry-delay>1m</expiry-delay>-->
+				</local-scheme>
+			</front-scheme>
+
+			<back-scheme>
+				<distributed-scheme>
+					<scheme-ref>default-distributed</scheme-ref>
+				</distributed-scheme>
+			</back-scheme>
+
+			<invalidation-strategy>present</invalidation-strategy>
+			<autostart>true</autostart>
+		</near-scheme>
+
+		<near-scheme>
+			<scheme-name>product-default-near</scheme-name>
+
+			<front-scheme>
+				<local-scheme>
+					<eviction-policy>HYBRID</eviction-policy>
+					<high-units>10000</high-units>
+					<!--<expiry-delay>1m</expiry-delay>-->
+				</local-scheme>
+			</front-scheme>
+
+			<back-scheme>
+				<distributed-scheme>
+					<scheme-ref>product-default-distributed</scheme-ref>
+				</distributed-scheme>
+			</back-scheme>
+
+			<invalidation-strategy>present</invalidation-strategy>
+			<autostart>true</autostart>
+		</near-scheme>
+		<near-scheme>
+			<scheme-name>upc-default-near</scheme-name>
+
+			<front-scheme>
+				<local-scheme>
+					<eviction-policy>HYBRID</eviction-policy>
+					<high-units>100000</high-units>
+				</local-scheme>
+			</front-scheme>
+
+			<back-scheme>
+				<distributed-scheme>
+					<scheme-ref>upc-default-distributed</scheme-ref>
+				</distributed-scheme>
+			</back-scheme>
+
+			<invalidation-strategy>present</invalidation-strategy>
+			<autostart>true</autostart>
+		</near-scheme>
+		<near-scheme>
+			<scheme-name>category-default-near</scheme-name>
+
+			<front-scheme>
+				<local-scheme>
+					<eviction-policy>HYBRID</eviction-policy>
+					<high-units>5000</high-units>
+				</local-scheme>
+			</front-scheme>
+
+			<back-scheme>
+				<distributed-scheme>
+					<scheme-ref>category-default-distributed</scheme-ref>
+				</distributed-scheme>
+			</back-scheme>
+
+			<invalidation-strategy>present</invalidation-strategy>
+			<autostart>true</autostart>
+		</near-scheme>
+        <near-scheme>
+			<scheme-name>thumbnail-default-near</scheme-name>
+
+			<front-scheme>
+				<local-scheme>
+					<eviction-policy>HYBRID</eviction-policy>
+					<high-units>10000</high-units>
+				</local-scheme>
+			</front-scheme>
+
+			<back-scheme>
+				<distributed-scheme>
+					<scheme-ref>default-distributed</scheme-ref>
+				</distributed-scheme>
+			</back-scheme>
+
+			<invalidation-strategy>present</invalidation-strategy>
+			<autostart>true</autostart>
+		</near-scheme>
+
+		<near-scheme>
+			<scheme-name>expirable-near</scheme-name>
+
+			<front-scheme>
+				<local-scheme>
+					<eviction-policy>HYBRID</eviction-policy>
+					<high-units>1000</high-units>
+					<expiry-delay>5m</expiry-delay>
+					<flush-delay>10s</flush-delay>
+				</local-scheme>
+			</front-scheme>
+
+			<back-scheme>
+				<distributed-scheme>
+					<scheme-ref>expirable-distributed</scheme-ref>
+				</distributed-scheme>
+			</back-scheme>
+
+			<invalidation-strategy>present</invalidation-strategy>
+			<autostart>true</autostart>
+		</near-scheme>
+
+		<distributed-scheme>
+			<scheme-name>product-default-distributed</scheme-name>
+			<service-name>PDistributedCache</service-name>
+
+			<serializer>
+				<class-name>com.tangosol.io.pof.ConfigurablePofContext</class-name>
+      			<init-params>
+					<init-param>
+						<param-value>pof-config.xml</param-value>
+						<param-type>String</param-type>
+					</init-param>
+				</init-params>
+			</serializer>
+			
+			<backing-map-scheme>
+				<!--Read-write-backing-map caching scheme.    -->
+				<read-write-backing-map-scheme>
+					<scheme-name>productLoaderScheme</scheme-name>
+					<internal-cache-scheme>
+						<local-scheme>
+							<eviction-policy>HYBRID</eviction-policy>
+							<high-units>0</high-units>
+							<!--<scheme-ref>product-eviction</scheme-ref>-->
+						</local-scheme>
+					</internal-cache-scheme>
+
+					<cachestore-scheme>
+						<class-scheme>
+							<class-name>com.macys.breeze.preloader.cachestorescheme.CachestoreSchemeLoader</class-name>
+						</class-scheme>
+					</cachestore-scheme><!--
+					<refresh-ahead-factor>0.5</refresh-ahead-factor>
+				--></read-write-backing-map-scheme>
+			</backing-map-scheme>
+
+			<autostart>true</autostart>
+		</distributed-scheme>
+		<distributed-scheme>
+			<scheme-name>upc-default-distributed</scheme-name>
+			<service-name>UPCDistributedCache</service-name>
+
+			<serializer>
+				<class-name>com.tangosol.io.pof.ConfigurablePofContext</class-name>
+      			<init-params>
+					<init-param>
+						<param-value>pof-config.xml</param-value>
+						<param-type>String</param-type>
+					</init-param>
+				</init-params>
+			</serializer>
+			<backing-map-scheme>
+				<!--Read-write-backing-map caching scheme.    -->
+				<read-write-backing-map-scheme>
+					<scheme-name>upcLoaderScheme</scheme-name>
+					<internal-cache-scheme>
+						<local-scheme>
+							<eviction-policy>HYBRID</eviction-policy>
+							<high-units>0</high-units>
+							<!--<scheme-ref>product-eviction</scheme-ref>-->
+						</local-scheme>
+					</internal-cache-scheme>
+
+					<cachestore-scheme>
+						<class-scheme>
+							<class-name>com.macys.breeze.preloader.cachestorescheme.CachestoreSchemeUpcLoader</class-name>
+						</class-scheme>
+					</cachestore-scheme><!--
+					<refresh-ahead-factor>0.5</refresh-ahead-factor>
+				--></read-write-backing-map-scheme>
+			</backing-map-scheme>
+			<autostart>true</autostart>
+		</distributed-scheme>
+		<distributed-scheme>
+			<scheme-name>category-default-distributed</scheme-name>
+			<service-name>PDistributedCache</service-name>
+			<serializer>
+				<class-name>com.tangosol.io.pof.ConfigurablePofContext</class-name>
+      			<init-params>
+					<init-param>
+						<param-value>pof-config.xml</param-value>
+						<param-type>String</param-type>
+					</init-param>
+				</init-params>
+			</serializer>
+			<backing-map-scheme>
+				<!--Read-write-backing-map caching scheme.    -->
+				<read-write-backing-map-scheme>
+					<scheme-name>categoryLoaderScheme</scheme-name>
+					<internal-cache-scheme>
+						<local-scheme>
+							<eviction-policy>HYBRID</eviction-policy>
+							<high-units>0</high-units>
+							<!--<scheme-ref>product-eviction</scheme-ref>-->
+						</local-scheme>
+					</internal-cache-scheme>
+
+					<cachestore-scheme>
+						<class-scheme>
+							<class-name>com.macys.breeze.preloader.cachestorescheme.CachestoreSchemeCategoryLoader</class-name>
+						</class-scheme>
+					</cachestore-scheme>
+				</read-write-backing-map-scheme>
+			</backing-map-scheme>
+
+			<autostart>true</autostart>
+		</distributed-scheme>
+		<distributed-scheme>
+			<scheme-name>default-distributed</scheme-name>
+			<service-name>PDistributedCache</service-name>
+
+			<serializer>
+				<class-name>com.tangosol.io.pof.ConfigurablePofContext</class-name>
+      			<init-params>
+					<init-param>
+						<param-value>pof-config.xml</param-value>
+						<param-type>String</param-type>
+					</init-param>
+				</init-params>
+			</serializer>
+				<backing-map-scheme> <local-scheme>
+				<scheme-ref>default-backing-map</scheme-ref> </local-scheme>
+				</backing-map-scheme>
+
+			<!--
+			<backing-map-scheme>
+				<read-write-backing-map-scheme>
+					<scheme-name>productLoaderScheme</scheme-name>
+					<internal-cache-scheme>
+						<local-scheme>
+							<scheme-ref>product-eviction</scheme-ref>
+						</local-scheme>
+					</internal-cache-scheme>
+
+					<cachestore-scheme>
+						<class-scheme>
+							<class-name>com.macys.breeze.preloader.cachestorescheme.CategoryCachestoreSchemeLoader</class-name>
+						</class-scheme>
+					</cachestore-scheme>
+					<refresh-ahead-factor>0.5</refresh-ahead-factor>
+				</read-write-backing-map-scheme>
+			</backing-map-scheme>
+
+			--><autostart>true</autostart>
+		</distributed-scheme>
+
+		<distributed-scheme>
+			<scheme-name>expirable-distributed</scheme-name>
+			<service-name>DistributedCache2</service-name>
+
+			<serializer>
+				<class-name>com.tangosol.io.pof.ConfigurablePofContext</class-name>
+      			<init-params>
+					<init-param>
+						<param-value>pof-config.xml</param-value>
+						<param-type>String</param-type>
+					</init-param>
+				</init-params>
+			</serializer>
+
+			<backing-map-scheme>
+				<local-scheme>
+					<eviction-policy>HYBRID</eviction-policy>
+					<high-units>0</high-units>
+					<expiry-delay>47h</expiry-delay>
+					<flush-delay>15m</flush-delay>
+				</local-scheme>
+			</backing-map-scheme>
+			<autostart>true</autostart>
+		</distributed-scheme>
+
+		<replicated-scheme>
+			<scheme-name>default-replicated</scheme-name>
+			<service-name>ReplicatedCache</service-name>
+			<backing-map-scheme>
+				<class-scheme>
+					<scheme-name>replicated-backing-map</scheme-name>
+					<class-name>com.tangosol.util.SafeHashMap</class-name>
+				</class-scheme>
+			</backing-map-scheme>
+		</replicated-scheme>
+
+		<local-scheme>
+			<scheme-name>default-backing-map</scheme-name>
+		</local-scheme>
+		 <local-scheme>
+		      <scheme-name>product-eviction</scheme-name>
+		      <expiry-delay>20s</expiry-delay>
+		   </local-scheme>
+
+	</caching-schemes>
+</cache-config>
