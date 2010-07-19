@@ -27,7 +27,7 @@ public class SearchFactory<I, IC, Q> {
 	private PlugableSearchIndex<I, IC, Q> indexPlugin;
 	private IC indexConfig;
 	private ValueExtractor extractor;
-	private DefaultIndexEngineConfig engineConfig;
+	private IndexEngineConfig engineConfig = new DefaultIndexEngineConfig();
 	
 	private Object token;
 	
@@ -36,6 +36,10 @@ public class SearchFactory<I, IC, Q> {
 		this.indexConfig = config;
 		this.extractor = extractor;
 		this.token = plugin.createIndexCompatibilityToken(indexConfig); 
+	}
+	
+	public IndexEngineConfig getEngineConfig() {
+		return engineConfig;
 	}
 	
 	public void createIndex(NamedCache cache) {
@@ -203,17 +207,18 @@ public class SearchFactory<I, IC, Q> {
 				psi.updateIndexEntries(coreIndex, Collections.singletonMap(event.getKey(), event), this);
 			}
 			else {
-				IndexUpdateEvent old = pendingUpdates.get(event.getKey());
-				if (old != null) {
-					old.merge(event);
+				synchronized (this) {
+					IndexUpdateEvent old = pendingUpdates.get(event.getKey());
+					if (old != null) {
+						old.merge(event);
+					}
+					else {
+						pendingUpdates.put(event.getKey(), event);
+					}
 				}
-				else {
-					pendingUpdates.put(event.getKey(), event);
+				if (pendingUpdates.size() >= queueSizeLimit) {
+					flush();
 				}
-			}
-			
-			if (pendingUpdates.size() >= queueSizeLimit) {
-				flush();
 			}
 		}
 		

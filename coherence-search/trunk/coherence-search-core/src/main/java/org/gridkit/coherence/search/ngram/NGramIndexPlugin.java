@@ -16,7 +16,8 @@ public class NGramIndexPlugin implements PlugableSearchIndex<NGramIndex, Integer
         return ngramFilter(index, query, keySet);
     }
 
-    private boolean ngramFilter(NGramIndex index, String substring, Set setKeys) {
+    @SuppressWarnings("unchecked")
+	private boolean ngramFilter(NGramIndex index, String substring, Set setKeys) {
         if (index.getNGramSize() <= substring.length()) {
             filterSet(index, substring, setKeys);
             return true;
@@ -27,7 +28,8 @@ public class NGramIndexPlugin implements PlugableSearchIndex<NGramIndex, Integer
         }
     }
 
-    private void unionFilterSet(NGramIndex index, String substring, Set setKeys) {
+    @SuppressWarnings("unchecked")
+	private void unionFilterSet(NGramIndex index, String substring, Set setKeys) {
         Set result = new HashSet();
         for(Object entry: index.getNGramMap().entrySet()) {
             String ngram = (String) ((Map.Entry)entry).getKey();
@@ -44,7 +46,8 @@ public class NGramIndexPlugin implements PlugableSearchIndex<NGramIndex, Integer
         setKeys.retainAll(result);
     }
 
-    private void filterSet(NGramIndex index, String substring, Set setKeys) {
+    @SuppressWarnings("unchecked")
+	private void filterSet(NGramIndex index, String substring, Set setKeys) {
         int n = 0;
         int ngramSize = index.getNGramSize();
         while(true) {
