@@ -3,7 +3,7 @@
 	
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.gridkit.coherence.search</groupId>
-	<artifactId>core</artifactId>
+	<artifactId>coherence-search-core</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0-SNAPSHOT</version>
 	<name>Coherence Search core</name>
