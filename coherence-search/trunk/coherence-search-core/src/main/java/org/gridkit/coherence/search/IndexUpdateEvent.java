@@ -6,6 +6,11 @@ public class IndexUpdateEvent implements Map.Entry<Object, Object> {
 	
 	public enum Type {INSERT, UPDATE, DELETE, NOPE};
 	
+	/**
+	 * Marker object to denote what field value is undefined.
+	 */
+	public static final Object UNKNOWN = new Object();
+	
 	private Object key;
 	private Object value;
 	private Object originalValue;

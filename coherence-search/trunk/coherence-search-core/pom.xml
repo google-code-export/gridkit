@@ -12,7 +12,7 @@
 		<dependency>
 			<groupId>com.oracle.coherence</groupId>
 			<artifactId>coherence</artifactId>
-			<version>3.6.0b17229</version>
+			<version>[3.6.0b17229,]</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

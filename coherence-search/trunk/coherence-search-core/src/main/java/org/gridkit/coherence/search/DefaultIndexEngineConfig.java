@@ -1,5 +1,9 @@
 package org.gridkit.coherence.search;
 
+/**
+ * Default implementation of {@link IndexEngineConfig}. 
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ */
 public class DefaultIndexEngineConfig implements IndexEngineConfig {
 
 	private int indexUpdateQueueSizeLimit = 1024;
