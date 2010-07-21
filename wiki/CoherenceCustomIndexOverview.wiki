@@ -1,0 +1,15 @@
+#summary Coherence Custom index API overview
+
+Before you start with custom index I suggest you to study this topic in Coherence documentation - [http://download.oracle.com/docs/cd/E15357_01/coh.360/e15723/api_querycache.htm Queering data in Cache].
+
+= Implementing custom index =
+Implementing custom index requires implemeting 3 classes.
+ * [http://download.oracle.com/docs/cd/E15357_01/coh.360/e15725/com/tangosol/util/extractor/IndexAwareExtractor.html IndexAwareExtractor] is responsible for creation of index.
+ * [http://download.oracle.com/docs/cd/E15357_01/coh.360/e15725/index.html?com/tangosol/util/extractor/IndexAwareExtractor.html MapIndex] implementation is core of your custom index; Coherence will notify it about changes in stored objects.
+ * [http://download.oracle.com/docs/cd/E15357_01/coh.360/e15725/index.html?com/tangosol/util/extractor/IndexAwareExtractor.html IndexAwareFilter] to use own index implementation you should create own filter (because standard filters are not aware about your custom index).
+
+In Coherence [http://download.oracle.com/docs/cd/E15357_01/coh.360/e15725/index.html?com/tangosol/util/extractor/IndexAwareExtractor.html IndexAwareFilter] implementation is responsible to build own execution plan. Up on execution [http://download.oracle.com/docs/cd/E15357_01/coh.360/e15725/index.html?com/tangosol/util/extractor/IndexAwareExtractor.html IndexAwareFilter] is provided by collection of all indexes available for cache and it can choose which of them to use. Collection of indexes is stored as map there [http://download.oracle.com/docs/cd/E15357_01/coh.360/e15725/index.html?com/tangosol/util/extractor/IndexAwareExtractor.html ValueExtractor] serves as key and [http://download.oracle.com/docs/cd/E15357_01/coh.360/e15725/index.html?com/tangosol/util/extractor/IndexAwareExtractor.html MapIndex] instance as value. So your custom filter should look for your custom [http://download.oracle.com/docs/cd/E15357_01/coh.360/e15725/index.html?com/tangosol/util/extractor/IndexAwareExtractor.html MapIndex] using your custom [http://download.oracle.com/docs/cd/E15357_01/coh.360/e15725/com/tangosol/util/extractor/IndexAwareExtractor.html IndexAwareExtractor] as key (then it can downcast it and use your custom API instead of [http://download.oracle.com/docs/cd/E15357_01/coh.360/e15725/index.html?com/tangosol/util/extractor/IndexAwareExtractor.html MapIndex]).
+
+Custom index is created same way as standard index, by calling [http://download.oracle.com/docs/cd/E15357_01/coh.360/e15725/com/tangosol/util/QueryMap.html#addIndex_com_tangosol_util_ValueExtractor__boolean__java_util_Comparator_ addIndex(…)] on cache object. If you provide IndexAwareExtractor to [http://download.oracle.com/docs/cd/E15357_01/coh.360/e15725/com/tangosol/util/QueryMap.html#addIndex_com_tangosol_util_ValueExtractor__boolean__java_util_Comparator_ addIndex(…)] call, instead of creating standard SimpleMapIndex, Coherence will use extractor to create index structure.
+
+
