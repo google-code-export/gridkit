@@ -1,0 +1,27 @@
+#summary Coherence-Search project overview
+
+= Introduction =
+One of important features of Oracle Coherence is ability to maintain indexes of object attributes to speed up filters. Until 3.6 Coherence could use only simple reverse index for this purpose (implemented using either hash table or binary tree). A new release of Coherence 3.6 has introduced a feature of custom indexes, so using sophisticated full-text and other specialized indexes has became possible.
+
+== Project goal ==
+Coherence custom index API is quite complicated to deal with. The purpose of this project is to implement some generic layer to simplify integration of custom indexes and to adapt widely used search libraries (like Apache Lucene) to be used with Coherence.
+
+== Advantages of integration search using coherence ==
+ * Coherence will keep your index in sych with your data
+ * In case of distributed cache, custom cache also gets distributed and will benefit from Coherence advanced parallel queering
+
+== Limitation of Coherence search ==
+ * Coherence Filter API is very basic, so advanced features of search libraries like scoring cannot be exposed. If you need scoring, faceted search, etc then Coherence Serach is not your choice so far.
+
+= Documentation =
+ * [CoherenceCustomIndexAPI Coherence custom index API usage]
+ * [CoherenceSearchCoreAPI Coherence search core API usage]
+
+= Source =
+== CoherenceSearch core ==
+=== Unstable ===
+*SVN:* [https://gridkit.googlecode.com/svn/coherence-search/trunk/coherence-search-lucene]
+
+== CoherenceSearch Lucene integration ==
+=== Unstable ===
+*SVN:* [https://gridkit.googlecode.com/svn/coherence-search/trunk/coherence-search-core]
