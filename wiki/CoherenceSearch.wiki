@@ -18,10 +18,10 @@ Coherence custom index API is quite complicated to deal with. The purpose of thi
  * [CoherenceSearchCoreAPI Coherence search core API usage]
 
 = Source =
-== CoherenceSearch core ==
+== Coherence-Search core ==
 === Unstable ===
 *SVN:* [https://gridkit.googlecode.com/svn/coherence-search/trunk/coherence-search-lucene]
 
-== CoherenceSearch Lucene integration ==
+== Coherence-Search Lucene integration ==
 === Unstable ===
 *SVN:* [https://gridkit.googlecode.com/svn/coherence-search/trunk/coherence-search-core]
