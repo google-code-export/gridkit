@@ -14,7 +14,7 @@ Coherence custom index API is quite complicated to deal with. The purpose of thi
  * Coherence Filter API is very basic, so advanced features of search libraries like scoring cannot be exposed. If you need scoring, faceted search, etc then Coherence Serach is not your choice so far.
 
 = Documentation =
- * [CoherenceCustomIndexAPI Coherence custom index API usage]
+ * [CoherenceCustomIndexOverview Coherence custom index API usage]
  * [CoherenceSearchCoreAPI Coherence search core API usage]
 
 = Source =
