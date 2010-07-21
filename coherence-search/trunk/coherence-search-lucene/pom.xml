@@ -10,9 +10,14 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.gridkit.coherence.search</groupId>
+			<artifactId>coherence-search-core</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>com.oracle.coherence</groupId>
 			<artifactId>coherence</artifactId>
-			<version>3.6.0b17229</version>
+			<version>[3.6.0b17229,]</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

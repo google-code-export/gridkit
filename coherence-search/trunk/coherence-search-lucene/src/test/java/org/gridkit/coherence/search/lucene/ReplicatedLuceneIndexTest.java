@@ -1,0 +1,15 @@
+package org.gridkit.coherence.search.lucene;
+
+
+import com.tangosol.net.CacheFactory;
+import com.tangosol.net.NamedCache;
+
+public class ReplicatedLuceneIndexTest extends BaseLuceneIndexTest {
+
+	@Override
+	protected NamedCache getCache() {
+		return CacheFactory.getCache("replicated-cache");
+	}
+
+	
+}
