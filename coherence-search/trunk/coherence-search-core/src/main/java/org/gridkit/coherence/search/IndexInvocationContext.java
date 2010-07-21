@@ -12,6 +12,7 @@ public interface IndexInvocationContext {
 
     public Binary ensureBinaryKey(Object key);    
     public Object ensureObjectKey(Object key);
+    public Object ensureFilterCompatibleKey(Object key);
     
     /**
      * In some cases you may want to keep simple attribute index along woth specialized.

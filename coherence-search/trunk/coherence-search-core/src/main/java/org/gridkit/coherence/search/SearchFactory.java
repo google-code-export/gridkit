@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 
 import org.gridkit.coherence.search.IndexUpdateEvent.Type;
 
+import com.tangosol.io.Serializer;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.Binary;
 import com.tangosol.util.BinaryEntry;
@@ -22,6 +23,16 @@ import com.tangosol.util.ValueExtractor;
 import com.tangosol.util.extractor.IndexAwareExtractor;
 import com.tangosol.util.filter.IndexAwareFilter;
 
+/**
+ * Central class in Coherence-Search API. It is used as a factory to
+ * produce query filters and index extractors. 
+ * 
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ *
+ * @param <I> index instance type (see {@link PlugableSearchIndex})
+ * @param <IC> index config type (see {@link PlugableSearchIndex})
+ * @param <Q> query type (see {@link PlugableSearchIndex})
+ */
 public class SearchFactory<I, IC, Q> {
 
 	private PlugableSearchIndex<I, IC, Q> indexPlugin;
@@ -31,17 +42,29 @@ public class SearchFactory<I, IC, Q> {
 	
 	private Object token;
 	
+	/**
+	 * @param plugin search index plugin
+	 * @param config config for this instance of index
+	 * @param extractor extractor to extract indexed attribute from object
+	 */
 	public SearchFactory(PlugableSearchIndex<I, IC, Q> plugin, IC config, ValueExtractor extractor) {
 		this.indexPlugin = plugin;
 		this.indexConfig = config;
 		this.extractor = extractor;
 		this.token = plugin.createIndexCompatibilityToken(indexConfig); 
 	}
-	
+
+	/**
+	 * @return mutable {@link IndexEngineConfig} which can be used to tune options
+	 */
 	public IndexEngineConfig getEngineConfig() {
 		return engineConfig;
 	}
 	
+	/**
+	 * Creates index for provided {@link NamedCache}
+	 * @param cache
+	 */
 	public void createIndex(NamedCache cache) {
 		SearchIndexExtractor<I, IC, Q> extractor = createConfiguredExtractor();
 		cache.addIndex(extractor, false, null);
@@ -55,6 +78,11 @@ public class SearchFactory<I, IC, Q> {
 		return new SearchIndexExtractor<I, IC, Q>(indexPlugin, token, extractor);
 	}
 
+	/**
+	 * Create query based filter. An index should be created using {@link #createIndex(NamedCache)} before using of such filter.
+	 * @param query search query, specific to plugin
+	 * @return Coherence filter
+	 */
 	public Filter createFilter(Q query) {
 		return new QueryFilter<I, Q>(createFilterExtractor(), query);
 	}
@@ -75,6 +103,9 @@ public class SearchFactory<I, IC, Q> {
 		private int queueSizeLimit = 0;
 		private int indexingDelay = 0;
 		private boolean originalValueForUpdates = true;
+		
+		private boolean binaryMode = false;
+		private Serializer serializer = null;
 		
 		public SearchIndexEngine(I index, ValueExtractor extractor, PlugableSearchIndex<I, ?, Q> psi) {
 			this.coreIndex = index;
@@ -132,6 +163,7 @@ public class SearchFactory<I, IC, Q> {
 		@Override
 		@SuppressWarnings("unchecked")
 		public void insert(Entry entry) {
+			checkMode(entry);
 			Object key = getKeyFromEntry(entry);
 			Object value = getValuefromEntry(entry);
 			IndexUpdateEvent event = new IndexUpdateEvent(key, value, null, Type.INSERT);
@@ -144,6 +176,7 @@ public class SearchFactory<I, IC, Q> {
 		@Override
 		@SuppressWarnings("unchecked")
 		public void update(Entry entry) {
+			checkMode(entry);
 			Object key = getKeyFromEntry(entry);
 			Object value = getValuefromEntry(entry);
 			Object oldValue = getOriginalValueFromEntry(entry);
@@ -157,6 +190,7 @@ public class SearchFactory<I, IC, Q> {
 		@Override
 		@SuppressWarnings("unchecked")
 		public void delete(Entry entry) {
+			checkMode(entry);
 			Object key = getKeyFromEntry(entry);
 			Object oldValue = getOriginalValueFromEntry(entry);
 			IndexUpdateEvent event = new IndexUpdateEvent(key, null, oldValue, Type.DELETE);
@@ -164,6 +198,17 @@ public class SearchFactory<I, IC, Q> {
 				attributeIndex.delete(entry);
 			}
 			enqueue(event);
+		}
+
+		@SuppressWarnings("unchecked")
+		private void checkMode(Entry entry) {
+			// TODO optimize
+			if (!binaryMode) {
+				if (entry instanceof BinaryEntry) {
+					binaryMode = true;
+					serializer = ((BinaryEntry)entry).getSerializer();
+				}
+			}			
 		}
 
 		@SuppressWarnings("unchecked")
@@ -223,7 +268,7 @@ public class SearchFactory<I, IC, Q> {
 		}
 		
 		private synchronized void flush() {
-			if (pendingUpdates.size() > 0) {
+			if (pendingUpdates != null && pendingUpdates.size() > 0) {
 				psi.updateIndexEntries(coreIndex, pendingUpdates, this);
 				pendingUpdates.clear();
 			}
@@ -268,18 +313,39 @@ public class SearchFactory<I, IC, Q> {
 			}
 			else {
 				// TODO proper serializer support
-				return ExternalizableHelper.toBinary(key);
+				if (serializer != null) {
+					return ExternalizableHelper.toBinary(key, serializer);
+				}
+				else {
+					return ExternalizableHelper.toBinary(key);
+				}
 			}
 		}
 
 		@Override
 		public Object ensureObjectKey(Object key) {
 			if (key instanceof Binary) {
-				return ExternalizableHelper.fromBinary((Binary) key);
+				if (serializer != null) {
+					return ExternalizableHelper.fromBinary((Binary) key, serializer);
+				}
+				else {
+					return ExternalizableHelper.fromBinary((Binary) key);
+				}
 			}
 			else {
 				// TODO proper serializer support
 				return key;
+			}
+		}
+		
+
+		@Override
+		public Object ensureFilterCompatibleKey(Object key) {
+			if (binaryMode) {
+				return ensureBinaryKey(key);
+			}
+			else {
+				return ensureObjectKey(key);
 			}
 		}
 

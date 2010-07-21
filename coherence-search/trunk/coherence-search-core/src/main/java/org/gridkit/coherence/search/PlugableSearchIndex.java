@@ -49,6 +49,7 @@ public interface PlugableSearchIndex<I, IC, Q> {
     
     /**
      * See {@link IndexAwareFilter#applyIndex(Map, Set)}
+     * @return <code>true</code> if post filtering of results is required
      */
     public boolean applyIndex(I index, Q query, Set<Object> keySet, IndexInvocationContext context);
     
