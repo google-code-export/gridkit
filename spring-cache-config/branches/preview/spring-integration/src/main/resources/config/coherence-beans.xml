@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+
+	<bean id="named-cache" abstract="true" factory-method="getCache"/>
+	
+	<bean id="clustered-cache-definition" abstract="true" class="org.gridkit.coherence.integration.spring.ClusteredCacheDefinition" />
+
+	<bean id="distribted-scheme-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.DistributedCacheServiceConfiguration" />
+	
+	<bean id="clustered-cache-service" abstract="true" class="org.gridkit.coherence.integration.spring.impl.ClusteredCacheServiceBean"/>
+	
+	<bean id="read-write-backing-map" 
+			abstract="true" 
+			class="org.gridkit.coherence.integration.spring.cache.ReadWriteBackingMapDefinition" 
+			scope="prototype" 
+			lazy-init="true"
+	>
+		<property name="internalMap">
+			<bean class="com.tangosol.net.cache.LocalCache"/>
+		</property>
+	</bean> 
+	
+	<bean id="local-cache-definition" 
+			abstract="true" 
+			class="org.gridkit.coherence.integration.spring.cache.LocalCacheDefinition"
+			lazy-init="true"
+	/>
+		
+</beans>

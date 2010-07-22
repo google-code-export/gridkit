@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+	<import resource="/coherence-beans.xml"/>
+	
+	<bean id="cache.A" parent="named-cache" factory-bean="A"/>
+	<bean id="cache.B" parent="named-cache" factory-bean="B"/>
+	<bean id="cache.C" parent="named-cache" factory-bean="C"/>
+	<bean id="cache.D" parent="named-cache" factory-bean="D"/>
+
+	<bean id="default.distributed.service" parent="clustered-cache-service">
+		<property name="serviceName" value="DistributedCache" />
+		<property name="configuration">
+			<bean parent="distribted-scheme-configuration">
+				<property name="localStorage" value="true"/>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="A" parent="clustered-cache-definition">
+		<property name="service" ref="default.distributed.service"/>
+		<property name="backTier"><idref local="hash-map-cache"/></property>
+	</bean>
+
+	<bean id="B" parent="clustered-cache-definition">
+		<property name="service" ref="default.distributed.service"/>
+		<property name="backTier"><idref local="read-write-test-backend"/></property>
+	</bean>
+
+	<bean id="C" parent="clustered-cache-definition">
+		<property name="service" ref="default.distributed.service"/>
+		<property name="backTier"><idref local="local-cache"/></property>
+	</bean>
+
+	<bean id="D" parent="clustered-cache-definition">
+		<property name="service" ref="default.distributed.service"/>
+		<property name="backTier"><idref local="local-cache-with-expiry"/></property>
+	</bean>
+
+	<bean id="local-cache" parent="local-cache-definition" />
+
+	<bean id="local-cache-with-expiry" parent="local-cache-definition">
+		<property name="expiryDelayMillis" value="1000"/>
+	</bean>
+
+	<bean id="hash-map-cache" class="java.util.HashMap" lazy-init="true" />
+		
+	<bean id="read-write-test-backend" parent="read-write-backing-map">
+		<property name="loader">
+			<bean id="cacheStore" class="com.tangosol.net.cache.MapCacheStore" scope="prototype">
+				<constructor-arg>
+					<bean class="java.util.HashMap">
+						<constructor-arg>
+							<map>
+								<entry key="a" value="1" />
+								<entry key="b" value="2" />
+							</map>
+						</constructor-arg>
+					</bean>
+				</constructor-arg>
+			</bean>
+		</property>
+	</bean>
+		
+</beans>
