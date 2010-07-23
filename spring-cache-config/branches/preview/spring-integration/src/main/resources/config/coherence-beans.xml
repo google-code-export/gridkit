@@ -1,16 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2010 Grid Dynamics Consulting Services, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
 
-	<bean id="named-cache" abstract="true" factory-method="getCache"/>
+	<bean id="named-cache" abstract="true" factory-method="getCache" lazy-init="true"/>
 	
 	<bean id="clustered-cache-definition" abstract="true" class="org.gridkit.coherence.integration.spring.ClusteredCacheDefinition" />
 
 	<bean id="distribted-scheme-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.DistributedCacheServiceConfiguration" />
+
+	<bean id="replicated-scheme-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.ReplicatedCacheServiceConfiguration" />
+
+	<bean id="optimistic-scheme-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.OptimisticCacheServiceConfiguration" />
 	
-	<bean id="clustered-cache-service" abstract="true" class="org.gridkit.coherence.integration.spring.impl.ClusteredCacheServiceBean"/>
+	<bean id="default-backing-map-lookup-strategy" class="org.gridkit.coherence.integration.spring.impl.ByNameBackingMapLookupStrategy"/>
+	
+	<bean id="clustered-cache-service" abstract="true" class="org.gridkit.coherence.integration.spring.impl.ClusteredCacheServiceBean">
+		<property name="backingMapLookupStrategy" ref="default-backing-map-lookup-strategy" />
+	</bean>
 	
 	<bean id="read-write-backing-map" 
 			abstract="true" 
@@ -19,9 +44,23 @@
 			lazy-init="true"
 	>
 		<property name="internalMap">
-			<bean class="com.tangosol.net.cache.LocalCache"/>
+			<!-- Have to use indirection to force Spring to create separate bean for each subclassed bean -->
+			<bean class="org.gridkit.coherence.integration.spring.cache.BeanMapProvider">
+				<property name="bean"><idref local="default-coherence-local-cache"/></property>
+			</bean>
 		</property>
 	</bean> 
+
+	<bean id="default-coherence-local-cache" class="com.tangosol.net.cache.LocalCache" scope="prototype" lazy-init="true"/>
+
+	<bean id="near-cache-decorator" abstract="true" class="org.gridkit.coherence.integration.spring.cache.NearCacheDecorator">
+		<property name="frontMap">
+			<!-- Have to use indirection to force Spring to create separate bean for each subclassed bean -->
+			<bean class="org.gridkit.coherence.integration.spring.cache.BeanMapProvider">
+				<property name="bean"><idref local="default-coherence-local-cache"/></property>
+			</bean>
+		</property>
+	</bean>
 	
 	<bean id="local-cache-definition" 
 			abstract="true" 

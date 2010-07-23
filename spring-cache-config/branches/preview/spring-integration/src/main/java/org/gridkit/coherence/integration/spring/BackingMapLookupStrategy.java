@@ -13,33 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gridkit.coherence.integration.spring.service;
 
-import org.junit.Ignore;
+package org.gridkit.coherence.integration.spring;
 
-import com.tangosol.net.PartitionedService;
-import com.tangosol.net.partition.KeyAssociator;
+import java.util.Map;
 
-/**
- * @author Alexey Ragozin (alexey.ragozin@gmail.com)
- */
-@Ignore
-public class TestKeyAssociator implements KeyAssociator {
+import com.tangosol.net.BackingMapManagerContext;
 
-	public TestKeyAssociator() {
-		new String();
-	}
+public interface BackingMapLookupStrategy {
+
+	public Map<?, ?> instantiateBackingMap(String cacheName, BackingMapManagerContext context);
 	
-	@Override
-	public Object getAssociatedKey(Object paramObject) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void init(PartitionedService paramPartitionedService) {
-		// TODO Auto-generated method stub
-		
-	}
-
+	public void disposeBackingMap(String cacheName, Map<?, ?> backingMap);
 }

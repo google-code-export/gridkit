@@ -1,18 +1,31 @@
+/**
+ * Copyright 2010 Grid Dynamics Consulting Services, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.gridkit.coherence.integration.spring.impl;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import org.gridkit.coherence.integration.spring.ClusteredCacheDefinition;
+import org.gridkit.coherence.integration.spring.BackingMapLookupStrategy;
 import org.gridkit.coherence.integration.spring.ClusteredCacheService;
 import org.gridkit.coherence.integration.spring.service.CacheServiceConfiguration;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Required;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 
 import com.tangosol.net.AbstractBackingMapManager;
 import com.tangosol.net.BackingMapManager;
@@ -22,7 +35,7 @@ import com.tangosol.net.Cluster;
 import com.tangosol.net.NamedCache;
 import com.tangosol.net.Service;
 
-public class ClusteredCacheServiceBean implements ClusteredCacheService, InitializingBean, BeanNameAware, ApplicationContextAware, DisposableBean {
+public class ClusteredCacheServiceBean implements ClusteredCacheService, InitializingBean, BeanNameAware, DisposableBean {
 
 	private String serviceName;
 	private String beanName;
@@ -30,7 +43,8 @@ public class ClusteredCacheServiceBean implements ClusteredCacheService, Initial
 	private CacheServiceConfiguration configuration;
 	private boolean autostart = false;
 	
-	private ApplicationContext appContext;
+	private BackingMapLookupStrategy backingMapLookupStrategy;
+//	private ApplicationContext appContext;
 	
 	private CacheService service;
 	
@@ -39,7 +53,7 @@ public class ClusteredCacheServiceBean implements ClusteredCacheService, Initial
 	private static ThreadUnlockHelper threadHelper = new ThreadUnlockHelper();
 	
 	public void setBeanName(String name) {
-		serviceName = name;
+		this.beanName = name;
 	}		
 
 	public void setServiceName(String serviceName) {
@@ -54,12 +68,12 @@ public class ClusteredCacheServiceBean implements ClusteredCacheService, Initial
 	public void setAutostart(boolean autostart) {
 		this.autostart = autostart;
 	}
-	
-	@Override
-	public void setApplicationContext(ApplicationContext appContext) throws BeansException {
-		this.appContext = appContext;
+
+	@Required
+	public void setBackingMapLookupStrategy(BackingMapLookupStrategy backingMapLookupStrategy) {
+		this.backingMapLookupStrategy = backingMapLookupStrategy;
 	}
-	
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (autostart) {
@@ -134,10 +148,15 @@ public class ClusteredCacheServiceBean implements ClusteredCacheService, Initial
 			return threadHelper.safeExecute(new Callable<Map>() {
 				@Override
 				public Map call() throws Exception {
-					ClusteredCacheDefinition cd = (ClusteredCacheDefinition) appContext.getBean(cacheName);
-					return cd.getBackendInstance(appContext, getContext());
+					return backingMapLookupStrategy.instantiateBackingMap(cacheName, getContext());
 				}				
 			});
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public void releaseBackingMap(String sName, Map map) {
+			super.releaseBackingMap(sName, map);
 		}
 	}
 }
