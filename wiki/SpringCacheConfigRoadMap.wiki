@@ -10,7 +10,7 @@
   * HYBRID - *Done*
   * LRU - *Done*
   * LFU - *Done*
-  * custom policy - TODO
+  * custom policy - *Done*, Spring bean suport
  * {{{<local-scheme><high-units>}}} - *Done*
  * {{{<local-scheme><low-units>}}} - *Done*
  * {{{<local-scheme><unit-calculator>}}} - *Done*, Spring bean support
@@ -33,7 +33,7 @@ TODO
  * {{{<distributed-scheme><partition-listener>}}} - *Done*, Spring bean support, improvement pending
  * {{{<distributed-scheme><backup-count>}}} - *Done*
  * {{{<distributed-scheme><backup-count-after-writebehind>}}} - *Done*
- * {{{<distributed-scheme><backup-storage>}}} - TODO
+ * {{{<distributed-scheme><backup-storage>}}} - TODO, broken on Coherence side
  * {{{<distributed-scheme><thread-count>}}} - *Done*
  * {{{<distributed-scheme><lease-granularity>}}} - *Done*
  * {{{<distributed-scheme><transfer-threshold>}}} - *Done*
@@ -42,15 +42,41 @@ TODO
  * {{{<distributed-scheme><task-hung-threshold>}}} - *Done*
  * {{{<distributed-scheme><task-timeout>}}} - *Done*
  * {{{<distributed-scheme><request-timeout>}}} - *Done*
+ * {{{<distributed-scheme><guardian-timeout>}}} - TODO
+ * {{{<distributed-scheme><service-failure-policy>}}} - TODO
+ * {{{<distributed-scheme><member-listener>}}} - TODO
+ * {{{<distributed-scheme><partitioned-quorum-policy-scheme>}} - TODO
  * {{{<distributed-scheme><operation-bundling>}}} - TODO
 == {{{<transactional-scheme>}}} ==
 TODO
 == {{{<replicated-scheme>}}} ==
-Partial support, details to be elaborated
+ * {{{<replicated-scheme><service-name>}}} - *Done*
+ * {{{<replicated-scheme><serializer>}}} - *Done*, Spring bean support 
+ * {{{<replicated-scheme><listener>}}} - TODO
+ * {{{<replicated-scheme><backing-map-scheme>}}} - *Done*, Spring bean support
+ * {{{<replicated-scheme><standard-lease-milliseconds>}}} - *Done*
+ * {{{<replicated-scheme><lease-granularity>}}} - *Done*
+ * {{{<replicated-scheme><mobile-issues>}}} - *Done*
+ * {{{<replicated-scheme><guardian-timeout>}}} - TODO
+ * {{{<replicated-scheme><service-failure-policy>}}} - TODO
+ * {{{<replicated-scheme><autostart>}}} - *Done*
+ * {{{<replicated-scheme><member-listener>}}} - *Done*
 == {{{<optimistic-scheme>}}} ==
-Partial support, details to be elaborated
+ * {{{<optimistic-scheme><service-name>}}} - *Done*
+ * {{{<optimistic-scheme><serializer>}}} - *Done*, Spring bean support 
+ * {{{<optimistic-scheme><listener>}}} - TODO
+ * {{{<optimistic-scheme><backing-map-scheme>}}} - *Done*, Spring bean support
+ * {{{<optimistic-scheme><guardian-timeout>}}} - TODO
+ * {{{<optimistic-scheme><service-failure-policy>}}} - TODO
+ * {{{<optimistic-scheme><autostart>}}} - *Done*
+ * {{{<optimistic-scheme><member-listener>}}} - *Done*
 == {{{<near-scheme>}}} ==
-TODO
+ * {{{<near-scheme><class-name>}}} - *Done*, Spring bean support
+ * {{{<near-scheme><listener>}}} - TODO
+ * {{{<near-scheme><front-scheme>}}} - *Done*, Spring bean support
+ * {{{<near-scheme><back-scheme>}}} - *Done*, Spring bean support
+ * {{{<near-scheme><invalidation-strategy>}}} - *Done*
+ * {{{<near-scheme><autostart>}}} - doesn't make sense, not a service
 == {{{<versioned-near-scheme>}}} ==
 Will not support
 == {{{<overflow-scheme>}}} ==
