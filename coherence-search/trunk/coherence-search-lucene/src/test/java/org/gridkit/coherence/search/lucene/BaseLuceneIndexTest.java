@@ -17,30 +17,20 @@
 package org.gridkit.coherence.search.lucene;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.MatchAllDocsQuery;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.BooleanClause.Occur;
-import org.gridkit.coherence.search.SearchFactory;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.extractor.ReflectionExtractor;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
+import org.gridkit.coherence.search.SearchFactory;
+import org.junit.*;
+
+import java.util.*;
 
 public abstract class BaseLuceneIndexTest {
 
@@ -98,7 +88,7 @@ public abstract class BaseLuceneIndexTest {
 	
     static Map<String, String> generateEncodedNumber(long from, long to, String[] wordset) {
         Map<String, String> result = new HashMap<String, String>();
-        for (int i = 0; i != to; ++i) {
+        for (long i = from; i != to; ++i) {
             String text = encodeBitPositions(i, wordset);
             result.put(text, text);
         }
