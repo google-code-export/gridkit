@@ -63,7 +63,7 @@ public abstract class LuceneBasedFilter implements IndexAwareFilter {
 
                         @Override
                         public boolean acceptsDocsOutOfOrder() {
-                            return false;
+                            return true;
                         }
                     });
 
