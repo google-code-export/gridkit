@@ -14,25 +14,17 @@
  * limitations under the License.
  */
 
-package org.gridkit.coherence.serach.ngram;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import org.gridkit.coherence.search.SearchFactory;
-import org.gridkit.coherence.search.ngram.NGramIndex;
-import org.gridkit.coherence.search.ngram.NGramIndexPlugin;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+package org.gridkit.coherence.search.ngram;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.extractor.ReflectionExtractor;
+import org.gridkit.coherence.search.SearchFactory;
+import org.junit.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class BaseNGramIndexTest {
 

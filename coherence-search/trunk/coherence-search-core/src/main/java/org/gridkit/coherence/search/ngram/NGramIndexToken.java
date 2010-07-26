@@ -16,7 +16,7 @@
 
 package org.gridkit.coherence.search.ngram;
 
-public class NGramIndexToken {
+class NGramIndexToken {
 
     public static final NGramIndexToken INSTANCE = new NGramIndexToken();
     

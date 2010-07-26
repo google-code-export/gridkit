@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class NGramIndex {
+class NGramIndex {
 
     final int ngramSize;
     final Map<String, NGramRefList> index = new HashMap<String, NGramRefList>();

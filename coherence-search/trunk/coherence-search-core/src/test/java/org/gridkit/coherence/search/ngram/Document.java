@@ -14,18 +14,27 @@
  * limitations under the License.
  */
 
-package org.gridkit.coherence.serach.ngram;
+package org.gridkit.coherence.search.ngram;
 
-import com.tangosol.net.CacheFactory;
-import com.tangosol.net.NamedCache;
+import java.io.Serializable;
 
-/**
- * @author Alexey Ragozin (alexey.ragozin@gmail.com)
- */
-public class ReplicatedNGramIndexTest extends BaseNGramIndexTest {
+import org.junit.Ignore;
 
-	@Override
-	protected NamedCache getCache() {
-		return CacheFactory.getCache("replicated-cache");
+@Ignore
+@SuppressWarnings("serial")
+public class Document implements Serializable {
+
+	private String text;
+
+	public Document(String text) {
+		this.text = text;
+	}
+	
+	public String getText() {
+		return text;
+	}
+	
+	public String toString() {
+		return text;
 	}
 }

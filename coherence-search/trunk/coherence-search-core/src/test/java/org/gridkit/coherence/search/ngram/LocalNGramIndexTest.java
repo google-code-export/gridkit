@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.gridkit.coherence.serach.ngram;
+package org.gridkit.coherence.search.ngram;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.NamedCache;
@@ -22,11 +22,11 @@ import com.tangosol.net.NamedCache;
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class DistributedNGramIndexTest extends BaseNGramIndexTest {
+public class LocalNGramIndexTest extends BaseNGramIndexTest {
 
 	@Override
 	protected NamedCache getCache() {
-		return CacheFactory.getCache("distributed-cache");
+		return CacheFactory.getCache("local-cache");
 	}
 
 	
