@@ -25,7 +25,7 @@ import java.util.Map;
  * 
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class NGramRefList {    
+class NGramRefList {
     final String ngram;
     final Map<Object, int[]> references = new HashMap<Object, int[]>();
     
