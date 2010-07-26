@@ -21,7 +21,7 @@ import java.io.Serializable;
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class GenericLuceneIndexToken implements Serializable {
+class GenericLuceneIndexToken implements Serializable {
 
 	private static final long serialVersionUID = 20100721L;
 	

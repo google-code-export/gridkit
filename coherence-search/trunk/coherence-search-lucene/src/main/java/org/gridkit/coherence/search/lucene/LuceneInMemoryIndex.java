@@ -16,18 +16,13 @@
 
 package org.gridkit.coherence.search.lucene;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
+import com.tangosol.util.Binary;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.SetBasedFieldSelector;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.SetBasedFieldSelector;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
@@ -41,12 +36,16 @@ import org.gridkit.coherence.search.IndexInvocationContext;
 import org.gridkit.coherence.search.IndexUpdateEvent;
 import org.gridkit.coherence.search.IndexUpdateEvent.Type;
 
-import com.tangosol.util.Binary;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class LuceneInMemoryIndex {
+class LuceneInMemoryIndex {
 
 	public static final String DOCUMENT_KEY = "@doc-key";
 	

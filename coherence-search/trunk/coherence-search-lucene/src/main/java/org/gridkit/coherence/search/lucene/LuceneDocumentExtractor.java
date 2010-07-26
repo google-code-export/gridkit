@@ -16,21 +16,20 @@
 
 package org.gridkit.coherence.search.lucene;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.tangosol.util.Binary;
+import com.tangosol.util.ValueExtractor;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.Field.TermVector;
 
-import com.tangosol.util.Binary;
-import com.tangosol.util.ValueExtractor;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class LuceneDocumentExtractor implements ValueExtractor {
+class LuceneDocumentExtractor implements ValueExtractor {
 
 	public static final String DOCUMENT_ID = "doc-id";
 	

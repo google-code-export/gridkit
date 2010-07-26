@@ -23,7 +23,7 @@ import org.apache.lucene.analysis.Analyzer;
  * analyzer instance not being serializable.
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public interface LuceneAnalyzerProvider {
+interface LuceneAnalyzerProvider {
 
 	public Analyzer getAnalyzer();
 	
