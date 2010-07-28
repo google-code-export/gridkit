@@ -51,12 +51,12 @@ import com.tangosol.util.filter.IndexAwareFilter;
  */
 public class SearchFactory<I, IC, Q> {
 
-	private PlugableSearchIndex<I, IC, Q> indexPlugin;
-	private IC indexConfig;
-	private ValueExtractor extractor;
-	private IndexEngineConfig engineConfig = new DefaultIndexEngineConfig();
+	protected PlugableSearchIndex<I, IC, Q> indexPlugin;
+	protected IC indexConfig;
+	protected ValueExtractor extractor;
+	protected IndexEngineConfig engineConfig = new DefaultIndexEngineConfig();
 	
-	private Object token;
+	protected Object token;
 	
 	/**
 	 * @param plugin search index plugin
