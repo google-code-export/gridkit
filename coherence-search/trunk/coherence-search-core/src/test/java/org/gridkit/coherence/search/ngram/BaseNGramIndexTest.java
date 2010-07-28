@@ -26,6 +26,9 @@ import org.junit.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ */
 public abstract class BaseNGramIndexTest {
 
 	private int NGRAM_SIZE;

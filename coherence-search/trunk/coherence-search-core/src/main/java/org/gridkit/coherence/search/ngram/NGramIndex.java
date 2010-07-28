@@ -21,7 +21,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-class NGramIndex {
+/**
+ * Reference implementation of custom index.
+ * 
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ */
+public class NGramIndex {
 
     final int ngramSize;
     final Map<String, NGramRefList> index = new HashMap<String, NGramRefList>();

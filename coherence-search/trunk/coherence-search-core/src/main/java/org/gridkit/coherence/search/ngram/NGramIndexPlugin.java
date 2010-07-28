@@ -25,6 +25,11 @@ import org.gridkit.coherence.search.IndexInvocationContext;
 import org.gridkit.coherence.search.IndexUpdateEvent;
 import org.gridkit.coherence.search.PlugableSearchIndex;
 
+/**
+ * Reference implementation of custom index.
+ * 
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ */
 public class NGramIndexPlugin implements PlugableSearchIndex<NGramIndex, Integer, String> {
 
 	@Override
