@@ -17,20 +17,29 @@
 package org.gridkit.coherence.search.lucene;
 
 
-import com.tangosol.net.CacheFactory;
-import com.tangosol.net.DefaultConfigurableCacheFactory;
-import com.tangosol.net.NamedCache;
-import com.tangosol.util.extractor.ReflectionExtractor;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
-import org.gridkit.coherence.search.SearchFactory;
-import org.junit.*;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-import java.util.*;
+import com.tangosol.net.CacheFactory;
+import com.tangosol.net.DefaultConfigurableCacheFactory;
+import com.tangosol.net.NamedCache;
+import com.tangosol.util.extractor.ReflectionExtractor;
 
 public abstract class BaseLuceneIndexTest {
 
@@ -41,7 +50,7 @@ public abstract class BaseLuceneIndexTest {
 
 	private NamedCache cache;
 	private LuceneDocumentExtractor extractor = new LuceneDocumentExtractor("text", new ReflectionExtractor("toString"));
-	private SearchFactory<LuceneInMemoryIndex, LuceneAnalyzerProvider, Query> factory = new SearchFactory<LuceneInMemoryIndex, LuceneAnalyzerProvider, Query>(new LuceneSearchPlugin(), new WhitespaceAnalyzerProvider(), extractor);
+	private LuceneSearchFactory factory = new LuceneSearchFactory("default", extractor);
 	{
 //		factory.getEngineConfig().setIndexUpdateQueueSizeLimit(10);
 	};

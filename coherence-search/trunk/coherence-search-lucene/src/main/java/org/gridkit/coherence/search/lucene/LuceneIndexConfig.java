@@ -16,37 +16,18 @@
 
 package org.gridkit.coherence.search.lucene;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.WhitespaceAnalyzer;
-
 import java.io.Serializable;
+
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.store.Directory;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-class WhitespaceAnalyzerProvider implements LuceneAnalyzerProvider, Serializable {
-
-	private static final long serialVersionUID = 20100720L;
-
-	int x;
+public interface LuceneIndexConfig extends Serializable {
 	
-	public Analyzer getAnalyzer() {
-		return new WhitespaceAnalyzer();
-	}
+	public Analyzer getAnalyzer();
 
-	@Override
-	public int hashCode() {
-		return getClass().hashCode();
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		return true;
-	}	
+	public Directory createDirectoryInstance();
+	
 }

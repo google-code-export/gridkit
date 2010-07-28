@@ -16,34 +16,15 @@
 
 package org.gridkit.coherence.search.lucene;
 
-import java.io.Serializable;
+import org.apache.lucene.store.Directory;
 
 /**
+ * This interface need to avoid potential problems with particular Lucene
+ * analyzer instance not being serializable.
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-class GenericLuceneIndexToken implements Serializable {
+interface LuceneDirectoryProvider {
 
-	private static final long serialVersionUID = 20100721L;
+	public Directory createDirectory();
 	
-	public GenericLuceneIndexToken() {
-	}
-
-	@Override
-	public int hashCode() {
-		return getClass().hashCode();
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		return true;
-	}
-	
-	
-
 }

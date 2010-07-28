@@ -16,27 +16,30 @@
 
 package org.gridkit.coherence.search.lucene;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.WhitespaceAnalyzer;
-
 import java.io.Serializable;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-class WhitespaceAnalyzerProvider implements LuceneAnalyzerProvider, Serializable {
+class GenericNamedLuceneIndexToken implements Serializable {
 
-	private static final long serialVersionUID = 20100720L;
-
-	int x;
+	private static final long serialVersionUID = 20100721L;
 	
-	public Analyzer getAnalyzer() {
-		return new WhitespaceAnalyzer();
+	private String name;
+	
+	public GenericNamedLuceneIndexToken() {
+	}
+	
+	public GenericNamedLuceneIndexToken(String name) {
+		this.name = name;
 	}
 
 	@Override
 	public int hashCode() {
-		return getClass().hashCode();
+		final int prime = 31;
+		int result = getClass().hashCode();
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
 	}
 
 	@Override
@@ -47,6 +50,12 @@ class WhitespaceAnalyzerProvider implements LuceneAnalyzerProvider, Serializable
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
+		GenericNamedLuceneIndexToken other = (GenericNamedLuceneIndexToken) obj;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
 		return true;
-	}	
+	}
 }

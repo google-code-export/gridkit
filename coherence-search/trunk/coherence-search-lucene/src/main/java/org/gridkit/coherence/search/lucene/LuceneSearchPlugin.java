@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.store.Directory;
 import org.gridkit.coherence.search.IndexEngineConfig;
 import org.gridkit.coherence.search.IndexInvocationContext;
 import org.gridkit.coherence.search.IndexUpdateEvent;
@@ -29,11 +30,20 @@ import org.gridkit.coherence.search.PlugableSearchIndex;
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class LuceneSearchPlugin implements PlugableSearchIndex<LuceneInMemoryIndex, LuceneAnalyzerProvider, Query> {
+public class LuceneSearchPlugin implements PlugableSearchIndex<LuceneInMemoryIndex, LuceneIndexConfig, Query> {
+
+	private String name = "";
+	
+	public LuceneSearchPlugin() {
+	}
+	
+	public LuceneSearchPlugin(String name) {
+		this.name = name;
+	}
 
 	@Override
-	public Object createIndexCompatibilityToken(LuceneAnalyzerProvider indexConfig) {
-		return new GenericLuceneIndexToken();
+	public Object createIndexCompatibilityToken(LuceneIndexConfig indexConfig) {
+		return new GenericNamedLuceneIndexToken(name);
 	}
 
 	@Override
@@ -42,9 +52,10 @@ public class LuceneSearchPlugin implements PlugableSearchIndex<LuceneInMemoryInd
 	}
 
 	@Override
-	public LuceneInMemoryIndex createIndexInstance(LuceneAnalyzerProvider indexConfig) {
+	public LuceneInMemoryIndex createIndexInstance(LuceneIndexConfig indexConfig) {
+		Directory directory = indexConfig.createDirectoryInstance();
 		Analyzer analyzer = indexConfig.getAnalyzer(); 
-		return new LuceneInMemoryIndex(analyzer);
+		return new LuceneInMemoryIndex(directory, analyzer);
 	}
 
 	@Override
@@ -66,6 +77,7 @@ public class LuceneSearchPlugin implements PlugableSearchIndex<LuceneInMemoryInd
 
 	@Override
 	public boolean evaluate(Query query, Object document) {
+		// TODO we can create new new index put single document and query this index
 		return false;
 	}
 }

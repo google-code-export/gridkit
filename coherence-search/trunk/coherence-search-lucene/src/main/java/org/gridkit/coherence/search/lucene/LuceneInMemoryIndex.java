@@ -16,13 +16,18 @@
 
 package org.gridkit.coherence.search.lucene;
 
-import com.tangosol.util.Binary;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.SetBasedFieldSelector;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.document.SetBasedFieldSelector;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
@@ -31,16 +36,11 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Scorer;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.RAMDirectory;
 import org.gridkit.coherence.search.IndexInvocationContext;
 import org.gridkit.coherence.search.IndexUpdateEvent;
 import org.gridkit.coherence.search.IndexUpdateEvent.Type;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import com.tangosol.util.Binary;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
@@ -54,8 +54,8 @@ class LuceneInMemoryIndex {
 	
 	private IndexSearcher searcher;
 	
-	public LuceneInMemoryIndex(Analyzer analyzer) {
-		this.storage = new RAMDirectory();
+	public LuceneInMemoryIndex(Directory directory, Analyzer analyzer) {
+		this.storage = directory;
 		this.analyzer = analyzer;
 	}
 	
