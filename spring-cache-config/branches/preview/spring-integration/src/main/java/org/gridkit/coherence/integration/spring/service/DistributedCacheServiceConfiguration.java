@@ -26,16 +26,16 @@ import com.tangosol.net.partition.PartitionListener;
 public class DistributedCacheServiceConfiguration extends CacheServiceConfiguration {
 	
 	@XmlConfigProperty("thread-count")
-	protected int threadCount;
+	protected Integer threadCount;
 	
 	@XmlConfigProperty("partition-count")
-	protected int partitionCount;
+	protected Integer partitionCount;
 	
 	@XmlConfigProperty("backup-count")
-	protected int backupCount;
+	protected Integer backupCount;
 	
 	@XmlConfigProperty("backup-count-after-writebehind")
-	protected int backupCountAfterWritebehind;
+	protected Integer backupCountAfterWritebehind;
 	
 	@ReflectionInjectedProperty("__m_KeyAssociator")
 	protected KeyAssociator keyAssociator;
@@ -47,19 +47,19 @@ public class DistributedCacheServiceConfiguration extends CacheServiceConfigurat
 	protected PartitionListener partitionListener;
 	
 	@XmlConfigProperty("transfer-threshold")
-	protected int TransferThresholdKbytes;
+	protected Integer TransferThresholdKbytes;
 	
 	@XmlConfigProperty("local-storage")
-	protected boolean localStorage;
+	protected Boolean localStorage;
 	
 	@XmlConfigProperty("task-hung-threshold")
-	protected int taskHungThresholdMillis;
+	protected Integer taskHungThresholdMillis;
 	
 	@XmlConfigProperty("task-timeout")
-	protected int taskTimeoutMillis;
+	protected Integer taskTimeoutMillis;
 	
 	@XmlConfigProperty("request-timeout")
-	protected int requestTimeoutMillis;
+	protected Integer requestTimeoutMillis;
 
 	public void setThreadCount(int threadCount) {
 		this.threadCount = threadCount;

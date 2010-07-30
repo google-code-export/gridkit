@@ -89,7 +89,6 @@ public class ClusteredCacheDefinition implements InitializingBean, BeanNameAware
 
 	public NamedCache getCache() {
 		try {
-			// TODO JMX monitoring support
 			NamedCache cache = clusteredService.ensureCache(cacheName);
 			if (frontTier != null) {
 				cache = frontTier.wrapCache(cache);
@@ -112,6 +111,7 @@ public class ClusteredCacheDefinition implements InitializingBean, BeanNameAware
 	}
 
 	private Map<?, ?> resolveMap(Object bean, BackingMapManagerContext cacheCtx) {
-		return BackningMapProvider.Helper.getMapFromBean(bean, cacheCtx, Map.class);
+		Map<?, ?> map = BackningMapProvider.Helper.getMapFromBean(bean, cacheCtx, Map.class);
+		return map;
 	}
 }

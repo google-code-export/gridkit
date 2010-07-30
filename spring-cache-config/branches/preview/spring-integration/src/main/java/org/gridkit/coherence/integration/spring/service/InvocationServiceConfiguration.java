@@ -21,7 +21,35 @@ package org.gridkit.coherence.integration.spring.service;
  */
 public class InvocationServiceConfiguration extends GenericServiceConfiguration {
 
+	@XmlConfigProperty("thread-count")
+	protected Integer threadCount;
+	
+	@XmlConfigProperty("task-timeout")
+	protected Integer taskTimeoutMillis;
+
+	@XmlConfigProperty("task-hung-threshold")
+	protected Integer taskHungThresholdMillis;
+	
+	@XmlConfigProperty("request-timeout")
+	protected Integer requestTimeout;
+	
 	public ServiceType getServiceType() {
 		return ServiceType.Invocation;
+	}
+	
+	public void setThreadCount(int threadCount) {
+		this.threadCount = threadCount;
+	}
+
+	public void setTaskHungThresholdMillis(int taskHungThresholdMillis) {
+		this.taskHungThresholdMillis = taskHungThresholdMillis;
+	}
+
+	public void setTaskTimeoutMillis(int taskTimeoutMillis) {
+		this.taskTimeoutMillis = taskTimeoutMillis;
+	}
+
+	public void setRequestTimeout(int requestTimeout) {
+		this.requestTimeout = requestTimeout;
 	}
 }

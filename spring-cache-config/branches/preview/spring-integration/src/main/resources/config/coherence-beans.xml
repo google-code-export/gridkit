@@ -23,16 +23,23 @@
 
 	<bean id="named-cache" abstract="true" factory-method="getCache" lazy-init="true"/>
 	
+	<bean id="service-reference" abstract="true" factory-method="getCoherenceService" lazy-init="true"/>
+	
 	<bean id="clustered-cache-definition" abstract="true" class="org.gridkit.coherence.integration.spring.ClusteredCacheDefinition" />
 
+	<!-- Service configurations prototypes -->
 	<bean id="distribted-scheme-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.DistributedCacheServiceConfiguration" />
-
 	<bean id="replicated-scheme-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.ReplicatedCacheServiceConfiguration" />
-
 	<bean id="optimistic-scheme-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.OptimisticCacheServiceConfiguration" />
-	
+	<bean id="invocation-service-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.InvocationServiceConfiguration" />
+
+	<!-- Default backing map lookup strategy -->
 	<bean id="default-backing-map-lookup-strategy" class="org.gridkit.coherence.integration.spring.impl.ByNameBackingMapLookupStrategy"/>
 	
+	<!-- Abstract service beans -->
+	
+	<bean id="clustered-service" abstract="true" class="org.gridkit.coherence.integration.spring.impl.ClusteredServiceBean"/>
+
 	<bean id="clustered-cache-service" abstract="true" class="org.gridkit.coherence.integration.spring.impl.ClusteredCacheServiceBean">
 		<property name="backingMapLookupStrategy" ref="default-backing-map-lookup-strategy" />
 	</bean>
@@ -45,7 +52,7 @@
 	>
 		<property name="internalMap">
 			<!-- Have to use indirection to force Spring to create separate bean for each subclassed bean -->
-			<bean class="org.gridkit.coherence.integration.spring.cache.BeanMapProvider">
+			<bean class="org.gridkit.coherence.integration.spring.impl.BeanMapProvider">
 				<property name="bean"><idref local="default-coherence-local-cache"/></property>
 			</bean>
 		</property>
@@ -56,7 +63,7 @@
 	<bean id="near-cache-decorator" abstract="true" class="org.gridkit.coherence.integration.spring.cache.NearCacheDecorator">
 		<property name="frontMap">
 			<!-- Have to use indirection to force Spring to create separate bean for each subclassed bean -->
-			<bean class="org.gridkit.coherence.integration.spring.cache.BeanMapProvider">
+			<bean class="org.gridkit.coherence.integration.spring.impl.BeanMapProvider">
 				<property name="bean"><idref local="default-coherence-local-cache"/></property>
 			</bean>
 		</property>
@@ -67,5 +74,9 @@
 			class="org.gridkit.coherence.integration.spring.cache.LocalCacheDefinition"
 			lazy-init="true"
 	/>
+	
+	<bean id="member-listener-collection" abstract="true" class="org.gridkit.coherence.integration.spring.service.MemberListenerCollection$List" />
+	<bean id="service-listener-collection" abstract="true" class="org.gridkit.coherence.integration.spring.service.ServiceListenerCollection$List" />
+	<bean id="partition-listener-collection" abstract="true" class="org.gridkit.coherence.integration.spring.service.PartitionListenerCollection$List" />
 		
 </beans>

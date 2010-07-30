@@ -19,14 +19,14 @@ package org.gridkit.coherence.integration.spring.service;
 /**
  * @author Dmitri Babaev
  */
-public class ReplicatedCacheServiceConfiguration extends CacheServiceConfiguration {
+public class ReplicatedCacheServiceConfiguration extends OptimisticCacheServiceConfiguration {
 	
 	@XmlConfigProperty("standard-lease-milliseconds")
-	protected int standartLeaseMillis;
+	protected Integer standartLeaseMillis;
 	
 	
 	@XmlConfigProperty("mobile-issues")
-	protected boolean mobileIssues;
+	protected Boolean mobileIssues;
 
 	public ServiceType getServiceType() {
 		return ServiceType.ReplicatedCache;

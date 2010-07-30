@@ -34,6 +34,7 @@ import com.tangosol.io.Serializer;
 import com.tangosol.io.ReadBuffer.BufferInput;
 import com.tangosol.io.WriteBuffer.BufferOutput;
 import com.tangosol.net.CacheFactory;
+import com.tangosol.net.InvocationService;
 import com.tangosol.net.NamedCache;
 import com.tangosol.net.cache.AbstractEvictionPolicy;
 import com.tangosol.net.cache.CacheLoader;
@@ -88,6 +89,7 @@ public class SimpleContextTest {
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public Map loadAll(Collection key) {
 			throw new UnsupportedOperationException();
 		}
@@ -105,7 +107,7 @@ public class SimpleContextTest {
 		NamedCache cache = (NamedCache) context.getBean("cache.D");
 		cache.put("a", "b");
 		Assert.assertEquals("b", cache.get("a"));
-		LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500));
+		LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1000));
 		// entry should expire
 		Assert.assertEquals(null, cache.get("a"));
 	}
@@ -294,5 +296,11 @@ public class SimpleContextTest {
 		Assert.assertEquals("X", cacheJ.getFrontMap().get("a"));
 		Assert.assertEquals("Y", cacheJ.getFrontMap().get("b"));
 		Assert.assertEquals("Z", cacheJ.getFrontMap().get("c"));
+	}
+	
+	@Test
+	public void testService_Invocation() {
+		InvocationService service = (InvocationService) context.getBean("exec-service");
+		service.getInfo().getServiceMembers();
 	}
 }

@@ -1,0 +1,6 @@
+
+-------------------------------------------------------------
+30 Jul 2010
+* Some support for JMX
+* MemberListener support for services
+* ServiceListener support for services

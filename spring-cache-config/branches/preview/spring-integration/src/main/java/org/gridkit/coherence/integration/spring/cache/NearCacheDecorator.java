@@ -18,13 +18,14 @@ package org.gridkit.coherence.integration.spring.cache;
 
 import java.util.Map;
 
-import org.gridkit.coherence.integration.spring.BackningMapProvider;
 import org.gridkit.coherence.integration.spring.MapProvider;
 import org.gridkit.coherence.integration.spring.NamedCacheDecorator;
 import org.springframework.beans.factory.annotation.Required;
 
+import com.tangosol.net.CacheFactory;
 import com.tangosol.net.NamedCache;
 import com.tangosol.net.cache.NearCache;
+import com.tangosol.net.management.Registry;
 
 public class NearCacheDecorator implements NamedCacheDecorator {
 
@@ -47,11 +48,35 @@ public class NearCacheDecorator implements NamedCacheDecorator {
 
 	@Override
 	public NamedCache wrapCache(NamedCache innerCache) {
+		String name = innerCache.getCacheName();
+		String serviceName = innerCache.getCacheService().getInfo().getServiceName();
 		if (nestedDecorator != null) {
 			innerCache = nestedDecorator.wrapCache(innerCache);
 		}
 		Map<?,?> map = MapProvider.Helper.getMapFromBean(frontSchemeBean, Map.class);
 		NearCache cache = new NearCache(map, innerCache, invalidationStrategy.type());
+		
+		jmxRegister(map, name, serviceName, "front");
+		
 		return cache;
+	}
+	
+	@Override
+	public void releaseWrapper(NamedCache wrapped) {
+		// TODO design cache life cycle
+	}
+
+	protected void jmxRegister(Map<?, ?> cache, String name, String service, String tier) {
+		Registry r = CacheFactory.getCluster().getManagement();
+		String id = "type=Cache,serive=" + service + ",name=" + name + ",tier=" + tier;
+		id = r.ensureGlobalName(id);
+		r.register(id, cache);		
+	}
+
+	protected void jmxUnregister(String name, String service, String tier) {
+		Registry r = CacheFactory.getCluster().getManagement();
+		String id = "type=Cache,serive=" + service + ",name=" + name + ",tier=" + tier;
+		id = r.ensureGlobalName(id);
+		r.unregister(id);		
 	}
 }

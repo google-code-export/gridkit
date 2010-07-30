@@ -142,5 +142,15 @@
 			<bean id="cacheStore" class="org.gridkit.coherence.integration.SimpleContextTest.TestCacheLoader"/>
 		</property>
 	</bean>
+	
+	<bean id="exec-service" parent="service-reference" factory-bean="invocation-service"/>
+	
+	<bean id="invocation-service" parent="clustered-service">
+		<property name="configuration">
+			<bean parent="invocation-service-configuration">
+				<property name="threadCount" value="5"/>
+			</bean>
+		</property>
+	</bean>
 		
 </beans>

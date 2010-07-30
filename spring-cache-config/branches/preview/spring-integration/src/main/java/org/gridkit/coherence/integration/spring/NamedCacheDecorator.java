@@ -22,4 +22,6 @@ public interface NamedCacheDecorator {
 
 	public NamedCache wrapCache(NamedCache innerCache);
 	
+	public void releaseWrapper(NamedCache wrapped);
+	
 }

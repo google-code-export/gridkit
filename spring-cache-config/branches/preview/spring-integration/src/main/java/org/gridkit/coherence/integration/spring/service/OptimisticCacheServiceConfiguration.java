@@ -20,7 +20,7 @@ package org.gridkit.coherence.integration.spring.service;
 /**
  * @author Dmitri Babaev
  */
-public class OptimisticCacheServiceConfiguration extends ReplicatedCacheServiceConfiguration {
+public class OptimisticCacheServiceConfiguration extends CacheServiceConfiguration {
 	
 	public ServiceType getServiceType() {
 		return ServiceType.OptimisticCache;

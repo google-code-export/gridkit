@@ -21,6 +21,8 @@ import com.tangosol.run.xml.XmlElement;
 
 public interface ServiceConfiguration {
 
+	public ServiceType getServiceType();
+	
 	public XmlElement getXmlConfiguration();
 
 	public void postConfigure(Service service);

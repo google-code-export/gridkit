@@ -21,7 +21,6 @@ import java.util.concurrent.Callable;
 
 import org.gridkit.coherence.integration.spring.BackingMapLookupStrategy;
 import org.gridkit.coherence.integration.spring.ClusteredCacheService;
-import org.gridkit.coherence.integration.spring.service.CacheServiceConfiguration;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -34,51 +33,16 @@ import com.tangosol.net.CacheService;
 import com.tangosol.net.Cluster;
 import com.tangosol.net.NamedCache;
 import com.tangosol.net.Service;
+import com.tangosol.net.management.Registry;
 
-public class ClusteredCacheServiceBean implements ClusteredCacheService, InitializingBean, BeanNameAware, DisposableBean {
+public class ClusteredCacheServiceBean extends ClusteredServiceBean implements ClusteredCacheService, InitializingBean, BeanNameAware, DisposableBean {
 
-	private String serviceName;
-	private String beanName;
-
-	private CacheServiceConfiguration configuration;
-	private boolean autostart = false;
-	
-	private BackingMapLookupStrategy backingMapLookupStrategy;
-//	private ApplicationContext appContext;
-	
-	private CacheService service;
-	
+	private BackingMapLookupStrategy backingMapLookupStrategy;	
 	private final BackingMapManager bmm = new BackendManager();
 	
-	private static ThreadUnlockHelper threadHelper = new ThreadUnlockHelper();
-	
-	public void setBeanName(String name) {
-		this.beanName = name;
-	}		
-
-	public void setServiceName(String serviceName) {
-		this.serviceName = serviceName;
-	}
-	
-	@Required
-	public void setConfiguration(CacheServiceConfiguration config) {
-		this.configuration = config;
-	}
-	
-	public void setAutostart(boolean autostart) {
-		this.autostart = autostart;
-	}
-
 	@Required
 	public void setBackingMapLookupStrategy(BackingMapLookupStrategy backingMapLookupStrategy) {
 		this.backingMapLookupStrategy = backingMapLookupStrategy;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		if (autostart) {
-			ensureStarted();
-		}
 	}
 
 	@Override
@@ -86,28 +50,27 @@ public class ClusteredCacheServiceBean implements ClusteredCacheService, Initial
 		// TODO destroying service
 	}
 
+	protected CacheService getCacheService() {
+		return ((CacheService)service);
+	}
+	
 	@Override
 	public NamedCache ensureCache(final String name) {
 		ensureStarted();
 		return threadHelper.modalExecute(new Callable<NamedCache>() {
 			@Override
 			public NamedCache call() throws Exception {
-				return service.ensureCache(name, null);
+				return getCacheService().ensureCache(name, null);
 			}
 		});
 	}
 
 	@Override
 	public void destroyCahce(NamedCache cache) {
-		service.destroyCache(cache);
+		getCacheService().destroyCache(cache);
 		
 	}
 
-	public CacheService getCoherenceService() {
-		ensureStarted();
-		return service;
-	}
-	
 	private synchronized void ensureStarted() {
 		if (this.service == null) {
 			serviceName = serviceName == null ? beanName : serviceName;
@@ -139,24 +102,56 @@ public class ClusteredCacheServiceBean implements ClusteredCacheService, Initial
 			this.service = (CacheService) service;
 		}
 	}
+	
+	@Override
+	protected void initializeService(Service service) {
+		super.initializeService(service);
+		((CacheService)service).setBackingMapManager(bmm);					
+	}
 
+	@Override
+	protected void validateService(Service service) {
+		super.validateService(service);
+		if (((CacheService)service).getBackingMapManager() != bmm) {
+			throw new IllegalArgumentException("Service name conflict. Service [" + serviceName + "] is owned by other service bean");
+		}
+	}
+
+	protected void jmxRegister(Map<?, ?> cache, String name, String tier) {
+		Registry r = service.getCluster().getManagement();
+		String id = "type=Cache,serive=" + service.getInfo().getServiceName() + ",name=" + name + ",tier=" + tier;
+		id = r.ensureGlobalName(id);
+		r.register(id, cache);		
+	}
+
+	protected void jmxUnregister(String name, String tier) {
+		Registry r = service.getCluster().getManagement();
+		String id = "type=Cache,serive=" + serviceName + ",name=" + name + ",tier=" + tier;
+		id = r.ensureGlobalName(id);
+		r.unregister(id);		
+	}
+	
+	
 	private class BackendManager extends AbstractBackingMapManager {
 
 		@Override
 		@SuppressWarnings("unchecked")
 		public Map instantiateBackingMap(final String cacheName) {
-			return threadHelper.safeExecute(new Callable<Map>() {
+			Map backingMap = threadHelper.safeExecute(new Callable<Map>() {
 				@Override
 				public Map call() throws Exception {
 					return backingMapLookupStrategy.instantiateBackingMap(cacheName, getContext());
 				}				
 			});
+			jmxRegister(backingMap, cacheName, "back");
+			return backingMap;
 		}
 
 		@SuppressWarnings("unchecked")
 		@Override
 		public void releaseBackingMap(String sName, Map map) {
 			super.releaseBackingMap(sName, map);
+			jmxUnregister(sName, "back");
 		}
 	}
 }
