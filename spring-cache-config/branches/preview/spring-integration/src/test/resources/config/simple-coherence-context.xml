@@ -64,7 +64,7 @@
 			<bean parent="distribted-scheme-configuration">
 				<property name="localStorage" value="true"/>
 				<property name="serializer">
-					<bean class="org.gridkit.coherence.integration.SimpleContextTest$CustomSerializer" />
+					<bean class="org.gridkit.coherence.integration.BaseSimpleContextTest$CustomSerializer" />
 				</property>
 			</bean>
 		</property>
@@ -131,7 +131,7 @@
 
 	<bean id="local-cache-with-custom-eviction" parent="local-cache-definition">
 		<property name="evictionPolicy">
-			<bean class="org.gridkit.coherence.integration.SimpleContextTest$CustomEvictor"/>
+			<bean class="org.gridkit.coherence.integration.BaseSimpleContextTest$CustomEvictor"/>
 		</property>
 	</bean>
 
@@ -139,7 +139,7 @@
 		
 	<bean id="read-write-test-backend" parent="read-write-backing-map">
 		<property name="loader">
-			<bean id="cacheStore" class="org.gridkit.coherence.integration.SimpleContextTest.TestCacheLoader"/>
+			<bean id="cacheStore" class="org.gridkit.coherence.integration.BaseSimpleContextTest.TestCacheLoader"/>
 		</property>
 	</bean>
 	

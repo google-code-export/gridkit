@@ -25,14 +25,12 @@ import com.tangosol.net.CacheFactory;
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class SimpleContextTest extends BaseSimpleContextTest {
+public class SchemeSimpleContextTest extends BaseSimpleContextTest {
 
 	@BeforeClass
 	public static void init() {
-
 		System.setProperty("tangosol.coherence.wka", "localhost");
-		context = new ClassPathXmlApplicationContext("config/simple-coherence-context.xml");
-		
+		context = new ClassPathXmlApplicationContext("schema/simple-coherence-context.xml");
 	}
 	
 	@AfterClass

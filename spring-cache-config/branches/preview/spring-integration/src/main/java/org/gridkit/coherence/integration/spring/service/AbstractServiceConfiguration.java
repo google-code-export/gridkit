@@ -29,7 +29,7 @@ import com.tangosol.net.ProxyService;
 import com.tangosol.net.Service;
 import com.tangosol.run.xml.XmlElement;
 
-public abstract class AbstractServiceConfiguration implements ServiceConfiguration, ServicePostProcessor {
+public abstract class AbstractServiceConfiguration implements ServiceConfiguration, ServicePostProcessor, Cloneable {
 	
 	public abstract ServiceType getServiceType();
 		
@@ -37,6 +37,15 @@ public abstract class AbstractServiceConfiguration implements ServiceConfigurati
 		XmlElement config = CacheFactory.getServiceConfig(getServiceType().toString());
 		overrideServiceProperties(config);
 		return config;		
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T extends AbstractServiceConfiguration> T clone() {
+		try {
+			return (T) super.clone();
+		} catch (CloneNotSupportedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	protected void overrideServiceProperties(XmlElement config) {

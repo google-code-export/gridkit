@@ -33,12 +33,15 @@ public class ReadWriteBackingMapDefinition implements BackningMapProvider, Initi
 	
 	private Object internalMap;
 	private Object missesMap;
-	private CacheLoader loader;
+	private CacheLoader cachestore;
 	private boolean readOnly = false;
+	private Integer cacheStoreTimeoutMillis;
 	private int writeBehindSeconds = 0;
 	private double refreshAheadFactor = 0.0D;
+	private Double writeBatchFactor;
+	private Integer writeRequeueThreshold;
 	
-	private ObservableMap instance;
+	private ReadWriteBackingMap instance;
 	
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -55,15 +58,32 @@ public class ReadWriteBackingMapDefinition implements BackningMapProvider, Initi
 		ObservableMap internal = BackningMapProvider.Helper.getMapFromBean(internalMap, cacheCtx, ObservableMap.class);
 		Map<?, ?> misses = missesMap == null ? null : BackningMapProvider.Helper.getMapFromBean(missesMap, cacheCtx, Map.class);
 		
-		instance = new ReadWriteBackingMap(cacheCtx, internal, misses, loader, readOnly, writeBehindSeconds, refreshAheadFactor);
+		instance = new ReadWriteBackingMap(cacheCtx, internal, misses, cachestore, readOnly, writeBehindSeconds, refreshAheadFactor);
+		if (cacheStoreTimeoutMillis != null) {
+			instance.setCacheStoreTimeoutMillis(cacheStoreTimeoutMillis);
+		}
+		if (writeBatchFactor != null) {
+			instance.setWriteBatchFactor(writeBatchFactor);
+		}
+		if (writeRequeueThreshold != null) {
+			instance.setWriteRequeueThreshold(writeRequeueThreshold);
+		}
 	}
 	
 	public void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
 	}
 	
+	public void setCacheStoreTimeoutMillis(int cacheStoreTimeout) {
+		this.cacheStoreTimeoutMillis = cacheStoreTimeout;
+	}
+
 	public void setLoader(CacheLoader loader) {
-		this.loader = loader;
+		this.cachestore = loader;
+	}
+
+	public void setCachestore(CacheLoader store) {
+		this.cachestore = store;
 	}
 	
 	public void setRefreshAheadFactor(double refreshAheadFactor) {
@@ -81,4 +101,14 @@ public class ReadWriteBackingMapDefinition implements BackningMapProvider, Initi
 	public void setWriteBehindSeconds(int writeBehindSeconds) {
 		this.writeBehindSeconds = writeBehindSeconds;
 	}
+
+	public void setWriteBatchFactor(double writeBatchFactor) {
+		this.writeBatchFactor = writeBatchFactor;
+	}
+
+	public void setWriteRequeueThreshold(int writeRequeueThreshold) {
+		this.writeRequeueThreshold = writeRequeueThreshold;
+	}
+	
+	
 }

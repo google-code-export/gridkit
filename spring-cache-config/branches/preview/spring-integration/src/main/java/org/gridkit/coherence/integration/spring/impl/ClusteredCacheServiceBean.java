@@ -35,6 +35,9 @@ import com.tangosol.net.NamedCache;
 import com.tangosol.net.Service;
 import com.tangosol.net.management.Registry;
 
+/**
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ */
 public class ClusteredCacheServiceBean extends ClusteredServiceBean implements ClusteredCacheService, InitializingBean, BeanNameAware, DisposableBean {
 
 	private BackingMapLookupStrategy backingMapLookupStrategy;	

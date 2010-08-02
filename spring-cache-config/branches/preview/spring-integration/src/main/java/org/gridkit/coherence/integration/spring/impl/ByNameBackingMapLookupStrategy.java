@@ -55,7 +55,7 @@ public class ByNameBackingMapLookupStrategy implements BackingMapLookupStrategy,
 		else if (bean instanceof MapProvider) {
 			map = ((MapProvider)bean).getMap();
 		}
-		else if (bean instanceof Map) {
+		else if (bean instanceof Map<?, ?>) {
 			map = (Map<?, ?>) bean;
 		}
 		else {

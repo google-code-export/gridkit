@@ -30,7 +30,6 @@ import org.springframework.beans.factory.annotation.Required;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.tangosol.coherence.component.manageable.modelAdapter.ManagementMBean;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.DistributedCacheService;
 import com.tangosol.net.InvocationService;
@@ -80,6 +79,7 @@ public class ServiceListenersTest {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testExecService() {
 		Map<String, String> log = (Map<String, String>) context.getBean("log-map");
 		InvocationService is = (InvocationService) context.getBean("exec-service");

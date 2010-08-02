@@ -13,32 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.gridkit.coherence.integration;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import com.tangosol.net.CacheFactory;
+package org.gridkit.coherence.integration.spring.service;
 
 /**
- * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ *  Coherence*Extend configuration fragment
+ *	@author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class SimpleContextTest extends BaseSimpleContextTest {
+public class AcceptorConfig {
 
-	@BeforeClass
-	public static void init() {
-
-		System.setProperty("tangosol.coherence.wka", "localhost");
-		context = new ClassPathXmlApplicationContext("config/simple-coherence-context.xml");
-		
-	}
 	
-	@AfterClass
-	public static void shutdown() {
-		context = null;
-		CacheFactory.getCluster().shutdown();
-	}
+	private Integer connectionLimit;
 	
 }

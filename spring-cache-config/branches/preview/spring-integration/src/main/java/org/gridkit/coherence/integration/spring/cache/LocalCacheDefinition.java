@@ -40,6 +40,7 @@ public class LocalCacheDefinition implements MapProvider, InitializingBean {
 	private EvictionPolicy evictionPolicy;
 	private CacheEvictionType evictionType = CacheEvictionType.HYBRID;
 	private UnitCalculator unitCalculator;
+	private int unitFactor = -1;
 		
 	private LocalCache instance;
 
@@ -54,6 +55,9 @@ public class LocalCacheDefinition implements MapProvider, InitializingBean {
 		}
 		if (unitCalculator != null) {
 			cache.setUnitCalculator(unitCalculator);
+		}
+		if (unitFactor > 0) {
+			cache.setUnitFactor(unitFactor);
 		}
 		if (evictionPolicy != null)	{
 			cache.setEvictionPolicy(evictionPolicy);
@@ -111,6 +115,14 @@ public class LocalCacheDefinition implements MapProvider, InitializingBean {
 		this.lowUnits = lowUnits;
 	}
 	
+	public void setUnitCalculator(UnitCalculator unitCalculator) {
+		this.unitCalculator = unitCalculator;
+	}
+
+	public void setUnitFactor(int unitFactor) {
+		this.unitFactor = unitFactor;
+	}
+
 	@Override
 	public Map<?, ?> getMap() {
 		return instance;
