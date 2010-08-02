@@ -17,29 +17,19 @@
 package org.gridkit.coherence.search.lucene;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.MatchAllDocsQuery;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.BooleanClause.Occur;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.extractor.ReflectionExtractor;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
+import org.junit.*;
+
+import java.util.*;
 
 public abstract class BaseLuceneIndexTest {
 
@@ -50,7 +40,7 @@ public abstract class BaseLuceneIndexTest {
 
 	private NamedCache cache;
 	private LuceneDocumentExtractor extractor = new LuceneDocumentExtractor("text", new ReflectionExtractor("toString"));
-	private LuceneSearchFactory factory = new LuceneSearchFactory("default", extractor);
+	private LuceneSearchFactory factory = new LuceneSearchFactory(extractor);
 	{
 //		factory.getEngineConfig().setIndexUpdateQueueSizeLimit(10);
 	};
@@ -140,61 +130,6 @@ public abstract class BaseLuceneIndexTest {
 		Assert.assertEquals(16, query("private").length);
 	}
 
-	@Test
-	public void testQuery128() {
-		init(128);
-		Assert.assertEquals(128, cache.size());
-		Assert.assertEquals(128, query(new MatchAllDocsQuery()).length);
-//		Assert.assertEquals(2, query("public", "private", "protected", "final").length);
-//		Assert.assertEquals(4, query("public", "private", "protected").length);
-//		Assert.assertEquals(8, query("public", "private").length);
-//		Assert.assertEquals(16, query("private").length);
-	}
-
-	@Test
-	public void testQuery512() {
-		init(512);
-		Assert.assertEquals(512, cache.size());
-		Assert.assertEquals(512, query(new MatchAllDocsQuery()).length);
-//		Assert.assertEquals(2, query("public", "private", "protected", "final").length);
-//		Assert.assertEquals(4, query("public", "private", "protected").length);
-//		Assert.assertEquals(8, query("public", "private").length);
-//		Assert.assertEquals(16, query("private").length);
-	}
-
-	@Test
-	public void testQuery1024() {
-		init(1024);
-		Assert.assertEquals(1024, cache.size());
-		Assert.assertEquals(1024, query(new MatchAllDocsQuery()).length);
-//		Assert.assertEquals(2, query("public", "private", "protected", "final").length);
-//		Assert.assertEquals(4, query("public", "private", "protected").length);
-//		Assert.assertEquals(8, query("public", "private").length);
-//		Assert.assertEquals(16, query("private").length);
-	}
-
-	@Test
-	public void testQuery2048() {
-		init(2048);
-		Assert.assertEquals(2048, cache.size());
-		Assert.assertEquals(2048, query(new MatchAllDocsQuery()).length);
-//		Assert.assertEquals(2, query("public", "private", "protected", "final").length);
-//		Assert.assertEquals(4, query("public", "private", "protected").length);
-//		Assert.assertEquals(8, query("public", "private").length);
-//		Assert.assertEquals(16, query("private").length);
-	}
-
-	@Test
-	public void testQuery4096() {
-		init(4096);
-		Assert.assertEquals(4096, cache.size());
-		Assert.assertEquals(4096, query(new MatchAllDocsQuery()).length);
-//		Assert.assertEquals(2, query("public", "private", "protected", "final").length);
-//		Assert.assertEquals(4, query("public", "private", "protected").length);
-//		Assert.assertEquals(8, query("public", "private").length);
-//		Assert.assertEquals(16, query("private").length);
-	}
-	
 	@SuppressWarnings("unchecked")
 	private String[] query(Query query) {
 		Set entries = cache.entrySet(factory.createFilter(query));

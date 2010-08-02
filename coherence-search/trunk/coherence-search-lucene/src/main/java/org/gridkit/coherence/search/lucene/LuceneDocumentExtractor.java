@@ -29,7 +29,7 @@ import java.util.List;
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-class LuceneDocumentExtractor implements ValueExtractor {
+public class LuceneDocumentExtractor implements ValueExtractor {
 
 	public static final String DOCUMENT_ID = "doc-id";
 	

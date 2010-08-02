@@ -5,7 +5,7 @@ import org.gridkit.coherence.search.SearchFactory;
 
 public class LuceneSearchFactory extends SearchFactory<LuceneInMemoryIndex, LuceneIndexConfig, Query> {
 
-	public LuceneSearchFactory(String name, LuceneDocumentExtractor luceneExtractor) {
+	public LuceneSearchFactory(LuceneDocumentExtractor luceneExtractor) {
 		super(new LuceneSearchPlugin(), new DefaultLuceneIndexConfig(), luceneExtractor);
 	}
 
