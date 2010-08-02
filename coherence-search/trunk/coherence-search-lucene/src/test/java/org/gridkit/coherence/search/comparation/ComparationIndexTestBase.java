@@ -3,6 +3,7 @@ package org.gridkit.coherence.search.comparation;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
+import com.tangosol.util.extractor.ReflectionExtractor;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -15,6 +16,12 @@ import java.util.Set;
  */
 
 public abstract class ComparationIndexTestBase {
+
+    protected static final int N = 100;
+
+    public ReflectionExtractor[] stringFieldExtractors;
+    public ReflectionExtractor[] intFieldExtractors;
+
     protected NamedCache cache;
 
     @BeforeClass
@@ -25,14 +32,23 @@ public abstract class ComparationIndexTestBase {
     @Before
     public void init() {
         cache = CacheFactory.getCache("local-cache");
+
+        stringFieldExtractors = new ReflectionExtractor[N];
+        intFieldExtractors = new ReflectionExtractor[N];
+
+        for (int i = 0; i < N; i++) {
+            stringFieldExtractors[i] = new ReflectionExtractor("getStringField", new Object[]{i});
+            intFieldExtractors[i] = new ReflectionExtractor("getIntField", new Object[]{i});
+        }
+
         setUp();
     }
 
     protected abstract void setUp();
 
     private void addData() {
-        for (int i = 0; i < 1000000; i++) {
-            cache.put(i, new MockIndexedObject(String.valueOf(i), i));
+        for (int i = 0; i < 100000; i++) {
+            cache.put(i, new MockIndexedObject(String.valueOf(i), i, N));
         }
     }
 

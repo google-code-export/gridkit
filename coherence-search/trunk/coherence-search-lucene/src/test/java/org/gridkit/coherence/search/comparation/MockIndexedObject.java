@@ -1,25 +1,29 @@
 package org.gridkit.coherence.search.comparation;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * @author Alexander Solovyov
  */
 
 public class MockIndexedObject implements Serializable {
-    private String stringField;
-    private int intField;
+    private String[] stringField;
+    private int[] intField;
 
-    public MockIndexedObject(String stringField, int intField) {
-        this.stringField = stringField;
-        this.intField = intField;
+    public MockIndexedObject(String stringValue, int intValue, int size) {
+        this.stringField = new String[size];
+        Arrays.fill(stringField, stringValue);
+
+        this.intField = new int[size];
+        Arrays.fill(intField, intValue);
     }
 
-    public String getStringField() {
-        return stringField;
+    public String getStringField(int index) {
+        return stringField[index];
     }
 
-    public int getIntField() {
-        return intField;
+    public int getIntField(int index) {
+        return intField[index];
     }
 }
