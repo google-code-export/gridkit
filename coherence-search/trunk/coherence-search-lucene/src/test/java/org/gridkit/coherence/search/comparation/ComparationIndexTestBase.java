@@ -17,7 +17,8 @@ import java.util.Set;
 
 public abstract class ComparationIndexTestBase {
 
-    protected static final int N = 100;
+    protected static final int N = 10;
+    private static final int RECORD_NUMBER = 1000000;
 
     public ReflectionExtractor[] stringFieldExtractors;
     public ReflectionExtractor[] intFieldExtractors;
@@ -47,8 +48,8 @@ public abstract class ComparationIndexTestBase {
     protected abstract void setUp();
 
     private void addData() {
-        for (int i = 0; i < 100000; i++) {
-            cache.put(i, new MockIndexedObject(String.valueOf(i), i, N));
+        for (int i = 0; i < RECORD_NUMBER; i++) {
+            cache.put(i, new MockIndexedObject(i % N, N));
         }
     }
 
@@ -62,7 +63,8 @@ public abstract class ComparationIndexTestBase {
 
         System.out.println("TIME: " + (System.currentTimeMillis() - t));
 
-        Assert.assertEquals(1, resultSize);
+        Assert.assertTrue(resultSize > 1);
+        Assert.assertTrue(resultSize == RECORD_NUMBER / N);
     }
 
     protected abstract Set entrySet();
