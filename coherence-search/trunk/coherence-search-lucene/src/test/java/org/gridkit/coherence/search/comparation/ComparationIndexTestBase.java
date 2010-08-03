@@ -4,10 +4,10 @@ import com.tangosol.net.CacheFactory;
 import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.extractor.ReflectionExtractor;
+import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.Assert;
 
 import java.util.Set;
 
@@ -63,6 +63,8 @@ public abstract class ComparationIndexTestBase {
 
         Assert.assertTrue(resultSize >= 1);
         Assert.assertTrue(resultSize <= RECORD_NUMBER / STEP);
+
+        System.out.println("Result size: " + resultSize);
 
         for (int i = 0; i < 5; i++) {
             assertEntrySetSize();
