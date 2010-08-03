@@ -58,16 +58,23 @@ public abstract class ComparationIndexTestBase {
     public void test() {
         addData();
 
-        long t = System.currentTimeMillis();
-
+        // warm up
         int resultSize = entrySet().size();
-
-        System.out.println("TIME: " + (System.currentTimeMillis() - t));
 
         Assert.assertTrue(resultSize >= 1);
         Assert.assertTrue(resultSize <= RECORD_NUMBER / STEP);
 
-        System.out.println("ResultSize: " + resultSize);
+        for (int i = 0; i < 5; i++) {
+            assertEntrySetSize();
+        }
+    }
+
+    private void assertEntrySetSize() {
+        long t = System.currentTimeMillis();
+
+        entrySet().size();
+
+        System.out.println("TIME: " + (System.currentTimeMillis() - t));
     }
 
     protected abstract Set entrySet();
