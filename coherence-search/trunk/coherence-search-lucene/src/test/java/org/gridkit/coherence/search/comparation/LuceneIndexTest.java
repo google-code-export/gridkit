@@ -25,7 +25,6 @@ public class LuceneIndexTest extends ComparationIndexTestBase {
         for (int i = 0; i < N; i++) {
             extractor.addText("stringField" + i, stringFieldExtractors[i]);
             extractor.addText("intField" + i, intFieldExtractors[i]);
-            
         }
 
         factory = new LuceneSearchFactory(extractor);
@@ -41,9 +40,8 @@ public class LuceneIndexTest extends ComparationIndexTestBase {
         BooleanQuery query = new BooleanQuery();
 
         for (int i = 0; i < N; i++) {
-            String value = String.valueOf(i);
-            query.add(new TermQuery(new Term("stringField" + i, value)), BooleanClause.Occur.MUST);
-            query.add(new TermQuery(new Term("intField" + i, value)), BooleanClause.Occur.MUST);
+            query.add(new TermQuery(new Term("stringField" + i, String.valueOf(i))), BooleanClause.Occur.MUST);
+            query.add(new TermQuery(new Term("intField" + i, String.valueOf(i + N))), BooleanClause.Occur.MUST);
         }
 
         Filter filter = factory.createFilter(query);

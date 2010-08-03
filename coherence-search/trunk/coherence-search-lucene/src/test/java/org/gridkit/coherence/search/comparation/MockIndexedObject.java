@@ -10,11 +10,11 @@ public class MockIndexedObject implements Serializable {
     private String[] stringField;
     private int[] intField;
     private int currentValue;
-    private int size;
+    private int step;
 
-    public MockIndexedObject(int startValue, int size) {
-        this.currentValue = startValue;
-        this.size = size;
+    public MockIndexedObject(int startValue, int size, int step) {
+        this.currentValue = startValue % step;
+        this.step = step;
 
         this.stringField = new String[size];
         this.intField = new int[size];
@@ -37,7 +37,7 @@ public class MockIndexedObject implements Serializable {
     }
 
     private int nextValue() {
-        if (++currentValue >= size) {
+        if (++currentValue >= step) {
             currentValue = 0;
         }
 

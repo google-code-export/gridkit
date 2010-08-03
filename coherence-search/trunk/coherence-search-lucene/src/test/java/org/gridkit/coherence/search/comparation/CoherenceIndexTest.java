@@ -42,7 +42,7 @@ public class CoherenceIndexTest extends ComparationIndexTestBase {
         Filter[] filters = new Filter[N];
 
         for (int i = 0; i < N; i++) {
-            filters[i] = new EqualsFilter(intFieldExtractors[i], i);
+            filters[i] = new EqualsFilter(intFieldExtractors[i], i + N);
         }
 
         return filters;
