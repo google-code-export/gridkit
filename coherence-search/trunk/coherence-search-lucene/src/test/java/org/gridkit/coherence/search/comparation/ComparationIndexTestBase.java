@@ -66,17 +66,20 @@ public abstract class ComparationIndexTestBase {
 
         System.out.println("Result size: " + resultSize);
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 50; i++) {
             assertEntrySetSize();
         }
     }
 
     private void assertEntrySetSize() {
-        long t = System.currentTimeMillis();
+        long t = System.nanoTime();
 
-        entrySet().size();
+        int attemptCount = 1000;
+        for (int i = 0; i < attemptCount; i++) {
+            entrySet().size();
+        }
 
-        System.out.println("TIME: " + (System.currentTimeMillis() - t));
+        System.out.println("TIME: " + (System.nanoTime() - t) / attemptCount );
     }
 
     protected abstract Set entrySet();
