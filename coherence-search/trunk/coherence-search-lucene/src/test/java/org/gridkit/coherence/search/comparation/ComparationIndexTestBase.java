@@ -18,8 +18,8 @@ import java.util.Set;
 public abstract class ComparationIndexTestBase {
 
     protected static final int N = 10;
-    private static final int RECORD_NUMBER = 500000;
-    private static final int STEP = N * 2;
+    private static final int RECORD_NUMBER = 100000;
+    private static final int STEP = N * 10000;
 
     public ReflectionExtractor[] stringFieldExtractors;
     public ReflectionExtractor[] intFieldExtractors;
@@ -64,8 +64,10 @@ public abstract class ComparationIndexTestBase {
 
         System.out.println("TIME: " + (System.currentTimeMillis() - t));
 
-        Assert.assertTrue(resultSize > 1);
-        Assert.assertTrue(resultSize == RECORD_NUMBER / STEP);
+        Assert.assertTrue(resultSize >= 1);
+        Assert.assertTrue(resultSize <= RECORD_NUMBER / STEP);
+
+        System.out.println("ResultSize: " + resultSize);
     }
 
     protected abstract Set entrySet();
