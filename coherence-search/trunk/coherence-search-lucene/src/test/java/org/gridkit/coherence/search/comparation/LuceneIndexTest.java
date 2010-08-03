@@ -30,6 +30,7 @@ public class LuceneIndexTest extends ComparationIndexTestBase {
 
         factory = new LuceneSearchFactory(extractor);
         factory.getEngineConfig().setIndexUpdateQueueSizeLimit(100000);
+        factory.getEngineConfig().setIndexUpdateDelay(60000);
 
         factory.createIndex(cache);
     }
@@ -40,8 +41,9 @@ public class LuceneIndexTest extends ComparationIndexTestBase {
         BooleanQuery query = new BooleanQuery();
 
         for (int i = 0; i < N; i++) {
-            query.add(new TermQuery(new Term("stringField" + i, "1")), BooleanClause.Occur.MUST);
-            query.add(new TermQuery(new Term("intField" + i, "1")), BooleanClause.Occur.MUST);
+            String value = String.valueOf(i);
+            query.add(new TermQuery(new Term("stringField" + i, value)), BooleanClause.Occur.MUST);
+            query.add(new TermQuery(new Term("intField" + i, value)), BooleanClause.Occur.MUST);
         }
 
         Filter filter = factory.createFilter(query);
