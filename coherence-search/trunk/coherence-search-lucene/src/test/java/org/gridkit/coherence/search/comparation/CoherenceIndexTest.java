@@ -11,7 +11,7 @@ import java.util.Set;
  * @author Alexander Solovyov
  */
 
-public class CoherenceIndexTest extends ComparationIndexTestBase {
+public class CoherenceIndexTest extends IndexComparisonTestBase {
 
     @Override
     protected void setUp() {

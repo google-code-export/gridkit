@@ -16,28 +16,16 @@
 
 package org.gridkit.coherence.search;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.Map.Entry;
-
-import org.gridkit.coherence.search.IndexUpdateEvent.Type;
-
 import com.tangosol.io.Serializer;
 import com.tangosol.net.NamedCache;
-import com.tangosol.util.Binary;
-import com.tangosol.util.BinaryEntry;
-import com.tangosol.util.ExternalizableHelper;
-import com.tangosol.util.Filter;
-import com.tangosol.util.MapIndex;
-import com.tangosol.util.SimpleMapIndex;
-import com.tangosol.util.ValueExtractor;
+import com.tangosol.util.*;
 import com.tangosol.util.extractor.IndexAwareExtractor;
 import com.tangosol.util.filter.IndexAwareFilter;
+import org.gridkit.coherence.search.IndexUpdateEvent.Type;
+
+import java.io.Serializable;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Central class in Coherence-Search API. It is used as a factory to
@@ -391,7 +379,7 @@ public class SearchFactory<I, IC, Q> {
 		}
 	}
 	
-	public static class SearchIndexExtractor<I, IC, Q> implements IndexAwareExtractor {
+	public static class SearchIndexExtractor<I, IC, Q> implements IndexAwareExtractor, Serializable {
 
 		private PlugableSearchIndex<I, IC, Q> psi;
 		private Object token;
@@ -487,7 +475,7 @@ public class SearchFactory<I, IC, Q> {
 		
 	}
 	
-	public static class QueryFilter<I, Q> implements IndexAwareFilter {
+	public static class QueryFilter<I, Q> implements IndexAwareFilter, Serializable {
 
 		private SearchIndexExtractor<I, ?, Q> extractor;
 		private Q query;

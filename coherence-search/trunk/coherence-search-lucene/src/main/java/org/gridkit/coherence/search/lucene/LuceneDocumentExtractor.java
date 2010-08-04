@@ -25,11 +25,12 @@ import org.apache.lucene.document.Field.TermVector;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.Serializable;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class LuceneDocumentExtractor implements ValueExtractor {
+public class LuceneDocumentExtractor implements ValueExtractor, Serializable {
 
 	public static final String DOCUMENT_ID = "doc-id";
 	
@@ -74,7 +75,7 @@ public class LuceneDocumentExtractor implements ValueExtractor {
 		return fields;
 	}
 	
-	public static interface FieldFactory {		
+	public static interface FieldFactory extends Serializable {
 
 		public Field toField(Object attribute);
 		public ValueExtractor getExtractor();

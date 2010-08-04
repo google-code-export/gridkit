@@ -14,7 +14,7 @@ import java.util.Set;
  * @author Alexander Solovyov
  */
 
-public class LuceneIndexTest extends ComparationIndexTestBase {
+public class LuceneIndexTest extends IndexComparisonTestBase {
 
     private LuceneSearchFactory factory;
 

@@ -18,10 +18,12 @@ package org.gridkit.coherence.search.lucene;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.store.Directory;
 
+import java.io.Serializable;
+
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class DefaultLuceneIndexConfig implements LuceneIndexConfig {
+public class DefaultLuceneIndexConfig implements LuceneIndexConfig, Serializable {
 
 	private static final long serialVersionUID = 20100728L;
 

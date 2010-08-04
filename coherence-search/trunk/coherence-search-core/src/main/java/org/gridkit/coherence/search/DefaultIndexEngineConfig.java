@@ -16,11 +16,13 @@
 
 package org.gridkit.coherence.search;
 
+import java.io.Serializable;
+
 /**
  * Default implementation of {@link IndexEngineConfig}. 
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class DefaultIndexEngineConfig implements IndexEngineConfig {
+public class DefaultIndexEngineConfig implements IndexEngineConfig, Serializable {
 
 	private int indexUpdateQueueSizeLimit = 1024;
 	private int indexUpdateDelay = 5000;

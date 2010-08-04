@@ -8,6 +8,7 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.gridkit.coherence.search.lucene.MockIndexedObject;
 
 import java.util.Set;
 import java.lang.management.ManagementFactory;
@@ -16,7 +17,7 @@ import java.lang.management.ManagementFactory;
  * @author Alexander Solovyov
  */
 
-public abstract class ComparationIndexTestBase {
+public abstract class IndexComparisonTestBase {
 
     protected static final int N = 10;
     private static final int RECORD_NUMBER = 100000;
@@ -29,12 +30,15 @@ public abstract class ComparationIndexTestBase {
 
     @BeforeClass
     public static void configure() {
+        System.setProperty("tangosol.coherence.wka", "localhost");
+        System.setProperty("tangosol.coherence.cluster", "index-comparison-test");
+
         CacheFactory.setConfigurableCacheFactory(new DefaultConfigurableCacheFactory("lucene-cache-config.xml"));
     }
 
     @Before
     public void init() {
-        cache = CacheFactory.getCache("local-cache");
+        cache = CacheFactory.getCache("distributed-cache");
 
         stringFieldExtractors = new ReflectionExtractor[N];
         intFieldExtractors = new ReflectionExtractor[N];

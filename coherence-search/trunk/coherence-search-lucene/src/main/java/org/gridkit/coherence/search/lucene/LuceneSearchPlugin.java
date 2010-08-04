@@ -16,9 +16,6 @@
 
 package org.gridkit.coherence.search.lucene;
 
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.Directory;
@@ -27,10 +24,14 @@ import org.gridkit.coherence.search.IndexInvocationContext;
 import org.gridkit.coherence.search.IndexUpdateEvent;
 import org.gridkit.coherence.search.PlugableSearchIndex;
 
+import java.io.Serializable;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class LuceneSearchPlugin implements PlugableSearchIndex<LuceneInMemoryIndex, LuceneIndexConfig, Query> {
+public class LuceneSearchPlugin implements PlugableSearchIndex<LuceneInMemoryIndex, LuceneIndexConfig, Query>, Serializable {
 
 	private String name = "";
 	
