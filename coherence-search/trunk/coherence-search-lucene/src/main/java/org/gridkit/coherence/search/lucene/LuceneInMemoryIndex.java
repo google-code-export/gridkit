@@ -16,18 +16,13 @@
 
 package org.gridkit.coherence.search.lucene;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
+import com.tangosol.util.Binary;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.SetBasedFieldSelector;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.SetBasedFieldSelector;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
@@ -40,7 +35,11 @@ import org.gridkit.coherence.search.IndexInvocationContext;
 import org.gridkit.coherence.search.IndexUpdateEvent;
 import org.gridkit.coherence.search.IndexUpdateEvent.Type;
 
-import com.tangosol.util.Binary;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
@@ -128,11 +127,13 @@ class LuceneInMemoryIndex {
 				@Override
 				@SuppressWarnings("unchecked")
 				public void collect(int doc) throws IOException {
+                    System.out.println("Begin to collect");
 					Document document = searcher.doc(doc, new SetBasedFieldSelector(Collections.singleton(LuceneInMemoryIndex.DOCUMENT_KEY), Collections.EMPTY_SET));
 					String key64 = document.get(LuceneInMemoryIndex.DOCUMENT_KEY);
 					Binary bin = new Binary(fromBase64(key64));
 					Object key = context.ensureFilterCompatibleKey(bin);
 					if (keySet.contains(key)) {
+                        System.out.println("Collected");
 						retained.add(key);
 					}
 				}

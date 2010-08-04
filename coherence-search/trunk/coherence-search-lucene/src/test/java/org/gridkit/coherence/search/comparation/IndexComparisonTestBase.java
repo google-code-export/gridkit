@@ -5,13 +5,13 @@ import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.extractor.ReflectionExtractor;
 import junit.framework.Assert;
+import org.gridkit.coherence.search.lucene.MockIndexedObject;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.gridkit.coherence.search.lucene.MockIndexedObject;
 
-import java.util.Set;
 import java.lang.management.ManagementFactory;
+import java.util.Set;
 
 /**
  * @author Alexander Solovyov
@@ -20,8 +20,8 @@ import java.lang.management.ManagementFactory;
 public abstract class IndexComparisonTestBase {
 
     protected static final int N = 10;
-    private static final int RECORD_NUMBER = 100000;
-    private static final int STEP = N * 10000;
+    private static final int RECORD_NUMBER = 100;
+    private static final int STEP = N * 10;
 
     public ReflectionExtractor[] stringFieldExtractors;
     public ReflectionExtractor[] intFieldExtractors;
@@ -32,6 +32,8 @@ public abstract class IndexComparisonTestBase {
     public static void configure() {
         System.setProperty("tangosol.coherence.wka", "localhost");
         System.setProperty("tangosol.coherence.cluster", "index-comparison-test");
+
+        // System.setProperty("tangosol.coherence.distributed.localstorage", "false");
 
         CacheFactory.setConfigurableCacheFactory(new DefaultConfigurableCacheFactory("lucene-cache-config.xml"));
     }

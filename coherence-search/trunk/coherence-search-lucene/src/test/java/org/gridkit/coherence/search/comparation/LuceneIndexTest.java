@@ -28,7 +28,7 @@ public class LuceneIndexTest extends IndexComparisonTestBase {
         }
 
         factory = new LuceneSearchFactory(extractor);
-        factory.getEngineConfig().setIndexUpdateQueueSizeLimit(100000);
+        factory.getEngineConfig().setIndexUpdateQueueSizeLimit(0);
         factory.getEngineConfig().setIndexUpdateDelay(60000);
 
         factory.createIndex(cache);

@@ -1,4 +1,4 @@
-package org.gridkit.coherence.search.comparation;
+package org.gridkit.coherence.search.lucene;
 
 import java.io.Serializable;
 
