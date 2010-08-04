@@ -10,6 +10,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Set;
+import java.lang.management.ManagementFactory;
 
 /**
  * @author Alexander Solovyov
@@ -49,14 +50,21 @@ public abstract class ComparationIndexTestBase {
     protected abstract void setUp();
 
     private void addData() {
+        long t = System.currentTimeMillis();
+
         for (int i = 0; i < RECORD_NUMBER; i++) {
             cache.put(i, new MockIndexedObject(i, N, STEP));
         }
+
+        System.out.println("ADD DATA (ms): " + (System.currentTimeMillis() - t) );
     }
 
     @Test
     public void test() {
         addData();
+
+        System.gc();
+        System.out.println("Mem. usage " + ManagementFactory.getMemoryMXBean().getHeapMemoryUsage());
 
         // warm up
         int resultSize = entrySet().size();
