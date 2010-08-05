@@ -16,16 +16,29 @@
 
 package org.gridkit.coherence.search;
 
-import com.tangosol.io.Serializer;
-import com.tangosol.net.NamedCache;
-import com.tangosol.util.*;
-import com.tangosol.util.extractor.IndexAwareExtractor;
-import com.tangosol.util.filter.IndexAwareFilter;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.Map.Entry;
+
 import org.gridkit.coherence.search.IndexUpdateEvent.Type;
 
-import java.io.Serializable;
-import java.util.*;
-import java.util.Map.Entry;
+import com.tangosol.io.Serializer;
+import com.tangosol.net.NamedCache;
+import com.tangosol.util.Binary;
+import com.tangosol.util.BinaryEntry;
+import com.tangosol.util.ExternalizableHelper;
+import com.tangosol.util.Filter;
+import com.tangosol.util.MapIndex;
+import com.tangosol.util.SimpleMapIndex;
+import com.tangosol.util.ValueExtractor;
+import com.tangosol.util.extractor.IndexAwareExtractor;
+import com.tangosol.util.filter.IndexAwareFilter;
 
 /**
  * Central class in Coherence-Search API. It is used as a factory to
@@ -409,9 +422,6 @@ public class SearchFactory<I, IC, Q> {
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result
-					+ ((extractor == null) ? 0 : extractor.hashCode());
-			result = prime * result + ((psi == null) ? 0 : psi.hashCode());
 			result = prime * result + ((token == null) ? 0 : token.hashCode());
 			return result;
 		}
@@ -426,16 +436,6 @@ public class SearchFactory<I, IC, Q> {
 			if (getClass() != obj.getClass())
 				return false;
 			SearchIndexExtractor other = (SearchIndexExtractor) obj;
-			if (extractor == null) {
-				if (other.extractor != null)
-					return false;
-			} else if (!extractor.equals(other.extractor))
-				return false;
-			if (psi == null) {
-				if (other.psi != null)
-					return false;
-			} else if (!psi.equals(other.psi))
-				return false;
 			if (token == null) {
 				if (other.token != null)
 					return false;
