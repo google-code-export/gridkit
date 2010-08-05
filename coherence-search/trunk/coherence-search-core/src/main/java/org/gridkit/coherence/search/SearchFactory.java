@@ -447,7 +447,6 @@ public class SearchFactory<I, IC, Q> {
 		@Override
 		@SuppressWarnings("unchecked")
 		public MapIndex createIndex(boolean sorted, Comparator comparator, Map indexMap) {
-            System.out.println("index created");
 			SearchIndexEngine<I, Q> engine = new SearchIndexEngine<I, Q>(psi.createIndexInstance(indexConfiguration), extractor, psi);
 			engine.init(engineConfig, indexMap);
 			indexMap.put(this, engine);

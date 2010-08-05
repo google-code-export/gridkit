@@ -17,12 +17,9 @@ public class TestDocument implements Serializable {
 	
 	private String[] stringField;
     private int[] intField;
-    private int seqNo;
 
     public TestDocument(int seqNo) {
-        this.seqNo = seqNo;
-
-        int dim = ((32 - Integer.numberOfLeadingZeros(seqNo)) / 4) + 1; 
+        int dim = ((32 - Integer.numberOfLeadingZeros(seqNo)) / 4) + 1;
         
         this.stringField = new String[dim];
         this.intField = new int[dim];

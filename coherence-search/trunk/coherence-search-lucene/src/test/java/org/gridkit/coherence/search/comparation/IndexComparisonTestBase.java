@@ -1,19 +1,17 @@
 package org.gridkit.coherence.search.comparation;
 
-import java.lang.management.ManagementFactory;
-import java.util.Set;
-
+import com.tangosol.net.CacheFactory;
+import com.tangosol.net.DefaultConfigurableCacheFactory;
+import com.tangosol.net.NamedCache;
+import com.tangosol.util.extractor.ReflectionExtractor;
 import junit.framework.Assert;
-
 import org.gridkit.coherence.search.lucene.TestDocument;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.tangosol.net.CacheFactory;
-import com.tangosol.net.DefaultConfigurableCacheFactory;
-import com.tangosol.net.NamedCache;
-import com.tangosol.util.extractor.ReflectionExtractor;
+import java.lang.management.ManagementFactory;
+import java.util.Set;
 
 /**
  * @author Alexander Solovyov
@@ -23,7 +21,6 @@ public abstract class IndexComparisonTestBase {
 
     protected static final int N = 5;
     private static final int RECORD_NUMBER = 1 << 16;
-    private static final int STEP = N * 10;
 
     public ReflectionExtractor[] stringFieldExtractors;
     public ReflectionExtractor[] intFieldExtractors;
