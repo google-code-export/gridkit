@@ -127,13 +127,11 @@ class LuceneInMemoryIndex {
 				@Override
 				@SuppressWarnings("unchecked")
 				public void collect(int doc) throws IOException {
-                    System.out.println("Begin to collect");
 					Document document = searcher.doc(doc, new SetBasedFieldSelector(Collections.singleton(LuceneInMemoryIndex.DOCUMENT_KEY), Collections.EMPTY_SET));
 					String key64 = document.get(LuceneInMemoryIndex.DOCUMENT_KEY);
 					Binary bin = new Binary(fromBase64(key64));
 					Object key = context.ensureFilterCompatibleKey(bin);
 					if (keySet.contains(key)) {
-                        System.out.println("Collected");
 						retained.add(key);
 					}
 				}

@@ -1,17 +1,19 @@
 package org.gridkit.coherence.search.comparation;
 
-import com.tangosol.net.CacheFactory;
-import com.tangosol.net.DefaultConfigurableCacheFactory;
-import com.tangosol.net.NamedCache;
-import com.tangosol.util.extractor.ReflectionExtractor;
+import java.lang.management.ManagementFactory;
+import java.util.Set;
+
 import junit.framework.Assert;
-import org.gridkit.coherence.search.lucene.MockIndexedObject;
+
+import org.gridkit.coherence.search.lucene.TestDocument;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.lang.management.ManagementFactory;
-import java.util.Set;
+import com.tangosol.net.CacheFactory;
+import com.tangosol.net.DefaultConfigurableCacheFactory;
+import com.tangosol.net.NamedCache;
+import com.tangosol.util.extractor.ReflectionExtractor;
 
 /**
  * @author Alexander Solovyov
@@ -19,8 +21,8 @@ import java.util.Set;
 
 public abstract class IndexComparisonTestBase {
 
-    protected static final int N = 10;
-    private static final int RECORD_NUMBER = 100;
+    protected static final int N = 5;
+    private static final int RECORD_NUMBER = 1 << 16;
     private static final int STEP = N * 10;
 
     public ReflectionExtractor[] stringFieldExtractors;
@@ -33,7 +35,7 @@ public abstract class IndexComparisonTestBase {
         System.setProperty("tangosol.coherence.wka", "localhost");
         System.setProperty("tangosol.coherence.cluster", "index-comparison-test");
 
-        // System.setProperty("tangosol.coherence.distributed.localstorage", "false");
+         System.setProperty("tangosol.coherence.distributed.localstorage", "false");
 
         CacheFactory.setConfigurableCacheFactory(new DefaultConfigurableCacheFactory("lucene-cache-config.xml"));
     }
@@ -58,9 +60,7 @@ public abstract class IndexComparisonTestBase {
     private void addData() {
         long t = System.currentTimeMillis();
 
-        for (int i = 0; i < RECORD_NUMBER; i++) {
-            cache.put(i, new MockIndexedObject(i, N, STEP));
-        }
+        cache.putAll(TestDocument.generate(0, RECORD_NUMBER));
 
         System.out.println("ADD DATA (ms): " + (System.currentTimeMillis() - t) );
     }
@@ -75,10 +75,10 @@ public abstract class IndexComparisonTestBase {
         // warm up
         int resultSize = entrySet().size();
 
-        Assert.assertTrue(resultSize >= 1);
-        Assert.assertTrue(resultSize <= RECORD_NUMBER / STEP);
-
         System.out.println("Result size: " + resultSize);
+
+        Assert.assertEquals(1, resultSize);
+
 
         for (int i = 0; i < 50; i++) {
             assertEntrySetSize();

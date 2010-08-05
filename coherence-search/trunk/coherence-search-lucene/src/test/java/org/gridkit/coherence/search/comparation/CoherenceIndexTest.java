@@ -32,7 +32,7 @@ public class CoherenceIndexTest extends IndexComparisonTestBase {
         Filter[] filters = new Filter[N];
 
         for (int i = 0; i < N; i++) {
-            filters[i] = new EqualsFilter(stringFieldExtractors[i], String.valueOf(i));
+            filters[i] = new EqualsFilter(stringFieldExtractors[i], "A");
         }
 
         return filters;
@@ -42,7 +42,7 @@ public class CoherenceIndexTest extends IndexComparisonTestBase {
         Filter[] filters = new Filter[N];
 
         for (int i = 0; i < N; i++) {
-            filters[i] = new EqualsFilter(intFieldExtractors[i], i + N);
+            filters[i] = new EqualsFilter(intFieldExtractors[i], 0);
         }
 
         return filters;

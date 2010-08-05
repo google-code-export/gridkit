@@ -32,6 +32,8 @@ import java.io.Serializable;
  */
 public class LuceneDocumentExtractor implements ValueExtractor, Serializable {
 
+	private static final long serialVersionUID = 20090804L;
+
 	public static final String DOCUMENT_ID = "doc-id";
 	
 	private List<FieldFactory> fieldMap = new ArrayList<FieldFactory>();
