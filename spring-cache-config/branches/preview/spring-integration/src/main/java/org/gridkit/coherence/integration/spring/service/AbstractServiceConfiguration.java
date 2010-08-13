@@ -39,10 +39,9 @@ public abstract class AbstractServiceConfiguration implements ServiceConfigurati
 		return config;		
 	}
 	
-	@SuppressWarnings("unchecked")
-	public <T extends AbstractServiceConfiguration> T clone() {
+	public Object clone() {
 		try {
-			return (T) super.clone();
+			return super.clone();
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);
 		}
