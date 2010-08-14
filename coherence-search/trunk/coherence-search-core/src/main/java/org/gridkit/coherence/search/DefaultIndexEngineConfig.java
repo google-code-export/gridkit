@@ -24,6 +24,8 @@ import java.io.Serializable;
  */
 public class DefaultIndexEngineConfig implements IndexEngineConfig, Serializable {
 
+	private static final long serialVersionUID = 20100814L;
+	
 	private int indexUpdateQueueSizeLimit = 1024;
 	private int indexUpdateDelay = 5000;
 	private boolean attributeIndexEnabled = false;

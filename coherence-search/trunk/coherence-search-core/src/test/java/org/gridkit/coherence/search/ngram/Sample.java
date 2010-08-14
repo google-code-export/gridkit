@@ -22,6 +22,7 @@ import org.gridkit.coherence.search.ngram.NGramIndexPlugin;
 import org.junit.Ignore;
 
 import com.tangosol.net.NamedCache;
+import com.tangosol.util.ValueExtractor;
 import com.tangosol.util.extractor.ReflectionExtractor;
 
 /**
@@ -33,17 +34,32 @@ public class Sample {
 
 	NamedCache cache;
 	
-	public void init() {
+	public void usingGridSearch() {
 		// plugin for n-gram index
 		NGramIndexPlugin plugin = new NGramIndexPlugin();
 
-		// create index factory for "toString" attribute using n-gram index plugin with n-gram size 3
-		SearchFactory<NGramIndex, Integer, String> nGramSearchFactory = new SearchFactory<NGramIndex, Integer, String>(plugin, 3, new ReflectionExtractor("toString"));
+		// Create extrator for attribute to be indexed
+		// any extractor returning string will do for n-gram index
+		ValueExtractor extractor = new ReflectionExtractor("toString");
+		
+		// create index factory using n-gram index plugin with n-gram size 3
+		SearchFactory<NGramIndex, Integer, String> nGramSearchFactory = new SearchFactory<NGramIndex, Integer, String>(plugin, 3, extractor);
 
-		// initialize index
+		// search factory allows you to adjust some
+		// configuration options for Coherence index
+		// below we are limiting asynchronous update
+		// max queue length to 100
+		nGramSearchFactory.getEngineConfig().setIndexUpdateQueueSizeLimit(100);
+		
+		// initialize index for cache
+		// this operation actually tells coherence
+		// to create index structures on all
+		// storage enabled nodes
 		nGramSearchFactory.createIndex(cache);
 		
 		// query by n-gram index, looking to every object containing substring "text"
+		// different custom indexes may use different types of queries
+		// for n-gram index query is a plain java.lang.String object
 		cache.keySet(nGramSearchFactory.createFilter("text"));
 		
 	}

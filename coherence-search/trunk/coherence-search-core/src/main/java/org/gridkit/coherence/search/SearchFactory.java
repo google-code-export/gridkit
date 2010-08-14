@@ -394,6 +394,8 @@ public class SearchFactory<I, IC, Q> {
 	
 	public static class SearchIndexExtractor<I, IC, Q> implements IndexAwareExtractor, Serializable {
 
+		private static final long serialVersionUID = 20100813L;
+		
 		private PlugableSearchIndex<I, IC, Q> psi;
 		private Object token;
 		private IC indexConfiguration;
@@ -476,6 +478,8 @@ public class SearchFactory<I, IC, Q> {
 	}
 	
 	public static class QueryFilter<I, Q> implements IndexAwareFilter, Serializable {
+		
+		private static final long serialVersionUID = 20100813L;
 
 		private SearchIndexExtractor<I, ?, Q> extractor;
 		private Q query;
@@ -561,7 +565,7 @@ public class SearchFactory<I, IC, Q> {
 
 		@Override
 		public boolean evaluate(Object object) {
-			return extractor.getPSI().evaluate(query, object);
+			return extractor.getPSI().evaluate(query, extractor.extract(object));
 		}
 	}
 }
