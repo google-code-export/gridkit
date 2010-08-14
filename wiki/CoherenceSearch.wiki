@@ -37,3 +37,7 @@ Coherence custom index API is quite complicated to deal with. The purpose of thi
 == Coherence-Search Lucene integration ==
 === Unstable ===
 *SVN:* [https://gridkit.googlecode.com/svn/coherence-search/trunk/coherence-search-core]
+
+= Maven =
+
+= Binaries =
