@@ -1,5 +1,5 @@
-#summary Coherence-Search project overview
-#labels Featured
+#summary GridSearch / Coherence project overview
+#labels Featured,GridSearch
 
 = Introduction =
 One of important features of Oracle Coherence is ability to maintain indexes of object attributes to speed up filters. Until 3.6 Coherence could use only simple reverse index for this purpose (implemented using either hash table or binary tree). A new release of Coherence 3.6 has introduced a feature of custom indexes, so using sophisticated full-text and other specialized indexes has became possible.
@@ -10,11 +10,16 @@ Coherence custom index API is quite complicated to deal with. The purpose of thi
 == Advantages of integration search using coherence ==
  * Coherence will keep your index in sych with your data
  * In case of distributed cache, custom cache also gets distributed and will benefit from Coherence advanced parallel queering
+ * Combine built in Coherence filters with custom ones to make Coherence filter API even more powerfull
 
 == Limitation of Coherence search ==
  * Coherence Filter API is very basic, so advanced features of search libraries like scoring cannot be exposed. If you need scoring, faceted search, etc then Coherence Serach is not your choice so far.
 
 = Documentation =
+ * [http://http://gridkit.googlecode.com/svn/jdocs/grid-search/coherence-common/latest/index.html JavaDoc GridSearch / Coherence common]
+ * [http://http://gridkit.googlecode.com/svn/jdocs/grid-search/coherence-lucene/latest/index.html JavaDoc GridSearch / Lucene search for Coherence]
+ * [HowToSearchDataGrid Getting started, searching data grid]
+ * [HowToCustomSearchIndex Implementing custom index for Coherence]
  * [CoherenceCustomIndexOverview Coherence custom index API usage]
  * [CoherenceSearchCoreAPI Coherence search core API usage]
 
