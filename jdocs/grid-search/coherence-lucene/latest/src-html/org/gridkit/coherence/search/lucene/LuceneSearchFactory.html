@@ -1,0 +1,81 @@
+<HTML>
+<BODY BGCOLOR="white">
+<PRE>
+<FONT color="green">001</FONT>    package org.gridkit.coherence.search.lucene;<a name="line.1"></a>
+<FONT color="green">002</FONT>    <a name="line.2"></a>
+<FONT color="green">003</FONT>    import org.apache.lucene.search.Query;<a name="line.3"></a>
+<FONT color="green">004</FONT>    import org.gridkit.coherence.search.SearchFactory;<a name="line.4"></a>
+<FONT color="green">005</FONT>    <a name="line.5"></a>
+<FONT color="green">006</FONT>    public class LuceneSearchFactory extends SearchFactory&lt;LuceneInMemoryIndex, LuceneIndexConfig, Query&gt; {<a name="line.6"></a>
+<FONT color="green">007</FONT>    <a name="line.7"></a>
+<FONT color="green">008</FONT>            public LuceneSearchFactory(LuceneDocumentExtractor luceneExtractor) {<a name="line.8"></a>
+<FONT color="green">009</FONT>                    super(new LuceneSearchPlugin(), new DefaultLuceneIndexConfig(), luceneExtractor);<a name="line.9"></a>
+<FONT color="green">010</FONT>            }<a name="line.10"></a>
+<FONT color="green">011</FONT>    <a name="line.11"></a>
+<FONT color="green">012</FONT>            public void setLuceneIndexConfig(LuceneIndexConfig config) {<a name="line.12"></a>
+<FONT color="green">013</FONT>                    indexConfig = config;<a name="line.13"></a>
+<FONT color="green">014</FONT>            }<a name="line.14"></a>
+<FONT color="green">015</FONT>    }<a name="line.15"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</BODY>
+</HTML>
