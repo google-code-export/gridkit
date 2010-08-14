@@ -23,14 +23,14 @@
     <groupId>org.gridkit.search</groupId>
     <artifactId>coherence-search-lucene</artifactId>
     <packaging>jar</packaging>
-    <version>0.9</version>
+    <version>0.9.1-SNAPSHOT</version>
     <name>Grid Search / Coherence Lucene plugin</name>
 
     <repositories>
 	    <repository>
 		    <id>gridkit.org</id>
-			<name>GridKit.org repository</name>
-			<url>https://gridkit.googlecode.com/svn/repo</url>
+		    <name>GridKit.org repository</name>
+		    <url>https://gridkit.googlecode.com/svn/repo</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
@@ -44,7 +44,7 @@
         <dependency>
             <groupId>org.gridkit.search</groupId>
             <artifactId>coherence-search-common</artifactId>
-            <version>0.9</version>
+            <version>0.9.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>

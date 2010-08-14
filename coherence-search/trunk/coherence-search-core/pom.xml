@@ -23,7 +23,7 @@
 	<groupId>org.gridkit.search</groupId>
 	<artifactId>coherence-search-common</artifactId>
 	<packaging>jar</packaging>
-	<version>0.9</version>
+	<version>0.9.1-SNAPSHOT</version>
 	<name>Grid Search / Coherence common (code.google.com/p/gridkit)</name>
 
 	<dependencies>
