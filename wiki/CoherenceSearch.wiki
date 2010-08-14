@@ -12,7 +12,7 @@ Coherence custom index API is quite complicated to deal with. The purpose of thi
  * In case of distributed cache, custom cache also gets distributed and will benefit from Coherence advanced parallel queering
  * Combine built in Coherence filters with custom ones to make Coherence filter API even more powerfull
 
-== Advantages of Lucene index over built in Coherence index
+== Advantages of Lucene index over built in Coherence index ==
  * Full text search with various query types
  * Better handling of high cardinality indexes ([LuceneForHighCardinalityIndexes read more])
  * Compact index size ([LuceneVsCoherenceMemoryUsage read mode])
