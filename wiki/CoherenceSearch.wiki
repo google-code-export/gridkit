@@ -1,5 +1,6 @@
 #summary GridSearch / Coherence project overview
 #labels Featured,GridSearch
+#sidebar GridSearch_Coherence_TOC
 
 = Introduction =
 One of important features of Oracle Coherence is ability to maintain indexes of object attributes to speed up filters. Until 3.6 Coherence could use only simple reverse index for this purpose (implemented using either hash table or binary tree). A new release of Coherence 3.6 has introduced a feature of custom indexes, so using sophisticated full-text and other specialized indexes has became possible.
