@@ -19,6 +19,17 @@ public class LuceneIndexTest extends IndexComparisonTestBase {
 
     private LuceneSearchFactory factory;
 
+    public static void main(String[] args) {
+		configure();
+
+		LuceneIndexTest test = new LuceneIndexTest();
+		test.init();
+		System.out.println("Lucene index");
+		System.out.println("N = " + N);
+		System.out.println("RECORD_NUMBER = " + RECORD_NUMBER);
+		test.test();
+	}
+    
     @Override
     protected void setUp() {
         LuceneDocumentExtractor extractor = new LuceneDocumentExtractor();
@@ -32,10 +43,12 @@ public class LuceneIndexTest extends IndexComparisonTestBase {
         factory.getEngineConfig().setIndexUpdateQueueSizeLimit(1024);
         factory.getEngineConfig().setIndexUpdateDelay(60000);
 
+		System.out.println("Creating Lucene index");
         factory.createIndex(cache);
     }
 
-    @Override
+	@Override
+	@SuppressWarnings("unchecked")
     protected Set entrySet() {
 
         BooleanQuery query = new BooleanQuery();

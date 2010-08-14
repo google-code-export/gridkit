@@ -17,6 +17,8 @@
 package org.gridkit.coherence.search.lucene;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.index.memory.MemoryIndex;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.Directory;
 import org.gridkit.coherence.search.IndexEngineConfig;
@@ -33,6 +35,8 @@ import java.util.Set;
  */
 public class LuceneSearchPlugin implements PlugableSearchIndex<LuceneInMemoryIndex, LuceneIndexConfig, Query>, Serializable {
 
+	private static final long serialVersionUID = 20100813L;
+	
 	private String name = "";
 	
 	public LuceneSearchPlugin() {
@@ -78,7 +82,11 @@ public class LuceneSearchPlugin implements PlugableSearchIndex<LuceneInMemoryInd
 
 	@Override
 	public boolean evaluate(Query query, Object document) {
-		// TODO we can create new new index put single document and query this index
-		return false;
+		Field[] fields = (Field[]) document;
+		MemoryIndex memIndex = new MemoryIndex();
+		for(Field field: fields) {
+			memIndex.addField(field.name(), field.tokenStreamValue(), field.getBoost());
+		}
+		return memIndex.search(query) > 0.0f;
 	}
 }

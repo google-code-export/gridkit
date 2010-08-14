@@ -7,7 +7,10 @@ import java.io.Serializable;
  */
 
 public class MockIndexedObject implements Serializable {
-    private String[] stringField;
+
+	private static final long serialVersionUID = 1L;
+	
+	private String[] stringField;
     private int[] intField;
     private int currentValue;
     private int step;

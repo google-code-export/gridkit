@@ -13,7 +13,9 @@ public abstract class IndexComparisonTestServer {
 
 
     public static void main(String[] args) {
-        System.setProperty("tangosol.coherence.wka", "localhost");
+    	if (System.getProperty("tangosol.coherence.wka") == null) {
+    		System.setProperty("tangosol.coherence.wka", "localhost");
+    	}
         System.setProperty("tangosol.coherence.cluster", "index-comparison-test");
 
         System.setProperty("tangosol.coherence.distributed.localstorage", "true");

@@ -68,9 +68,7 @@ class LuceneInMemoryIndex {
 				searcher = null;
 			}
 
-			System.out.println("Createing writer (" + events.size() + " pending) @ " + Thread.currentThread().getName());
 			writer = new IndexWriter(storage, analyzer, IndexWriter.MaxFieldLength.UNLIMITED);
-			System.out.println("Writer created #" + writer.hashCode() + " @ " + Thread.currentThread().getName());
 			try {
 				for(IndexUpdateEvent event: events.values()) {
 					if (event.getType() == Type.NOPE) {

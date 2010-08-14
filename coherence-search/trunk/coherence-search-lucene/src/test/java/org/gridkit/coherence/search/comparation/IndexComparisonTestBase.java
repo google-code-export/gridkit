@@ -1,17 +1,19 @@
 package org.gridkit.coherence.search.comparation;
 
-import com.tangosol.net.CacheFactory;
-import com.tangosol.net.DefaultConfigurableCacheFactory;
-import com.tangosol.net.NamedCache;
-import com.tangosol.util.extractor.ReflectionExtractor;
+import java.util.Set;
+
 import junit.framework.Assert;
+
 import org.gridkit.coherence.search.lucene.TestDocument;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.lang.management.ManagementFactory;
-import java.util.Set;
+import com.tangosol.net.CacheFactory;
+import com.tangosol.net.DefaultConfigurableCacheFactory;
+import com.tangosol.net.NamedCache;
+import com.tangosol.util.extractor.ReflectionExtractor;
+import com.tangosol.util.filter.AlwaysFilter;
 
 /**
  * @author Alexander Solovyov
@@ -19,8 +21,8 @@ import java.util.Set;
 
 public abstract class IndexComparisonTestBase {
 
-    protected static final int N = 5;
-    private static final int RECORD_NUMBER = 1 << 16;
+    protected static final int RECORD_NUMBER = Integer.getInteger("RECORD_NUMBER", 1 << Integer.getInteger("RECORD_BITS", 16));
+    protected static final int N = ((32 - Integer.numberOfLeadingZeros(RECORD_NUMBER - 1) + TestDocument.BITS_PER_ATTRIB - 1) / TestDocument.BITS_PER_ATTRIB);
 
     public ReflectionExtractor[] stringFieldExtractors;
     public ReflectionExtractor[] intFieldExtractors;
@@ -29,10 +31,12 @@ public abstract class IndexComparisonTestBase {
 
     @BeforeClass
     public static void configure() {
-        System.setProperty("tangosol.coherence.wka", "localhost");
+    	if (System.getProperty("tangosol.coherence.wka") == null) {
+    		System.setProperty("tangosol.coherence.wka", "localhost");
+    	}
         System.setProperty("tangosol.coherence.cluster", "index-comparison-test");
 
-         System.setProperty("tangosol.coherence.distributed.localstorage", "false");
+        System.setProperty("tangosol.coherence.distributed.localstorage", "false");
 
         CacheFactory.setConfigurableCacheFactory(new DefaultConfigurableCacheFactory("lucene-cache-config.xml"));
     }
@@ -57,7 +61,12 @@ public abstract class IndexComparisonTestBase {
     private void addData() {
         long t = System.currentTimeMillis();
 
-        cache.putAll(TestDocument.generate(0, RECORD_NUMBER));
+        int page = 1 << 12;
+        for(int i = 0; i < RECORD_NUMBER; i += page) {
+        	int j = Math.min(RECORD_NUMBER, i + page);
+        	cache.putAll(TestDocument.generate(i, j));
+        	System.out.println("Done " + j);
+        }
 
         System.out.println("ADD DATA (ms): " + (System.currentTimeMillis() - t) );
     }
@@ -66,8 +75,10 @@ public abstract class IndexComparisonTestBase {
     public void test() {
         addData();
 
+        String memusage = (String) cache.aggregate(AlwaysFilter.INSTANCE, new MemUsageAggregator());
+        
         System.gc();
-        System.out.println("Mem. usage " + ManagementFactory.getMemoryMXBean().getHeapMemoryUsage());
+        System.out.println("Mem. usage: \n" + memusage);
 
         // warm up
         int resultSize = entrySet().size();
@@ -84,14 +95,20 @@ public abstract class IndexComparisonTestBase {
 
     private void assertEntrySetSize() {
         long t = System.nanoTime();
+        long deadline = System.currentTimeMillis() + 5000;
 
         int attemptCount = 1000;
-        for (int i = 0; i < attemptCount; i++) {
+        int i = 0;
+        for (i = 0; i < attemptCount; i++) {
             entrySet().size();
+            if (i % 10 == 0 && System.currentTimeMillis() > deadline) {
+            	break;
+            }
         }
 
-        System.out.println("TIME: " + (System.nanoTime() - t) / attemptCount );
+        System.out.println((System.nanoTime() - t) / i );
     }
 
-    protected abstract Set entrySet();
+    @SuppressWarnings("unchecked")
+	protected abstract Set entrySet();
 }

@@ -16,16 +16,18 @@
 
 package org.gridkit.coherence.search.lucene;
 
-import com.tangosol.util.Binary;
-import com.tangosol.util.ValueExtractor;
+import java.io.Serializable;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.Field.TermVector;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.io.Serializable;
+import com.tangosol.util.Binary;
+import com.tangosol.util.ValueExtractor;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
@@ -35,6 +37,7 @@ public class LuceneDocumentExtractor implements ValueExtractor, Serializable {
 	private static final long serialVersionUID = 20090804L;
 
 	public static final String DOCUMENT_ID = "doc-id";
+	public static final LuceneAnalyzerProvider DEFAULT_ANALYZER = WhitespaceAnalyzerProvider.INSTANCE;
 	
 	private List<FieldFactory> fieldMap = new ArrayList<FieldFactory>();
 
@@ -49,16 +52,24 @@ public class LuceneDocumentExtractor implements ValueExtractor, Serializable {
 		addText(name, extractor, Field.Store.NO, Field.Index.ANALYZED, TermVector.NO);
 	}
 
+	public void addText(String name, ValueExtractor extractor, LuceneAnalyzerProvider analyzer) {
+		addText(name, extractor, Field.Store.NO, Field.Index.ANALYZED, TermVector.NO);
+	}
+
 	public void addText(String name, ValueExtractor extractor, Field.Store store, Field.Index index) {
 		addText(name, extractor, store, index, TermVector.NO);
 	}
 
 	public void addText(String name, ValueExtractor extractor, Field.Store store, Field.Index index, Field.TermVector termVector) {
-		fieldMap.add(new GenericFieldFactory(name, extractor, false, store, index, termVector));
+		fieldMap.add(new GenericFieldFactory(name, extractor, DEFAULT_ANALYZER, false, store, index, termVector));
+	}
+
+	public void addText(String name, ValueExtractor extractor, LuceneAnalyzerProvider analyzer, Field.Store store, Field.Index index, Field.TermVector termVector) {
+		fieldMap.add(new GenericFieldFactory(name, extractor, analyzer, false, store, index, termVector));
 	}
 	
 	public void addBinaryField(String name, ValueExtractor extractor, Field.Store store) {
-		fieldMap.add(new GenericFieldFactory(name, extractor, true, store, null, null));
+		fieldMap.add(new GenericFieldFactory(name, extractor, null, true, store, null, null));
 	}
 	
 	public void addCustomField(FieldFactory ff) {
@@ -85,8 +96,12 @@ public class LuceneDocumentExtractor implements ValueExtractor, Serializable {
 	}
 	
 	public static class GenericFieldFactory implements FieldFactory {
+
+		private static final long serialVersionUID = 20100813L;
+		
 		private String name;
 		private ValueExtractor extractor;
+		private LuceneAnalyzerProvider textAnalyzer; 
 		private boolean binary;
 		private Field.Store store = Store.NO;
 		private Field.Index index = Index.ANALYZED;
@@ -96,9 +111,10 @@ public class LuceneDocumentExtractor implements ValueExtractor, Serializable {
 			// for remotting
 		}
 		
-		public GenericFieldFactory(String name, ValueExtractor extractor, boolean binary, Store store, Index index, TermVector termVector) {
+		public GenericFieldFactory(String name, ValueExtractor extractor, LuceneAnalyzerProvider analyzer, boolean binary, Store store, Index index, TermVector termVector) {
 			this.name = name;
 			this.extractor = extractor;
+			this.textAnalyzer = analyzer;
 			this.binary = binary;
 			this.store = store;
 			this.index = index;
@@ -127,7 +143,10 @@ public class LuceneDocumentExtractor implements ValueExtractor, Serializable {
 			}
 			else {
 				String text = String.valueOf(attribute);
-				return new Field(name, text, store, index, termVector);
+				Field field = new Field(name, text, store, index, termVector);
+				// TODO check proper support for all Lucence filed types
+				field.setTokenStream(textAnalyzer.getAnalyzer().tokenStream(name, new StringReader(text)));
+				return field;
 			}
 		}
 	}

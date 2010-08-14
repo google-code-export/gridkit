@@ -11,14 +11,14 @@ import java.util.Set;
  * @author Alexander Solovyov
  */
 
-public class CoherenceIndexTest extends IndexComparisonTestBase {
+public class NoIndexTest extends IndexComparisonTestBase {
 
     public static void main(String[] args) {
 		configure();
 
-		CoherenceIndexTest test = new CoherenceIndexTest();
+		NoIndexTest test = new NoIndexTest();
 		test.init();
-		System.out.println("Coherence index");
+		System.out.println("No index");
 		System.out.println("N = " + N);
 		System.out.println("RECORD_NUMBER = " + RECORD_NUMBER);
 		test.test();
@@ -26,11 +26,11 @@ public class CoherenceIndexTest extends IndexComparisonTestBase {
 	
     @Override
     protected void setUp() {
-		System.out.println("Creating Coherence indexes");
-        for (int i = 0; i < N; i++) {
-            cache.addIndex(stringFieldExtractors[i], false, null);
-            cache.addIndex(intFieldExtractors[i], false, null);
-        }
+//		System.out.println("Creating Coherence indexes");
+//        for (int i = 0; i < N; i++) {
+//            cache.addIndex(stringFieldExtractors[i], false, null);
+//            cache.addIndex(intFieldExtractors[i], false, null);
+//        }
     }
 
     @SuppressWarnings("unchecked")

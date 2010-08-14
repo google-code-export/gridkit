@@ -38,9 +38,9 @@ public abstract class BaseLuceneIndexTest {
     	"class", "interface", "pub", "pro", "abs", "static", "void"
     };
 
-	private NamedCache cache;
-	private LuceneDocumentExtractor extractor = new LuceneDocumentExtractor("text", new ReflectionExtractor("toString"));
-	private LuceneSearchFactory factory = new LuceneSearchFactory(extractor);
+	protected NamedCache cache;
+	protected LuceneDocumentExtractor extractor = new LuceneDocumentExtractor("text", new ReflectionExtractor("toString"));
+	protected LuceneSearchFactory factory = new LuceneSearchFactory(extractor);
 	{
 //		factory.getEngineConfig().setIndexUpdateQueueSizeLimit(10);
 	};

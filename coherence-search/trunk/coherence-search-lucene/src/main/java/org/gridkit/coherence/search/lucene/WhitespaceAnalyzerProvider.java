@@ -27,7 +27,9 @@ import java.io.Serializable;
 class WhitespaceAnalyzerProvider implements LuceneAnalyzerProvider, Serializable {
 
 	private static final long serialVersionUID = 20100720L;
-
+	
+	public static final WhitespaceAnalyzerProvider INSTANCE = new WhitespaceAnalyzerProvider();
+	
 	int x;
 	
 	public Analyzer getAnalyzer() {
