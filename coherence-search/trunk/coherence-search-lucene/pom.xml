@@ -17,21 +17,35 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.gridkit.coherence.search</groupId>
-	<artifactId>coherence-search-lucene</artifactId>
-	<packaging>jar</packaging>
-	<version>1.0-SNAPSHOT</version>
-	<name>Coherence Search Lucene plugin</name>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.gridkit.search</groupId>
+    <artifactId>coherence-search-lucene</artifactId>
+    <packaging>jar</packaging>
+    <version>0.9</version>
+    <name>Grid Search / Coherence Lucene plugin</name>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.gridkit.coherence.search</groupId>
-			<artifactId>coherence-search-core</artifactId>
-			<version>1.0-SNAPSHOT</version>
-		</dependency>
+    <repositories>
+	    <repository>
+		    <id>gridkit.org</id>
+			<name>GridKit.org repository</name>
+			<url>https://gridkit.googlecode.com/svn/repo</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+		</repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.gridkit.search</groupId>
+            <artifactId>coherence-search-common</artifactId>
+            <version>0.9</version>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.lucene</groupId>
@@ -39,34 +53,48 @@
             <version>3.0.2</version>
         </dependency>
 
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.5</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-memory</artifactId>
-			<version>3.0.2</version>
-		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.5</version>
+            <scope>test</scope>
+        </dependency>
+		
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-memory</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+		
+    </dependencies>
 
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<configuration>
-						<source>1.6</source>
-						<target>1.6</target>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-		<plugins>
-		</plugins>
-	</build>
-	
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>1.6</source>
+                        <target>1.6</target>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <configuration>
+                        <links>
+                            <link>http://gridkit.googlecode.com/svn/jdocs/grid-search/coherence-common/latest</link>
+                            <link>http://gridkit.googlecode.com/svn/jdocs/grid-search/coherence-lucene/latest</link>
+                            <link>http://download.oracle.com/docs/cd/E15357_01/coh.360/e15725</link>
+                        </links>
+                        <linksource>true</linksource>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+        </plugins>
+    </build>
+    
 </project>

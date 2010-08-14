@@ -20,17 +20,17 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.gridkit.coherence.search</groupId>
-	<artifactId>coherence-search-core</artifactId>
+	<groupId>org.gridkit.search</groupId>
+	<artifactId>coherence-search-common</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0-SNAPSHOT</version>
-	<name>Coherence Search core</name>
+	<version>0.9</version>
+	<name>Grid Search / Coherence common (code.google.com/p/gridkit)</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>com.oracle.coherence</groupId>
 			<artifactId>coherence</artifactId>
-			<version>[3.6.0b17229,]</version>
+			<version>3.6.0b17229</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -51,9 +51,21 @@
 						<target>1.6</target>
 					</configuration>
 				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<configuration>
+						<links>
+							<link>http://gridkit.googlecode.com/svn/jdocs/grid-search/coherence-common/latest</link>
+							<link>http://gridkit.googlecode.com/svn/jdocs/grid-search/coherence-lucene/latest</link>
+							<link>http://download.oracle.com/docs/cd/E15357_01/coh.360/e15725</link>
+						</links>
+						<linksource>true</linksource>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
-		<plugins>
+		<plugins>			
 		</plugins>
 	</build>
 	
