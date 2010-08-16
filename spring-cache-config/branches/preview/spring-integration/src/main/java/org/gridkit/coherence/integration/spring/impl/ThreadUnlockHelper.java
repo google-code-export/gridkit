@@ -38,6 +38,7 @@ class ThreadUnlockHelper {
 		public Thread newThread(Runnable r) {
 			Thread thread = new Thread(r);
 			thread.setName("BlockingCacheOpsExecutor");
+			thread.setDaemon(true);
 			return thread;
 		}
 	});
@@ -47,6 +48,7 @@ class ThreadUnlockHelper {
 		public Thread newThread(Runnable r) {
 			Thread thread = new Thread(r);
 			thread.setName("DeferredSpringOpsExecutor");
+			thread.setDaemon(true);
 			return thread;
 		}
 	});
