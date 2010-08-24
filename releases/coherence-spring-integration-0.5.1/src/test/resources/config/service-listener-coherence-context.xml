@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2010 Grid Dynamics Consulting Services, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"
+       default-lazy-init="true"
+>
+
+	<import resource="/coherence-beans.xml"/>
+
+	<bean id="log-map" class="java.util.concurrent.ConcurrentHashMap"/>
+
+	<bean id="member-listener1" class="org.gridkit.coherence.integration.spring.service.ServiceListenersTest.LogMemberListener">
+		<property name="log" ref="log-map"/>
+	</bean>
+
+	<bean id="member-listener2" class="org.gridkit.coherence.integration.spring.service.ServiceListenersTest.LogMemberListener">
+		<property name="log" ref="log-map"/>
+	</bean>
+
+	<bean id="member-listener3" class="org.gridkit.coherence.integration.spring.service.ServiceListenersTest.LogMemberListener">
+		<property name="log" ref="log-map"/>
+	</bean>
+
+	<bean id="service-listener1" class="org.gridkit.coherence.integration.spring.service.ServiceListenersTest.LogServiceListener">
+		<property name="log" ref="log-map"/>
+	</bean>
+
+	<bean id="service-listener2" class="org.gridkit.coherence.integration.spring.service.ServiceListenersTest.LogServiceListener">
+		<property name="log" ref="log-map"/>
+	</bean>
+
+	<bean id="service-listener3" class="org.gridkit.coherence.integration.spring.service.ServiceListenersTest.LogServiceListener">
+		<property name="log" ref="log-map"/>
+	</bean>
+
+	<bean id="cache-service" parent="service-reference" factory-bean="default.distributed.service"/>
+	
+	<bean id="default.distributed.service" parent="clustered-cache-service">
+		<property name="serviceName" value="DistributedCache" />
+		<property name="configuration">
+			<bean parent="distribted-scheme-configuration">
+				<property name="localStorage" value="true"/>
+			</bean>
+		</property>
+		<property name="memberListener" ref="member-listener1"/>
+		<property name="serviceListener" ref="service-listener1"/>
+	</bean>
+	
+
+	<bean id="exec-service" parent="service-reference" factory-bean="invocation-service"/>
+	
+	<bean id="invocation-service" parent="clustered-service">
+		<property name="configuration">
+			<bean parent="invocation-service-configuration">
+				<property name="threadCount" value="5"/>
+			</bean>
+		</property>
+		<property name="memberListener">
+			<bean parent="member-listener-collection">
+				<property name="list">
+					<list>
+						<ref local="member-listener2"/>
+						<ref local="member-listener3"/>
+					</list>
+				</property>
+			</bean>
+		</property>
+		<property name="serviceListener">
+			<bean parent="service-listener-collection">
+				<property name="list">
+					<list>
+						<ref local="service-listener2"/>
+						<ref local="service-listener3"/>
+					</list>
+				</property>
+			</bean>
+		</property>
+	</bean>
+		
+</beans>
