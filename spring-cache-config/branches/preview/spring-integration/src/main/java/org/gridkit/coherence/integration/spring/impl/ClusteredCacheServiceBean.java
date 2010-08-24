@@ -28,9 +28,7 @@ import org.springframework.beans.factory.annotation.Required;
 
 import com.tangosol.net.AbstractBackingMapManager;
 import com.tangosol.net.BackingMapManager;
-import com.tangosol.net.CacheFactory;
 import com.tangosol.net.CacheService;
-import com.tangosol.net.Cluster;
 import com.tangosol.net.NamedCache;
 import com.tangosol.net.Service;
 import com.tangosol.net.management.Registry;
@@ -40,7 +38,7 @@ import com.tangosol.net.management.Registry;
  */
 public class ClusteredCacheServiceBean extends ClusteredServiceBean implements ClusteredCacheService, InitializingBean, BeanNameAware, DisposableBean {
 
-	private BackingMapLookupStrategy backingMapLookupStrategy;	
+	private BackingMapLookupStrategy backingMapLookupStrategy;
 	private final BackingMapManager bmm = new BackendManager();
 	
 	@Required
@@ -74,38 +72,6 @@ public class ClusteredCacheServiceBean extends ClusteredServiceBean implements C
 		
 	}
 
-	private synchronized void ensureStarted() {
-		if (this.service == null) {
-			serviceName = serviceName == null ? beanName : serviceName;
-			final Cluster cluster = CacheFactory.ensureCluster();
-			final Service service = cluster.ensureService(serviceName, configuration.getServiceType().toString());
-			synchronized(cluster) {
-				if (!service.isRunning()) {
-					service.configure(configuration.getXmlConfiguration());
-					configuration.postConfigure(service);						
-					((CacheService)service).setBackingMapManager(bmm);					
-				}
-			}
-			if (!service.isRunning()) {
-				threadHelper.modalExecute(new Callable<Void>() {
-					@Override
-					public Void call() throws Exception {
-						synchronized(cluster) {
-							if (!service.isRunning()) {
-								service.start();
-							}
-							return null;
-						}   
-					}
-				});
-			}
-			if (((CacheService)service).getBackingMapManager() != bmm) {
-				throw new IllegalArgumentException("Service name conflict. Service [" + serviceName + "] is owned by other service bean");
-			}
-			this.service = (CacheService) service;
-		}
-	}
-	
 	@Override
 	protected void initializeService(Service service) {
 		super.initializeService(service);
@@ -120,15 +86,15 @@ public class ClusteredCacheServiceBean extends ClusteredServiceBean implements C
 		}
 	}
 
-	protected void jmxRegister(Map<?, ?> cache, String name, String tier) {
-		Registry r = service.getCluster().getManagement();
+	protected void jmxRegister(CacheService cacheService, Map<?, ?> cache, String name, String tier) {
+		Registry r = cacheService.getCluster().getManagement();
 		String id = "type=Cache,serive=" + service.getInfo().getServiceName() + ",name=" + name + ",tier=" + tier;
 		id = r.ensureGlobalName(id);
 		r.register(id, cache);		
 	}
 
-	protected void jmxUnregister(String name, String tier) {
-		Registry r = service.getCluster().getManagement();
+	protected void jmxUnregister(CacheService cacheService, String name, String tier) {
+		Registry r = cacheService.getCluster().getManagement();
 		String id = "type=Cache,serive=" + serviceName + ",name=" + name + ",tier=" + tier;
 		id = r.ensureGlobalName(id);
 		r.unregister(id);		
@@ -146,7 +112,7 @@ public class ClusteredCacheServiceBean extends ClusteredServiceBean implements C
 					return backingMapLookupStrategy.instantiateBackingMap(cacheName, getContext());
 				}				
 			});
-			jmxRegister(backingMap, cacheName, "back");
+			jmxRegister(getContext().getCacheService(), backingMap, cacheName, "back");
 			return backingMap;
 		}
 
@@ -154,7 +120,7 @@ public class ClusteredCacheServiceBean extends ClusteredServiceBean implements C
 		@Override
 		public void releaseBackingMap(String sName, Map map) {
 			super.releaseBackingMap(sName, map);
-			jmxUnregister(sName, "back");
+			jmxUnregister(getContext().getCacheService(), sName, "back");
 		}
 	}
 }

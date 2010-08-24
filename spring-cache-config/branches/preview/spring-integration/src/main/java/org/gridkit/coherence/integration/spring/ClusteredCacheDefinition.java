@@ -34,6 +34,7 @@ public class ClusteredCacheDefinition implements InitializingBean, BeanNameAware
 	private ClusteredCacheService clusteredService;
 	private String backendBeanId;
 	private Object backendBean;
+	private boolean initialized = false;
 	
 	
 	@Override
@@ -62,10 +63,14 @@ public class ClusteredCacheDefinition implements InitializingBean, BeanNameAware
 	
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		// TODO validation
+		if ((backendBean == null) && (backendBeanId == null)) {
+			throw new IllegalArgumentException("No backing map is configured");
+		}
 		if (backendBean != null) {
+			// TODO validation
 			validateBackendBean();
 		}
+		initialized = true;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -88,6 +93,9 @@ public class ClusteredCacheDefinition implements InitializingBean, BeanNameAware
 	}
 
 	public NamedCache getCache() {
+		if (!initialized) {
+			throw new IllegalStateException("Cache definition is not initialized");
+		}
 		try {
 			NamedCache cache = clusteredService.ensureCache(cacheName);
 			if (frontTier != null) {
@@ -102,6 +110,9 @@ public class ClusteredCacheDefinition implements InitializingBean, BeanNameAware
 	}
 	
 	public Map<?, ?> getBackendInstance(ApplicationContext appCtx, BackingMapManagerContext cacheCtx) {
+		if (!initialized) {
+			throw new IllegalStateException("Cache definition is not initialized");
+		}
 		if (backendBean != null) {
 			return resolveMap(backendBean, cacheCtx);
 		}

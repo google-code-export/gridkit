@@ -26,7 +26,7 @@ import com.tangosol.net.CacheFactory;
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
 public class SchemeSimpleContextTest extends BaseSimpleContextTest {
-
+	
 	@BeforeClass
 	public static void init() {
 		System.setProperty("tangosol.coherence.wka", "localhost");
@@ -38,5 +38,4 @@ public class SchemeSimpleContextTest extends BaseSimpleContextTest {
 		context = null;
 		CacheFactory.getCluster().shutdown();
 	}
-	
 }

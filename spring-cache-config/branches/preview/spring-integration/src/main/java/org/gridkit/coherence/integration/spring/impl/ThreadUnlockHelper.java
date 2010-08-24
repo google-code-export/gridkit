@@ -53,7 +53,6 @@ class ThreadUnlockHelper {
 		}
 	});
 	
-	
 	private final static BlockingQueue<Event> queue = new LinkedBlockingQueue<Event>();
 
 	private final Executor queueExecutor = new Executor() {
@@ -98,18 +97,23 @@ class ThreadUnlockHelper {
 	}
 
 	private void queueCleanUp() {
-		springThreadExecutor.execute(new Runnable() {
-			@Override
-			public void run() {
-				modalExecute(new Callable<Void>() {
-					
-					@Override
-					public Void call() throws Exception {
-						return null;
-					}
-				});
-			}
-		});
+		// ditch clean, will relay on second future TODO a job
+		// old version of cleanUp may lead to dead lock due to
+		// lock(TheardUnlockHelper) -> lock(Spring) sequence which is deadlock prone with
+		// lock(Spring) -> lock(ThreadUnlockHelper) - getCache sequence
+		
+//		springThreadExecutor.execute(new Runnable() {
+//			@Override
+//			public void run() {
+//				modalExecute(new Callable<Void>() {
+//					
+//					@Override
+//					public Void call() throws Exception {
+//						return null;
+//					}
+//				});
+//			}
+//		});
 	}
 	
 	public <V> V safeExecute(Callable<V> callable) {

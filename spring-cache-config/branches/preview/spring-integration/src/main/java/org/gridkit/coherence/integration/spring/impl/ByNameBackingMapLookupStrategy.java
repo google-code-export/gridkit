@@ -22,6 +22,7 @@ import org.gridkit.coherence.integration.spring.BackningMapProvider;
 import org.gridkit.coherence.integration.spring.ClusteredCacheDefinition;
 import org.gridkit.coherence.integration.spring.MapProvider;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
@@ -44,7 +45,9 @@ public class ByNameBackingMapLookupStrategy implements BackingMapLookupStrategy,
 	@Override
 	public Map<?, ?> instantiateBackingMap(String cacheName, BackingMapManagerContext context) {
 		String name = template.replaceAll("[{]cache-name[}]", cacheName);
+
 		Object bean = appContext.getBean(name);
+		((DefaultListableBeanFactory)appContext.getAutowireCapableBeanFactory()).getBeanDefinition("A");
 		Map<?, ?> map;
 		if (bean instanceof ClusteredCacheDefinition) {
 			map = ((ClusteredCacheDefinition)bean).getBackendInstance(appContext, context);

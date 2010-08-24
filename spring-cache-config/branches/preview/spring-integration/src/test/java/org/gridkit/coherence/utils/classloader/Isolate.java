@@ -24,13 +24,15 @@ import java.util.Enumeration;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 
+import org.junit.Ignore;
+
 /**
  *	@author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
+@Ignore
 public class Isolate {
 	
 	private String name;
-	private String[] packages;	
 	private Thread isolatedThread;
 	private ClassLoader cl;
 	
@@ -38,12 +40,12 @@ public class Isolate {
 	
 	public Isolate(String name, String... packages) {		
 		this.name = name;
-		this.packages = packages;
 		this.cl = new IsolatedClassloader(getClass().getClassLoader(), packages);
 	}
 	
 	public synchronized void start() {
 		isolatedThread = new Thread(new Runner());
+		isolatedThread.setName("Isolate-" + name);
 		isolatedThread.setDaemon(true);
 		isolatedThread.start();		
 	}
@@ -77,8 +79,8 @@ public class Isolate {
 						break;
 					}
 					else {
-						Class task = cl.loadClass(msg);						
-						Constructor c = task.getConstructors()[0];
+						Class<?> task = cl.loadClass(msg);						
+						Constructor<?> c = task.getConstructors()[0];
 						c.setAccessible(true);
 						Runnable r = (Runnable) c.newInstance();
 						r.run();
@@ -147,7 +149,7 @@ public class Isolate {
 					return this.loadClass(name, false);
 				}
 			}
-			Class cc = baseClassloader.loadClass(name);
+			Class<?> cc = baseClassloader.loadClass(name);
 			return cc;
 		}
 
@@ -168,9 +170,9 @@ public class Isolate {
 					}
 				}
 				byte[] cd = bos.toByteArray();
-				Class baseC = baseClassloader.loadClass(classname);				
-				Class c = defineClass(classname, cd, 0, cd.length, baseC.getProtectionDomain());
-				System.out.println("IS-" + name + " > " + classname);
+				Class<?> baseC = baseClassloader.loadClass(classname);				
+				Class<?> c = defineClass(classname, cd, 0, cd.length, baseC.getProtectionDomain());
+				//System.out.println("IS-" + name + " > " + classname);
 				return c;
 			}
 			catch(Exception e) {

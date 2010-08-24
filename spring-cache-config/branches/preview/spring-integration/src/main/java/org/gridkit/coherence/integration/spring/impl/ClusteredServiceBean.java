@@ -78,7 +78,7 @@ public class ClusteredServiceBean implements ClusteredService, InitializingBean,
 		return service;
 	}
 	
-	private synchronized void ensureStarted() {
+	protected final synchronized void ensureStarted() {
 		if (this.service == null) {
 			serviceName = serviceName == null ? beanName : serviceName;
 			final Cluster cluster = CacheFactory.ensureCluster();

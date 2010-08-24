@@ -46,6 +46,7 @@
 		<distributed-service-scheme id="default.distributed.service">
 			<service-name>DistributedCache</service-name>
 			<local-storage>true</local-storage>
+			<autostart>true</autostart>
 		</distributed-service-scheme>
 	
 		<replicated-service-scheme id="default.replicated.service">
@@ -56,8 +57,7 @@
 			<service-name>OptimisticCache</service-name>
 		</replicated-service-scheme>
 	
-		
-	
+			
 		<named-cache-scheme id="A">
 			<service><b:ref local="default.distributed.service"/></service>
 			<back-tier><java-map/></back-tier>
