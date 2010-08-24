@@ -46,8 +46,7 @@ public class ByNameBackingMapLookupStrategy implements BackingMapLookupStrategy,
 	public Map<?, ?> instantiateBackingMap(String cacheName, BackingMapManagerContext context) {
 		String name = template.replaceAll("[{]cache-name[}]", cacheName);
 
-		Object bean = appContext.getBean(name);
-		((DefaultListableBeanFactory)appContext.getAutowireCapableBeanFactory()).getBeanDefinition("A");
+		Object bean = appContext.getBean(name);		
 		Map<?, ?> map;
 		if (bean instanceof ClusteredCacheDefinition) {
 			map = ((ClusteredCacheDefinition)bean).getBackendInstance(appContext, context);
