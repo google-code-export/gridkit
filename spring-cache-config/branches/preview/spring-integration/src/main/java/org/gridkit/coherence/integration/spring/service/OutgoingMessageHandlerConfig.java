@@ -30,4 +30,28 @@ public class OutgoingMessageHandlerConfig {
 	@XmlConfigProperty("request-timeout")
 	private Integer requestTimeout;
 
+	public Integer getHeartbeatInterval() {
+		return heartbeatInterval;
+	}
+
+	public void setHeartbeatInterval(Integer heartbeatInterval) {
+		this.heartbeatInterval = heartbeatInterval;
+	}
+
+	public Integer getHeartbeatTimeout() {
+		return heartbeatTimeout;
+	}
+
+	public void setHeartbeatTimeout(Integer heartbeatTimeout) {
+		this.heartbeatTimeout = heartbeatTimeout;
+	}
+
+	public Integer getRequestTimeout() {
+		return requestTimeout;
+	}
+
+	public void setRequestTimeout(Integer requestTimeout) {
+		this.requestTimeout = requestTimeout;
+	}
+	
 }

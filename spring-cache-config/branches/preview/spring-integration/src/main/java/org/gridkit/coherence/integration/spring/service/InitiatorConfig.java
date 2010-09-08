@@ -15,20 +15,15 @@
  */
 package org.gridkit.coherence.integration.spring.service;
 
-import java.util.Collection;
-
-import com.tangosol.coherence.component.util.daemon.queueProcessor.service.peer.acceptor.TcpAcceptor;
+import com.tangosol.coherence.component.util.daemon.queueProcessor.service.peer.initiator.TcpInitiator;
 import com.tangosol.io.Serializer;
-import com.tangosol.util.Filter;
 
 /**
- *  Coherence*Extend configuration fragment
- *	@author Alexey Ragozin (alexey.ragozin@gmail.com)
+ * Coherence*Extend configuration fragment
+ * @author malexejev@gmail.com
+ * 07.09.2010
  */
-public class AcceptorConfig {
-
-	@XmlConfigProperty("connection-limit")
-	private Integer connectionLimit;
+public class InitiatorConfig {
 	
 	@ReflectionInjectedProperty("__m_OutgoingMessageHandlerConfig")
 	private OutgoingMessageHandlerConfig outgoingMessageHandlerConfig;
@@ -36,19 +31,8 @@ public class AcceptorConfig {
 	@ReflectionInjectedProperty("__m_Serializer")
 	private Serializer serializer;
 	
-	@ReflectionInjectedProperty("__m_TcpAcceptor")
-	private TcpAcceptor tcpAcceptor;
-	
-	@XmlConfigProperty("filters")
-	private Collection<Filter> filters;
-
-	public Integer getConnectionLimit() {
-		return connectionLimit;
-	}
-
-	public void setConnectionLimit(Integer connectionLimit) {
-		this.connectionLimit = connectionLimit;
-	}
+	@ReflectionInjectedProperty("__m_TcpInitiator")
+	private TcpInitiator tcpInitiator;
 
 	public OutgoingMessageHandlerConfig getOutgoingMessageHandlerConfig() {
 		return outgoingMessageHandlerConfig;
@@ -67,20 +51,12 @@ public class AcceptorConfig {
 		this.serializer = serializer;
 	}
 
-	public TcpAcceptor getTcpAcceptor() {
-		return tcpAcceptor;
+	public TcpInitiator getTcpInitiator() {
+		return tcpInitiator;
 	}
 
-	public void setTcpAcceptor(TcpAcceptor tcpAcceptor) {
-		this.tcpAcceptor = tcpAcceptor;
-	}
-
-	public Collection<Filter> getFilters() {
-		return filters;
-	}
-
-	public void setFilters(Collection<Filter> filters) {
-		this.filters = filters;
+	public void setTcpInitiator(TcpInitiator tcpInitiator) {
+		this.tcpInitiator = tcpInitiator;
 	}
 	
 }

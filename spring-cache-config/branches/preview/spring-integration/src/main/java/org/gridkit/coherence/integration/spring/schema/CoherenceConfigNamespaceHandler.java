@@ -35,6 +35,9 @@ import org.gridkit.coherence.integration.spring.service.LeaseGranularity;
 import org.gridkit.coherence.integration.spring.service.MemberListenerCollection;
 import org.gridkit.coherence.integration.spring.service.OptimisticCacheServiceConfiguration;
 import org.gridkit.coherence.integration.spring.service.PartitionListenerCollection;
+import org.gridkit.coherence.integration.spring.service.ProxyServiceConfiguration;
+import org.gridkit.coherence.integration.spring.service.RemoteCacheServiceConfiguration;
+import org.gridkit.coherence.integration.spring.service.RemoteInvocationServiceConfiguration;
 import org.gridkit.coherence.integration.spring.service.ReplicatedCacheServiceConfiguration;
 import org.gridkit.coherence.integration.spring.service.ServiceListenerCollection;
 import org.springframework.beans.MutablePropertyValues;
@@ -60,7 +63,6 @@ import com.tangosol.net.cache.BinaryMemoryCalculator;
  *	@author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
 public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
-
 	
 	private static final String TAG_COHERENCE_CONFIG = "coherence-config";
 	private static final String TAG_NAMED_CACHE = "named-cache";
@@ -69,9 +71,12 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 	private static final String TAG_REPLICATED_SERVICE_SCHEME = "replicated-service-scheme";
 	private static final String TAG_OPTIMISTIC_SERVICE_SCHEME = "optimistic-service-scheme";
 	private static final String TAG_INVOCATION_SERVICE_SCHEME = "invocation-service-scheme";
+	private static final String TAG_PROXY_SERVICE_SCHEME = "proxy-service-scheme";
+	private static final String TAG_REMOTE_INVOCATION_SERVICE_SCHEME = "remote-invocation-service-scheme";
 	private static final String TAG_NAMED_CACHE_SCHEME = "named-cache-scheme";
 	private static final String TAG_LOCAL_CACHE_SCHEME = "local-cache-scheme";
 	private static final String TAG_NEAR_CACHE_SCHEME = "near-cache-scheme";
+	private static final String TAG_REMOTE_CACHE_SCHEME = "remote-cache-scheme";
 	private static final String TAG_READ_WRITE_BACKING_MAP_SCHEME = "read-write-backing-map-scheme";
 	
 	private static final String BEAN_DFEAULT_BACKING_MAP_LOOKUP_STRATEGY = "default-backing-map-lookup-strategy";
@@ -121,6 +126,33 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 				registerInvocationServiceConfigProperties(invocationService.configTemplate);
 				
 				registerBeanDefinitionParser(TAG_INVOCATION_SERVICE_SCHEME, invocationService);
+			}
+			// proxy (for Coherence*Extend)
+			{
+				ServiceBeanTemplate proxyService = new ServiceBeanTemplate();
+				proxyService.className = ClusteredServiceBean.class.getName();
+				registerServiceBeanProperties(proxyService);
+				registerProxyServiceConfigProperties(proxyService.configTemplate);
+				
+				registerBeanDefinitionParser(TAG_PROXY_SERVICE_SCHEME, proxyService);
+			}
+			// remote cache (for Coherence*Extend)
+			{
+				ServiceBeanTemplate remoteCacheService = new ServiceBeanTemplate();
+				remoteCacheService.className = ClusteredServiceBean.class.getName();
+				registerServiceBeanProperties(remoteCacheService);
+				registerRemoteCacheServiceConfigProperties(remoteCacheService.configTemplate);
+				
+				registerBeanDefinitionParser(TAG_REMOTE_CACHE_SCHEME, remoteCacheService);
+			}
+			// remote invocation (for Coherence*Extend)
+			{
+				ServiceBeanTemplate remoteInvocationService = new ServiceBeanTemplate();
+				remoteInvocationService.className = ClusteredServiceBean.class.getName();
+				registerServiceBeanProperties(remoteInvocationService);
+				registerRemoteInvocationServiceConfigProperties(remoteInvocationService.configTemplate);
+				
+				registerBeanDefinitionParser(TAG_REMOTE_INVOCATION_SERVICE_SCHEME, remoteInvocationService);
 			}
 		}
 		{// cache schemes
@@ -206,6 +238,32 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 		template.addProperty("task-hung-threshlod", "taskHungThreshpld", new TimeoutPropertyParser());
 		template.addProperty("task-timeout", 		"taskTimeout", new TimeoutPropertyParser());
 		template.addProperty("request-timeout", 	"requestTimeout", new TimeoutPropertyParser());
+	}
+	
+	private void registerProxyServiceConfigProperties(CustomBeanDefinitionTemplate template) {
+		registerServiceConfigProperties(template);
+	
+		template.className = ProxyServiceConfiguration.class.getName();
+
+		template.addProperty("thread-count", 				"threadCount", new StringPropertyParser());
+		template.addProperty("task-hung-threshlod", 		"taskHungThreshpld", new TimeoutPropertyParser());
+		template.addProperty("task-timeout", 				"taskTimeout", new TimeoutPropertyParser());
+		template.addProperty("request-timeout", 			"requestTimeout", new TimeoutPropertyParser());
+		template.addProperty("acceptor-config", 			"acceptorConfig", new BeanPropertyParser());
+		template.addProperty("remote-cache-service",		"remoteCacheService", new BeanPropertyParser());
+		template.addProperty("remote-invocation-service",	"remoteInvocationService", new BeanPropertyParser());
+	}
+	
+	private void registerRemoteCacheServiceConfigProperties(CustomBeanDefinitionTemplate template) {
+		registerServiceConfigProperties(template);
+		template.className = RemoteCacheServiceConfiguration.class.getName();
+		template.addProperty("initiator-config", "initiatorConfig", new BeanPropertyParser());
+	}
+	
+	private void registerRemoteInvocationServiceConfigProperties(CustomBeanDefinitionTemplate template) {
+		registerServiceConfigProperties(template);
+		template.className = RemoteInvocationServiceConfiguration.class.getName();
+		template.addProperty("initiator-config", "initiatorConfig", new BeanPropertyParser());
 	}
 	
 	private void registerCacheSchemeProperties(CustomBeanDefinitionTemplate template) {

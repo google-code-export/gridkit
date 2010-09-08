@@ -84,6 +84,7 @@ public class LocalCacheDefinition implements MapProvider, InitializingBean {
 		return false;
 	}
 	
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (evictionPolicy == null && evictionType == null) {
 			evictionType = CacheEvictionType.HYBRID;

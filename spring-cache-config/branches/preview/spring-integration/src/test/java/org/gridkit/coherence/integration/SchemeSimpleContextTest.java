@@ -18,6 +18,7 @@ package org.gridkit.coherence.integration;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.tangosol.net.CacheFactory;
@@ -25,6 +26,7 @@ import com.tangosol.net.CacheFactory;
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
+@Ignore
 public class SchemeSimpleContextTest extends BaseSimpleContextTest {
 	
 	@BeforeClass

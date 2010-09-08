@@ -29,10 +29,8 @@ public class SimpleContextTest extends BaseSimpleContextTest {
 
 	@BeforeClass
 	public static void init() {
-
 		System.setProperty("tangosol.coherence.wka", "localhost");
 		context = new ClassPathXmlApplicationContext("config/simple-coherence-context.xml");
-		
 	}
 	
 	@AfterClass

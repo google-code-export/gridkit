@@ -22,7 +22,6 @@ import org.gridkit.coherence.integration.spring.BackningMapProvider;
 import org.gridkit.coherence.integration.spring.ClusteredCacheDefinition;
 import org.gridkit.coherence.integration.spring.MapProvider;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 

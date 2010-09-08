@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 
@@ -286,4 +287,17 @@ public abstract class BaseSimpleContextTest {
 		InvocationService service = (InvocationService) context.getBean("exec-service");
 		service.getInfo().getServiceMembers();
 	}
+	
+//	@Test
+	@Ignore
+	public void testCacheK_RemoteCache() {
+		NearCache cache = (NearCache) context.getBean("cache.K");
+		cache.put("a", "A");
+		cache.put("b", "B");
+		cache.put("c", "C");
+		Assert.assertEquals("A", cache.get("a"));
+		Assert.assertEquals("B", cache.get("b"));
+		Assert.assertEquals("C", cache.get("c"));
+	}
+	
 }
