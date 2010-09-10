@@ -71,13 +71,13 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 	private static final String TAG_REPLICATED_SERVICE_SCHEME = "replicated-service-scheme";
 	private static final String TAG_OPTIMISTIC_SERVICE_SCHEME = "optimistic-service-scheme";
 	private static final String TAG_INVOCATION_SERVICE_SCHEME = "invocation-service-scheme";
-	private static final String TAG_PROXY_SERVICE_SCHEME = "proxy-service-scheme";
-	private static final String TAG_REMOTE_INVOCATION_SERVICE_SCHEME = "remote-invocation-service-scheme";
 	private static final String TAG_NAMED_CACHE_SCHEME = "named-cache-scheme";
 	private static final String TAG_LOCAL_CACHE_SCHEME = "local-cache-scheme";
 	private static final String TAG_NEAR_CACHE_SCHEME = "near-cache-scheme";
-	private static final String TAG_REMOTE_CACHE_SCHEME = "remote-cache-scheme";
 	private static final String TAG_READ_WRITE_BACKING_MAP_SCHEME = "read-write-backing-map-scheme";
+	private static final String TAG_PROXY_SERVICE_SCHEME = "proxy-service-scheme";
+	private static final String TAG_REMOTE_INVOCATION_SERVICE_SCHEME = "remote-invocation-service-scheme";
+	private static final String TAG_REMOTE_CACHE_SCHEME = "remote-cache-scheme";
 	
 	private static final String BEAN_DFEAULT_BACKING_MAP_LOOKUP_STRATEGY = "default-backing-map-lookup-strategy";
 	
@@ -241,8 +241,6 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 	}
 	
 	private void registerProxyServiceConfigProperties(CustomBeanDefinitionTemplate template) {
-		registerServiceConfigProperties(template);
-	
 		template.className = ProxyServiceConfiguration.class.getName();
 
 		template.addProperty("thread-count", 				"threadCount", new StringPropertyParser());
@@ -333,31 +331,6 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 		@Override
 		public BeanDefinition parse(Element root, ParserContext parserContext) {
 			
-//			BeanDefinitionParserDelegate delegate = parserContext.getDelegate();
-//			
-//			if (delegate.isDefaultNamespace(delegate.getNamespaceURI(root))) {
-//				NodeList nl = root.getChildNodes();
-//				for (int i = 0; i < nl.getLength(); i++) {
-//					Node node = nl.item(i);
-//					if (node instanceof Element) {
-//						Element ele = (Element) node;
-//						String namespaceUri = delegate.getNamespaceURI(ele);
-//						if (delegate.isDefaultNamespace(namespaceUri)) {
-//							if (delegate.nodeNameEquals(ele, BEAN_ELEMENT)) {
-//								processBeanDefinition(ele, delegate);
-//							}
-//						}
-//						else {
-//							delegate.parseCustomElement(ele);
-//						}
-//					}
-//				}
-//			}
-//			else {
-//				delegate.parseCustomElement(root);
-//			}
-
-			
 			NodeList nl = root.getChildNodes();
 			for(int i = 0; i != nl.getLength(); ++i) {
 				Node n = nl.item(i);
@@ -383,17 +356,26 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 		public boolean lazyInit = true;
 				
 		private Map<String, PropertyInfo> props = new HashMap<String, PropertyInfo>();
+		private Map<String, PropertyInfo> attributes = new HashMap<String, PropertyInfo>();
 		private Map<String, BeanDefinition> defaultBeans = new HashMap<String, BeanDefinition>();
 		private Map<String, Object> defaultValues = new HashMap<String, Object>();
 
-		
 		public void addProperty(String element, String propName, PropertyParser parser) {
 			PropertyInfo info = new PropertyInfo();
-			info.elementName = element;
+			info.name = element;
 			info.propName = propName;
 			info.parser = parser;
 			
 			props.put(element, info);
+		}
+
+		public void addAttribute(String attributeName, String propName, PropertyParser parser) {
+			PropertyInfo info = new PropertyInfo();
+			info.name = attributeName;
+			info.propName = propName;
+			info.parser = parser;
+			
+			attributes.put(attributeName, info);
 		}
 
 		public void addDefault(String propName, BeanDefinition bd) {
@@ -421,22 +403,37 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 			}
 			bd.setLazyInit(lazyInit);
 			
+			/*
+			NamedNodeMap nnp = element.getAttributes();
+			for (int i = 0; i < nnp.getLength(); ++i) {
+				Node n = nnp.item(i);
+				PropertyInfo info = attributes.get(key)
+			}
+			*/
+			
 			NodeList nl = element.getChildNodes();
-			for(int i = 0; i != nl.getLength(); ++i) {
+			for (int i = 0; i != nl.getLength(); ++i) {
 				Node n = nl.item(i);
 				if (n.getNodeType() == Node.ELEMENT_NODE) {
 					String prop = parserContext.getDelegate().getLocalName(n);
 					PropertyInfo info = props.get(prop);
 					if (info == null) {
 						reportUnknownTag(element, parserContext, n);
+					} else {
+						info.parser.initProperty((Element)n, bd, info.propName, parserContext);
 					}
-					else {
+				} else if (n.getNodeType() == Node.ATTRIBUTE_NODE) {
+					String attr = parserContext.getDelegate().getLocalName(n);
+					PropertyInfo info = attributes.get(attr);
+					if (info == null) {
+						reportUnknownAttribute(element, parserContext, n);
+					} else {
 						info.parser.initProperty((Element)n, bd, info.propName, parserContext);
 					}
 				}
 			};
 			
-			for(String prop: defaultBeans.keySet()) {
+			for (String prop: defaultBeans.keySet()) {
 				if (!bd.getPropertyValues().contains(prop)) {
 					GenericBeanDefinition defValue = new GenericBeanDefinition(defaultBeans.get(prop));
 					String id = parserContext.getReaderContext().generateBeanName(defValue);
@@ -445,7 +442,7 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 				}
 			}
 
-			for(String prop: defaultValues.keySet()) {
+			for (String prop: defaultValues.keySet()) {
 				if (!bd.getPropertyValues().contains(prop)) {
 					bd.getPropertyValues().add(prop, defaultValues.get(prop));
 				}
@@ -459,6 +456,13 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 //			parserContext.getReaderContext().fatal(
 //					"Unknown tag '" + parserContext.getDelegate().getLocalName(n)
 //							+ "' while parsing <" + parserContext.getDelegate().getLocalName(element) + ">", element);
+		}
+		
+		private void reportUnknownAttribute(Element element, ParserContext parserContext, Node n) {
+			// TODO yes, i will not implement this too
+//			parserContext.getReaderContext().fatal(
+//			"Unknown attribute '" + parserContext.getDelegate().getLocalName(n)
+//					+ "' while parsing <" + parserContext.getDelegate().getLocalName(element) + ">", element);
 		}
 	}
 	
@@ -514,9 +518,12 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 		}
 	}
 
+	/*
+	 * Contains either child element property binding or current element's attribute binding
+	 */
 	private static class PropertyInfo {
 		@SuppressWarnings("unused")
-		public String elementName;
+		public String name;
 		public String propName;
 		public PropertyParser parser; 
 	}

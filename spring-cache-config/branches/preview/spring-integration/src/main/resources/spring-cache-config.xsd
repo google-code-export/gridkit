@@ -80,51 +80,13 @@
 		</xs:choice>
 	</xs:complexType>
 	
-	<xs:complexType name="acceptor-config-bean">
-		<xs:choice>
-			<xs:element name="connection-limit" minOccurs="0" maxOccurs="1" type="xs:integer"/>
-			<xs:element name="outgoing-message-handler" minOccurs="0" maxOccurs="1" type="outgoing-message-handler-bean"/>
-			<xs:element name="serializer" minOccurs="0" maxOccurs="1" type="serializer-bean"/>
-			<xs:element name="tcp-acceptor" minOccurs="0" maxOccurs="1" type="single-spring-bean">
-			<!-- 
-				<xs:complexType>
-					<xs:choice>
-						<xs:group ref="tcp-config-elements"/>
-						<xs:element name="address-provider" minOccurs="0" maxOccurs="1" type="address-provider-bean"/>
-						<xs:element name="listen-backlog" minOccurs="0" maxOccurs="1" type="xs:integer"/>
-						<xs:element name="authorized-hosts" minOccurs="0" maxOccurs="1">
-							<xs:complexType>
-								<xs:choice>
-						            <xs:element name="host-address" minOccurs="0" maxOccurs="1" type="xs:string"/>
-						            <xs:element name="host-range" minOccurs="0" maxOccurs="1" type="xs:string"/>
-						            <xs:element name="host-filter" minOccurs="0" maxOccurs="1" type="single-spring-bean"/>
-								</xs:choice>
-							</xs:complexType>
-						</xs:element>
-						<xs:element name="suspect-protocol-enabled" minOccurs="0" maxOccurs="1" type="xs:boolean"/>
-						<xs:element name="suspect-buffer-size" minOccurs="0" maxOccurs="1" type="size-value"/>
-						<xs:element name="suspect-buffer-length" minOccurs="0" maxOccurs="1" type="xs:integer"/>
-						<xs:element name="nominal-buffer-size" minOccurs="0" maxOccurs="1" type="size-value"/>
-						<xs:element name="nominal-buffer-length" minOccurs="0" maxOccurs="1" type="xs:integer"/>
-						<xs:element name="limit-buffer-size" minOccurs="0" maxOccurs="1" type="size-value"/>
-						<xs:element name="limit-buffer-length" minOccurs="0" maxOccurs="1" type="xs:integer"/>
-					</xs:choice>
-				</xs:complexType>
-				 -->
-			</xs:element>
-			<xs:element minOccurs="0" maxOccurs="1" name="filters" type="beans:collectionType"/>
-		</xs:choice>
-	</xs:complexType>
-	
 	<xs:complexType name="initiator-config-bean">
 		<xs:choice>
 			<xs:element name="outgoing-message-handler" minOccurs="0" maxOccurs="1" type="outgoing-message-handler-bean"/>
 			<xs:element name="serializer" minOccurs="0" maxOccurs="1" type="serializer-bean"/>
-			<xs:element name="tcp-initiator" minOccurs="0" maxOccurs="1" type="single-spring-bean">
-			<!-- 
+			<xs:element name="tcp-initiator" minOccurs="0" maxOccurs="1">
 				<xs:complexType>
 					<xs:choice>
-						<xs:group ref="tcp-config-elements"/>
 						<xs:element name="remote-addresses" minOccurs="1" maxOccurs="1">
 							<xs:complexType>
 								<xs:choice>
@@ -134,119 +96,47 @@
 											<xs:attribute name="port" use="optional" type="xs:integer"/>
 										</xs:complexType>
 						            </xs:element>
-									<xs:element name="address-provider" minOccurs="0" maxOccurs="1" type="address-provider-bean"/>
+									<xs:element name="address-provider" minOccurs="0" maxOccurs="1" type="single-spring-bean"/>
 								</xs:choice>
 							</xs:complexType>
 						</xs:element>
-						<xs:element name="connect-timeout" minOccurs="0" maxOccurs="1" type="time-value"/>
 					</xs:choice>
+					<xs:attribute name="local-host" type="xs:string" use="optional"/>
+					<xs:attribute name="local-port" type="xs:integer" use="optional"/>
+					<xs:attribute name="socket-provider-config" type="xs:string" use="optional"/>
+					<xs:attribute name="reuse-address" type="xs:boolean" use="optional"/>
+					<xs:attribute name="keep-alive-enabled" type="xs:boolean" use="optional"/>
+					<xs:attribute name="tcp-delay-enabled" type="xs:boolean" use="optional"/>
+					<xs:attribute name="receive-buffer-size" type="size-value" use="optional"/>
+					<xs:attribute name="send-buffer-size" type="size-value" use="optional"/>
+					<xs:attribute name="linger-timeout" type="size-value" use="optional"/>
+					<xs:attribute name="connect-timeout" type="time-value" use="optional"/>
 				</xs:complexType>
-				 -->
 			</xs:element>
+			<!-- TODO
 			<xs:element minOccurs="0" maxOccurs="1" name="filters" type="beans:collectionType"/>
+			-->
 		</xs:choice>
 	</xs:complexType>
 	
 	<xs:complexType name="outgoing-message-handler-bean">
-		<xs:choice>
-			<xs:element name="heartbeat-interval" minOccurs="0" maxOccurs="1" type="time-value"/>
-			<xs:element name="heartbeat-timeout" minOccurs="0" maxOccurs="1" type="time-value"/>
-			<xs:element name="request-timeout" minOccurs="0" maxOccurs="1" type="time-value"/>
-		</xs:choice>
+		<xs:attribute name="heartbeat-interval" type="time-value" use="optional"/>
+		<xs:attribute name="heartbeat-timeout" type="time-value" use="optional"/>
+		<xs:attribute name="request-timeout" type="time-value" use="optional"/>
 	</xs:complexType>
 	
-	<!-- 
-	<xs:complexType name="address-provider-bean">
-		<xs:choice>
-			<xs:element name="class-name" minOccurs="0" maxOccurs="1" type="xs:string"/>
-			<xs:element name="class-factory-name" minOccurs="0" maxOccurs="1" type="xs:string"/>
-			<xs:element name="method-name" minOccurs="0" maxOccurs="1" type="xs:string"/>
-			<xs:element name="init-params" minOccurs="0" maxOccurs="1" type="init-params"/>
-		</xs:choice>
-	</xs:complexType>
-	 -->
-	
-	<!-- 
-	<xs:complexType name="proxy-config-bean">
-		<xs:choice>
-			<xs:group ref="single-spring-bean-elements"/>
-			<xs:element name="cache-service-proxy">
-				<xs:complexType>
-					<xs:choice>
-						<xs:element name="enabled" minOccurs="0" maxOccurs="1" type="xs:boolean"/>
-						<xs:element name="lock-enabled" minOccurs="0" maxOccurs="1" type="xs:boolean"/>
-						<xs:element name="read-only" minOccurs="0" maxOccurs="1" type="xs:boolean"/>
-						<xs:element name="class-name" minOccurs="0" maxOccurs="1" type="xs:string"/>
-						<xs:element name="init-params" minOccurs="0" maxOccurs="1" type="init-params"/>
-					</xs:choice>
-				</xs:complexType>
-			</xs:element>
-			<xs:element name="invocation-service-proxy">
-				<xs:complexType>
-					<xs:choice>
-						<xs:element name="enabled" minOccurs="0" maxOccurs="1" type="xs:boolean"/>
-						<xs:element name="class-name" minOccurs="0" maxOccurs="1" type="xs:string"/>
-						<xs:element name="init-params" minOccurs="0" maxOccurs="1" type="init-params"/>
-					</xs:choice>
-				</xs:complexType>
-			</xs:element>
-		</xs:choice>
-	</xs:complexType>
-	 -->
-
-	<!-- 
+	<!-- Uncomment when init-params are to be implemented
 	<xs:complexType name="init-params">
 		<xs:choice>
 			<xs:element minOccurs="1" maxOccurs="unbounded" name="init-param">
 				<xs:complexType>
-					<xs:choice>
-						<xs:element minOccurs="0" maxOccurs="1" name="param-name" type="xs:string" />
-						<xs:element minOccurs="0" maxOccurs="1" name="param-type">
-							<xs:complexType>
-								<xs:choice>
-									<xs:element name="java.lang.String"/>
-									<xs:element name="java.lang.Boolean"/>
-									<xs:element name="java.lang.Integer"/>
-									<xs:element name="java.lang.Long"/>
-									<xs:element name="java.lang.Double"/>
-									<xs:element name="java.math.BigDecimal"/>
-									<xs:element name="java.io.File"/>
-									<xs:element name="java.sql.Date"/>
-									<xs:element name="java.sql.Time"/>
-									<xs:element name="java.sql.Timestamp"/>
-								</xs:choice>
-							</xs:complexType>
-						</xs:element>
-						<xs:element minOccurs="0" maxOccurs="1" name="param-value" type="xs:string"/>
-					</xs:choice>
+					<xs:attribute name="param-name" type="xs:string" use="optional"/>
+					<xs:attribute name="param-type" type="xs:string" use="optional"/>
+					<xs:attribute name="param-value" type="xs:string" use="optional"/>
 				</xs:complexType>
 			</xs:element>
 		</xs:choice>
 	</xs:complexType>
-	 -->
-	 
-	 <!-- 
-	<xs:group name="tcp-config-elements">
-		<xs:choice>
-            <xs:element name="local-address" minOccurs="0" maxOccurs="1">
-				<xs:complexType>
-					<xs:attribute name="host" use="required" type="xs:string"/>
-					<xs:attribute name="port" use="optional" type="xs:integer"/>
-				</xs:complexType>
-            </xs:element>
-			<xs:element name="socket-provider" minOccurs="0" maxOccurs="1">
-				<xs:complexType>
-					<xs:attribute name="config" use="optional" type="xs:string"/>
-				</xs:complexType>
-			</xs:element>
-            <xs:element name="reuse-address" minOccurs="0" maxOccurs="1" type="xs:boolean"/>
-            <xs:element name="keep-alive-enabled" minOccurs="0" maxOccurs="1" type="xs:boolean"/>
-            <xs:element name="tcp-delay-enabled" minOccurs="0" maxOccurs="1" type="xs:boolean"/>
-            <xs:element name="receive-buffer-size" minOccurs="0" maxOccurs="1" type="size-value"/>
-            <xs:element name="send-buffer-size" minOccurs="0" maxOccurs="1" type="size-value"/>
-            <xs:element name="linger-timeout" minOccurs="0" maxOccurs="1" type="size-value"/>
-		</xs:choice>
-	</xs:group>
 	 -->
 	
 	<xs:simpleType name="time-value">
@@ -318,7 +208,7 @@
 				<!-- configuration bean part -->
 				<xs:element name="serializer" minOccurs="0" maxOccurs="1" type="serializer-bean"/>
 				<xs:element name="member-listener" minOccurs="0" maxOccurs="unbounded" type="single-spring-bean"/>
-				<xs:element name="serivice-listener" minOccurs="0" maxOccurs="unbounded" type="single-spring-bean"/>
+				<xs:element name="service-listener" minOccurs="0" maxOccurs="unbounded" type="single-spring-bean"/>
 				<!-- TODO
 				<xs:element name="guardian-timeout" minOccurs="0" maxOccurs="1" type="time-value"/>
 				<xs:element name="service-failure-policy" minOccurs="0" maxOccurs="1" type="service-failure-policy-bean"/>
@@ -404,21 +294,77 @@
 			<xs:complexContent>
 				<xs:extension base="beans:identifiedType">
 					<xs:choice minOccurs="0" maxOccurs="unbounded">
-						<xs:group ref="coherence-service-config-elements"/>
-						<xs:element name="task-hung-threshlod" minOccurs="0" maxOccurs="1" type="time-value"/>
-						<xs:element name="task-timeout" minOccurs="0" maxOccurs="1" type="time-value"/>
-						<xs:element name="request-timeout" minOccurs="0" maxOccurs="1" type="time-value"/>
-						<xs:element name="thread-count" minOccurs="0" maxOccurs="1" type="xs:integer"/>
-						<xs:element name="acceptor-config" minOccurs="0" maxOccurs="1" type="acceptor-config-bean"/>
-						
-<!--						<xs:element name="proxy-config" minOccurs="0" maxOccurs="1" type="proxy-config-bean"/>-->
-
-						<xs:element name="remote-cache-service" minOccurs="0" maxOccurs="1" type="single-spring-bean"/>
-						<xs:element name="remote-invocation-service" minOccurs="0" maxOccurs="1" type="single-spring-bean"/>
+						<xs:element name="member-listener" minOccurs="0" maxOccurs="unbounded" type="single-spring-bean"/>
+						<xs:element name="service-listener" minOccurs="0" maxOccurs="unbounded" type="single-spring-bean"/>
 						<!-- TODO
+						<xs:element name="guardian-timeout" minOccurs="0" maxOccurs="1" type="time-value"/>
+						<xs:element name="service-failure-policy" minOccurs="0" maxOccurs="1" type="service-failure-policy-bean"/>
 						<xs:element name="proxy-quorum-policy-scheme" minOccurs="0" maxOccurs="1" />
 						 -->
+						<xs:element name="acceptor-serializer" minOccurs="0" maxOccurs="1" type="serializer-bean"/>
+						<xs:element name="acceptor-filter" minOccurs="0" maxOccurs="1" type="single-spring-bean"/>
+						<xs:element name="outgoing-message-handler" minOccurs="0" maxOccurs="1" type="outgoing-message-handler-bean"/>
+						<xs:element name="tcp-acceptor" minOccurs="0" maxOccurs="1">
+							<xs:complexType>
+								<xs:choice>
+									<!-- TODO
+						            <xs:element name="authorized-host-filter" minOccurs="0" maxOccurs="1" type="single-spring-bean"/>
+									 -->
+									<xs:element name="address-provider" minOccurs="0" maxOccurs="1" type="single-spring-bean"/>
+								</xs:choice>
+								<xs:attribute name="authorized-host-address" type="xs:string" use="optional"/>
+								<xs:attribute name="authorized-host-range" type="xs:string" use="optional"/>
+								<xs:attribute name="local-host" type="xs:string" use="optional"/>
+								<xs:attribute name="local-port" type="xs:integer" use="optional"/>
+								<xs:attribute name="socket-provider-config" type="xs:string" use="optional"/>
+								<xs:attribute name="reuse-address" type="xs:boolean" use="optional"/>
+								<xs:attribute name="keep-alive-enabled" type="xs:boolean" use="optional"/>
+								<xs:attribute name="tcp-delay-enabled" type="xs:boolean" use="optional"/>
+								<xs:attribute name="receive-buffer-size" type="size-value" use="optional"/>
+								<xs:attribute name="send-buffer-size" type="size-value" use="optional"/>
+								<xs:attribute name="linger-timeout" type="time-value" use="optional"/>
+								<xs:attribute name="listen-backlog" type="xs:integer" use="optional"/>
+								<xs:attribute name="suspect-protocol-enabled" type="xs:boolean" use="optional"/>
+								<xs:attribute name="suspect-buffer-size" type="size-value" use="optional"/>
+								<xs:attribute name="suspect-buffer-length" type="xs:integer" use="optional"/>
+								<xs:attribute name="nominal-buffer-size" type="size-value" use="optional"/>
+								<xs:attribute name="nominal-buffer-length" type="xs:integer" use="optional"/>
+								<xs:attribute name="limit-buffer-size" type="size-value" use="optional"/>
+								<xs:attribute name="limit-buffer-length" type="xs:integer" use="optional"/>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="cache-service-proxy">
+							<xs:complexType>
+								<!-- TODO
+								<xs:choice>
+									<xs:element name="init-params" minOccurs="0" maxOccurs="1" type="init-params"/>
+								</xs:choice>
+								 -->
+								<xs:attribute name="enabled" type="xs:boolean" use="optional"/>
+								<xs:attribute name="lock-enabled" type="xs:boolean" use="optional"/>
+								<xs:attribute name="read-only" type="xs:boolean" use="optional"/>
+								<xs:attribute name="class-name" type="xs:string" use="optional"/>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="invocation-service-proxy">
+							<xs:complexType>
+								<!-- TODO
+								<xs:choice>
+									<xs:element name="init-params" minOccurs="0" maxOccurs="1" type="init-params"/>
+								</xs:choice>
+								-->
+								<xs:attribute name="enabled" type="xs:boolean" use="optional"/>
+								<xs:attribute name="class-name" type="xs:string" use="optional"/>
+							</xs:complexType>
+						</xs:element>
 					</xs:choice>
+					<xs:attribute name="service-name" type="xs:string" use="optional"/>
+					<xs:attribute name="autostart" type="xs:boolean" use="optional"/>
+					<xs:attribute name="task-hung-threshlod" type="time-value" use="optional"/>
+					<xs:attribute name="task-timeout" type="time-value" use="optional"/>
+					<xs:attribute name="request-timeout" type="time-value" use="optional"/>
+					<xs:attribute name="thread-count" type="xs:integer" use="optional"/>
+					<xs:attribute name="acceptor-connection-limit" type="xs:integer" use="optional"/>
 				</xs:extension>
 			</xs:complexContent>
 		</xs:complexType>
@@ -454,8 +400,7 @@
 	
 	<!-- TODO
 	 
-	<xs:element name="transactional-service-scheme">
-	</xs:element>
+	<xs:element name="transactional-service-scheme"/>
 	
 	 -->	
 

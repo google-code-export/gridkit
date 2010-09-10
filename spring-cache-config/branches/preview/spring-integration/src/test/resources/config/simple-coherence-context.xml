@@ -153,91 +153,19 @@
 		</property>
 	</bean>
 	
-	
 	<!-- Coherence*Extend Cluster-side beans -->
 	
-	
-	<bean id="default.proxy.service" parent="clustered-cache-service" lazy-init="false">
+	<bean id="default.proxy.service" parent="clustered-service">
 		<property name="serviceName" value="ExtendTCPProxy" />
 		<property name="configuration">
 			<bean parent="proxy-service-configuration">
-				<property name="acceptorConfig">
-					<bean parent="acceptor-configuration">
-						<property name="tcpAcceptor">
-							<bean class="com.tangosol.coherence.component.util.daemon.queueProcessor.service.peer.acceptor.TcpAcceptor">
-								<property name="localAddress">
-									<bean class="java.net.InetSocketAddress">
-										<constructor-arg type="java.lang.String" value="localhost"/>
-										<constructor-arg type="int" value="9099"/>
-									</bean>
-								</property>
-							</bean>
-						</property>
-					</bean>
-				</property>
-				<!-- Play with this later
-				<property name="remoteCacheService">
-					<bean class="com.tangosol.coherence.component.net.extend.proxy.serviceProxy.CacheServiceProxy">
-						<property name="enabled" value="true"/>
-					</bean>
-				</property>
-				<property name="remoteInvocationService">
-					<bean class="com.tangosol.coherence.component.net.extend.proxy.serviceProxy.InvocationServiceProxy">
-						<property name="enabled" value="true"/>
-					</bean>
-				</property>
-				 -->
+				<property name="acceptorLocalHost" value="localhost"/>
+				<property name="acceptorLocalPort" value="9099"/>
+				<property name="cacheProxyEnabled" value="true"/>
+				<property name="invocationProxyEnabled" value="false"/>
 				<property name="autostart" value="true"/>
 			</bean>
 		</property>
 	</bean>
-	
-	<!-- Coherence*Extend Client beans -->
-	
-	<bean id="default.remote.cache.service" parent="clustered-cache-service">
-		<property name="serviceName" value="RemoteCache" />
-		<property name="configuration">
-			<bean parent="remote-cache-scheme-configuration">
-				<property name="initiatorConfig">
-					<bean parent="initiator-configuration">
-						<property name="tcpInitiator">
-							<bean class="com.tangosol.coherence.component.util.daemon.queueProcessor.service.peer.initiator.TcpInitiator">
-								<property name="remoteAddresses">
-									<bean class="java.net.InetSocketAddress">
-										<constructor-arg type="java.lang.String" value="localhost"/>
-										<constructor-arg type="int" value="9099"/>
-									</bean>
-								</property>
-							</bean>
-						</property>
-					</bean>
-				</property>
-			</bean>
-		</property>
-	</bean>
-
-	<bean id="cache.K" parent="named-cache" factory-bean="K" lazy-init="true"/>
-	
-	<bean id="K" parent="clustered-cache-definition">
-		<property name="service" ref="default.remote.cache.service"/>
-		<property name="backTier"><idref local="hash-map-cache"/></property>
-	</bean>
-
-	<bean id="remote-cache-service" parent="clustered-cache-service" depends-on="default.proxy.service">
-		<property name="serviceName" value="RemoteCacheSer" />
-		<property name="configuration">
-			<bean parent="proxy-service-configuration" />
-		</property>
-	</bean>
-	
-	<!-- 
-	<bean id="remote-invocation-service" parent="clustered-service" depends-on="default.proxy.service">
-		<property name="configuration">
-			<bean parent="remote-invocation-service">
-				<property name="threadCount" value="5"/>
-			</bean>
-		</property>
-	</bean>
-	 -->
 	
 </beans>

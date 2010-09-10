@@ -37,9 +37,8 @@
 	<bean id="remote-invocation-scheme-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.RemoteInvocationServiceConfiguration" />
 	
 	<!-- Prototypes for Coherence*Extend configuration elements -->
-	<bean id="acceptor-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.AcceptorConfig" />
 	<bean id="initiator-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.InitiatorConfig" />
-	<bean id="outgoing-message-handler-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.OutgoingMessageHandlerConfig" />
+	<bean id="tcp-initiator-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.TcpInitiatorConfig" />
 
 	<!-- Default backing map lookup strategy -->
 	<bean id="default-backing-map-lookup-strategy" class="org.gridkit.coherence.integration.spring.impl.ByNameBackingMapLookupStrategy"/>

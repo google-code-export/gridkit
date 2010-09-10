@@ -15,7 +15,6 @@
  */
 package org.gridkit.coherence.integration.spring.service;
 
-import com.tangosol.coherence.component.util.daemon.queueProcessor.service.peer.initiator.TcpInitiator;
 import com.tangosol.io.Serializer;
 
 /**
@@ -32,7 +31,7 @@ public class InitiatorConfig {
 	private Serializer serializer;
 	
 	@ReflectionInjectedProperty("__m_TcpInitiator")
-	private TcpInitiator tcpInitiator;
+	private TcpInitiatorConfig tcpInitiatorConfig;
 
 	public OutgoingMessageHandlerConfig getOutgoingMessageHandlerConfig() {
 		return outgoingMessageHandlerConfig;
@@ -51,12 +50,12 @@ public class InitiatorConfig {
 		this.serializer = serializer;
 	}
 
-	public TcpInitiator getTcpInitiator() {
-		return tcpInitiator;
+	public TcpInitiatorConfig getTcpInitiatorConfig() {
+		return tcpInitiatorConfig;
 	}
 
-	public void setTcpInitiator(TcpInitiator tcpInitiator) {
-		this.tcpInitiator = tcpInitiator;
+	public void setTcpInitiatorConfig(TcpInitiatorConfig tcpInitiatorConfig) {
+		this.tcpInitiatorConfig = tcpInitiatorConfig;
 	}
-	
+
 }

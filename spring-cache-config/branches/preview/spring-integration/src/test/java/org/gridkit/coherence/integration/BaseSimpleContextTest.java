@@ -23,8 +23,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
+import org.gridkit.coherence.integration.spring.ClusteredService;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 
@@ -288,9 +288,11 @@ public abstract class BaseSimpleContextTest {
 		service.getInfo().getServiceMembers();
 	}
 	
-//	@Test
-	@Ignore
+	@Test
 	public void testCacheK_RemoteCache() {
+		ClusteredService proxy = (ClusteredService) context.getBean("default.proxy.service");
+		System.out.println(proxy.getCoherenceService().getInfo());
+		/*
 		NearCache cache = (NearCache) context.getBean("cache.K");
 		cache.put("a", "A");
 		cache.put("b", "B");
@@ -298,6 +300,7 @@ public abstract class BaseSimpleContextTest {
 		Assert.assertEquals("A", cache.get("a"));
 		Assert.assertEquals("B", cache.get("b"));
 		Assert.assertEquals("C", cache.get("c"));
+		*/
 	}
 	
 }
