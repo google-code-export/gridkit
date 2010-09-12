@@ -17,6 +17,7 @@
 package org.gridkit.coherence.integration.spring;
 
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
@@ -34,8 +35,10 @@ public class ClusteredCacheDefinition implements InitializingBean, BeanNameAware
 	private ClusteredCacheService clusteredService;
 	private String backendBeanId;
 	private Object backendBean;
-	private boolean initialized = false;
+	private CountDownLatch initGate = new CountDownLatch(1);
 	
+	public ClusteredCacheDefinition() {
+	}
 	
 	@Override
 	public void setBeanName(String name) {
@@ -70,7 +73,7 @@ public class ClusteredCacheDefinition implements InitializingBean, BeanNameAware
 			// TODO validation
 			validateBackendBean();
 		}
-		initialized = true;
+		initGate.countDown();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -93,9 +96,17 @@ public class ClusteredCacheDefinition implements InitializingBean, BeanNameAware
 	}
 
 	public NamedCache getCache() {
-		if (!initialized) {
-			throw new IllegalStateException("Cache definition is not initialized");
+		// should wait bean to be initialized
+		try {
+			initGate.await();
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
 		}
+//		if (!initialized) {
+//			System.out.println("By thread " + threadName);
+//			callSite.printStackTrace();
+//			throw new IllegalStateException("Cache definition is not initialized");
+//		}
 		try {
 			NamedCache cache = clusteredService.ensureCache(cacheName);
 			if (frontTier != null) {
@@ -110,9 +121,17 @@ public class ClusteredCacheDefinition implements InitializingBean, BeanNameAware
 	}
 	
 	public Map<?, ?> getBackendInstance(ApplicationContext appCtx, BackingMapManagerContext cacheCtx) {
-		if (!initialized) {
-			throw new IllegalStateException("Cache definition is not initialized");
+		// should wait bean to be initialized
+		try {
+			initGate.await();
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
 		}
+//		if (!initialized) {
+//			System.out.println("By thread " + threadName);
+//			callSite.printStackTrace();
+//			throw new IllegalStateException("Cache definition is not initialized");
+//		}
 		if (backendBean != null) {
 			return resolveMap(backendBean, cacheCtx);
 		}

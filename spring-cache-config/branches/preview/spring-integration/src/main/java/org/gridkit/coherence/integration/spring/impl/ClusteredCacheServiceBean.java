@@ -88,7 +88,7 @@ public class ClusteredCacheServiceBean extends ClusteredServiceBean implements C
 
 	protected void jmxRegister(CacheService cacheService, Map<?, ?> cache, String name, String tier) {
 		Registry r = cacheService.getCluster().getManagement();
-		String id = "type=Cache,serive=" + service.getInfo().getServiceName() + ",name=" + name + ",tier=" + tier;
+		String id = "type=Cache,serive=" + cacheService.getInfo().getServiceName() + ",name=" + name + ",tier=" + tier;
 		id = r.ensureGlobalName(id);
 		r.register(id, cache);		
 	}

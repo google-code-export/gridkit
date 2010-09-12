@@ -65,6 +65,15 @@ public class Isolate {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		cl = null;
+	}
+	
+	public Class<?> loadClass(String name) throws ClassNotFoundException {
+		return cl.loadClass(name);
+	}
+	
+	public ClassLoader getClassLoader() {
+		return cl;
 	}
 	
 	private class Runner implements Runnable {

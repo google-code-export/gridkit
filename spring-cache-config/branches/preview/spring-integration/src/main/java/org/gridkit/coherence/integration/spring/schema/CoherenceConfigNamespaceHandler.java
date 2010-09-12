@@ -353,7 +353,6 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 		public String className;
 		public String factoryBean;
 		public String factoryMethod;
-		public boolean lazyInit = true;
 				
 		private Map<String, PropertyInfo> props = new HashMap<String, PropertyInfo>();
 		private Map<String, PropertyInfo> attributes = new HashMap<String, PropertyInfo>();
@@ -367,15 +366,6 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 			info.parser = parser;
 			
 			props.put(element, info);
-		}
-
-		public void addAttribute(String attributeName, String propName, PropertyParser parser) {
-			PropertyInfo info = new PropertyInfo();
-			info.name = attributeName;
-			info.propName = propName;
-			info.parser = parser;
-			
-			attributes.put(attributeName, info);
 		}
 
 		public void addDefault(String propName, BeanDefinition bd) {
@@ -401,15 +391,8 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 			if (factoryMethod != null) {
 				bd.setFactoryMethodName(factoryMethod);
 			}
-			bd.setLazyInit(lazyInit);
 			
-			/*
-			NamedNodeMap nnp = element.getAttributes();
-			for (int i = 0; i < nnp.getLength(); ++i) {
-				Node n = nnp.item(i);
-				PropertyInfo info = attributes.get(key)
-			}
-			*/
+			initBeanLazyInit(bd, element, parserContext);
 			
 			NodeList nl = element.getChildNodes();
 			for (int i = 0; i != nl.getLength(); ++i) {
@@ -451,6 +434,33 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 			return bd;
 		}
 
+		protected void initBeanLazyInit(BeanDefinition bd, Element element, ParserContext parserContext) {
+			String lazy = element.getAttribute("lazy-init");
+			if ("true".equalsIgnoreCase(lazy.toLowerCase())) {
+				bd.setLazyInit(true);
+			}
+			else if ("false".equalsIgnoreCase(lazy.toLowerCase())) {
+				bd.setLazyInit(false);
+			}
+			else {
+				initBeanLazyInitDefault(bd, parserContext);
+			}			
+		}
+
+		protected void initBeanLazyInitDefault(BeanDefinition bd, ParserContext parserContext) {
+			String lazy = parserContext.getDelegate().getDefaults().getLazyInit();
+			if ("true".equalsIgnoreCase(lazy.toLowerCase())) {
+				bd.setLazyInit(true);
+			}
+			else if ("false".equalsIgnoreCase(lazy.toLowerCase())) {
+				bd.setLazyInit(false);
+			}
+			else {
+				// default
+				bd.setLazyInit(true);
+			}
+		}
+
 		private void reportUnknownTag(Element element, ParserContext parserContext, Node n) {
 			// TODO
 //			parserContext.getReaderContext().fatal(
@@ -470,6 +480,9 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 		
 		public CustomBeanDefinitionTemplate configTemplate = new CustomBeanDefinitionTemplate();
 		
+		public ServiceBeanTemplate() {
+		}
+		
 		@Override
 		protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 			AbstractBeanDefinition serviceBean = super.parseInternal(element, parserContext);						
@@ -482,6 +495,11 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 			BeanDefinitionHolder holder = new BeanDefinitionHolder(configBean, confId);
 			
 			serviceBean.getPropertyValues().add("configuration", holder);
+			
+			if (serviceBean.isLazyInit()) {
+				parserContext.getReaderContext().warning("Coherence service is defined as lazy, this is discouraged. Bean name \"" + id + "\" ", element);
+			}
+			
 			return serviceBean;
 		}
 
@@ -491,6 +509,11 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 				id = parserContext.getReaderContext().generateBeanName(serviceBean);
 			}
 			return id;
+		}
+
+		@Override
+		protected void initBeanLazyInitDefault(BeanDefinition bd, ParserContext parserContext) {
+			bd.setLazyInit(false);
 		}
 	}
 	
@@ -509,6 +532,7 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 	private class ServiceInstanceBeanParser extends AbstractBeanDefinitionParser {
 		@Override
 		protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+			// TODO lazy init semantic
 			GenericBeanDefinition bd = new GenericBeanDefinition();
 			String serviceName = element.getAttribute("scheme-name");
 			bd.setFactoryBeanName(serviceName);

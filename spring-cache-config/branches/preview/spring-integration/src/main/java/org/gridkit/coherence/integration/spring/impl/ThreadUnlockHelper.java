@@ -115,7 +115,15 @@ class ThreadUnlockHelper {
 //			}
 //		});
 	}
-	
+
+	public <V> Future<V> executeAsync(final Callable<V> callable) {
+		return springThreadExecutor.submit(callable);
+	}
+ 	
+	/**
+	 * Sends callable in spring bean queue and dedicate worker thread
+	 * at same time. First who gets executed will return result.
+	 */
 	public <V> V safeExecute(Callable<V> callable) {
 		SplitFuture<V> future = new SplitFuture<V>(callable, callable);
 		queueExecutor.execute(future.getA());

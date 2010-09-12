@@ -55,6 +55,14 @@
 		</xs:complexType>
 	</xs:element>
 
+	<xs:complexType name="identified-bean">
+		<xs:complexContent>
+			<xs:extension base="beans:identifiedType">
+				<xs:attribute name="lazy-init"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
 	<xs:complexType name="single-spring-bean">
 		<xs:choice>
 			<xs:group ref="single-spring-bean-elements"/>
@@ -194,15 +202,15 @@
 	<xs:element name="service-instance">
 		<xs:complexType>
 			<xs:complexContent>
-				<xs:extension base="beans:identifiedType">
+				<xs:extension base="identified-bean">
 					<xs:attribute name="scheme-name" use="required" type="xs:IDREF"/>
 				</xs:extension>
 			</xs:complexContent>
 		</xs:complexType>	
 	</xs:element>
 	
-	<xs:group name="coherence-service-config-elements">
-		<xs:choice>
+	<xs:group name="coherence-service-config-elements">	
+		<xs:choice>		
 	            <xs:element name="service-name" minOccurs="0" maxOccurs="1" type="xs:string"/>
 				<xs:element name="autostart" minOccurs="0" maxOccurs="1" type="xs:boolean"/>
 				<!-- configuration bean part -->
@@ -219,7 +227,7 @@
 	<xs:element name="distributed-service-scheme">
 		<xs:complexType>
 			<xs:complexContent>
-				<xs:extension base="beans:identifiedType">
+				<xs:extension base="identified-bean">					
 					<xs:choice minOccurs="0" maxOccurs="unbounded">
 						<xs:group ref="coherence-service-config-elements"/>
 						<xs:element name="partition-count" minOccurs="0" maxOccurs="1" type="xs:integer"/>

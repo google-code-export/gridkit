@@ -22,10 +22,10 @@
        xmlns:coh="http://gridkit.org/schema/coherence/spring-cache-config"
        xsi:schemaLocation="
        				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-       				http://gridkit.org/schema/coherence/spring-cache-config file:///C:/dev/workspace1/spring-integration/src/main/resources/spring-cache-config.xsd"
+       				http://gridkit.org/schema/coherence/spring-cache-config spring-cache-config.xsd"
        default-lazy-init="true"
 >
-       				<!-- http://files.griddynamics.net/spring-cache-config.xsd -->
+
 	<coh:coherence-config 
 		xmlns="http://gridkit.org/schema/coherence/spring-cache-config"
 		xmlns:b="http://www.springframework.org/schema/beans"
@@ -44,9 +44,11 @@
 		<!-- 
 		 -->
 		
-		<distributed-service-scheme id="default.distributed.service">
+		<distributed-service-scheme id="default.distributed.service" lazy-init="false">
 			<service-name>DistributedCache</service-name>
-			<local-storage>true</local-storage>
+			<!-- 
+				<local-storage>true</local-storage>
+			 -->
 			<autostart>true</autostart>
 		</distributed-service-scheme>
 	
@@ -88,7 +90,9 @@
 			<service>
 				<distributed-service-scheme>		
 					<service-name>DiscributedCache2</service-name>
-					<local-storage>true</local-storage>
+					<!--  
+					 <local-storage>true</local-storage>
+					 -->
 					<serializer><b:bean class="org.gridkit.coherence.integration.BaseSimpleContextTest$CustomSerializer" /></serializer>		
 				</distributed-service-scheme>
 			</service>
@@ -143,9 +147,11 @@
 		</invocation-service-scheme>
 		
 		<!-- Coherence*Extend proxy -->
+		<!-- 
 		<proxy-service-scheme service-name="TCPExtendProxy" autostart="true" thread-count="5">
 			<tcp-acceptor local-host="localhost" local-port="9099"/>
 		</proxy-service-scheme>
+		 -->
 		
 	</coh:coherence-config>
 		

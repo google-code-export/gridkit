@@ -21,7 +21,7 @@
 	<groupId>org.gridkit</groupId>
 	<artifactId>coherence-spring-integration</artifactId>
 	<packaging>jar</packaging>
-	<version>0.5.1</version>
+	<version>0.5.2-SNAPSHOT</version>
 	<name>spring-integration</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>

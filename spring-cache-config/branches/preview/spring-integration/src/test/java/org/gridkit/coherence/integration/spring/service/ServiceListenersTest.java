@@ -70,12 +70,20 @@ public class ServiceListenersTest {
 		Assert.assertTrue(log.containsKey("service-listener1-started"));
 		
 		dcs.shutdown();
-		LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1000));
-
-		Assert.assertTrue(log.containsKey("member-listener1-leaving"));
-		Assert.assertTrue(log.containsKey("member-listener1-left"));
-		Assert.assertTrue(log.containsKey("service-listener1-stopping"));
-		Assert.assertTrue(log.containsKey("service-listener1-stopped"));
+		for(int i = 0; i != 20; ++i) {
+			LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(100));
+			
+			try {
+				Assert.assertTrue(log.containsKey("member-listener1-leaving"));
+				Assert.assertTrue(log.containsKey("member-listener1-left"));
+				Assert.assertTrue(log.containsKey("service-listener1-stopping"));
+				Assert.assertTrue(log.containsKey("service-listener1-stopped"));
+				break;
+			} catch (AssertionError e) {
+				// retry
+				continue;
+			}
+		}
 	}
 
 	@Test
@@ -93,17 +101,25 @@ public class ServiceListenersTest {
 		Assert.assertTrue(log.containsKey("service-listener3-started"));
 		
 		is.shutdown();
-		LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1000));
-		
-		Assert.assertTrue(log.containsKey("member-listener2-leaving"));
-		Assert.assertTrue(log.containsKey("member-listener2-left"));
-		Assert.assertTrue(log.containsKey("service-listener2-stopping"));
-		Assert.assertTrue(log.containsKey("service-listener2-stopped"));
+		for(int i = 0; i != 20; ++i) {
+			LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(100));
+			
+			try {
+				Assert.assertTrue(log.containsKey("member-listener2-leaving"));
+				Assert.assertTrue(log.containsKey("member-listener2-left"));
+				Assert.assertTrue(log.containsKey("service-listener2-stopping"));
+				Assert.assertTrue(log.containsKey("service-listener2-stopped"));
 
-		Assert.assertTrue(log.containsKey("member-listener3-leaving"));
-		Assert.assertTrue(log.containsKey("member-listener3-left"));
-		Assert.assertTrue(log.containsKey("service-listener3-stopping"));
-		Assert.assertTrue(log.containsKey("service-listener3-stopped"));
+				Assert.assertTrue(log.containsKey("member-listener3-leaving"));
+				Assert.assertTrue(log.containsKey("member-listener3-left"));
+				Assert.assertTrue(log.containsKey("service-listener3-stopping"));
+				Assert.assertTrue(log.containsKey("service-listener3-stopped"));
+				break;
+			} catch (AssertionError e) {
+				// retry
+				continue;
+			}
+		}
 	}
 	
 	

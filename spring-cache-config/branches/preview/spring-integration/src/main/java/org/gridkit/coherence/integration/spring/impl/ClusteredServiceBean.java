@@ -61,7 +61,15 @@ public class ClusteredServiceBean implements ClusteredService, InitializingBean,
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (autostart) {
-			ensureStarted();
+			// we need to release Spring so it can finish
+			// initializing of other objects
+			new Thread() {
+				@Override
+				public void run() {
+					setName("service-starter:[" + serviceName + "]");
+					ensureStarted();
+				}
+			}.start();
 		}
 	}
 
