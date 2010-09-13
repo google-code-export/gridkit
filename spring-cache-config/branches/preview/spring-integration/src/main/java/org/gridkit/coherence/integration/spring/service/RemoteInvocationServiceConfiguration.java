@@ -19,22 +19,11 @@ package org.gridkit.coherence.integration.spring.service;
 /**
  * @author Dmitri Babaev
  */
-public class RemoteInvocationServiceConfiguration extends GenericServiceConfiguration {
-	
-	@ReflectionInjectedProperty("__m_InitiatorConfig")
-	protected InitiatorConfig initiatorConfig;
+public class RemoteInvocationServiceConfiguration extends AbstractRemoteServiceConfiguration {
 	
 	@Override
 	public ServiceType getServiceType() {
 		return ServiceType.RemoteInvocation;
 	}
 
-	public InitiatorConfig getInitiatorConfig() {
-		return initiatorConfig;
-	}
-
-	public void setInitiatorConfig(InitiatorConfig initiatorConfig) {
-		this.initiatorConfig = initiatorConfig;
-	}
-	
 }

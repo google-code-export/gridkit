@@ -309,6 +309,13 @@
 						<xs:element name="service-failure-policy" minOccurs="0" maxOccurs="1" type="service-failure-policy-bean"/>
 						<xs:element name="proxy-quorum-policy-scheme" minOccurs="0" maxOccurs="1" />
 						 -->
+						<xs:element name="service-name" minOccurs="0" maxOccurs="1" type="xs:string"/>
+						<xs:element name="autostart" minOccurs="0" maxOccurs="1" type="xs:boolean"/>
+						<xs:element name="thread-count" minOccurs="0" maxOccurs="1" type="xs:integer"/>
+						<xs:element name="task-hung-threshlod" minOccurs="0" maxOccurs="1" type="time-value"/>
+						<xs:element name="task-timeout" minOccurs="0" maxOccurs="1" type="time-value"/>
+						<xs:element name="request-timeout" minOccurs="0" maxOccurs="1" type="time-value"/>
+						<xs:element name="acceptor-connection-limit" minOccurs="0" maxOccurs="1" type="xs:integer"/>
 						<xs:element name="acceptor-serializer" minOccurs="0" maxOccurs="1" type="serializer-bean"/>
 						<xs:element name="acceptor-filter" minOccurs="0" maxOccurs="1" type="single-spring-bean"/>
 						<xs:element name="outgoing-message-handler" minOccurs="0" maxOccurs="1" type="outgoing-message-handler-bean"/>
@@ -366,13 +373,6 @@
 							</xs:complexType>
 						</xs:element>
 					</xs:choice>
-					<xs:attribute name="service-name" type="xs:string" use="optional"/>
-					<xs:attribute name="autostart" type="xs:boolean" use="optional"/>
-					<xs:attribute name="task-hung-threshlod" type="time-value" use="optional"/>
-					<xs:attribute name="task-timeout" type="time-value" use="optional"/>
-					<xs:attribute name="request-timeout" type="time-value" use="optional"/>
-					<xs:attribute name="thread-count" type="xs:integer" use="optional"/>
-					<xs:attribute name="acceptor-connection-limit" type="xs:integer" use="optional"/>
 				</xs:extension>
 			</xs:complexContent>
 		</xs:complexType>

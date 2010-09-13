@@ -306,7 +306,7 @@ public abstract class BaseSimpleContextTest {
 		service.getInfo().getServiceMembers();
 	}
 	
-	@Test @Ignore
+	@Test
 	public void testCacheK_RemoteCache() {
 		ClusteredService proxy = (ClusteredService) context.getBean("default.proxy.service");
 		System.out.println(proxy.getCoherenceService().getInfo());

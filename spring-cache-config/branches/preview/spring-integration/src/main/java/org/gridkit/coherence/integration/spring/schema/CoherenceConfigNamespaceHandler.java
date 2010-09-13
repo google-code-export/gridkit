@@ -242,14 +242,47 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 	
 	private void registerProxyServiceConfigProperties(CustomBeanDefinitionTemplate template) {
 		template.className = ProxyServiceConfiguration.class.getName();
-
+		
 		template.addProperty("thread-count", 				"threadCount", new StringPropertyParser());
-		template.addProperty("task-hung-threshlod", 		"taskHungThreshpld", new TimeoutPropertyParser());
-		template.addProperty("task-timeout", 				"taskTimeout", new TimeoutPropertyParser());
+		template.addProperty("task-hung-threshlod", 		"taskHungThresholdMillis", new TimeoutPropertyParser());
+		template.addProperty("task-timeout", 				"taskTimeoutMillis", new TimeoutPropertyParser());
 		template.addProperty("request-timeout", 			"requestTimeout", new TimeoutPropertyParser());
-		template.addProperty("acceptor-config", 			"acceptorConfig", new BeanPropertyParser());
-		template.addProperty("remote-cache-service",		"remoteCacheService", new BeanPropertyParser());
-		template.addProperty("remote-invocation-service",	"remoteInvocationService", new BeanPropertyParser());
+		template.addProperty("acceptor-connection-limit", 	"connectionLimit", new StringPropertyParser());
+		template.addProperty("acceptor-serializer", 		"acceptorSerializer", new SerializerBeanParser());
+		template.addProperty("acceptor-filter", 			"acceptorConnectionFilter", new BeanPropertyParser());
+		
+		template.addProperty("outgoing-message-handler[heartbeat-interval]","acceptorHeartbeatInterval", new TimeoutPropertyParser());
+		template.addProperty("outgoing-message-handler[heartbeat-timeout]",	"acceptorHeartbeatTimeout", new TimeoutPropertyParser());
+		template.addProperty("outgoing-message-handler[request-timeout]",	"acceptorRequestTimeout", new TimeoutPropertyParser());
+		
+		template.addProperty("tcp-acceptor/address-provider",			"addressProvider", new BeanPropertyParser());
+		template.addProperty("tcp-acceptor[authorized-host-address]",	"authorizedHostAddress", new StringPropertyParser());
+		template.addProperty("tcp-acceptor[authorized-host-range]",		"authorizedHostRange", new StringPropertyParser());
+		template.addProperty("tcp-acceptor[local-host]",				"acceptorLocalHost", new StringPropertyParser());
+		template.addProperty("tcp-acceptor[local-port]",				"acceptorLocalPort", new StringPropertyParser());
+		template.addProperty("tcp-acceptor[socket-provider-config]",	"acceptorSocketProviderConfig", new StringPropertyParser());
+		template.addProperty("tcp-acceptor[reuse-address]",				"acceptorReuseAddress", new StringPropertyParser());
+		template.addProperty("tcp-acceptor[keep-alive-enabled]",		"acceptorKeepAliveEnabled", new StringPropertyParser());
+		template.addProperty("tcp-acceptor[tcp-delay-enabled]",			"acceptorTcpDelayEnabled", new StringPropertyParser());
+		template.addProperty("tcp-acceptor[receive-buffer-size]",		"acceptorReceiveBufferSizeBytes", new SizePropertyParser());
+		template.addProperty("tcp-acceptor[send-buffer-size]",			"acceptorSendBufferSizeBytes", new SizePropertyParser());
+		template.addProperty("tcp-acceptor[linger-timeout]",			"acceptorLingerTimeoutMillis", new TimeoutPropertyParser());
+		template.addProperty("tcp-acceptor[listen-backlog]",			"acceptorListenBacklog", new StringPropertyParser());
+		template.addProperty("tcp-acceptor[suspect-protocol-enabled]",	"acceptorSuspectProtocolEnabled", new StringPropertyParser());
+		template.addProperty("tcp-acceptor[suspect-buffer-size]",		"acceptorSuspectBufferSizeBytes", new SizePropertyParser());
+		template.addProperty("tcp-acceptor[suspect-buffer-length]",		"acceptorSuspectBufferLength", new StringPropertyParser());
+		template.addProperty("tcp-acceptor[nominal-buffer-size]",		"acceptorNominalBufferSizeBytes", new SizePropertyParser());
+		template.addProperty("tcp-acceptor[nominal-buffer-length]",		"acceptorNominalBufferLength", new StringPropertyParser());
+		template.addProperty("tcp-acceptor[limit-buffer-size]",			"acceptorLimitBufferSizeBytes", new SizePropertyParser());
+		template.addProperty("tcp-acceptor[limit-buffer-length]",		"acceptorLimitBufferLength", new StringPropertyParser());
+		
+		template.addProperty("cache-service-proxy[enabled]",		"cacheProxyEnabled", new StringPropertyParser());
+		template.addProperty("cache-service-proxy[lock-enabled]",	"cacheProxyLockEnabled", new StringPropertyParser());
+		template.addProperty("cache-service-proxy[read-only]",		"cacheProxyReadOnly", new StringPropertyParser());
+		template.addProperty("cache-service-proxy[class-name]",		"cacheProxyClassName", new StringPropertyParser());
+		
+		template.addProperty("invocation-service-proxy[enabled]",	"invocationProxyEnabled", new StringPropertyParser());
+		template.addProperty("invocation-service-proxy[class-name]","invocationProxyClassName", new StringPropertyParser());
 	}
 	
 	private void registerRemoteCacheServiceConfigProperties(CustomBeanDefinitionTemplate template) {
@@ -355,13 +388,12 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 		public String factoryMethod;
 				
 		private Map<String, PropertyInfo> props = new HashMap<String, PropertyInfo>();
-		private Map<String, PropertyInfo> attributes = new HashMap<String, PropertyInfo>();
 		private Map<String, BeanDefinition> defaultBeans = new HashMap<String, BeanDefinition>();
 		private Map<String, Object> defaultValues = new HashMap<String, Object>();
 
 		public void addProperty(String element, String propName, PropertyParser parser) {
 			PropertyInfo info = new PropertyInfo();
-			info.name = element;
+			info.path = element;
 			info.propName = propName;
 			info.parser = parser;
 			
@@ -394,6 +426,28 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 			
 			initBeanLazyInit(bd, element, parserContext);
 			
+			// New way of configuration parsing
+			for (String path: props.keySet()) {
+				PropertyInfo info = props.get(path);
+				Element actualElement = findActualElement(element, path);
+				if (actualElement == null) continue; 
+				if (path.indexOf('[') > 0) {
+					// attribute value
+					String attributeName = path.substring(path.indexOf('[') + 1, path.indexOf(']'));
+					String attributeValue = actualElement.getAttribute(attributeName);
+					if (StringUtils.hasText(attributeValue)) {
+						AttributeParser parser = (AttributeParser) info.parser;
+						parser.initProperty(attributeValue, bd, info.propName, parserContext);
+					}
+				} else {
+					// child element
+					ElementParser parser = (ElementParser) info.parser;
+					parser.initProperty(actualElement, bd, info.propName, parserContext);
+				}
+			}
+			
+			/* 
+			// Old way of configuration parsing
 			NodeList nl = element.getChildNodes();
 			for (int i = 0; i != nl.getLength(); ++i) {
 				Node n = nl.item(i);
@@ -403,18 +457,12 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 					if (info == null) {
 						reportUnknownTag(element, parserContext, n);
 					} else {
-						info.parser.initProperty((Element)n, bd, info.propName, parserContext);
-					}
-				} else if (n.getNodeType() == Node.ATTRIBUTE_NODE) {
-					String attr = parserContext.getDelegate().getLocalName(n);
-					PropertyInfo info = attributes.get(attr);
-					if (info == null) {
-						reportUnknownAttribute(element, parserContext, n);
-					} else {
-						info.parser.initProperty((Element)n, bd, info.propName, parserContext);
+						ElementParser parser = (ElementParser) info.parser;
+						parser.initProperty((Element)n, bd, info.propName, parserContext);
 					}
 				}
-			};
+			}
+			*/
 			
 			for (String prop: defaultBeans.keySet()) {
 				if (!bd.getPropertyValues().contains(prop)) {
@@ -460,7 +508,25 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 				bd.setLazyInit(true);
 			}
 		}
-
+		
+		private Element findActualElement(Element parent, String path) {
+			Element current = parent;
+			String p = (path.indexOf('[') > 0) ? path.substring(0, path.indexOf('[')) : path;
+			int slash = p.indexOf('/');
+			do {
+				String childName = (slash > 0) ? p.substring(0, slash) : p;
+				if (current.getElementsByTagName(childName).getLength() == 1) {
+					current = (Element) current.getElementsByTagName(childName).item(0);
+				} else {
+					// configuration fragment omitted, configuration will use its defaults
+					return null;
+				}
+				p = p.substring(slash + 1);
+				slash = p.indexOf('/');
+			} while (slash > 0);
+			return current;
+		}
+		
 		private void reportUnknownTag(Element element, ParserContext parserContext, Node n) {
 			// TODO
 //			parserContext.getReaderContext().fatal(
@@ -468,12 +534,6 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 //							+ "' while parsing <" + parserContext.getDelegate().getLocalName(element) + ">", element);
 		}
 		
-		private void reportUnknownAttribute(Element element, ParserContext parserContext, Node n) {
-			// TODO yes, i will not implement this too
-//			parserContext.getReaderContext().fatal(
-//			"Unknown attribute '" + parserContext.getDelegate().getLocalName(n)
-//					+ "' while parsing <" + parserContext.getDelegate().getLocalName(element) + ">", element);
-		}
 	}
 	
 	private class ServiceBeanTemplate extends CustomBeanDefinitionTemplate {
@@ -542,34 +602,50 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 		}
 	}
 
-	/*
-	 * Contains either child element property binding or current element's attribute binding
-	 */
 	private static class PropertyInfo {
 		@SuppressWarnings("unused")
-		public String name;
+		public String path;
 		public String propName;
 		public PropertyParser parser; 
 	}
 	
-	private interface PropertyParser {
+	private interface PropertyParser { // just a mixin interface to provide consistency
+	}
+
+	private interface ElementParser extends PropertyParser {
 		public void initProperty(Element xml, GenericBeanDefinition bd, String propName, ParserContext context);
 	}
 
-	private static class StringPropertyParser implements PropertyParser {
+	private interface AttributeParser extends PropertyParser {
+		public void initProperty(String value, GenericBeanDefinition bd, String propName, ParserContext context);
+	}
+
+	private static class StringPropertyParser implements ElementParser, AttributeParser {
 
 		@Override
 		public void initProperty(Element xml, GenericBeanDefinition bd, String propName, ParserContext context) {
-			String text = xml.getTextContent();
+			initProperty(xml.getTextContent(), bd, propName, context);
+		}
+		
+		@Override
+		public void initProperty(String value, GenericBeanDefinition bd,
+				String propName, ParserContext context) {
 			MutablePropertyValues mpv = bd.getPropertyValues();
-			mpv.add(propName, text);
+			mpv.add(propName, value);
 		}
 	}
 
-	private static class TimeoutPropertyParser implements PropertyParser {
+	private static class TimeoutPropertyParser implements ElementParser, AttributeParser {
+		
 		@Override
 		public void initProperty(Element xml, GenericBeanDefinition bd, String propName, ParserContext context) {
-			String text = xml.getTextContent().toLowerCase();
+			initProperty(xml.getTextContent(), bd, propName, context);
+		}
+		
+		@Override
+		public void initProperty(String value, GenericBeanDefinition bd,
+				String propName, ParserContext context) {
+			String text = value.toLowerCase();
 			TimeUnit tu = TimeUnit.MILLISECONDS;
 			if (text.endsWith("ms")) {
 				text = text.substring(0, text.length() - 2);
@@ -592,12 +668,20 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 			MutablePropertyValues mpv = bd.getPropertyValues();
 			mpv.add(propName, timeout);
 		}
+		
 	}
 
-	private static class SizePropertyParser implements PropertyParser {
+	private static class SizePropertyParser implements ElementParser, AttributeParser {
+		
 		@Override
 		public void initProperty(Element xml, GenericBeanDefinition bd, String propName, ParserContext context) {
-			String text = xml.getTextContent().toLowerCase();
+			initProperty(xml.getTextContent(), bd, propName, context);
+		}
+		
+		@Override
+		public void initProperty(String value, GenericBeanDefinition bd,
+				String propName, ParserContext context) {
+			String text = value.toLowerCase();
 			int multiplier = 1;
 			if (text.endsWith("b")) {
 				text = text.substring(0, text.length() - 1);
@@ -616,13 +700,14 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 				multiplier = 1 << 40;
 			}
 			double d = Double.parseDouble(text) * multiplier;
-			long value = (long) d;
+			long val = (long) d;
 			MutablePropertyValues mpv = bd.getPropertyValues();
-			mpv.add(propName, value);
-		}		
+			mpv.add(propName, val);
+		}
+		
 	}
 	
-	private static class BeanPropertyParser implements PropertyParser {
+	private static class BeanPropertyParser implements ElementParser {
 		@Override
 		public void initProperty(Element xml, GenericBeanDefinition bd,	String propName, ParserContext context) {
 			NodeList nl = xml.getChildNodes();
@@ -646,7 +731,7 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 		}
 	}
 	
-	private static class EnumPropertyParser implements PropertyParser {
+	private static class EnumPropertyParser implements ElementParser {
 		
 		private Object[] values;
 		
@@ -796,14 +881,14 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 		}
 	}
 	
-	private static class ListenerCollectionParser implements PropertyParser {
+	private static class ListenerCollectionParser implements ElementParser {
 		
 		private String listenerCollectionName;
 		
 		public ListenerCollectionParser(String listenerCollectionName) {
 			this.listenerCollectionName = listenerCollectionName;
 		}
-
+		
 		@Override
 		public void initProperty(Element xml, GenericBeanDefinition bd,	String propName, ParserContext context) {
 			if (bd.getPropertyValues().contains(propName)) {

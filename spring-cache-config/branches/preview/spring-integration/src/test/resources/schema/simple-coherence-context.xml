@@ -147,11 +147,15 @@
 		</invocation-service-scheme>
 		
 		<!-- Coherence*Extend proxy -->
-		<!-- 
-		<proxy-service-scheme service-name="TCPExtendProxy" autostart="true" thread-count="5">
+		<proxy-service-scheme id="default.proxy.service">
+			<service-name>TCPExtendProxy</service-name>
+			<outgoing-message-handler request-timeout="1s"/>
 			<tcp-acceptor local-host="localhost" local-port="9099"/>
+			<cache-service-proxy enabled="true"/>
+			<invocation-service-proxy enabled="false"/>
+			<thread-count>5</thread-count>
+			<autostart>true</autostart>
 		</proxy-service-scheme>
-		 -->
 		
 	</coh:coherence-config>
 		

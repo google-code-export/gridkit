@@ -93,7 +93,7 @@ class ThreadUnlockHelper {
 			} catch (ExecutionException e) {
 				throw new RuntimeException("ExecutionException", e.getCause());
 			}
-		}		
+		}
 	}
 
 	private void queueCleanUp() {

@@ -28,7 +28,7 @@ import com.tangosol.net.messaging.ConnectionFilter;
  * @author Max Alexejev (malexejev@gmail.com)
  * 06.09.2010
  */
-public class ProxyServiceConfiguration extends GenericServiceConfiguration {
+public class ProxyServiceConfiguration extends AbstractServiceConfiguration {
 	
 	@XmlConfigProperty("thread-count")
 	protected Integer threadCount;
@@ -57,14 +57,6 @@ public class ProxyServiceConfiguration extends GenericServiceConfiguration {
 	@XmlConfigProperty("acceptor-config/outgoing-message-handler/request-timeout")
 	private Integer acceptorRequestTimeout;
 	
-	public Serializer getAcceptorSerializer() {
-		return acceptorSerializer;
-	}
-
-	public void setAcceptorSerializer(Serializer acceptorSerializer) {
-		this.acceptorSerializer = acceptorSerializer;
-	}
-
 	// FIXME @ReflectionInjectedProperty("__m_Acceptor.__m_Serializer")
 	private Serializer acceptorSerializer;
 	
@@ -296,6 +288,14 @@ public class ProxyServiceConfiguration extends GenericServiceConfiguration {
 
 	public void setAcceptorTcpDelayEnabled(Boolean acceptorTcpDelayEnabled) {
 		this.acceptorTcpDelayEnabled = acceptorTcpDelayEnabled;
+	}
+
+	public Serializer getAcceptorSerializer() {
+		return acceptorSerializer;
+	}
+
+	public void setAcceptorSerializer(Serializer acceptorSerializer) {
+		this.acceptorSerializer = acceptorSerializer;
 	}
 
 	public Integer getAcceptorReceiveBufferSizeBytes() {

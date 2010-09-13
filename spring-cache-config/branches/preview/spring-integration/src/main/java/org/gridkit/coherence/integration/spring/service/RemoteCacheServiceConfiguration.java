@@ -19,24 +19,14 @@ package org.gridkit.coherence.integration.spring.service;
 /**
  * @author Dmitri Babaev
  */
-public class RemoteCacheServiceConfiguration extends GenericServiceConfiguration {
+public class RemoteCacheServiceConfiguration extends AbstractRemoteServiceConfiguration {
 	
 	// TODO: add operationBundling support
-	
-	@ReflectionInjectedProperty("__m_InitiatorConfig")
-	protected InitiatorConfig initiatorConfig;
 	
 	@Override
 	public ServiceType getServiceType() {
 		return ServiceType.RemoteCache;
 	}
-
-	public InitiatorConfig getInitiatorConfig() {
-		return initiatorConfig;
-	}
-
-	public void setInitiatorConfig(InitiatorConfig initiatorConfig) {
-		this.initiatorConfig = initiatorConfig;
-	}
+	
 	
 }
