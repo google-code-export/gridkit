@@ -23,11 +23,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
-import org.gridkit.coherence.integration.spring.ClusteredService;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.tangosol.io.Serializer;
 import com.tangosol.io.ReadBuffer.BufferInput;
@@ -307,18 +306,22 @@ public abstract class BaseSimpleContextTest {
 	}
 	
 	@Test
-	public void testCacheK_RemoteCache() {
-		ClusteredService proxy = (ClusteredService) context.getBean("default.proxy.service");
-		System.out.println(proxy.getCoherenceService().getInfo());
-		/*
-		NearCache cache = (NearCache) context.getBean("cache.K");
-		cache.put("a", "A");
-		cache.put("b", "B");
-		cache.put("c", "C");
-		Assert.assertEquals("A", cache.get("a"));
-		Assert.assertEquals("B", cache.get("b"));
-		Assert.assertEquals("C", cache.get("c"));
-		*/
+	public void testCache_RemoteCache() {
+		ApplicationContext clientContext = new ClassPathXmlApplicationContext("config/extend-client-context.xml");
+		NamedCache cache = (NamedCache) clientContext.getBean("cache.A");
+		cache.put("a", "b");
+		Assert.assertEquals("b", cache.get("a"));
+		
+		clientContext = null;
+	}
+	
+	@Test
+	public void testService_RemoteInvocation() {
+		ApplicationContext clientContext = new ClassPathXmlApplicationContext("config/extend-client-context.xml");
+		InvocationService service = (InvocationService) clientContext.getBean("remote-exec-service");
+		service.getInfo().getServiceMembers();
+		
+		clientContext = null;
 	}
 	
 }

@@ -154,15 +154,16 @@
 	</bean>
 	
 	<!-- Coherence*Extend Cluster-side beans -->
+	<bean id="proxy-service-invoker" parent="service-reference" factory-bean="proxy-service" lazy-init="false"/>
 	
-	<bean id="default.proxy.service" parent="clustered-service">
+	<bean id="proxy-service" parent="clustered-service">
 		<property name="serviceName" value="ExtendTCPProxy" />
 		<property name="configuration">
 			<bean parent="proxy-service-configuration">
 				<property name="acceptorLocalHost" value="localhost"/>
 				<property name="acceptorLocalPort" value="9099"/>
 				<property name="cacheProxyEnabled" value="true"/>
-				<property name="invocationProxyEnabled" value="false"/>
+				<property name="invocationProxyEnabled" value="true"/>
 				<property name="autostart" value="true"/>
 			</bean>
 		</property>

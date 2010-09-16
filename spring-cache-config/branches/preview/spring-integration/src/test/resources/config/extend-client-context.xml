@@ -23,51 +23,38 @@
 
 	<import resource="/coherence-beans.xml"/>
 	
-	<!-- Coherence*Extend Client beans -->
-	
-	<bean id="default.remote.cache.service" parent="clustered-cache-service">
-		<property name="serviceName" value="RemoteCache" />
+	<!-- Coherence*Extend Remote Cache Service -->
+	<bean id="remote-cache-service" parent="cache-service">
+		<property name="serviceName" value="ExtendTcpCacheService" />
 		<property name="configuration">
 			<bean parent="remote-cache-scheme-configuration">
-				<property name="initiatorConfig">
-					<bean parent="initiator-configuration">
-						<property name="tcpInitiator">
-							<bean parent="tcp-initiator-configuration">
-								<property name="remoteAddresses">
-									<bean class="java.net.InetSocketAddress">
-										<constructor-arg type="java.lang.String" value="localhost"/>
-										<constructor-arg type="int" value="9099"/>
-									</bean>
-								</property>
-							</bean>
-						</property>
-					</bean>
-				</property>
+				<property name="initiatorRemoteHost" value="localhost"/>
+				<property name="initiatorRemotePort" value="9099"/>
+				<property name="initiatorConnectTimeout" value="10000"/>
+				<property name="initiatorRequestTimeout" value="5000"/>
 			</bean>
 		</property>
 	</bean>
 
-	<bean id="cache.K" parent="named-cache" factory-bean="K" lazy-init="true"/>
-	
-	<bean id="K" parent="clustered-cache-definition">
-		<property name="service" ref="default.remote.cache.service"/>
+	<!-- Actual cache defined in simple-coherence-context.xml -->
+	<bean id="cache.A" parent="named-cache" factory-bean="A" lazy-init="true"/>
+	<bean id="A" parent="cache-definition">
+		<property name="service" ref="remote-cache-service"/>
 	</bean>
 
-	<bean id="remote-cache-service" parent="clustered-cache-service" depends-on="default.proxy.service">
-		<property name="serviceName" value="RemoteCacheSer" />
-		<property name="configuration">
-			<bean parent="proxy-service-configuration" />
-		</property>
-	</bean>
+	<!-- Coherence*Extend Remote Invocation -->
+	<bean id="remote-exec-service" parent="service-reference" factory-bean="remote-invocation-service"/>
 	
-	<!-- 
-	<bean id="remote-invocation-service" parent="clustered-service" depends-on="default.proxy.service">
+	<bean id="remote-invocation-service" parent="clustered-service">
+		<property name="serviceName" value="ExtendTcpInvocationService" />
 		<property name="configuration">
-			<bean parent="remote-invocation-service">
-				<property name="threadCount" value="5"/>
+			<bean parent="remote-invocation-scheme-configuration">
+				<property name="initiatorRemoteHost" value="localhost"/>
+				<property name="initiatorRemotePort" value="9099"/>
+				<property name="initiatorConnectTimeout" value="10000"/>
+				<property name="initiatorRequestTimeout" value="5000"/>
 			</bean>
 		</property>
 	</bean>
-	 -->
 	
 </beans>

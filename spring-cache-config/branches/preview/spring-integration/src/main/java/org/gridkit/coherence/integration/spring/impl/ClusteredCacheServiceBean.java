@@ -20,26 +20,20 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.gridkit.coherence.integration.spring.BackingMapLookupStrategy;
-import org.gridkit.coherence.integration.spring.ClusteredCacheService;
-import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Required;
 
-import com.tangosol.net.AbstractBackingMapManager;
 import com.tangosol.net.BackingMapManager;
 import com.tangosol.net.CacheService;
-import com.tangosol.net.NamedCache;
+import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.Service;
-import com.tangosol.net.management.Registry;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class ClusteredCacheServiceBean extends ClusteredServiceBean implements ClusteredCacheService, InitializingBean, BeanNameAware, DisposableBean {
+public class ClusteredCacheServiceBean extends CacheServiceBean {
 
 	private BackingMapLookupStrategy backingMapLookupStrategy;
-	private final BackingMapManager bmm = new BackendManager();
+	private final BackingMapManager bmm = new DummyConfigurableCacheFactory().managerInstance;
 	
 	@Required
 	public void setBackingMapLookupStrategy(BackingMapLookupStrategy backingMapLookupStrategy) {
@@ -49,27 +43,6 @@ public class ClusteredCacheServiceBean extends ClusteredServiceBean implements C
 	@Override
 	public void destroy() throws Exception {
 		// TODO destroying service
-	}
-
-	protected CacheService getCacheService() {
-		return ((CacheService)service);
-	}
-	
-	@Override
-	public NamedCache ensureCache(final String name) {
-		ensureStarted();
-		return threadHelper.modalExecute(new Callable<NamedCache>() {
-			@Override
-			public NamedCache call() throws Exception {
-				return getCacheService().ensureCache(name, null);
-			}
-		});
-	}
-
-	@Override
-	public void destroyCahce(NamedCache cache) {
-		getCacheService().destroyCache(cache);
-		
 	}
 
 	@Override
@@ -86,41 +59,37 @@ public class ClusteredCacheServiceBean extends ClusteredServiceBean implements C
 		}
 	}
 
-	protected void jmxRegister(CacheService cacheService, Map<?, ?> cache, String name, String tier) {
-		Registry r = cacheService.getCluster().getManagement();
-		String id = "type=Cache,serive=" + cacheService.getInfo().getServiceName() + ",name=" + name + ",tier=" + tier;
-		id = r.ensureGlobalName(id);
-		r.register(id, cache);		
-	}
+	/*
+	 * This trick is needed because of explicit upcast of backingManager 
+	 * to DefaultConfigurableCacheFactory.Manager in DefaultConfigurableCacheFactory.validateBackingMapManager
+	 * during remote cache instantiation
+	 */
+	private class DummyConfigurableCacheFactory extends DefaultConfigurableCacheFactory {
+		
+		final BackendManager managerInstance = new BackendManager();
+		
+		private class BackendManager extends DefaultConfigurableCacheFactory.Manager {
+			
+			@Override
+			@SuppressWarnings("unchecked")
+			public Map instantiateBackingMap(final String cacheName) {
+				Map backingMap = threadHelper.safeExecute(new Callable<Map>() {
+					@Override
+					public Map call() throws Exception {
+						return backingMapLookupStrategy.instantiateBackingMap(cacheName, getContext());
+					}				
+				});
+				jmxRegister(getContext().getCacheService(), backingMap, cacheName, "back");
+				return backingMap;
+			}
 
-	protected void jmxUnregister(CacheService cacheService, String name, String tier) {
-		Registry r = cacheService.getCluster().getManagement();
-		String id = "type=Cache,serive=" + serviceName + ",name=" + name + ",tier=" + tier;
-		id = r.ensureGlobalName(id);
-		r.unregister(id);		
-	}
-	
-	
-	private class BackendManager extends AbstractBackingMapManager {
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public Map instantiateBackingMap(final String cacheName) {
-			Map backingMap = threadHelper.safeExecute(new Callable<Map>() {
-				@Override
-				public Map call() throws Exception {
-					return backingMapLookupStrategy.instantiateBackingMap(cacheName, getContext());
-				}				
-			});
-			jmxRegister(getContext().getCacheService(), backingMap, cacheName, "back");
-			return backingMap;
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public void releaseBackingMap(String sName, Map map) {
-			super.releaseBackingMap(sName, map);
-			jmxUnregister(getContext().getCacheService(), sName, "back");
+			@SuppressWarnings("unchecked")
+			@Override
+			public void releaseBackingMap(String sName, Map map) {
+				super.releaseBackingMap(sName, map);
+				jmxUnregister(getContext().getCacheService(), sName, "back");
+			}
 		}
 	}
+	
 }

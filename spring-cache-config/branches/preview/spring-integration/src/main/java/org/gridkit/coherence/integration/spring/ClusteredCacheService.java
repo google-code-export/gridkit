@@ -22,6 +22,6 @@ public interface ClusteredCacheService extends ClusteredService {
 
 	public NamedCache ensureCache(String name);
 	
-	public void destroyCahce(NamedCache cahce);
+	public void destroyCache(NamedCache cache);
 	
 }

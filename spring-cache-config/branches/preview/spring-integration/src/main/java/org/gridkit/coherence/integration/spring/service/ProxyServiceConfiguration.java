@@ -19,6 +19,7 @@ package org.gridkit.coherence.integration.spring.service;
 import com.tangosol.io.Serializer;
 import com.tangosol.net.AddressProvider;
 import com.tangosol.net.messaging.ConnectionFilter;
+import com.tangosol.util.Filter;
 
 
 /**
@@ -34,10 +35,10 @@ public class ProxyServiceConfiguration extends AbstractServiceConfiguration {
 	protected Integer threadCount;
 	
 	@XmlConfigProperty("task-timeout")
-	protected Integer taskTimeoutMillis;
+	protected Integer taskTimeout;
 	
 	@XmlConfigProperty("task-hung-threshold")
-	protected Integer taskHungThresholdMillis;
+	protected Integer taskHungThreshold;
 	
 	@XmlConfigProperty("request-timeout")
 	protected Integer requestTimeout;
@@ -66,6 +67,9 @@ public class ProxyServiceConfiguration extends AbstractServiceConfiguration {
 	@XmlConfigProperty("acceptor-config/tcp-acceptor/authorized-hosts/host-range")
 	private String authorizedHostRange;
 
+	@ReflectionInjectedProperty("__m_Acceptor.__m_AuthorizedHostFilter")
+	private Filter authorizedHostFilter;
+	
 	@ReflectionInjectedProperty("__m_Acceptor.__m_AddressProvider")
 	private AddressProvider addressProvider;
 	
@@ -75,7 +79,8 @@ public class ProxyServiceConfiguration extends AbstractServiceConfiguration {
 	@XmlConfigProperty("acceptor-config/tcp-acceptor/local-address/port")
 	private Integer acceptorLocalPort;
 	
-	@XmlConfigProperty("acceptor-config/tcp-acceptor/socket-provider-config")
+	// TODO add complex support for socket-provider configuration (now only works with string predefines)
+	@XmlConfigProperty("acceptor-config/tcp-acceptor/socket-provider")
 	private String acceptorSocketProviderConfig;
 	
 	@XmlConfigProperty("acceptor-config/tcp-acceptor/reuse-address")
@@ -88,13 +93,13 @@ public class ProxyServiceConfiguration extends AbstractServiceConfiguration {
 	private Boolean acceptorTcpDelayEnabled;
 	
 	@XmlConfigProperty("acceptor-config/tcp-acceptor/receive-buffer-size")
-	private Integer acceptorReceiveBufferSizeBytes;
+	private Integer acceptorReceiveBufferSize;
 	
 	@XmlConfigProperty("acceptor-config/tcp-acceptor/send-buffer-size")
-	private Integer acceptorSendBufferSizeBytes;
+	private Integer acceptorSendBufferSize;
 	
 	@XmlConfigProperty("acceptor-config/tcp-acceptor/linger-timeout")
-	private Integer acceptorLingerTimeoutMillis;
+	private Integer acceptorLingerTimeout;
 	
 	@XmlConfigProperty("acceptor-config/tcp-acceptor/listen-backlog")
 	private Integer acceptorListenBacklog;
@@ -103,19 +108,19 @@ public class ProxyServiceConfiguration extends AbstractServiceConfiguration {
 	private Boolean acceptorSuspectProtocolEnabled;
 	
 	@XmlConfigProperty("acceptor-config/tcp-acceptor/suspect-buffer-size")
-	private Integer acceptorSuspectBufferSizeBytes;
+	private Integer acceptorSuspectBufferSize;
 	
 	@XmlConfigProperty("acceptor-config/tcp-acceptor/suspect-buffer-length")
 	private Integer acceptorSuspectBufferLength;
 	
 	@XmlConfigProperty("acceptor-config/tcp-acceptor/nominal-buffer-size")
-	private Integer acceptorNominalBufferSizeBytes;
+	private Integer acceptorNominalBufferSize;
 	
 	@XmlConfigProperty("acceptor-config/tcp-acceptor/nominal-buffer-length")
 	private Integer acceptorNominalBufferLength;
 	
 	@XmlConfigProperty("acceptor-config/tcp-acceptor/limit-buffer-size")
-	private Integer acceptorLimitBufferSizeBytes;
+	private Integer acceptorLimitBufferSize;
 	
 	@XmlConfigProperty("acceptor-config/tcp-acceptor/limit-buffer-length")
 	private Integer acceptorLimitBufferLength;
@@ -152,22 +157,6 @@ public class ProxyServiceConfiguration extends AbstractServiceConfiguration {
 
 	public void setThreadCount(Integer threadCount) {
 		this.threadCount = threadCount;
-	}
-
-	public Integer getTaskTimeoutMillis() {
-		return taskTimeoutMillis;
-	}
-
-	public void setTaskTimeoutMillis(Integer taskTimeoutMillis) {
-		this.taskTimeoutMillis = taskTimeoutMillis;
-	}
-
-	public Integer getTaskHungThresholdMillis() {
-		return taskHungThresholdMillis;
-	}
-
-	public void setTaskHungThresholdMillis(Integer taskHungThresholdMillis) {
-		this.taskHungThresholdMillis = taskHungThresholdMillis;
 	}
 
 	public Integer getRequestTimeout() {
@@ -234,6 +223,14 @@ public class ProxyServiceConfiguration extends AbstractServiceConfiguration {
 		this.authorizedHostRange = authorizedHostRange;
 	}
 
+	public Filter getAuthorizedHostFilter() {
+		return authorizedHostFilter;
+	}
+
+	public void setAuthorizedHostFilter(Filter authorizedHostFilter) {
+		this.authorizedHostFilter = authorizedHostFilter;
+	}
+
 	public AddressProvider getAddressProvider() {
 		return addressProvider;
 	}
@@ -298,31 +295,6 @@ public class ProxyServiceConfiguration extends AbstractServiceConfiguration {
 		this.acceptorSerializer = acceptorSerializer;
 	}
 
-	public Integer getAcceptorReceiveBufferSizeBytes() {
-		return acceptorReceiveBufferSizeBytes;
-	}
-
-	public void setAcceptorReceiveBufferSizeBytes(
-			Integer acceptorReceiveBufferSizeBytes) {
-		this.acceptorReceiveBufferSizeBytes = acceptorReceiveBufferSizeBytes;
-	}
-
-	public Integer getAcceptorSendBufferSizeBytes() {
-		return acceptorSendBufferSizeBytes;
-	}
-
-	public void setAcceptorSendBufferSizeBytes(Integer acceptorSendBufferSizeBytes) {
-		this.acceptorSendBufferSizeBytes = acceptorSendBufferSizeBytes;
-	}
-
-	public Integer getAcceptorLingerTimeoutMillis() {
-		return acceptorLingerTimeoutMillis;
-	}
-
-	public void setAcceptorLingerTimeoutMillis(Integer acceptorLingerTimeoutMillis) {
-		this.acceptorLingerTimeoutMillis = acceptorLingerTimeoutMillis;
-	}
-
 	public Integer getAcceptorListenBacklog() {
 		return acceptorListenBacklog;
 	}
@@ -340,15 +312,6 @@ public class ProxyServiceConfiguration extends AbstractServiceConfiguration {
 		this.acceptorSuspectProtocolEnabled = acceptorSuspectProtocolEnabled;
 	}
 
-	public Integer getAcceptorSuspectBufferSizeBytes() {
-		return acceptorSuspectBufferSizeBytes;
-	}
-
-	public void setAcceptorSuspectBufferSizeBytes(
-			Integer acceptorSuspectBufferSizeBytes) {
-		this.acceptorSuspectBufferSizeBytes = acceptorSuspectBufferSizeBytes;
-	}
-
 	public Integer getAcceptorSuspectBufferLength() {
 		return acceptorSuspectBufferLength;
 	}
@@ -357,29 +320,12 @@ public class ProxyServiceConfiguration extends AbstractServiceConfiguration {
 		this.acceptorSuspectBufferLength = acceptorSuspectBufferLength;
 	}
 
-	public Integer getAcceptorNominalBufferSizeBytes() {
-		return acceptorNominalBufferSizeBytes;
-	}
-
-	public void setAcceptorNominalBufferSizeBytes(
-			Integer acceptorNominalBufferSizeBytes) {
-		this.acceptorNominalBufferSizeBytes = acceptorNominalBufferSizeBytes;
-	}
-
 	public Integer getAcceptorNominalBufferLength() {
 		return acceptorNominalBufferLength;
 	}
 
 	public void setAcceptorNominalBufferLength(Integer acceptorNominalBufferLength) {
 		this.acceptorNominalBufferLength = acceptorNominalBufferLength;
-	}
-
-	public Integer getAcceptorLimitBufferSizeBytes() {
-		return acceptorLimitBufferSizeBytes;
-	}
-
-	public void setAcceptorLimitBufferSizeBytes(Integer acceptorLimitBufferSizeBytes) {
-		this.acceptorLimitBufferSizeBytes = acceptorLimitBufferSizeBytes;
 	}
 
 	public Integer getAcceptorLimitBufferLength() {
@@ -445,6 +391,70 @@ public class ProxyServiceConfiguration extends AbstractServiceConfiguration {
 
 	public void setInvocationProxyClassName(String invocationProxyClassName) {
 		this.invocationProxyClassName = invocationProxyClassName;
+	}
+
+	public Integer getTaskTimeout() {
+		return taskTimeout;
+	}
+
+	public void setTaskTimeout(Integer taskTimeout) {
+		this.taskTimeout = taskTimeout;
+	}
+
+	public Integer getTaskHungThreshold() {
+		return taskHungThreshold;
+	}
+
+	public void setTaskHungThreshold(Integer taskHungThreshold) {
+		this.taskHungThreshold = taskHungThreshold;
+	}
+
+	public Integer getAcceptorReceiveBufferSize() {
+		return acceptorReceiveBufferSize;
+	}
+
+	public void setAcceptorReceiveBufferSize(Integer acceptorReceiveBufferSize) {
+		this.acceptorReceiveBufferSize = acceptorReceiveBufferSize;
+	}
+
+	public Integer getAcceptorSendBufferSize() {
+		return acceptorSendBufferSize;
+	}
+
+	public void setAcceptorSendBufferSize(Integer acceptorSendBufferSize) {
+		this.acceptorSendBufferSize = acceptorSendBufferSize;
+	}
+
+	public Integer getAcceptorLingerTimeout() {
+		return acceptorLingerTimeout;
+	}
+
+	public void setAcceptorLingerTimeout(Integer acceptorLingerTimeout) {
+		this.acceptorLingerTimeout = acceptorLingerTimeout;
+	}
+
+	public Integer getAcceptorSuspectBufferSize() {
+		return acceptorSuspectBufferSize;
+	}
+
+	public void setAcceptorSuspectBufferSize(Integer acceptorSuspectBufferSize) {
+		this.acceptorSuspectBufferSize = acceptorSuspectBufferSize;
+	}
+
+	public Integer getAcceptorNominalBufferSize() {
+		return acceptorNominalBufferSize;
+	}
+
+	public void setAcceptorNominalBufferSize(Integer acceptorNominalBufferSize) {
+		this.acceptorNominalBufferSize = acceptorNominalBufferSize;
+	}
+
+	public Integer getAcceptorLimitBufferSize() {
+		return acceptorLimitBufferSize;
+	}
+
+	public void setAcceptorLimitBufferSize(Integer acceptorLimitBufferSize) {
+		this.acceptorLimitBufferSize = acceptorLimitBufferSize;
 	}
 	
 }

@@ -25,6 +25,7 @@
 	
 	<bean id="service-reference" abstract="true" factory-method="getCoherenceService" lazy-init="true"/>
 	
+	<bean id="cache-definition" abstract="true" class="org.gridkit.coherence.integration.spring.CacheDefinition" />
 	<bean id="clustered-cache-definition" abstract="true" class="org.gridkit.coherence.integration.spring.ClusteredCacheDefinition" />
 
 	<!-- Service configurations prototypes -->
@@ -36,10 +37,6 @@
 	<bean id="remote-cache-scheme-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.RemoteCacheServiceConfiguration" />
 	<bean id="remote-invocation-scheme-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.RemoteInvocationServiceConfiguration" />
 	
-	<!-- Prototypes for Coherence*Extend configuration elements -->
-	<bean id="initiator-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.InitiatorConfig" />
-	<bean id="tcp-initiator-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.TcpInitiatorConfig" />
-
 	<!-- Default backing map lookup strategy -->
 	<bean id="default-backing-map-lookup-strategy" class="org.gridkit.coherence.integration.spring.impl.ByNameBackingMapLookupStrategy"/>
 	
@@ -47,6 +44,8 @@
 	
 	<bean id="clustered-service" abstract="true" class="org.gridkit.coherence.integration.spring.impl.ClusteredServiceBean"/>
 
+	<bean id="cache-service" abstract="true" class="org.gridkit.coherence.integration.spring.impl.CacheServiceBean"/>
+	
 	<bean id="clustered-cache-service" abstract="true" class="org.gridkit.coherence.integration.spring.impl.ClusteredCacheServiceBean">
 		<property name="backingMapLookupStrategy" ref="default-backing-map-lookup-strategy" />
 	</bean>

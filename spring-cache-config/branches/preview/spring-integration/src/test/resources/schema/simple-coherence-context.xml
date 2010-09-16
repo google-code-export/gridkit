@@ -41,8 +41,6 @@
 		<named-cache id="cache.H" cache-name="H"/>
 		<named-cache id="cache.I" cache-name="I"/>
 		<named-cache id="cache.J" cache-name="J"/>
-		<!-- 
-		 -->
 		
 		<distributed-service-scheme id="default.distributed.service" lazy-init="false">
 			<service-name>DistributedCache</service-name>
@@ -147,12 +145,27 @@
 		</invocation-service-scheme>
 		
 		<!-- Coherence*Extend proxy -->
-		<proxy-service-scheme id="default.proxy.service">
+		<proxy-service-scheme id="proxy-service">
 			<service-name>TCPExtendProxy</service-name>
-			<outgoing-message-handler request-timeout="1s"/>
-			<tcp-acceptor local-host="localhost" local-port="9099"/>
-			<cache-service-proxy enabled="true"/>
-			<invocation-service-proxy enabled="false"/>
+			<acceptor-config>
+				<outgoing-message-handler>
+					<request-timeout>1s</request-timeout>				
+				</outgoing-message-handler>
+				<tcp-acceptor>
+					<local-address>
+						<address>localhost</address>
+						<port>9099</port>
+					</local-address>
+				</tcp-acceptor>
+			</acceptor-config>
+			<proxy-config>
+				<cache-service-proxy>
+					<enabled>true</enabled>
+				</cache-service-proxy>
+				<invocation-service-proxy>
+					<enabled>true</enabled>
+				</invocation-service-proxy>
+			</proxy-config>
 			<thread-count>5</thread-count>
 			<autostart>true</autostart>
 		</proxy-service-scheme>

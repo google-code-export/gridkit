@@ -17,41 +17,18 @@
 package org.gridkit.coherence.integration.spring;
 
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 
-import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.context.ApplicationContext;
 
 import com.tangosol.net.BackingMapManagerContext;
-import com.tangosol.net.NamedCache;
 
-public class ClusteredCacheDefinition implements InitializingBean, BeanNameAware, MapProvider  {
+public class ClusteredCacheDefinition extends CacheDefinition {
 
-	private String cacheName;
-	
-	private NamedCacheDecorator frontTier;
-	private ClusteredCacheService clusteredService;
 	private String backendBeanId;
 	private Object backendBean;
-	private CountDownLatch initGate = new CountDownLatch(1);
 	
 	public ClusteredCacheDefinition() {
-	}
-	
-	@Override
-	public void setBeanName(String name) {
-		this.cacheName = name;
-	}
-	
-	public void setFrontTier(NamedCacheDecorator frontTier) {
-		this.frontTier = frontTier;
-	}
-	
-	@Required
-	public void setService(ClusteredCacheService service) {
-		this.clusteredService = service;
 	}
 	
 	@Required
@@ -90,36 +67,6 @@ public class ClusteredCacheDefinition implements InitializingBean, BeanNameAware
 		throw new IllegalArgumentException("Invalid type for backendBean " + backendBean.getClass().getName() + ", should be Map, MapProvider or BackingMapProvider");
 	}
 
-	@Override
-	public Map<?, ?> getMap() {
-		return getCache();
-	}
-
-	public NamedCache getCache() {
-		// should wait bean to be initialized
-		try {
-			initGate.await();
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}
-//		if (!initialized) {
-//			System.out.println("By thread " + threadName);
-//			callSite.printStackTrace();
-//			throw new IllegalStateException("Cache definition is not initialized");
-//		}
-		try {
-			NamedCache cache = clusteredService.ensureCache(cacheName);
-			if (frontTier != null) {
-				cache = frontTier.wrapCache(cache);
-			}
-			return cache;
-		}
-		catch(RuntimeException e) {
-			e.printStackTrace();
-			throw e;
-		}
-	}
-	
 	public Map<?, ?> getBackendInstance(ApplicationContext appCtx, BackingMapManagerContext cacheCtx) {
 		// should wait bean to be initialized
 		try {
