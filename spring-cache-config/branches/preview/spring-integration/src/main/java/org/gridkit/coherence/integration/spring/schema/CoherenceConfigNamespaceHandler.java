@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.gridkit.coherence.integration.spring.BackingMapLookupStrategy;
+import org.gridkit.coherence.integration.spring.CacheDefinition;
 import org.gridkit.coherence.integration.spring.ClusteredCacheDefinition;
 import org.gridkit.coherence.integration.spring.cache.InvalidationStrategy;
 import org.gridkit.coherence.integration.spring.cache.LocalCacheDefinition;
@@ -71,6 +72,7 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 	private static final String TAG_REPLICATED_SERVICE_SCHEME = "replicated-service-scheme";
 	private static final String TAG_OPTIMISTIC_SERVICE_SCHEME = "optimistic-service-scheme";
 	private static final String TAG_INVOCATION_SERVICE_SCHEME = "invocation-service-scheme";
+	private static final String TAG_COMMON_CACHE_SCHEME = "common-cache-scheme";
 	private static final String TAG_NAMED_CACHE_SCHEME = "named-cache-scheme";
 	private static final String TAG_LOCAL_CACHE_SCHEME = "local-cache-scheme";
 	private static final String TAG_NEAR_CACHE_SCHEME = "near-cache-scheme";
@@ -140,7 +142,6 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 			{
 				ServiceBeanTemplate remoteCacheService = new ServiceBeanTemplate();
 				remoteCacheService.className = ClusteredServiceBean.class.getName();
-				registerServiceBeanProperties(remoteCacheService);
 				registerRemoteCacheServiceConfigProperties(remoteCacheService.configTemplate);
 				
 				registerBeanDefinitionParser(TAG_REMOTE_CACHE_SCHEME, remoteCacheService);
@@ -149,13 +150,17 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 			{
 				ServiceBeanTemplate remoteInvocationService = new ServiceBeanTemplate();
 				remoteInvocationService.className = ClusteredServiceBean.class.getName();
-				registerServiceBeanProperties(remoteInvocationService);
 				registerRemoteInvocationServiceConfigProperties(remoteInvocationService.configTemplate);
 				
 				registerBeanDefinitionParser(TAG_REMOTE_INVOCATION_SERVICE_SCHEME, remoteInvocationService);
 			}
 		}
 		{// cache schemes
+			{
+				CustomBeanDefinitionTemplate cacheScheme = new CustomBeanDefinitionTemplate();
+				registerCommonCacheSchemeProperties(cacheScheme);
+				registerBeanDefinitionParser(TAG_COMMON_CACHE_SCHEME, cacheScheme);
+			}
 			{
 				CustomBeanDefinitionTemplate cacheScheme = new CustomBeanDefinitionTemplate();
 				registerCacheSchemeProperties(cacheScheme);
@@ -252,7 +257,7 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 		template.addProperty("acceptor-config/serializer", 		"acceptorSerializer", new SerializerBeanParser());
 		template.addProperty("acceptor-config/filter", 			"acceptorConnectionFilter", new BeanPropertyParser());
 		
-		template.addProperty("acceptor-config/outgoing-message-handler/heartbeat-interval","acceptorHeartbeatInterval", new TimeoutPropertyParser());
+		template.addProperty("acceptor-config/outgoing-message-handler/heartbeat-interval",	"acceptorHeartbeatInterval", new TimeoutPropertyParser());
 		template.addProperty("acceptor-config/outgoing-message-handler/heartbeat-timeout",	"acceptorHeartbeatTimeout", new TimeoutPropertyParser());
 		template.addProperty("acceptor-config/outgoing-message-handler/request-timeout",	"acceptorRequestTimeout", new TimeoutPropertyParser());
 		
@@ -290,16 +295,49 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 		template.addProperty("proxy-config/invocation-service-proxy/class-name","invocationProxyClassName", new StringPropertyParser());
 	}
 	
+	private void registerRemoteServiceConfigProperties(CustomBeanDefinitionTemplate template) {
+		template.addProperty("service-name", "serviceName", new StringPropertyParser());
+		
+		template.addProperty("initiator-config/outgoing-message-handler/heartbeat-interval", "initiatorHeartbeatInterval", new TimeoutPropertyParser());
+		template.addProperty("initiator-config/outgoing-message-handler/heartbeat-timeout", "initiatorHeartbeatTimeout", new TimeoutPropertyParser());
+		template.addProperty("initiator-config/outgoing-message-handler/request-timeout", "initiatorRequestTimeout", new TimeoutPropertyParser());
+		
+		template.addProperty("initiator-config/serializer", "initiatorSerializer", new SerializerBeanParser());
+		template.addProperty("initiator-config/filter", 	"initiatorConnectionFilter", new BeanPropertyParser());
+		
+		template.addProperty("initiator-config/tcp-initiator/local-address/address",	"initiatorLocalHost", new StringPropertyParser());
+		template.addProperty("initiator-config/tcp-initiator/local-address/port",		"initiatorLocalPort", new StringPropertyParser());
+		
+		template.addProperty("initiator-config/tcp-initiator/remote-addresses", "remoteAddresses", new PornoPropertyParser());
+		
+		template.addProperty("initiator-config/tcp-initiator/remote-addresses/address-provider",	"addressProvider", new BeanPropertyParser());
+		
+		template.addProperty("initiator-config/tcp-initiator/socket-provider",		"initiatorSocketProviderConfig", new StringPropertyParser());
+		
+		template.addProperty("initiator-config/tcp-initiator/reuse-address",		"initiatorReuseAddress", new StringPropertyParser());
+		template.addProperty("initiator-config/tcp-initiator/keep-alive-enabled",	"initiatorKeepAliveEnabled", new StringPropertyParser());
+		template.addProperty("initiator-config/tcp-initiator/tcp-delay-enabled",	"acceptorTcpDelayEnabled", new StringPropertyParser());
+		template.addProperty("initiator-config/tcp-initiator/receive-buffer-size",	"acceptorReceiveBufferSizeBytes", new SizePropertyParser());
+		template.addProperty("initiator-config/tcp-initiator/send-buffer-size",		"acceptorSendBufferSizeBytes", new SizePropertyParser());
+		template.addProperty("initiator-config/tcp-initiator/linger-timeout",		"acceptorLingerTimeoutMillis", new TimeoutPropertyParser());
+		template.addProperty("initiator-config/tcp-initiator/connect-timeout",		"acceptorLingerTimeoutMillis", new TimeoutPropertyParser());
+	}
+	
 	private void registerRemoteCacheServiceConfigProperties(CustomBeanDefinitionTemplate template) {
-		registerServiceConfigProperties(template);
+		registerRemoteServiceConfigProperties(template);
 		template.className = RemoteCacheServiceConfiguration.class.getName();
-		template.addProperty("initiator-config", "initiatorConfig", new BeanPropertyParser());
 	}
 	
 	private void registerRemoteInvocationServiceConfigProperties(CustomBeanDefinitionTemplate template) {
-		registerServiceConfigProperties(template);
+		registerRemoteServiceConfigProperties(template);
 		template.className = RemoteInvocationServiceConfiguration.class.getName();
-		template.addProperty("initiator-config", "initiatorConfig", new BeanPropertyParser());
+	}
+	
+	private void registerCommonCacheSchemeProperties(CustomBeanDefinitionTemplate template) {
+		template.className = CacheDefinition.class.getName();
+		
+		template.addProperty("front-tier", "frontTier", new FrontTierBeanParser());
+		template.addProperty("service", "service", new ServiceBeanParser());
 	}
 	
 	private void registerCacheSchemeProperties(CustomBeanDefinitionTemplate template) {
@@ -314,7 +352,7 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 		template.className = NearCacheDecorator.class.getName();
 
 		template.addProperty("front-scheme", "frontMap", new CacheMapBeanParser());
-		template.addProperty("invalidation-strategy", "invalidationStratgy", new EnumPropertyParser(InvalidationStrategy.values()));
+		template.addProperty("invalidation-strategy", "invalidationStrategy", new EnumPropertyParser(InvalidationStrategy.values()));
 		
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setBeanClassName(LocalCacheDefinition.class.getName());

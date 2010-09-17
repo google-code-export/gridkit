@@ -18,6 +18,7 @@ package org.gridkit.coherence.integration;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.tangosol.net.CacheFactory;
@@ -25,17 +26,20 @@ import com.tangosol.net.CacheFactory;
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
+@Ignore
 public class SimpleContextTest extends BaseSimpleContextTest {
 
 	@BeforeClass
 	public static void init() {
 		System.setProperty("tangosol.coherence.wka", "localhost");
 		context = new ClassPathXmlApplicationContext("config/simple-coherence-context.xml");
+		clientContext = new ClassPathXmlApplicationContext("config/extend-client-context.xml");		
 	}
 	
 	@AfterClass
 	public static void shutdown() {
 		context = null;
+		clientContext = null;
 		CacheFactory.getCluster().shutdown();
 	}
 	

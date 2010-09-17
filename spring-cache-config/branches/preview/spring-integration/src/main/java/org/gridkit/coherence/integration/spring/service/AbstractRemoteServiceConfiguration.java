@@ -15,8 +15,11 @@
  */
 package org.gridkit.coherence.integration.spring.service;
 
+import java.util.List;
+
 import com.tangosol.io.Serializer;
 import com.tangosol.net.AddressProvider;
+import com.tangosol.net.messaging.ConnectionFilter;
 /**
  * Common configuration details for remote services,
  * such as caches and invocation
@@ -38,10 +41,9 @@ public abstract class AbstractRemoteServiceConfiguration extends
 	// FIXME @ReflectionInjectedProperty("__m_Initiator.__m_Serializer")
 	private Serializer initiatorSerializer;
 	
-	/* TODO <initiator-config><use-filters>
+	// TODO <initiator-config><use-filters>
 	@ReflectionInjectedProperty("__m_Initiator.__m_ConnectionFilter")
 	private ConnectionFilter initiatorConnectionFilter;
-	*/
 	
 	@XmlConfigProperty("initiator-config/tcp-initiator/local-address/address")
 	private String initiatorLocalHost;
@@ -49,11 +51,8 @@ public abstract class AbstractRemoteServiceConfiguration extends
 	@XmlConfigProperty("initiator-config/tcp-initiator/local-address/port")
 	private Integer initiatorLocalPort;
 	
-	@XmlConfigProperty("initiator-config/tcp-initiator/remote-addresses/socket-address/address")
-	private String initiatorRemoteHost;
-	
-	@XmlConfigProperty("initiator-config/tcp-initiator/remote-addresses/socket-address/port")
-	private String initiatorRemotePort;
+	@XmlConfigProperty("initiator-config/tcp-initiator/remote-addresses")
+	private List<SocketAddressConfig> remoteAddresses;
 	
 	@ReflectionInjectedProperty("__m_Initiator.__m_AddressProvider")
 	private AddressProvider addressProvider;
@@ -115,6 +114,15 @@ public abstract class AbstractRemoteServiceConfiguration extends
 		this.initiatorSerializer = initiatorSerializer;
 	}
 
+	public ConnectionFilter getInitiatorConnectionFilter() {
+		return initiatorConnectionFilter;
+	}
+
+	public void setInitiatorConnectionFilter(
+			ConnectionFilter initiatorConnectionFilter) {
+		this.initiatorConnectionFilter = initiatorConnectionFilter;
+	}
+
 	public String getInitiatorLocalHost() {
 		return initiatorLocalHost;
 	}
@@ -129,22 +137,6 @@ public abstract class AbstractRemoteServiceConfiguration extends
 
 	public void setInitiatorLocalPort(Integer initiatorLocalPort) {
 		this.initiatorLocalPort = initiatorLocalPort;
-	}
-
-	public String getInitiatorRemoteHost() {
-		return initiatorRemoteHost;
-	}
-
-	public void setInitiatorRemoteHost(String initiatorRemoteHost) {
-		this.initiatorRemoteHost = initiatorRemoteHost;
-	}
-
-	public String getInitiatorRemotePort() {
-		return initiatorRemotePort;
-	}
-
-	public void setInitiatorRemotePort(String initiatorRemotePort) {
-		this.initiatorRemotePort = initiatorRemotePort;
 	}
 
 	public AddressProvider getAddressProvider() {
@@ -218,6 +210,14 @@ public abstract class AbstractRemoteServiceConfiguration extends
 
 	public void setInitiatorConnectTimeout(Integer initiatorConnectTimeout) {
 		this.initiatorConnectTimeout = initiatorConnectTimeout;
+	}
+
+	public List<SocketAddressConfig> getRemoteAddresses() {
+		return remoteAddresses;
+	}
+
+	public void setRemoteAddresses(List<SocketAddressConfig> remoteAddresses) {
+		this.remoteAddresses = remoteAddresses;
 	}
 
 }

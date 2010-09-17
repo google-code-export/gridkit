@@ -21,6 +21,7 @@ import org.gridkit.coherence.utils.classloader.Isolate;
 import org.gridkit.coherence.utils.classloader.IsolateTestRunner;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.context.ApplicationContext;
@@ -32,7 +33,8 @@ import com.tangosol.net.RequestPolicyException;
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-// Need to run in isolated class loader, otherwise Coherence defaults are not going to be overridden by system properties 
+// Need to run in isolated class loader, otherwise Coherence defaults are not going to be overridden by system properties
+@Ignore
 @RunWith(IsolateTestRunner.class)
 public class RemoteStorageSchemeContextTest extends BaseSimpleContextTest {
 	
@@ -49,11 +51,13 @@ public class RemoteStorageSchemeContextTest extends BaseSimpleContextTest {
 		System.setProperty("tangosol.coherence.wka", "localhost");
 		System.setProperty("tangosol.coherence.distributed.localstorage", "false");
 		context = new ClassPathXmlApplicationContext("schema/simple-coherence-context.xml");
+//		clientContext = new ClassPathXmlApplicationContext("schema/extend-client-context.xml");		
 	}
 	
 	@AfterClass
 	public static void shutdown() {
 		context = null;
+//		clientContext = null;
 		CacheFactory.getCluster().shutdown();
 		node1.submit(StopCmd.class.getName());
 		node1.stop();

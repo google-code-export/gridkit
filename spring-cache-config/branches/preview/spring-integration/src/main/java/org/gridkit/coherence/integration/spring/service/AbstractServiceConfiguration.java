@@ -18,6 +18,9 @@ package org.gridkit.coherence.integration.spring.service;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+
+import org.springframework.util.StringUtils;
 
 import com.tangosol.coherence.component.util.SafeService;
 import com.tangosol.coherence.component.util.safeService.SafeCacheService;
@@ -33,9 +36,10 @@ public abstract class AbstractServiceConfiguration implements ServiceConfigurati
 	
 	public abstract ServiceType getServiceType();
 		
+	@Override
 	public XmlElement getXmlConfiguration() {
 		XmlElement config = CacheFactory.getServiceConfig(getServiceType().toString());
-		overrideServiceProperties(config);
+		overrideProperties(this, config);
 		return config;		
 	}
 	
@@ -47,27 +51,58 @@ public abstract class AbstractServiceConfiguration implements ServiceConfigurati
 		}
 	}
 	
-	protected void overrideServiceProperties(XmlElement config) {
-		for (Class<?> type = this.getClass(); type != Object.class; type = type.getSuperclass()) {
+	@SuppressWarnings("unchecked")
+	protected void overrideProperties(Object holder, XmlElement config) {
+		for (Class<?> type = holder.getClass(); type != Object.class; type = type.getSuperclass()) {
 			for (Field field : type.getDeclaredFields()) {
 				XmlConfigProperty sp = field.getAnnotation(XmlConfigProperty.class);
 				if (sp != null) {
 					Object val = null;
 					try {
 						field.setAccessible(true);
-						val = field.get(this);
+						val = field.get(holder);
 					} catch (IllegalAccessException e) {
 						throw new RuntimeException(e);
 					}
 					
 					if (val != null) {
-						config.ensureElement(sp.value()).setString(String.valueOf(val));
-					}
+						XmlElement ensured = config.ensureElement(sp.value());
+						
+						if (Collection.class.isAssignableFrom(field.getType())) {
+							for (Object o: (Collection) val) {
+								XmlConfigFragment fr = o.getClass().getAnnotation(XmlConfigFragment.class);
+								if (fr != null && StringUtils.hasText(fr.value())) {
+									XmlElement child = ensured.addElement(fr.value());
+									
+									// step into recursion
+									overrideProperties(o, child);
+								} else {
+									throw new IllegalStateException(
+											"@XmlConfigFragment must be defined for item " + o.getClass().getCanonicalName() + 
+											" in collection " + ensured);
+								}
+							}
+						} else {
+							XmlConfigFragment fr = field.getType().getAnnotation(XmlConfigFragment.class);
+							if (fr != null) {
+								if (StringUtils.hasText(fr.value())) {
+									ensured = ensured.ensureElement(fr.value());
+								}
+								// step into recursion
+								overrideProperties(val, ensured);
+							} else {
+								// step out of recursion
+								ensured.setString(String.valueOf(val));
+							}
+						}
+					} // if (val != null) alternate step out
+					
 				}
 			}
 		}
 	}
-
+	
+	@Override
 	public void postConfigure(Service service) {
 		if (service instanceof SafeService) {
 			injectPostConfigureHook(service);
@@ -155,18 +190,9 @@ public abstract class AbstractServiceConfiguration implements ServiceConfigurati
 			int p = pr.indexOf('.');
 			String segment = pr.substring(0, p);
 			pr = pr.substring(p + 1);
-//			if (segment.endsWith("()")) {
-//				segment = segment.substring(0, segment.length() - 2);
-//				Method m = target.getClass().getMethod(segment, new Class[0]);
-//				m.setAccessible(true);
-//				target = m.invoke(target);
-//			}
-//			else 
-			{
-				Field field = getField(target, segment);
-				field.setAccessible(true);
-				target = field.get(target);
-			}
+			Field field = getField(target, segment);
+			field.setAccessible(true);
+			target = field.get(target);
 		}
 
 		Field field = getField(target, pr);

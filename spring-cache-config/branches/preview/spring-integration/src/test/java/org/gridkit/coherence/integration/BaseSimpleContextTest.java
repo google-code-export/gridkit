@@ -26,7 +26,6 @@ import java.util.concurrent.locks.LockSupport;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.tangosol.io.Serializer;
 import com.tangosol.io.ReadBuffer.BufferInput;
@@ -45,7 +44,8 @@ import com.tangosol.util.ExternalizableHelper;
 public abstract class BaseSimpleContextTest {
 
 	protected static ApplicationContext context;
-		
+	protected static ApplicationContext clientContext;
+	
 	@Test
 	public void testCacheA() {
 		NamedCache cache = (NamedCache) context.getBean("cache.A");
@@ -307,21 +307,15 @@ public abstract class BaseSimpleContextTest {
 	
 	@Test
 	public void testCache_RemoteCache() {
-		ApplicationContext clientContext = new ClassPathXmlApplicationContext("config/extend-client-context.xml");
 		NamedCache cache = (NamedCache) clientContext.getBean("cache.A");
 		cache.put("a", "b");
 		Assert.assertEquals("b", cache.get("a"));
-		
-		clientContext = null;
 	}
 	
 	@Test
 	public void testService_RemoteInvocation() {
-		ApplicationContext clientContext = new ClassPathXmlApplicationContext("config/extend-client-context.xml");
 		InvocationService service = (InvocationService) clientContext.getBean("remote-exec-service");
 		service.getInfo().getServiceMembers();
-		
-		clientContext = null;
 	}
 	
 }

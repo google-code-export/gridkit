@@ -23,23 +23,33 @@
 
 	<import resource="/coherence-beans.xml"/>
 	
+	<!-- Actual cache defined in simple-coherence-context.xml -->
+	<bean id="cache.A" parent="named-cache" factory-bean="A" lazy-init="true"/>
+	<bean id="A" parent="cache-definition">
+		<property name="service" ref="remote-cache-service"/>
+	</bean>
+
 	<!-- Coherence*Extend Remote Cache Service -->
 	<bean id="remote-cache-service" parent="cache-service">
 		<property name="serviceName" value="ExtendTcpCacheService" />
 		<property name="configuration">
 			<bean parent="remote-cache-scheme-configuration">
-				<property name="initiatorRemoteHost" value="localhost"/>
-				<property name="initiatorRemotePort" value="9099"/>
+				<property name="remoteAddresses">
+					<list>
+						<bean parent="socket-address-config">
+							<property name="host" value="localhost"/>
+							<property name="port" value="9099"/>
+						</bean>
+						<bean parent="socket-address-config">
+							<property name="host" value="localhost"/>
+							<property name="port" value="9199"/>
+						</bean>
+					</list>
+				</property>
 				<property name="initiatorConnectTimeout" value="10000"/>
 				<property name="initiatorRequestTimeout" value="5000"/>
 			</bean>
 		</property>
-	</bean>
-
-	<!-- Actual cache defined in simple-coherence-context.xml -->
-	<bean id="cache.A" parent="named-cache" factory-bean="A" lazy-init="true"/>
-	<bean id="A" parent="cache-definition">
-		<property name="service" ref="remote-cache-service"/>
 	</bean>
 
 	<!-- Coherence*Extend Remote Invocation -->
@@ -49,8 +59,18 @@
 		<property name="serviceName" value="ExtendTcpInvocationService" />
 		<property name="configuration">
 			<bean parent="remote-invocation-scheme-configuration">
-				<property name="initiatorRemoteHost" value="localhost"/>
-				<property name="initiatorRemotePort" value="9099"/>
+				<property name="remoteAddresses">
+					<list>
+						<bean parent="socket-address-config">
+							<property name="host" value="localhost"/>
+							<property name="port" value="9099"/>
+						</bean>
+						<bean parent="socket-address-config">
+							<property name="host" value="localhost"/>
+							<property name="port" value="9199"/>
+						</bean>
+					</list>
+				</property>
 				<property name="initiatorConnectTimeout" value="10000"/>
 				<property name="initiatorRequestTimeout" value="5000"/>
 			</bean>

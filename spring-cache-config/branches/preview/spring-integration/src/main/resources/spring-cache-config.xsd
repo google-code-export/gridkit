@@ -41,16 +41,17 @@
 				<xs:element ref="invocation-service-scheme"/>
 				
 				<xs:element ref="proxy-service-scheme"/>
-				<xs:element ref="remote-cache-scheme"/>				
+				<xs:element ref="remote-cache-service-scheme"/>
 				<xs:element ref="remote-invocation-service-scheme"/>
 				
+				<xs:element ref="common-cache-scheme"/>
 				<xs:element ref="named-cache-scheme"/>
 
-				<xs:element ref="near-cache-scheme"/>				
+				<xs:element ref="near-cache-scheme"/>
 				<xs:element ref="local-cache-scheme"/>
-				<xs:element ref="read-write-backing-map-scheme"/>		
+				<xs:element ref="read-write-backing-map-scheme"/>
 				
-				<xs:element ref="beans:bean"/>		
+				<xs:element ref="beans:bean"/>
 			</xs:choice>
 		</xs:complexType>
 	</xs:element>
@@ -89,12 +90,13 @@
 	</xs:complexType>
 	
 	<xs:complexType name="initiator-config-bean">
-		<xs:all>
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
 			<xs:element name="outgoing-message-handler" minOccurs="0" maxOccurs="1" type="outgoing-message-handler-bean"/>
 			<xs:element name="serializer" minOccurs="0" maxOccurs="1" type="serializer-bean"/>
 			<xs:element name="tcp-initiator" minOccurs="0" maxOccurs="1">
 				<xs:complexType>
-					<xs:choice>
+					<xs:choice minOccurs="0" maxOccurs="unbounded">
+						<xs:element name="local-address" minOccurs="0" maxOccurs="1" type="local-address-bean"/>
 						<xs:element name="remote-addresses" minOccurs="1" maxOccurs="1">
 							<xs:complexType>
 								<xs:choice>
@@ -108,23 +110,21 @@
 								</xs:choice>
 							</xs:complexType>
 						</xs:element>
+						<xs:element name="socket-provider" minOccurs="0" maxOccurs="1" type="xs:string"/>
+						<xs:element name="reuse-address" minOccurs="0" maxOccurs="1" type="xs:boolean"/>
+						<xs:element name="keep-alive-enabled" minOccurs="0" maxOccurs="1" type="xs:boolean"/>
+						<xs:element name="tcp-delay-enabled" minOccurs="0" maxOccurs="1" type="xs:boolean"/>
+						<xs:element name="receive-buffer-size" minOccurs="0" maxOccurs="1" type="size-value"/>
+						<xs:element name="send-buffer-size" minOccurs="0" maxOccurs="1" type="size-value"/>
+						<xs:element name="connect-timeout" minOccurs="0" maxOccurs="1" type="time-value"/>
+						<xs:element name="linger-timeout" minOccurs="0" maxOccurs="1" type="time-value"/>
 					</xs:choice>
-					<xs:attribute name="local-host" type="xs:string" use="optional"/>
-					<xs:attribute name="local-port" type="xs:integer" use="optional"/>
-					<xs:attribute name="socket-provider-config" type="xs:string" use="optional"/>
-					<xs:attribute name="reuse-address" type="xs:boolean" use="optional"/>
-					<xs:attribute name="keep-alive-enabled" type="xs:boolean" use="optional"/>
-					<xs:attribute name="tcp-delay-enabled" type="xs:boolean" use="optional"/>
-					<xs:attribute name="receive-buffer-size" type="size-value" use="optional"/>
-					<xs:attribute name="send-buffer-size" type="size-value" use="optional"/>
-					<xs:attribute name="linger-timeout" type="size-value" use="optional"/>
-					<xs:attribute name="connect-timeout" type="time-value" use="optional"/>
 				</xs:complexType>
 			</xs:element>
 			<!-- TODO
 			<xs:element minOccurs="0" maxOccurs="1" name="filters" type="beans:collectionType"/>
 			-->
-		</xs:all>
+		</xs:choice>
 	</xs:complexType>
 	
 	<xs:complexType name="outgoing-message-handler-bean">
@@ -402,7 +402,7 @@
 		</xs:complexType>
 	</xs:element>
 	
-	<xs:element name="remote-cache-scheme">
+	<xs:element name="remote-cache-service-scheme">
 		<xs:complexType>
 			<xs:complexContent>
 				<xs:extension base="beans:identifiedType">
@@ -433,7 +433,7 @@
 	
 	<!-- TODO
 	<xs:element name="transactional-service-scheme"/>
-	 -->	
+	 -->
 
 	<!-- Cache scheme configuration -->
 	
@@ -442,6 +442,19 @@
 			<xs:complexContent>
 				<xs:extension base="beans:identifiedType">
 					<xs:attribute name="cache-name" use="required" type="xs:IDREF"/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	
+	<xs:element name="common-cache-scheme">
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="beans:identifiedType">
+					<xs:choice minOccurs="0" maxOccurs="unbounded">
+						<xs:element name="service" minOccurs="1" maxOccurs="1" type="cache-service-bean"/>
+						<xs:element name="front-tier" minOccurs="0" maxOccurs="1" type="front-tier-bean"/>
+					</xs:choice>
 				</xs:extension>
 			</xs:complexContent>
 		</xs:complexType>
@@ -467,7 +480,7 @@
 			<xs:element ref="distributed-service-scheme"/>
 			<xs:element ref="replicated-service-scheme"/>
 			<xs:element ref="optimistic-service-scheme"/>
-			<xs:element ref="remote-cache-scheme"/>
+			<xs:element ref="remote-cache-service-scheme"/>
 			<!-- 
 			<xs:element ref="transactional-service-scheme"/>
 			 -->
