@@ -61,13 +61,29 @@
 		</remote-cache-service-scheme>
 		
 		<!-- Coherence*Extend Remote Invocation -->
-		<!-- 
-		<service-instance id="exec-service" scheme-name="invocation-service"/>
+		<service-instance id="remote-exec-service" scheme-name="remote-invocation-service"/>
 		
-		<invocation-service-scheme id="invocation-service">
-			<thread-count>5</thread-count>
-		</invocation-service-scheme>
-		 -->
+		<remote-invocation-service-scheme id="remote-invocation-service">
+			<service-name>ExtendTcpInvocationService</service-name>
+			<initiator-config>
+				<outgoing-message-handler>
+					<request-timeout>5s</request-timeout>				
+				</outgoing-message-handler>
+				<tcp-initiator>
+					<remote-addresses>
+						<socket-address>
+							<address>localhost</address>
+							<port>9099</port>
+						</socket-address>
+						<socket-address>
+							<address>localhost</address>
+							<port>9199</port>
+						</socket-address>
+					</remote-addresses>
+					<connect-timeout>10s</connect-timeout>
+				</tcp-initiator>
+			</initiator-config>
+		</remote-invocation-service-scheme>
 		
 	</coh:coherence-config>
 		

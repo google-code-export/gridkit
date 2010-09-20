@@ -28,6 +28,7 @@ import org.gridkit.coherence.integration.spring.cache.LocalCacheDefinition;
 import org.gridkit.coherence.integration.spring.cache.NearCacheDecorator;
 import org.gridkit.coherence.integration.spring.cache.ReadWriteBackingMapDefinition;
 import org.gridkit.coherence.integration.spring.impl.ByNameBackingMapLookupStrategy;
+import org.gridkit.coherence.integration.spring.impl.CacheServiceBean;
 import org.gridkit.coherence.integration.spring.impl.ClusteredCacheServiceBean;
 import org.gridkit.coherence.integration.spring.impl.ClusteredServiceBean;
 import org.gridkit.coherence.integration.spring.service.DistributedCacheServiceConfiguration;
@@ -41,6 +42,7 @@ import org.gridkit.coherence.integration.spring.service.RemoteCacheServiceConfig
 import org.gridkit.coherence.integration.spring.service.RemoteInvocationServiceConfiguration;
 import org.gridkit.coherence.integration.spring.service.ReplicatedCacheServiceConfiguration;
 import org.gridkit.coherence.integration.spring.service.ServiceListenerCollection;
+import org.gridkit.coherence.integration.spring.service.SocketAddressConfig;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -79,10 +81,12 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 	private static final String TAG_READ_WRITE_BACKING_MAP_SCHEME = "read-write-backing-map-scheme";
 	private static final String TAG_PROXY_SERVICE_SCHEME = "proxy-service-scheme";
 	private static final String TAG_REMOTE_INVOCATION_SERVICE_SCHEME = "remote-invocation-service-scheme";
-	private static final String TAG_REMOTE_CACHE_SCHEME = "remote-cache-scheme";
+	private static final String TAG_REMOTE_CACHE_SCHEME = "remote-cache-service-scheme";
 	
+	private static final String TAG_SOCKET_ADDRESS = "socket-address";
+
 	private static final String BEAN_DFEAULT_BACKING_MAP_LOOKUP_STRATEGY = "default-backing-map-lookup-strategy";
-	
+
 	@Override
 	public void init() {
 		
@@ -138,10 +142,11 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 				
 				registerBeanDefinitionParser(TAG_PROXY_SERVICE_SCHEME, proxyService);
 			}
-			// remote cache (for Coherence*Extend)
+			// remote cache (for Coherence*Extend) - although its a cache, it is still closer to the service in its behavior
 			{
 				ServiceBeanTemplate remoteCacheService = new ServiceBeanTemplate();
-				remoteCacheService.className = ClusteredServiceBean.class.getName();
+				remoteCacheService.className = CacheServiceBean.class.getName();
+				registerServiceBeanProperties(remoteCacheService);
 				registerRemoteCacheServiceConfigProperties(remoteCacheService.configTemplate);
 				
 				registerBeanDefinitionParser(TAG_REMOTE_CACHE_SCHEME, remoteCacheService);
@@ -150,6 +155,7 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 			{
 				ServiceBeanTemplate remoteInvocationService = new ServiceBeanTemplate();
 				remoteInvocationService.className = ClusteredServiceBean.class.getName();
+				registerServiceBeanProperties(remoteInvocationService);
 				registerRemoteInvocationServiceConfigProperties(remoteInvocationService.configTemplate);
 				
 				registerBeanDefinitionParser(TAG_REMOTE_INVOCATION_SERVICE_SCHEME, remoteInvocationService);
@@ -180,6 +186,17 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 				CustomBeanDefinitionTemplate readWriteMap = new CustomBeanDefinitionTemplate();
 				registerReadWriteBackingMapSchemeProperties(readWriteMap);
 				registerBeanDefinitionParser(TAG_READ_WRITE_BACKING_MAP_SCHEME, readWriteMap);
+			}
+		}
+		{// configuration fragments
+			{
+				CustomBeanDefinitionTemplate socketConfig = new CustomBeanDefinitionTemplate();
+				
+				socketConfig.className = SocketAddressConfig.class.getName();
+				socketConfig.addProperty("address",	"host", new StringPropertyParser());
+				socketConfig.addProperty("port", 	"port", new StringPropertyParser());
+				
+				registerBeanDefinitionParser(TAG_SOCKET_ADDRESS, socketConfig);
 			}
 		}
 	}
@@ -296,8 +313,6 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 	}
 	
 	private void registerRemoteServiceConfigProperties(CustomBeanDefinitionTemplate template) {
-		template.addProperty("service-name", "serviceName", new StringPropertyParser());
-		
 		template.addProperty("initiator-config/outgoing-message-handler/heartbeat-interval", "initiatorHeartbeatInterval", new TimeoutPropertyParser());
 		template.addProperty("initiator-config/outgoing-message-handler/heartbeat-timeout", "initiatorHeartbeatTimeout", new TimeoutPropertyParser());
 		template.addProperty("initiator-config/outgoing-message-handler/request-timeout", "initiatorRequestTimeout", new TimeoutPropertyParser());
@@ -308,7 +323,7 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 		template.addProperty("initiator-config/tcp-initiator/local-address/address",	"initiatorLocalHost", new StringPropertyParser());
 		template.addProperty("initiator-config/tcp-initiator/local-address/port",		"initiatorLocalPort", new StringPropertyParser());
 		
-		template.addProperty("initiator-config/tcp-initiator/remote-addresses", "remoteAddresses", new PornoPropertyParser());
+		template.addProperty("initiator-config/tcp-initiator/remote-addresses", "remoteAddresses", new CollectionPropertyParser(TAG_SOCKET_ADDRESS));
 		
 		template.addProperty("initiator-config/tcp-initiator/remote-addresses/address-provider",	"addressProvider", new BeanPropertyParser());
 		
@@ -316,11 +331,11 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 		
 		template.addProperty("initiator-config/tcp-initiator/reuse-address",		"initiatorReuseAddress", new StringPropertyParser());
 		template.addProperty("initiator-config/tcp-initiator/keep-alive-enabled",	"initiatorKeepAliveEnabled", new StringPropertyParser());
-		template.addProperty("initiator-config/tcp-initiator/tcp-delay-enabled",	"acceptorTcpDelayEnabled", new StringPropertyParser());
-		template.addProperty("initiator-config/tcp-initiator/receive-buffer-size",	"acceptorReceiveBufferSizeBytes", new SizePropertyParser());
-		template.addProperty("initiator-config/tcp-initiator/send-buffer-size",		"acceptorSendBufferSizeBytes", new SizePropertyParser());
-		template.addProperty("initiator-config/tcp-initiator/linger-timeout",		"acceptorLingerTimeoutMillis", new TimeoutPropertyParser());
-		template.addProperty("initiator-config/tcp-initiator/connect-timeout",		"acceptorLingerTimeoutMillis", new TimeoutPropertyParser());
+		template.addProperty("initiator-config/tcp-initiator/tcp-delay-enabled",	"initiatorTcpDelayEnabled", new StringPropertyParser());
+		template.addProperty("initiator-config/tcp-initiator/receive-buffer-size",	"initiatorReceiveBufferSize", new SizePropertyParser());
+		template.addProperty("initiator-config/tcp-initiator/send-buffer-size",		"initiatorSendBufferSize", new SizePropertyParser());
+		template.addProperty("initiator-config/tcp-initiator/linger-timeout",		"initiatorLingerTimeout", new TimeoutPropertyParser());
+		template.addProperty("initiator-config/tcp-initiator/connect-timeout",		"initiatorConnectTimeout", new TimeoutPropertyParser());
 	}
 	
 	private void registerRemoteCacheServiceConfigProperties(CustomBeanDefinitionTemplate template) {
@@ -961,6 +976,36 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 				mpv.add(propName, holder);				
 			}
 		}
+	}
+	
+	private static class CollectionPropertyParser implements ElementParser {
+		
+		private final String elementName;
+		
+		public CollectionPropertyParser(String elementName) {
+			this.elementName = elementName;
+		}
+
+		@Override
+		public void initProperty(Element xml, GenericBeanDefinition bd, String propName, ParserContext context) {
+			NodeList nl = xml.getElementsByTagName(elementName);
+			
+			GenericBeanDefinition ll = new GenericBeanDefinition();
+			ll.setBeanClass(java.util.ArrayList.class);
+			
+			ManagedList<Object> list = new ManagedList<Object>(nl.getLength());
+			for(int i = 0; i != nl.getLength(); ++i) {
+				list.add(context.getDelegate().parsePropertySubElement(((Element)nl.item(i)), bd));
+			}
+			
+			ll.getConstructorArgumentValues().addGenericArgumentValue(list);
+			String llName = context.getReaderContext().generateBeanName(ll);
+			BeanDefinitionHolder holder = new BeanDefinitionHolder(ll, llName);
+			
+			MutablePropertyValues mpv = bd.getPropertyValues();
+			mpv.add(propName, holder);				
+		}
+		
 	}
 	
 }

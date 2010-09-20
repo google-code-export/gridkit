@@ -102,8 +102,10 @@
 								<xs:choice>
 						            <xs:element name="socket-address" minOccurs="1" maxOccurs="unbounded">
 										<xs:complexType>
-											<xs:attribute name="host" use="required" type="xs:string"/>
-											<xs:attribute name="port" use="optional" type="xs:integer"/>
+											<xs:sequence>
+												<xs:element name="address" minOccurs="1" maxOccurs="1" type="xs:string"/>
+												<xs:element name="port" minOccurs="1" maxOccurs="1" type="xs:integer"/>
+											</xs:sequence>
 										</xs:complexType>
 						            </xs:element>
 									<xs:element name="address-provider" minOccurs="0" maxOccurs="1" type="single-spring-bean"/>
@@ -407,7 +409,7 @@
 			<xs:complexContent>
 				<xs:extension base="beans:identifiedType">
 					<xs:choice minOccurs="0" maxOccurs="unbounded">
-			            <xs:element name="service-name" minOccurs="0" maxOccurs="1" type="xs:string"/>
+						<xs:element name="service-name" minOccurs="0" maxOccurs="1" type="xs:string"/>
 						<xs:element name="initiator-config" minOccurs="0" maxOccurs="1" type="initiator-config-bean"/>
 						<!-- TODO
 						<xs:element name="operation-bundling" minOccurs="0" maxOccurs="1" type="single-spring-bean"/>

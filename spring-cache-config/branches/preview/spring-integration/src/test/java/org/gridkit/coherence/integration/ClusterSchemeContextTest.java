@@ -33,7 +33,6 @@ import com.tangosol.net.CacheFactory;
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-@Ignore
 public class ClusterSchemeContextTest extends BaseSimpleContextTest {
 
 	public static Isolate node1;
@@ -49,13 +48,13 @@ public class ClusterSchemeContextTest extends BaseSimpleContextTest {
 		node2.start();
 		node2.submit(StartCmd.class.getName());
 		context = new ClassPathXmlApplicationContext("schema/simple-coherence-context.xml");
-//		clientContext = new ClassPathXmlApplicationContext("schema/extend-client-context.xml");		
+		clientContext = new ClassPathXmlApplicationContext("schema/extend-client-context.xml");		
 	}
 	
 	@AfterClass
 	public static void shutdown() {
 		context = null;
-//		clientContext = null;
+		clientContext = null;
 		CacheFactory.getCluster().shutdown();
 		node1.submit(StopCmd.class.getName());
 		node1.stop();
