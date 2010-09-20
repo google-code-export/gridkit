@@ -16,25 +16,21 @@
     limitations under the License.
 
 -->
-<beans xmlns="http://www.springframework.org/schema/beans"
+<beans:beans xmlns="http://gridkit.org/schema/coherence/spring-cache-config"
 	   xmlns:beans="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:coh="http://gridkit.org/schema/coherence/spring-cache-config"
        xsi:schemaLocation="
-       				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+       				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
        				http://gridkit.org/schema/coherence/spring-cache-config spring-cache-config.xsd"
        default-lazy-init="true"
 >
 
-	<coh:coherence-config 
-		xmlns="http://gridkit.org/schema/coherence/spring-cache-config"
-		xmlns:b="http://www.springframework.org/schema/beans"
-		>
+	<coherence-config>
 
 		<!-- Actual cache defined in simple-coherence-context.xml -->
 		<named-cache id="cache.A" cache-name="A"/>
 		<common-cache-scheme id="A">
-			<service><b:ref local="remote-cache-service"/></service>
+			<service><beans:ref local="remote-cache-service"/></service>
 		</common-cache-scheme>
 		
 		<!-- Coherence*Extend Remote Cache Service -->
@@ -85,6 +81,6 @@
 			</initiator-config>
 		</remote-invocation-service-scheme>
 		
-	</coh:coherence-config>
+	</coherence-config>
 		
-</beans>
+</beans:beans>
