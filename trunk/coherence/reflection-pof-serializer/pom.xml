@@ -23,7 +23,7 @@
     <groupId>org.gridkit.coherence.utils</groupId>
     <artifactId>reflection-pof-serializer</artifactId>
     <packaging>jar</packaging>
-    <version>0.5.1.1-SNAPSHOT</version>
+    <version>0.5.1-SNAPSHOT</version>
     <name>Reflection POF Serializer for Oracle Coherence</name>
     <url></url>
 
