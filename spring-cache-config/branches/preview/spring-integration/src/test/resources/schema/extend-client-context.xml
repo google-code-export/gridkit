@@ -29,9 +29,9 @@
 
 		<!-- Actual cache defined in simple-coherence-context.xml -->
 		<named-cache id="cache.A" cache-name="A"/>
-		<common-cache-scheme id="A">
+		<named-cache-scheme id="A">
 			<service><beans:ref local="remote-cache-service"/></service>
-		</common-cache-scheme>
+		</named-cache-scheme>
 		
 		<!-- Coherence*Extend Remote Cache Service -->
 		<remote-cache-service-scheme id="remote-cache-service">

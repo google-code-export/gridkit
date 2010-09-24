@@ -25,7 +25,6 @@
 	
 	<bean id="service-reference" abstract="true" factory-method="getCoherenceService" lazy-init="true"/>
 	
-	<bean id="cache-definition" abstract="true" class="org.gridkit.coherence.integration.spring.CacheDefinition" />
 	<bean id="clustered-cache-definition" abstract="true" class="org.gridkit.coherence.integration.spring.ClusteredCacheDefinition" />
 
 	<!-- Service configurations prototypes -->

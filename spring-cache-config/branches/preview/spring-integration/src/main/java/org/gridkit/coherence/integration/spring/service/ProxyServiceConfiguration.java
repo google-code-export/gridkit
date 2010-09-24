@@ -58,9 +58,21 @@ public class ProxyServiceConfiguration extends AbstractServiceConfiguration {
 	@XmlConfigProperty("acceptor-config/outgoing-message-handler/request-timeout")
 	private Integer acceptorRequestTimeout;
 	
-	// FIXME @ReflectionInjectedProperty("__m_Acceptor.__m_Serializer")
+	@ReflectionInjectedProperty("__m_Acceptor.__m_Serializer")
 	private Serializer acceptorSerializer;
 	
+	// FIXME
+	@XmlConfigProperty("acceptor-config/serializer/class-name") /* instance/ */
+	private String acceptorSerializerClass;
+	
+	public String getAcceptorSerializerClass() {
+		return acceptorSerializerClass;
+	}
+
+	public void setAcceptorSerializerClass(String acceptorSerializerClass) {
+		this.acceptorSerializerClass = acceptorSerializerClass;
+	}
+
 	@XmlConfigProperty("acceptor-config/tcp-acceptor/authorized-hosts/host-address")
 	private String authorizedHostAddress;
 	
@@ -70,7 +82,7 @@ public class ProxyServiceConfiguration extends AbstractServiceConfiguration {
 	@ReflectionInjectedProperty("__m_Acceptor.__m_AuthorizedHostFilter")
 	private Filter authorizedHostFilter;
 	
-	@ReflectionInjectedProperty("__m_Acceptor.__m_AddressProvider")
+	@ReflectionInjectedProperty("__m_Acceptor.__m_LocalAddressProvider")
 	private AddressProvider addressProvider;
 	
 	@XmlConfigProperty("acceptor-config/tcp-acceptor/local-address/address")

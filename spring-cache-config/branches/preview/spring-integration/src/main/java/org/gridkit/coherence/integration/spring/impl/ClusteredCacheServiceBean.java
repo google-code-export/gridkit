@@ -48,7 +48,7 @@ public class ClusteredCacheServiceBean extends CacheServiceBean {
 	@Override
 	protected void initializeService(Service service) {
 		super.initializeService(service);
-		((CacheService)service).setBackingMapManager(bmm);					
+		((CacheService)service).setBackingMapManager(bmm);
 	}
 
 	@Override

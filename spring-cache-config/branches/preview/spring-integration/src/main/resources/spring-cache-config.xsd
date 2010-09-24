@@ -44,7 +44,6 @@
 				<xs:element ref="remote-cache-service-scheme"/>
 				<xs:element ref="remote-invocation-service-scheme"/>
 				
-				<xs:element ref="common-cache-scheme"/>
 				<xs:element ref="named-cache-scheme"/>
 
 				<xs:element ref="near-cache-scheme"/>
@@ -444,19 +443,6 @@
 			<xs:complexContent>
 				<xs:extension base="beans:identifiedType">
 					<xs:attribute name="cache-name" use="required" type="xs:IDREF"/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	
-	<xs:element name="common-cache-scheme">
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="beans:identifiedType">
-					<xs:choice minOccurs="0" maxOccurs="unbounded">
-						<xs:element name="service" minOccurs="1" maxOccurs="1" type="cache-service-bean"/>
-						<xs:element name="front-tier" minOccurs="0" maxOccurs="1" type="front-tier-bean"/>
-					</xs:choice>
 				</xs:extension>
 			</xs:complexContent>
 		</xs:complexType>

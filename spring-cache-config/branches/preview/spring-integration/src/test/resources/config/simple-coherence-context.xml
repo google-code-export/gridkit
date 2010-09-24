@@ -162,6 +162,12 @@
 			<bean parent="proxy-service-configuration">
 				<property name="acceptorLocalHost" value="localhost"/>
 				<property name="acceptorLocalPort" value="9099"/>
+				<property name="acceptorSerializerClass" value="org.gridkit.coherence.integration.BaseSimpleContextTest$CustomSerializer"/>
+				<!-- 
+				<property name="acceptorSerializer">
+					<bean class="org.gridkit.coherence.integration.BaseSimpleContextTest$CustomSerializer"/>
+				</property>
+				 -->
 				<property name="cacheProxyEnabled" value="true"/>
 				<property name="invocationProxyEnabled" value="true"/>
 				<property name="autostart" value="true"/>

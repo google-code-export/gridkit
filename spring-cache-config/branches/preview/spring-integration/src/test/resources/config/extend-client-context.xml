@@ -23,9 +23,9 @@
 
 	<import resource="/coherence-beans.xml"/>
 	
-	<!-- Actual cache defined in simple-coherence-context.xml -->
+	<!-- Simple cache defined in simple-coherence-context.xml -->
 	<bean id="cache.A" parent="named-cache" factory-bean="A" lazy-init="true"/>
-	<bean id="A" parent="cache-definition">
+	<bean id="A" parent="clustered-cache-definition">
 		<property name="service" ref="remote-cache-service"/>
 	</bean>
 
@@ -34,6 +34,12 @@
 		<property name="serviceName" value="ExtendTcpCacheService" />
 		<property name="configuration">
 			<bean parent="remote-cache-scheme-configuration">
+				<!-- 
+				<property name="initiatorSerializer">
+					<bean class="org.gridkit.coherence.integration.BaseSimpleContextTest$CustomSerializer"/>
+				</property>
+				 -->
+				<property name="initiatorSerializerClass" value="org.gridkit.coherence.integration.BaseSimpleContextTest$CustomSerializer"/>
 				<property name="remoteAddresses">
 					<list>
 						<bean parent="socket-address-config">
@@ -59,6 +65,12 @@
 		<property name="serviceName" value="ExtendTcpInvocationService" />
 		<property name="configuration">
 			<bean parent="remote-invocation-scheme-configuration">
+				<!--
+				<property name="initiatorSerializer">
+					<bean class="org.gridkit.coherence.integration.BaseSimpleContextTest$CustomSerializer"/>
+				</property>
+				 -->
+				<property name="initiatorSerializerClass" value="org.gridkit.coherence.integration.BaseSimpleContextTest$CustomSerializer"/>
 				<property name="remoteAddresses">
 					<list>
 						<bean parent="socket-address-config">
@@ -70,6 +82,9 @@
 							<property name="port" value="9199"/>
 						</bean>
 					</list>
+				</property>
+				<property name="addressProvider">
+					<bean class="org.gridkit.coherence.integration.BaseSimpleContextTest$CustomAddressProvider"/>
 				</property>
 				<property name="initiatorConnectTimeout" value="10000"/>
 				<property name="initiatorRequestTimeout" value="5000"/>

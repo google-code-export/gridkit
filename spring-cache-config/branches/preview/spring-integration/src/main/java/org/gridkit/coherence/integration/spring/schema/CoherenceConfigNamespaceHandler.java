@@ -21,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.gridkit.coherence.integration.spring.BackingMapLookupStrategy;
-import org.gridkit.coherence.integration.spring.CacheDefinition;
 import org.gridkit.coherence.integration.spring.ClusteredCacheDefinition;
 import org.gridkit.coherence.integration.spring.cache.InvalidationStrategy;
 import org.gridkit.coherence.integration.spring.cache.LocalCacheDefinition;
@@ -74,7 +73,6 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 	private static final String TAG_REPLICATED_SERVICE_SCHEME = "replicated-service-scheme";
 	private static final String TAG_OPTIMISTIC_SERVICE_SCHEME = "optimistic-service-scheme";
 	private static final String TAG_INVOCATION_SERVICE_SCHEME = "invocation-service-scheme";
-	private static final String TAG_COMMON_CACHE_SCHEME = "common-cache-scheme";
 	private static final String TAG_NAMED_CACHE_SCHEME = "named-cache-scheme";
 	private static final String TAG_LOCAL_CACHE_SCHEME = "local-cache-scheme";
 	private static final String TAG_NEAR_CACHE_SCHEME = "near-cache-scheme";
@@ -162,11 +160,6 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 			}
 		}
 		{// cache schemes
-			{
-				CustomBeanDefinitionTemplate cacheScheme = new CustomBeanDefinitionTemplate();
-				registerCommonCacheSchemeProperties(cacheScheme);
-				registerBeanDefinitionParser(TAG_COMMON_CACHE_SCHEME, cacheScheme);
-			}
 			{
 				CustomBeanDefinitionTemplate cacheScheme = new CustomBeanDefinitionTemplate();
 				registerCacheSchemeProperties(cacheScheme);
@@ -346,13 +339,6 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 	private void registerRemoteInvocationServiceConfigProperties(CustomBeanDefinitionTemplate template) {
 		registerRemoteServiceConfigProperties(template);
 		template.className = RemoteInvocationServiceConfiguration.class.getName();
-	}
-	
-	private void registerCommonCacheSchemeProperties(CustomBeanDefinitionTemplate template) {
-		template.className = CacheDefinition.class.getName();
-		
-		template.addProperty("front-tier", "frontTier", new FrontTierBeanParser());
-		template.addProperty("service", "service", new ServiceBeanParser());
 	}
 	
 	private void registerCacheSchemeProperties(CustomBeanDefinitionTemplate template) {

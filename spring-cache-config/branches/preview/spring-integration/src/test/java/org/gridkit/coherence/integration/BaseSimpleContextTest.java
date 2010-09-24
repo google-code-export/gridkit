@@ -17,7 +17,10 @@
 package org.gridkit.coherence.integration;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -30,12 +33,15 @@ import org.springframework.context.ApplicationContext;
 import com.tangosol.io.Serializer;
 import com.tangosol.io.ReadBuffer.BufferInput;
 import com.tangosol.io.WriteBuffer.BufferOutput;
+import com.tangosol.net.ConfigurableAddressProvider;
 import com.tangosol.net.InvocationService;
 import com.tangosol.net.NamedCache;
 import com.tangosol.net.cache.AbstractEvictionPolicy;
 import com.tangosol.net.cache.CacheLoader;
 import com.tangosol.net.cache.NearCache;
 import com.tangosol.net.cache.ConfigurableCacheMap.Entry;
+import com.tangosol.run.xml.SimpleElement;
+import com.tangosol.util.Base;
 import com.tangosol.util.ExternalizableHelper;
 
 /**
@@ -318,4 +324,38 @@ public abstract class BaseSimpleContextTest {
 		service.getInfo().getServiceMembers();
 	}
 	
+	public static class CustomAddressProvider extends ConfigurableAddressProvider {
+		
+		public CustomAddressProvider() {
+			super(new SimpleElement());
+			List<AddressHolder> list = new ArrayList<AddressHolder>(2);
+			list.add(new AddressHolderWrapper("localhost", 9099));
+			list.add(new AddressHolderWrapper("localhost", 9199));
+			this.m_listHolders = Base.randomize(list);
+			this.m_fSafe = true;
+		}
+		
+		@Override
+		public void accept() {
+			super.accept();
+		}
+
+		@Override
+		public InetSocketAddress getNextAddress() {
+			return super.getNextAddress();
+		}
+
+		@Override
+		public void reject(Throwable eCause) {
+			super.reject(eCause);
+		}
+		
+		protected class AddressHolderWrapper extends ConfigurableAddressProvider.AddressHolder {
+			protected AddressHolderWrapper(String host, int port) {
+				super(host, port);
+			}
+		}
+		
+	}
+
 }

@@ -38,9 +38,21 @@ public abstract class AbstractRemoteServiceConfiguration extends
 	@XmlConfigProperty("initiator-config/outgoing-message-handler/request-timeout")
 	private Integer initiatorRequestTimeout;
 	
-	// FIXME @ReflectionInjectedProperty("__m_Initiator.__m_Serializer")
+	@ReflectionInjectedProperty("__m_Initiator.__m_Serializer")
 	private Serializer initiatorSerializer;
 	
+	// FIXME
+	@XmlConfigProperty("initiator-config/serializer/class-name") /* instance/ */
+	private String initiatorSerializerClass;
+	
+	public String getInitiatorSerializerClass() {
+		return initiatorSerializerClass;
+	}
+
+	public void setInitiatorSerializerClass(String initiatorSerializerClass) {
+		this.initiatorSerializerClass = initiatorSerializerClass;
+	}
+
 	// TODO <initiator-config><use-filters>
 	@ReflectionInjectedProperty("__m_Initiator.__m_ConnectionFilter")
 	private ConnectionFilter initiatorConnectionFilter;
@@ -54,7 +66,7 @@ public abstract class AbstractRemoteServiceConfiguration extends
 	@XmlConfigProperty("initiator-config/tcp-initiator/remote-addresses")
 	private List<SocketAddressConfig> remoteAddresses;
 	
-	@ReflectionInjectedProperty("__m_Initiator.__m_AddressProvider")
+	@ReflectionInjectedProperty("__m_Initiator.__m_RemoteAddressProvider")
 	private AddressProvider addressProvider;
 	
 	// TODO add complex support for socket-provider configuration (now only works with string predefines)
