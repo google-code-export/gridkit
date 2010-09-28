@@ -48,13 +48,11 @@ public class ClusterSchemeContextTest extends BaseSimpleContextTest {
 		node2.start();
 		node2.submit(StartCmd.class.getName());
 		context = new ClassPathXmlApplicationContext("schema/simple-coherence-context.xml");
-		clientContext = new ClassPathXmlApplicationContext("schema/extend-client-context.xml");		
 	}
 	
 	@AfterClass
 	public static void shutdown() {
 		context = null;
-		clientContext = null;
 		CacheFactory.getCluster().shutdown();
 		node1.submit(StopCmd.class.getName());
 		node1.stop();
@@ -68,7 +66,7 @@ public class ClusterSchemeContextTest extends BaseSimpleContextTest {
 	public void testCluster() {
 		CacheFactory.ensureCluster();
 		Set<?> members = CacheFactory.getCluster().getMemberSet();
-		Assert.assertEquals(3, members.size());
+		Assert.assertEquals(6, members.size());
 	}
 	
 	@Ignore

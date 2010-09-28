@@ -13,29 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.gridkit.coherence.integration.spring;
 
-package org.gridkit.coherence.integration;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import com.tangosol.net.CacheFactory;
+import com.tangosol.net.NamedCache;
 
 /**
- * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ * Cache management service interface.
+ * Used by proxy service to invoke methods on a local cache by remote clients.
+ * @author malexejev@gmail.com
+ * 27.09.2010
  */
-public class SchemeSimpleContextTest extends BaseSimpleContextTest {
+public interface CacheLookupStrategy {
 	
-	@BeforeClass
-	public static void init() {
-		System.setProperty("tangosol.coherence.wka", "localhost");
-		context = new ClassPathXmlApplicationContext("schema/simple-coherence-context.xml");
-	}
+	NamedCache ensureCache(String sCacheName, ClassLoader loader);
 	
-	@AfterClass
-	public static void shutdown() {
-		context = null;
-		CacheFactory.getCluster().shutdown();
-	}
+	void destroyCache(NamedCache cache);
+	
 }

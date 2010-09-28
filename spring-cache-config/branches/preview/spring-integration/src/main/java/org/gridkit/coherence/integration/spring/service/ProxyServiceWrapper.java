@@ -34,71 +34,88 @@ class ProxyServiceWrapper implements ProxyService {
 		this.postProcessor = postProcessor;
 	}
 	
+	@Override
 	public void configure(XmlElement config) {
 		service.configure(config);
 		if (postProcessor != null) {
 			postProcessor.postConfigure(service);
 		}
 	}
+	
 
 	// delegates
 	
+	@Override
 	public void addMemberListener(MemberListener paramMemberListener) {
 		service.addMemberListener(paramMemberListener);
 	}
 
+	@Override
 	public void addServiceListener(ServiceListener paramServiceListener) {
 		service.addServiceListener(paramServiceListener);
 	}
 
+	@Override
 	public Cluster getCluster() {
 		return service.getCluster();
 	}
 
+	@Override
 	public ClassLoader getContextClassLoader() {
 		return service.getContextClassLoader();
 	}
 
+	@Override
 	public ServiceInfo getInfo() {
 		return service.getInfo();
 	}
 
+	@Override
 	public Serializer getSerializer() {
 		return service.getSerializer();
 	}
 
+	@Override
 	public Object getUserContext() {
 		return service.getUserContext();
 	}
 
+	@Override
 	public boolean isRunning() {
 		return service.isRunning();
 	}
 
+	@Override
 	public void removeMemberListener(MemberListener paramMemberListener) {
 		service.removeMemberListener(paramMemberListener);
 	}
 
+	@Override
 	public void removeServiceListener(ServiceListener paramServiceListener) {
 		service.removeServiceListener(paramServiceListener);
 	}
 
+	@Override
 	public void setContextClassLoader(ClassLoader paramClassLoader) {
 		service.setContextClassLoader(paramClassLoader);
 	}
 
+	@Override
 	public void setUserContext(Object paramObject) {
 		service.setUserContext(paramObject);
 	}
 
+	@Override
 	public void shutdown() {
 		service.shutdown();
 	}
 
+	@Override
 	public void start() {
 		service.start();
 	}
 
+	@Override
 	public void stop() {
 		service.stop();
 	}

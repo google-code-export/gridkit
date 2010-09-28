@@ -296,10 +296,11 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 		template.addProperty("acceptor-config/tcp-acceptor/limit-buffer-size",			"acceptorLimitBufferSizeBytes", new SizePropertyParser());
 		template.addProperty("acceptor-config/tcp-acceptor/limit-buffer-length",		"acceptorLimitBufferLength", new StringPropertyParser());
 		
-		template.addProperty("proxy-config/cache-service-proxy/enabled",		"cacheProxyEnabled", new StringPropertyParser());
-		template.addProperty("proxy-config/cache-service-proxy/lock-enabled",	"cacheProxyLockEnabled", new StringPropertyParser());
-		template.addProperty("proxy-config/cache-service-proxy/read-only",		"cacheProxyReadOnly", new StringPropertyParser());
-		template.addProperty("proxy-config/cache-service-proxy/class-name",		"cacheProxyClassName", new StringPropertyParser());
+		template.addProperty("proxy-config/cache-service-proxy/enabled",				"cacheProxyEnabled", new StringPropertyParser());
+		template.addProperty("proxy-config/cache-service-proxy/lock-enabled",			"cacheProxyLockEnabled", new StringPropertyParser());
+		template.addProperty("proxy-config/cache-service-proxy/read-only",				"cacheProxyReadOnly", new StringPropertyParser());
+		template.addProperty("proxy-config/cache-service-proxy/class-name",				"cacheProxyClassName", new StringPropertyParser());
+		template.addProperty("proxy-config/cache-service-proxy/cache-lookup-strategy",	"cacheLookupStrategy", new BeanPropertyParser());
 		
 		template.addProperty("proxy-config/invocation-service-proxy/enabled",	"invocationProxyEnabled", new StringPropertyParser());
 		template.addProperty("proxy-config/invocation-service-proxy/class-name","invocationProxyClassName", new StringPropertyParser());

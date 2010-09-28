@@ -26,9 +26,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
+import org.gridkit.coherence.utils.classloader.Isolate;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.tangosol.io.Serializer;
 import com.tangosol.io.ReadBuffer.BufferInput;
@@ -50,7 +54,18 @@ import com.tangosol.util.ExternalizableHelper;
 public abstract class BaseSimpleContextTest {
 
 	protected static ApplicationContext context;
-	protected static ApplicationContext clientContext;
+	protected static Isolate extendClient;
+	
+	@BeforeClass
+	public static void startClient() {
+		extendClient = new Isolate("Extend-Client", "com.tangosol", "org.gridkit");
+		extendClient.start();
+	}
+	
+	@AfterClass
+	public static void stopClient() {
+		extendClient.stop();
+	}
 	
 	@Test
 	public void testCacheA() {
@@ -62,7 +77,7 @@ public abstract class BaseSimpleContextTest {
 	@Test
 	public void testCacheB() {
 		NamedCache cache = (NamedCache) context.getBean("cache.B");
-		Assert.assertEquals("A", cache.get("a"));		
+		Assert.assertEquals("A", cache.get("a"));
 		Assert.assertEquals("B", cache.get("b"));		
 	}
 
@@ -308,21 +323,40 @@ public abstract class BaseSimpleContextTest {
 	@Test
 	public void testService_Invocation() {
 		InvocationService service = (InvocationService) context.getBean("exec-service");
-		service.getInfo().getServiceMembers();
+		System.out.println(service.getInfo().getServiceMembers());
 	}
 	
 	@Test
-	public void testCache_RemoteCache() {
-		NamedCache cache = (NamedCache) clientContext.getBean("cache.A");
-		cache.put("a", "b");
-		Assert.assertEquals("b", cache.get("a"));
+	public void testExtend_RemoteCache() {
+		extendClient.submit(RemoteCacheCmd.class.getName());
 	}
 	
 	@Test
-	public void testService_RemoteInvocation() {
-		InvocationService service = (InvocationService) clientContext.getBean("remote-exec-service");
-		service.getInfo().getServiceMembers();
+	public void testExtend_RemoteInvocation() {
+		extendClient.submit(RemoteInvocationCmd.class.getName());
 	}
+	
+	public static class RemoteCacheCmd implements Runnable {
+		@Override
+		public void run() {
+			ApplicationContext clientContext = new ClassPathXmlApplicationContext("schema/extend-client-context.xml");		
+			NamedCache cache = (NamedCache) clientContext.getBean("cache.A");
+			cache.put("a", "b");
+			Assert.assertEquals("b", cache.get("a"));
+			clientContext = null;
+		}
+	}
+	
+	public static class RemoteInvocationCmd implements Runnable {
+		@Override
+		public void run() {
+			ApplicationContext clientContext = new ClassPathXmlApplicationContext("schema/extend-client-context.xml");		
+			InvocationService service = (InvocationService) clientContext.getBean("remote-exec-service");
+			System.out.println(service.getInfo().getServiceMembers());
+			clientContext = null;
+		}
+	}
+	
 	
 	public static class CustomAddressProvider extends ConfigurableAddressProvider {
 		

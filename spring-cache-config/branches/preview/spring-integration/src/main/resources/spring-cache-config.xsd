@@ -380,6 +380,7 @@
 												<xs:element name="lock-enabled" minOccurs="0" maxOccurs="1" type="xs:boolean"/>
 												<xs:element name="read-only" minOccurs="0" maxOccurs="1" type="xs:boolean"/>
 												<xs:element name="class-name" minOccurs="0" maxOccurs="1" type="xs:string"/>
+												<xs:element name="cache-lookup-strategy" minOccurs="0" maxOccurs="1" type="single-spring-bean"/>
 											</xs:choice>
 										</xs:complexType>
 									</xs:element>

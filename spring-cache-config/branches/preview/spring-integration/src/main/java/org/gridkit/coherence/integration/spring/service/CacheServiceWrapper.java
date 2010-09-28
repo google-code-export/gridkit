@@ -38,6 +38,7 @@ class CacheServiceWrapper implements CacheService {
 		this.postProcessor = postProcessor;
 	}
 	
+	@Override
 	public void configure(XmlElement config) {
 		service.configure(config);
 		if (postProcessor != null) {
@@ -47,87 +48,108 @@ class CacheServiceWrapper implements CacheService {
 
 	// delegates
 	
+	@Override
 	public void addMemberListener(MemberListener paramMemberListener) {
 		service.addMemberListener(paramMemberListener);
 	}
 
+	@Override
 	public void addServiceListener(ServiceListener paramServiceListener) {
 		service.addServiceListener(paramServiceListener);
 	}
 
+	@Override
 	public void destroyCache(NamedCache paramNamedCache) {
 		service.destroyCache(paramNamedCache);
 	}
 
+	@Override
 	public NamedCache ensureCache(String paramString,
 			ClassLoader paramClassLoader) {
 		return service.ensureCache(paramString, paramClassLoader);
 	}
 
+	@Override
 	public BackingMapManager getBackingMapManager() {
 		return service.getBackingMapManager();
 	}
 
+	@Override
 	public Enumeration<?> getCacheNames() {
 		return service.getCacheNames();
 	}
 
+	@Override
 	public Cluster getCluster() {
 		return service.getCluster();
 	}
 
+	@Override
 	public ClassLoader getContextClassLoader() {
 		return service.getContextClassLoader();
 	}
 
+	@Override
 	public ServiceInfo getInfo() {
 		return service.getInfo();
 	}
 
+	@Override
 	public Serializer getSerializer() {
 		return service.getSerializer();
 	}
 
+	@Override
 	public Object getUserContext() {
 		return service.getUserContext();
 	}
 
+	@Override
 	public boolean isRunning() {
 		return service.isRunning();
 	}
 
+	@Override
 	public void releaseCache(NamedCache paramNamedCache) {
 		service.releaseCache(paramNamedCache);
 	}
 
+	@Override
 	public void removeMemberListener(MemberListener paramMemberListener) {
 		service.removeMemberListener(paramMemberListener);
 	}
 
+	@Override
 	public void removeServiceListener(ServiceListener paramServiceListener) {
 		service.removeServiceListener(paramServiceListener);
 	}
 
+	@Override
 	public void setBackingMapManager(BackingMapManager paramBackingMapManager) {
 		service.setBackingMapManager(paramBackingMapManager);
 	}
 
+	@Override
 	public void setContextClassLoader(ClassLoader paramClassLoader) {
 		service.setContextClassLoader(paramClassLoader);
 	}
 
+	@Override
 	public void setUserContext(Object paramObject) {
 		service.setUserContext(paramObject);
 	}
 
+	@Override
 	public void shutdown() {
 		service.shutdown();
 	}
 
+	@Override
 	public void start() {
 		service.start();
 	}
 
+	@Override
 	public void stop() {
 		service.stop();
 	}

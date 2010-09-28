@@ -32,15 +32,20 @@
 	<bean id="replicated-scheme-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.ReplicatedCacheServiceConfiguration" />
 	<bean id="optimistic-scheme-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.OptimisticCacheServiceConfiguration" />
 	<bean id="invocation-service-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.InvocationServiceConfiguration" />
-	<bean id="proxy-service-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.ProxyServiceConfiguration" />
 	<bean id="remote-cache-scheme-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.RemoteCacheServiceConfiguration" />
 	<bean id="remote-invocation-scheme-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.RemoteInvocationServiceConfiguration" />
+	<bean id="proxy-service-configuration" abstract="true" class="org.gridkit.coherence.integration.spring.service.ProxyServiceConfiguration">
+		<property name="cacheLookupStrategy" ref="default-cache-lookup-strategy" />	
+	</bean>
 	
 	<!-- Configurations fragments -->
 	<bean id="socket-address-config" abstract="true" class="org.gridkit.coherence.integration.spring.service.SocketAddressConfig" />
 	
 	<!-- Default backing map lookup strategy -->
 	<bean id="default-backing-map-lookup-strategy" class="org.gridkit.coherence.integration.spring.impl.ByNameBackingMapLookupStrategy"/>
+	
+	<!-- Default cache lookup strategy -->
+	<bean id="default-cache-lookup-strategy" class="org.gridkit.coherence.integration.spring.impl.SpringContextCacheLookupStrategy"/>
 	
 	<!-- Abstract service beans -->
 	

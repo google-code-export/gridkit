@@ -22,9 +22,9 @@ import java.util.concurrent.Callable;
 import org.gridkit.coherence.integration.spring.BackingMapLookupStrategy;
 import org.springframework.beans.factory.annotation.Required;
 
+import com.tangosol.net.AbstractBackingMapManager;
 import com.tangosol.net.BackingMapManager;
 import com.tangosol.net.CacheService;
-import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.Service;
 
 /**
@@ -33,7 +33,7 @@ import com.tangosol.net.Service;
 public class ClusteredCacheServiceBean extends CacheServiceBean {
 
 	private BackingMapLookupStrategy backingMapLookupStrategy;
-	private final BackingMapManager bmm = new DummyConfigurableCacheFactory().managerInstance;
+	private final BackingMapManager bmm = new BackendManager();
 	
 	@Required
 	public void setBackingMapLookupStrategy(BackingMapLookupStrategy backingMapLookupStrategy) {
@@ -48,7 +48,7 @@ public class ClusteredCacheServiceBean extends CacheServiceBean {
 	@Override
 	protected void initializeService(Service service) {
 		super.initializeService(service);
-		((CacheService)service).setBackingMapManager(bmm);
+		((CacheService)service).setBackingMapManager(bmm);					
 	}
 
 	@Override
@@ -59,36 +59,26 @@ public class ClusteredCacheServiceBean extends CacheServiceBean {
 		}
 	}
 
-	/*
-	 * This trick is needed because of explicit upcast of backingManager 
-	 * to DefaultConfigurableCacheFactory.Manager in DefaultConfigurableCacheFactory.validateBackingMapManager
-	 * during remote cache instantiation
-	 */
-	private class DummyConfigurableCacheFactory extends DefaultConfigurableCacheFactory {
-		
-		final BackendManager managerInstance = new BackendManager();
-		
-		private class BackendManager extends DefaultConfigurableCacheFactory.Manager {
-			
-			@Override
-			@SuppressWarnings("unchecked")
-			public Map instantiateBackingMap(final String cacheName) {
-				Map backingMap = threadHelper.safeExecute(new Callable<Map>() {
-					@Override
-					public Map call() throws Exception {
-						return backingMapLookupStrategy.instantiateBackingMap(cacheName, getContext());
-					}				
-				});
-				jmxRegister(getContext().getCacheService(), backingMap, cacheName, "back");
-				return backingMap;
-			}
+	private class BackendManager extends AbstractBackingMapManager {
 
-			@SuppressWarnings("unchecked")
-			@Override
-			public void releaseBackingMap(String sName, Map map) {
-				super.releaseBackingMap(sName, map);
-				jmxUnregister(getContext().getCacheService(), sName, "back");
-			}
+		@Override
+		@SuppressWarnings("unchecked")
+		public Map instantiateBackingMap(final String cacheName) {
+			Map backingMap = threadHelper.safeExecute(new Callable<Map>() {
+				@Override
+				public Map call() throws Exception {
+					return backingMapLookupStrategy.instantiateBackingMap(cacheName, getContext());
+				}				
+			});
+			jmxRegister(getContext().getCacheService(), backingMap, cacheName, "back");
+			return backingMap;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public void releaseBackingMap(String sName, Map map) {
+			super.releaseBackingMap(sName, map);
+			jmxUnregister(getContext().getCacheService(), sName, "back");
 		}
 	}
 	

@@ -44,6 +44,7 @@ class DistributedCacheServiceWrapper implements DistributedCacheService {
 		this.postProcessor = postProcessor;
 	}
 
+	@Override
 	public void configure(XmlElement config) {
 		service.configure(config);
 		if (postProcessor != null) {
@@ -53,131 +54,160 @@ class DistributedCacheServiceWrapper implements DistributedCacheService {
 	
 	// Delegates
 	
+	@Override
 	public void addMemberListener(MemberListener arg0) {
 		service.addMemberListener(arg0);
 	}
 
+	@Override
 	public void addServiceListener(ServiceListener arg0) {
 		service.addServiceListener(arg0);
 	}
 
+	@Override
 	public void destroyCache(NamedCache arg0) {
 		service.destroyCache(arg0);
 	}
 
+	@Override
 	public NamedCache ensureCache(String arg0, ClassLoader arg1) {
 		return service.ensureCache(arg0, arg1);
 	}
 
+	@Override
 	public BackingMapManager getBackingMapManager() {
 		return service.getBackingMapManager();
 	}
 
+	@Override
 	public int getBackupCount() {
 		return service.getBackupCount();
 	}
 
+	@Override
 	public Enumeration<?> getCacheNames() {
 		return service.getCacheNames();
 	}
 
+	@Override
 	public Cluster getCluster() {
 		return service.getCluster();
 	}
 
+	@Override
 	public ClassLoader getContextClassLoader() {
 		return service.getContextClassLoader();
 	}
 
+	@Override
 	public ServiceInfo getInfo() {
 		return service.getInfo();
 	}
 
+	@Override
 	public KeyAssociator getKeyAssociator() {
 		return service.getKeyAssociator();
 	}
 
+	@Override
 	public Member getKeyOwner(Object arg0) {
 		return service.getKeyOwner(arg0);
 	}
 
+	@Override
 	public KeyPartitioningStrategy getKeyPartitioningStrategy() {
 		return service.getKeyPartitioningStrategy();
 	}
 
+	@Override
 	public PartitionSet getOwnedPartitions(Member arg0) {
 		return service.getOwnedPartitions(arg0);
 	}
 
+	@Override
 	public Set<?> getOwnershipEnabledMembers() {
 		return service.getOwnershipEnabledMembers();
 	}
 
+	@Override
 	public PartitionAssignmentStrategy getPartitionAssignmentStrategy() {
 		return service.getPartitionAssignmentStrategy();
 	}
 
+	@Override
 	public int getPartitionCount() {
 		return service.getPartitionCount();
 	}
 
+	@Override
 	public Serializer getSerializer() {
 		return service.getSerializer();
 	}
 
+	@Override
 	@SuppressWarnings("deprecation")
 	public Set<?> getStorageEnabledMembers() {
 		return service.getStorageEnabledMembers();
 	}
 
+	@Override
 	public Object getUserContext() {
 		return service.getUserContext();
 	}
 
+	@Override
 	public boolean isLocalStorageEnabled() {
 		return service.isLocalStorageEnabled();
 	}
 
+	@Override
 	public boolean isRunning() {
 		return service.isRunning();
 	}
 
+	@Override
 	public void releaseCache(NamedCache arg0) {
 		service.releaseCache(arg0);
 	}
 
+	@Override
 	public void removeMemberListener(MemberListener arg0) {
 		service.removeMemberListener(arg0);
 	}
 
+	@Override
 	public void removeServiceListener(ServiceListener arg0) {
 		service.removeServiceListener(arg0);
 	}
 
+	@Override
 	public void setBackingMapManager(BackingMapManager arg0) {
 		service.setBackingMapManager(arg0);
 	}
 
+	@Override
 	public void setContextClassLoader(ClassLoader arg0) {
 		service.setContextClassLoader(arg0);
 	}
 
+	@Override
 	public void setUserContext(Object arg0) {
 		service.setUserContext(arg0);
 	}
 
+	@Override
 	public void shutdown() {
 		service.shutdown();
 	}
 
+	@Override
 	public void start() {
 		service.start();
 	}
 
+	@Override
 	public void stop() {
 		service.stop();
 	}
-	
-	
 
 }

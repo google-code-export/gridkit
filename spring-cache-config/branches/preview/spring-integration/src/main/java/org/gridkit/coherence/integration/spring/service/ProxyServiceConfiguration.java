@@ -16,8 +16,17 @@
 
 package org.gridkit.coherence.integration.spring.service;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+
+import org.gridkit.coherence.integration.spring.CacheLookupStrategy;
+
+import com.tangosol.coherence.component.net.extend.proxy.serviceProxy.CacheServiceProxy;
+import com.tangosol.coherence.component.net.extend.proxy.serviceProxy.InvocationServiceProxy;
+import com.tangosol.coherence.component.util.daemon.queueProcessor.service.grid.ProxyService;
 import com.tangosol.io.Serializer;
 import com.tangosol.net.AddressProvider;
+import com.tangosol.net.Service;
 import com.tangosol.net.messaging.ConnectionFilter;
 import com.tangosol.util.Filter;
 
@@ -158,11 +167,34 @@ public class ProxyServiceConfiguration extends AbstractServiceConfiguration {
 	@XmlConfigProperty("proxy-config/invocation-service-proxy/class-name")
 	private String invocationProxyClassName;
 	
+	private CacheLookupStrategy cacheLookupStrategy;
+	
+	// see public void postConfigure(Service service)
+	@SuppressWarnings("unused")
+	@ReflectionInjectedProperty("__m_InvocationServiceProxy")
+	private InvocationServiceProxy invocationServiceProxyWrapper;
+	
 	@Override
 	public ServiceType getServiceType() {
 		return ServiceType.Proxy;
 	}
-
+	
+	@Override
+	protected void overrideInstanceFields(Service service) 
+			throws SecurityException, IllegalArgumentException, NoSuchMethodException, IllegalAccessException, 
+			InvocationTargetException, NoSuchFieldException {
+		
+		super.overrideInstanceFields(service);
+		
+		Field cacheServiceProxyField = ProxyService.class.getDeclaredField("__m_CacheServiceProxy");
+		cacheServiceProxyField.setAccessible(true);
+		CacheServiceProxy cacheProxy = (CacheServiceProxy) cacheServiceProxyField.get(service);
+		
+		Field cacheServiceField = CacheServiceProxy.class.getDeclaredField("__m_CacheService");
+		cacheServiceField.setAccessible(true);
+		cacheServiceField.set(cacheProxy, new CacheServiceProxyWrapper(cacheProxy, cacheLookupStrategy));
+	}
+	
 	public Integer getThreadCount() {
 		return threadCount;
 	}
@@ -467,6 +499,14 @@ public class ProxyServiceConfiguration extends AbstractServiceConfiguration {
 
 	public void setAcceptorLimitBufferSize(Integer acceptorLimitBufferSize) {
 		this.acceptorLimitBufferSize = acceptorLimitBufferSize;
+	}
+
+	public CacheLookupStrategy getCacheLookupStrategy() {
+		return cacheLookupStrategy;
+	}
+
+	public void setCacheLookupStrategy(CacheLookupStrategy cacheLookupStrategy) {
+		this.cacheLookupStrategy = cacheLookupStrategy;
 	}
 	
 }

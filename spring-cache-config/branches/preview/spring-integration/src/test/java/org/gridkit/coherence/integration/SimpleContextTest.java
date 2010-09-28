@@ -17,10 +17,15 @@
 package org.gridkit.coherence.integration;
 
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Test;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.tangosol.net.CacheFactory;
+import com.tangosol.net.InvocationService;
+import com.tangosol.net.NamedCache;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
@@ -31,14 +36,45 @@ public class SimpleContextTest extends BaseSimpleContextTest {
 	public static void init() {
 		System.setProperty("tangosol.coherence.wka", "localhost");
 		context = new ClassPathXmlApplicationContext("config/simple-coherence-context.xml");
-		clientContext = new ClassPathXmlApplicationContext("config/extend-client-context.xml");		
 	}
 	
 	@AfterClass
 	public static void shutdown() {
 		context = null;
-		clientContext = null;
 		CacheFactory.getCluster().shutdown();
+	}
+	
+	@Test
+	@Override
+	public void testExtend_RemoteCache() {
+		extendClient.submit(RemoteCacheBeansCmd.class.getName());
+	}
+	
+	@Test
+	@Override
+	public void testExtend_RemoteInvocation() {
+		extendClient.submit(RemoteInvocationBeansCmd.class.getName());
+	}
+	
+	public static class RemoteCacheBeansCmd implements Runnable {
+		@Override
+		public void run() {
+			ApplicationContext clientContext = new ClassPathXmlApplicationContext("config/extend-client-context.xml");		
+			NamedCache cache = (NamedCache) clientContext.getBean("cache.A");
+			cache.put("a", "b");
+			Assert.assertEquals("b", cache.get("a"));
+			clientContext = null;
+		}
+	}
+	
+	public static class RemoteInvocationBeansCmd implements Runnable {
+		@Override
+		public void run() {
+			ApplicationContext clientContext = new ClassPathXmlApplicationContext("config/extend-client-context.xml");		
+			InvocationService service = (InvocationService) clientContext.getBean("remote-exec-service");
+			System.out.println(service.getInfo().getServiceMembers());
+			clientContext = null;
+		}
 	}
 	
 }
