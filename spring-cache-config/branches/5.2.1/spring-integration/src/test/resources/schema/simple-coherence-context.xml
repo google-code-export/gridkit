@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright 2010 Grid Dynamics Consulting Services, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<beans:beans xmlns="http://gridkit.org/schema/coherence/spring-cache-config"
+	   xmlns:beans="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+       				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       				http://gridkit.org/schema/coherence/spring-cache-config spring-cache-config.xsd"
+       default-lazy-init="true"
+>
+
+	<coherence-config>
+
+		<named-cache id="cache.A" cache-name="A"/>
+		<named-cache id="cache.B" cache-name="B"/>
+		<named-cache id="cache.C" cache-name="C"/>
+		<named-cache id="cache.D" cache-name="D"/>
+		<named-cache id="cache.E" cache-name="E"/>
+		<named-cache id="cache.F" cache-name="F"/>
+		<named-cache id="cache.G" cache-name="G"/>
+		<named-cache id="cache.H" cache-name="H"/>
+		<named-cache id="cache.I" cache-name="I"/>
+		<named-cache id="cache.J" cache-name="J"/>
+		
+		<distributed-service-scheme id="default.distributed.service" lazy-init="false">
+			<service-name>DistributedCache</service-name>
+			<!-- 
+				<local-storage>true</local-storage>
+			 -->
+			<autostart>true</autostart>
+		</distributed-service-scheme>
+	
+		<replicated-service-scheme id="default.replicated.service">
+			<service-name>ReplicatedCache</service-name>		
+		</replicated-service-scheme>
+	
+		<replicated-service-scheme id="default.optimistic.service">
+			<service-name>OptimisticCache</service-name>
+		</replicated-service-scheme>
+		
+		
+		<named-cache-scheme id="A">
+			<service><beans:ref local="default.distributed.service"/></service>
+			<back-tier><java-map/></back-tier>
+		</named-cache-scheme>
+	
+		<named-cache-scheme id="B">
+			<service><beans:ref local="default.distributed.service"/></service>
+			<back-tier><beans:ref local="read-write-test-backend"/></back-tier>
+		</named-cache-scheme>
+
+		<named-cache-scheme id="C">
+			<service><beans:ref local="default.distributed.service"/></service>
+			<back-tier><local-cache-scheme/></back-tier>
+		</named-cache-scheme>
+
+		<named-cache-scheme id="D">
+			<service><beans:ref local="default.distributed.service"/></service>
+			<back-tier>
+				<local-cache-scheme>
+					<expiry-delay>200ms</expiry-delay>
+					<flush-delay>200ms</flush-delay>
+				</local-cache-scheme>
+			</back-tier>
+		</named-cache-scheme>
+
+		<named-cache-scheme id="E">
+			<service>
+				<distributed-service-scheme>		
+					<service-name>DiscributedCache2</service-name>
+					<!--  
+					 <local-storage>true</local-storage>
+					 -->
+					<serializer><beans:bean class="org.gridkit.coherence.integration.BaseSimpleContextTest$CustomSerializer" /></serializer>		
+				</distributed-service-scheme>
+			</service>
+			<back-tier><local-cache-scheme/></back-tier>
+		</named-cache-scheme>
+
+		<named-cache-scheme id="F">
+			<service><beans:ref local="default.distributed.service"/></service>
+			<back-tier>
+				<local-cache-scheme>
+					<expiry-delay>200ms</expiry-delay>
+					<flush-delay>200ms</flush-delay>
+					<eviction-policy>
+						<beans:bean class="org.gridkit.coherence.integration.BaseSimpleContextTest$CustomEvictor"/>
+					</eviction-policy>
+				</local-cache-scheme>
+			</back-tier>
+		</named-cache-scheme>
+
+		<named-cache-scheme id="G">
+			<service><beans:ref local="default.replicated.service"/></service>
+			<back-tier><local-cache-scheme/></back-tier>
+		</named-cache-scheme>
+
+		<named-cache-scheme id="H">
+			<service><beans:ref local="default.optimistic.service"/></service>
+			<back-tier><local-cache-scheme/></back-tier>
+		</named-cache-scheme>
+
+		<named-cache-scheme id="I">
+			<front-tier><near-cache-scheme/></front-tier>
+			<service><beans:ref local="default.distributed.service"/></service>
+			<back-tier><local-cache-scheme/></back-tier>
+		</named-cache-scheme>
+
+		<named-cache-scheme id="J">
+			<front-tier><near-cache-scheme/></front-tier>
+			<service><beans:ref local="default.distributed.service"/></service>
+			<back-tier><local-cache-scheme/></back-tier>
+		</named-cache-scheme>
+
+		<read-write-backing-map-scheme id="read-write-test-backend">
+			<cachestore>
+				<beans:bean id="cacheStore" class="org.gridkit.coherence.integration.BaseSimpleContextTest.TestCacheLoader"/>
+			</cachestore>
+		</read-write-backing-map-scheme>
+
+		<service-instance id="exec-service" scheme-name="invocation-service"/>
+		
+		<invocation-service-scheme id="invocation-service">
+			<thread-count>5</thread-count>
+		</invocation-service-scheme>
+		
+		<!-- Coherence*Extend proxy -->
+		<proxy-service-scheme id="proxy-service">
+			<service-name>TCPExtendProxy</service-name>
+			<acceptor-config>
+				<outgoing-message-handler>
+					<request-timeout>1s</request-timeout>				
+				</outgoing-message-handler>
+				<tcp-acceptor>
+					<local-address>
+						<address>localhost</address>
+						<port>9099</port>
+					</local-address>
+				</tcp-acceptor>
+			</acceptor-config>
+			<proxy-config>
+				<cache-service-proxy>
+					<enabled>true</enabled>
+					<cache-lookup-strategy>
+						<beans:bean class="org.gridkit.coherence.integration.spring.impl.SpringContextCacheLookupStrategy"/>
+					</cache-lookup-strategy>
+				</cache-service-proxy>
+				<invocation-service-proxy>
+					<enabled>true</enabled>
+				</invocation-service-proxy>
+			</proxy-config>
+			<thread-count>5</thread-count>
+			<autostart>true</autostart>
+		</proxy-service-scheme>
+		
+	</coherence-config>
+	
+</beans:beans>
