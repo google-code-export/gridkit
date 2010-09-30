@@ -30,6 +30,7 @@ import org.gridkit.coherence.integration.spring.impl.ByNameBackingMapLookupStrat
 import org.gridkit.coherence.integration.spring.impl.CacheServiceBean;
 import org.gridkit.coherence.integration.spring.impl.ClusteredCacheServiceBean;
 import org.gridkit.coherence.integration.spring.impl.ClusteredServiceBean;
+import org.gridkit.coherence.integration.spring.impl.ProxyServiceBean;
 import org.gridkit.coherence.integration.spring.service.DistributedCacheServiceConfiguration;
 import org.gridkit.coherence.integration.spring.service.InvocationServiceConfiguration;
 import org.gridkit.coherence.integration.spring.service.LeaseGranularity;
@@ -134,7 +135,7 @@ public class CoherenceConfigNamespaceHandler extends NamespaceHandlerSupport {
 			// proxy (for Coherence*Extend)
 			{
 				ServiceBeanTemplate proxyService = new ServiceBeanTemplate();
-				proxyService.className = ClusteredServiceBean.class.getName();
+				proxyService.className = ProxyServiceBean.class.getName();
 				registerServiceBeanProperties(proxyService);
 				registerProxyServiceConfigProperties(proxyService.configTemplate);
 				

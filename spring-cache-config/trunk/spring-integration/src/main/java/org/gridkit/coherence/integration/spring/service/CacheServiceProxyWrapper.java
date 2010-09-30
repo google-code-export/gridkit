@@ -26,7 +26,7 @@ import com.tangosol.net.WrapperCacheService;
  * @author malexejev@gmail.com
  * 27.09.2010
  */
-class CacheServiceProxyWrapper extends WrapperCacheService {
+public class CacheServiceProxyWrapper extends WrapperCacheService {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -36,7 +36,6 @@ class CacheServiceProxyWrapper extends WrapperCacheService {
 			CacheLookupStrategy cacheLookupStrategy) {
 		super(delegate);
 		this.cacheLookupStrategy = cacheLookupStrategy;
-		
 	}
 
 	@Override

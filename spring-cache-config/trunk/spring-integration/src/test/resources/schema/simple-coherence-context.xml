@@ -157,9 +157,6 @@
 			<proxy-config>
 				<cache-service-proxy>
 					<enabled>true</enabled>
-					<cache-lookup-strategy>
-						<beans:bean class="org.gridkit.coherence.integration.spring.impl.SpringContextCacheLookupStrategy"/>
-					</cache-lookup-strategy>
 				</cache-service-proxy>
 				<invocation-service-proxy>
 					<enabled>true</enabled>
