@@ -1,8 +1,5 @@
 package org.gridkit.coherence.profile;
 
-
-
-
 /**
  * @author Alexey Ragozin (aragozin@griddynamics.net)
  */
