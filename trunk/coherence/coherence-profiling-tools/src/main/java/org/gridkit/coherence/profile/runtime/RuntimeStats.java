@@ -14,8 +14,7 @@ import org.gridkit.coherence.profile.distributed.ClusterInfoService;
  */
 public class RuntimeStats {
 
-    // TODO false by default
-    public static boolean ENABLED = System.getProperty("battery.statistics") == null ? false : Boolean.getBoolean("battery.statistics");
+    public static boolean ENABLED = true;
  
     public static long nanoTime() {
         return ENABLED ? System.nanoTime() : 0;

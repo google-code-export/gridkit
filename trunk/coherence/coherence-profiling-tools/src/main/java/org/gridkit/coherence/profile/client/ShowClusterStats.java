@@ -30,7 +30,6 @@ public class ShowClusterStats {
     }
     
     public static void main(String[] args) {
-        System.setProperty("tangosol.pof.enabled", "true");
         System.setProperty("tangosol.coherence.distributed.localstorage", "false");
         new ShowClusterStats(args).start();
     }
