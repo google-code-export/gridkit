@@ -8,8 +8,9 @@ package org.gridkit.coherence.profile.distributed;
  * @author Alexey Ragozin (aragozin@gridsynamics.com)
  */
 public class ClusterProperty extends ClusterPropertyKey {
-
-    private Object value;
+	private static final long serialVersionUID = 1L;
+	
+	private Object value;
     
     protected ClusterProperty() {
         // for serialization

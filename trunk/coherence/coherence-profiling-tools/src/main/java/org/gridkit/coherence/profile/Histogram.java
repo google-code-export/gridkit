@@ -1,11 +1,14 @@
 package org.gridkit.coherence.profile;
 
+import java.io.Serializable;
+
 /**
  * @author Alexey Ragozin (aragozin@griddynamics.net)
  */
-public class Histogram implements Sampler, StatValue, Cloneable {
-
-    long lowLimit;
+public class Histogram implements Sampler, StatValue, Cloneable, Serializable {
+	private static final long serialVersionUID = 1L;
+	
+	long lowLimit;
 	long step;
 	int size;
 
