@@ -3,15 +3,18 @@
  */
 package org.gridkit.coherence.profile.distributed;
 
+import java.io.Serializable;
+
 import com.tangosol.util.Binary;
 import com.tangosol.util.UID;
 
 /**
  * @author Alexey Ragozin (aragozin@gridsynamics.com)
  */
-public class ClusterPropertyKey {
-
-    private Binary memberId;
+public class ClusterPropertyKey implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
+	private Binary memberId;
     private String propName;
     
     protected ClusterPropertyKey() {
