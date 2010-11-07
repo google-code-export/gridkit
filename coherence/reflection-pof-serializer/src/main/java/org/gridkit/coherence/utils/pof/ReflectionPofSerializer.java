@@ -94,7 +94,7 @@ public class ReflectionPofSerializer implements PofSerializer {
         }
     }
     
-    private Map<Class<?>, ObjectFormat> formats = new ConcurrentHashMap<Class<?>, ObjectFormat>();
+    private ConcurrentMap<Class<?>, ObjectFormat> formats = new ConcurrentHashMap<Class<?>, ObjectFormat>();
     
     
     @Override
@@ -105,15 +105,7 @@ public class ReflectionPofSerializer implements PofSerializer {
 
     protected Object internalDeserialize(PofReader in) throws IOException {
         Class<?> type = in.getPofContext().getClass(in.getUserTypeId());
-        ObjectFormat format = formats.get(type);
-        if (format == null) {
-            try {
-                format = new ObjectFormat(type);
-            } catch (Exception e) {
-                throw new IOException("Failed to create reflection format for " + type.getName(), e);
-            }
-            formats.put(type, format);
-        }
+        ObjectFormat format = getClassCodec(type);
         Object result = resolve(format.deserialize(in));
         return result;
     }
@@ -138,7 +130,8 @@ public class ReflectionPofSerializer implements PofSerializer {
             } catch (Exception e) {
                 throw new IOException("Failed to create reflection format for " + type.getName(), e);
             }
-            formats.put(type, format);
+            formats.putIfAbsent(type, format);
+            format = formats.get(type);
         }
         return format;
     }
