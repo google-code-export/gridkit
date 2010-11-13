@@ -14,7 +14,7 @@ import org.gridkit.coherence.profile.distributed.ClusterInfoService;
  */
 public class RuntimeStats {
 
-    public static boolean ENABLED = true;
+    public static boolean ENABLED = Boolean.valueOf(System.getProperty("org.gridkit.coherence.profile.enabled", "false"));
  
     public static long nanoTime() {
         return ENABLED ? System.nanoTime() : 0;
