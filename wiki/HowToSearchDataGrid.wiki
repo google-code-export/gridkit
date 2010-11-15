@@ -1,6 +1,6 @@
 #summary How to use GridSearch with Coherence
 
-Example below explains usage of GridSearch API using n-gram index as example.
+Example below explains usage of [GridSerach4Coherence GridSearch] API using n-gram index as example.
 
 {{{
 /**
