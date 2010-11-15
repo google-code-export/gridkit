@@ -1,10 +1,10 @@
 #summary Project's maven repository description
 
-GridKit project is hosting own Maven repository for its artifacts.
+[http://code.google.com/p/gridkit/ GridKit] project is hosting own Maven repository for its artifacts.
 
 Repository URL is [https://gridkit.googlecode.com/svn/repo]
 
-You can add reference to our repository to your POM to download GridKit artifacts automatically.
+You can add reference to our repository to your POM to download [http://code.google.com/p/gridkit/ GridKit] artifacts automatically.
 
 {{{
 <repositories>
