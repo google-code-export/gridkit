@@ -1,7 +1,7 @@
 #summary GridSearch / Coherence (TOC)
 
- * [GridSerach4Coherence GridSearch] / Coherence
-  * [GridSerach4Coherence Introdution]
+ * [GridSearch4Coherence GridSearch] / Coherence
+  * [GridSearch4Coherence Introdution]
   * Java docs
    * [http://gridkit.googlecode.com/svn/jdocs/grid-search/coherence-common/latest/index.html Coherence common]
    * [http://gridkit.googlecode.com/svn/jdocs/grid-search/coherence-lucene/latest/index.html Lucene plugin for Coherence]  
@@ -9,6 +9,6 @@
    * [HowToSearchDataGrid Searching with GridSearch]
    * [HowToCustomSearchIndex Implement custom index]
   * Get code
-   * [GridSerach4Coherence#Source Source code]
-   * [GridSerach4Coherence#Binaries Binaries]
-   * [GridSerach4Coherence#Maven Maven repo]
+   * [GridSearch4Coherence#Source Source code]
+   * [GridSearch4Coherence#Binaries Binaries]
+   * [GridSearch4Coherence#Maven Maven repo]
