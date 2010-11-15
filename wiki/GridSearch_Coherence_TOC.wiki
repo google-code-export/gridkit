@@ -7,6 +7,7 @@
    * [http://gridkit.googlecode.com/svn/jdocs/grid-search/coherence-lucene/latest/index.html Lucene plugin for Coherence]  
   * How to
    * [HowToSearchDataGrid Searching with GridSearch]
+   * [HowToUsingLuceneInGrid Using Lucene in grid]
    * [HowToCustomSearchIndex Implement custom index]
   * Get code
    * [GridSearch4Coherence#Source Source code]
