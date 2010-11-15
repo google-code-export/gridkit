@@ -25,6 +25,7 @@ Coherence custom index API is quite complicated to deal with. The purpose of thi
  * [http://gridkit.googlecode.com/svn/jdocs/grid-search/coherence-common/latest/index.html JavaDoc GridSearch / Coherence common]
  * [http://gridkit.googlecode.com/svn/jdocs/grid-search/coherence-lucene/latest/index.html JavaDoc GridSearch / Lucene search for Coherence]
  * [HowToSearchDataGrid Getting started, searching data grid]
+ * [HowToUsingLuceneInGrid Getting started, using Lucene in grid]
  * [HowToCustomSearchIndex Implementing custom index for Coherence]
  * [CoherenceCustomIndexOverview Coherence custom index API usage]
  * [CoherenceSearchCoreAPI Coherence search core API usage]
