@@ -8,6 +8,7 @@
   * How to
    * [HowToSearchDataGrid Searching with GridSearch]
    * [HowToCustomSearchIndex Implement custom index]
-   * [HowToUseInMaven Add maven dependency]
-  * [CoherenceSearch#Source Source code]
-  * [CoherenceSearch#Binaries Binaries]
+  * Get code
+   * [CoherenceSearch#Source Source code]
+   * [CoherenceSearch#Binaries Binaries]
+   * [CoherenceSearch#Maven Maven repo]
