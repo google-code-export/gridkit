@@ -31,13 +31,15 @@ Coherence custom index API is quite complicated to deal with. The purpose of thi
  * [CoherenceSearchCoreAPI Coherence search core API usage]
 
 = Source =
-== Coherence-Search core ==
+== GridSearch / Coherence common ==
 === Unstable ===
-|| Trunk || *SVN:* [https://gridkit.googlecode.com/svn/coherence-search/trunk/coherence-search-lucene] ||
+|| Trunk || *SVN:* [https://gridkit.googlecode.com/svn/grid-search/trunk/coherence-search-common] ||
+|| 0.9|| *SVN:* [https://gridkit.googlecode.com/svn/releases/coherence-search-common-0.9] ||
 
-== Coherence-Search Lucene integration ==
+== GridSearch / Lucene integration ==
 === Unstable ===
-|| Trunk || *SVN:* [https://gridkit.googlecode.com/svn/coherence-search/trunk/coherence-search-core] ||
+|| Trunk || *SVN:* [https://gridkit.googlecode.com/svn/grid-search/trunk/coherence-search-lucene] ||
+|| 0.9 || *SVN:* [https://gridkit.googlecode.com/svn/releases/coherence-search-lucene-0.9] ||
 
 = Maven =
 See MavenRepo for details of project Maven repository
