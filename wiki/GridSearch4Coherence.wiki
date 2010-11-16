@@ -31,20 +31,18 @@ Coherence custom index API is quite complicated to deal with. The purpose of thi
  * [CoherenceSearchCoreAPI Coherence search core API usage]
 
 = Source =
-== GridSearch / Coherence common ==
-=== Unstable ===
+== [# GridSearch] / Coherence common ==
 || Trunk || *SVN:* [https://gridkit.googlecode.com/svn/grid-search/trunk/coherence-search-common] ||
 || 0.9|| *SVN:* [https://gridkit.googlecode.com/svn/releases/coherence-search-common-0.9] ||
 
-== GridSearch / Lucene integration ==
-=== Unstable ===
+== [# GridSearch] / Lucene integration ==
 || Trunk || *SVN:* [https://gridkit.googlecode.com/svn/grid-search/trunk/coherence-search-lucene] ||
 || 0.9 || *SVN:* [https://gridkit.googlecode.com/svn/releases/coherence-search-lucene-0.9] ||
 
 = Maven =
 See MavenRepo for details of project Maven repository
-== Coherence-Search core ==
-=== 0.9 version ===
+== [# GridSearch] / Coherence common ==
+==== 0.9 version ====
 {{{
 <dependency>
     <groupId>org.gridkit.search</groupId>
@@ -52,8 +50,8 @@ See MavenRepo for details of project Maven repository
     <version>0.9</version>
 </dependency>
 }}}
-== Coherence-Search core ==
-=== 0.9 version ===
+== [# GridSearch] / Lucene integration ==
+==== 0.9 version ====
 {{{
 <dependency>
     <groupId>org.gridkit.search</groupId>
@@ -64,3 +62,11 @@ See MavenRepo for details of project Maven repository
 
 
 = Binaries =
+== [# GridSearch] / Coherence common ==
+==== 0.9 ====
+|| jar || [https://gridkit.googlecode.com/svn/repo/org/gridkit/search/coherence-search-common/0.9/coherence-search-common-0.9.jar coherence-search-common-0.9.jar] ||
+|| javadocs || [] ||
+== [# GridSearch] / Lucene integration ==
+==== 0.9 ====
+|| jar || ||
+|| javadocs || ||
