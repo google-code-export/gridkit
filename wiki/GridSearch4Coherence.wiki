@@ -62,11 +62,7 @@ See MavenRepo for details of project Maven repository
 
 
 = Binaries =
-== [# GridSearch] / Coherence common ==
-==== 0.9 ====
-|| jar || [https://gridkit.googlecode.com/svn/repo/org/gridkit/search/coherence-search-common/0.9/coherence-search-common-0.9.jar coherence-search-common-0.9.jar] ||
-|| javadocs || [] ||
-== [# GridSearch] / Lucene integration ==
-==== 0.9 ====
-|| jar || ||
-|| javadocs || ||
+ * [https://gridkit.googlecode.com/svn/repo/org/gridkit/search/coherence-search-common/0.9/coherence-search-common-0.9.jar coherence-search-common-0.9.jar]
+ * [https://gridkit.googlecode.com/svn/repo/org/gridkit/search/coherence-search-common/0.9/coherence-search-common-0.9-javadoc.jar coherence-search-common-0.9-javadoc.jar]
+ * [https://gridkit.googlecode.com/svn/repo/org/gridkit/search/coherence-search-lucene/0.9/coherence-search-lucene-0.9.jar coherence-search-lucene-0.9.jar]
+ * [https://gridkit.googlecode.com/svn/repo/org/gridkit/search/coherence-search-lucene/0.9/coherence-search-lucene-0.9-javadoc.jar coherence-search-lucene-0.9-javadoc.jar]
