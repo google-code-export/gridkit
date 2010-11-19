@@ -1,15 +1,18 @@
-#summary GridSearch / Coherence project overview
+#summary Grid4Search for Coherence
 #labels Featured,GridSearch
 #sidebar GridSearch_Coherence_TOC
+_project by [griddynamics.com GridDynamics]_
 
 = Introduction =
-Orcale Coherence has very powerful ability to create secondary indexes for any attribute of cached objects. While being quite powerful by themselves, standard Coherence indexes have their limitation. Two most important of them are:
+Oracle Coherence has a very powerful ability to create secondary indexes for any attribute of cached objects. While being quite powerful by themselves, standard Coherence indexes have their limitations. The two most important of them are:
  * memory consumption of build in indexes cannot be controlled (and they are [http://blog.griddynamics.com/2009/10/coherence-memory-usage-indexes.html heap hungry] indeed);
  * only hash table or binary tree implementations are available.
-Coherence 3.6 has introduced a new API which allows developers to overcome these limitations by plugging in custom implementations for secondary indexes into Coherence caches. Index API opens a way for integrating full-text and other specialized indexes for your distributed caches.
+Coherence 3.6 has introduced a new API which allows developers to overcome these limitations by plugging in custom implementations for secondary indexes into Coherence caches. Index API opens a way to integrate full-text and other specialized indexes for your distributed caches.
 
-= Project goals =
-Coherence custom index API is quite complicated to deal with. The purpose of this project is to implement some generic layer to simplify integration of custom indexes and to adapt widely used search libraries (like [http://lucene.apache.org Apache Lucene]) to be used with Coherence.
+[griddynamics.com GridDynamics] has developed a solution, Grid4Search, to help integrate Oracle Coherence 3.6 with Apache Lucene.
+
+= Project Goals =
+Coherence custom index API is quite complicated. The purpose of this project by GridDynamics is to develop generic layer to simplify integration of custom indexes and to adapt widely used search libraries (like [http://lucene.apache.org Apache Lucene]) to be used with Coherence.
 
 == Advantages of Lucene index over built in Coherence index ==
  * Full text search with various query types
@@ -18,11 +21,11 @@ Coherence custom index API is quite complicated to deal with. The purpose of thi
 
 == Advantages of integration search using coherence ==
  * Coherence will keep your index in sych with your data
- * In case of distributed cache, custom cache also gets distributed and will benefit from Coherence advanced parallel queering
+ * In case of distributed cache, custom cache also gets distributed and will benefit from Coherence advanced parallel queries
  * Combine built in Coherence filters with custom ones to make Coherence filter API even more powerful
 
-== Limitation of Coherence search ==
- * Coherence Filter API is very basic, so advanced features of search libraries like scoring cannot be exposed. If you need scoring, faceted search, etc then Grid Search is not your choice so far.
+== Limitations of Coherence query API ==
+ * Coherence Filter API is very basic, so advanced features of search libraries like scoring cannot be exposed. If you need scoring, faceted search, etc .. then Grid4Search would not be your choice.
 
 = Documentation =
  * [http://gridkit.googlecode.com/svn/jdocs/grid-search/coherence-common/latest/index.html JavaDoc GridSearch / Coherence common]
@@ -33,18 +36,25 @@ Coherence custom index API is quite complicated to deal with. The purpose of thi
  * [CoherenceCustomIndexOverview Coherence custom index API usage]
  * [CoherenceSearchCoreAPI Coherence search core API usage]
 
+= Project structure =
+There are two modules in project right now.
+
+*[# Grid4Search] / Coherence common* is a layer of abstraction on top of Oracle Coherence index API. It implements generic service provider interface (SPI) to develop custom index implementations.
+
+*[# Grid4Search] / Lucene integration* is implementation of SPI provided by module above using Apache Lucene as search implementation. 
+
 = Source =
-== [# GridSearch] / Coherence common ==
+== [# Grid4Search] / Coherence common ==
 || Trunk || *SVN:* [https://gridkit.googlecode.com/svn/grid-search/trunk/coherence-search-common] ||
 || 0.9|| *SVN:* [https://gridkit.googlecode.com/svn/releases/coherence-search-common-0.9] ||
 
-== [# GridSearch] / Lucene integration ==
+== [# Grid4Search] / Lucene integration ==
 || Trunk || *SVN:* [https://gridkit.googlecode.com/svn/grid-search/trunk/coherence-search-lucene] ||
 || 0.9 || *SVN:* [https://gridkit.googlecode.com/svn/releases/coherence-search-lucene-0.9] ||
 
 = Maven =
 See MavenRepo for details of project Maven repository
-== [# GridSearch] / Coherence common ==
+== [# Grid4Search] / Coherence common ==
 ==== 0.9 version ====
 {{{
 <dependency>
@@ -53,7 +63,7 @@ See MavenRepo for details of project Maven repository
     <version>0.9</version>
 </dependency>
 }}}
-== [# GridSearch] / Lucene integration ==
+== [# Grid4Search] / Lucene integration ==
 ==== 0.9 version ====
 {{{
 <dependency>
