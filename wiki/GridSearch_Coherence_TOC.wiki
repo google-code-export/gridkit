@@ -1,6 +1,6 @@
 #summary Grid4Search / Coherence (TOC)
 
- * [GridSearch4Coherence GridSearch] / Coherence
+ * [GridSearch4Coherence Grid4Search] / Coherence
   * [GridSearch4Coherence Introdution]
   * Java docs
    * [http://gridkit.googlecode.com/svn/jdocs/grid-search/coherence-common/latest/index.html Coherence common]
