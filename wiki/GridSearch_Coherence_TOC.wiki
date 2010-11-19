@@ -1,4 +1,4 @@
-#summary GridSearch / Coherence (TOC)
+#summary Grid4Search / Coherence (TOC)
 
  * [GridSearch4Coherence GridSearch] / Coherence
   * [GridSearch4Coherence Introdution]
