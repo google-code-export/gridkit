@@ -1,7 +1,7 @@
 #summary Grid4Search for Coherence
 #labels Featured,GridSearch
 #sidebar GridSearch_Coherence_TOC
-_project by [griddynamics.com GridDynamics]_
+_project by [http://griddynamics.com GridDynamics]_
 
 = Introduction =
 Oracle Coherence has a very powerful ability to create secondary indexes for any attribute of cached objects. While being quite powerful by themselves, standard Coherence indexes have their limitations. The two most important of them are:
