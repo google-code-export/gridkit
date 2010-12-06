@@ -32,14 +32,22 @@ public class ClusterInfoService {
         return INSTANCE;
     }
         
-    private UID uid;
     private NamedCache cache;
     private HistogramService histogramService;
     
+    private synchronized NamedCache getCache() {
+    	if (cache == null) {
+    		cache = CacheFactory.getCache("distributed.cluster-info");
+            cache.addIndex(GET_PROP_NAME, false, null);
+    	}
+    	return cache;
+    }
+    
+    private UID getUid() {
+    	return CacheFactory.getCluster().getLocalMember().getUid();
+    }
+    
     protected ClusterInfoService() {
-        cache = CacheFactory.getCache("distributed.cluster-info");
-        cache.addIndex(GET_PROP_NAME, false, null);
-        uid = CacheFactory.getCluster().getLocalMember().getUid();
     }
     
     public synchronized HistogramService getHistogramService() {
@@ -50,13 +58,13 @@ public class ClusterInfoService {
     }
     
     public Object getLocalProperty(String name) {
-        ClusterPropertyKey key = new ClusterPropertyKey(uid, name);
-        ClusterProperty prop = (ClusterProperty) cache.get(key);
+        ClusterPropertyKey key = new ClusterPropertyKey(getUid(), name);
+        ClusterProperty prop = (ClusterProperty) getCache().get(key);
         return prop == null ? null : prop.getValue();
     }
     
     public Map<UID, Object> getProperty(String name, boolean liveOnly) {
-        Set<Map.Entry<ClusterPropertyKey, ClusterProperty>> set = AnyType.cast(cache.entrySet(new EqualsFilter(GET_PROP_NAME, name)));
+        Set<Map.Entry<ClusterPropertyKey, ClusterProperty>> set = AnyType.cast(getCache().entrySet(new EqualsFilter(GET_PROP_NAME, name)));
         Map<UID, Object> result = new HashMap<UID, Object>();
         Set<UID> liveUid = null;
         if (liveOnly) {
@@ -77,21 +85,21 @@ public class ClusterInfoService {
     }    
 
     public void putProperty(String name, Object value) {
-        ClusterPropertyKey key = new ClusterPropertyKey(uid, name);
+        ClusterPropertyKey key = new ClusterPropertyKey(getUid(), name);
         ClusterProperty val = new ClusterProperty(key, value);
-        cache.put(key, val);
+        getCache().put(key, val);
     }
     
     @SuppressWarnings("unchecked")
     public void eraseProperty(String name) {
-        cache.keySet().removeAll(cache.keySet(new EqualsFilter(GET_PROP_NAME, name)));
+        getCache().keySet().removeAll(getCache().keySet(new EqualsFilter(GET_PROP_NAME, name)));
     }
  
     public Set<String> listProperties(String pattern) {
         Pattern pat = toPattern(pattern);
         Set<String> result = new HashSet<String>();
         try {
-            for(ClusterPropertyKey key: AnyType.<Set<ClusterPropertyKey>>cast(cache.keySet())) {
+            for(ClusterPropertyKey key: AnyType.<Set<ClusterPropertyKey>>cast(getCache().keySet())) {
                 Matcher mc = pat.matcher(key.getPropName());
                 if (mc.matches()) {
                     result.add(key.getPropName());
@@ -114,7 +122,7 @@ public class ClusterInfoService {
         Pattern pat = toPattern(pattern);
         @SuppressWarnings("unused")
 		Set<String> result = new HashSet<String>();
-        for(ClusterPropertyKey key: AnyType.<Set<ClusterPropertyKey>>cast(cache.keySet())) {
+        for(ClusterPropertyKey key: AnyType.<Set<ClusterPropertyKey>>cast(getCache().keySet())) {
             Matcher mc = pat.matcher(key.getPropName());
             if (mc.matches()) {
                 eraseProperty(key.getPropName());
