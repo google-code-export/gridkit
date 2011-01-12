@@ -15,5 +15,7 @@ public interface StatValue {
     public double getTotal();
 
     public double getStdDev();
+    
+    public double getMax();
 
 }
