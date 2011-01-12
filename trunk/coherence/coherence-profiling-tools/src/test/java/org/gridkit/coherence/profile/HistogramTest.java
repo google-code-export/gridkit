@@ -10,11 +10,12 @@ public class HistogramTest {
 	public void testAddValueSimple() {
 		Histogram hist = new Histogram(1, 1, 100, 10);
 		hist.addSample(11);
+		hist.addSample(9);
 		hist.updateStats();
 		assertEquals(11, (long)hist.getMax());
-		assertEquals(1, (long)hist.getCount());
-		assertEquals(11, (long)hist.getTotal());
-		assertEquals(11, (long)hist.getAvg());
+		assertEquals(2, (long)hist.getCount());
+		assertEquals(20, (long)hist.getTotal());
+		assertEquals(10, (long)hist.getAvg());
 	}
 	
 	@Test
@@ -28,4 +29,35 @@ public class HistogramTest {
 		assertEquals(5, (long)hist.getAvg());
 	}
 
+	@Test
+	public void testClone() {
+		Histogram hist = new Histogram(1, 1, 100, 10);
+		hist.addSample(11);
+		hist.addSample(9);
+		
+		Histogram hist2 = hist.clone();
+		hist2.updateStats();
+		
+		assertEquals(11, (long)hist2.getMax());
+		assertEquals(2, (long)hist2.getCount());
+		assertEquals(20, (long)hist2.getTotal());
+		assertEquals(10, (long)hist2.getAvg());
+	}
+	
+	@Test
+	public void testAddHistogram() {
+		Histogram hist = new Histogram(1, 1, 100, 10);
+		hist.addSample(11);
+		hist.addSample(9);
+		
+		Histogram hist2 = hist.clone();
+		hist2.addSample(15);
+		hist.addHistogram(hist2);
+		hist.updateStats();
+		
+		assertEquals(15, (long)hist.getMax());
+		assertEquals(5, (long)hist.getCount());
+		assertEquals(55, (long)hist.getTotal());
+		assertEquals(11, (long)hist.getAvg());
+	}
 }
