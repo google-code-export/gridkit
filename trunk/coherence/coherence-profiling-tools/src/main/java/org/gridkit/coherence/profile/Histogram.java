@@ -98,7 +98,7 @@ public class Histogram implements Sampler, StatValue, Cloneable, Serializable {
 		}
 		
 		if (value > actualMax*scale) {
-			actualMax = value/scale;
+			actualMax = ((double)value)/scale;
 		}
 	}
 
