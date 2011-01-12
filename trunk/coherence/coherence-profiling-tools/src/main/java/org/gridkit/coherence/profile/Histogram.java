@@ -16,6 +16,7 @@ public class Histogram implements Sampler, StatValue, Cloneable, Serializable {
 
 	long[] totalCountBuckets;
 	double[] totalSumBuckets;
+	double actualMax;
 
 	transient double count;
 	transient double total;
@@ -40,8 +41,9 @@ public class Histogram implements Sampler, StatValue, Cloneable, Serializable {
 	public Histogram clone() {
         try {
             Histogram that = (Histogram) super.clone();
-            that.totalCountBuckets = that.totalCountBuckets.clone();
-            that.totalSumBuckets = that.totalSumBuckets.clone();            
+            that.totalCountBuckets = totalCountBuckets.clone();
+            that.totalSumBuckets = totalSumBuckets.clone();     
+            that.actualMax = actualMax;
             return that;
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
@@ -94,6 +96,10 @@ public class Histogram implements Sampler, StatValue, Cloneable, Serializable {
 		catch(ArrayIndexOutOfBoundsException e) {
 		    new String();
 		}
+		
+		if (value > actualMax*scale) {
+			actualMax = value/scale;
+		}
 	}
 
 	public void addHistogram(Histogram histogram) {
@@ -108,6 +114,10 @@ public class Histogram implements Sampler, StatValue, Cloneable, Serializable {
 	    for(int i = 0; i != totalSumBuckets.length; ++i) {
 	        totalSumBuckets[i] += histogram.totalSumBuckets[i];
 	    }
+	    
+	    if (histogram.actualMax > actualMax) {
+			actualMax = histogram.actualMax;
+		}
 	}
 	
 	private void check(String field, Object o1, Object o2) {
@@ -130,6 +140,10 @@ public class Histogram implements Sampler, StatValue, Cloneable, Serializable {
 
 	public double getStdDev() {
 		return stdDev;
+	}
+	
+	public double getMax() {
+		return actualMax;
 	}
 
 	public void updateStats()
