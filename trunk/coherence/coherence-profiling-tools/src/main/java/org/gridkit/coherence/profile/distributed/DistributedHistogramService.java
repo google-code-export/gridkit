@@ -87,12 +87,13 @@ public class DistributedHistogramService implements HistogramService {
         if (existing != null) {
             hist.addHistogram(existing);
         }
-        else {
-            localCounters.put(name, existing = hist);
-        }
+        localCounters.put(name, hist);
         
-        AsyncSampler sampler = new AsyncSampler();
-        samplers.put(name, sampler);
+        AsyncSampler sampler = samplers.get(name);
+        if (sampler == null) {
+        	sampler = new AsyncSampler();
+        	samplers.put(name, sampler);
+        }
         
         return sampler;
     }
