@@ -82,12 +82,11 @@ public class DistributedHistogramService implements HistogramService {
 
     @Override
     public synchronized Sampler defineSampler(String name, long scale, long min, long max, int size) {
-        Histogram hist = new Histogram(scale, min, max, size);
         Histogram existing = localCounters.get(name);
-        if (existing != null) {
-            hist.addHistogram(existing);
+        if (existing == null) {
+        	Histogram hist = new Histogram(scale, min, max, size);
+            localCounters.put(name, hist);
         }
-        localCounters.put(name, hist);
         
         AsyncSampler sampler = samplers.get(name);
         if (sampler == null) {
