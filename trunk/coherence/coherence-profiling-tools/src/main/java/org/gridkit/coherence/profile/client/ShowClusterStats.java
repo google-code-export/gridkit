@@ -105,26 +105,4 @@ public class ShowClusterStats {
             setResult(JvmId.JVM_ID);
         }
     }
-
-    public static class StatsReset extends AbstractInvocable {
-        
-        private static final long serialVersionUID = 20090725L;
-        
-        private String pattern;
-        
-        protected StatsReset() {
-            // for serialization
-        }
-
-        public StatsReset(String pattern) {
-            this.pattern = pattern;
-        }
-        
-        
-        @Override
-        public void run() {
-            ClusterInfoService.getInstance().getHistogramService().resetAll(pattern);
-            setResult(JvmId.JVM_ID);
-        }
-    }
 }
