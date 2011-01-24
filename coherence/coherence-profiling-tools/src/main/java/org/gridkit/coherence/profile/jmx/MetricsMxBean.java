@@ -10,5 +10,14 @@ import java.util.Map;
  */
 @MXBean
 public interface MetricsMxBean {
+	
     public Map<String, StatValue> getMetricStats();
+    
+    public void resetByRegExPattern(String regexPattern);
+    
+    public void resetMetric(String name);
+    
+    public void enableProfiling();
+    
+    public void disableProfiling();
 }
