@@ -32,7 +32,7 @@ public class MetricsProvider implements MetricsMxBean {
     }
     
     @Override
-    public void resetMetric(String name) {
+    public void resetMetricByName(String name) {
     	ClusterInfoService.getInstance().getHistogramService().resetValue(name);
     }
     

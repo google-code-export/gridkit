@@ -15,7 +15,7 @@ public interface MetricsMxBean {
     
     public void resetByRegExPattern(String regexPattern);
     
-    public void resetMetric(String name);
+    public void resetMetricByName(String name);
     
     public void enableProfiling();
     
