@@ -55,6 +55,7 @@ public class Histogram implements Sampler, StatValue, Cloneable, Serializable {
 	        totalCountBuckets[i] = 0;
 	        totalSumBuckets[i] = 0;
 	    }
+	    actualMax = 0;
 	}
 	
 	public Histogram invert() {
