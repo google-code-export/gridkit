@@ -60,4 +60,16 @@ public class HistogramTest {
 		assertEquals(55, (long)hist.getTotal());
 		assertEquals(11, (long)hist.getAvg());
 	}
+	
+	@Test
+	public void testReset() {
+		Histogram hist = new Histogram(1, 1, 100, 10);
+		hist.addSample(11);
+		hist.addSample(9);
+		
+		assertEquals(11, (long)hist.getMax());
+		
+		hist.reset();
+		assertEquals(0, (long)hist.getMax());
+	}
 }
