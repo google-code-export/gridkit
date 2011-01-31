@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<attributes>
+	<attribute>
+		<id>0</id>
+		<name>date</name>
+		<type>java.util.Date</type>
+		<description>date description</description>
+	</attribute>
+	<attribute>
+		<id>1</id>
+		<name>name</name>
+		<type>java.lang.String</type>
+		<description>name description</description>
+	</attribute>
+</attributes>

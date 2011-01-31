@@ -1,0 +1,77 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.griddynamics.skeleton</groupId>
+	<artifactId>app-skeleton</artifactId>
+	<version>0.0.1</version>
+	
+	<properties>
+		<project.build.xmlDirectory>src/main/xml</project.build.xmlDirectory>
+		<attributes.dictionary.folder>com/griddynamics/skeleton/dictionary</attributes.dictionary.folder>
+	</properties>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>xml-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>generate-java-dictionary</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>transform</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<transformationSets>
+						<transformationSet>
+							<dir>${project.build.xmlDirectory}/attributes-dictionary</dir>
+							<includes><include>attributes-dictionary.xml</include></includes>
+							<stylesheet>${project.build.xmlDirectory}/attributes-dictionary/names-transformation.xslt</stylesheet>
+							
+							<parameters>
+								<parameter><name>package</name><value>${attributes.dictionary.folder}</value></parameter>
+							</parameters>
+							
+							<outputDir>${project.build.sourceDirectory}/${attributes.dictionary.folder}</outputDir>
+							<fileMappers>
+								<fileMapper implementation="org.codehaus.plexus.components.io.filemappers.RegExpFileMapper">
+									<pattern>^(.*)\.xml$</pattern>
+									<replacement>Names.java</replacement>
+								</fileMapper>
+							</fileMappers>
+						</transformationSet>
+					</transformationSets>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>net.sf.saxon</groupId>
+						<artifactId>saxon</artifactId>
+						<version>8.7</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>com.googlecode.maven-java-formatter-plugin</groupId>
+				<artifactId>maven-java-formatter-plugin</artifactId>
+				<version>0.2.0</version>
+				<executions>
+					<execution>
+						<id>format-java-dictionary</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>format</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<directories>
+						<param>${project.build.sourceDirectory}/${attributes.dictionary.folder}</param>
+					</directories>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
