@@ -178,4 +178,35 @@ public class Histogram implements Sampler, StatValue, Cloneable, Serializable {
 
 		this.stdDev = Math.sqrt(dTotalVar / dCount);
 	}
+	
+	@Override
+	public double getApproximatePercentile95() {
+		return approximatePercentile(0.95);
+	}
+	
+	@Override
+	public double getApproximatePercentile99() {
+		return approximatePercentile(0.99);
+	}
+	
+	@Override
+	public double getApproximatePercentile999() {
+		return approximatePercentile(0.999);
+	}
+	
+	public double approximatePercentile(double percentile) {
+		double total = 0;
+		for(int i = 0; i != totalCountBuckets.length; ++i)
+			total += totalCountBuckets[i];
+		
+		double count = 0;
+		for(int i = 0; i != totalCountBuckets.length; ++i) {
+			count += totalCountBuckets[i];
+			if (count/total > percentile) {
+				return lowLimit + i*step;
+			}
+		}
+		
+		return lowLimit + size*step;
+	}
 }

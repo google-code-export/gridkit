@@ -78,36 +78,65 @@ public class MetricsProvider implements MetricsMxBean {
         private double stdDev;
         private double max;
 
+		private double percentile95;
+		private double percentile99;
+		private double percentile999;
+
         public MetricStats() {
         }
 
-        @ConstructorProperties({"count", "avg", "total", "stdDev", "max"})
-        public MetricStats(double count, double avg, double total, double stdDev, double max) {
+        @ConstructorProperties({"count", "avg", "total", "stdDev", "max", "percentile95", "percentile99", "percentile999"})
+        public MetricStats(double count, double avg, double total, double stdDev, double max,
+        		double percentile95, double percentile99, double percentile999)
+        {
             this.count = count;
             this.avg = avg;
             this.total = total;
             this.stdDev = stdDev;
             this.max = max;
+            this.percentile95 = percentile95;
+            this.percentile99 = percentile99;
+            this.percentile999 = percentile999;
         }
 
+        @Override
         public double getCount() {
             return count;
         }
 
+        @Override
         public double getAvg() {
             return avg;
         }
 
+        @Override
         public double getTotal() {
             return total;
         }
 
+        @Override
         public double getStdDev() {
             return stdDev;
         }
         
+        @Override
         public double getMax() {
         	return max;
+        }
+        
+        @Override
+        public double getApproximatePercentile95() {
+        	return percentile95;
+        }
+        
+        @Override
+        public double getApproximatePercentile99() {
+        	return percentile99;
+        }
+        
+        @Override
+        public double getApproximatePercentile999() {
+        	return percentile999;
         }
     }
 }

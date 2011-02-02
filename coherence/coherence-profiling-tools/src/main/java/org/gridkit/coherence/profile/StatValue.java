@@ -17,5 +17,10 @@ public interface StatValue {
     public double getStdDev();
     
     public double getMax();
-
+    
+    public double getApproximatePercentile95();
+    
+    public double getApproximatePercentile99();
+    
+    public double getApproximatePercentile999();
 }
