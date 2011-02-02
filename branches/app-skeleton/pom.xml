@@ -14,37 +14,28 @@
 		<plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>xml-maven-plugin</artifactId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.2</version>
 				<executions>
 					<execution>
 						<id>generate-java-dictionary</id>
 						<phase>process-resources</phase>
 						<goals>
-							<goal>transform</goal>
+							<goal>java</goal>
 						</goals>
+						<configuration>
+							<includeProjectDependencies>false</includeProjectDependencies>
+							<includePluginDependencies>true</includePluginDependencies>
+							<mainClass>net.sf.saxon.Transform</mainClass>
+								<arguments>
+									<argument>${project.build.xmlDirectory}/attributes-dictionary/attributes-dictionary.xml</argument>
+									<argument>${project.build.xmlDirectory}/attributes-dictionary/names-transformation.xslt</argument>
+									<argument>sourceFolder=${project.build.sourceDirectory}</argument>
+									<argument>dictionaryFolder=${attributes.dictionary.folder}</argument>
+								</arguments>
+						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<transformationSets>
-						<transformationSet>
-							<dir>${project.build.xmlDirectory}/attributes-dictionary</dir>
-							<includes><include>attributes-dictionary.xml</include></includes>
-							<stylesheet>${project.build.xmlDirectory}/attributes-dictionary/names-transformation.xslt</stylesheet>
-							
-							<parameters>
-								<parameter><name>package</name><value>${attributes.dictionary.folder}</value></parameter>
-							</parameters>
-							
-							<outputDir>${project.build.sourceDirectory}/${attributes.dictionary.folder}</outputDir>
-							<fileMappers>
-								<fileMapper implementation="org.codehaus.plexus.components.io.filemappers.RegExpFileMapper">
-									<pattern>^(.*)\.xml$</pattern>
-									<replacement>Names.java</replacement>
-								</fileMapper>
-							</fileMappers>
-						</transformationSet>
-					</transformationSets>
-				</configuration>
 				<dependencies>
 					<dependency>
 						<groupId>net.sf.saxon</groupId>
@@ -53,6 +44,7 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+
 			<plugin>
 				<groupId>com.googlecode.maven-java-formatter-plugin</groupId>
 				<artifactId>maven-java-formatter-plugin</artifactId>
@@ -70,6 +62,15 @@
 					<directories>
 						<param>${project.build.sourceDirectory}/${attributes.dictionary.folder}</param>
 					</directories>
+				</configuration>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
 				</configuration>
 			</plugin>
 		</plugins>

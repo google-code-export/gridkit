@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <attributes>
-	<attribute>
-		<id>0</id>
-		<name>date</name>
+	<attribute id="0">
+		<name>datetime.Date.startDate</name>
 		<type>java.util.Date</type>
-		<description>date description</description>
+		<description>startDate description</description>
 	</attribute>
-	<attribute>
-		<id>1</id>
-		<name>name</name>
-		<type>java.lang.String</type>
-		<description>name description</description>
+
+	<attribute id="1">
+		<name>datetime.Date.finishDate</name>
+		<type>java.util.Date</type>
+		<description>finishDate description</description>
+	</attribute>
+	
+	<attribute id="2">
+		<name>price.Price.initialPrice</name>
+		<type>java.lang.Double</type>
+		<description>initialPrice description</description>
 	</attribute>
 </attributes>
