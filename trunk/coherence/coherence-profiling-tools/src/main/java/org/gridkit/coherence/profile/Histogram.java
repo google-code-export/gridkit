@@ -207,6 +207,6 @@ public class Histogram implements Sampler, StatValue, Cloneable, Serializable {
 			}
 		}
 		
-		return lowLimit + size*step;
+		return lowLimit + totalCountBuckets.length*step;
 	}
 }
