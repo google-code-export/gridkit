@@ -72,4 +72,53 @@ public class HistogramTest {
 		hist.reset();
 		assertEquals(0, (long)hist.getMax());
 	}
+	
+	@Test
+	public void testPercentile() {
+		Histogram hist = new Histogram(1, 0, 100, 100);
+		
+		for (int i = 0; i < 99; ++i) {
+			hist.addSample(90);
+		}
+		
+		double p95 = hist.getApproximatePercentile95();
+		assertEquals(91, (int)p95);
+		double p99 = hist.getApproximatePercentile99();
+		assertEquals(91, (int)p99);
+		double p999 = hist.getApproximatePercentile999();
+		assertEquals(91, (int)p999);
+		
+		for (int i = 0; i < 5; ++i) {
+			hist.addSample(99);
+		}
+		
+		p95 = hist.getApproximatePercentile95();
+		assertEquals(91, (int)p95);
+		p99 = hist.getApproximatePercentile99();
+		assertEquals(100, (int)p99);
+		p999 = hist.getApproximatePercentile999();
+		assertEquals(100, (int)p999);
+		
+		for (int i = 0; i < 5; ++i) {
+			hist.addSample(99);
+		}
+		
+		p95 = hist.getApproximatePercentile95();
+		assertEquals(100, (int)p95);
+		p99 = hist.getApproximatePercentile99();
+		assertEquals(100, (int)p99);
+		p999 = hist.getApproximatePercentile999();
+		assertEquals(100, (int)p999);
+		
+		for (int i = 0; i < 100000; ++i) {
+			hist.addSample(1);
+		}
+		
+		p95 = hist.getApproximatePercentile95();
+		assertEquals(2, (int)p95);
+		p99 = hist.getApproximatePercentile99();
+		assertEquals(2, (int)p99);
+		p999 = hist.getApproximatePercentile999();
+		assertEquals(91, (int)p999);
+	}
 }
