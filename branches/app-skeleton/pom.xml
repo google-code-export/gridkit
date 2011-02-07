@@ -7,7 +7,7 @@
 	
 	<properties>
 		<project.build.xmlDirectory>src/main/xml</project.build.xmlDirectory>
-		<attributes.dictionary.folder>com/griddynamics/skeleton/dictionary</attributes.dictionary.folder>
+		<attribute.dictionary.folder>com/griddynamics/skeleton/attribute/dictionary</attribute.dictionary.folder>
 	</properties>
 	
 	<build>
@@ -28,10 +28,10 @@
 							<includePluginDependencies>true</includePluginDependencies>
 							<mainClass>net.sf.saxon.Transform</mainClass>
 								<arguments>
-									<argument>${project.build.xmlDirectory}/attributes-dictionary/attributes-dictionary.xml</argument>
-									<argument>${project.build.xmlDirectory}/attributes-dictionary/names-transformation.xslt</argument>
+									<argument>${project.build.xmlDirectory}/attribute/dictionary/complete-dictionary.xml</argument>
+									<argument>${project.build.xmlDirectory}/attribute/transformation/complete-transformation.xslt</argument>
 									<argument>sourceFolder=${project.build.sourceDirectory}</argument>
-									<argument>dictionaryFolder=${attributes.dictionary.folder}</argument>
+									<argument>dictionaryFolder=${attribute.dictionary.folder}</argument>
 								</arguments>
 						</configuration>
 					</execution>
@@ -56,13 +56,14 @@
 						<goals>
 							<goal>format</goal>
 						</goals>
+						<configuration>
+							<configFile>${project.build.xmlDirectory}/attribute/transformation/eclipse-formatter-config.xml</configFile>
+							<directories>
+								<param>${project.build.sourceDirectory}/${attribute.dictionary.folder}</param>
+							</directories>
+						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<directories>
-						<param>${project.build.sourceDirectory}/${attributes.dictionary.folder}</param>
-					</directories>
-				</configuration>
 			</plugin>
 			
 			<plugin>
