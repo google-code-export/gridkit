@@ -1,19 +1,39 @@
 package com.griddynamics.skeleton.attribute;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-public class AttributeKeyRegistry {
-	private static final AttributeKeyRegistry instance = new AttributeKeyRegistry(new ConcurrentHashMap<Short, AttributeKey<?>>());
+public final class AttributeKeyRegistry {
+	private static final AttributeKeyRegistry instance = new AttributeKeyRegistry();
 	
-	private Map<Short, AttributeKey<?>> registry;
+	private AttributeKeyRegistry() {}
 	
-	private AttributeKeyRegistry(Map<Short, AttributeKey<?>> registry) {
-		this.registry = registry;
+	public static AttributeKeyRegistry getInstance() {
+		return instance;
+	}
+	
+	private ConcurrentMap<String, AttributeKey<?>> registryByString = new ConcurrentHashMap<String, AttributeKey<?>>();
+	private ConcurrentMap<Integer, AttributeKey<?>> registryByInteger = new ConcurrentHashMap<Integer, AttributeKey<?>>();
+	
+	public void registerAttributeKey(String name, AttributeKey<?> attributeKey) {
+		AttributeKey<?> pastAttribute = registryByString.putIfAbsent(name, attributeKey);
+		
+		if (pastAttribute != null)
+			throw new RuntimeException("already registered name");
+		
+		pastAttribute = registryByInteger.putIfAbsent(attributeKey.getId(), attributeKey);
+		
+		if (pastAttribute != null)
+			throw new RuntimeException("already registered id");
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T> AttributeKey<T> getAttributeKey(short id) {
-		return (AttributeKey<T>)registry.get(id);
+	public <T> AttributeKey<T> getAttributeKey(String name) {
+		return (AttributeKey<T>) registryByString.get(name);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> AttributeKey<T> getAttributeKey(int id) {
+		return (AttributeKey<T>) registryByInteger.get(id);
 	}
 }

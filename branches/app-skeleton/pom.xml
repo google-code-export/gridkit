@@ -32,6 +32,8 @@
 									<argument>${project.build.xmlDirectory}/attribute/transformation/complete-transformation.xslt</argument>
 									<argument>sourceFolder=${project.build.sourceDirectory}</argument>
 									<argument>dictionaryFolder=${attribute.dictionary.folder}</argument>
+									<argument>attributeKeyClass=com.griddynamics.skeleton.attribute.AttributeKey</argument>
+									<argument>attributeKeyRegistryClass=com.griddynamics.skeleton.attribute.AttributeKeyRegistry</argument>
 								</arguments>
 						</configuration>
 					</execution>
