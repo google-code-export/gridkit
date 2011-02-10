@@ -5,7 +5,7 @@ import java.util.Map;
 import org.apteka.insurance.attribute.annotation.AttrToDict;
 
 public interface Accumulator {
-	@AttrToDict
+	@AttrToDict("hello")
 	Map<String, Integer> getDrugLimits();
 	
 	@AttrToDict
