@@ -33,6 +33,7 @@
 		<module>attribute</module>
 		<module>attribute-annotation</module>
 		<module>dictionary</module>
+		<module>dictionary-generator</module>
 		<module>service</module>
 		<module>model</module>
 		<module>rule</module>
