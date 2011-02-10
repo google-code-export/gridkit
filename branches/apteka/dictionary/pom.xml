@@ -14,6 +14,8 @@
 	</parent>
 	
 	<properties>
+		<project.build.xmlDirectory>${basedir}/src/main/xml</project.build.xmlDirectory>
+		
 		<attribute.dictionary.folder>org/apteka/insurance/dictionary</attribute.dictionary.folder>
 	</properties>
 	

@@ -12,4 +12,29 @@
 		<version>0.0.1</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
+	
+	<dependencies>
+		<dependency>
+			<groupId>org.apteka.insurance</groupId>
+			<artifactId>attribute-annotation</artifactId>
+		</dependency>
+		
+		<dependency>
+		    <groupId>commons-beanutils</groupId>
+		    <artifactId>commons-beanutils</artifactId>
+		    <version>1.8.3</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.0.1</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 </project>
