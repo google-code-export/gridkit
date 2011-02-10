@@ -20,9 +20,15 @@
 		
 		<xsl:for-each select="$classes">
 			<xsl:variable name="currentClass" select="current()"/>
-			
+
 			<xsl:variable name="class" select="fn:concat($dictionaryPackage, '.', $currentClass)"/>
 			<xsl:variable name="outputFile" select="fn:concat('file:/', fn:replace($sourceFolder, '\\', '/'), '/', fn:replace($class, '\.', '/') , '.java')"></xsl:variable>
+		
+			<xsl:value-of select="$dictionaryPackage"/>
+			<xsl:value-of select="'|'"/>
+			<xsl:value-of select="$currentClass"/>
+			<xsl:value-of select="'|'"/>
+			<xsl:value-of select="$class"/>
 		
 			<xsl:message terminate="no"><xsl:value-of select="fn:concat('Writing to ', $outputFile)"/></xsl:message>
 		
@@ -48,13 +54,13 @@
 				
 				<xsl:value-of select="'public static final class Text {'"/>
 					<xsl:for-each select="$currentAttributes">
-						<xsl:value-of select="fn:concat('public static final String ', af:lastName(name), ' = &quot;', af:lastName(name), '&quot;;')"/>
+						<xsl:value-of select="fn:concat('public static final String ', af:lastName(name), ' = &quot;', name, '&quot;;')"/>
 					</xsl:for-each>
 				<xsl:value-of select="'}&#xA;'"/>
 				
 				<xsl:value-of select="'static {'"/>
 					<xsl:for-each select="$currentAttributes">
-						<xsl:value-of select="fn:concat('AttrKeyRegistry.getInstance().registerAttrKey(&quot;', af:lastName(name), '&quot;, ', af:lastName(name), ');')"/>
+						<xsl:value-of select="fn:concat('AttrKeyRegistry.getInstance().registerAttrKey(&quot;', name, '&quot;, ', af:lastName(name), ');')"/>
 					</xsl:for-each>
 				<xsl:value-of select="'}&#xA;'"/>
 				

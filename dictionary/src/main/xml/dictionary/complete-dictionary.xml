@@ -1,20 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <attributes>
 	<attribute id="0">
-		<name>datetime.Date.startDate</name>
-		<type>java.util.Date</type>
-		<description>startDate description</description>
-	</attribute>
-
-	<attribute id="1">
-		<name>datetime.Date.finishDate</name>
-		<type>java.util.Date</type>
-		<description>finishDate description</description>
-	</attribute>
-	
-	<attribute id="2">
-		<name>price.Price.initialPrice</name>
+		<name>Accumulator.discretionValue</name>
 		<type>Double</type>
-		<description>initialPrice description</description>
+	</attribute>
+	<attribute id="1">
+		<name>Accumulator.drugLimits</name>
+		<type>java.util.Map</type>
+		<description>hello</description>
+	</attribute>
+	<attribute id="2">
+		<name>Drug.name</name>
+		<type>String</type>
+	</attribute>
+	<attribute id="3">
+		<name>Drug.price</name>
+		<type>Double</type>
+	</attribute>
+	<attribute id="4">
+		<name>Patient.clientName</name>
+		<type>String</type>
+	</attribute>
+	<attribute id="5">
+		<name>Patient.name</name>
+		<type>String</type>
+	</attribute>
+	<attribute id="6">
+		<name>Benefit.discretionValue</name>
+		<type>Double</type>
+	</attribute>
+	<attribute id="7">
+		<name>Benefit.drugLimits</name>
+		<type>java.util.Map</type>
+	</attribute>
+	<attribute id="8">
+		<name>Client.name</name>
+		<type>String</type>
 	</attribute>
 </attributes>
