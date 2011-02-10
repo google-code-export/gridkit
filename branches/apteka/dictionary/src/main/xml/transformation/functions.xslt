@@ -25,7 +25,15 @@
 	<xsl:function name="af:fullClass">
 		<xsl:param name="name"/>
 		<xsl:variable name="nameSeq" select="fn:tokenize($name, '\.')"/>
-		<xsl:value-of select="fn:concat(af:package($name), '.', af:class($name))"/>
+
+		<xsl:choose>
+			<xsl:when test="fn:string-length(af:package($name)) > 0">
+				<xsl:value-of select="fn:concat(af:package($name), '.', af:class($name))"/>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="af:class($name)"/>
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:function>
 
 	<xsl:function name="af:firstName">
