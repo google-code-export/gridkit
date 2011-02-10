@@ -16,7 +16,7 @@ public class AttrKey<T> implements Serializable {
 	}
 	
 	public AttrKey(short id, Class<T> clazz) {
-		this(id, clazz, null);
+		this(id, clazz, "");
 	}
 
 	public int getId() {

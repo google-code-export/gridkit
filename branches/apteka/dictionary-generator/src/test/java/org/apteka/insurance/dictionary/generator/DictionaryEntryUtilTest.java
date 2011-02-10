@@ -20,6 +20,6 @@ public class DictionaryEntryUtilTest {
 	
 	@Test
 	public void describeTest() {
-		System.out.println(DictionaryEntryUtil.toXML(DictionaryEntryUtil.describe(TestInterface.class, 0, "org.apteka.insurance.dictionary.generator").get(0)));
+		//System.out.println(DictionaryEntryUtil.toXML(DictionaryEntryUtil.describe(TestInterface.class, 0, "org.apteka.insurance.dictionary.generator").get(0)));
 	}
 }
