@@ -1,0 +1,12 @@
+package org.apteka.insurance.demo.rules
+
+import java.util.Map
+
+global org.apteka.insurance.demo.cache.CacheService cacheService;
+
+rule "simple rule"
+when
+	m : Map()
+then
+	System.out.println("map inside: " + m);
+end
