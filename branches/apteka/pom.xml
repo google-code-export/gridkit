@@ -50,6 +50,12 @@
 
 			<dependency>
 				<groupId>org.apteka.insurance</groupId>
+				<artifactId>attribute-annotation</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apteka.insurance</groupId>
 				<artifactId>dictionary</artifactId>
 				<version>${project.version}</version>
 			</dependency>
