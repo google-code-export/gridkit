@@ -1,6 +1,6 @@
 package org.apteka.insurance.dictionary.generator;
 
-import org.apteka.insurance.attribute.annotation.AttrToDict;
+import org.apteka.insurance.dictionary.generator.annotation.AttrToDict;
 import org.junit.Test;
 
 public class DictionaryEntryUtilTest {
