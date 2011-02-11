@@ -47,4 +47,16 @@
 		<xsl:variable name="nameSeq" select="fn:tokenize($name, '\.')"/>
 		<xsl:value-of select="fn:subsequence($nameSeq, fn:count($nameSeq))"/>
 	</xsl:function>
+	
+	<xsl:function name="af:nonGenericClassName">
+		<xsl:param name="name"/>
+		<xsl:choose>
+			<xsl:when test="fn:contains($name, '&lt;')">
+				<xsl:value-of select="fn:substring-before($name, '&lt;')"/>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="$name"/>
+			</xsl:otherwise>
+		</xsl:choose>
+	</xsl:function>
 </xsl:stylesheet>
