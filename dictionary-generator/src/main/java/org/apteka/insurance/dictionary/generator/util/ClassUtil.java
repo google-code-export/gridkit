@@ -11,8 +11,8 @@ import java.util.Map;
 import static java.lang.String.format;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apteka.insurance.attribute.annotation.AttrToDict;
 import org.apteka.insurance.dictionary.generator.DictionaryEntry;
+import org.apteka.insurance.dictionary.generator.annotation.AttrToDict;
 
 public class ClassUtil {
 	private static final Map<Class<?>, Class<?>> classTransform = new HashMap<Class<?>, Class<?>>();
