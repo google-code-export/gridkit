@@ -24,21 +24,21 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apteka.insurance.dictionary.generator.util.ClassUtil;
 import org.apteka.insurance.dictionary.generator.util.XmlUtil;
 
-public class DictionaryGenerator {
+public class XmlDictionaryGenerator {
 	public static void main(String[] args) throws ClassNotFoundException, IOException, ValidityException, ParsingException {
-		//String targetFolder = args[0];
-		//String packagePrefix = args[1];
-		//String targetFile = args[2];
+		String targetFolder = args[0];
+		String packagePrefix = args[1];
+		String targetFile = args[2];
 
-		String targetFolder = "../model/target/classes";
-		String packagePrefix = "org.apteka.insurance.model";
-		String targetFile = "target/dictionary.xml";
+		//String targetFolder = "../model/target/classes";
+		//String packagePrefix = "org.apteka.insurance.model";
+		//String targetFile = "target/dictionary.xml";
 		
 		Collection<File> files = listClasses(targetFolder);
 		
 		Collection<String> classes = getClasses(files, packagePrefix);
 		
-		ClassLoader classLoader = new URLClassLoader(getFileURLs(targetFolder), DictionaryGenerator.class.getClassLoader());
+		ClassLoader classLoader = new URLClassLoader(getFileURLs(targetFolder), XmlDictionaryGenerator.class.getClassLoader());
 		
 		List<DictionaryEntry> entries = new ArrayList<DictionaryEntry>();
 		for (String clazz : classes)
