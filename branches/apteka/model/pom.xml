@@ -13,15 +13,22 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	
+	<properties>
+		<project.build.xmlDirectory>${basedir}/src/main/xml</project.build.xmlDirectory>
+		
+		<attribute.dictionary.folder>org/apteka/insurance/dictionary</attribute.dictionary.folder>
+	</properties>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.apteka.insurance</groupId>
-			<artifactId>attribute-annotation</artifactId>
+			<artifactId>attribute</artifactId>
 		</dependency>
 		
 		<dependency>
 			<groupId>org.apteka.insurance</groupId>
-			<artifactId>dictionary</artifactId>
+			<artifactId>dictionary-generator</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 	
@@ -41,12 +48,11 @@
 						<configuration>
 							<includeProjectDependencies>false</includeProjectDependencies>
 							<includePluginDependencies>true</includePluginDependencies>
-							<mainClass>org.apteka.insurance.dictionary.generator.DictionaryGenerator</mainClass>
+							<mainClass>org.apteka.insurance.dictionary.generator.XmlDictionaryGenerator</mainClass>
 								<arguments>
 									<argument>${basedir}/target/classes</argument>
 									<argument>org.apteka.insurance.model</argument>
-									<argument>${basedir}/target/dictionary.xml</argument>
-									<argument>0</argument>
+									<argument>${basedir}/src/main/resources/xml/attribute-dictionary.xml</argument>
 								</arguments>
 						</configuration>
 					</execution>
