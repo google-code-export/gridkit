@@ -1,7 +1,7 @@
 package org.apteka.insurance.dictionary.generator;
 
-import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -12,18 +12,28 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import nu.xom.Builder;
+import nu.xom.Document;
+import nu.xom.ParsingException;
+import nu.xom.Serializer;
+import nu.xom.ValidityException;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
-import org.apache.commons.io.output.FileWriterWithEncoding;
+import org.apteka.insurance.dictionary.generator.util.ClassUtil;
+import org.apteka.insurance.dictionary.generator.util.XmlUtil;
 
 public class DictionaryGenerator {
-	public static void main(String[] args) throws ClassNotFoundException, IOException {
-		String targetFolder = args[0];
-		String packagePrefix = args[1];
-		String targetFile = args[2];
-		int startId = Integer.valueOf(args[3]);
+	public static void main(String[] args) throws ClassNotFoundException, IOException, ValidityException, ParsingException {
+		//String targetFolder = args[0];
+		//String packagePrefix = args[1];
+		//String targetFile = args[2];
 
+		String targetFolder = "../model/target/classes";
+		String packagePrefix = "org.apteka.insurance.model";
+		String targetFile = "target/dictionary.xml";
+		
 		Collection<File> files = listClasses(targetFolder);
 		
 		Collection<String> classes = getClasses(files, packagePrefix);
@@ -31,29 +41,21 @@ public class DictionaryGenerator {
 		ClassLoader classLoader = new URLClassLoader(getFileURLs(targetFolder), DictionaryGenerator.class.getClassLoader());
 		
 		List<DictionaryEntry> entries = new ArrayList<DictionaryEntry>();
-		for (String clazz : classes) {
-			int initSize = entries.size();
-			entries.addAll(DictionaryEntryUtil.describe(classLoader.loadClass(clazz), startId, packagePrefix));
-			startId += entries.size() - initSize;
-		}
+		for (String clazz : classes)
+			entries.addAll(ClassUtil.describe(classLoader.loadClass(clazz), packagePrefix));
 		
-		writeDictionary(targetFile, entries);
-	}
-	
-	private static void writeDictionary(String targetFile, List<DictionaryEntry> entries) throws IOException {
-		FileWriterWithEncoding fstream = new FileWriterWithEncoding(targetFile, "UTF-8");
-		BufferedWriter out = new BufferedWriter(fstream);
-			
-		out.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		out.write("<attributes>\n");
+		Builder parser = new Builder();
+		Document dictionary = parser.build(new File(targetFile));
+
+		XmlUtil.populateDocument(dictionary, entries);
 		
-		for (DictionaryEntry entry : entries) {
-			out.write(DictionaryEntryUtil.toXML(entry));
-		}
+		FileOutputStream targetOutput = new FileOutputStream(new File(targetFile));
 		
-		out.write("</attributes>\n");
-			
-		out.close();
+		Serializer serializer = new Serializer(targetOutput, "UTF-8");
+		serializer.setIndent(4);
+		serializer.write(dictionary);
+		
+		targetOutput.close();
 	}
 	
 	private static Collection<String> getClasses(Collection<File> files, String packagePrefix) throws MalformedURLException {
@@ -83,8 +85,3 @@ public class DictionaryGenerator {
 		return result;
 	}
 }
-
-//String targetFolder = "target/classes";
-//String packagePrefix = "org.apteka.insurance.dictionary";
-//String targetFile = "target/dictionary.xml";
-//int startId = 0;

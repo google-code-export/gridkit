@@ -7,7 +7,7 @@ public class DictionaryEntry implements Serializable {
 	
 	private int id;
 	private String name;
-	private Class<?> type;
+	private String type;
 	private String description;
 	
 	public int getId() {
@@ -26,11 +26,11 @@ public class DictionaryEntry implements Serializable {
 		this.name = name;
 	}
 	
-	public Class<?> getType() {
+	public String getType() {
 		return type;
 	}
 	
-	public void setType(Class<?> type) {
+	public void setType(String type) {
 		this.type = type;
 	}
 	
@@ -42,6 +42,7 @@ public class DictionaryEntry implements Serializable {
 		this.description = description;
 	}
 
+	@Override
 	public String toString() {
 		return "DictionaryEntry [id=" + id + ", name=" + name + ", type="
 				+ type + ", description=" + description + "]";
