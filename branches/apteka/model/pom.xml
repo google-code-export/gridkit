@@ -15,8 +15,8 @@
 	
 	<properties>
 		<project.build.xmlDirectory>${basedir}/src/main/xml</project.build.xmlDirectory>
-		
-		<attribute.dictionary.folder>org/apteka/insurance/dictionary</attribute.dictionary.folder>
+		<attribute.dictionary.folder>com/medx/dictionary</attribute.dictionary.folder>
+                <dynamic.model.root>com.medx.model</dynamic.model.root>
 	</properties>
 	
 	<dependencies>
@@ -46,7 +46,7 @@
 							<mainClass>org.apteka.insurance.dictionary.generator.XmlDictionaryGenerator</mainClass>
 								<arguments>
 									<argument>${basedir}/target/classes</argument>
-									<argument>org.apteka.insurance.model</argument>
+									<argument>${dynamic.model.root}</argument>
 									<argument>${basedir}/src/main/resources/xml/attribute-dictionary.xml</argument>
 								</arguments>
 						</configuration>
