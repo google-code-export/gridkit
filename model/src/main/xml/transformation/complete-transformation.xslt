@@ -31,13 +31,14 @@
 				<xsl:value-of select="fn:concat('import ', $attributeKeyClass, ';&#xA;&#xA;')"/>
 				<!--<xsl:value-of select="fn:concat('import ', $attributeKeyRegistryClass, ';&#xA;&#xA;')"/>-->
 				
+				<xsl:value-of select="'//Auto generated code. Do not modify.&#xA;'"/>
 				<xsl:value-of select="fn:concat('public final class ', af:lastName($class), ' { &#xA;')"/>
 
 				<xsl:variable name="currentAttributes" select="$attributes[af:fullClass(name) = $currentClass]"/>
 
 				<xsl:for-each select="$currentAttributes">
 					<xsl:variable name="genericClass" select="fn:concat('AttrKey&lt;' , type, '&gt;')"/>
-					<xsl:value-of select="fn:concat('public static final ', $genericClass, ' ', af:lastName(name), ' = new ', $genericClass, '(', @id, ',', af:nonGenericClassName(type), '.class ,&quot;', description , '&quot;);')"/>
+					<xsl:value-of select="fn:concat('public static final ', $genericClass, ' ', af:lastName(name), ' = new ', $genericClass, '(', @id, ', &quot;', name, '&quot;, ', af:nonGenericClassName(type), '.class ,&quot;', description , '&quot;);')"/>
 				</xsl:for-each>
 				
 				<xsl:value-of select="'public static final class Id {'"/>

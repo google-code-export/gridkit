@@ -81,8 +81,7 @@
 									<argument>${project.build.xmlDirectory}/transformation/complete-transformation.xslt</argument>
 									<argument>sourceFolder=${project.build.sourceDirectory}</argument>
 									<argument>dictionaryFolder=${attribute.dictionary.folder}</argument>
-									<argument>attributeKeyClass=org.apteka.insurance.attribute.AttrKey</argument>
-									<argument>attributeKeyRegistryClass=org.apteka.insurance.attribute.AttrKeyRegistry</argument>
+									<argument>attributeKeyClass=com.medx.attribute.AttrKey</argument>
 								</arguments>
 						</configuration>
 					</execution>
