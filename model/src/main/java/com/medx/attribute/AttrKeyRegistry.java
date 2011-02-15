@@ -1,4 +1,4 @@
-package org.apteka.insurance.attribute;
+package com.medx.attribute;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
