@@ -51,13 +51,14 @@ public final class StringMapProxy extends AbstractMapProxy<String> {
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public <V> V get(AttrKey<V> key) {
-		return null;
+		return (V)getAttributeValue(key.getName());
 	}
 
 	@Override
-	public <V> V set(AttrKey<V> key, V value) {
-		return null;
+	public <V> void set(AttrKey<V> key, V value) {
+		setAttributeValue(key.getName(), value);
 	}
 	
 	@Override
