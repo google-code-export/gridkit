@@ -11,7 +11,7 @@ import com.medx.metamodel.Facade;
 @Facade()
 public interface AccumulatorFrame {
 
-	//@AttrKey(com.medx.dictionary.accumulator.AccumulatorFrame.Text.accumulators)
+	@AttrKey(com.medx.dictionary.accumulator.AccumulatorFrame.Text.accumulators)
 	public Collection<Accumulator> getAccumulators();
 	
 //	@AttrKey(com.medx.dictionary.accumulator.AccumulatorFrame.Text.accumulators)
