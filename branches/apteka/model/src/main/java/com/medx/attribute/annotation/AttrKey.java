@@ -1,4 +1,4 @@
-package org.apteka.insurance.attribute.annotation;
+package com.medx.attribute.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
