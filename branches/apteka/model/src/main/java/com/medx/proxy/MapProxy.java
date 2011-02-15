@@ -2,8 +2,10 @@ package com.medx.proxy;
 
 import java.util.Map;
 
-public interface MapProxy<T> {
+public interface MapProxy {
 	<U> U cast(Class<U> clazz);
 	
-	Map<T, Object> getBackendMap();
+	Map<Integer, Object> getBackendMap();
+	
+	Map<String, Object> exportBackendMap();
 }
