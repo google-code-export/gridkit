@@ -6,42 +6,34 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
-import com.medx.attribute.AttrKeyRegistry;
+import com.medx.attribute.AttrKey;
 import com.medx.attribute.AttrMap;
-import com.medx.attribute.annotation.AttrKey;
-import com.medx.type.TypeRegistry;
-import com.medx.util.TextUtil;
+import com.medx.proxy.wrapper.ListWrapper;
+import com.medx.proxy.wrapper.Wrapper;
+import com.medx.util.CastUtil;
 
-public abstract class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap {
-	public static final int CLASSES_KEY = Integer.MIN_VALUE;
-	
-	private static final Map<String, MethodHandlerFactory> handlerFactory = new HashMap<String, MethodHandlerFactory>();
-	
-	// TODO it is possible to implement static initialization of this field
-	private static final ConcurrentMap<Method, MethodHandler> handlerRegistry = new ConcurrentHashMap<Method, MethodHandler>();
+public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap {
+	private static List<Wrapper> wrappers = new ArrayList<Wrapper>();
 	
 	static {
-		handlerFactory.put(GetMethodHandler.getPrefix(), GetMethodHandler.getFactory());
-		handlerFactory.put(SetMethodHandler.getPrefix(), SetMethodHandler.getFactory());
+		wrappers.add(new ListWrapper());
 	}
-	
-	protected static final Class<?>[] implementedInterfaces = {Map.class, MapProxy.class, AttrMap.class};
-	
-	protected final TypeRegistry typeRegistry;
-	protected final AttrKeyRegistry attrKeyRegistry;
 	
 	private final Map<Integer, Object> backendMap;
-	private final Map<Integer, Object> wrappedBackendMap = new HashMap<Integer, Object>();
+	private Map<Integer, Object> wrappedBackendMap;
 	
-	protected MapProxyImpl(Map<Integer, Object> backendMap, TypeRegistry typeRegistry, AttrKeyRegistry attrKeyRegistry) {
+	MapProxyImpl(Map<Integer, Object> backendMap) {
 		this.backendMap = backendMap;
-		this.typeRegistry = typeRegistry;
-		this.attrKeyRegistry = attrKeyRegistry;
 	}
 
+	private Map<Integer, Object> getWrappedBackendMap() {
+		if (wrappedBackendMap == null)
+			wrappedBackendMap = new HashMap<Integer, Object>();
+		
+		return wrappedBackendMap;
+	}
+	
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		if (method.getDeclaringClass() == Map.class)
@@ -50,45 +42,54 @@ public abstract class MapProxyImpl implements InvocationHandler, MapProxy, AttrM
 		if (method.getDeclaringClass() == AttrMap.class || method.getDeclaringClass() == MapProxy.class || method.getDeclaringClass() == Object.class)
 			return method.invoke(this, args);
 
-		return getMethodHandler(method).invoke(this, args);
+		return MapProxyFactory.Instance.methodHandlerRegistry.getMethodHandler(method).invoke(this, args);
 	}
 	
-	Object getAttributeValue(int id) {
-		if (wrappedBackendMap.containsKey(id))
-			return wrappedBackendMap.get(id);
+	@Override
+	public Object getAttributeValue(int attributeId) {
+		if (getWrappedBackendMap().containsKey(attributeId))
+			return getWrappedBackendMap().get(attributeId);
 		
-		return null;
+		MapProxyFactory proxyFactory = MapProxyFactory.Instance.getInstance();
+		
+		Object result = backendMap.get(attributeId);
+		
+		if (result == null)
+			return result;
+		
+		boolean cacheResult = false;
+		
+		if (proxyFactory.isWrappable(result)) {
+			result = proxyFactory.createProxy(CastUtil.<Map<Integer, Object>>cast(result));
+			cacheResult = true;
+		}
+		else
+			for (Wrapper wrapper : wrappers)
+				if (wrapper.isApplicable(result)) {
+					result = wrapper.wrap(result);
+					cacheResult = true;
+					break;
+				}
+		
+		if (cacheResult)
+			getWrappedBackendMap().put(attributeId, result);
+		
+		return result;
 	}
 	
-	void setAttributeValue(int id, Object value) {
+	@Override
+	public void setAttributeValue(int attributeId, Object value) {
 		
 	}
-	
-	private MethodHandler getMethodHandler(Method method) {
-		if (handlerRegistry.containsKey(method))
-			return handlerRegistry.get(method);
-		
-		String camelPrefix = TextUtil.getCamelPrefix(method.getName());
-		String attributeName = method.getAnnotation(AttrKey.class).value();
-		int attributeId = attrKeyRegistry.getAttrKey(attributeName).getId();
-		
-		handlerRegistry.putIfAbsent(method, handlerFactory.get(camelPrefix).createMethodHandler(attributeId));
-		
-		return handlerRegistry.get(method);
-	}
-	
-	//protected List<?> wrapList(List<?> list, ProxyFactory<T> proxyFactory) {
-	//	List<Object> result = new ArrayList<Object>(list.size());
-	//}
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public <V> V get(com.medx.attribute.AttrKey<V> key) {
+	public <V> V get(AttrKey<V> key) {
 		return (V)getAttributeValue(key.getId());
 	}
 
 	@Override
-	public <V> void set(com.medx.attribute.AttrKey<V> key, V value) {
+	public <V> void set(AttrKey<V> key, V value) {
 		setAttributeValue(key.getId(), value);
 	}
 	
@@ -100,5 +101,10 @@ public abstract class MapProxyImpl implements InvocationHandler, MapProxy, AttrM
 	@Override
 	public Map<Integer, Object> getBackendMap() {
 		return backendMap;
+	}
+
+	@Override
+	public Map<String, Object> exportBackendMap() {
+		return null;
 	}
 }
