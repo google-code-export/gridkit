@@ -8,7 +8,7 @@ import com.medx.attribute.AttrMap;
 import com.medx.proxy.handler.MethodHandlerFactory;
 import com.medx.type.TypeRegistry;
 
-public class MapProxyFactoryImpl implements InternalMapProxyFactory {
+public class MapProxyFactoryImpl implements MapProxyFactoryInternal {
 	private static final int CLASSES_KEY = Integer.MIN_VALUE;
 	
 	private static final Class<?>[] implementedInterfaces = {Map.class, MapProxy.class, AttrMap.class};
