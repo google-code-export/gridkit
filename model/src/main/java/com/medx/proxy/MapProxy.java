@@ -3,7 +3,11 @@ package com.medx.proxy;
 import java.util.Map;
 
 public interface MapProxy {
-	<U> U cast(Class<U> clazz);
+	<T> T cast(Class<T> clazz);
+	
+	Object getAttributeValue(int attributeId);
+	
+	void setAttributeValue(int attributeId, Object value);
 	
 	Map<Integer, Object> getBackendMap();
 	

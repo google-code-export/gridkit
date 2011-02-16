@@ -1,19 +1,12 @@
-package com.medx.proxy;
+package com.medx.proxy.handler;
 
 import java.util.Map;
 
-class GetMethodHandler implements MethodHandler {
+import com.medx.proxy.MapProxy;
+
+public class GetMethodHandler implements MethodHandler {
 	public static String getPrefix() {
 		return "get";
-	}
-	
-	public static MethodHandlerFactory getFactory() {
-		return new MethodHandlerFactory() {
-			@Override
-			public MethodHandler createMethodHandler(int attributeId) {
-				return new GetMethodHandler(attributeId);
-			}
-		};
 	}
 	
 	private final int attributeId;
@@ -23,7 +16,7 @@ class GetMethodHandler implements MethodHandler {
 	}
 
 	@Override
-	public Object invoke(MapProxyImpl mapProxy, Object[] args) {
+	public Object invoke(MapProxy mapProxy, Object[] args) {
 		Object attribute = mapProxy.getAttributeValue(attributeId);
 		
 		if (args.length == 0)
