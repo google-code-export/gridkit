@@ -2,26 +2,22 @@ package com.medx.proxy.wrapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import com.medx.proxy.MapProxyFactory;
 import com.medx.util.CastUtil;
 
-public class ListWrapper implements Wrapper {
-	public boolean isApplicable(Object object) {
+public class ListWrapper implements Wrapper<List<?>> {
+	public boolean isWrappable(Object object) {
 		return object != null && object.getClass().isInstance(List.class);
 	}
 	
-	public List<Object> wrap(Object list_) {
-		List<Object> list = CastUtil.<List<Object>>cast(list_);
+	public List<?> wrap(Object object, Wrapper<?> objectWrapper) {
+		List<Object> list = CastUtil.<List<Object>>cast(object);
 		
 		ArrayList<Object> result = new ArrayList<Object>(list.size());
 		
-		MapProxyFactory proxyFactory = MapProxyFactory.Instance.getInstance();
-		
 		for (Object element : list)
-			if (proxyFactory.isWrappable(element))
-				result.add(proxyFactory.createProxy(CastUtil.<Map<Integer, Object>>cast(element)));
+			if (objectWrapper.isWrappable(element))
+				result.add(objectWrapper.wrap(element, objectWrapper));
 			else
 				result.add(element);
 		

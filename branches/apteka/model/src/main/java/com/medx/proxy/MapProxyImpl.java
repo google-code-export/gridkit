@@ -13,8 +13,8 @@ import com.medx.proxy.wrapper.ListWrapper;
 import com.medx.proxy.wrapper.Wrapper;
 import com.medx.util.CastUtil;
 
-public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap {
-	private static List<Wrapper> wrappers = new ArrayList<Wrapper>();
+public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, Wrapper<Object> {
+	private static List<Wrapper<?>> wrappers = new ArrayList<Wrapper<?>>();
 	
 	static {
 		wrappers.add(new ListWrapper());
@@ -23,8 +23,11 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap {
 	private final Map<Integer, Object> backendMap;
 	private Map<Integer, Object> wrappedBackendMap;
 	
-	MapProxyImpl(Map<Integer, Object> backendMap) {
+	private final InternalMapProxyFactory mapProxyFactory;
+	
+	MapProxyImpl(Map<Integer, Object> backendMap, InternalMapProxyFactory mapProxyFactory) {
 		this.backendMap = backendMap;
+		this.mapProxyFactory = mapProxyFactory;
 	}
 
 	private Map<Integer, Object> getWrappedBackendMap() {
@@ -42,7 +45,7 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap {
 		if (method.getDeclaringClass() == AttrMap.class || method.getDeclaringClass() == MapProxy.class || method.getDeclaringClass() == Object.class)
 			return method.invoke(this, args);
 
-		return MapProxyFactory.Instance.methodHandlerRegistry.getMethodHandler(method).invoke(this, args);
+		return mapProxyFactory.getMethodHandlerFactory().getMethodHandler(method).invoke(this, args);
 	}
 	
 	@Override
@@ -50,31 +53,40 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap {
 		if (getWrappedBackendMap().containsKey(attributeId))
 			return getWrappedBackendMap().get(attributeId);
 		
-		MapProxyFactory proxyFactory = MapProxyFactory.Instance.getInstance();
+		Object attribute = backendMap.get(attributeId);
 		
-		Object result = backendMap.get(attributeId);
+		if (!isWrappable(attribute))
+			return attribute;
 		
-		if (result == null)
-			return result;
+		Object wrappedAttribute = wrap(attribute, this);
 		
-		boolean cacheResult = false;
+		getWrappedBackendMap().put(attributeId, wrappedAttribute);
 		
-		if (proxyFactory.isWrappable(result)) {
-			result = proxyFactory.createProxy(CastUtil.<Map<Integer, Object>>cast(result));
-			cacheResult = true;
-		}
-		else
-			for (Wrapper wrapper : wrappers)
-				if (wrapper.isApplicable(result)) {
-					result = wrapper.wrap(result);
-					cacheResult = true;
-					break;
-				}
+		return wrappedAttribute;
+	}
+	
+	@Override
+	public boolean isWrappable(Object object) {
+		if (mapProxyFactory.isProxiable(object))
+			return true;
 		
-		if (cacheResult)
-			getWrappedBackendMap().put(attributeId, result);
+		for (Wrapper<?> wrapper : wrappers)
+			if (wrapper.isWrappable(object))
+				return true;
 		
-		return result;
+		return false;
+	}
+
+	@Override
+	public Object wrap(Object object, Wrapper<?> objectWrapper) {
+		if (mapProxyFactory.isProxiable(object))
+			return mapProxyFactory.createMapProxy(CastUtil.<Map<Integer, Object>>cast(object));
+		
+		for (Wrapper<?> wrapper : wrappers)
+			if (wrapper.isWrappable(object))
+				return wrapper.wrap(object, objectWrapper);
+		
+		return null;
 	}
 	
 	@Override
