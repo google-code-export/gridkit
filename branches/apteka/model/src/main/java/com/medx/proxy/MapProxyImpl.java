@@ -24,9 +24,9 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, Attri
 	private final Map<Integer, Object> backendMap;
 	private Map<Integer, Object> wrappedBackendMap;
 	
-	private final InternalMapProxyFactory mapProxyFactory;
+	private final MapProxyFactoryInternal mapProxyFactory;
 	
-	MapProxyImpl(Map<Integer, Object> backendMap, InternalMapProxyFactory mapProxyFactory) {
+	MapProxyImpl(Map<Integer, Object> backendMap, MapProxyFactoryInternal mapProxyFactory) {
 		this.backendMap = backendMap;
 		this.mapProxyFactory = mapProxyFactory;
 	}
