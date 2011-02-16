@@ -8,12 +8,12 @@ import com.medx.attribute.AttrKeyRegistry;
 import com.medx.attribute.annotation.AttrKey;
 import com.medx.util.TextUtil;
 
-public class CachedMethodHandlerRegistry implements MethodHandlerRegistry {
+public class CachedMethodHandlerFactory implements MethodHandlerFactory {
 	private final ConcurrentMap<Method, MethodHandler> handlerRegistry = new ConcurrentHashMap<Method, MethodHandler>();
 	
 	private final AttrKeyRegistry attrKeyRegistry;
 
-	public CachedMethodHandlerRegistry(AttrKeyRegistry attrKeyRegistry) {
+	public CachedMethodHandlerFactory(AttrKeyRegistry attrKeyRegistry) {
 		this.attrKeyRegistry = attrKeyRegistry;
 	}
 

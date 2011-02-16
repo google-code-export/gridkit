@@ -1,7 +1,7 @@
 package com.medx.proxy.wrapper;
 
-public interface Wrapper {
-	boolean isApplicable(Object object);
+public interface Wrapper<T> {
+	boolean isWrappable(Object object);
 	
-	Object wrap(Object result);
+	T wrap(Object object, Wrapper<?> objectWrapper);
 }
