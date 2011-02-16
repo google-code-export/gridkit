@@ -9,12 +9,13 @@ import java.util.Map;
 
 import com.medx.attribute.AttrKey;
 import com.medx.attribute.AttrMap;
+import com.medx.proxy.handler.AttributeAccessor;
 import com.medx.proxy.wrapper.ListWrapper;
 import com.medx.proxy.wrapper.Wrapper;
 import com.medx.util.CastUtil;
 
-public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, Wrapper<Object> {
-	private static List<Wrapper<?>> wrappers = new ArrayList<Wrapper<?>>();
+public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, AttributeAccessor, Wrapper {
+	private static List<Wrapper> wrappers = new ArrayList<Wrapper>();
 	
 	static {
 		wrappers.add(new ListWrapper());
@@ -70,7 +71,7 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, Wrapp
 		if (mapProxyFactory.isProxiable(object))
 			return true;
 		
-		for (Wrapper<?> wrapper : wrappers)
+		for (Wrapper wrapper : wrappers)
 			if (wrapper.isWrappable(object))
 				return true;
 		
@@ -78,11 +79,11 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, Wrapp
 	}
 
 	@Override
-	public Object wrap(Object object, Wrapper<?> objectWrapper) {
+	public Object wrap(Object object, Wrapper objectWrapper) {
 		if (mapProxyFactory.isProxiable(object))
 			return mapProxyFactory.createMapProxy(CastUtil.<Map<Integer, Object>>cast(object));
 		
-		for (Wrapper<?> wrapper : wrappers)
+		for (Wrapper wrapper : wrappers)
 			if (wrapper.isWrappable(object))
 				return wrapper.wrap(object, objectWrapper);
 		
