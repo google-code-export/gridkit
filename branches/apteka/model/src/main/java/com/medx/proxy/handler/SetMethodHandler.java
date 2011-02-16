@@ -1,7 +1,5 @@
 package com.medx.proxy.handler;
 
-import com.medx.proxy.MapProxy;
-
 public class SetMethodHandler implements MethodHandler {
 	public static String getPrefix() {
 		return "set";
@@ -14,9 +12,9 @@ public class SetMethodHandler implements MethodHandler {
 	}
 	
 	@Override
-	public Object invoke(MapProxy mapProxy, Object[] args) {
+	public Object invoke(AttributeAccessor attributeAccessor, Object[] args) {
 		if (args.length == 1)
-			mapProxy.setAttributeValue(attributeId, args[0]);
+			attributeAccessor.setAttributeValue(attributeId, args[0]);
 		else
 			throw new RuntimeException("Unexpected arguments count");
 		

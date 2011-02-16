@@ -2,8 +2,6 @@ package com.medx.proxy.handler;
 
 import java.util.Map;
 
-import com.medx.proxy.MapProxy;
-
 public class GetMethodHandler implements MethodHandler {
 	public static String getPrefix() {
 		return "get";
@@ -16,8 +14,8 @@ public class GetMethodHandler implements MethodHandler {
 	}
 
 	@Override
-	public Object invoke(MapProxy mapProxy, Object[] args) {
-		Object attribute = mapProxy.getAttributeValue(attributeId);
+	public Object invoke(AttributeAccessor attributeAccessor, Object[] args) {
+		Object attribute = attributeAccessor.getAttributeValue(attributeId);
 		
 		if (args.length == 0)
 			return attribute;
