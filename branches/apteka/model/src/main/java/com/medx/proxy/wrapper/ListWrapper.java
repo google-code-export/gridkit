@@ -5,21 +5,18 @@ import java.util.List;
 
 import com.medx.util.CastUtil;
 
-public class ListWrapper implements Wrapper {
+public class ListWrapper implements CompositeWrapper {
 	public boolean isWrappable(Object object) {
-		return object != null && object.getClass().isInstance(List.class);
+		return object != null && List.class.isInstance(object);
 	}
 	
-	public List<?> wrap(Object object, Wrapper objectWrapper) {
-		List<Object> list = CastUtil.<List<Object>>cast(object);
+	public List<?> wrap(Object object, ObjectWrapper objectWrapper) {
+		List<Object> list = CastUtil.cast(object);
 		
 		ArrayList<Object> result = new ArrayList<Object>(list.size());
 		
 		for (Object element : list)
-			if (objectWrapper.isWrappable(element))
-				result.add(objectWrapper.wrap(element, objectWrapper));
-			else
-				result.add(element);
+			result.add(objectWrapper.wrap(element));
 		
 		return result;
 	}

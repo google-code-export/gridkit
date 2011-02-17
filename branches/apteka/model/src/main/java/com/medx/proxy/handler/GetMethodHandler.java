@@ -17,7 +17,7 @@ public class GetMethodHandler implements MethodHandler {
 	public Object invoke(AttributeAccessor attributeAccessor, Object[] args) {
 		Object attribute = attributeAccessor.getAttributeValue(attributeId);
 		
-		if (args.length == 0)
+		if (args == null)
 			return attribute;
 		else if (args.length == 1)
 			return ((Map<?, ?>)attribute).get(args[0]);
