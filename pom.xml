@@ -29,6 +29,7 @@
 	</repositories>
 	
 	<modules>
+		<module>framework</module>
 		<module>dictionary-generator</module>
 		<module>model</module>
 		<module>demo</module>
