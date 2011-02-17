@@ -3,39 +3,39 @@ package com.medx.proxy;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.medx.attribute.AttrKey;
 import com.medx.attribute.AttrMap;
 import com.medx.proxy.handler.AttributeAccessor;
+import com.medx.proxy.wrapper.CompositeWrapper;
 import com.medx.proxy.wrapper.ListWrapper;
-import com.medx.proxy.wrapper.Wrapper;
+import com.medx.proxy.wrapper.MapWrapper;
+import com.medx.proxy.wrapper.ObjectWrapper;
+import com.medx.proxy.wrapper.SetWrapper;
 import com.medx.util.CastUtil;
 
-public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, AttributeAccessor, Wrapper {
-	private static List<Wrapper> wrappers = new ArrayList<Wrapper>();
+public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, AttributeAccessor, ObjectWrapper {
+	private static List<CompositeWrapper> wrappers = new ArrayList<CompositeWrapper>();
 	
 	static {
 		wrappers.add(new ListWrapper());
+		wrappers.add(new MapWrapper());
+		wrappers.add(new SetWrapper());
 	}
 	
 	private final Map<Integer, Object> backendMap;
-	private Map<Integer, Object> wrappedBackendMap;
+	private final Set<Integer> wrappedAttributeIds = new TreeSet<Integer>();
 	
 	private final MapProxyFactoryInternal mapProxyFactory;
 	
 	MapProxyImpl(Map<Integer, Object> backendMap, MapProxyFactoryInternal mapProxyFactory) {
 		this.backendMap = backendMap;
 		this.mapProxyFactory = mapProxyFactory;
-	}
-
-	private Map<Integer, Object> getWrappedBackendMap() {
-		if (wrappedBackendMap == null)
-			wrappedBackendMap = new HashMap<Integer, Object>();
-		
-		return wrappedBackendMap;
 	}
 	
 	@Override
@@ -51,48 +51,31 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, Attri
 	
 	@Override
 	public Object getAttributeValue(int attributeId) {
-		if (getWrappedBackendMap().containsKey(attributeId))
-			return getWrappedBackendMap().get(attributeId);
+		if (wrappedAttributeIds.contains(attributeId))
+			return backendMap.get(attributeId);
 		
-		Object attribute = backendMap.get(attributeId);
+		Object wrappedAttribute = wrap(backendMap.get(attributeId));
+		wrappedAttributeIds.add(attributeId);
 		
-		if (!isWrappable(attribute))
-			return attribute;
-		
-		Object wrappedAttribute = wrap(attribute, this);
-		
-		getWrappedBackendMap().put(attributeId, wrappedAttribute);
-		
+		backendMap.put(attributeId, wrappedAttribute);
 		return wrappedAttribute;
-	}
-	
-	@Override
-	public boolean isWrappable(Object object) {
-		if (mapProxyFactory.isProxiable(object))
-			return true;
-		
-		for (Wrapper wrapper : wrappers)
-			if (wrapper.isWrappable(object))
-				return true;
-		
-		return false;
 	}
 
 	@Override
-	public Object wrap(Object object, Wrapper objectWrapper) {
+	public Object wrap(Object object) {
 		if (mapProxyFactory.isProxiable(object))
 			return mapProxyFactory.createMapProxy(CastUtil.<Map<Integer, Object>>cast(object));
 		
-		for (Wrapper wrapper : wrappers)
+		for (CompositeWrapper wrapper : wrappers)
 			if (wrapper.isWrappable(object))
-				return wrapper.wrap(object, objectWrapper);
+				return wrapper.wrap(object, this);
 		
-		return null;
+		return object;
 	}
 	
 	@Override
 	public void setAttributeValue(int attributeId, Object value) {
-		
+		backendMap.put(attributeId, value);
 	}
 	
 	@Override
@@ -108,7 +91,19 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, Attri
 	
 	@Override
 	public <U> U cast(Class<U> clazz) {
-		return null;
+		int[] interfaceIds = CastUtil.cast(backendMap.get(MapProxyFactory.CLASSES_KEY));
+		
+		interfaceIds = Arrays.copyOf(interfaceIds, interfaceIds.length + 1);
+		interfaceIds[interfaceIds.length] = mapProxyFactory.getTypeRegistry().getTypeId(clazz);
+		
+		backendMap.put(MapProxyFactory.CLASSES_KEY, interfaceIds);
+		
+		return CastUtil.cast(mapProxyFactory.createMapProxy(backendMap));
+	}
+	
+	@Override
+	public boolean isCapableToImplement(Class<?> clazz) {
+		return false;
 	}
 	
 	@Override
@@ -119,5 +114,20 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, Attri
 	@Override
 	public Map<String, Object> exportBackendMap() {
 		return null;
+	}
+	
+	@Override
+	public int hashCode() {
+		return backendMap.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return backendMap.equals(obj);
+	}
+	
+	@Override
+	public String toString() {
+		return backendMap.toString();
 	}
 }

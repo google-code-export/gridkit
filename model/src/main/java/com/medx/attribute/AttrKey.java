@@ -2,7 +2,7 @@ package com.medx.attribute;
 
 import java.io.Serializable;
 
-public class AttrKey<T> implements Serializable {
+public final class AttrKey<T> implements Serializable {
 	private static final long serialVersionUID = 2463933901280809464L;
 	
 	private final int id;
@@ -18,7 +18,7 @@ public class AttrKey<T> implements Serializable {
 		this.description = description;
 	}
 	
-	public AttrKey(short id, String name, Class<T> clazz) {
+	public AttrKey(int id, String name, Class<?> clazz) {
 		this(id, name, clazz, "");
 	}
 

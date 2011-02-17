@@ -25,17 +25,8 @@ public class CachedMethodHandlerFactory implements MethodHandlerFactory {
 		String attributeName = method.getAnnotation(AttrKey.class).value();
 		int attributeId = attrKeyRegistry.getAttrKey(attributeName).getId();
 		
-		handlerRegistry.putIfAbsent(method, createMethodHandler(camelPrefix, attributeId));
+		handlerRegistry.putIfAbsent(method, MethodHandlerCreator.createMethodHandler(camelPrefix, attributeId));
 		
 		return handlerRegistry.get(method);
-	}
-	
-	private static MethodHandler createMethodHandler(String camelPrefix, int attributeId) {
-		if (GetMethodHandler.getPrefix().equals(camelPrefix))
-			return new GetMethodHandler(attributeId);
-		else if (SetMethodHandler.getPrefix().equals(camelPrefix))
-			return new SetMethodHandler(attributeId);
-		else
-			throw new RuntimeException("Unknown camel prefix - " + camelPrefix);
 	}
 }

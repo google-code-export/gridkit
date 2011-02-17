@@ -1,10 +1,6 @@
 package com.medx.proxy.handler;
 
 public class SetMethodHandler implements MethodHandler {
-	public static String getPrefix() {
-		return "set";
-	}
-	
 	private final int attributeId;
 	
 	public SetMethodHandler(int attributeId) {
@@ -19,5 +15,9 @@ public class SetMethodHandler implements MethodHandler {
 			throw new RuntimeException("Unexpected arguments count");
 		
 		return null;
+	}
+	
+	public static String getPrefix() {
+		return "set";
 	}
 }

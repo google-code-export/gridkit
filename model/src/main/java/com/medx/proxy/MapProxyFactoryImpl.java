@@ -9,8 +9,6 @@ import com.medx.proxy.handler.MethodHandlerFactory;
 import com.medx.type.TypeRegistry;
 
 public class MapProxyFactoryImpl implements MapProxyFactoryInternal {
-	private static final int CLASSES_KEY = Integer.MIN_VALUE;
-	
 	private static final Class<?>[] implementedInterfaces = {Map.class, MapProxy.class, AttrMap.class};
 	
 	private final TypeRegistry typeRegistry;
@@ -28,7 +26,7 @@ public class MapProxyFactoryImpl implements MapProxyFactoryInternal {
 		Class<?>[] interfaces = Arrays.copyOf(implementedInterfaces, implementedInterfaces.length + interfaceIds.length);
 		
 		for (int i = implementedInterfaces.length; i < interfaces.length; ++i)
-			interfaces[i] = typeRegistry.getType(interfaceIds[i]);
+			interfaces[i] = typeRegistry.getType(interfaceIds[i - implementedInterfaces.length]);
 		
 		MapProxyImpl mapProxyImpl = new MapProxyImpl(backendMap, this);
 		
@@ -40,7 +38,7 @@ public class MapProxyFactoryImpl implements MapProxyFactoryInternal {
 
 	@Override
 	public boolean isProxiable(Object object) {
-		if (object == null || object.getClass() != Map.class)
+		if (object == null || !Map.class.isInstance(object))
 			return false;
 		
 		Object candidate = ((Map<?, ?>)object).get(CLASSES_KEY);
@@ -54,5 +52,10 @@ public class MapProxyFactoryImpl implements MapProxyFactoryInternal {
 	@Override
 	public MethodHandlerFactory getMethodHandlerFactory() {
 		return methodHandlerFactory;
+	}
+
+	@Override
+	public TypeRegistry getTypeRegistry() {
+		return typeRegistry;
 	}
 }
