@@ -42,7 +42,7 @@
 		<dependencies>
 			<dependency>
 				<groupId>org.apteka.insurance</groupId>
-				<artifactId>attribute</artifactId>
+				<artifactId>framework</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -59,15 +59,15 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.apteka.insurance</groupId>
-				<artifactId>service</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>${junit.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${org.slf4j.version}</version>
 			</dependency>
 
 			<dependency>
