@@ -3,10 +3,6 @@ package com.medx.proxy.handler;
 import java.util.Map;
 
 public class GetMethodHandler implements MethodHandler {
-	public static String getPrefix() {
-		return "get";
-	}
-	
 	private final int attributeId;
 	
 	public GetMethodHandler(int attributeId) {
@@ -23,5 +19,9 @@ public class GetMethodHandler implements MethodHandler {
 			return ((Map<?, ?>)attribute).get(args[0]);
 		else
 			throw new RuntimeException("Unexpected arguments count");
+	}
+	
+	public static String getPrefix() {
+		return "get";
 	}
 }
