@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.medx.attribute.AttrKeyRegistry;
+import com.medx.attribute.AttrMap;
 import com.medx.proxy.handler.CachedMethodHandlerFactory;
 import com.medx.proxy.handler.MethodHandlerFactory;
 import com.medx.proxy.test.TestAttrKeyRegistry;
@@ -136,5 +137,21 @@ public class MapProxyImplTest {
 		assertEquals(1, order.getItems().size());
 		assertEquals("keyboard", order.getItems().get(0).getTitle());
 		assertEquals(3.0, order.getItems().get(0).getPrice(), DELTA);
+	}
+	
+	@Test
+	public void test6() {
+		System.out.println(proxyFactory.createMapProxy(orderMap).toString());
+	}
+	
+	@Test
+	public void test7(){
+		AttrMap order = (AttrMap)proxyFactory.createMapProxy(orderMap);
+		
+		assertEquals(Integer.valueOf(0), order.get(TestDictionary.orderId));
+		
+		order.set(TestDictionary.orderId, 1);
+		
+		assertEquals(Integer.valueOf(1), order.get(TestDictionary.orderId));
 	}
 }
