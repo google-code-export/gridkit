@@ -8,7 +8,12 @@ public class TextUtil {
 		return str;
 	}
 	
-	public static String getCamelPostfix(String str) {
-		return null;
+	public static String getRawType(String str) {
+		int index = str.indexOf('<');
+		
+		if (index == -1)
+			return str;
+		else
+			return str.substring(0, index);
 	}
 }

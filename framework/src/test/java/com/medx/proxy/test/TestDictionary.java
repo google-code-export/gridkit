@@ -14,7 +14,6 @@ public class TestDictionary {
 	public static final AttrKey<Integer> orderId = new AttrKey<Integer>(1, "orderId", Integer.class);
 	public static final AttrKey<String> orderItemTitle = new AttrKey<String>(2, "orderItemTitle", String.class);
 	public static final AttrKey<Double> orderItemPrice = new AttrKey<Double>(3, "orderItemPrice", Double.class);
-	
 	public static final AttrKey<Customer> orderCustomer = new AttrKey<Customer>(4, "orderCustomer", Customer.class);
 	public static final AttrKey<List<OrderItem>> orderItems = new AttrKey<List<OrderItem>>(5, "orderItems", List.class);
 	
@@ -26,6 +25,7 @@ public class TestDictionary {
 		public static final int orderCustomer = 4;
 		public static final int orderItems = 5;
 	}
+	
 	public static final class Text {
 		public static final String customerName = "customerName";
 		public static final String orderId = "orderId";

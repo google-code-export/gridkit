@@ -1,33 +1,34 @@
 package com.medx.proxy;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.medx.attribute.AttrKeyRegistry;
 import com.medx.attribute.AttrMap;
-import com.medx.proxy.handler.CachedMethodHandlerFactory;
+import com.medx.attribute.XmlAttrKeyRegistry;
+import com.medx.proxy.handler.CachingMethodHandlerFactory;
 import com.medx.proxy.handler.MethodHandlerFactory;
-import com.medx.proxy.test.TestAttrKeyRegistry;
 import com.medx.proxy.test.TestDictionary;
-import com.medx.proxy.test.TestTypeRegistry;
 import com.medx.proxy.test.model.Customer;
 import com.medx.proxy.test.model.Order;
 import com.medx.proxy.test.model.OrderItem;
 import com.medx.type.TypeRegistry;
+import com.medx.type.XmlTypeRegistry;
 
 public class MapProxyImplTest {
 	private static final double DELTA = 0.0001;
 	
-	private static TypeRegistry typeRegistry = new TestTypeRegistry();
-	private static AttrKeyRegistry attrKeyRegistry = new TestAttrKeyRegistry();
-	private static MethodHandlerFactory methodHandlerFactory = new CachedMethodHandlerFactory(attrKeyRegistry);
+	private static TypeRegistry typeRegistry = new XmlTypeRegistry(MapProxyImplTest.class.getClassLoader().getResourceAsStream("xml/test-type-dictionary.xml"));
+	private static AttrKeyRegistry attrKeyRegistry = new XmlAttrKeyRegistry(MapProxyImplTest.class.getClassLoader().getResourceAsStream("xml/test-attribute-dictionary.xml"));
+	private static MethodHandlerFactory methodHandlerFactory = new CachingMethodHandlerFactory(attrKeyRegistry);
 	private static MapProxyFactory proxyFactory = new MapProxyFactoryImpl(typeRegistry, methodHandlerFactory);
 	
 	public static Map<Integer, Object> customerMap = null;
