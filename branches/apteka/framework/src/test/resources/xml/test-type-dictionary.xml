@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<types>
+	<type id="0">
+		<name>customer</name>
+		<class>com.medx.proxy.test.model.Customer</class>
+	</type>
+	
+	<type id="1">
+		<name>order</name>
+		<class>com.medx.proxy.test.model.Order</class>
+	</type>
+	
+	<type id="2">
+		<name>orderItem</name>
+		<class>com.medx.proxy.test.model.OrderItem</class>
+	</type>
+</types>
