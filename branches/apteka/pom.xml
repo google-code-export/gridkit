@@ -17,6 +17,9 @@
 		<org.slf4j.version>1.5.11</org.slf4j.version>
 		<org.apache.tomcat.version>6.0.26</org.apache.tomcat.version>
 		<javax.servlet.jstl.version>1.1.2</javax.servlet.jstl.version>
+		<xom.version>1.2.5</xom.version>
+		<commons-beanutils.version>1.8.3</commons-beanutils.version>
+		<commons-io.version>2.0.1</commons-io.version>
 		
 		<project.build.ruleDirectory>src/main/rule</project.build.ruleDirectory>
 	</properties>
@@ -56,6 +59,24 @@
 				<groupId>org.apteka.insurance</groupId>
 				<artifactId>model</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>xom</groupId>
+				<artifactId>xom</artifactId>
+				<version>${xom.version}</version>
+			</dependency>
+
+			<dependency>
+			    <groupId>commons-beanutils</groupId>
+			    <artifactId>commons-beanutils</artifactId>
+			    <version>${commons-beanutils.version}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>${commons-io.version}</version>
 			</dependency>
 
 			<dependency>
