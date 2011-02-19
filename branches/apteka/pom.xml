@@ -33,12 +33,11 @@
 	
 	<modules>
 		<module>framework</module>
+		<module>processing</module>
 		<module>dictionary-generator</module>
 		<module>model</module>
 		<module>demo</module>
-		<!--<module>rule</module>
-		<module>service</module>
-		<module>guvnor</module>-->
+		<!--<module>guvnor</module>-->
 	</modules>
 	
 	<dependencyManagement>
