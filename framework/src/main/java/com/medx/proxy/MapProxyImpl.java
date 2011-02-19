@@ -98,7 +98,7 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, Attri
 		
 		backendMap.put(MapProxyFactory.CLASSES_KEY, interfaceIds);
 		
-		return CastUtil.cast(mapProxyFactory.createMapProxy(backendMap));
+		return CastUtil.<U>cast(mapProxyFactory.createMapProxy(backendMap));
 	}
 	
 	@Override
