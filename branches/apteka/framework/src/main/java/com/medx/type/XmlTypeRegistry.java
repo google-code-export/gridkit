@@ -14,8 +14,6 @@ import nu.xom.Nodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.medx.util.TextUtil;
-
 public class XmlTypeRegistry implements TypeRegistry {
 	private static final Logger log = LoggerFactory.getLogger(XmlTypeRegistry.class);
 	
@@ -41,7 +39,7 @@ public class XmlTypeRegistry implements TypeRegistry {
 			log.warn(format("Failed to load dictionary from InputStream"), e);
 		}
 		
-		parseNodes(dictionary.query("/types/type[@id and name and class]"));
+		parseNodes(dictionary.query("/attributes/attribute[@id and name and type]"));
 	}
 	
 	private synchronized void parseNodes(Nodes nodes) {
@@ -62,11 +60,15 @@ public class XmlTypeRegistry implements TypeRegistry {
 				continue;
 			}
 			
-			String className = TextUtil.getRawType(node.getChildElements("class").get(0).getValue());
+			String className = node.getChildElements("type").get(0).getValue();
+			
+			if (!className.matches("java\\.lang\\.Class<.+>"))
+				continue;
+			
 			Class<?> clazz = null;
 			
 			try {
-				clazz = Class.forName(className);
+				clazz = Class.forName(className.substring("java.lang.Class<".length(), className.length() - 1));
 			} catch (ClassNotFoundException e) {
 				log.warn(format("Failded to find type '%s'", className));
 				continue;
