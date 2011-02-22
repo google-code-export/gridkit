@@ -1,32 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<attributes>
-    <attribute id="0">
-        <name>customerName</name>
+<attributes version="1">
+    <attribute id="0" version="1">
+        <name>model.Customer.name</name>
         <type>String</type>
     </attribute>
     
-    <attribute id="1">
-        <name>orderId</name>
+    <attribute id="1" version="1">
+        <name>model.Order.id</name>
         <type>Integer</type>
     </attribute>
 
-    <attribute id="2">
-        <name>orderItemTitle</name>
+    <attribute id="2" version="1">
+        <name>model.OrderItem.title</name>
         <type>String</type>
     </attribute>
     
-    <attribute id="3">
-        <name>orderItemPrice</name>
+    <attribute id="3" version="1">
+        <name>model.OrderItem.price</name>
         <type>Double</type>
     </attribute>
 
-    <attribute id="4">
-        <name>orderCustomer</name>
+    <attribute id="4" version="1">
+        <name>model.Order.customer</name>
         <type>com.medx.proxy.test.model.Customer</type>
     </attribute>
     
-    <attribute id="5">
-        <name>orderItems</name>
+    <attribute id="5" version="1">
+        <name>model.Order.items</name>
         <type>java.util.List&lt;com.medx.proxy.test.model.OrderItem&gt;</type>
+    </attribute>
+    
+    <attribute id="6" version="1">
+        <name>customer.class</name>
+        <type>java.lang.Class&lt;com.medx.proxy.test.model.Customer&gt;</type>
+    </attribute>
+    
+    <attribute id="7" version="1">
+        <name>order.class</name>
+        <type>java.lang.Class&lt;com.medx.proxy.test.model.Order&gt;</type>
+    </attribute>
+    
+    <attribute id="8" version="1">
+        <name>orderItem.class</name>
+        <type>java.lang.Class&lt;com.medx.proxy.test.model.OrderItem&gt;</type>
     </attribute>
 </attributes>

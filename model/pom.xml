@@ -52,39 +52,7 @@
 					</compilerArguments>
 				</configuration>
 			</plugin>
-		 <!-- 
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.2</version>
-				<executions>
-					<execution>
-						<id>generate-xml-dictionary</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>java</goal>
-						</goals>
-						<configuration>
-							<includeProjectDependencies>false</includeProjectDependencies>
-							<includePluginDependencies>true</includePluginDependencies>
-							<mainClass>org.apteka.insurance.dictionary.generator.XmlDictionaryGenerator</mainClass>
-								<arguments>
-									<argument>${basedir}/target/classes</argument>
-									<argument>${dynamic.model.root}</argument>
-									<argument>${basedir}/src/main/resources/xml/attribute-dictionary.xml</argument>
-								</arguments>
-						</configuration>
-					</execution>
-				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>org.apteka.insurance</groupId>
-						<artifactId>dictionary-generator</artifactId>
-						<version>${project.version}</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-			-->
+			
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>

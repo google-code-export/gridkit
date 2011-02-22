@@ -26,9 +26,9 @@ import com.medx.type.XmlTypeRegistry;
 public class MapProxyImplTest {
 	private static final double DELTA = 0.0001;
 	
-	private static TypeRegistry typeRegistry = new XmlTypeRegistry(MapProxyImplTest.class.getClassLoader().getResourceAsStream("xml/test-type-dictionary.xml"));
+	private static TypeRegistry typeRegistry = new XmlTypeRegistry(MapProxyImplTest.class.getClassLoader().getResourceAsStream("xml/test-attribute-dictionary.xml"));
 	private static AttrKeyRegistry attrKeyRegistry = new XmlAttrKeyRegistry(MapProxyImplTest.class.getClassLoader().getResourceAsStream("xml/test-attribute-dictionary.xml"));
-	private static MethodHandlerFactory methodHandlerFactory = new CachingMethodHandlerFactory(attrKeyRegistry);
+	private static MethodHandlerFactory methodHandlerFactory = new CachingMethodHandlerFactory(attrKeyRegistry, "com.medx.proxy.test");
 	private static MapProxyFactory proxyFactory = new MapProxyFactoryImpl(typeRegistry, methodHandlerFactory);
 	
 	public static Map<Integer, Object> customerMap = null;
@@ -42,18 +42,18 @@ public class MapProxyImplTest {
 	public void before() {
 		customerMap = new HashMap<Integer, Object>();
 		
-		int[] customerClasses = {0};
+		int[] customerClasses = {6};
 		customerMap.put(Integer.MIN_VALUE, customerClasses);
 		customerMap.put(TestDictionary.Id.customerName, "Ted");
 		
 		orderMap = new HashMap<Integer, Object>();
 		
-		int[] orderClasses = {1};
+		int[] orderClasses = {7};
 		orderMap.put(Integer.MIN_VALUE, orderClasses);
 		orderMap.put(TestDictionary.Id.orderId, 0);
 		orderMap.put(TestDictionary.Id.orderCustomer, customerMap);
 		
-		int[] orderIteamClasses = {2};
+		int[] orderIteamClasses = {8};
 		
 		orderItem1Map = new HashMap<Integer, Object>(); 
 		
