@@ -14,8 +14,21 @@
 	</parent>
 	
 	<dependencies>
+		<dependency>
+			<groupId>org.apteka.insurance</groupId>
+			<artifactId>framework</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+		</dependency>
 	</dependencies>
 	
-	<build>
-	</build>
+	<build/>
 </project>

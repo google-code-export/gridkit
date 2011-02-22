@@ -43,8 +43,16 @@
 			<plugin>
 				<groupId>org.bsc.maven</groupId>
 				<artifactId>maven-processor-plugin</artifactId>
+				<configuration>
+					<processors>
+						<processor>com.medx.processing.dictionary.XmlDictionaryGenerator</processor>
+					</processors>
+					<compilerArguments>
+						-AXmlDictionaryGenerator.cutPrefix=com.medx.model -AXmlDictionaryGenerator.targetFile=${basedir}/src/main/resources/xml/attribute-dictionary.xml
+					</compilerArguments>
+				</configuration>
 			</plugin>
-		
+		 <!-- 
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
@@ -76,7 +84,7 @@
 					</dependency>
 				</dependencies>
 			</plugin>
-			
+			-->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
@@ -131,6 +139,7 @@
 					</execution>
 				</executions>
 			</plugin>
+		
 		</plugins>
 	</build>
 </project>

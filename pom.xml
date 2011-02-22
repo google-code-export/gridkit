@@ -22,6 +22,7 @@
 		<commons-io.version>2.0.1</commons-io.version>
 		
 		<project.build.ruleDirectory>src/main/rule</project.build.ruleDirectory>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	
 	<repositories>

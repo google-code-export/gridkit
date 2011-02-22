@@ -23,9 +23,11 @@ import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apteka.insurance.dictionary.generator.util.ClassUtil;
 import org.apteka.insurance.dictionary.generator.util.XmlUtil;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 public class XmlDictionaryGenerator {
-	public static void main(String[] args) throws ClassNotFoundException, IOException, ValidityException, ParsingException {
+	public static void main(String[] args) throws ClassNotFoundException, IOException, ValidityException, ParsingException, SAXException {
 		String targetFolder = args[0];
 		String packagePrefix = args[1];
 		String targetFile = args[2];
@@ -44,7 +46,7 @@ public class XmlDictionaryGenerator {
 		for (String clazz : classes)
 			entries.addAll(ClassUtil.describe(classLoader.loadClass(clazz), packagePrefix));
 		
-		Builder parser = new Builder();
+		Builder parser = new Builder(XMLReaderFactory.createXMLReader());
 		Document dictionary = parser.build(new File(targetFile));
 
 		XmlUtil.populateDocument(dictionary, entries);

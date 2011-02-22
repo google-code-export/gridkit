@@ -1,11 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<attributes>
-    <attribute id="1">
+<attributes version="1">
+    <attribute id="0" version="1">
+        <name>accumulator.AccumulatorFrame.classAttribute</name>
+        <type>java.lang.Class&lt;com.medx.model.accumulator.AccumulatorFrame&gt;</type>
+    </attribute>
+    <attribute id="1" version="1">
         <name>accumulator.AccumulatorFrame.accumulators</name>
         <type>java.util.Collection&lt;com.medx.model.accumulator.Accumulator&gt;</type>
     </attribute>
-    <attribute id="2">
+    <attribute id="2" version="1">
         <name>accumulator.AccumulatorFrame.stages</name>
         <type>java.util.List&lt;com.medx.model.accumulator.AccumulationStage&gt;</type>
+    </attribute>
+    <attribute id="3" version="1">
+        <name>accumulator.AccumulatorFrame.age</name>
+        <type>java.lang.Integer</type>
+    </attribute>
+    <attribute id="4" version="1">
+        <name>accumulator.AccumulatorFrame.stagesMap</name>
+        <type>java.util.Map&lt;java.lang.String,java.util.List&lt;com.medx.model.accumulator.AccumulationStage&gt;&gt;</type>
+    </attribute>
+    <attribute id="5" version="1">
+        <name>accumulator.AccumulatorFrame.price</name>
+        <type>java.lang.Double</type>
+    </attribute>
+    <attribute id="6" version="1">
+        <name>accumulator.AccumulatorFrame.process</name>
+        <type>org.apache.xalan.xslt.Process</type>
+    </attribute>
+    <attribute id="7" version="1">
+        <name>accumulator.AccumulatorFrame.inttt</name>
+        <type>java.lang.Integer[]</type>
+    </attribute>
+    <attribute id="8" version="1">
+        <name>accumulator.AccumulatorFrame.stagesMapArray</name>
+        <type>java.util.Map&lt;java.lang.String,java.util.List&lt;com.medx.model.accumulator.AccumulationStage&gt;&gt;[]</type>
     </attribute>
 </attributes>
