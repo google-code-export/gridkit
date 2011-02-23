@@ -46,68 +46,13 @@
 				<configuration>
 					<processors>
 						<processor>com.medx.processing.dictionary.XmlDictionaryGenerator</processor>
+						<processor>com.medx.processing.dictionary.JavaDictionaryGenerator</processor>
 					</processors>
 					<compilerArguments>
-						-AXmlDictionaryGenerator.cutPrefix=com.medx.model -AXmlDictionaryGenerator.targetFile=${basedir}/src/main/resources/xml/attribute-dictionary.xml
+						-AjavaAddPrefix=com.medx.dictionary -ApackageCutPrefix=com.medx.model -AdictionaryFile=${basedir}/src/main/resources/xml/attribute-dictionary.xml -AsourceFolder=${project.build.sourceDirectory}
 					</compilerArguments>
 				</configuration>
-			</plugin>
-			
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.2</version>
-				<executions>
-					<execution>
-						<id>generate-java-dictionary</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>java</goal>
-						</goals>
-						<configuration>
-							<includeProjectDependencies>false</includeProjectDependencies>
-							<includePluginDependencies>true</includePluginDependencies>
-							<mainClass>net.sf.saxon.Transform</mainClass>
-								<arguments>
-									<argument>${basedir}/src/main/resources/xml/attribute-dictionary.xml</argument>
-									<argument>${project.build.xmlDirectory}/transformation/complete-transformation.xslt</argument>
-									<argument>sourceFolder=${project.build.sourceDirectory}</argument>
-									<argument>dictionaryFolder=${attribute.dictionary.folder}</argument>
-									<argument>attributeKeyClass=com.medx.attribute.AttrKey</argument>
-								</arguments>
-						</configuration>
-					</execution>
-				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>net.sf.saxon</groupId>
-						<artifactId>saxon</artifactId>
-						<version>8.7</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-			
-			<plugin>
-				<groupId>com.googlecode.maven-java-formatter-plugin</groupId>
-				<artifactId>maven-java-formatter-plugin</artifactId>
-				<version>0.2.0</version>
-				<executions>
-					<execution>
-						<id>format-java-dictionary</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>format</goal>
-						</goals>
-						<configuration>
-							<configFile>${project.build.xmlDirectory}/transformation/eclipse-formatter-config.xml</configFile>
-							<directories>
-								<param>${project.build.sourceDirectory}/${attribute.dictionary.folder}</param>
-							</directories>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		
+			</plugin>		
 		</plugins>
 	</build>
 </project>

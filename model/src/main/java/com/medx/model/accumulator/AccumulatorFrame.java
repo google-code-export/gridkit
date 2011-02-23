@@ -6,14 +6,12 @@ import java.util.Map;
 
 import org.apache.xalan.xslt.Process;
 
-import com.medx.attribute.annotation.AttrKey;
 import com.medx.metamodel.Facade;
 import com.medx.type.annotation.DictType;
 
 @Facade()
 @DictType
 public interface AccumulatorFrame {
-	@AttrKey(com.medx.dictionary.accumulator.AccumulatorFrame.Text.accumulators)
 	public Collection<Accumulator> getAccumulators();
 	
 //	@AttrKey(com.medx.dictionary.accumulator.AccumulatorFrame.Text.accumulators)

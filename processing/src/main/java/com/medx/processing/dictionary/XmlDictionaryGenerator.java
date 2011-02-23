@@ -41,26 +41,31 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 @SupportedAnnotationTypes("com.medx.type.annotation.DictType")
-@SupportedOptions({"XmlDictionaryGenerator.cutPrefix", "XmlDictionaryGenerator.addPrefix", "XmlDictionaryGenerator.targetFile"})
+@SupportedOptions({"packageCutPrefix", "xmlAddPrefix", "dictionaryFile"})
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class XmlDictionaryGenerator extends AbstractProcessor {
 	private static Logger log = LoggerFactory.getLogger(XmlDictionaryGenerator.class);
 	
-	private String cutPrefix;
-	private String addPrefix;
-	private String targetFile;
+	private String packageCutPrefix;
+	private String xmlAddPrefix;
+	private String dictionaryFile;
 	
 	@Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
     	super.init(processingEnv);
     	
-    	cutPrefix  = getEnvOption("XmlDictionaryGenerator.cutPrefix", processingEnv, "");
-    	addPrefix  = getEnvOption("XmlDictionaryGenerator.addPrefix", processingEnv, "");
-    	targetFile = getEnvOption("XmlDictionaryGenerator.targetFile", processingEnv, null);
+    	packageCutPrefix  = getEnvOption("packageCutPrefix", processingEnv, "");
+    	xmlAddPrefix  = getEnvOption("xmlAddPrefix", processingEnv, "");
+    	dictionaryFile = getEnvOption("dictionaryFile", processingEnv, null);
 	}
 	
 	@Override
 	public boolean process(Set<? extends TypeElement> elements, RoundEnvironment env) {
+		if (elements.size() == 0) {
+			System.out.println("TODO fix - XmlDictionaryGenerator.empty");
+			return false;
+		}
+		
 		try {
 			return processInternal(elements, env);
 		} catch (Exception e) {
@@ -70,12 +75,9 @@ public class XmlDictionaryGenerator extends AbstractProcessor {
 	}
 	
 	private boolean processInternal(Set<? extends TypeElement> elements, RoundEnvironment env) throws IOException, ValidityException, ParsingException, SAXException {
-		if (elements.size() == 0)
-			return true;
-
-		File dictionaryFile = new File(targetFile);
+		File dictionaryFileDesc = new File(dictionaryFile);
 	
-		Document dictionary = loadOrCreateDictionary(dictionaryFile, new Builder(XMLReaderFactory.createXMLReader(), false));
+		Document dictionary = loadOrCreateDictionary(dictionaryFileDesc, new Builder(XMLReaderFactory.createXMLReader(), false));
 		
 		int dictionaryVersion = isDictionaryWithVersion(dictionary) ? getDictionaryVersion(dictionary) : 1;
 		
@@ -85,16 +87,16 @@ public class XmlDictionaryGenerator extends AbstractProcessor {
 		for (TypeElement dictType : elements)
 			for (Element clazz : env.getElementsAnnotatedWith(dictType)) {
 				getters.addAll(filterGetters(filterExecutableElements(clazz.getEnclosedElements())));
-				entries.add(createClassDictionaryEntry((TypeElement)clazz, dictionaryVersion, cutPrefix, addPrefix));
+				entries.add(createClassDictionaryEntry((TypeElement)clazz, dictionaryVersion, packageCutPrefix, xmlAddPrefix));
 			}
 		
-		entries.addAll(mapDictionaryEntries(getters, dictionaryVersion, cutPrefix, addPrefix));
+		entries.addAll(mapDictionaryEntries(getters, dictionaryVersion, packageCutPrefix, xmlAddPrefix));
 		
 		populateDictionary(dictionary, entries);
 		
-		storeDictionary(dictionary, dictionaryFile);
+		storeDictionary(dictionary, dictionaryFileDesc);
 
-		return true;
+		return false;
 	}
 	
 	public static void populateDictionary(Document dictionary, List<DictionaryEntry> entries) {

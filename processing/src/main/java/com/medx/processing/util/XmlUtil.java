@@ -20,7 +20,7 @@ public class XmlUtil {
 		type.appendChild(entry.getType());
 		attribute.appendChild(type);
 		
-		if (entry.getDescription() != null) {
+		if (!entry.getDescription().isEmpty()) {
 			Element description = new Element("description");
 			description.appendChild(entry.getDescription());
 			attribute.appendChild(description);

@@ -95,7 +95,7 @@ public class XmlAttrKeyRegistry implements AttrKeyRegistry {
 			if (node.getChildElements("description").size() > 0)
 				description = node.getChildElements("description").get(0).getValue();
 			
-			AttrKey<?> attrKey = new AttrKey<Object>(id, name, type, description);
+			AttrKey<?> attrKey = new AttrKey<Object>(id, name, 0, type, description);
 			
 			attrKeyById.put(id, attrKey);
 			attrKeyByName.put(name, attrKey);
