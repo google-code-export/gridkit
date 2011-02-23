@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -15,6 +16,11 @@ import com.medx.processing.dictionary.DictionaryEntry;
 
 public class MirrorUtil {
 	private static String GETTER_PATTERN  = "get[A-Z].*";
+	
+	public static String getEnvOption(String option, ProcessingEnvironment processingEnv, String defaultValue) {
+		String result = processingEnv.getOptions().get(option);
+		return result == null ? defaultValue : result;
+	}
 	
 	public static List<ExecutableElement> filterExecutableElements(List<? extends Element> elements) {
 		List<ExecutableElement> result = new ArrayList<ExecutableElement>();
