@@ -10,15 +10,9 @@ import com.medx.metamodel.Facade;
 import com.medx.type.annotation.DictType;
 
 @Facade()
-@DictType
+@DictType(packageCutPrefix = "com.medx.model", javaAddPrefix = "com.medx.dictionary")
 public interface AccumulatorFrame {
 	public Collection<Accumulator> getAccumulators();
-	
-//	@AttrKey(com.medx.dictionary.accumulator.AccumulatorFrame.Text.accumulators)
-//	public void addAccumulator(Accumulator accum);
-//
-//	@AttrKey(com.medx.dictionary.accumulator.AccumulatorFrame.Text.accumulators)
-//	public void clearAccumulators();
 	
 	public List<AccumulationStage> getStages();
 	

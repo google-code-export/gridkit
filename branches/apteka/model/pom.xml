@@ -49,7 +49,7 @@
 						<processor>com.medx.processing.dictionary.JavaDictionaryGenerator</processor>
 					</processors>
 					<compilerArguments>
-						-AjavaAddPrefix=com.medx.dictionary -ApackageCutPrefix=com.medx.model -AdictionaryFile=${basedir}/src/main/resources/xml/attribute-dictionary.xml -AsourceFolder=${project.build.sourceDirectory}
+						-AdictionaryFile=${basedir}/src/main/resources/xml/attribute-dictionary.xml -AstartId=0 -AsourceFolder=${project.build.sourceDirectory}
 					</compilerArguments>
 				</configuration>
 			</plugin>		
