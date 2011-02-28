@@ -1,7 +1,6 @@
 package com.medx.processing.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,13 +12,19 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 
 import com.medx.processing.dictionary.DictionaryEntry;
+import com.medx.util.DictUtil;
+import com.medx.util.TextUtil;
 
 public class MirrorUtil {
 	private static String GETTER_PATTERN  = "get[A-Z].*";
 	
-	public static String getEnvOption(String option, ProcessingEnvironment processingEnv, String defaultValue) {
+	public static String getEnvOption(String option, ProcessingEnvironment processingEnv) {
 		String result = processingEnv.getOptions().get(option);
-		return result == null ? defaultValue : result;
+		
+		if (result == null)
+			throw new RuntimeException("No env option " + option + " was found");
+			
+		return result;
 	}
 	
 	public static List<ExecutableElement> filterExecutableElements(List<? extends Element> elements) {
@@ -57,61 +62,42 @@ public class MirrorUtil {
 		return true;
 	}
 	
-	public static List<DictionaryEntry> mapDictionaryEntries(List<ExecutableElement> getters, int version, String cutPrefix, String addPrefix) {
-		List<DictionaryEntry> result = new ArrayList<DictionaryEntry>();
-		
-		for (ExecutableElement getter : getters)
-			result.add(createDictionaryEntry(getter, version, cutPrefix, addPrefix));
-		
-		return result;
-	}
-
-	private static String getAttributeName(String simpleName, TypeElement clazz, String cutPrefix, String addPrefix) {
-		simpleName = Character.toLowerCase(simpleName.charAt(3)) + simpleName.substring(4);
-		
-		String className = clazz.getQualifiedName().toString();
-		
-		if (!cutPrefix.isEmpty() && !className.startsWith(cutPrefix))
-			throw new IllegalArgumentException("cutPrefix");
-		
-		return (addPrefix.isEmpty() ? "" : addPrefix + ".") + className.substring(cutPrefix.length() + 1) + "." + simpleName;
-	}
-	
-	public static DictionaryEntry createClassDictionaryEntry(TypeElement clazz, int version, String cutPrefix, String addPrefix) {
+	public static DictionaryEntry createClassDictionaryEntry(TypeElement clazz) {
 		DictionaryEntry result = new DictionaryEntry();
 		
-		result.setVersion(version);
-		result.setName(getAttributeName("getClassAttribute", clazz, cutPrefix, addPrefix));
+		result.setName(DictUtil.getAttrName(clazz, "classAttribute"));
 		result.setType("java.lang.Class<" + clazz.getQualifiedName() + ">");
 		
 		return result;
 	}
 	
-	public static DictionaryEntry createDictionaryEntry(ExecutableElement getter, int version, String cutPrefix, String addPrefix) {
+	public static DictionaryEntry createAttrDictionaryEntry(ExecutableElement getter) {
 		DictionaryEntry result = new DictionaryEntry();
 		
-		result.setVersion(version);
-		result.setName(getAttributeName(getter.getSimpleName().toString(), (TypeElement)getter.getEnclosingElement(), cutPrefix, addPrefix));
+		String attrName = TextUtil.getCamelPostfix(getter.getSimpleName().toString());
+		result.setName(DictUtil.getAttrName((TypeElement)getter.getEnclosingElement(), attrName));
+		
 		result.setType(replacePrimitiveType(getter.getReturnType().toString()));
 		
 		return result;
 	}
 	
-	private static Map<String, String> primitiveTypeReplacements = new HashMap<String, String>();
+	private static Map<String, Class<?>> primitiveTypeReplacements = new HashMap<String, Class<?>>();
 	
 	static {
-		List<String> primitiveTypes = Arrays.asList("bool", "byte", "int", "long", "char", "float", "double");
-		List<Class<?>> primitiveClasses = Arrays.<Class<?>>asList(Boolean.class, Byte.class, Integer.class, Long.class, Character.class, Float.class, Double.class);
-		
-		for (int i = 0; i < primitiveTypes.size(); ++i){
-			primitiveTypeReplacements.put("^" + primitiveTypes.get(i), primitiveClasses.get(i).getCanonicalName());
-			primitiveTypeReplacements.put(primitiveTypes.get(i) + "\\[", primitiveClasses.get(i).getCanonicalName() + "\\[");
-		}
+		primitiveTypeReplacements.put("bool", Boolean.class);
+		primitiveTypeReplacements.put("byte", Byte.class);
+		primitiveTypeReplacements.put("int", Integer.class);
+		primitiveTypeReplacements.put("long", Long.class);
+		primitiveTypeReplacements.put("char", Character.class);
+		primitiveTypeReplacements.put("float", Float.class);
+		primitiveTypeReplacements.put("double", Double.class);
 	}
 	
 	private static String replacePrimitiveType(String type) {
-		for (Map.Entry<String, String> replacement : primitiveTypeReplacements.entrySet())
-			type = type.replaceFirst(replacement.getKey(), replacement.getValue());
+		for (Map.Entry<String, Class<?>> replacement : primitiveTypeReplacements.entrySet())
+			if (replacement.getKey().equals(type))
+				return replacement.getValue().getCanonicalName();
 		
 		return type;
 	}

@@ -6,7 +6,7 @@ import com.medx.metamodel.Facade;
 import com.medx.type.annotation.DictType;
 
 @Facade
-@DictType
+@DictType(packageCutPrefix = "com.medx.model", javaAddPrefix = "com.medx.dictionary")
 public interface AccumVectorMatcher extends AccumulatorCriteria {
 	
 	public Collection<AccumValueMatcher> getConditions();

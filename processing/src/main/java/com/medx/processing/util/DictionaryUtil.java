@@ -6,6 +6,8 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 import static java.lang.String.format;
 
@@ -21,13 +23,15 @@ import nu.xom.ValidityException;
 public class DictionaryUtil {
 	private static Logger log = LoggerFactory.getLogger(DictionaryUtil.class);
 	
-	public static Document createDictionary() {
+	public static Document createDictionary(int version) {
 		Element attributes = new Element("attributes");
-		attributes.addAttribute(new Attribute("version", "1"));
+		attributes.addAttribute(new Attribute("version", String.valueOf(version)));
 		return new Document(attributes);
 	}
 	
-	public static Document loadDictionary(File file, Builder parser) throws ValidityException, ParsingException, IOException {
+	public static Document loadDictionary(File file) throws ValidityException, ParsingException, IOException, SAXException {
+		Builder parser = new Builder(XMLReaderFactory.createXMLReader(), false);
+		
 		if (!file.exists())
 			return null;
 		
@@ -41,14 +45,10 @@ public class DictionaryUtil {
 		return dictionary;
 	}
 	
-	public static Document loadOrCreateDictionary(File file, Builder parser) throws ValidityException, ParsingException, IOException {
-		Document dictionary = loadDictionary(file, parser);
+	public static Document loadOrCreateDictionary(File file) throws ValidityException, ParsingException, IOException, SAXException {
+		Document dictionary = loadDictionary(file);
 		
-		return dictionary == null ? createDictionary() : dictionary;
-	}
-	
-	public static boolean isDictionaryWithVersion(Document dictionary) {
-		return dictionary.getRootElement().getAttribute("version") != null;
+		return dictionary == null ? createDictionary(1) : dictionary;
 	}
 	
 	public static int getDictionaryVersion(Document dictionary) {
@@ -80,8 +80,8 @@ public class DictionaryUtil {
 		return true;
 	}
 	
-	public static int getMaximumId(Document dictionary) {
-		int maxId = -1;
+	public static int getMaximumId(Document dictionary, int startId) {
+		int maxId = startId;
 		
 		Nodes nodes = dictionary.query("/attributes/attribute[@id]");
 		
@@ -95,5 +95,11 @@ public class DictionaryUtil {
 		}
 		
 		return maxId;
+	}
+	
+	public static String getAttributeSign(Document dictionary, String attrName, String singName) {
+		Nodes nodes = dictionary.query(format("/attributes/attribute[name='%s']/@%s", attrName, singName));
+		
+		return ((Attribute)nodes.get(0)).getValue();
 	}
 }

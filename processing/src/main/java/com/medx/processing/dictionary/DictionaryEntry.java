@@ -2,7 +2,7 @@ package com.medx.processing.dictionary;
 
 import java.io.Serializable;
 
-public class DictionaryEntry implements Serializable {
+public final class DictionaryEntry implements Serializable {
 	private static final long serialVersionUID = 3701736350302492183L;
 	
 	private int id;

@@ -2,13 +2,12 @@ package com.medx.processing.dictionary;
 
 import static com.medx.processing.util.DictionaryUtil.getDictionaryVersion;
 import static com.medx.processing.util.DictionaryUtil.getMaximumId;
-import static com.medx.processing.util.DictionaryUtil.isDictionaryWithVersion;
 import static com.medx.processing.util.DictionaryUtil.loadOrCreateDictionary;
 import static com.medx.processing.util.DictionaryUtil.storeDictionary;
+import static com.medx.processing.util.MirrorUtil.createAttrDictionaryEntry;
 import static com.medx.processing.util.MirrorUtil.createClassDictionaryEntry;
 import static com.medx.processing.util.MirrorUtil.filterExecutableElements;
 import static com.medx.processing.util.MirrorUtil.filterGetters;
-import static com.medx.processing.util.MirrorUtil.mapDictionaryEntries;
 import static com.medx.processing.util.MirrorUtil.getEnvOption;
 import static com.medx.processing.util.XmlUtil.toXML;
 import static java.lang.String.format;
@@ -30,7 +29,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
-import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.ParsingException;
 import nu.xom.ValidityException;
@@ -38,25 +36,22 @@ import nu.xom.ValidityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 @SupportedAnnotationTypes("com.medx.type.annotation.DictType")
-@SupportedOptions({"packageCutPrefix", "xmlAddPrefix", "dictionaryFile"})
+@SupportedOptions({"dictionaryFile", "startId"})
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class XmlDictionaryGenerator extends AbstractProcessor {
 	private static Logger log = LoggerFactory.getLogger(XmlDictionaryGenerator.class);
 	
-	private String packageCutPrefix;
-	private String xmlAddPrefix;
 	private String dictionaryFile;
+	private int startId;
 	
 	@Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
     	super.init(processingEnv);
     	
-    	packageCutPrefix  = getEnvOption("packageCutPrefix", processingEnv, "");
-    	xmlAddPrefix  = getEnvOption("xmlAddPrefix", processingEnv, "");
-    	dictionaryFile = getEnvOption("dictionaryFile", processingEnv, null);
+    	dictionaryFile = getEnvOption("dictionaryFile", processingEnv);
+    	startId = Integer.valueOf(getEnvOption("startId", processingEnv));
 	}
 	
 	@Override
@@ -77,9 +72,9 @@ public class XmlDictionaryGenerator extends AbstractProcessor {
 	private boolean processInternal(Set<? extends TypeElement> elements, RoundEnvironment env) throws IOException, ValidityException, ParsingException, SAXException {
 		File dictionaryFileDesc = new File(dictionaryFile);
 	
-		Document dictionary = loadOrCreateDictionary(dictionaryFileDesc, new Builder(XMLReaderFactory.createXMLReader(), false));
+		Document dictionary = loadOrCreateDictionary(dictionaryFileDesc);
 		
-		int dictionaryVersion = isDictionaryWithVersion(dictionary) ? getDictionaryVersion(dictionary) : 1;
+		int dictionaryVersion = getDictionaryVersion(dictionary);
 		
 		List<ExecutableElement> getters = new ArrayList<ExecutableElement>();
 		List<DictionaryEntry> entries = new ArrayList<DictionaryEntry>();
@@ -87,10 +82,14 @@ public class XmlDictionaryGenerator extends AbstractProcessor {
 		for (TypeElement dictType : elements)
 			for (Element clazz : env.getElementsAnnotatedWith(dictType)) {
 				getters.addAll(filterGetters(filterExecutableElements(clazz.getEnclosedElements())));
-				entries.add(createClassDictionaryEntry((TypeElement)clazz, dictionaryVersion, packageCutPrefix, xmlAddPrefix));
+				
+				DictionaryEntry classEntry = createClassDictionaryEntry((TypeElement)clazz);
+				classEntry.setVersion(dictionaryVersion);
+				
+				entries.add(classEntry);
 			}
 		
-		entries.addAll(mapDictionaryEntries(getters, dictionaryVersion, packageCutPrefix, xmlAddPrefix));
+		entries.addAll(mapTypeDictionaryEntries(getters, dictionaryVersion));
 		
 		populateDictionary(dictionary, entries);
 		
@@ -99,7 +98,19 @@ public class XmlDictionaryGenerator extends AbstractProcessor {
 		return false;
 	}
 	
-	public static void populateDictionary(Document dictionary, List<DictionaryEntry> entries) {
+	public static List<DictionaryEntry> mapTypeDictionaryEntries(List<ExecutableElement> getters, int version) {
+		List<DictionaryEntry> result = new ArrayList<DictionaryEntry>();
+		
+		for (ExecutableElement getter : getters) {
+			DictionaryEntry entry = createAttrDictionaryEntry(getter);
+			entry.setVersion(version);
+			result.add(entry);
+		}
+		
+		return result;
+	}
+	
+	public void populateDictionary(Document dictionary, List<DictionaryEntry> entries) {
 		List<DictionaryEntry> entriesToPopulate = new ArrayList<DictionaryEntry>();
 		
 		for (DictionaryEntry entry : entries) {
@@ -109,7 +120,7 @@ public class XmlDictionaryGenerator extends AbstractProcessor {
 				log.warn(format("Failed to add dictionary entry with name '%s' because this name is already in use", entry.getName()));
 		}
 		
-		int id = getMaximumId(dictionary);
+		int id = getMaximumId(dictionary, startId);
 		
 		for (DictionaryEntry entry : entriesToPopulate) {
 			entry.setId(++id);

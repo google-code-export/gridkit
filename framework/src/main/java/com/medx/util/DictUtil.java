@@ -1,23 +1,39 @@
 package com.medx.util;
 
+import javax.lang.model.element.TypeElement;
+
 import com.medx.type.annotation.DictType;
 
+//TODO fix for classes without default package
 public class DictUtil {
-	public static String getAttrName(Class<?> clazz, String name) {
-		DictType dictType = clazz.getAnnotation(DictType.class);
-		
-		String attrName = clazz.getCanonicalName();
-		
+	public static String getAttrName(DictType dictType, String className, String attrName) {
 		if (!dictType.packageCutPrefix().isEmpty())
-			attrName = attrName.substring(dictType.packageCutPrefix().length() + 1);
+			className = className.substring(dictType.packageCutPrefix().length() + 1);
 		
 		if (!dictType.xmlAddPrefix().isEmpty())
-			attrName = dictType.xmlAddPrefix() + "." + attrName;
+			className = dictType.xmlAddPrefix() + "." + className;
 		
-		return attrName + "." + name;
+		return className + "." + attrName;
 	}
 	
-	public static String getJavaDictionary(Class<?> clazz) {
-		return null;
+	public static String getAttrName(Class<?> clazz, String attrName) {
+		return getAttrName(clazz.getAnnotation(DictType.class), clazz.getCanonicalName(), attrName);
+	}
+	
+	public static String getAttrName(TypeElement clazz, String attrName) {
+		return getAttrName(clazz.getAnnotation(DictType.class), clazz.getQualifiedName().toString(), attrName);
+	}
+	
+	public static String getJavaDictionaryPackage(TypeElement clazz) {
+		DictType dictType = clazz.getAnnotation(DictType.class);
+		
+		String packageName = clazz.getQualifiedName().toString();
+		
+		packageName = packageName.contains(".") ? packageName.substring(0, packageName.lastIndexOf('.')) : "";
+		
+		if (!packageName.isEmpty())
+			packageName = packageName.substring(dictType.packageCutPrefix().length());
+
+		return dictType.javaAddPrefix() + packageName;
 	}
 }
