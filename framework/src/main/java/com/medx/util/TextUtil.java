@@ -8,12 +8,19 @@ public class TextUtil {
 		return str;
 	}
 	
-	public static String getRawType(String str) {
-		int index = str.indexOf('<');
+	public static String getCamelPostfix(String str) {
+		for (int i = 0; i < str.length(); ++i)
+			if (Character.isUpperCase(str.charAt(i)))
+				return Character.toLowerCase(str.charAt(i)) + str.substring(i + 1);
+		return "";
+	}
+	
+	public static String repeat(char ch, int count) {
+		String result = "";
 		
-		if (index == -1)
-			return str;
-		else
-			return str.substring(0, index);
+		while (count-- > 0)
+			result += ch;
+		
+		return result;
 	}
 }

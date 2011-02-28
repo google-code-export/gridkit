@@ -1,5 +1,6 @@
 package com.medx.proxy;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class MapProxyImplTest {
 	
 	private static TypeRegistry typeRegistry = new XmlTypeRegistry(MapProxyImplTest.class.getClassLoader().getResourceAsStream("xml/test-attribute-dictionary.xml"));
 	private static AttrKeyRegistry attrKeyRegistry = new XmlAttrKeyRegistry(MapProxyImplTest.class.getClassLoader().getResourceAsStream("xml/test-attribute-dictionary.xml"));
-	private static MethodHandlerFactory methodHandlerFactory = new CachingMethodHandlerFactory(attrKeyRegistry, "com.medx.proxy.test");
+	private static MethodHandlerFactory methodHandlerFactory = new CachingMethodHandlerFactory(attrKeyRegistry);
 	private static MapProxyFactory proxyFactory = new MapProxyFactoryImpl(typeRegistry, methodHandlerFactory);
 	
 	public static Map<Integer, Object> customerMap = null;
@@ -42,9 +43,15 @@ public class MapProxyImplTest {
 	public void before() {
 		customerMap = new HashMap<Integer, Object>();
 		
+		int[] customerTags = {1,2,3};
+		String[] customerTitles = {"a", "b", "c"}; 
+		
 		int[] customerClasses = {6};
+		//TODO Integer.MIN_VALUE may cause serialization overhead
 		customerMap.put(Integer.MIN_VALUE, customerClasses);
 		customerMap.put(TestDictionary.Id.customerName, "Ted");
+		customerMap.put(TestDictionary.Id.customerTags, customerTags);
+		customerMap.put(TestDictionary.Id.customerTitles, customerTitles);
 		
 		orderMap = new HashMap<Integer, Object>();
 		
@@ -154,5 +161,16 @@ public class MapProxyImplTest {
 		order.set(TestDictionary.orderId, 1);
 		
 		assertEquals(Integer.valueOf(1), order.get(TestDictionary.orderId));
+	}
+	
+	@Test
+	public void test8() {
+		Customer customer = proxyFactory.createMapProxy(customerMap);
+		
+		int[] customerTags = {1,2,3};
+		String[] customerTitles = {"a", "b", "c"}; 
+		
+		assertArrayEquals(customerTags, customer.getTags());
+		assertArrayEquals(customerTitles, customer.getTitles());
 	}
 }

@@ -16,7 +16,7 @@ import nu.xom.Nodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.medx.util.TextUtil;
+import com.medx.util.ClassUtil;
 
 public class XmlAttrKeyRegistry implements AttrKeyRegistry {
 	private static final Logger log = LoggerFactory.getLogger(XmlAttrKeyRegistry.class);
@@ -77,7 +77,7 @@ public class XmlAttrKeyRegistry implements AttrKeyRegistry {
 				continue;
 			}
 			
-			String clazz = TextUtil.getRawType(node.getChildElements("type").get(0).getValue());
+			String clazz = ClassUtil.getRawType(node.getChildElements("type").get(0).getValue());
 			Class<?> type = null;
 			
 			if (typeShortcuts.containsKey(clazz.toUpperCase()))

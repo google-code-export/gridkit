@@ -44,4 +44,14 @@
         <name>orderItem.class</name>
         <type>java.lang.Class&lt;com.medx.proxy.test.model.OrderItem&gt;</type>
     </attribute>
+    
+   <attribute id="9" version="1">
+        <name>model.Customer.tags</name>
+        <type>int[]</type>
+    </attribute>
+    
+    <attribute id="10" version="1">
+        <name>model.Customer.titles</name>
+        <type>java.lang.String[]</type>
+    </attribute>
 </attributes>
