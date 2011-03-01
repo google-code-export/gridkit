@@ -2,15 +2,15 @@
 <dictionary:dictionary version="1" xmlns:dictionary="http://medx.com/framework/dictionary">
 	<typeDescriptors>
 		<typeDescriptor id="6" version="1">
-			<class>com.medx.proxy.test.model.Customer</class>
+			<class>com.medx.framework.proxy.test.model.Customer</class>
 		</typeDescriptor>
 		
 		<typeDescriptor id="7" version="1">
-			<class>com.medx.proxy.test.model.Order</class>
+			<class>com.medx.framework.proxy.test.model.Order</class>
 		</typeDescriptor>
 		
 		<typeDescriptor id="8" version="1">
-			<class>com.medx.proxy.test.model.OrderItem</class>
+			<class>com.medx.framework.proxy.test.model.OrderItem</class>
 		</typeDescriptor>
 	</typeDescriptors>
 	
@@ -37,7 +37,7 @@
 		
 		<attributeDescriptor id="4" version="1">
 			<name>model.Order.customer</name>
-			<class>com.medx.proxy.test.model.Customer</class>
+			<class>com.medx.framework.proxy.test.model.Customer</class>
 		</attributeDescriptor>
 		
 		<attributeDescriptor id="5" version="1">

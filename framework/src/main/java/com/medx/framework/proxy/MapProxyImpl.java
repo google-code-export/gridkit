@@ -94,7 +94,7 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, Attri
 		int[] interfaceIds = CastUtil.cast(backendMap.get(MapProxyFactory.CLASSES_KEY));
 		
 		interfaceIds = Arrays.copyOf(interfaceIds, interfaceIds.length + 1);
-		interfaceIds[interfaceIds.length] = mapProxyFactory.getTypeRegistry().getTypeId(clazz);
+		interfaceIds[interfaceIds.length] = mapProxyFactory.getTypeRegistry().getTypeKey(clazz).getId();
 		
 		backendMap.put(MapProxyFactory.CLASSES_KEY, interfaceIds);
 		

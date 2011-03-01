@@ -26,7 +26,7 @@ public class MapProxyFactoryImpl implements MapProxyFactoryInternal {
 		Class<?>[] interfaces = Arrays.copyOf(implementedInterfaces, implementedInterfaces.length + interfaceIds.length);
 		
 		for (int i = implementedInterfaces.length; i < interfaces.length; ++i)
-			interfaces[i] = typeRegistry.getType(interfaceIds[i - implementedInterfaces.length]);
+			interfaces[i] = typeRegistry.getTypeKey(interfaceIds[i - implementedInterfaces.length]).getClazz();
 		
 		MapProxyImpl mapProxyImpl = new MapProxyImpl(backendMap, this);
 		

@@ -2,7 +2,7 @@ package com.medx.framework.proxy.test.model;
 
 import com.medx.framework.type.annotation.DictType;
 
-@DictType(packageCutPrefix = "com.medx.proxy.test")
+@DictType(packageCutPrefix = "com.medx.framework.proxy.test")
 public interface OrderItem {
 	String getTitle();
 	

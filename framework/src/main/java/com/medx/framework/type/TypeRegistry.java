@@ -1,9 +1,7 @@
 package com.medx.framework.type;
 
 public interface TypeRegistry {
-	Class<?> getType(int id);
-	Class<?> getType(String name);
+	<T> TypeKey<T> getTypeKey(int id);
 	
-	int getTypeId(Class<?> clazz);
-	String getTypeName(Class<?> clazz);
+	<T> TypeKey<T> getTypeKey(Class<T> clazz);
 }
