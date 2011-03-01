@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlType;
 
-@XmlType(namespace=Dictionary.DICTIONARY_NAMESPACE)
+@XmlType(namespace=Dictionary.DICTIONARY_NAMESPACE, propOrder={})
 @XmlAccessorType(XmlAccessType.FIELD)
 public class DictionaryEntry implements Serializable {
 	private static final long serialVersionUID = -1769844964944839373L;

@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(namespace=Dictionary.DICTIONARY_NAMESPACE)
-@XmlType(namespace=Dictionary.DICTIONARY_NAMESPACE)
+@XmlType(namespace=Dictionary.DICTIONARY_NAMESPACE, propOrder={})
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Dictionary implements Serializable {
 	public static final String DICTIONARY_NAMESPACE = "http://medx.com/framework/dictionary";
