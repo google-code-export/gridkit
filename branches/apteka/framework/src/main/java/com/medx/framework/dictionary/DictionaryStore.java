@@ -3,7 +3,6 @@ package com.medx.framework.dictionary;
 import java.io.File;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -17,7 +16,7 @@ public class DictionaryStore {
 	private final Unmarshaller unmarshaller;
 	
 	public DictionaryStore() throws JAXBException {
-		jaxbContext = JAXBContext.newInstance(Dictionary.class);
+		jaxbContext = JAXBContext.newInstance(Dictionary.class.getPackage().getName());
 		
 		marshaller = jaxbContext.createMarshaller();
 		unmarshaller = jaxbContext.createUnmarshaller();
