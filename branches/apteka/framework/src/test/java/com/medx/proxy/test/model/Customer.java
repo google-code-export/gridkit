@@ -1,6 +1,6 @@
 package com.medx.proxy.test.model;
 
-import com.medx.type.annotation.DictType;
+import com.medx.framework.type.annotation.DictType;
 
 @DictType(packageCutPrefix = "com.medx.proxy.test")
 public interface Customer {

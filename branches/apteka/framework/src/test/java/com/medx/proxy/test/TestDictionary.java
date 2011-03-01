@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.junit.Ignore;
 
-import com.medx.attribute.AttrKey;
+import com.medx.framework.attribute.AttrKey;
 import com.medx.proxy.test.model.Customer;
 import com.medx.proxy.test.model.OrderItem;
 
