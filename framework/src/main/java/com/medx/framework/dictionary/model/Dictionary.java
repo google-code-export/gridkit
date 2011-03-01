@@ -11,10 +11,12 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-@XmlRootElement
-@XmlType(namespace="http://medx.com/dictionary")
+@XmlRootElement(namespace=Dictionary.DICTIONARY_NAMESPACE)
+@XmlType(namespace=Dictionary.DICTIONARY_NAMESPACE)
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Dictionary implements Serializable {
+	public static final String DICTIONARY_NAMESPACE = "http://medx.com/framework/dictionary";
+	
 	private static final long serialVersionUID = -3021789882790056395L;
 	
 	@XmlAttribute(required=true)

@@ -2,8 +2,10 @@ package com.medx.framework.dictionary.model;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
-@XmlRootElement
+@XmlRootElement(namespace=Dictionary.DICTIONARY_NAMESPACE)
+@XmlType(namespace=Dictionary.DICTIONARY_NAMESPACE)
 public class TypeDescriptor extends DictionaryEntry {
 	private static final long serialVersionUID = 6113820571290881884L;
 	
