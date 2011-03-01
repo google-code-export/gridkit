@@ -2,8 +2,6 @@ package com.medx.framework.dictionary.model;
 
 import java.io.Serializable;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlType;
@@ -11,9 +9,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.medx.framework.dictionary.model.adapter.IntegerAdapter;
 
-@XmlType(namespace=Dictionary.DICTIONARY_NAMESPACE, propOrder={})
-@XmlAccessorType(XmlAccessType.FIELD)
-public class DictionaryEntry implements Serializable {
+@XmlType(propOrder={})
+public abstract class DictionaryEntry implements Serializable {
 	private static final long serialVersionUID = -1769844964944839373L;
 	
 	@XmlID
