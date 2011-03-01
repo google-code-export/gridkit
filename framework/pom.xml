@@ -49,25 +49,26 @@
 				<executions>
 					<execution>
 						<phase>generate-resources</phase>
+						<id>generate-framework-dictionary</id>
 						<goals>
 							<goal>generate</goal>
 						</goals>
+						
+						<configuration>
+							<project>${project}</project>
+							<srcdir>${project.build.sourceDirectory}/com/medx/framework/dictionary/model</srcdir>
+							<destdir>${project.basedir}/src/main/resources/xml/framework</destdir>
+							<schemas>
+								<schema>
+									<namespace>http://medx.com/framework/dictionary</namespace>
+									<file>dictionary.xsd</file>
+								</schema>
+							</schemas>
+							<verbose>true</verbose>
+						</configuration>
 					</execution>
 				</executions>
 
-				<configuration>
-					<project>${project}</project>
-					<srcdir>${project.build.sourceDirectory}/com/medx/framework/dictionary/model</srcdir>
-					<destdir>src/main/resources/xml</destdir>
-					<schemas>
-						<schema>
-							<namespace>http://medx.com/framework/dictionary</namespace>
-							<file>dictionary.xsd</file>
-						</schema>
-					</schemas>
-					<verbose>true</verbose>
-				</configuration>
-				
 				<dependencies>
 					<dependency>
 						<groupId>javax.xml.bind</groupId>
