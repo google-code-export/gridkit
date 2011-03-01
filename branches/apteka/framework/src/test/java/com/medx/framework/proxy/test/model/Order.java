@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.medx.framework.type.annotation.DictType;
 
-@DictType(packageCutPrefix = "com.medx.proxy.test")
+@DictType(packageCutPrefix = "com.medx.framework.proxy.test")
 public interface Order {
 	int getId();
 	

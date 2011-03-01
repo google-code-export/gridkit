@@ -10,14 +10,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.medx.framework.attribute.AttrKeyRegistry;
+import com.medx.framework.attribute.AttrKeyRegistryImpl;
 import com.medx.framework.attribute.AttrMap;
-import com.medx.framework.attribute.XmlAttrKeyRegistry;
-import com.medx.framework.proxy.MapProxyFactory;
-import com.medx.framework.proxy.MapProxyFactoryImpl;
+import com.medx.framework.dictionary.DictionaryReader;
+import com.medx.framework.dictionary.model.Dictionary;
 import com.medx.framework.proxy.handler.CachingMethodHandlerFactory;
 import com.medx.framework.proxy.handler.MethodHandlerFactory;
 import com.medx.framework.proxy.test.TestDictionary;
@@ -25,14 +24,23 @@ import com.medx.framework.proxy.test.model.Customer;
 import com.medx.framework.proxy.test.model.Order;
 import com.medx.framework.proxy.test.model.OrderItem;
 import com.medx.framework.type.TypeRegistry;
-import com.medx.framework.type.XmlTypeRegistry;
+import com.medx.framework.type.TypeRegistryImpl;
 
-@Ignore
 public class MapProxyImplTest {
 	private static final double DELTA = 0.0001;
 	
-	private static TypeRegistry typeRegistry = new XmlTypeRegistry(MapProxyImplTest.class.getClassLoader().getResourceAsStream("xml/test-attribute-dictionary.xml"));
-	private static AttrKeyRegistry attrKeyRegistry = new XmlAttrKeyRegistry(MapProxyImplTest.class.getClassLoader().getResourceAsStream("xml/test-attribute-dictionary.xml"));
+	private static final Dictionary dictionary;
+	
+	static {
+		try {
+			dictionary = (new DictionaryReader()).readDictionary("src/test/resources/xml/test-dictionary.xml");
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	private static TypeRegistry typeRegistry = new TypeRegistryImpl(dictionary);
+	private static AttrKeyRegistry attrKeyRegistry = new AttrKeyRegistryImpl(dictionary);
 	private static MethodHandlerFactory methodHandlerFactory = new CachingMethodHandlerFactory(attrKeyRegistry);
 	private static MapProxyFactory proxyFactory = new MapProxyFactoryImpl(typeRegistry, methodHandlerFactory);
 	
