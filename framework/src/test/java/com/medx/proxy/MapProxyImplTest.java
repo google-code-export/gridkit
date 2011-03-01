@@ -12,17 +12,19 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.medx.attribute.AttrKeyRegistry;
-import com.medx.attribute.AttrMap;
-import com.medx.attribute.XmlAttrKeyRegistry;
-import com.medx.proxy.handler.CachingMethodHandlerFactory;
-import com.medx.proxy.handler.MethodHandlerFactory;
+import com.medx.framework.attribute.AttrKeyRegistry;
+import com.medx.framework.attribute.AttrMap;
+import com.medx.framework.attribute.XmlAttrKeyRegistry;
+import com.medx.framework.proxy.MapProxyFactory;
+import com.medx.framework.proxy.MapProxyFactoryImpl;
+import com.medx.framework.proxy.handler.CachingMethodHandlerFactory;
+import com.medx.framework.proxy.handler.MethodHandlerFactory;
+import com.medx.framework.type.TypeRegistry;
+import com.medx.framework.type.XmlTypeRegistry;
 import com.medx.proxy.test.TestDictionary;
 import com.medx.proxy.test.model.Customer;
 import com.medx.proxy.test.model.Order;
 import com.medx.proxy.test.model.OrderItem;
-import com.medx.type.TypeRegistry;
-import com.medx.type.XmlTypeRegistry;
 
 public class MapProxyImplTest {
 	private static final double DELTA = 0.0001;

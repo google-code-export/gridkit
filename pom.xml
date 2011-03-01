@@ -38,6 +38,11 @@
 			<id>maven-annotation-plugin-repo</id>
 			<url>http://maven-annotation-plugin.googlecode.com/svn/trunk/mavenrepo</url>
 		</pluginRepository>
+		
+		<pluginRepository>
+			<id>maven-repository.dev.java.net</id>
+			<url>http://download.java.net/maven/2</url>
+		</pluginRepository> 
 	</pluginRepositories>
 	
 	<modules>

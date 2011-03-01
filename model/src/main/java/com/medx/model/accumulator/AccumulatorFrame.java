@@ -6,8 +6,8 @@ import java.util.Map;
 
 import org.apache.xalan.xslt.Process;
 
+import com.medx.framework.type.annotation.DictType;
 import com.medx.metamodel.Facade;
-import com.medx.type.annotation.DictType;
 
 @Facade()
 @DictType(packageCutPrefix = "com.medx.model", javaAddPrefix = "com.medx.dictionary")

@@ -33,10 +33,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-import com.medx.attribute.AttrKey;
+import com.medx.framework.attribute.AttrKey;
+import com.medx.framework.util.DictUtil;
 import com.medx.processing.util.DictionaryUtil;
 import com.medx.processing.util.MirrorUtil;
-import com.medx.util.DictUtil;
 
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;

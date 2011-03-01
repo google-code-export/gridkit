@@ -11,9 +11,9 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 
+import com.medx.framework.util.DictUtil;
+import com.medx.framework.util.TextUtil;
 import com.medx.processing.dictionary.DictionaryEntry;
-import com.medx.util.DictUtil;
-import com.medx.util.TextUtil;
 
 public class MirrorUtil {
 	private static String GETTER_PATTERN  = "get[A-Z].*";
