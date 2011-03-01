@@ -16,7 +16,7 @@ public class DictionaryStore {
 	private final Unmarshaller unmarshaller;
 	
 	public DictionaryStore() throws JAXBException {
-		jaxbContext = JAXBContext.newInstance(Dictionary.class.getPackage().getName());
+		jaxbContext = JAXBContext.newInstance(Dictionary.class);
 		
 		marshaller = jaxbContext.createMarshaller();
 		unmarshaller = jaxbContext.createUnmarshaller();
