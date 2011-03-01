@@ -1,10 +1,10 @@
-package com.medx.framework.proxy.test.model;
+package com.medx.framework.test.model;
 
 import java.util.List;
 
-import com.medx.framework.type.annotation.DictType;
+import com.medx.framework.annotation.DictType;
 
-@DictType(packageCutPrefix = "com.medx.framework.proxy.test")
+@DictType
 public interface Order {
 	int getId();
 	
