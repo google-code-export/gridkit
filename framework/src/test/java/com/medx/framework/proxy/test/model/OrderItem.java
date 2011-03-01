@@ -1,4 +1,4 @@
-package com.medx.proxy.test.model;
+package com.medx.framework.proxy.test.model;
 
 import com.medx.framework.type.annotation.DictType;
 

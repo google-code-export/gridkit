@@ -1,4 +1,4 @@
-package com.medx.proxy.test.model;
+package com.medx.framework.proxy.test.model;
 
 import java.util.List;
 
