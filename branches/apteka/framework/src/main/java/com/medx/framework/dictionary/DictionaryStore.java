@@ -16,10 +16,12 @@ public class DictionaryStore {
 	private final Unmarshaller unmarshaller;
 	
 	public DictionaryStore() throws JAXBException {
-		jaxbContext = JAXBContext.newInstance(Dictionary.class);
+		jaxbContext = JAXBContext.newInstance(Dictionary.class.getPackage().getName());
 		
 		marshaller = jaxbContext.createMarshaller();
 		unmarshaller = jaxbContext.createUnmarshaller();
+		
+		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 	}
 	
 	public Dictionary loadDictionary(String fileName) throws JAXBException {

@@ -1,3 +1,95 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <attributes version="1">
+    <attribute id="1" version="1">
+        <name>accumulator.AccumulationStage.classAttribute</name>
+        <type>java.lang.Class&lt;com.medx.model.accumulator.AccumulationStage&gt;</type>
+    </attribute>
+    <attribute id="2" version="1">
+        <name>accumulator.Rule.classAttribute</name>
+        <type>java.lang.Class&lt;com.medx.model.accumulator.Rule&gt;</type>
+    </attribute>
+    <attribute id="3" version="1">
+        <name>accumulator.AccumValueRange.classAttribute</name>
+        <type>java.lang.Class&lt;com.medx.model.accumulator.AccumValueRange&gt;</type>
+    </attribute>
+    <attribute id="4" version="1">
+        <name>accumulator.AccumVectorMatcher.classAttribute</name>
+        <type>java.lang.Class&lt;com.medx.model.accumulator.AccumVectorMatcher&gt;</type>
+    </attribute>
+    <attribute id="5" version="1">
+        <name>accumulator.AccumulatorFrame.classAttribute</name>
+        <type>java.lang.Class&lt;com.medx.model.accumulator.AccumulatorFrame&gt;</type>
+    </attribute>
+    <attribute id="6" version="1">
+        <name>accumulator.Accumulator.classAttribute</name>
+        <type>java.lang.Class&lt;com.medx.model.accumulator.Accumulator&gt;</type>
+    </attribute>
+    <attribute id="7" version="1">
+        <name>accumulator.AccumulationStage.rules</name>
+        <type>java.util.Collection&lt;com.medx.model.accumulator.Rule&gt;</type>
+    </attribute>
+    <attribute id="8" version="1">
+        <name>accumulator.Rule.accumulatorCriteria</name>
+        <type>com.medx.model.accumulator.AccumulatorCriteria</type>
+    </attribute>
+    <attribute id="9" version="1">
+        <name>accumulator.Rule.claimCriteria</name>
+        <type>com.medx.model.accumulator.ClaimCriteria</type>
+    </attribute>
+    <attribute id="10" version="1">
+        <name>accumulator.Rule.matrix</name>
+        <type>com.medx.model.accumulator.AccumulationMatrix</type>
+    </attribute>
+    <attribute id="11" version="1">
+        <name>accumulator.AccumValueRange.lowerBound</name>
+        <type>java.lang.Number</type>
+    </attribute>
+    <attribute id="12" version="1">
+        <name>accumulator.AccumValueRange.higherBound</name>
+        <type>java.lang.Number</type>
+    </attribute>
+    <attribute id="13" version="1">
+        <name>accumulator.AccumVectorMatcher.conditions</name>
+        <type>java.util.Collection&lt;com.medx.model.accumulator.AccumValueMatcher&gt;</type>
+    </attribute>
+    <attribute id="14" version="1">
+        <name>accumulator.AccumulatorFrame.accumulators</name>
+        <type>java.util.Collection&lt;com.medx.model.accumulator.Accumulator&gt;</type>
+    </attribute>
+    <attribute id="15" version="1">
+        <name>accumulator.AccumulatorFrame.stages</name>
+        <type>java.util.List&lt;com.medx.model.accumulator.AccumulationStage&gt;</type>
+    </attribute>
+    <attribute id="16" version="1">
+        <name>accumulator.AccumulatorFrame.age</name>
+        <type>java.lang.Integer</type>
+    </attribute>
+    <attribute id="17" version="1">
+        <name>accumulator.AccumulatorFrame.stagesMap</name>
+        <type>java.util.Map&lt;java.lang.String,java.util.List&lt;com.medx.model.accumulator.AccumulationStage&gt;&gt;</type>
+    </attribute>
+    <attribute id="18" version="1">
+        <name>accumulator.AccumulatorFrame.price</name>
+        <type>java.lang.Double</type>
+    </attribute>
+    <attribute id="19" version="1">
+        <name>accumulator.AccumulatorFrame.process</name>
+        <type>org.apache.xalan.xslt.Process</type>
+    </attribute>
+    <attribute id="20" version="1">
+        <name>accumulator.AccumulatorFrame.inttt</name>
+        <type>int[]</type>
+    </attribute>
+    <attribute id="21" version="1">
+        <name>accumulator.AccumulatorFrame.stagesMapArray</name>
+        <type>java.util.Map&lt;java.lang.String,java.util.List&lt;com.medx.model.accumulator.AccumulationStage&gt;&gt;[]</type>
+    </attribute>
+    <attribute id="22" version="1">
+        <name>accumulator.Accumulator.key</name>
+        <type>com.medx.model.accumulator.AccumKey</type>
+    </attribute>
+    <attribute id="23" version="1">
+        <name>accumulator.Accumulator.lookBackPeriod</name>
+        <type>com.medx.model.accumulator.LookBackPeriod</type>
+    </attribute>
 </attributes>

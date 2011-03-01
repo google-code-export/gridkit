@@ -3,31 +3,28 @@ package com.medx.framework.dictionary.model;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-@XmlRootElement(namespace=Dictionary.DICTIONARY_NAMESPACE)
-@XmlType(namespace=Dictionary.DICTIONARY_NAMESPACE, propOrder={})
-@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement
+@XmlType(propOrder={})
 public class Dictionary implements Serializable {
-	public static final String DICTIONARY_NAMESPACE = "http://medx.com/framework/dictionary";
-	
 	private static final long serialVersionUID = -3021789882790056395L;
+	
+	public static final String FRAMEWORK_DICTIONARY_NAMESPACE = "http://medx.com/framework/dictionary";
 	
 	@XmlAttribute(required=true)
 	private int version;
 	
 	@XmlElementWrapper
-	@XmlAnyElement
+	@XmlElement(name="typeDescriptor")
 	private List<TypeDescriptor> typeDescriptors;
 	
 	@XmlElementWrapper
-	@XmlAnyElement
+	@XmlElement(name="attributeDescriptor")
 	private List<AttributeDescriptor> attributeDescriptors;
 
 	public List<TypeDescriptor> getTypeDescriptors() {
