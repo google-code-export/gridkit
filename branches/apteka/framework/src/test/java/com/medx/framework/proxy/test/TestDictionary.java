@@ -1,12 +1,12 @@
-package com.medx.proxy.test;
+package com.medx.framework.proxy.test;
 
 import java.util.List;
 
 import org.junit.Ignore;
 
 import com.medx.framework.attribute.AttrKey;
-import com.medx.proxy.test.model.Customer;
-import com.medx.proxy.test.model.OrderItem;
+import com.medx.framework.proxy.test.model.Customer;
+import com.medx.framework.proxy.test.model.OrderItem;
 
 @Ignore
 public class TestDictionary {

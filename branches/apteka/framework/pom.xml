@@ -68,7 +68,7 @@
 						</configuration>
 					</execution>
 				</executions>
-
+				
 				<dependencies>
 					<dependency>
 						<groupId>javax.xml.bind</groupId>
@@ -86,6 +86,28 @@
 						<version>2.2</version>
 					</dependency>
 				</dependencies>
+			</plugin>
+			
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.6</version>
+				
+				<executions>
+					<execution>
+						<phase>generate-resources</phase>
+						<id>clean-generated-xsd</id>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<delete includeemptydirs="true">
+									<fileset dir="${project.basedir}/src/main/resources/xml/framework/" includes="**/*" excludes="dictionary.xsd"/>
+								</delete>
+							</target>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

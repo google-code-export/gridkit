@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary version="1" xmlns="http://medx.com/framework/dictionary">
+	<typeDescriptors>
+		<typeDescriptor id="6" version="1">
+			<class>com.medx.proxy.test.model.Customer</class>
+		</typeDescriptor>
+		
+		<typeDescriptor id="7" version="1">
+			<class>com.medx.proxy.test.model.Order</class>
+		</typeDescriptor>
+		
+		<typeDescriptor id="8" version="1">
+			<class>com.medx.proxy.test.model.OrderItem</class>
+		</typeDescriptor>
+	</typeDescriptors>
+	
+	<attributeDescriptors>
+		<attributeDescriptor id="0" version="1">
+			<name>model.Customer.name</name>
+			<class>java.lang.String</class>
+		</attributeDescriptor>
+		
+		<attributeDescriptor id="1" version="1">
+			<name>model.Order.id</name>
+			<class>java.lang.Integer</class>
+		</attributeDescriptor>
+		
+		<attributeDescriptor id="2" version="1">
+			<name>model.OrderItem.title</name>
+			<class>java.lang.String</class>
+		</attributeDescriptor>
+		
+		<attributeDescriptor id="3" version="1">
+			<name>model.OrderItem.price</name>
+			<class>java.lang.Double</class>
+		</attributeDescriptor>
+		
+		<attributeDescriptor id="4" version="1">
+			<name>model.Order.customer</name>
+			<class>com.medx.proxy.test.model.Customer</class>
+		</attributeDescriptor>
+		
+		<attributeDescriptor id="5" version="1">
+			<name>model.Order.items</name>
+			<class>java.util.List&lt;com.medx.proxy.test.model.OrderItem&gt;</class>
+		</attributeDescriptor>
+		
+		<attributeDescriptor id="9" version="1">
+			<name>model.Customer.tags</name>
+			<class>int[]</class>
+		</attributeDescriptor>
+		
+		<attributeDescriptor id="10" version="1">
+			<name>model.Customer.titles</name>
+			<class>java.lang.String[]</class>
+		</attributeDescriptor>
+	</attributeDescriptors>
+</dictionary>

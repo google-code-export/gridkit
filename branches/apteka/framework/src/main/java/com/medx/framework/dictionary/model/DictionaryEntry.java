@@ -7,6 +7,9 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import com.medx.framework.dictionary.model.adapter.IntegerAdapter;
 
 @XmlType(namespace=Dictionary.DICTIONARY_NAMESPACE, propOrder={})
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -14,18 +17,19 @@ public class DictionaryEntry implements Serializable {
 	private static final long serialVersionUID = -1769844964944839373L;
 	
 	@XmlID
+	@XmlJavaTypeAdapter(IntegerAdapter.class)
 	@XmlAttribute(required=true)
-	private String id;
+	private Integer id;
 	
 	@XmlAttribute(required=false)
 	private int version;
 	
-	public String getId() {
+	public int getId() {
 		return id;
 	}
 	
 	public void setId(int id) {
-		this.id = String.valueOf(id);
+		this.id = id;
 	}
 	
 	public int getVersion() {
