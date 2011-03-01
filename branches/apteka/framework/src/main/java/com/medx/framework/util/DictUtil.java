@@ -1,5 +1,6 @@
 package com.medx.framework.util;
 
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 
 import com.medx.framework.annotation.ModelPackage;
@@ -26,14 +27,20 @@ public class DictUtil {
 	public static String getAttrName(Class<?> clazz, String attrName) {
 		Package modelPackage = getModelPackage(clazz.getPackage());
 		
-		return getAttrName(modelPackage.getAnnotation(ModelPackage.class), modelPackage.getName(), clazz.getCanonicalName(), attrName);
+		String packageName = modelPackage.getName();
+		String className = clazz.getCanonicalName();
+		
+		return getAttrName(modelPackage.getAnnotation(ModelPackage.class), packageName, className, attrName);
 	}
 	
-	public static String getAttrName(TypeElement clazz, String attrName) {
-		return null;
-		//return getAttrName(clazz.getAnnotation(DictType.class), clazz.getQualifiedName().toString(), attrName);
+	public static String getAttrName(TypeElement clazz, PackageElement modelPackage, String attrName) {
+		String packageName = modelPackage.getQualifiedName().toString();
+		String className = clazz.getQualifiedName().toString();
+		
+		return getAttrName(modelPackage.getAnnotation(ModelPackage.class), packageName, className, attrName);
 	}
 	
+	/*
 	public static String getJavaDictionaryPackage(TypeElement clazz) {
 		//DictType dictType = clazz.getAnnotation(DictType.class);
 		
@@ -47,4 +54,5 @@ public class DictUtil {
 		return null;
 		//return dictType.javaAddPrefix() + packageName;
 	}
+	*/
 }

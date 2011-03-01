@@ -6,11 +6,11 @@ import java.util.Map;
 
 import org.apache.xalan.xslt.Process;
 
-import com.medx.framework.type.annotation.DictType;
+import com.medx.framework.annotation.DictType;
 import com.medx.metamodel.Facade;
 
-@Facade()
-@DictType(packageCutPrefix = "com.medx.model", javaAddPrefix = "com.medx.dictionary")
+@Facade
+@DictType
 public interface AccumulatorFrame {
 	public Collection<Accumulator> getAccumulators();
 	

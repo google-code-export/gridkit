@@ -46,8 +46,8 @@ import freemarker.template.TemplateException;
 @SupportedAnnotationTypes("com.medx.type.annotation.DictType")
 @SupportedOptions({"sourceFolder", "dictionaryFile"})
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
-public class JavaDictionaryGenerator extends AbstractProcessor{
-	private static Logger log = LoggerFactory.getLogger(XmlDictionaryGenerator.class);
+public class JavaDictionaryGenerator {// extends AbstractProcessor{
+/*	private static Logger log = LoggerFactory.getLogger(XmlDictionaryGenerator.class);
 	
 	private String dictionaryFile;
 	private String sourceFolder;
@@ -177,5 +177,5 @@ public class JavaDictionaryGenerator extends AbstractProcessor{
 			clazz = clazz.substring(0, clazz.indexOf('<'));
 		
 		return clazz + ".class";
-	}
+	}*/
 }
