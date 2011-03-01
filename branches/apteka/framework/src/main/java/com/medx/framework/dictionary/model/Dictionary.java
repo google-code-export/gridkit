@@ -19,11 +19,11 @@ public class Dictionary implements Serializable {
 	@XmlAttribute(required=true)
 	private int version;
 	
-	@XmlElementWrapper
+	@XmlElementWrapper(required=false)
 	@XmlElement(name="typeDescriptor")
 	private List<TypeDescriptor> typeDescriptors;
 	
-	@XmlElementWrapper
+	@XmlElementWrapper(required=false)
 	@XmlElement(name="attributeDescriptor")
 	private List<AttributeDescriptor> attributeDescriptors;
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<medx:dictionary version="1" xmlns:medx="http://medx.com/framework/dictionary">
+<dictionary:dictionary version="1" xmlns:dictionary="http://medx.com/framework/dictionary">
 	<typeDescriptors>
 		<typeDescriptor id="6" version="1">
 			<class>com.medx.proxy.test.model.Customer</class>
@@ -55,4 +55,4 @@
 			<class>java.lang.String[]</class>
 		</attributeDescriptor>
 	</attributeDescriptors>
-</medx:dictionary>
+</dictionary:dictionary>
