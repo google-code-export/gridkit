@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.xml.bind.JAXBException;
-import javax.xml.stream.XMLStreamException;
 
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import com.medx.framework.dictionary.model.AttributeDescriptor;
 import com.medx.framework.dictionary.model.Dictionary;
@@ -14,19 +14,18 @@ import com.medx.framework.dictionary.model.TypeDescriptor;
 
 public class DictionaryStoreTest {
 	@Test
-	public void testLoad() throws JAXBException {
-		DictionaryStore ds = new DictionaryStore();
+	public void testRead() throws JAXBException, SAXException, IOException {
+		DictionaryReader ds = new DictionaryReader();
 		
-		Dictionary dictionary = ds.loadDictionary("src/test/resources/xml/test-dictionary.xml");
-		//Dictionary dictionary = ds.loadDictionary("/tmp/d.xml");
+		Dictionary dictionary = ds.readDictionary("src/test/resources/xml/test-dictionary.xml");
 		
 		System.out.println(dictionary.getAttributeDescriptors().size());
 		System.out.println(dictionary.getTypeDescriptors().size());
 	}
 	
-	@Test
+	//@Test
 	public void testStore() throws JAXBException {
-		DictionaryStore ds = new DictionaryStore();
+		DictionaryWriter ds = new DictionaryWriter();
 		
 		Dictionary dictionary = new Dictionary();
 		
@@ -41,6 +40,6 @@ public class DictionaryStoreTest {
 		
 		dictionary.getTypeDescriptors().add(typeDescriptor);
 		
-		ds.storeDictionary("/tmp/d.xml", dictionary);
+		ds.writeDictionary("/tmp/d.xml", dictionary);
 	}
 }
