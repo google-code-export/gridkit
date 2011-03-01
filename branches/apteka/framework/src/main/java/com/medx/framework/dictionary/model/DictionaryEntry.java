@@ -6,7 +6,9 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlID;
+import javax.xml.bind.annotation.XmlType;
 
+@XmlType(namespace=Dictionary.DICTIONARY_NAMESPACE)
 @XmlAccessorType(XmlAccessType.FIELD)
 public class DictionaryEntry implements Serializable {
 	private static final long serialVersionUID = -1769844964944839373L;
