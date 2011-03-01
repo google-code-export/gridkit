@@ -4,12 +4,7 @@ import static com.medx.processing.util.DictionaryUtil.getDictionaryVersion;
 import static com.medx.processing.util.DictionaryUtil.getMaximumId;
 import static com.medx.processing.util.DictionaryUtil.loadOrCreateDictionary;
 import static com.medx.processing.util.DictionaryUtil.storeDictionary;
-import static com.medx.processing.util.MirrorUtil.createAttrDictionaryEntry;
-import static com.medx.processing.util.MirrorUtil.createClassDictionaryEntry;
-import static com.medx.processing.util.MirrorUtil.filterExecutableElements;
-import static com.medx.processing.util.MirrorUtil.filterGetters;
-import static com.medx.processing.util.MirrorUtil.getEnvOption;
-import static com.medx.processing.util.XmlUtil.toXML;
+import static com.medx.processing.util.MirrorUtil.*;
 import static java.lang.String.format;
 
 import java.io.File;
@@ -27,7 +22,9 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
 
 import nu.xom.Document;
 import nu.xom.ParsingException;
@@ -37,22 +34,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-@SupportedAnnotationTypes("com.medx.type.annotation.DictType")
-@SupportedOptions({"dictionaryFile", "startId"})
+import com.medx.framework.annotation.DictType;
+import com.medx.framework.annotation.ModelPackage;
+import com.medx.framework.dictionary.model.AttributeDescriptor;
+import com.medx.framework.dictionary.model.TypeDescriptor;
+import com.medx.framework.util.DictUtil;
+
+@SupportedAnnotationTypes("com.medx.framework.annotation.ModelPackage")
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class XmlDictionaryGenerator extends AbstractProcessor {
 	private static Logger log = LoggerFactory.getLogger(XmlDictionaryGenerator.class);
 	
-	private String dictionaryFile;
-	private int startId;
-	
-	@Override
-    public synchronized void init(ProcessingEnvironment processingEnv) {
-    	super.init(processingEnv);
-    	
-    	dictionaryFile = getEnvOption("dictionaryFile", processingEnv);
-    	startId = Integer.valueOf(getEnvOption("startId", processingEnv));
-	}
+	private final static String GETTER_PATTERN  = "get[A-Z].*";
 	
 	@Override
 	public boolean process(Set<? extends TypeElement> elements, RoundEnvironment env) {
@@ -64,11 +57,42 @@ public class XmlDictionaryGenerator extends AbstractProcessor {
 		try {
 			return processInternal(elements, env);
 		} catch (Exception e) {
-			log.warn("Exception during annotation processing", e);
+			log.warn("Exception during xml dictionary generation", e);
 			throw new RuntimeException(e);
 		}
 	}
 	
+	private boolean processInternal(Set<? extends TypeElement> elements, RoundEnvironment env) {
+		for (TypeElement modelPackage : elements)
+			for (Element packet : env.getElementsAnnotatedWith(modelPackage))
+				processModelPackage((PackageElement)packet, env);
+		
+		return false;
+	}
+
+	private void processModelPackage(PackageElement modelPackage, RoundEnvironment env) {
+		Set<? extends Element> allDictTypes = env.getElementsAnnotatedWith(DictType.class);
+		
+		List<TypeElement> dictTypes = null; //filterDictTypes(allDictTypes, modelPackage);
+		
+		List<ExecutableElement> getters = new ArrayList<ExecutableElement>();
+		
+		for (TypeElement dictType : dictTypes)
+			getters.addAll(filterGetters(filterExecutableElements(dictType.getEnclosedElements())));
+	}
+	
+	/*
+	public static AttributeDescriptor createAttributeDescriptor(TypeElement clazz) {
+		AttributeDescriptor result = new AttributeDescriptor();
+		
+		result.setName(DictUtil.getAttrName(clazz, "classAttribute"));
+		result.
+		
+		return result;
+	}
+	*/
+	
+	/*
 	private boolean processInternal(Set<? extends TypeElement> elements, RoundEnvironment env) throws IOException, ValidityException, ParsingException, SAXException {
 		File dictionaryFileDesc = new File(dictionaryFile);
 	
@@ -97,7 +121,8 @@ public class XmlDictionaryGenerator extends AbstractProcessor {
 
 		return false;
 	}
-	
+	*/
+	/*
 	public static List<DictionaryEntry> mapTypeDictionaryEntries(List<ExecutableElement> getters, int version) {
 		List<DictionaryEntry> result = new ArrayList<DictionaryEntry>();
 		
@@ -127,4 +152,5 @@ public class XmlDictionaryGenerator extends AbstractProcessor {
 			dictionary.getRootElement().appendChild(toXML(entry));
 		}
 	}
+	*/
 }

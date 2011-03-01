@@ -4,26 +4,40 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 
+import com.medx.framework.dictionary.model.AttributeDescriptor;
+import com.medx.framework.util.ClassUtil;
 import com.medx.framework.util.DictUtil;
 import com.medx.framework.util.TextUtil;
-import com.medx.processing.dictionary.DictionaryEntry;
 
 public class MirrorUtil {
 	private static String GETTER_PATTERN  = "get[A-Z].*";
 	
 	public static String getEnvOption(String option, ProcessingEnvironment processingEnv) {
-		String result = processingEnv.getOptions().get(option);
+		return processingEnv.getOptions().get(option);
+	}
+	
+	public List<TypeElement> filterDictTypes(Set<? extends Element> dictTypes, PackageElement modelPackage) {
+		List<TypeElement> result = new ArrayList<TypeElement>();
 		
-		if (result == null)
-			throw new RuntimeException("No env option " + option + " was found");
-			
+		String packageName = modelPackage.getQualifiedName().toString();
+		
+		for (Element element : dictTypes)
+			if (element instanceof TypeElement) {
+				TypeElement typeElement = (TypeElement)element;
+				
+				if (!packageName.isEmpty() && typeElement.getQualifiedName().toString().startsWith(packageName + "."))
+					result.add(typeElement);
+			}
+		
 		return result;
 	}
 	
@@ -62,43 +76,19 @@ public class MirrorUtil {
 		return true;
 	}
 	
-	public static DictionaryEntry createClassDictionaryEntry(TypeElement clazz) {
-		DictionaryEntry result = new DictionaryEntry();
-		
-		result.setName(DictUtil.getAttrName(clazz, "classAttribute"));
-		result.setType("java.lang.Class<" + clazz.getQualifiedName() + ">");
-		
-		return result;
+	private List<AttributeDescriptor> mapAttributeDescriptors(List<ExecutableElement> getters, PackageElement modelPackage) {
+		return null;
 	}
 	
-	public static DictionaryEntry createAttrDictionaryEntry(ExecutableElement getter) {
-		DictionaryEntry result = new DictionaryEntry();
+	
+	public static AttributeDescriptor createAttributeDescriptor(ExecutableElement getter, PackageElement modelPackage) {
+		AttributeDescriptor result = new AttributeDescriptor();
 		
 		String attrName = TextUtil.getCamelPostfix(getter.getSimpleName().toString());
-		result.setName(DictUtil.getAttrName((TypeElement)getter.getEnclosingElement(), attrName));
+		result.setName(DictUtil.getAttrName((TypeElement)getter.getEnclosingElement(), modelPackage, attrName));
 		
-		result.setType(replacePrimitiveType(getter.getReturnType().toString()));
+		result.setClazz(ClassUtil.replacePrimitiveType(getter.getReturnType().toString()));
 		
 		return result;
-	}
-	
-	private static Map<String, Class<?>> primitiveTypeReplacements = new HashMap<String, Class<?>>();
-	
-	static {
-		primitiveTypeReplacements.put("bool", Boolean.class);
-		primitiveTypeReplacements.put("byte", Byte.class);
-		primitiveTypeReplacements.put("int", Integer.class);
-		primitiveTypeReplacements.put("long", Long.class);
-		primitiveTypeReplacements.put("char", Character.class);
-		primitiveTypeReplacements.put("float", Float.class);
-		primitiveTypeReplacements.put("double", Double.class);
-	}
-	
-	private static String replacePrimitiveType(String type) {
-		for (Map.Entry<String, Class<?>> replacement : primitiveTypeReplacements.entrySet())
-			if (replacement.getKey().equals(type))
-				return replacement.getValue().getCanonicalName();
-		
-		return type;
 	}
 }

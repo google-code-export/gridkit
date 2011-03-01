@@ -9,9 +9,9 @@ import java.util.Map;
 public class ClassUtil {
 	public static final List<String> primitiveTypes = Collections.unmodifiableList(Arrays.asList("boolean", "byte", "int", "long", "char", "float", "double"));
 	
-	public static final Map<String, String> primitiveArrayChars = new HashMap<String, String>();
-	
 	private static String ARRAY_POSTFIX = "[]";
+	
+	public static final Map<String, String> primitiveArrayChars = new HashMap<String, String>();
 	
 	static {
 		primitiveArrayChars.put("boolean", "Z");
@@ -23,6 +23,18 @@ public class ClassUtil {
 		primitiveArrayChars.put("double", "D");
 	}
 	
+	private static Map<String, Class<?>> primitiveTypeReplacements = new HashMap<String, Class<?>>();
+	
+	static {
+		primitiveTypeReplacements.put("bool", Boolean.class);
+		primitiveTypeReplacements.put("byte", Byte.class);
+		primitiveTypeReplacements.put("int", Integer.class);
+		primitiveTypeReplacements.put("long", Long.class);
+		primitiveTypeReplacements.put("char", Character.class);
+		primitiveTypeReplacements.put("float", Float.class);
+		primitiveTypeReplacements.put("double", Double.class);
+	}
+	
 	public static String getParentPackage(String packageName) {
 		if (packageName.contains("."))
 			return packageName.substring(0, packageName.lastIndexOf('.'));
@@ -30,6 +42,12 @@ public class ClassUtil {
 			throw new IllegalArgumentException("packageName");
 		else
 			return "";
+	}
+	
+	public static String replacePrimitiveType(String clazz) {
+		if (primitiveTypeReplacements.keySet().contains(clazz))
+			return primitiveTypeReplacements.get(clazz).getCanonicalName();
+		return clazz;
 	}
 	
 	public static String getRawType(String type) {
