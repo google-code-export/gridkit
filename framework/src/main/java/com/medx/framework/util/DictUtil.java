@@ -2,38 +2,49 @@ package com.medx.framework.util;
 
 import javax.lang.model.element.TypeElement;
 
-import com.medx.framework.type.annotation.DictType;
+import com.medx.framework.annotation.ModelPackage;
 
-//TODO fix for classes without default package
 public class DictUtil {
-	public static String getAttrName(DictType dictType, String className, String attrName) {
-		if (!dictType.packageCutPrefix().isEmpty())
-			className = className.substring(dictType.packageCutPrefix().length() + 1);
+	private static String getAttrName(ModelPackage modelPackage, String packageName, String className, String attrName) {
+		if (!packageName.isEmpty() && !className.startsWith(packageName + "."))
+			throw new IllegalArgumentException("packageName | className");
 		
-		if (!dictType.xmlAddPrefix().isEmpty())
-			className = dictType.xmlAddPrefix() + "." + className;
+		String resultAttrName = packageName.isEmpty() ? className : className.substring(packageName.length() + 1);
 		
-		return className + "." + attrName;
+		resultAttrName = modelPackage.value().isEmpty() ? resultAttrName : modelPackage.value() + "." + resultAttrName;
+
+		return resultAttrName + "." + attrName;
+	}
+	
+	private static Package getModelPackage(Package packet) {
+		if (packet.isAnnotationPresent(ModelPackage.class))
+			return packet;
+		else
+			return getModelPackage(Package.getPackage(ClassUtil.getParentPackage(packet.getName())));
 	}
 	
 	public static String getAttrName(Class<?> clazz, String attrName) {
-		return getAttrName(clazz.getAnnotation(DictType.class), clazz.getCanonicalName(), attrName);
+		Package modelPackage = getModelPackage(clazz.getPackage());
+		
+		return getAttrName(modelPackage.getAnnotation(ModelPackage.class), modelPackage.getName(), clazz.getCanonicalName(), attrName);
 	}
 	
 	public static String getAttrName(TypeElement clazz, String attrName) {
-		return getAttrName(clazz.getAnnotation(DictType.class), clazz.getQualifiedName().toString(), attrName);
+		return null;
+		//return getAttrName(clazz.getAnnotation(DictType.class), clazz.getQualifiedName().toString(), attrName);
 	}
 	
 	public static String getJavaDictionaryPackage(TypeElement clazz) {
-		DictType dictType = clazz.getAnnotation(DictType.class);
+		//DictType dictType = clazz.getAnnotation(DictType.class);
 		
 		String packageName = clazz.getQualifiedName().toString();
 		
 		packageName = packageName.contains(".") ? packageName.substring(0, packageName.lastIndexOf('.')) : "";
 		
-		if (!packageName.isEmpty())
-			packageName = packageName.substring(dictType.packageCutPrefix().length());
+		//if (!packageName.isEmpty())
+		//	packageName = packageName.substring(dictType.packageCutPrefix().length());
 
-		return dictType.javaAddPrefix() + packageName;
+		return null;
+		//return dictType.javaAddPrefix() + packageName;
 	}
 }

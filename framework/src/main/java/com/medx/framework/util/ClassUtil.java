@@ -23,6 +23,15 @@ public class ClassUtil {
 		primitiveArrayChars.put("double", "D");
 	}
 	
+	public static String getParentPackage(String packageName) {
+		if (packageName.contains("."))
+			return packageName.substring(0, packageName.lastIndexOf('.'));
+		else if (packageName.isEmpty())
+			throw new IllegalArgumentException("packageName");
+		else
+			return "";
+	}
+	
 	public static String getRawType(String type) {
 		int index = type.indexOf('<');
 		

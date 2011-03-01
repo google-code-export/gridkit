@@ -19,10 +19,10 @@ import com.medx.framework.dictionary.DictionaryReader;
 import com.medx.framework.dictionary.model.Dictionary;
 import com.medx.framework.proxy.handler.CachingMethodHandlerFactory;
 import com.medx.framework.proxy.handler.MethodHandlerFactory;
-import com.medx.framework.proxy.test.TestDictionary;
-import com.medx.framework.proxy.test.model.Customer;
-import com.medx.framework.proxy.test.model.Order;
-import com.medx.framework.proxy.test.model.OrderItem;
+import com.medx.framework.test.TestDictionary;
+import com.medx.framework.test.model.Customer;
+import com.medx.framework.test.model.Order;
+import com.medx.framework.test.model.OrderItem;
 import com.medx.framework.type.TypeRegistry;
 import com.medx.framework.type.TypeRegistryImpl;
 
