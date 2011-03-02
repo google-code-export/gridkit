@@ -132,6 +132,9 @@
 								<goal>process</goal>
 							</goals>
 							<phase>process-sources</phase>
+							<configuration>
+								<outputDirectory>src/main/java</outputDirectory>
+							</configuration>
 						</execution>
 					</executions>
 					<dependencies>

@@ -13,12 +13,6 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	
-	<properties>
-		<project.build.xmlDirectory>${basedir}/src/main/xml</project.build.xmlDirectory>
-		<attribute.dictionary.folder>com/medx/dictionary</attribute.dictionary.folder>
-		<dynamic.model.root>com.medx.model</dynamic.model.root>
-	</properties>
-	
 	<dependencies>
 		<dependency>
 			<groupId>org.apteka.insurance</groupId>

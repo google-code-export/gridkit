@@ -35,8 +35,27 @@ public class ClassUtil {
 		primitiveTypeReplacements.put("double", Double.class);
 	}
 	
-	public static boolean isInPackage(String clazz, String packet) {
+	public static String getSimpleClassName(String clazz) {
+		return clazz.contains(".") ? clazz.substring(clazz.lastIndexOf('.') + 1) : clazz;
+	}
+	
+	public static String getClassPackage(String clazz) {
+		return clazz.contains(".") ? clazz.substring(0, clazz.lastIndexOf('.')) : "";
+	}
+	
+	public static String getFullClassName(String clazz, String packet) {
+		return packet.isEmpty() ? clazz : packet + "." + clazz;
+	}
+	
+	public static boolean isClassInPackage(String clazz, String packet) {
 		return packet.isEmpty() ? true : clazz.startsWith(packet + ".");
+	}
+	
+	public static boolean isPackageInPackage(String childPackage, String parentPackage) {
+		if (parentPackage.equals(childPackage))
+			return true;
+		
+		return childPackage.isEmpty() ? false : childPackage.startsWith(parentPackage + ".");
 	}
 	
 	public static boolean hasParentPackage(String packageName) {

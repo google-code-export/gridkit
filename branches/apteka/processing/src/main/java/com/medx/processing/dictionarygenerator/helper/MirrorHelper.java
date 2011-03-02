@@ -7,7 +7,6 @@ import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 
@@ -25,16 +24,14 @@ public class MirrorHelper {
 		return processingEnv.getOptions().get(option);
 	}
 	
-	public static List<TypeElement> filterDictTypes(Set<? extends Element> dictTypes, PackageElement modelPackage) {
+	public static List<TypeElement> filterDictTypes(Set<? extends Element> dictTypes, String packageName) {
 		List<TypeElement> result = new ArrayList<TypeElement>();
-		
-		String packageName = modelPackage.getQualifiedName().toString();
 		
 		for (Element element : dictTypes)
 			if (element instanceof TypeElement) {
 				TypeElement typeElement = (TypeElement)element;
 				
-				if (ClassUtil.isInPackage(typeElement.getQualifiedName().toString(), packageName))
+				if (ClassUtil.isClassInPackage(typeElement.getQualifiedName().toString(), packageName))
 					result.add(typeElement);
 			}
 		
@@ -76,23 +73,22 @@ public class MirrorHelper {
 		return true;
 	}
 	
-	public static List<AttributeDescriptor> mapAttributeDescriptors(List<ExecutableElement> getters, PackageElement modelPackage) {
+	public static List<AttributeDescriptor> mapAttributeDescriptors(List<ExecutableElement> getters, String modelPackageName, ModelPackage modelPackage) {
 		List<AttributeDescriptor> result = new ArrayList<AttributeDescriptor>();
 		
 		for(ExecutableElement getter : getters)
-			result.add(createAttributeDescriptor(getter, modelPackage));
+			result.add(createAttributeDescriptor(getter, modelPackageName, modelPackage));
 		
 		return result;
 	}
 	
-	public static AttributeDescriptor createAttributeDescriptor(ExecutableElement getter, PackageElement modelPackage) {
+	public static AttributeDescriptor createAttributeDescriptor(ExecutableElement getter, String modelPackageName, ModelPackage modelPackage) {
 		AttributeDescriptor result = new AttributeDescriptor();
 		
 		String attrName = TextUtil.getCamelPostfix(getter.getSimpleName().toString());
 		String className = ((TypeElement)getter.getEnclosingElement()).getQualifiedName().toString();
-		String modelPackageName = modelPackage.getQualifiedName().toString();
 		
-		result.setName(DictUtil.getAttrName(modelPackage.getAnnotation(ModelPackage.class), modelPackageName, className, attrName));
+		result.setName(DictUtil.getAttrName(modelPackage, modelPackageName, className, attrName));
 		
 		result.setClazz(ClassUtil.replacePrimitiveType(getter.getReturnType().toString()));
 		
