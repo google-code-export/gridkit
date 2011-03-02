@@ -45,8 +45,7 @@
 				<artifactId>maven-processor-plugin</artifactId>
 				<configuration>
 					<processors>
-						<processor>com.medx.processing.dictionary.DictionaryGenerationProcessor</processor>
-						<!--<processor>com.medx.processing.dictionary.JavaDictionaryGenerator</processor>-->
+						<processor>com.medx.processing.dictionarygenerator.DictionaryGenerationProcessor</processor>
 					</processors>
 				</configuration>
 			</plugin>
