@@ -1,10 +1,10 @@
-package com.medx.processing.dictionary;
+package com.medx.processing.dictionarygenerator;
 
-import static com.medx.processing.util.MirrorUtil.createTypeDescriptor;
-import static com.medx.processing.util.MirrorUtil.filterDictTypes;
-import static com.medx.processing.util.MirrorUtil.filterExecutableElements;
-import static com.medx.processing.util.MirrorUtil.filterGetters;
-import static com.medx.processing.util.MirrorUtil.mapAttributeDescriptors;
+import static com.medx.processing.dictionarygenerator.helper.MirrorHelper.createTypeDescriptor;
+import static com.medx.processing.dictionarygenerator.helper.MirrorHelper.filterDictTypes;
+import static com.medx.processing.dictionarygenerator.helper.MirrorHelper.filterExecutableElements;
+import static com.medx.processing.dictionarygenerator.helper.MirrorHelper.filterGetters;
+import static com.medx.processing.dictionarygenerator.helper.MirrorHelper.mapAttributeDescriptors;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +31,7 @@ import com.medx.framework.dictionary.DictionaryWriter;
 import com.medx.framework.dictionary.model.AttributeDescriptor;
 import com.medx.framework.dictionary.model.Dictionary;
 import com.medx.framework.dictionary.model.TypeDescriptor;
+import com.medx.processing.dictionarygenerator.helper.DictionaryHelper;
 
 public class ModelPackageProcessor {
 	private PackageElement modelPackage;
@@ -43,7 +44,7 @@ public class ModelPackageProcessor {
 	private Map<String, List<AttributeDescriptor>> attributeDescriptors = new HashMap<String, List<AttributeDescriptor>>();
 	
 	private Dictionary dictionary;
-	private DictionaryManager dictionaryManager;
+	private DictionaryHelper dictionaryManager;
 	
 	public ModelPackageProcessor(PackageElement modelPackage, RoundEnvironment environment) {
 		this.modelPackage = modelPackage;
@@ -63,12 +64,6 @@ public class ModelPackageProcessor {
 		}
 		
 		populateDictionary();
-		
-		System.out.println("++++++++++++++ " + typeDescriptors.size());
-		System.out.println("++++++++++++++ " + dictionary.getTypeDescriptors().size());
-		
-		System.out.println("-------------- " + typeDescriptors);
-		System.out.println("++++++++++++++ " + dictionary.getTypeDescriptors());
 		
 		try {
 			storeDictionary();
@@ -150,9 +145,9 @@ public class ModelPackageProcessor {
 		if ((new File(xmlDictionary.path()).exists()))
 			dictionary = dictionaryReader.readDictionary(xmlDictionary.path());
 		else
-			dictionary = DictionaryManager.createEmptyDictionary();
+			dictionary = DictionaryHelper.createEmptyDictionary();
 		
-		dictionaryManager = new DictionaryManager(dictionary);
+		dictionaryManager = new DictionaryHelper(dictionary);
 	}
 	
 	private void storeDictionary() throws JAXBException {
