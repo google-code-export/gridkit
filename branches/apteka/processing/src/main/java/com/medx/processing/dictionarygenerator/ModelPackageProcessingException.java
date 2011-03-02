@@ -1,4 +1,4 @@
-package com.medx.processing.dictionary;
+package com.medx.processing.dictionarygenerator;
 
 import javax.lang.model.element.Element;
 

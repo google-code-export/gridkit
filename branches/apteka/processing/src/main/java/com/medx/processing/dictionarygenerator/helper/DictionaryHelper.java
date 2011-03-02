@@ -1,4 +1,4 @@
-package com.medx.processing.dictionary;
+package com.medx.processing.dictionarygenerator.helper;
 
 import java.util.ArrayList;
 
@@ -6,10 +6,10 @@ import com.medx.framework.dictionary.model.AttributeDescriptor;
 import com.medx.framework.dictionary.model.Dictionary;
 import com.medx.framework.dictionary.model.TypeDescriptor;
 
-public class DictionaryManager {
+public class DictionaryHelper {
 	private final Dictionary dictionary;
 
-	public DictionaryManager(Dictionary dictionary) {
+	public DictionaryHelper(Dictionary dictionary) {
 		this.dictionary = dictionary;
 	}
 

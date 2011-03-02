@@ -1,4 +1,4 @@
-package com.medx.processing.util;
+package com.medx.processing.dictionarygenerator.helper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ import com.medx.framework.util.ClassUtil;
 import com.medx.framework.util.DictUtil;
 import com.medx.framework.util.TextUtil;
 
-public class MirrorUtil {
+public class MirrorHelper {
 	private static String GETTER_PATTERN  = "get[A-Z].*";
 	
 	public static String getEnvOption(String option, ProcessingEnvironment processingEnv) {

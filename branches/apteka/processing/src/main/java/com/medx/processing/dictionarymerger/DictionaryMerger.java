@@ -1,4 +1,4 @@
-package com.medx.processing.dictionary;
+package com.medx.processing.dictionarymerger;
 
 public class DictionaryMerger {
 	/*private static final Logger log = LoggerFactory.getLogger(DictionaryMerger.class);
