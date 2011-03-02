@@ -22,7 +22,7 @@ public class DictionaryGenerationProcessor extends AbstractProcessor {
 	
 	@Override
 	public boolean process(Set<? extends TypeElement> elements, RoundEnvironment environment) {
-		log.info("+++++++++++++++++++++++++++++++++++++++ strated +++++++++++++++++++++++++++++++++++++++");
+		log.info("+++++++++++++++++++++++++++++++++++++++ strated size = " + elements.size());
 		
 		for (TypeElement modelPackage : elements)
 			for (Element packet : environment.getElementsAnnotatedWith(modelPackage))
