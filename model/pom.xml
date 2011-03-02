@@ -7,22 +7,16 @@
 	<artifactId>model</artifactId>
 	
 	<parent>
-		<groupId>org.apteka.insurance</groupId>
-		<artifactId>insurance-parent</artifactId>
+		<groupId>com.medx</groupId>
+		<artifactId>parent</artifactId>
 		<version>0.0.1</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	
 	<dependencies>
 		<dependency>
-			<groupId>org.apteka.insurance</groupId>
+			<groupId>com.medx</groupId>
 			<artifactId>framework</artifactId>
-		</dependency>
-	
-		<dependency>
-			<groupId>org.apteka.insurance</groupId>
-			<artifactId>dictionary-generator</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		
 		<dependency>

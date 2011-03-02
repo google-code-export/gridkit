@@ -8,8 +8,8 @@
 	<packaging>war</packaging>
 	
 	<parent>
-		<groupId>org.apteka.insurance</groupId>
-		<artifactId>insurance-parent</artifactId>
+		<groupId>com.medx</groupId>
+		<artifactId>parent</artifactId>
 		<version>0.0.1</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>

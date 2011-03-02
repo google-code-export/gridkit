@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.xalan.xslt.Process;
-
 import com.medx.framework.annotation.DictType;
 import com.medx.metamodel.Facade;
 
@@ -23,8 +21,6 @@ public interface AccumulatorFrame {
 	public void getQqqq();
 	
 	public Double getPrice();
-	
-	public Process getProcess();
 	
 	public int[] getInttt();
 	
