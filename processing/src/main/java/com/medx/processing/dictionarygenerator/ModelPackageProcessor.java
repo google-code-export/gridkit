@@ -25,6 +25,7 @@ import javax.xml.bind.JAXBException;
 import org.xml.sax.SAXException;
 
 import com.medx.framework.annotation.DictType;
+import com.medx.framework.annotation.JavaDictionary;
 import com.medx.framework.annotation.XmlDictionary;
 import com.medx.framework.dictionary.DictionaryReader;
 import com.medx.framework.dictionary.DictionaryWriter;
@@ -38,23 +39,26 @@ public class ModelPackageProcessor {
 	private RoundEnvironment environment;
 	
 	private XmlDictionary xmlDictionary;
-	//private JavaDictionary javaDictionary;
+	private JavaDictionary javaDictionary;
 	
 	private Map<String, TypeDescriptor> typeDescriptors = new HashMap<String, TypeDescriptor>();
 	private Map<String, List<AttributeDescriptor>> attributeDescriptors = new HashMap<String, List<AttributeDescriptor>>();
 	
 	private Dictionary dictionary;
-	private DictionaryHelper dictionaryManager;
+	private DictionaryHelper dictionaryHelper;
 	
 	public ModelPackageProcessor(PackageElement modelPackage, RoundEnvironment environment) {
 		this.modelPackage = modelPackage;
 		this.environment = environment;
 		
 		xmlDictionary = modelPackage.getAnnotation(XmlDictionary.class);
-		//javaDictionary = modelPackage.getAnnotation(JavaDictionary.class);
+		javaDictionary = modelPackage.getAnnotation(JavaDictionary.class);
 	}
 
 	public void process() throws ModelPackageProcessingException {
+		if (xmlDictionary == null)
+			return;
+		
 		prepareDescriptors();
 		
 		try {
@@ -70,6 +74,9 @@ public class ModelPackageProcessor {
 		} catch (Exception e) {
 			throw new ModelPackageProcessingException("Failed to store dicionary", e, modelPackage);
 		}
+		
+		if (javaDictionary == null)
+			return;
 	}
 	
 	private void prepareDescriptors() {
@@ -90,14 +97,14 @@ public class ModelPackageProcessor {
 	}
 	
 	private void populateDictionary() {
-		int nextId = dictionaryManager.getNextId(xmlDictionary.startId());
+		int nextId = dictionaryHelper.getNextId(xmlDictionary.startId());
 		nextId = populateTypeDescriptors(nextId);
 		nextId = populateAttributeDescriptors(nextId);
 	}
 	
 	private int populateTypeDescriptors(int nextId) {
 		for (Map.Entry<String, TypeDescriptor> descEntry : typeDescriptors.entrySet()) {
-			TypeDescriptor oldDesc = dictionaryManager.addTypeDescriptor(descEntry.getValue());
+			TypeDescriptor oldDesc = dictionaryHelper.addTypeDescriptor(descEntry.getValue());
 			
 			if (oldDesc != descEntry.getValue()) {
 				descEntry.setValue(oldDesc);
@@ -120,7 +127,7 @@ public class ModelPackageProcessor {
 			for (Iterator<AttributeDescriptor> iter = descList.iterator(); iter.hasNext(); ) {
 				AttributeDescriptor desc = iter.next();
 				
-				AttributeDescriptor oldDesc = dictionaryManager.addAttributeDescriptor(desc);
+				AttributeDescriptor oldDesc = dictionaryHelper.addAttributeDescriptor(desc);
 				
 				if (oldDesc != desc) { 
 					iter.remove();
@@ -147,7 +154,7 @@ public class ModelPackageProcessor {
 		else
 			dictionary = DictionaryHelper.createEmptyDictionary();
 		
-		dictionaryManager = new DictionaryHelper(dictionary);
+		dictionaryHelper = new DictionaryHelper(dictionary);
 	}
 	
 	private void storeDictionary() throws JAXBException {
