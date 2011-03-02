@@ -1,59 +1,43 @@
 package com.medx.processing.dictionary;
 
-import static com.medx.processing.util.DictionaryUtil.getDictionaryVersion;
-import static com.medx.processing.util.DictionaryUtil.getMaximumId;
-import static com.medx.processing.util.DictionaryUtil.loadOrCreateDictionary;
-import static com.medx.processing.util.DictionaryUtil.storeDictionary;
-import static com.medx.processing.util.MirrorUtil.*;
-import static java.lang.String.format;
+import static com.medx.processing.util.MirrorUtil.createTypeDescriptor;
+import static com.medx.processing.util.MirrorUtil.filterDictTypes;
+import static com.medx.processing.util.MirrorUtil.filterExecutableElements;
+import static com.medx.processing.util.MirrorUtil.filterGetters;
+import static com.medx.processing.util.MirrorUtil.mapAttributeDescriptors;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedOptions;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
-
-import nu.xom.Document;
-import nu.xom.ParsingException;
-import nu.xom.ValidityException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 
 import com.medx.framework.annotation.DictType;
-import com.medx.framework.annotation.ModelPackage;
 import com.medx.framework.dictionary.model.AttributeDescriptor;
 import com.medx.framework.dictionary.model.TypeDescriptor;
-import com.medx.framework.util.DictUtil;
 
 @SupportedAnnotationTypes("com.medx.framework.annotation.ModelPackage")
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class XmlDictionaryGenerator extends AbstractProcessor {
 	private static Logger log = LoggerFactory.getLogger(XmlDictionaryGenerator.class);
 	
-	private final static String GETTER_PATTERN  = "get[A-Z].*";
+	private Map<String, TypeDescriptor> typeDescriptors = new HashMap<String, TypeDescriptor>();
+	private Map<String, List<AttributeDescriptor>> attributeDescriptors = new HashMap<String, List<AttributeDescriptor>>();
 	
 	@Override
 	public boolean process(Set<? extends TypeElement> elements, RoundEnvironment env) {
-		if (elements.size() == 0) {
-			System.out.println("TODO fix - XmlDictionaryGenerator.empty");
-			return false;
-		}
-		
 		try {
 			return processInternal(elements, env);
 		} catch (Exception e) {
@@ -67,18 +51,23 @@ public class XmlDictionaryGenerator extends AbstractProcessor {
 			for (Element packet : env.getElementsAnnotatedWith(modelPackage))
 				processModelPackage((PackageElement)packet, env);
 		
-		return false;
+		return true;
 	}
 
 	private void processModelPackage(PackageElement modelPackage, RoundEnvironment env) {
 		Set<? extends Element> allDictTypes = env.getElementsAnnotatedWith(DictType.class);
 		
-		List<TypeElement> dictTypes = null; //filterDictTypes(allDictTypes, modelPackage);
+		List<TypeElement> dictTypes = filterDictTypes(allDictTypes, modelPackage);
 		
-		List<ExecutableElement> getters = new ArrayList<ExecutableElement>();
-		
-		for (TypeElement dictType : dictTypes)
-			getters.addAll(filterGetters(filterExecutableElements(dictType.getEnclosedElements())));
+		for (TypeElement dictType : dictTypes) {
+			String className = dictType.getQualifiedName().toString();
+			
+			typeDescriptors.put(className, createTypeDescriptor(dictType));
+			
+			List<ExecutableElement> getters = filterGetters(filterExecutableElements(dictType.getEnclosedElements()));
+			
+			attributeDescriptors.put(className, mapAttributeDescriptors(getters, modelPackage));
+		}
 	}
 	
 	/*

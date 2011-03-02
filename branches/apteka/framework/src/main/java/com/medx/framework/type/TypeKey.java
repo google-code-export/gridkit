@@ -9,7 +9,8 @@ public class TypeKey<T> implements Serializable {
 	private final int version;
 	private final Class<T> clazz;
 	
-	@SuppressWarnings("unchecked") public TypeKey(int id, int version, Class<?> clazz) {
+	@SuppressWarnings("unchecked")
+	public TypeKey(int id, int version, Class<?> clazz) {
 		this.id = id;
 		this.version = version;
 		this.clazz = (Class<T>)clazz;

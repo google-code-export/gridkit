@@ -11,7 +11,7 @@ public class ClassUtil {
 	
 	private static String ARRAY_POSTFIX = "[]";
 	
-	public static final Map<String, String> primitiveArrayChars = new HashMap<String, String>();
+	private static final Map<String, String> primitiveArrayChars = new HashMap<String, String>();
 	
 	static {
 		primitiveArrayChars.put("boolean", "Z");
@@ -33,6 +33,14 @@ public class ClassUtil {
 		primitiveTypeReplacements.put("char", Character.class);
 		primitiveTypeReplacements.put("float", Float.class);
 		primitiveTypeReplacements.put("double", Double.class);
+	}
+	
+	public static boolean isInPackage(String clazz, String packet) {
+		return packet.isEmpty() ? true : clazz.startsWith(packet + ".");
+	}
+	
+	public static boolean hasParentPackage(String packageName) {
+		return !packageName.isEmpty();
 	}
 	
 	public static String getParentPackage(String packageName) {
