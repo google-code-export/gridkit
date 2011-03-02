@@ -1,9 +1,7 @@
 package com.medx.processing.util;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -13,7 +11,9 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 
+import com.medx.framework.annotation.ModelPackage;
 import com.medx.framework.dictionary.model.AttributeDescriptor;
+import com.medx.framework.dictionary.model.TypeDescriptor;
 import com.medx.framework.util.ClassUtil;
 import com.medx.framework.util.DictUtil;
 import com.medx.framework.util.TextUtil;
@@ -25,7 +25,7 @@ public class MirrorUtil {
 		return processingEnv.getOptions().get(option);
 	}
 	
-	public List<TypeElement> filterDictTypes(Set<? extends Element> dictTypes, PackageElement modelPackage) {
+	public static List<TypeElement> filterDictTypes(Set<? extends Element> dictTypes, PackageElement modelPackage) {
 		List<TypeElement> result = new ArrayList<TypeElement>();
 		
 		String packageName = modelPackage.getQualifiedName().toString();
@@ -34,7 +34,7 @@ public class MirrorUtil {
 			if (element instanceof TypeElement) {
 				TypeElement typeElement = (TypeElement)element;
 				
-				if (!packageName.isEmpty() && typeElement.getQualifiedName().toString().startsWith(packageName + "."))
+				if (ClassUtil.isInPackage(typeElement.getQualifiedName().toString(), packageName))
 					result.add(typeElement);
 			}
 		
@@ -76,18 +76,33 @@ public class MirrorUtil {
 		return true;
 	}
 	
-	private List<AttributeDescriptor> mapAttributeDescriptors(List<ExecutableElement> getters, PackageElement modelPackage) {
-		return null;
+	public static List<AttributeDescriptor> mapAttributeDescriptors(List<ExecutableElement> getters, PackageElement modelPackage) {
+		List<AttributeDescriptor> result = new ArrayList<AttributeDescriptor>();
+		
+		for(ExecutableElement getter : getters)
+			result.add(createAttributeDescriptor(getter, modelPackage));
+		
+		return result;
 	}
-	
 	
 	public static AttributeDescriptor createAttributeDescriptor(ExecutableElement getter, PackageElement modelPackage) {
 		AttributeDescriptor result = new AttributeDescriptor();
 		
 		String attrName = TextUtil.getCamelPostfix(getter.getSimpleName().toString());
-		result.setName(DictUtil.getAttrName((TypeElement)getter.getEnclosingElement(), modelPackage, attrName));
+		String className = ((TypeElement)getter.getEnclosingElement()).getQualifiedName().toString();
+		String modelPackageName = modelPackage.getQualifiedName().toString();
+		
+		result.setName(DictUtil.getAttrName(modelPackage.getAnnotation(ModelPackage.class), modelPackageName, className, attrName));
 		
 		result.setClazz(ClassUtil.replacePrimitiveType(getter.getReturnType().toString()));
+		
+		return result;
+	}
+	
+	public static TypeDescriptor createTypeDescriptor(TypeElement clazz) {
+		TypeDescriptor result = new TypeDescriptor();
+		
+		result.setClazz(clazz.getQualifiedName().toString());
 		
 		return result;
 	}
