@@ -22,6 +22,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.tools.Diagnostic.Kind;
 import javax.xml.bind.JAXBException;
 
 import org.xml.sax.SAXException;
@@ -53,6 +54,8 @@ public class ModelPackageProcessor {
 	private Set<String> modelClasses = new HashSet<String>();
 	private Map<String, TypeDescriptor> typeDescriptors = new HashMap<String, TypeDescriptor>();
 	private Map<String, List<AttributeDescriptor>> attributeDescriptors = new HashMap<String, List<AttributeDescriptor>>();
+	
+	private Map<String, TypeElement> typeElements = new HashMap<String, TypeElement>();
 	
 	private Dictionary dictionary;
 	private DictionaryHelper dictionaryHelper;
@@ -114,6 +117,7 @@ public class ModelPackageProcessor {
 			
 			modelClasses.add(className);
 			
+			typeElements.put(className, dictType);
 			typeDescriptors.put(className, createTypeDescriptor(dictType));
 			
 			List<ExecutableElement> methods = filterExecutableElements(dictType.getEnclosedElements());
@@ -178,7 +182,7 @@ public class ModelPackageProcessor {
 			try {
 				freemarkerHelper.writeJavaClass(clazz, typeDescriptors.get(clazz), attributeDescriptors.get(clazz));
 			} catch (Exception e) {
-				e.printStackTrace();
+				processingEnv.getMessager().printMessage(Kind.WARNING, e.getMessage(), typeElements.get(clazz));
 			}
 		}
 	}
