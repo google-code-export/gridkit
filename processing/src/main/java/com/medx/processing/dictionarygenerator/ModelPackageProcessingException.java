@@ -8,11 +8,18 @@ public class ModelPackageProcessingException extends Exception {
 	private Element element;
 	
     public ModelPackageProcessingException(String message, Throwable cause, Element element) {
-        super(message, cause);
+        super("[ " + message + " ] : " + createMessage(cause), cause);
         this.element = element;
     }
-
+    
 	public Element getElement() {
 		return element;
+	}
+	
+	private static String createMessage(Throwable throwable){
+		if (throwable.getCause() == null)
+			return "[ " + throwable.getMessage() + " ]";
+		else
+			return "[ " + throwable.getMessage() + " ] : " + createMessage(throwable.getCause());
 	}
 }
