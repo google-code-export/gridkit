@@ -1,53 +1,15 @@
 package com.medx.processing.dictionary;
 
-import static com.medx.processing.util.MirrorUtil.filterExecutableElements;
-import static com.medx.processing.util.MirrorUtil.filterGetters;
-import static com.medx.processing.util.MirrorUtil.getEnvOption;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedOptions;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-
-import nu.xom.Document;
-import nu.xom.ParsingException;
-import nu.xom.ValidityException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
-
-import com.medx.framework.attribute.AttrKey;
-import com.medx.framework.util.DictUtil;
-import com.medx.processing.util.DictionaryUtil;
-import com.medx.processing.util.MirrorUtil;
-
-import freemarker.template.Configuration;
-import freemarker.template.DefaultObjectWrapper;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
 
 @SupportedAnnotationTypes("com.medx.type.annotation.DictType")
 @SupportedOptions({"sourceFolder", "dictionaryFile"})
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class JavaDictionaryGenerator {// extends AbstractProcessor{
-/*	private static Logger log = LoggerFactory.getLogger(XmlDictionaryGenerator.class);
+/*	private static Logger log = LoggerFactory.getLogger(DictionaryGenerationProcessor.class);
 	
 	private String dictionaryFile;
 	private String sourceFolder;

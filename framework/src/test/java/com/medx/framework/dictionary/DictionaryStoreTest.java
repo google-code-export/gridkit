@@ -13,7 +13,7 @@ import com.medx.framework.dictionary.model.Dictionary;
 import com.medx.framework.dictionary.model.TypeDescriptor;
 
 public class DictionaryStoreTest {
-	@Test
+	//@Test
 	public void testRead() throws JAXBException, SAXException, IOException {
 		DictionaryReader ds = new DictionaryReader();
 		
@@ -23,7 +23,7 @@ public class DictionaryStoreTest {
 		System.out.println(dictionary.getTypeDescriptors().size());
 	}
 	
-	//@Test
+	@Test
 	public void testStore() throws JAXBException {
 		DictionaryWriter ds = new DictionaryWriter();
 		
