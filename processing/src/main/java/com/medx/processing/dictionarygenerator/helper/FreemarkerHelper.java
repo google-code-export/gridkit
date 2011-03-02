@@ -48,13 +48,9 @@ public class FreemarkerHelper {
 		String dictPackage = DictUtil.getJavaDictionaryPackage(ClassUtil.getClassPackage(className), modelPackageName, javaDictionary);
 		String dictClassFullName = ClassUtil.getFullClassName(dictClass, dictPackage);
 		
-		List<Map<String, String>> attrDescsToTemplate = new ArrayList<Map<String,String>>();
-		
-		for(AttributeDescriptor attributeDescriptor : attrDescs)
-			attrDescsToTemplate.add(mapAttributeDescriptorToView(attributeDescriptor));
-		
 		Map<String, Object> templateData = prepareTemplateData(dictClass, dictPackage);
-		templateData.put("attrDescs", attrDescsToTemplate);
+		templateData.put("typeDesc", mapTypeDescriptorToView(typeDesc));
+		templateData.put("attrDescs", mapAttributeDescriptorsToView(attrDescs));
 		
 		Writer writer = filer.createSourceFile(dictClassFullName).openWriter();
 		
@@ -76,6 +72,25 @@ public class FreemarkerHelper {
 		return templateData;
 	}
 
+	public Map<String, String> mapTypeDescriptorToView(TypeDescriptor desc) {
+		Map<String, String> result = new HashMap<String, String>();
+		
+		result.put("id", String.valueOf(desc.getId()));
+		result.put("version", String.valueOf(desc.getVersion()));
+		result.put("clazz", desc.getClazz());
+		
+		return result;
+	}
+	
+	private List<Map<String, String>> mapAttributeDescriptorsToView(List<AttributeDescriptor> attrDescs) {
+		List<Map<String, String>> result = new ArrayList<Map<String,String>>();
+		
+		for(AttributeDescriptor attributeDescriptor : attrDescs)
+			result.add(mapAttributeDescriptorToView(attributeDescriptor));
+		
+		return result;
+	}
+	
 	private Map<String, String> mapAttributeDescriptorToView(AttributeDescriptor desc) {
 		Map<String, String> result = new HashMap<String, String>();
 		
