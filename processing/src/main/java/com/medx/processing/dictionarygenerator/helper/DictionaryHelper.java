@@ -54,10 +54,10 @@ public class DictionaryHelper {
 		return otherDesc;
 	}
 	
-	public static Dictionary createEmptyDictionary() {
+	public static Dictionary createEmptyDictionary(int version) {
 		Dictionary result = new Dictionary();
 		
-		result.setVersion(0);
+		result.setVersion(version);
 		result.setTypeDescriptors(new ArrayList<TypeDescriptor>());
 		result.setAttributeDescriptors(new ArrayList<AttributeDescriptor>());
 		

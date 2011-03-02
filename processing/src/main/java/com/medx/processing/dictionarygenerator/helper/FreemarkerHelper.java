@@ -1,135 +1,105 @@
 package com.medx.processing.dictionarygenerator.helper;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.processing.Filer;
+
+import com.medx.framework.annotation.JavaDictionary;
+import com.medx.framework.attribute.AttrKey;
+import com.medx.framework.dictionary.model.AttributeDescriptor;
+import com.medx.framework.dictionary.model.TypeDescriptor;
+import com.medx.framework.type.TypeKey;
+import com.medx.framework.util.ClassUtil;
+import com.medx.framework.util.DictUtil;
+
+import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+
 public class FreemarkerHelper {
-/*	private static Logger log = LoggerFactory.getLogger(DictionaryGenerationProcessor.class);
+	private final Template dictionaryTemplate;
 	
-	private String dictionaryFile;
-	private String sourceFolder;
+	private Filer filer;
 	
-	private Template dictionaryTemplate;
+	private String modelPackageName;
+	private JavaDictionary javaDictionary;
 	
-	private Document dictionary;
-	
-	public JavaDictionaryGenerator() throws IOException {
+	public FreemarkerHelper(Filer filer, String modelPackageName, JavaDictionary javaDictionary) throws IOException {
+		this.filer = filer;
+		this.modelPackageName = modelPackageName;
+		this.javaDictionary = javaDictionary;
+		
 		Configuration configuration = new Configuration();
 		
-		configuration.setClassForTemplateLoading(JavaDictionaryGenerator.class, "/freemarker");
+		configuration.setClassForTemplateLoading(FreemarkerHelper.class, "/freemarker");
 		configuration.setObjectWrapper(new DefaultObjectWrapper());
 		
 		dictionaryTemplate = configuration.getTemplate("javaDictionary.ftl");
 	}
 	
-	@Override
-    public synchronized void init(ProcessingEnvironment processingEnv) {
-    	super.init(processingEnv);
-    	
-    	sourceFolder = getEnvOption("sourceFolder", processingEnv);
-    	dictionaryFile = getEnvOption("dictionaryFile", processingEnv);
-    	
-    	try {
-			dictionary = DictionaryUtil.loadDictionary(new File(dictionaryFile));
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+	public void writeJavaClass(String className, TypeDescriptor typeDesc, List<AttributeDescriptor> attrDescs) throws IOException, TemplateException {
+		String dictClass = ClassUtil.getSimpleClassName(className);
+		String dictPackage = DictUtil.getJavaDictionaryPackage(ClassUtil.getClassPackage(className), modelPackageName, javaDictionary);
+		String dictClassFullName = ClassUtil.getFullClassName(dictClass, dictPackage);
+		
+		List<Map<String, String>> attrDescsToTemplate = new ArrayList<Map<String,String>>();
+		
+		for(AttributeDescriptor attributeDescriptor : attrDescs)
+			attrDescsToTemplate.add(mapAttributeDescriptorToView(attributeDescriptor));
+		
+		Map<String, Object> templateData = prepareTemplateData(dictClass, dictPackage);
+		templateData.put("attrDescs", attrDescsToTemplate);
+		
+		Writer writer = filer.createSourceFile(dictClassFullName).openWriter();
+		
+		dictionaryTemplate.process(templateData, writer);
+		writer.flush();
+		writer.close();
 	}
 	
-	@Override
-	public boolean process(Set<? extends TypeElement> elements, RoundEnvironment env) {
-		if (elements.size() == 0) {
-			System.out.println("TODO fix : JavaDictionaryGenerator.empty");
-			return false;
-		}
-		
-		try {
-			return processInternal(elements, env);
-		} catch (Exception e) {
-			log.warn("Exception during annotation processing", e);
-			throw new RuntimeException(e);
-		}
-	}
-	
-	private boolean processInternal(Set<? extends TypeElement> elements, RoundEnvironment env) throws IOException, ValidityException, ParsingException, SAXException, TemplateException {
-		for (TypeElement dictType : elements)
-			for (Element clazz : env.getElementsAnnotatedWith(dictType)) {
-				List<ExecutableElement> getters = filterGetters(filterExecutableElements(clazz.getEnclosedElements()));
-				List<DictionaryEntry> entries = createDictionaryEntries(getters);
-				
-				List<Map<String, String>> entriesToTemplate = new ArrayList<Map<String,String>>();
-				
-				for(DictionaryEntry entry : entries)
-					entriesToTemplate.add(mapEntryToView(entry));
-				
-				Map<String, Object> templateData = prepareTemplateData((TypeElement)clazz);
-				templateData.put("entries", entriesToTemplate);
-				
-				String sourceFile = getSourceFile((TypeElement) clazz);
-				
-				log.info("Writing file " + (new File(sourceFile).getAbsolutePath()));
-				
-				Writer out = new FileWriter(sourceFile);
-				dictionaryTemplate.process(templateData, out);
-				out.flush();
-				out.close();
-			}
-		
-		return true;
-	}
-	
-	private List<DictionaryEntry> createDictionaryEntries(List<ExecutableElement> getters) {
-		List<DictionaryEntry> result = new ArrayList<DictionaryEntry>();
-		
-		for (ExecutableElement getter : getters) {
-			DictionaryEntry entry = MirrorHelper.createAttrDictionaryEntry(getter);
-			
-			entry.setId(Integer.valueOf(DictionaryUtil.getAttributeSign(dictionary, entry.getName(), "id")));
-			entry.setVersion(Integer.valueOf(DictionaryUtil.getAttributeSign(dictionary, entry.getName(), "version")));
-			
-			result.add(entry);
-		}
-		
-		return result;
-	}
-	
-	private Map<String, Object> prepareTemplateData(TypeElement clazz) {
+	private Map<String, Object> prepareTemplateData(String dictionaryClass, String dictionaryPackage) {
 		Map<String, Object> templateData = new HashMap<String, Object>();
-		
-		String dictionaryPackage = DictUtil.getJavaDictionaryPackage(clazz);
-		String dictionaryClass = ((TypeElement)clazz).getSimpleName().toString();
-		
+
 		templateData.put("package", dictionaryPackage);
+		
 		templateData.put("attrKeyClass", AttrKey.class.getCanonicalName());
+		templateData.put("typeKeyClass", TypeKey.class.getCanonicalName());
+		
 		templateData.put("className", dictionaryClass);
 		
 		return templateData;
 	}
-	
-	private String getSourceFile(TypeElement clazz) {
-		String dictionaryPackage = DictUtil.getJavaDictionaryPackage(clazz);
-		String dictionaryClass = ((TypeElement)clazz).getSimpleName().toString();
-		
-		return sourceFolder + '/' + dictionaryPackage.replaceAll("\\.", "/") + '/' + dictionaryClass + ".java";
-	}
-	
-	private Map<String, String> mapEntryToView(DictionaryEntry entry) {
+
+	private Map<String, String> mapAttributeDescriptorToView(AttributeDescriptor desc) {
 		Map<String, String> result = new HashMap<String, String>();
 		
-		String entryName = entry.getName();
+		String entryName = desc.getName();
 		
-		result.put("id", String.valueOf(entry.getId()));
+		result.put("id", String.valueOf(desc.getId()));
 		result.put("name", "\"" + entryName + "\"");
 		result.put("varName", entryName.substring(entryName.lastIndexOf('.') + 1));
-		result.put("version", String.valueOf(entry.getVersion()));
-		result.put("description", "\"" + entry.getDescription() + "\"");
-		result.put("type", entry.getType());
-		result.put("clazz", getRawClass(entry.getType()));
+		result.put("version", String.valueOf(desc.getVersion()));
+		result.put("description", "\"" + desc.getDescription() + "\"");
+		result.put("type", desc.getClazz());
+		result.put("clazz", getRawClass(desc.getClazz()));
 		
 		return result;
 	}
 	
 	private static String getRawClass(String clazz) {
-		if (clazz.contains("<"))
-			clazz = clazz.substring(0, clazz.indexOf('<'));
+		int index = clazz.indexOf('<');
+		
+		if (index != -1) {
+			int lastIndex = clazz.lastIndexOf('>');
+			clazz = clazz.substring(0, index) + clazz.substring(lastIndex + 1);
+		}
 		
 		return clazz + ".class";
-	}*/
+	}
 }

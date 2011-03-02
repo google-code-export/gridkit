@@ -16,10 +16,12 @@ import javax.tools.Diagnostic.Kind;
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class DictionaryGenerationProcessor extends AbstractProcessor {	
 	@Override
-	public boolean process(Set<? extends TypeElement> elements, RoundEnvironment environment) {
+	public boolean process(Set<? extends TypeElement> elements, RoundEnvironment roundEnv) {
 		for (TypeElement modelPackage : elements) {
-			for (Element packet : environment.getElementsAnnotatedWith(modelPackage)) {
-				ModelPackageProcessor modelPackageProcessor = new ModelPackageProcessor((PackageElement)packet, environment);
+			for (Element element : roundEnv.getElementsAnnotatedWith(modelPackage)) {
+				PackageElement packet = (PackageElement) element;
+				
+				ModelPackageProcessor modelPackageProcessor = new ModelPackageProcessor(packet, roundEnv, processingEnv);
 				
 				try {
 					modelPackageProcessor.process();

@@ -10,11 +10,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -26,6 +28,7 @@ import org.xml.sax.SAXException;
 
 import com.medx.framework.annotation.DictType;
 import com.medx.framework.annotation.JavaDictionary;
+import com.medx.framework.annotation.ModelPackage;
 import com.medx.framework.annotation.XmlDictionary;
 import com.medx.framework.dictionary.DictionaryReader;
 import com.medx.framework.dictionary.DictionaryWriter;
@@ -33,26 +36,40 @@ import com.medx.framework.dictionary.model.AttributeDescriptor;
 import com.medx.framework.dictionary.model.Dictionary;
 import com.medx.framework.dictionary.model.TypeDescriptor;
 import com.medx.processing.dictionarygenerator.helper.DictionaryHelper;
+import com.medx.processing.dictionarygenerator.helper.FreemarkerHelper;
 
 public class ModelPackageProcessor {
-	private PackageElement modelPackage;
-	private RoundEnvironment environment;
+	private RoundEnvironment roundEnv;
+	private ProcessingEnvironment processingEnv;
 	
+	private PackageElement modelPackageElement;
+	
+	private String modelPackageName;
+	
+	private ModelPackage modelPackage;
 	private XmlDictionary xmlDictionary;
 	private JavaDictionary javaDictionary;
 	
+	private Set<String> modelClasses = new HashSet<String>();
 	private Map<String, TypeDescriptor> typeDescriptors = new HashMap<String, TypeDescriptor>();
 	private Map<String, List<AttributeDescriptor>> attributeDescriptors = new HashMap<String, List<AttributeDescriptor>>();
 	
 	private Dictionary dictionary;
 	private DictionaryHelper dictionaryHelper;
 	
-	public ModelPackageProcessor(PackageElement modelPackage, RoundEnvironment environment) {
-		this.modelPackage = modelPackage;
-		this.environment = environment;
+	private FreemarkerHelper freemarkerHelper;
+	
+	public ModelPackageProcessor(PackageElement modelPackageElement, RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
+		this.roundEnv = roundEnv;
+		this.processingEnv = processingEnv;
 		
-		xmlDictionary = modelPackage.getAnnotation(XmlDictionary.class);
-		javaDictionary = modelPackage.getAnnotation(JavaDictionary.class);
+		this.modelPackageElement = modelPackageElement;
+
+		this.modelPackageName = modelPackageElement.getQualifiedName().toString();
+		
+		this.modelPackage = modelPackageElement.getAnnotation(ModelPackage.class);
+		this.xmlDictionary = modelPackageElement.getAnnotation(XmlDictionary.class);
+		this.javaDictionary = modelPackageElement.getAnnotation(JavaDictionary.class);
 	}
 
 	public void process() throws ModelPackageProcessingException {
@@ -64,7 +81,7 @@ public class ModelPackageProcessor {
 		try {
 			loadDictionary();
 		} catch (Exception e) {
-			throw new ModelPackageProcessingException("Failed to load dicionary", e, modelPackage);
+			throw new ModelPackageProcessingException("Failed to load dicionary", e, modelPackageElement);
 		}
 		
 		populateDictionary();
@@ -72,27 +89,37 @@ public class ModelPackageProcessor {
 		try {
 			storeDictionary();
 		} catch (Exception e) {
-			throw new ModelPackageProcessingException("Failed to store dicionary", e, modelPackage);
+			throw new ModelPackageProcessingException("Failed to store dicionary", e, modelPackageElement);
 		}
 		
 		if (javaDictionary == null)
 			return;
+		
+		try {
+			freemarkerHelper = new FreemarkerHelper(processingEnv.getFiler(), modelPackageName, javaDictionary);
+		} catch (Exception e) {
+			throw new ModelPackageProcessingException("Failed to init freemarker", e, modelPackageElement);
+		}
+		
+		writeDictionaClasses();
 	}
 	
 	private void prepareDescriptors() {
-		Set<? extends Element> allDictTypes = environment.getElementsAnnotatedWith(DictType.class);
+		Set<? extends Element> allDictTypes = roundEnv.getElementsAnnotatedWith(DictType.class);
 		
-		List<TypeElement> dictTypes = filterDictTypes(allDictTypes, modelPackage);
+		List<TypeElement> dictTypes = filterDictTypes(allDictTypes, modelPackageName);
 		
 		for (TypeElement dictType : dictTypes) {
 			String className = dictType.getQualifiedName().toString();
+			
+			modelClasses.add(className);
 			
 			typeDescriptors.put(className, createTypeDescriptor(dictType));
 			
 			List<ExecutableElement> methods = filterExecutableElements(dictType.getEnclosedElements());
 			List<ExecutableElement> getters = filterGetters(methods);
 			
-			attributeDescriptors.put(className, mapAttributeDescriptors(getters, modelPackage));
+			attributeDescriptors.put(className, mapAttributeDescriptors(getters, modelPackageName, modelPackage));
 		}
 	}
 	
@@ -146,13 +173,23 @@ public class ModelPackageProcessor {
 		return nextId;
 	}
 	
+	private void writeDictionaClasses() {
+		for (String clazz : modelClasses) {
+			try {
+				freemarkerHelper.writeJavaClass(clazz, typeDescriptors.get(clazz), attributeDescriptors.get(clazz));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	private void loadDictionary() throws JAXBException, SAXException, IOException {
 		DictionaryReader dictionaryReader = new DictionaryReader();
 		
 		if ((new File(xmlDictionary.path()).exists()))
 			dictionary = dictionaryReader.readDictionary(xmlDictionary.path());
 		else
-			dictionary = DictionaryHelper.createEmptyDictionary();
+			dictionary = DictionaryHelper.createEmptyDictionary(1);
 		
 		dictionaryHelper = new DictionaryHelper(dictionary);
 	}
