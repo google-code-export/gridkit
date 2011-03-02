@@ -40,19 +40,16 @@
 	
 	<build>
 		<plugins>
-	<!--	<plugin>
+			<plugin>
 				<groupId>org.bsc.maven</groupId>
 				<artifactId>maven-processor-plugin</artifactId>
 				<configuration>
 					<processors>
-						<processor>com.medx.processing.dictionary.XmlDictionaryGenerator</processor>
-						<processor>com.medx.processing.dictionary.JavaDictionaryGenerator</processor>
+						<processor>com.medx.processing.dictionary.DictionaryGenerationProcessor</processor>
+						<!--<processor>com.medx.processing.dictionary.JavaDictionaryGenerator</processor>-->
 					</processors>
-					<compilerArguments>
-						-AdictionaryFile=${basedir}/src/main/resources/xml/attribute-dictionary.xml -AstartId=0 -AsourceFolder=${project.build.sourceDirectory}
-					</compilerArguments>
 				</configuration>
-			</plugin>	-->	
+			</plugin>
 		</plugins>
 	</build>
 </project>

@@ -3,6 +3,8 @@ package com.medx.framework.dictionary.model;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -13,6 +15,10 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(propOrder={})
 public class Dictionary implements Serializable {
 	private static final long serialVersionUID = -3021789882790056395L;
+	
+	public static JAXBContext getJaxbContext() throws JAXBException {
+		return JAXBContext.newInstance(Dictionary.class.getPackage().getName(), Dictionary.class.getClassLoader());
+	}
 	
 	public static final String FRAMEWORK_DICTIONARY_NAMESPACE = "http://medx.com/framework/dictionary";
 	

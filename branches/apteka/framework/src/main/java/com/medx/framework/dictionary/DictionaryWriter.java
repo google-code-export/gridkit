@@ -14,7 +14,7 @@ public class DictionaryWriter {
 	private Marshaller marshaller;
 	
 	public DictionaryWriter() throws JAXBException {
-		jaxbContext = JAXBContext.newInstance(Dictionary.class.getPackage().getName());
+		jaxbContext = Dictionary.getJaxbContext();
 		marshaller = jaxbContext.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 	}

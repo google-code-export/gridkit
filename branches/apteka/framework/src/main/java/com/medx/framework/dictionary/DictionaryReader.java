@@ -37,7 +37,7 @@ public class DictionaryReader {
 	private ValidationEventCollector validationCollector = new ValidationEventCollector();
 	
 	public DictionaryReader() throws JAXBException, SAXException, IOException {
-		jaxbContext = JAXBContext.newInstance(Dictionary.class.getPackage().getName());
+		jaxbContext = Dictionary.getJaxbContext();
 		
 		unmarshaller = jaxbContext.createUnmarshaller();
 		

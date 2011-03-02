@@ -1,28 +1,7 @@
 package com.medx.processing.dictionary;
 
-import static com.medx.processing.util.DictionaryUtil.getDictionaryVersion;
-import static com.medx.processing.util.DictionaryUtil.loadDictionary;
-import static com.medx.processing.util.DictionaryUtil.loadOrCreateDictionary;
-import static com.medx.processing.util.DictionaryUtil.storeDictionary;
-import static java.lang.String.format;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-
-import nu.xom.Attribute;
-import nu.xom.Document;
-import nu.xom.Element;
-import nu.xom.Nodes;
-import nu.xom.ParsingException;
-import nu.xom.ValidityException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
-
 public class DictionaryMerger {
-	private static final Logger log = LoggerFactory.getLogger(DictionaryMerger.class);
+	/*private static final Logger log = LoggerFactory.getLogger(DictionaryMerger.class);
 	
 	public static void main(String[] args) throws SAXException, ValidityException, ParsingException, IOException {
 		File destinationFile = new File(args[0]);
@@ -57,4 +36,5 @@ public class DictionaryMerger {
 			}
 		}
 	}
+	*/
 }
