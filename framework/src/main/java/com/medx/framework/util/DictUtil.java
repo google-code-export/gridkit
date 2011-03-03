@@ -42,8 +42,11 @@ public class DictUtil {
 		if (!modelPackage.equals(modelClassPackage))
 			resultPackage = modelPackage.isEmpty() ? modelClassPackage : modelClassPackage.substring(modelPackage.length() + 1);
 		
-		resultPackage = javaDictionary.value().isEmpty() ? resultPackage : javaDictionary.value() + "." + resultPackage;
-		
-		return resultPackage;
+		if (resultPackage.isEmpty())
+			return javaDictionary.value();
+		else if (javaDictionary.value().isEmpty())
+			return resultPackage;
+		else
+			return javaDictionary.value() + "." + resultPackage;
 	}
 }
