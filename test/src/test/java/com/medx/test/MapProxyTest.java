@@ -51,7 +51,7 @@ public class MapProxyTest extends TestData {
 	}
 	
 	@Test
-	public void simpleAttributeSetTest() {
+	public void simpleAttributeSetByIntTest() {
 		tomCustomer.setName("TomTom");
 		((AttrMap)polyCustomer).set(Customer.sex, Sex.MALE);
 		((Map)phoneOrderItem).put(OrderItem.quantity.getId(), new Integer(3));
@@ -59,6 +59,37 @@ public class MapProxyTest extends TestData {
 		assertEquals("TomTom", tomCustomer.getName());
 		assertEquals(Sex.MALE, ((AttrMap)polyCustomer).get(Customer.sex));
 		assertEquals(new Integer(3), ((Map)phoneOrderItem).get(OrderItem.quantity.getId()));
+	}
+
+	@Test
+	public void simpleAttributeSetByNameTest() {
+		tomCustomer.setName("TomTom");
+		((AttrMap)polyCustomer).set(Customer.sex, Sex.MALE);
+		((Map)phoneOrderItem).put(OrderItem.quantity.getName(), new Integer(3));
+		
+		assertEquals("TomTom", tomCustomer.getName());
+		assertEquals(Sex.MALE, ((AttrMap)polyCustomer).get(Customer.sex));
+		assertEquals(new Integer(3), ((Map)phoneOrderItem).get(OrderItem.quantity.getId()));
+	}
+
+	@Test
+	public void simpleAttributeSetByKeyTest() {
+		tomCustomer.setName("TomTom");
+		((AttrMap)polyCustomer).set(Customer.sex, Sex.MALE);
+		((Map)phoneOrderItem).put(OrderItem.quantity, new Integer(3));
+		
+		assertEquals("TomTom", tomCustomer.getName());
+		assertEquals(Sex.MALE, ((AttrMap)polyCustomer).get(Customer.sex));
+		assertEquals(new Integer(3), ((Map)phoneOrderItem).get(OrderItem.quantity.getId()));
+	}
+
+	@Test
+	public void attributeSetMapSizeTest() {
+		tomCustomer.setName("TomTom");
+		((AttrMap)polyCustomer).set(Customer.sex, Sex.MALE);
+		((Map)phoneOrderItem).put(OrderItem.quantity.getId(), new Integer(3));
+		
+		assertEquals(3, ((Map)phoneOrderItem).size());
 	}
 	
 	@Test
