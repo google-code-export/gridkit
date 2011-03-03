@@ -21,7 +21,6 @@
 		<commons-beanutils.version>1.8.3</commons-beanutils.version>
 		<commons-io.version>2.0.1</commons-io.version>
 		
-		<project.build.ruleDirectory>src/main/rule</project.build.ruleDirectory>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	
@@ -47,6 +46,7 @@
 	<modules>
 		<module>framework</module>
 		<module>processing</module>
+		<module>test</module>
 		<module>model</module>
 		<module>demo</module>
 		<!--<module>guvnor</module>-->
