@@ -1,10 +1,10 @@
 package com.medx.model.accumulator;
 
-import com.medx.framework.annotation.DictType;
+import com.medx.framework.annotation.ModelClass;
 import com.medx.metamodel.Facade;
 
 @Facade
-@DictType
+@ModelClass
 public interface Rule {
 
 	public AccumulatorCriteria getAccumulatorCriteria();

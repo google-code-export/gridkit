@@ -1,8 +1,8 @@
 package com.medx.framework.test.model;
 
-import com.medx.framework.annotation.DictType;
+import com.medx.framework.annotation.ModelClass;
 
-@DictType
+@ModelClass
 public interface OrderItem {
 	String getTitle();
 	

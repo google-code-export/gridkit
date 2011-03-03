@@ -2,11 +2,11 @@ package com.medx.model.accumulator;
 
 import java.util.Collection;
 
-import com.medx.framework.annotation.DictType;
+import com.medx.framework.annotation.ModelClass;
 import com.medx.metamodel.Facade;
 
 @Facade
-@DictType
+@ModelClass
 public interface AccumulationStage {
 
 	public Collection<Rule> getRules();
