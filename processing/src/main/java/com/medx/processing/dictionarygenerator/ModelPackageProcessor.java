@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
@@ -22,7 +23,10 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.tools.FileObject;
+import javax.tools.StandardLocation;
 import javax.tools.Diagnostic.Kind;
+import javax.tools.JavaFileManager.Location;
 import javax.xml.bind.JAXBException;
 
 import org.xml.sax.SAXException;
@@ -38,8 +42,11 @@ import com.medx.framework.dictionary.model.Dictionary;
 import com.medx.framework.dictionary.model.TypeDescriptor;
 import com.medx.processing.dictionarygenerator.helper.DictionaryHelper;
 import com.medx.processing.dictionarygenerator.helper.FreemarkerHelper;
+import com.medx.processing.util.MessageUtil;
 
 public class ModelPackageProcessor {
+	private static final AtomicInteger blankInfoCounter = new AtomicInteger(0);
+	
 	private RoundEnvironment roundEnv;
 	private ProcessingEnvironment processingEnv;
 	
@@ -54,7 +61,6 @@ public class ModelPackageProcessor {
 	private Set<String> modelClasses = new HashSet<String>();
 	private Map<String, TypeDescriptor> typeDescriptors = new HashMap<String, TypeDescriptor>();
 	private Map<String, List<AttributeDescriptor>> attributeDescriptors = new HashMap<String, List<AttributeDescriptor>>();
-	
 	private Map<String, TypeElement> typeElements = new HashMap<String, TypeElement>();
 	
 	private Dictionary dictionary;
@@ -92,6 +98,7 @@ public class ModelPackageProcessor {
 		try {
 			storeDictionary();
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new ModelPackageProcessingException("Failed to store dicionary", e, modelPackageElement);
 		}
 		
@@ -99,7 +106,7 @@ public class ModelPackageProcessor {
 			return;
 		
 		try {
-			freemarkerHelper = new FreemarkerHelper(processingEnv.getFiler(), modelPackageName, javaDictionary);
+			initFreemarker();
 		} catch (Exception e) {
 			throw new ModelPackageProcessingException("Failed to init freemarker", e, modelPackageElement);
 		}
@@ -177,12 +184,16 @@ public class ModelPackageProcessor {
 		return nextId;
 	}
 	
+	private void initFreemarker() throws IOException {
+		freemarkerHelper = new FreemarkerHelper(processingEnv.getFiler(), modelPackageName, javaDictionary);
+	}
+	
 	private void writeDictionaClasses() {
 		for (String clazz : modelClasses) {
 			try {
 				freemarkerHelper.writeJavaClass(clazz, typeDescriptors.get(clazz), attributeDescriptors.get(clazz));
 			} catch (Exception e) {
-				processingEnv.getMessager().printMessage(Kind.WARNING, e.getMessage(), typeElements.get(clazz));
+				processingEnv.getMessager().printMessage(Kind.WARNING, MessageUtil.createMessage("Failed to write dictionary file", e), typeElements.get(clazz));
 			}
 		}
 	}
@@ -190,16 +201,32 @@ public class ModelPackageProcessor {
 	private void loadDictionary() throws JAXBException, SAXException, IOException {
 		DictionaryReader dictionaryReader = new DictionaryReader();
 		
-		if ((new File(xmlDictionary.path()).exists()))
-			dictionary = dictionaryReader.readDictionary(xmlDictionary.path());
+		String dictionaryLocation = getDictionaryLocation();
+		
+		if ((new File(dictionaryLocation).exists()))
+			dictionary = dictionaryReader.readDictionary(dictionaryLocation);
 		else
 			dictionary = DictionaryHelper.createEmptyDictionary(1);
 		
 		dictionaryHelper = new DictionaryHelper(dictionary);
 	}
 	
-	private void storeDictionary() throws JAXBException {
+	private void storeDictionary() throws JAXBException, IOException {
 		DictionaryWriter dictionaryWriter = new DictionaryWriter();
-		dictionaryWriter.writeDictionary(xmlDictionary.path(), dictionary);
+		dictionaryWriter.writeDictionary(getDictionaryLocation(), dictionary);
+	}
+	
+	private String getDictionaryLocation() throws IOException {
+		String blankFileName = blankInfoCounter.incrementAndGet() + ".info";
+		
+		Location location = StandardLocation.SOURCE_OUTPUT;
+		
+		FileObject blankFile = processingEnv.getFiler().createResource(location, "", blankFileName, (Element)null);
+		
+		String result = blankFile.toUri().toString();
+		
+		blankFile.delete();
+		
+		return result.substring(0, result.length() - blankFileName.length()) + xmlDictionary.path();
 	}
 }

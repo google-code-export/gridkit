@@ -11,7 +11,7 @@ import java.util.TreeSet;
 
 import com.medx.framework.attribute.AttrKey;
 import com.medx.framework.attribute.AttrMap;
-import com.medx.framework.proxy.handler.AttributeAccessor;
+import com.medx.framework.proxy.handler.MapProxyAttributeProvider;
 import com.medx.framework.proxy.wrapper.CompositeWrapper;
 import com.medx.framework.proxy.wrapper.ListWrapper;
 import com.medx.framework.proxy.wrapper.MapWrapper;
@@ -19,7 +19,7 @@ import com.medx.framework.proxy.wrapper.ObjectWrapper;
 import com.medx.framework.proxy.wrapper.SetWrapper;
 import com.medx.framework.util.CastUtil;
 
-public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, AttributeAccessor, ObjectWrapper {
+public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, MapProxyAttributeProvider, ObjectWrapper {
 	private static List<CompositeWrapper> wrappers = new ArrayList<CompositeWrapper>();
 	
 	static {
@@ -99,11 +99,6 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, Attri
 		backendMap.put(MapProxyFactory.CLASSES_KEY, interfaceIds);
 		
 		return CastUtil.<U>cast(mapProxyFactory.createMapProxy(backendMap));
-	}
-	
-	@Override
-	public boolean isCapableToImplement(Class<?> clazz) {
-		return false;
 	}
 	
 	@Override

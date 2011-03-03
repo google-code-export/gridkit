@@ -55,7 +55,7 @@ public class ClassUtil {
 		if (parentPackage.equals(childPackage))
 			return true;
 		
-		return childPackage.isEmpty() ? false : childPackage.startsWith(parentPackage + ".");
+		return parentPackage.isEmpty() ? true : childPackage.startsWith(parentPackage + ".");
 	}
 	
 	public static boolean hasParentPackage(String packageName) {

@@ -8,20 +8,11 @@ public class DictUtil {
 		if (!ClassUtil.isClassInPackage(className, modelPackageName))
 			throw new IllegalArgumentException("modelPackageName | className");
 		
-		String resultAttrName = modelPackageName.isEmpty() ? className : className.substring(modelPackageName.length() + 1);
+		String result = modelPackageName.isEmpty() ? className : className.substring(modelPackageName.length() + 1);
 		
-		resultAttrName = modelPackage.value().isEmpty() ? resultAttrName : modelPackage.value() + "." + resultAttrName;
+		result = modelPackage.value().isEmpty() ? result : modelPackage.value() + "." + result;
 
-		return resultAttrName + "." + attrName;
-	}
-	
-	private static Package getModelPackage(Package packet) {
-		if (packet.isAnnotationPresent(ModelPackage.class))
-			return packet;
-		else if (!ClassUtil.hasParentPackage(packet.getName()))
-			throw new IllegalArgumentException("packet");
-		else
-			return getModelPackage(Package.getPackage(ClassUtil.getParentPackage(packet.getName())));
+		return result + "." + attrName;
 	}
 	
 	public static String getAttrName(Class<?> clazz, String attrName) {
@@ -31,6 +22,15 @@ public class DictUtil {
 		String className = clazz.getCanonicalName();
 		
 		return getAttrName(modelPackage.getAnnotation(ModelPackage.class), packageName, className, attrName);
+	}
+	
+	private static Package getModelPackage(Package packet) {
+		if (packet.isAnnotationPresent(ModelPackage.class))
+			return packet;
+		else if (!ClassUtil.hasParentPackage(packet.getName()))
+			throw new IllegalArgumentException("packet");
+		else
+			return getModelPackage(Package.getPackage(ClassUtil.getParentPackage(packet.getName())));
 	}
 	
 	public static String getJavaDictionaryPackage(String modelClassPackage, String modelPackage, JavaDictionary javaDictionary) {
