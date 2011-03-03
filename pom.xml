@@ -20,6 +20,7 @@
 		<org.freemarker.version>2.3.9</org.freemarker.version>
 		<commons-beanutils.version>1.8.3</commons-beanutils.version>
 		<commons-io.version>2.0.1</commons-io.version>
+		<kryo.version>1.04</kryo.version>
 		
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -28,6 +29,11 @@
 		<repository>
 			<id>jboss-repository</id>
 			<url>https://repository.jboss.org/nexus/content/groups/public/</url>
+		</repository>
+		
+		<repository>
+			<id>wordrak</id>
+			<url>http://wordrak.github.com/repo</url>
 		</repository>
 	</repositories>
 	
@@ -106,6 +112,12 @@
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-jdk14</artifactId>
 				<version>${org.slf4j.version}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>com.esotericsoftware</groupId>
+				<artifactId>kryo</artifactId>
+				<version>${kryo.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

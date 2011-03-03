@@ -6,8 +6,9 @@ import static com.medx.processing.dictionarygenerator.helper.MirrorHelper.filter
 import static com.medx.processing.dictionarygenerator.helper.MirrorHelper.filterGetters;
 import static com.medx.processing.dictionarygenerator.helper.MirrorHelper.mapAttributeDescriptors;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,7 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
@@ -45,8 +45,6 @@ import com.medx.processing.dictionarygenerator.helper.FreemarkerHelper;
 import com.medx.processing.util.MessageUtil;
 
 public class ModelPackageProcessor {
-	private static final AtomicInteger blankInfoCounter = new AtomicInteger(0);
-	
 	private RoundEnvironment roundEnv;
 	private ProcessingEnvironment processingEnv;
 	
@@ -68,6 +66,8 @@ public class ModelPackageProcessor {
 	
 	private FreemarkerHelper freemarkerHelper;
 	
+	private FileObject dictionaryFileObject;
+	
 	public ModelPackageProcessor(PackageElement modelPackageElement, RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
 		this.roundEnv = roundEnv;
 		this.processingEnv = processingEnv;
@@ -88,6 +88,7 @@ public class ModelPackageProcessor {
 		prepareDescriptors();
 		
 		try {
+			getDictionaryFileObject();
 			loadDictionary();
 		} catch (Exception e) {
 			throw new ModelPackageProcessingException("Failed to load dicionary", e, modelPackageElement);
@@ -201,32 +202,34 @@ public class ModelPackageProcessor {
 	private void loadDictionary() throws JAXBException, SAXException, IOException {
 		DictionaryReader dictionaryReader = new DictionaryReader();
 		
-		String dictionaryLocation = getDictionaryLocation();
-		
-		if ((new File(dictionaryLocation).exists()))
-			dictionary = dictionaryReader.readDictionary(dictionaryLocation);
-		else
+		try {
+			InputStream inputStream = dictionaryFileObject.openInputStream();
+			dictionary = dictionaryReader.readDictionary(inputStream);
+			
+			try {inputStream.close();} catch (IOException e) {}
+		}
+		catch (Exception e) {
 			dictionary = DictionaryHelper.createEmptyDictionary(1);
-		
+		}
+
 		dictionaryHelper = new DictionaryHelper(dictionary);
 	}
 	
 	private void storeDictionary() throws JAXBException, IOException {
 		DictionaryWriter dictionaryWriter = new DictionaryWriter();
-		dictionaryWriter.writeDictionary(getDictionaryLocation(), dictionary);
+		
+		Writer writer = dictionaryFileObject.openWriter();
+		
+		try {
+			dictionaryWriter.writeDictionary(writer, dictionary);
+		}
+		finally {
+			try {writer.close();} catch (IOException e) {}
+		}
 	}
 	
-	private String getDictionaryLocation() throws IOException {
-		String blankFileName = blankInfoCounter.incrementAndGet() + ".info";
-		
+	private void getDictionaryFileObject() throws IOException {
 		Location location = StandardLocation.SOURCE_OUTPUT;
-		
-		FileObject blankFile = processingEnv.getFiler().createResource(location, "", blankFileName, (Element)null);
-		
-		String result = blankFile.toUri().toString();
-		
-		blankFile.delete();
-		
-		return result.substring(0, result.length() - blankFileName.length()) + xmlDictionary.path();
+		dictionaryFileObject = processingEnv.getFiler().createResource(location, "", xmlDictionary.path(), (Element)null);
 	}
 }

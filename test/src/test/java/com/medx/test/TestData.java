@@ -34,7 +34,7 @@ public class TestData {
 	
 	@BeforeClass
 	protected static void beforeClass() throws Exception {
-		dictionary = (new DictionaryReader()).readDictionary("src/main/resources/xml/medx-test-dictionary.xml");
+		dictionary = (new DictionaryReader()).readDictionary("src/main/java/xml/medx-test-dictionary.xml");
 		typeRegistry = new TypeRegistryImpl(dictionary);
 		attrKeyRegistry = new AttrKeyRegistryImpl(dictionary);
 		methodHandlerFactory = new CachingMethodHandlerFactory(attrKeyRegistry);
