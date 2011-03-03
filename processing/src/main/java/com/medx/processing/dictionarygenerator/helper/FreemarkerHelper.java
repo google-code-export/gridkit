@@ -102,19 +102,8 @@ public class FreemarkerHelper {
 		result.put("version", String.valueOf(desc.getVersion()));
 		result.put("description", "\"" + desc.getDescription() + "\"");
 		result.put("type", desc.getClazz());
-		result.put("clazz", getRawClass(desc.getClazz()));
+		result.put("clazz", ClassUtil.getCanonicalRawType(desc.getClazz()) + ".class");
 		
 		return result;
-	}
-	
-	private static String getRawClass(String clazz) {
-		int index = clazz.indexOf('<');
-		
-		if (index != -1) {
-			int lastIndex = clazz.lastIndexOf('>');
-			clazz = clazz.substring(0, index) + clazz.substring(lastIndex + 1);
-		}
-		
-		return clazz + ".class";
 	}
 }

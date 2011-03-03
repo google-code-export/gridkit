@@ -4,6 +4,7 @@ import com.medx.framework.proxy.handler.MethodHandlerFactory;
 import com.medx.framework.type.TypeRegistry;
 
 interface MapProxyFactoryInternal extends MapProxyFactory {
-	MethodHandlerFactory getMethodHandlerFactory();
 	TypeRegistry getTypeRegistry();
+	
+	MethodHandlerFactory getMethodHandlerFactory();
 }

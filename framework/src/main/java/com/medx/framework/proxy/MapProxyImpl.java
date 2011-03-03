@@ -63,6 +63,9 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, MapPr
 
 	@Override
 	public Object wrap(Object object) {
+		if (object instanceof MapProxy)
+			return object;
+		
 		if (mapProxyFactory.isProxiable(object))
 			return mapProxyFactory.createMapProxy(CastUtil.<Map<Integer, Object>>cast(object));
 		
@@ -75,6 +78,12 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, MapPr
 	
 	@Override
 	public void setAttributeValue(int attributeId, Object value) {
+		if (value instanceof MapProxy)
+			wrappedAttributeIds.add(attributeId);
+		
+		if (mapProxyFactory.isProxiable(value))
+			wrappedAttributeIds.remove(attributeId);
+		
 		backendMap.put(attributeId, value);
 	}
 	
