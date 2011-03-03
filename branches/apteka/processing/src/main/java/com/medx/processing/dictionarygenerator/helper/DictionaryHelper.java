@@ -54,6 +54,10 @@ public class DictionaryHelper {
 		return otherDesc;
 	}
 	
+	public Dictionary getDictionary() {
+		return dictionary;
+	}
+	
 	public static Dictionary createEmptyDictionary(int version) {
 		Dictionary result = new Dictionary();
 		
@@ -62,9 +66,5 @@ public class DictionaryHelper {
 		result.setAttributeDescriptors(new ArrayList<AttributeDescriptor>());
 		
 		return result;
-	}
-	
-	public Dictionary getDictionary() {
-		return dictionary;
 	}
 }

@@ -65,7 +65,7 @@ public class ClassUtil {
 	public static String getParentPackage(String packageName) {
 		if (packageName.contains("."))
 			return packageName.substring(0, packageName.lastIndexOf('.'));
-		else if (packageName.isEmpty())
+		else if (!hasParentPackage(packageName))
 			throw new IllegalArgumentException("packageName");
 		else
 			return "";
@@ -77,13 +77,19 @@ public class ClassUtil {
 		return clazz;
 	}
 	
-	public static String getRawType(String type) {
+	public static String getCanonicalRawType(String type) {
 		int index = type.indexOf('<');
 		
 		if (index != -1) {
 			int lastIndex = type.lastIndexOf('>');
 			type = type.substring(0, index) + type.substring(lastIndex + 1);
 		}
+		
+		return type;
+	}
+	
+	public static String getRawType(String type) {
+		type = getCanonicalRawType(type);
 		
 		return isArray(type) ? getArrayRawType(type) : type;
 	}
