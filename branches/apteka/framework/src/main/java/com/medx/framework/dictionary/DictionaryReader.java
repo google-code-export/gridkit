@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 import javax.xml.XMLConstants;
@@ -52,11 +53,15 @@ public class DictionaryReader {
 		unmarshaller.setEventHandler(validationCollector);
 	}
 	
-	public Dictionary readDictionary(String fileName) throws JAXBException {
+	public Dictionary readDictionary(String fileName) throws JAXBException, MalformedURLException, IOException {
+		return readDictionary((new File(fileName)).toURI().toURL().openStream());
+	}
+	
+	public Dictionary readDictionary(InputStream inputStream) throws JAXBException {
 		Dictionary result = null;
 		
 		try {
-			result = (Dictionary) unmarshaller.unmarshal(new File(fileName));
+			result = (Dictionary) unmarshaller.unmarshal(inputStream);
 		}
 		catch (UnmarshalException e) {
 			loadValidationErrors(validationCollector);
