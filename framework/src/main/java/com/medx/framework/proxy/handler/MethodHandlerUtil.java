@@ -9,9 +9,9 @@ import com.medx.framework.util.TextUtil;
 
 public class MethodHandlerUtil {
 	public static MethodHandler createMethodHandler(String camelPrefix, int attributeId) {
-		if (GetMethodHandler.getPrefix().equals(camelPrefix))
+		if (GetMethodHandler.PREFIX.equals(camelPrefix))
 			return new GetMethodHandler(attributeId);
-		else if (SetMethodHandler.getPrefix().equals(camelPrefix))
+		else if (SetMethodHandler.PREFIX.equals(camelPrefix))
 			return new SetMethodHandler(attributeId);
 		else
 			throw new RuntimeException("Unknown camel prefix - " + camelPrefix);

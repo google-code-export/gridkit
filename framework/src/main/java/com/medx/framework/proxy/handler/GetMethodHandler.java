@@ -1,8 +1,8 @@
 package com.medx.framework.proxy.handler;
 
-import java.util.Map;
-
 public class GetMethodHandler implements MethodHandler {
+	public static final String PREFIX = "get";
+	
 	private final int attributeId;
 	
 	public GetMethodHandler(int attributeId) {
@@ -13,15 +13,9 @@ public class GetMethodHandler implements MethodHandler {
 	public Object invoke(MapProxyAttributeProvider attributeProvider, Object[] args) {
 		Object attribute = attributeProvider.getAttributeValue(attributeId);
 		
-		if (args == null)
+		if (args == null || args.length == 0)
 			return attribute;
-		else if (args.length == 1)
-			return ((Map<?, ?>)attribute).get(args[0]);
 		else
 			throw new RuntimeException("Unexpected arguments count");
-	}
-	
-	public static String getPrefix() {
-		return "get";
 	}
 }
