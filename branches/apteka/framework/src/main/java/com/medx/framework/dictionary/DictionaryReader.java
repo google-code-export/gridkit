@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.UnmarshalException;
 import javax.xml.bind.Unmarshaller;
@@ -30,16 +29,12 @@ import com.medx.framework.dictionary.model.TypeDescriptor;
 public class DictionaryReader {
 	private static final Logger log = LoggerFactory.getLogger(DictionaryReader.class);
 	
-	private JAXBContext jaxbContext;
-	
 	private Unmarshaller unmarshaller;
 	
 	private ValidationEventCollector validationCollector = new ValidationEventCollector();
 	
 	public DictionaryReader() throws JAXBException, SAXException, IOException {
-		jaxbContext = Dictionary.getJaxbContext();
-		
-		unmarshaller = jaxbContext.createUnmarshaller();
+		unmarshaller = DictionaryJaxbContext.getInstance().createUnmarshaller();
 		
 		SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 		

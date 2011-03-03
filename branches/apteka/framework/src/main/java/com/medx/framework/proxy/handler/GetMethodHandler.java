@@ -10,8 +10,8 @@ public class GetMethodHandler implements MethodHandler {
 	}
 
 	@Override
-	public Object invoke(AttributeAccessor attributeAccessor, Object[] args) {
-		Object attribute = attributeAccessor.getAttributeValue(attributeId);
+	public Object invoke(MapProxyAttributeProvider attributeProvider, Object[] args) {
+		Object attribute = attributeProvider.getAttributeValue(attributeId);
 		
 		if (args == null)
 			return attribute;

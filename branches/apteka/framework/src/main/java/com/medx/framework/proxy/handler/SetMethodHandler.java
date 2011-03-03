@@ -8,9 +8,9 @@ public class SetMethodHandler implements MethodHandler {
 	}
 	
 	@Override
-	public Object invoke(AttributeAccessor attributeAccessor, Object[] args) {
+	public Object invoke(MapProxyAttributeProvider attributeProvider, Object[] args) {
 		if (args.length == 1)
-			attributeAccessor.setAttributeValue(attributeId, args[0]);
+			attributeProvider.setAttributeValue(attributeId, args[0]);
 		else
 			throw new RuntimeException("Unexpected arguments count");
 		

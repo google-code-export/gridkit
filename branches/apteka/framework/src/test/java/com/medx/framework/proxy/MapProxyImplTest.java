@@ -59,8 +59,8 @@ public class MapProxyImplTest {
 		String[] customerTitles = {"a", "b", "c"}; 
 		
 		int[] customerClasses = {6};
-		//TODO Integer.MIN_VALUE may cause serialization overhead
-		customerMap.put(Integer.MIN_VALUE, customerClasses);
+		
+		customerMap.put(MapProxyFactory.CLASSES_KEY, customerClasses);
 		customerMap.put(TestDictionary.Id.customerName, "Ted");
 		customerMap.put(TestDictionary.Id.customerTags, customerTags);
 		customerMap.put(TestDictionary.Id.customerTitles, customerTitles);
@@ -68,7 +68,7 @@ public class MapProxyImplTest {
 		orderMap = new HashMap<Integer, Object>();
 		
 		int[] orderClasses = {7};
-		orderMap.put(Integer.MIN_VALUE, orderClasses);
+		orderMap.put(MapProxyFactory.CLASSES_KEY, orderClasses);
 		orderMap.put(TestDictionary.Id.orderId, 0);
 		orderMap.put(TestDictionary.Id.orderCustomer, customerMap);
 		
@@ -76,19 +76,19 @@ public class MapProxyImplTest {
 		
 		orderItem1Map = new HashMap<Integer, Object>(); 
 		
-		orderItem1Map.put(Integer.MIN_VALUE, orderIteamClasses);
+		orderItem1Map.put(MapProxyFactory.CLASSES_KEY, orderIteamClasses);
 		orderItem1Map.put(TestDictionary.Id.orderItemTitle, "clock");
 		orderItem1Map.put(TestDictionary.Id.orderItemPrice, 1.0);
 		
 		orderItem2Map = new HashMap<Integer, Object>(); 
 		
-		orderItem2Map.put(Integer.MIN_VALUE, orderIteamClasses);
+		orderItem2Map.put(MapProxyFactory.CLASSES_KEY, orderIteamClasses);
 		orderItem2Map.put(TestDictionary.Id.orderItemTitle, "mouse");
 		orderItem2Map.put(TestDictionary.Id.orderItemPrice, 2.0);
 		
 		orderItem3Map = new HashMap<Integer, Object>(); 
 		
-		orderItem3Map.put(Integer.MIN_VALUE, orderIteamClasses);
+		orderItem3Map.put(MapProxyFactory.CLASSES_KEY, orderIteamClasses);
 		orderItem3Map.put(TestDictionary.Id.orderItemTitle, "keyboard");
 		orderItem3Map.put(TestDictionary.Id.orderItemPrice, 3.0);
 		

@@ -1,6 +1,6 @@
 package com.medx.framework.proxy.handler;
 
-public interface AttributeAccessor {
+public interface MapProxyAttributeProvider {
 	Object getAttributeValue(int attributeId);
 	
 	void setAttributeValue(int attributeId, Object value);
