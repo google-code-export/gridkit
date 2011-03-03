@@ -31,7 +31,7 @@ import javax.xml.bind.JAXBException;
 
 import org.xml.sax.SAXException;
 
-import com.medx.framework.annotation.DictType;
+import com.medx.framework.annotation.ModelClass;
 import com.medx.framework.annotation.JavaDictionary;
 import com.medx.framework.annotation.ModelPackage;
 import com.medx.framework.annotation.XmlDictionary;
@@ -116,7 +116,7 @@ public class ModelPackageProcessor {
 	}
 	
 	private void prepareDescriptors() {
-		Set<? extends Element> allDictTypes = roundEnv.getElementsAnnotatedWith(DictType.class);
+		Set<? extends Element> allDictTypes = roundEnv.getElementsAnnotatedWith(ModelClass.class);
 		
 		List<TypeElement> dictTypes = filterDictTypes(allDictTypes, modelPackageName);
 		

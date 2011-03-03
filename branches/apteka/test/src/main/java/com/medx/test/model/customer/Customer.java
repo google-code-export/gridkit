@@ -1,8 +1,8 @@
 package com.medx.test.model.customer;
 
-import com.medx.framework.annotation.DictType;
+import com.medx.framework.annotation.ModelClass;
 
-@DictType
+@ModelClass
 public interface Customer {
 	String getName();
 	void setName(String name);

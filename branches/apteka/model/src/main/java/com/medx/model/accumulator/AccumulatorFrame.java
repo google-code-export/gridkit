@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import com.medx.framework.annotation.DictType;
+import com.medx.framework.annotation.ModelClass;
 import com.medx.metamodel.Facade;
 
 @Facade
-@DictType
+@ModelClass
 public interface AccumulatorFrame {
 	public Collection<Accumulator> getAccumulators();
 	

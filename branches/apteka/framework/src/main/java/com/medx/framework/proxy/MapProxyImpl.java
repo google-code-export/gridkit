@@ -89,12 +89,12 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, MapPr
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public <V> V get(AttrKey<V> key) {
+	public <V> V getAttribute(AttrKey<V> key) {
 		return (V)getAttributeValue(key.getId());
 	}
 
 	@Override
-	public <V> void set(AttrKey<V> key, V value) {
+	public <V> void setAttribute(AttrKey<V> key, V value) {
 		setAttributeValue(key.getId(), value);
 	}
 	
