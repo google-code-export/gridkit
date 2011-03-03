@@ -9,5 +9,5 @@ public interface OrderItem {
 	void setProduct(Product product);
 	
 	Integer getQuantity();
-	void getQuantity(Integer quantity);
+	void setQuantity(Integer quantity);
 }
