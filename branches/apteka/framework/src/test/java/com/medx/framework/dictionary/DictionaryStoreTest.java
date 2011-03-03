@@ -5,7 +5,6 @@ import java.util.ArrayList;
 
 import javax.xml.bind.JAXBException;
 
-import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import com.medx.framework.dictionary.model.AttributeDescriptor;
@@ -23,7 +22,7 @@ public class DictionaryStoreTest {
 		System.out.println(dictionary.getTypeDescriptors().size());
 	}
 	
-	@Test
+	//@Test
 	public void testStore() throws JAXBException {
 		DictionaryWriter ds = new DictionaryWriter();
 		
