@@ -45,7 +45,7 @@ public class MapProxyImplTest {
 	private static AttrKeyRegistry attrKeyRegistry = new AttrKeyRegistryImpl(dictionary);
 	private static MethodHandlerFactory methodHandlerFactory = new CachingMethodHandlerFactory(attrKeyRegistry);
 	private static MapProxyFactory proxyFactory = new MapProxyFactoryImpl(typeRegistry, methodHandlerFactory);
-	private static MapProxyBinarySerializer kryoSerializer = new KryoSerializer(proxyFactory);
+	private static MapProxyBinarySerializer kryoSerializer = new KryoSerializer(proxyFactory, typeRegistry, attrKeyRegistry);
 	
 	public static Map<Integer, Object> customerMap = null;
 	public static Map<Integer, Object> orderMap = null;
