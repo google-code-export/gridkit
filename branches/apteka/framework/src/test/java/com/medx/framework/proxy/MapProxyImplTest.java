@@ -21,6 +21,8 @@ import com.medx.framework.metadata.TypeRegistry;
 import com.medx.framework.metadata.TypeRegistryImpl;
 import com.medx.framework.proxy.handler.CachingMethodHandlerFactory;
 import com.medx.framework.proxy.handler.MethodHandlerFactory;
+import com.medx.framework.proxy.serialization.MapProxyBinarySerializer;
+import com.medx.framework.proxy.serialization.kryo.KryoSerializer;
 import com.medx.framework.test.TestDictionary;
 import com.medx.framework.test.model.Customer;
 import com.medx.framework.test.model.Order;
@@ -43,6 +45,7 @@ public class MapProxyImplTest {
 	private static AttrKeyRegistry attrKeyRegistry = new AttrKeyRegistryImpl(dictionary);
 	private static MethodHandlerFactory methodHandlerFactory = new CachingMethodHandlerFactory(attrKeyRegistry);
 	private static MapProxyFactory proxyFactory = new MapProxyFactoryImpl(typeRegistry, methodHandlerFactory);
+	private static MapProxyBinarySerializer kryoSerializer = new KryoSerializer(proxyFactory);
 	
 	public static Map<Integer, Object> customerMap = null;
 	public static Map<Integer, Object> orderMap = null;
@@ -58,37 +61,42 @@ public class MapProxyImplTest {
 		int[] customerTags = {1,2,3};
 		String[] customerTitles = {"a", "b", "c"}; 
 		
-		int[] customerClasses = {6};
+		customerMap.put(6, true);
+		customerMap.put(MapProxyFactory.PROXIABLE_KEY, true);
 		
-		customerMap.put(MapProxyFactory.CLASSES_KEY, customerClasses);
 		customerMap.put(TestDictionary.Id.customerName, "Ted");
 		customerMap.put(TestDictionary.Id.customerTags, customerTags);
 		customerMap.put(TestDictionary.Id.customerTitles, customerTitles);
 		
 		orderMap = new HashMap<Integer, Object>();
 		
-		int[] orderClasses = {7};
-		orderMap.put(MapProxyFactory.CLASSES_KEY, orderClasses);
+		orderMap.put(7, true);
+		orderMap.put(MapProxyFactory.PROXIABLE_KEY, true);
+		
 		orderMap.put(TestDictionary.Id.orderId, 0);
 		orderMap.put(TestDictionary.Id.orderCustomer, customerMap);
 		
-		int[] orderIteamClasses = {8};
-		
 		orderItem1Map = new HashMap<Integer, Object>(); 
 		
-		orderItem1Map.put(MapProxyFactory.CLASSES_KEY, orderIteamClasses);
+		orderItem1Map.put(8, true);
+		orderItem1Map.put(MapProxyFactory.PROXIABLE_KEY, true);
+		
 		orderItem1Map.put(TestDictionary.Id.orderItemTitle, "clock");
 		orderItem1Map.put(TestDictionary.Id.orderItemPrice, 1.0);
 		
 		orderItem2Map = new HashMap<Integer, Object>(); 
 		
-		orderItem2Map.put(MapProxyFactory.CLASSES_KEY, orderIteamClasses);
+		orderItem2Map.put(8, true);
+		orderItem2Map.put(MapProxyFactory.PROXIABLE_KEY, true);
+		
 		orderItem2Map.put(TestDictionary.Id.orderItemTitle, "mouse");
 		orderItem2Map.put(TestDictionary.Id.orderItemPrice, 2.0);
 		
 		orderItem3Map = new HashMap<Integer, Object>(); 
 		
-		orderItem3Map.put(MapProxyFactory.CLASSES_KEY, orderIteamClasses);
+		orderItem3Map.put(8, true);
+		orderItem3Map.put(MapProxyFactory.PROXIABLE_KEY, true);
+		
 		orderItem3Map.put(TestDictionary.Id.orderItemTitle, "keyboard");
 		orderItem3Map.put(TestDictionary.Id.orderItemPrice, 3.0);
 		
@@ -184,5 +192,18 @@ public class MapProxyImplTest {
 		
 		assertArrayEquals(customerTags, customer.getTags());
 		assertArrayEquals(customerTitles, customer.getTitles());
+	}
+	
+	@Test
+	public void test9() {
+		MapProxy orderItem1 = proxyFactory.createMapProxy(orderItem1Map);
+		
+		byte[] data = kryoSerializer.serialize(orderItem1);
+		
+		System.out.println("Serialized array size = " + data.length);
+		
+		MapProxy orderItem2 = kryoSerializer.deserialize(data);
+		
+		assertEquals(orderItem1, orderItem2);
 	}
 }

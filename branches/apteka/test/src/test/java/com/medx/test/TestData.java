@@ -27,6 +27,8 @@ import com.medx.test.model.product.Product;
 @Ignore
 public class TestData {
 	protected static Dictionary dictionary;
+	protected static Dictionary devDictionary;
+	
 	protected static TypeRegistry typeRegistry;
 	protected static AttrKeyRegistry attrKeyRegistry;
 	protected static MethodHandlerFactory methodHandlerFactory;
@@ -34,9 +36,13 @@ public class TestData {
 	
 	@BeforeClass
 	protected static void beforeClass() throws Exception {
-		dictionary = (new DictionaryReader()).readDictionary("src/main/java/xml/medx-test-dictionary.xml");
-		typeRegistry = new TypeRegistryImpl(dictionary);
-		attrKeyRegistry = new AttrKeyRegistryImpl(dictionary);
+		DictionaryReader reader = new DictionaryReader();
+		
+		dictionary = reader.readDictionary("src/main/java/com/medx/test/model/medx-test-dictionary.xml");
+		devDictionary = reader.readDictionary("src/main/java/com/medx/test/model/medx-test-dev-dictionary.xml");
+		
+		typeRegistry = new TypeRegistryImpl(dictionary, devDictionary);
+		attrKeyRegistry = new AttrKeyRegistryImpl(dictionary, devDictionary);
 		methodHandlerFactory = new CachingMethodHandlerFactory(attrKeyRegistry);
 		proxyFactory = new MapProxyFactoryImpl(typeRegistry, methodHandlerFactory);
 	}
