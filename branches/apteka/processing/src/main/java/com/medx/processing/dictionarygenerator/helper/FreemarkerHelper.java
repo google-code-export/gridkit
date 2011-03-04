@@ -13,7 +13,7 @@ import com.medx.framework.annotation.JavaDictionary;
 import com.medx.framework.attribute.AttrKey;
 import com.medx.framework.dictionary.model.AttributeDescriptor;
 import com.medx.framework.dictionary.model.TypeDescriptor;
-import com.medx.framework.type.TypeKey;
+import com.medx.framework.metadata.TypeKey;
 import com.medx.framework.util.ClassUtil;
 import com.medx.framework.util.DictUtil;
 
@@ -77,7 +77,7 @@ public class FreemarkerHelper {
 		
 		result.put("id", String.valueOf(desc.getId()));
 		result.put("version", String.valueOf(desc.getVersion()));
-		result.put("clazz", desc.getClazz());
+		result.put("clazz", desc.getJavaClassName());
 		
 		return result;
 	}

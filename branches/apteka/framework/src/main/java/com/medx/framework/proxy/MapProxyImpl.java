@@ -116,11 +116,6 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, MapPr
 	}
 
 	@Override
-	public Map<String, Object> exportBackendMap() {
-		return null;
-	}
-	
-	@Override
 	public int hashCode() {
 		return backendMap.hashCode();
 	}

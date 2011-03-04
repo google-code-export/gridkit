@@ -10,13 +10,13 @@ public class TypeDescriptor extends DictionaryEntry {
 	private static final long serialVersionUID = 6113820571290881884L;
 	
 	@XmlElement(required=true, name="class")
-	private String clazz;
+	private String javaClass;
 	
-	public String getClazz() {
-		return clazz;
+	public String getJavaClassName() {
+		return javaClass;
 	}
 
-	public void setClazz(String clazz) {
-		this.clazz = clazz;
+	public void setJavaClassName(String javaClass) {
+		this.javaClass = javaClass;
 	}
 }

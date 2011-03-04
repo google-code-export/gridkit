@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.Map;
 
 import com.medx.framework.attribute.AttrMap;
+import com.medx.framework.metadata.TypeRegistry;
 import com.medx.framework.proxy.handler.MethodHandlerFactory;
-import com.medx.framework.type.TypeRegistry;
 
 public class MapProxyFactoryImpl implements MapProxyFactoryInternal {
 	private static final Class<?>[] implementedInterfaces = {Map.class, MapProxy.class, AttrMap.class};
