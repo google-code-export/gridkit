@@ -1,7 +1,9 @@
 package com.medx.framework.dictionary.model;
 
-public class ObjectFactory {
+import javax.xml.bind.annotation.XmlTransient;
 
+@XmlTransient
+public class ObjectFactory {
 	public Dictionary createDictionary() {
 		return new Dictionary();
 	}
