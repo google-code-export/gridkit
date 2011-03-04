@@ -3,8 +3,7 @@ package com.medx.framework.proxy;
 import java.util.Map;
 
 public interface MapProxyFactory {
-	//TODO Integer.MIN_VALUE may cause serialization overhead
-	public static final int CLASSES_KEY = Integer.MIN_VALUE;
+	public static final Integer PROXIABLE_KEY = Integer.MAX_VALUE;
 	
 	boolean isProxiable(Object object);
 	

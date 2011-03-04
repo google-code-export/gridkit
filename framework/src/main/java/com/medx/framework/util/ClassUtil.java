@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ClassUtil {
-	public static final List<String> primitiveTypes = Collections.unmodifiableList(Arrays.asList("boolean", "byte", "int", "long", "char", "float", "double"));
+	public static final List<String> primitiveTypes = Collections.unmodifiableList(Arrays.asList("boolean", "byte", "char", "short", "int", "long", "float", "double"));
 	
 	private static String ARRAY_POSTFIX = "[]";
 	
@@ -16,9 +16,10 @@ public class ClassUtil {
 	static {
 		primitiveArrayChars.put("boolean", "Z");
 		primitiveArrayChars.put("byte", "B");
+		primitiveArrayChars.put("char", "C");
+		primitiveArrayChars.put("short", "S");
 		primitiveArrayChars.put("int", "I");
 		primitiveArrayChars.put("long", "J");
-		primitiveArrayChars.put("char", "C");
 		primitiveArrayChars.put("float", "F");
 		primitiveArrayChars.put("double", "D");
 	}

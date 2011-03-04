@@ -3,6 +3,7 @@ package com.medx.framework.proxy;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 
 import com.medx.framework.attribute.AttrMap;
 import com.medx.framework.metadata.TypeRegistry;
@@ -10,7 +11,7 @@ import com.medx.framework.proxy.handler.MethodHandlerFactory;
 
 public class MapProxyFactoryImpl implements MapProxyFactoryInternal {
 	private static final Class<?>[] implementedInterfaces = {Map.class, MapProxy.class, AttrMap.class};
-	
+
 	private final TypeRegistry typeRegistry;
 	private final MethodHandlerFactory methodHandlerFactory;
 	
@@ -21,12 +22,20 @@ public class MapProxyFactoryImpl implements MapProxyFactoryInternal {
 
 	@Override
 	public <T> T createMapProxy(Map<Integer, Object> backendMap) {
-		int[] interfaceIds = (int[])backendMap.get(CLASSES_KEY);
+		Set<Integer> typeIds = typeRegistry.getTypeIds(backendMap.keySet());
 		
-		Class<?>[] interfaces = Arrays.copyOf(implementedInterfaces, implementedInterfaces.length + interfaceIds.length);
+		Object proxiableKey = backendMap.get(PROXIABLE_KEY);
 		
-		for (int i = implementedInterfaces.length; i < interfaces.length; ++i)
-			interfaces[i] = typeRegistry.getTypeKey(interfaceIds[i - implementedInterfaces.length]).getClazz();
+		if (proxiableKey != null && !Boolean.class.isInstance(proxiableKey) && !(Boolean)proxiableKey)
+			throw new IllegalArgumentException("backendMap");
+		
+		backendMap.put(PROXIABLE_KEY, Boolean.TRUE);
+		
+		Class<?>[] interfaces = Arrays.copyOf(implementedInterfaces, implementedInterfaces.length + typeIds.size());
+		
+		int i = 0;
+		for(Integer typeId : typeIds)
+			interfaces[implementedInterfaces.length + i++] = typeRegistry.getTypeKey(typeId).getClazz();
 		
 		MapProxyImpl mapProxyImpl = new MapProxyImpl(backendMap, this);
 		
@@ -38,12 +47,15 @@ public class MapProxyFactoryImpl implements MapProxyFactoryInternal {
 
 	@Override
 	public boolean isProxiable(Object object) {
-		if (object == null || !Map.class.isInstance(object))
+		if (object == null)
 			return false;
 		
-		Object candidate = ((Map<?, ?>)object).get(CLASSES_KEY);
+		if (!Map.class.isInstance(object))
+			return false;
 		
-		if (candidate != null && candidate.getClass() == int[].class)
+		Object candidate = ((Map<?, ?>)object).get(PROXIABLE_KEY);
+		
+		if (candidate != null && candidate.getClass() == Boolean.class && (Boolean)candidate)
 			return true;
 		
 		return false;

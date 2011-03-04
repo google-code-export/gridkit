@@ -3,7 +3,6 @@ package com.medx.framework.proxy;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,6 +10,7 @@ import java.util.TreeSet;
 
 import com.medx.framework.attribute.AttrKey;
 import com.medx.framework.attribute.AttrMap;
+import com.medx.framework.metadata.TypeKey;
 import com.medx.framework.proxy.handler.MapProxyAttributeProvider;
 import com.medx.framework.proxy.wrapper.CompositeWrapper;
 import com.medx.framework.proxy.wrapper.ListWrapper;
@@ -100,12 +100,12 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, MapPr
 	
 	@Override
 	public <U> U cast(Class<U> clazz) {
-		int[] interfaceIds = CastUtil.cast(backendMap.get(MapProxyFactory.CLASSES_KEY));
+		TypeKey<U> typeKey = mapProxyFactory.getTypeRegistry().getTypeKey(clazz);
 		
-		interfaceIds = Arrays.copyOf(interfaceIds, interfaceIds.length + 1);
-		interfaceIds[interfaceIds.length - 1] = mapProxyFactory.getTypeRegistry().getTypeKey(clazz).getId();
+		if (typeKey == null)
+			throw new IllegalArgumentException("clazz");
 		
-		backendMap.put(MapProxyFactory.CLASSES_KEY, interfaceIds);
+		backendMap.put(typeKey.getId(), Boolean.TRUE);
 		
 		return CastUtil.<U>cast(mapProxyFactory.createMapProxy(backendMap));
 	}

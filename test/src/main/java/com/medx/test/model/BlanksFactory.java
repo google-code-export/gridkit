@@ -17,7 +17,8 @@ public class BlanksFactory {
 	public static Map<Integer, Object> createCustomer(String name, Sex sex) {
 		Map<Integer, Object> result = new HashMap<Integer, Object>();
 		
-		result.put(MapProxyFactory.CLASSES_KEY, asArray(Customer.Type.descriptor.getId()));
+		result.put(MapProxyFactory.PROXIABLE_KEY, true);
+		result.put(Customer.Type.descriptor.getId(), true);
 		
 		result.put(Customer.name.getId(), name);
 		result.put(Customer.sex.getId(), sex);
@@ -28,7 +29,9 @@ public class BlanksFactory {
 	public static Map<Integer, Object> createProduct(String title, double price, List<String> tags) {
 		Map<Integer, Object> result = new HashMap<Integer, Object>();
 		
-		result.put(MapProxyFactory.CLASSES_KEY, asArray(Product.Type.descriptor.getId(), Taggable.Type.descriptor.getId()));
+		result.put(MapProxyFactory.PROXIABLE_KEY, true);
+		result.put(Product.Type.descriptor.getId(), true);
+		result.put(Taggable.Type.descriptor.getId(), true);
 		
 		result.put(Product.title.getId(), title);
 		result.put(Product.price.getId(), price);
@@ -40,7 +43,8 @@ public class BlanksFactory {
 	public static Map<Integer, Object> createOrderItem(Map<Integer, Object> product, int quantity) {
 		Map<Integer, Object> result = new HashMap<Integer, Object>();
 		
-		result.put(MapProxyFactory.CLASSES_KEY, asArray(OrderItem.Type.descriptor.getId()));
+		result.put(MapProxyFactory.PROXIABLE_KEY, true);
+		result.put(OrderItem.Type.descriptor.getId(), true);
 		
 		result.put(OrderItem.product.getId(), product);
 		result.put(OrderItem.quantity.getId(), quantity);
@@ -50,24 +54,13 @@ public class BlanksFactory {
 	
 	public static Map<Integer, Object> createOrder(int id, Map<Integer, Object> customer, List<Map<Integer, Object>> items) {
 		Map<Integer, Object> result = new HashMap<Integer, Object>();
-		
-		result.put(MapProxyFactory.CLASSES_KEY, asArray(Order.Type.descriptor.getId()));
+
+		result.put(MapProxyFactory.PROXIABLE_KEY, true);
+		result.put(Order.Type.descriptor.getId(), true);
 		
 		result.put(Order.id.getId(), id);
 		result.put(Order.customer.getId(), customer);
 		result.put(Order.items.getId(), items);
-		
-		return result;
-	}
-	
-	private static int[] asArray(Integer... data) {
-		int[] result = new int[data.length];
-		
-		int i = 0;
-		
-		for (Integer e : data) {
-			result[i++] = e;
-		}
 		
 		return result;
 	}
