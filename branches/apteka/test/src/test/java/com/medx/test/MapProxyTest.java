@@ -20,6 +20,7 @@ import com.medx.test.dictionary.customer.Customer;
 import com.medx.test.dictionary.order.OrderItem;
 import com.medx.test.model.customer.Sex;
 
+@SuppressWarnings("unchecked")
 public class MapProxyTest extends TestData {
 	private static final double DELTA = 0.0001;
 	
