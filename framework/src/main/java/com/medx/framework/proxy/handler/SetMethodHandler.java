@@ -5,9 +5,6 @@ import com.medx.framework.attribute.AttrKey;
 
 @AttributeAccessHandler(verb = "set", attributeType = Object.class)
 public class SetMethodHandler implements MethodHandler {
-	
-	public static final String PREFIX = "set";
-	
 	private int attributeId;
 	
 	// no arg constructor to use via reflection

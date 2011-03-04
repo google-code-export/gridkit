@@ -8,10 +8,7 @@ import com.medx.framework.attribute.AttrKey;
 
 @AttributeAccessHandler(verb = "add", attributeType = Collection.class, noonForm = NoonForm.SINGULAR)
 public class AddMethodHandler implements MethodHandler {
-
-	public static final String PREFIX = "add";
-
-	private AttrKey attrKey;
+	private AttrKey<?> attrKey;
 	
 	@Override
 	public void setAttrKey(AttrKey<?> key) {
