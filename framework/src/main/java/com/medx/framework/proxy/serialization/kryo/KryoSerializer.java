@@ -11,6 +11,8 @@ import java.util.TreeSet;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.ObjectBuffer;
+import com.medx.framework.metadata.AttrKeyRegistry;
+import com.medx.framework.metadata.TypeRegistry;
 import com.medx.framework.proxy.MapProxy;
 import com.medx.framework.proxy.MapProxyFactory;
 import com.medx.framework.proxy.serialization.MapProxyBinarySerializer;
@@ -23,20 +25,26 @@ public class KryoSerializer implements MapProxyBinarySerializer {
 
     private final Kryo kryo;
     
-    private ThreadLocal<ObjectBuffer> objectBuffer;
+    private final ThreadLocal<ObjectBuffer> objectBuffer;
     
     private final MapProxyFactory proxyFactory;
     
-	public KryoSerializer(MapProxyFactory proxyFactory) {
-		this(proxyFactory, 1024);
+	private final TypeRegistry typeRegistry;
+	private final AttrKeyRegistry attrRegistry;
+    
+	public KryoSerializer(MapProxyFactory proxyFactory, TypeRegistry typeRegistry, AttrKeyRegistry attrRegistry) {
+		this(proxyFactory, typeRegistry, attrRegistry, 1024);
 	}
     
-	public KryoSerializer(MapProxyFactory proxyFactory, int capacity) {
-		this(proxyFactory, capacity, capacity);
+	public KryoSerializer(MapProxyFactory proxyFactory, TypeRegistry typeRegistry, AttrKeyRegistry attrRegistry, int capacity) {
+		this(proxyFactory, typeRegistry, attrRegistry, capacity, capacity);
 	}
     
-	public KryoSerializer(MapProxyFactory proxyFactory, final int initialCapacity, final int maxCapacity) {
+	public KryoSerializer(MapProxyFactory proxyFactory, TypeRegistry typeRegistry, AttrKeyRegistry attrRegistry, final int initialCapacity, final int maxCapacity) {
 		this.proxyFactory = proxyFactory;
+		
+		this.typeRegistry = typeRegistry;
+		this.attrRegistry = attrRegistry;
 		
 		this.kryo = createKryo();
 
@@ -57,13 +65,14 @@ public class KryoSerializer implements MapProxyBinarySerializer {
 		return objectBuffer.get().writeObjectData(mapProxy);
 	}
 
-	private static Kryo createKryo() {
+	private Kryo createKryo() {
 		Kryo kryo = new Kryo();
 		
 		for (Class<?> clazz : supportedClasses)
 			kryo.register(clazz);
 		
-		kryo.register(InvocationHandler.class, new MapProxyKryoSerializer(kryo));
+		//kryo.register(InvocationHandler.class, new MapProxyKryoSerializer(kryo));
+		kryo.register(InvocationHandler.class, new AdvancedMapProxyKryoSerializer(kryo, typeRegistry, attrRegistry));
 		
 		return kryo;
 	}
