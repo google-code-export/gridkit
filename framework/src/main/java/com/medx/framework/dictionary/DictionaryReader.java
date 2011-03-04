@@ -39,14 +39,15 @@ public class DictionaryReader {
 		
 		SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 		
-		InputStream schemaStream = DictionaryWriter.class.getResourceAsStream("/xml/framework/dictionary.xsd");
+		InputStream schemaStream = DictionaryWriter.class.getResourceAsStream("/META-INF/schema/dictionary.xsd");
 		
 		Schema schema = null;
 		try {
 			schema = schemaFactory.newSchema(new StreamSource(schemaStream));
 		}
 		finally {
-			schemaStream.close();
+			if (schemaStream != null)
+				try {schemaStream.close();} catch (IOException e) {}
 		}
 		
 		unmarshaller.setSchema(schema);
