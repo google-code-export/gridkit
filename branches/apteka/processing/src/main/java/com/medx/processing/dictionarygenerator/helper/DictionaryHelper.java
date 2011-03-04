@@ -1,10 +1,14 @@
 package com.medx.processing.dictionarygenerator.helper;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
+import com.medx.framework.annotation.ModelPackage;
 import com.medx.framework.dictionary.model.AttributeDescriptor;
 import com.medx.framework.dictionary.model.Dictionary;
 import com.medx.framework.dictionary.model.TypeDescriptor;
+import com.medx.framework.util.DictUtil;
 
 public class DictionaryHelper {
 	private final Dictionary dictionary;
@@ -34,28 +38,41 @@ public class DictionaryHelper {
 		return maxId;
 	}
 	
-	public TypeDescriptor addTypeDescriptor(TypeDescriptor otherDesc) {
+	public Set<String> getRegisteredTypes() {
+		Set<String> result = new HashSet<String>();
+		
 		for (TypeDescriptor desc : dictionary.getTypeDescriptors())
-			if (desc.getJavaClassName().equals(otherDesc.getJavaClassName()))
-				return desc;
+			result.add(desc.getJavaClassName());
 		
-		dictionary.getTypeDescriptors().add(otherDesc);
-		
-		return otherDesc;
+		return result;
 	}
 	
-	public AttributeDescriptor addAttributeDescriptor(AttributeDescriptor otherDesc) {
+	public Set<String> getRegisteredAttributes(ModelPackage modelPackage, String modelPackageName, String clazz) {
+		Set<String> result = new HashSet<String>();
+		
+		String attrNamePrefix = DictUtil.getAttrName(modelPackage, modelPackageName, clazz, "");
+		
 		for (AttributeDescriptor desc : dictionary.getAttributeDescriptors())
-			if (desc.getName().equals(otherDesc.getName()))
-				return desc;
+			if (desc.getName().startsWith(attrNamePrefix))
+				result.add(desc.getName());
 		
-		dictionary.getAttributeDescriptors().add(otherDesc);
-		
-		return otherDesc;
+		return result;
 	}
 	
-	public Dictionary getDictionary() {
-		return dictionary;
+	public TypeDescriptor containsTypeDescriptor(TypeDescriptor desc) {
+		for (TypeDescriptor internalDesc : dictionary.getTypeDescriptors())
+			if (internalDesc.getJavaClassName().equals(desc.getJavaClassName()))
+				return internalDesc;
+		
+		return null;
+	}
+	
+	public AttributeDescriptor containsAttributeDescriptor(AttributeDescriptor desc) {
+		for (AttributeDescriptor internalDesc : dictionary.getAttributeDescriptors())
+			if (internalDesc.getName().equals(desc.getName()))
+				return internalDesc;
+		
+		return null;
 	}
 	
 	public static Dictionary createEmptyDictionary(int version) {

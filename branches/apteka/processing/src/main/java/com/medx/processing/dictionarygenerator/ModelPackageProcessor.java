@@ -5,6 +5,7 @@ import static com.medx.processing.dictionarygenerator.helper.MirrorHelper.filter
 import static com.medx.processing.dictionarygenerator.helper.MirrorHelper.filterExecutableElements;
 import static com.medx.processing.dictionarygenerator.helper.MirrorHelper.filterGetters;
 import static com.medx.processing.dictionarygenerator.helper.MirrorHelper.mapAttributeDescriptors;
+import static java.lang.String.format;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,13 +27,12 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import javax.tools.Diagnostic.Kind;
-import javax.tools.JavaFileManager.Location;
 import javax.xml.bind.JAXBException;
 
 import org.xml.sax.SAXException;
 
-import com.medx.framework.annotation.ModelClass;
 import com.medx.framework.annotation.JavaDictionary;
+import com.medx.framework.annotation.ModelClass;
 import com.medx.framework.annotation.ModelPackage;
 import com.medx.framework.annotation.XmlDictionary;
 import com.medx.framework.dictionary.DictionaryReader;
@@ -57,16 +57,19 @@ public class ModelPackageProcessor {
 	private JavaDictionary javaDictionary;
 	
 	private Set<String> modelClasses = new HashSet<String>();
-	private Map<String, TypeDescriptor> typeDescriptors = new HashMap<String, TypeDescriptor>();
-	private Map<String, List<AttributeDescriptor>> attributeDescriptors = new HashMap<String, List<AttributeDescriptor>>();
-	private Map<String, TypeElement> typeElements = new HashMap<String, TypeElement>();
 	
-	private Dictionary dictionary;
-	private DictionaryHelper dictionaryHelper;
+	private Map<String, TypeElement> typeElements = new HashMap<String, TypeElement>();
+	private Map<String, TypeDescriptor> typeDescriptors = new HashMap<String, TypeDescriptor>();
+	
+	private Map<String, List<ExecutableElement>> attributeElements = new HashMap<String, List<ExecutableElement>>();
+	private Map<String, List<AttributeDescriptor>> attributeDescriptors = new HashMap<String, List<AttributeDescriptor>>();
+	
+	private Dictionary permanentDictionary;
+	private Dictionary temporaryDictionary;
+	
+	private DictionaryHelper permanentDictionaryHelper;
 	
 	private FreemarkerHelper freemarkerHelper;
-	
-	private FileObject dictionaryFileObject;
 	
 	public ModelPackageProcessor(PackageElement modelPackageElement, RoundEnvironment roundEnv, ProcessingEnvironment processingEnv) {
 		this.roundEnv = roundEnv;
@@ -85,22 +88,23 @@ public class ModelPackageProcessor {
 		if (xmlDictionary == null)
 			return;
 		
-		prepareDescriptors();
+		if (xmlDictionary.permanentPath() == null || xmlDictionary.temporaryPath() == null || xmlDictionary.permanentPath().equals(xmlDictionary.temporaryPath()))
+			throw new ModelPackageProcessingException("Illegal XmlDictionary values - " + xmlDictionary.toString(), modelPackageElement, true);
 		
 		try {
-			getDictionaryFileObject();
-			loadDictionary();
+			loadPermanentDictionary();
+			createTemporaryDictionary();
 		} catch (Exception e) {
-			throw new ModelPackageProcessingException("Failed to load dicionary", e, modelPackageElement);
+			throw new ModelPackageProcessingException("Failed to init dicionaries", e, modelPackageElement, true);
 		}
 		
+		prepareDescriptors();
 		populateDictionary();
 		
 		try {
-			storeDictionary();
+			storeTemporaryDictionary();
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new ModelPackageProcessingException("Failed to store dicionary", e, modelPackageElement);
+			throw new ModelPackageProcessingException("Failed to store dicionary", e, modelPackageElement, true);
 		}
 		
 		if (javaDictionary == null)
@@ -109,7 +113,7 @@ public class ModelPackageProcessor {
 		try {
 			initFreemarker();
 		} catch (Exception e) {
-			throw new ModelPackageProcessingException("Failed to init freemarker", e, modelPackageElement);
+			throw new ModelPackageProcessingException("Failed to init freemarker", e, modelPackageElement, true);
 		}
 		
 		writeDictionaClasses();
@@ -124,63 +128,119 @@ public class ModelPackageProcessor {
 			String className = dictType.getQualifiedName().toString();
 			
 			modelClasses.add(className);
-			
+
 			typeElements.put(className, dictType);
 			typeDescriptors.put(className, createTypeDescriptor(dictType));
 			
 			List<ExecutableElement> methods = filterExecutableElements(dictType.getEnclosedElements());
 			List<ExecutableElement> getters = filterGetters(methods);
 			
+			attributeElements.put(className, getters);
 			attributeDescriptors.put(className, mapAttributeDescriptors(getters, modelPackageName, modelPackage));
 		}
 	}
 	
-	private void populateDictionary() {
-		int nextId = dictionaryHelper.getNextId(xmlDictionary.startId());
-		nextId = populateTypeDescriptors(nextId);
-		nextId = populateAttributeDescriptors(nextId);
+	private static class PopulateDictionaryException extends Exception {
+		private static final long serialVersionUID = 2278038533169896184L;
 	}
 	
-	private int populateTypeDescriptors(int nextId) {
+	private void populateDictionary() throws ModelPackageProcessingException {
+		int nextId = permanentDictionaryHelper.getNextId(xmlDictionary.startId());
+		
+		boolean hasErrors = false;
+		
+		try {
+			nextId = populateTypeDescriptors(nextId);
+		} catch (PopulateDictionaryException e) {
+			hasErrors = true;
+		}
+		
+		for (String clazz : modelClasses)
+			try {
+				nextId = populateAttributeDescriptors(clazz, nextId);
+			} catch (PopulateDictionaryException e) {
+				hasErrors = true;
+			}
+		
+		if (hasErrors)
+			throw new ModelPackageProcessingException(modelPackageElement, false);
+	}
+	
+	private int populateTypeDescriptors(int nextId) throws PopulateDictionaryException {
+		Set<String> registeredTypes = permanentDictionaryHelper.getRegisteredTypes();
+		
 		for (Map.Entry<String, TypeDescriptor> descEntry : typeDescriptors.entrySet()) {
-			TypeDescriptor oldDesc = dictionaryHelper.addTypeDescriptor(descEntry.getValue());
+			TypeDescriptor oldDesc = permanentDictionaryHelper.containsTypeDescriptor(descEntry.getValue());
 			
-			if (oldDesc != descEntry.getValue()) {
-				descEntry.setValue(oldDesc);
-				//TODO generate warning if different types
+			if (oldDesc == null) {
+				descEntry.getValue().setId(nextId++);
+				descEntry.getValue().setVersion(temporaryDictionary.getVersion());
+				
+				temporaryDictionary.getTypeDescriptors().add(descEntry.getValue());
 			}
 			else {
-				descEntry.getValue().setId(nextId++);
-				descEntry.getValue().setVersion(dictionary.getVersion());
+				descEntry.setValue(oldDesc);
+				registeredTypes.remove(oldDesc.getJavaClassName());
 			}
+		}
+		
+		if (!registeredTypes.isEmpty()) {
+			for (String type : registeredTypes) {
+				String message = format("Class '%s' was removed from source code but presented in permanent dictionary", type);
+				processingEnv.getMessager().printMessage(Kind.ERROR, message, modelPackageElement);
+			}
+			
+			throw new PopulateDictionaryException();
 		}
 		
 		return nextId;
 	}
 	
-	private int populateAttributeDescriptors(int nextId) {
-		for (List<AttributeDescriptor> descList : attributeDescriptors.values()) {
-			
-			List<AttributeDescriptor> oldDescs = new ArrayList<AttributeDescriptor>();
-			
-			for (Iterator<AttributeDescriptor> iter = descList.iterator(); iter.hasNext(); ) {
-				AttributeDescriptor desc = iter.next();
+	private int populateAttributeDescriptors(String clazz, int nextId) throws PopulateDictionaryException {
+		Set<String> registeredAttributes = permanentDictionaryHelper.getRegisteredAttributes(modelPackage, modelPackageName, clazz);
+		
+		List<AttributeDescriptor> oldDescs = new ArrayList<AttributeDescriptor>();
+		
+		boolean hasErrors = false;
+		
+		int i = 0;
+		for (Iterator<AttributeDescriptor> iter = attributeDescriptors.get(clazz).iterator(); iter.hasNext(); ++i) {
+			AttributeDescriptor desc = iter.next();
+
+			AttributeDescriptor oldDesc = permanentDictionaryHelper.containsAttributeDescriptor(desc);
+
+			if (oldDesc == null) {
+				desc.setId(nextId++);
+				desc.setVersion(temporaryDictionary.getVersion());
 				
-				AttributeDescriptor oldDesc = dictionaryHelper.addAttributeDescriptor(desc);
-				
-				if (oldDesc != desc) { 
-					iter.remove();
-					oldDescs.add(oldDesc);
-					//TODO generate warning if different types
-				}
-				else {
-					desc.setId(nextId++);
-					desc.setVersion(dictionary.getVersion());
-				}
+				temporaryDictionary.getAttributeDescriptors().add(desc);
 			}
-			
-			descList.addAll(oldDescs);
+			else {
+				if (!desc.getClazz().equals(oldDesc.getClazz())) {
+					hasErrors = true;
+					String message = format("This attribute has another class in permanent dictionary ('%s')", oldDesc.getClazz());
+					processingEnv.getMessager().printMessage(Kind.ERROR, message, attributeElements.get(clazz).get(i));
+				}
+				
+				iter.remove();
+				oldDescs.add(oldDesc);
+				registeredAttributes.remove(oldDesc.getName());
+			}
 		}
+		
+		attributeDescriptors.get(clazz).addAll(oldDescs);
+		
+		if (!registeredAttributes.isEmpty()) {
+			hasErrors = true;
+			
+			for (String attribute : registeredAttributes) {
+				String message = format("Attribute '%s' was removed from source code but presented in permanent dictionary", attribute);
+				processingEnv.getMessager().printMessage(Kind.ERROR, message, typeElements.get(clazz));
+			}
+		}
+		
+		if (hasErrors)
+			throw new PopulateDictionaryException();
 		
 		return nextId;
 	}
@@ -199,26 +259,32 @@ public class ModelPackageProcessor {
 		}
 	}
 	
-	private void loadDictionary() throws JAXBException, SAXException, IOException {
+	private void createTemporaryDictionary() {
+		temporaryDictionary = DictionaryHelper.createEmptyDictionary(permanentDictionary.getVersion() + 1);
+	}
+	
+	private void loadPermanentDictionary() throws IOException, JAXBException, SAXException {
 		DictionaryReader dictionaryReader = new DictionaryReader();
 		
 		try {
-			InputStream inputStream = dictionaryFileObject.openInputStream();
-			dictionary = dictionaryReader.readDictionary(inputStream);
-			
+			FileObject fileObject = processingEnv.getFiler().getResource(StandardLocation.SOURCE_OUTPUT, "", xmlDictionary.permanentPath());
+			InputStream inputStream = fileObject.openInputStream();
+			permanentDictionary = dictionaryReader.readDictionary(inputStream);
 			try {inputStream.close();} catch (IOException e) {}
 		}
-		catch (Exception e) {
-			dictionary = DictionaryHelper.createEmptyDictionary(1);
+		catch (IOException e) {
+			FileObject fileObject = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "", xmlDictionary.permanentPath());
+			permanentDictionary = DictionaryHelper.createEmptyDictionary(0);
+			storeDictionary(fileObject, permanentDictionary);
 		}
-
-		dictionaryHelper = new DictionaryHelper(dictionary);
+		
+		permanentDictionaryHelper = new DictionaryHelper(permanentDictionary);
 	}
 	
-	private void storeDictionary() throws JAXBException, IOException {
+	private static void storeDictionary(FileObject fileObject, Dictionary dictionary) throws IOException, JAXBException {
 		DictionaryWriter dictionaryWriter = new DictionaryWriter();
 		
-		Writer writer = dictionaryFileObject.openWriter();
+		Writer writer = fileObject.openWriter();
 		
 		try {
 			dictionaryWriter.writeDictionary(writer, dictionary);
@@ -228,8 +294,7 @@ public class ModelPackageProcessor {
 		}
 	}
 	
-	private void getDictionaryFileObject() throws IOException {
-		Location location = StandardLocation.SOURCE_OUTPUT;
-		dictionaryFileObject = processingEnv.getFiler().createResource(location, "", xmlDictionary.path(), (Element)null);
+	private void storeTemporaryDictionary() throws JAXBException, IOException {
+		storeDictionary(processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "", xmlDictionary.temporaryPath(), (Element)null), temporaryDictionary);
 	}
 }

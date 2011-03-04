@@ -54,7 +54,14 @@ public class DictionaryReader {
 	}
 	
 	public Dictionary readDictionary(String fileName) throws JAXBException, MalformedURLException, IOException {
-		return readDictionary((new File(fileName)).toURI().toURL().openStream());
+		InputStream inputStream = (new File(fileName)).toURI().toURL().openStream();
+		
+		try {
+			return readDictionary(inputStream);
+		}
+		finally {
+			try {inputStream.close();} catch (IOException e) {}
+		}
 	}
 	
 	public Dictionary readDictionary(InputStream inputStream) throws JAXBException {
@@ -64,7 +71,7 @@ public class DictionaryReader {
 			result = (Dictionary) unmarshaller.unmarshal(inputStream);
 		}
 		catch (UnmarshalException e) {
-			loadValidationErrors(validationCollector);
+			logValidationErrors(validationCollector);
 			validationCollector.reset();
 			throw e;
 		}
@@ -74,7 +81,7 @@ public class DictionaryReader {
 		return result;
 	}
 	
-	private static void loadValidationErrors(ValidationEventCollector validationCollector) {
+	private static void logValidationErrors(ValidationEventCollector validationCollector) {
 		for(ValidationEvent event : validationCollector.getEvents() ){
 			ValidationEventLocator locator = event.getLocator();
 			

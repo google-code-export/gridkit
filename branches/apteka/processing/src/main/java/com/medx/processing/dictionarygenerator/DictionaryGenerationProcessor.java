@@ -12,6 +12,8 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 
+import com.medx.processing.util.MessageUtil;
+
 @SupportedAnnotationTypes("com.medx.framework.annotation.ModelPackage")
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class DictionaryGenerationProcessor extends AbstractProcessor {	
@@ -26,7 +28,10 @@ public class DictionaryGenerationProcessor extends AbstractProcessor {
 				try {
 					modelPackageProcessor.process();
 				} catch (ModelPackageProcessingException e) {
-					processingEnv.getMessager().printMessage(Kind.WARNING, e.getMessage(), e.getElement());
+					if (e.isLog())
+						processingEnv.getMessager().printMessage(Kind.ERROR, e.getMessage(), e.getElement());
+				} catch (Throwable t) {
+					processingEnv.getMessager().printMessage(Kind.ERROR, MessageUtil.createMessage("Unexpected Throwable during annotation processing", t), packet);
 				}
 			}
 		}
