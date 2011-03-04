@@ -36,7 +36,7 @@ public class DictionaryStoreTest {
 		dictionary.setVersion(1);
 		
 		TypeDescriptor typeDescriptor = new TypeDescriptor();
-		typeDescriptor.setClazz("qqq");
+		typeDescriptor.setJavaClassName("qqq");
 		typeDescriptor.setId(1);
 		typeDescriptor.setVersion(0);
 		

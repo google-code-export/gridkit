@@ -1,4 +1,4 @@
-package com.medx.framework.type;
+package com.medx.framework.metadata;
 
 import static java.lang.String.format;
 
@@ -31,14 +31,14 @@ public class TypeRegistryImpl implements TypeRegistry {
 			
 			Class<?> clazz = null;
 			try {
-				clazz = Class.forName(typeDescriptor.getClazz());
+				clazz = Class.forName(typeDescriptor.getJavaClassName());
 			} catch (ClassNotFoundException e) {
-				log.warn(format("Failded to find class '%s'", typeDescriptor.getClazz()));
+				log.warn(format("Failded to find class '%s'", typeDescriptor.getJavaClassName()));
 				continue;
 			}
 			
 			if (typeKeyByClass.containsKey(clazz)) {
-				log.warn(format("Type with class '%s' already presented", typeDescriptor.getClazz()));
+				log.warn(format("Type with class '%s' already presented", typeDescriptor.getJavaClassName()));
 				continue;
 			}
 			

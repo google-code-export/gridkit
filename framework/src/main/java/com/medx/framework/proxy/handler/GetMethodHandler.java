@@ -1,12 +1,20 @@
 package com.medx.framework.proxy.handler;
 
+import com.medx.framework.annotation.handler.AttributeAccessHandler;
+import com.medx.framework.attribute.AttrKey;
+
+@AttributeAccessHandler(verb = "get", attributeType = Object.class)
 public class GetMethodHandler implements MethodHandler {
 	public static final String PREFIX = "get";
 	
-	private final int attributeId;
+	private int attributeId;
+
+	// no arg constructor to use via reflection
+	public GetMethodHandler() {		
+	}
 	
-	public GetMethodHandler(int attributeId) {
-		this.attributeId = attributeId;
+	public void setAttrKey(AttrKey<?> attrKey) {
+		this.attributeId = attrKey.getId();
 	}
 
 	@Override

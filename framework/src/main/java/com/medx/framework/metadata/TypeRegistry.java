@@ -1,4 +1,4 @@
-package com.medx.framework.type;
+package com.medx.framework.metadata;
 
 public interface TypeRegistry {
 	<T> TypeKey<T> getTypeKey(int id);

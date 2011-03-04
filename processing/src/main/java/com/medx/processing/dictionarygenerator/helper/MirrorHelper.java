@@ -98,7 +98,7 @@ public class MirrorHelper {
 	public static TypeDescriptor createTypeDescriptor(TypeElement clazz) {
 		TypeDescriptor result = new TypeDescriptor();
 		
-		result.setClazz(clazz.getQualifiedName().toString());
+		result.setJavaClassName(clazz.getQualifiedName().toString());
 		
 		return result;
 	}

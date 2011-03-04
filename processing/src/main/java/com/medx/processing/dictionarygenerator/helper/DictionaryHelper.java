@@ -36,7 +36,7 @@ public class DictionaryHelper {
 	
 	public TypeDescriptor addTypeDescriptor(TypeDescriptor otherDesc) {
 		for (TypeDescriptor desc : dictionary.getTypeDescriptors())
-			if (desc.getClazz().equals(otherDesc.getClazz()))
+			if (desc.getJavaClassName().equals(otherDesc.getJavaClassName()))
 				return desc;
 		
 		dictionary.getTypeDescriptors().add(otherDesc);
