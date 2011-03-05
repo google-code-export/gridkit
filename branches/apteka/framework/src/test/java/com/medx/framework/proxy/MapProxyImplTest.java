@@ -12,9 +12,9 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.medx.framework.attribute.AttrMap;
 import com.medx.framework.dictionary.DictionaryReader;
 import com.medx.framework.dictionary.model.Dictionary;
+import com.medx.framework.metadata.AttrMap;
 import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.metadata.ModelMetadataImpl;
 import com.medx.framework.proxy.handler.CachingMethodHandlerFactory;

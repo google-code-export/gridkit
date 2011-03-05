@@ -1,4 +1,4 @@
-package com.medx.framework.attribute;
+package com.medx.framework.metadata;
 
 public interface AttrMap {
 	

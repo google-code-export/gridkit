@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.medx.framework.attribute.AttrKey;
-import com.medx.framework.attribute.AttrMap;
+import com.medx.framework.metadata.AttrKey;
+import com.medx.framework.metadata.AttrMap;
 import com.medx.framework.metadata.TypeKey;
 import com.medx.framework.proxy.handler.MapProxyAttributeProvider;
 import com.medx.framework.proxy.wrapper.CompositeWrapper;

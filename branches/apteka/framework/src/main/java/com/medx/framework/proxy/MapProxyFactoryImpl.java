@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
-import com.medx.framework.attribute.AttrMap;
+import com.medx.framework.metadata.AttrMap;
 import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.proxy.handler.MethodHandlerFactory;
 

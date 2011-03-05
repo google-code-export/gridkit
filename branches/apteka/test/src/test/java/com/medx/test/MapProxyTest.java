@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.medx.framework.attribute.AttrMap;
+import com.medx.framework.metadata.AttrMap;
 import com.medx.framework.proxy.MapProxy;
 import com.medx.test.dictionary.Taggable;
 import com.medx.test.dictionary.customer.Customer;

@@ -1,7 +1,7 @@
 package com.medx.framework.proxy.handler;
 
 import com.medx.framework.annotation.handler.NounForm;
-import com.medx.framework.attribute.AttrKey;
+import com.medx.framework.metadata.AttrKey;
 
 public class MethodInfo {
 	private final String verb;
