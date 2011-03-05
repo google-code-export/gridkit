@@ -2,7 +2,6 @@ package com.medx.framework.metadata;
 
 import java.util.Set;
 
-
 public interface ModelMetadata {
 	<T> AttrKey<T> getAttrKey(int id);
 	<T> AttrKey<T> getAttrKey(String name);
