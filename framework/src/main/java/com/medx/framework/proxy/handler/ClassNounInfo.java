@@ -7,27 +7,33 @@ import com.medx.framework.annotation.handler.NounForm;
 import com.medx.framework.attribute.AttrKey;
 
 public final class ClassNounInfo {
+	private final Map<String, AttrKey<?>> attrKeyByUnknown = new HashMap<String, AttrKey<?>>();
+	
 	private final Map<String, AttrKey<?>> attrKeyByPlural = new HashMap<String, AttrKey<?>>();
 	private final Map<String, AttrKey<?>> attrKeyBySingular = new HashMap<String, AttrKey<?>>();
 	
 	public NounForm getNounForm(String attrName) {
-		//if (attrKeyByPlural.containsKey(attrName) == attrKeyBySingular.containsKey(attrName))
-		//	throw new IllegalStateException("attrKeyByPlural | attrKeyBySingular");
+		if (attrKeyByPlural.containsKey(attrName) && attrKeyBySingular.containsKey(attrName))
+			throw new IllegalStateException("attrKeyByPlural | attrKeyBySingular");
 		
 		if (attrKeyByPlural.containsKey(attrName))
 			return NounForm.PLURAL;
-		else
+		else if (attrKeyBySingular.containsKey(attrName))
 			return NounForm.SINGULAR;
+		else
+			return NounForm.UNKNOWN;
 	}
 	
 	public AttrKey<?> getAttrKey(String attrName) {
-		//if (attrKeyByPlural.containsKey(attrName) == attrKeyBySingular.containsKey(attrName))
-		//	throw new IllegalStateException("attrKeyByPlural | attrKeyBySingular");
+		if (attrKeyByPlural.containsKey(attrName) && attrKeyBySingular.containsKey(attrName))
+			throw new IllegalStateException("attrKeyByPlural | attrKeyBySingular");
 		
 		if (attrKeyByPlural.containsKey(attrName))
 			return attrKeyByPlural.get(attrName);
-		else
+		else if (attrKeyBySingular.containsKey(attrName))
 			return attrKeyBySingular.get(attrName);
+		else
+			return attrKeyByUnknown.get(attrName);
 	}
 
 	public Map<String, AttrKey<?>> getAttrKeyByPlural() {
@@ -36,5 +42,9 @@ public final class ClassNounInfo {
 
 	public Map<String, AttrKey<?>> getAttrKeyBySingular() {
 		return attrKeyBySingular;
+	}
+
+	public Map<String, AttrKey<?>> getAttrKeyByUnknown() {
+		return attrKeyByUnknown;
 	}
 }

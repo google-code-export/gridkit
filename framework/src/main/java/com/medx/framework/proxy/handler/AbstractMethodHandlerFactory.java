@@ -46,13 +46,21 @@ public abstract class AbstractMethodHandlerFactory implements MethodHandlerFacto
 			
 			AttrKey<?> attrKey = attrRegistry.getAttrKey(modelAttrName);
 			
-			result.getAttrKeyByPlural().put(getPluralForm(getter), attrKey);
-			result.getAttrKeyBySingular().put(getSingularForm(getter), attrKey);
+			if (!hasNounlForm(getter)) 
+				result.getAttrKeyByUnknown().put(getterName, attrKey);
+			else {
+				result.getAttrKeyByPlural().put(getPluralForm(getter), attrKey);
+				result.getAttrKeyBySingular().put(getSingularForm(getter), attrKey);
+			}
 		}
 		
 		return result;
 	}
 
+	private static boolean hasNounlForm(Method getter) {
+		return getter.getAnnotation(Plural.class) != null || getter.getAnnotation(Singular.class) != null;
+	}
+	
 	private static String getPluralForm(Method getter) {
 		Plural plural = getter.getAnnotation(Plural.class);
 		
