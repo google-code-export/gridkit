@@ -1,18 +1,15 @@
-package com.medx.framework.proxy.handler;
+package com.medx.framework.proxy.handler.standard;
 
 import com.medx.framework.annotation.handler.AttributeAccessHandler;
 import com.medx.framework.attribute.AttrKey;
+import com.medx.framework.proxy.handler.MapProxyAttributeProvider;
+import com.medx.framework.proxy.handler.MethodHandler;
 
-@AttributeAccessHandler(verb = "set", attributeType = Object.class)
+@AttributeAccessHandler(verb = "set")
 public class SetMethodHandler implements MethodHandler {
-	private int attributeId;
+	private final int attributeId;
 	
-	// no arg constructor to use via reflection
-	public SetMethodHandler() {
-	}
-
-	@Override
-	public void setAttrKey(AttrKey<?> key) {
+	public SetMethodHandler(AttrKey<?> key) {
 		this.attributeId = key.getId();
 	}
 	

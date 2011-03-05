@@ -46,7 +46,7 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, MapPr
 		if (method.getDeclaringClass() == AttrMap.class || method.getDeclaringClass() == MapProxy.class || method.getDeclaringClass() == Object.class)
 			return method.invoke(this, args);
 
-		return mapProxyFactory.getMethodHandlerFactory().getMethodHandler(method).invoke(this, args);
+		return mapProxyFactory.getMethodHandlerFactory().createMethodHandler(method).invoke(this, args);
 	}
 	
 	@Override
