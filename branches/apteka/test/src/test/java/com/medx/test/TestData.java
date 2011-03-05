@@ -9,10 +9,8 @@ import org.junit.Ignore;
 
 import com.medx.framework.dictionary.DictionaryReader;
 import com.medx.framework.dictionary.model.Dictionary;
-import com.medx.framework.metadata.AttrKeyRegistry;
-import com.medx.framework.metadata.AttrKeyRegistryImpl;
-import com.medx.framework.metadata.TypeRegistry;
-import com.medx.framework.metadata.TypeRegistryImpl;
+import com.medx.framework.metadata.ModelMetadata;
+import com.medx.framework.metadata.ModelMetadataImpl;
 import com.medx.framework.proxy.MapProxyFactory;
 import com.medx.framework.proxy.MapProxyFactoryImpl;
 import com.medx.framework.proxy.handler.CachingMethodHandlerFactory;
@@ -31,13 +29,11 @@ public class TestData {
 	protected static Dictionary dictionary;
 	protected static Dictionary devDictionary;
 	
-	protected static TypeRegistry typeRegistry;
-	protected static AttrKeyRegistry attrKeyRegistry;
+	protected static ModelMetadata modelMetadata;
 	protected static MethodHandlerFactory methodHandlerFactory;
 	protected static MapProxyFactory proxyFactory;
 	
 	protected static MapProxyBinarySerializer kryoSerializer;
-
 	
 	@BeforeClass
 	protected static void beforeClass() throws Exception {
@@ -46,12 +42,11 @@ public class TestData {
 		dictionary = reader.readDictionary("src/main/java/com/medx/test/model/medx-test-dictionary.xml");
 		devDictionary = reader.readDictionary("src/main/java/com/medx/test/model/medx-test-dev-dictionary.xml");
 		
-		typeRegistry = new TypeRegistryImpl(dictionary, devDictionary);
-		attrKeyRegistry = new AttrKeyRegistryImpl(dictionary, devDictionary);
-		methodHandlerFactory = new CachingMethodHandlerFactory(attrKeyRegistry);
-		proxyFactory = new MapProxyFactoryImpl(typeRegistry, methodHandlerFactory);
+		modelMetadata = new ModelMetadataImpl(dictionary, devDictionary);
+		methodHandlerFactory = new CachingMethodHandlerFactory(modelMetadata);
+		proxyFactory = new MapProxyFactoryImpl(modelMetadata, methodHandlerFactory);
 		
-		kryoSerializer = new KryoSerializer(proxyFactory, typeRegistry, attrKeyRegistry);
+		kryoSerializer = new KryoSerializer(proxyFactory, modelMetadata);
 	}
 	
 	protected Map<Integer, Object> tomCustomerMap;

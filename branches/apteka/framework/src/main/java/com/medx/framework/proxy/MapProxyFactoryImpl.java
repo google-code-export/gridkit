@@ -6,23 +6,23 @@ import java.util.Map;
 import java.util.Set;
 
 import com.medx.framework.attribute.AttrMap;
-import com.medx.framework.metadata.TypeRegistry;
+import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.proxy.handler.MethodHandlerFactory;
 
 public class MapProxyFactoryImpl implements MapProxyFactoryInternal {
 	private static final Class<?>[] implementedInterfaces = {Map.class, MapProxy.class, AttrMap.class};
 
-	private final TypeRegistry typeRegistry;
+	private final ModelMetadata modelMetadata;
 	private final MethodHandlerFactory methodHandlerFactory;
 	
-	public MapProxyFactoryImpl(TypeRegistry typeRegistry, MethodHandlerFactory methodHandlerFactory) {
-		this.typeRegistry = typeRegistry;
+	public MapProxyFactoryImpl(ModelMetadata modelMetadata, MethodHandlerFactory methodHandlerFactory) {
+		this.modelMetadata = modelMetadata;
 		this.methodHandlerFactory = methodHandlerFactory;
 	}
 
 	@Override
 	public <T> T createMapProxy(Map<Integer, Object> backendMap) {
-		Set<Integer> typeIds = typeRegistry.getTypeIds(backendMap.keySet());
+		Set<Integer> typeIds = modelMetadata.getTypeIds(backendMap.keySet());
 		
 		Object proxiableKey = backendMap.get(PROXIABLE_KEY);
 		
@@ -35,7 +35,7 @@ public class MapProxyFactoryImpl implements MapProxyFactoryInternal {
 		
 		int i = 0;
 		for(Integer typeId : typeIds)
-			interfaces[implementedInterfaces.length + i++] = typeRegistry.getTypeKey(typeId).getClazz();
+			interfaces[implementedInterfaces.length + i++] = modelMetadata.getTypeKey(typeId).getClazz();
 		
 		MapProxyImpl mapProxyImpl = new MapProxyImpl(backendMap, this);
 		
@@ -67,7 +67,7 @@ public class MapProxyFactoryImpl implements MapProxyFactoryInternal {
 	}
 
 	@Override
-	public TypeRegistry getTypeRegistry() {
-		return typeRegistry;
+	public ModelMetadata getModelMetadata() {
+		return modelMetadata;
 	}
 }

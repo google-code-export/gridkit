@@ -100,7 +100,7 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, MapPr
 	
 	@Override
 	public <U> U cast(Class<U> clazz) {
-		TypeKey<U> typeKey = mapProxyFactory.getTypeRegistry().getTypeKey(clazz);
+		TypeKey<U> typeKey = mapProxyFactory.getModelMetadata().getTypeKey(clazz);
 		
 		if (typeKey == null)
 			throw new IllegalArgumentException("clazz");

@@ -11,8 +11,7 @@ import java.util.TreeSet;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.ObjectBuffer;
-import com.medx.framework.metadata.AttrKeyRegistry;
-import com.medx.framework.metadata.TypeRegistry;
+import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.proxy.MapProxy;
 import com.medx.framework.proxy.MapProxyFactory;
 import com.medx.framework.proxy.serialization.MapProxyBinarySerializer;
@@ -29,22 +28,19 @@ public class KryoSerializer implements MapProxyBinarySerializer {
     
     private final MapProxyFactory proxyFactory;
     
-	private final TypeRegistry typeRegistry;
-	private final AttrKeyRegistry attrRegistry;
+	private final ModelMetadata modelMetadata;
     
-	public KryoSerializer(MapProxyFactory proxyFactory, TypeRegistry typeRegistry, AttrKeyRegistry attrRegistry) {
-		this(proxyFactory, typeRegistry, attrRegistry, 1024);
+	public KryoSerializer(MapProxyFactory proxyFactory, ModelMetadata modelMetadata) {
+		this(proxyFactory, modelMetadata, 1024);
 	}
     
-	public KryoSerializer(MapProxyFactory proxyFactory, TypeRegistry typeRegistry, AttrKeyRegistry attrRegistry, int capacity) {
-		this(proxyFactory, typeRegistry, attrRegistry, capacity, capacity);
+	public KryoSerializer(MapProxyFactory proxyFactory, ModelMetadata modelMetadata, int capacity) {
+		this(proxyFactory, modelMetadata, capacity, capacity);
 	}
     
-	public KryoSerializer(MapProxyFactory proxyFactory, TypeRegistry typeRegistry, AttrKeyRegistry attrRegistry, final int initialCapacity, final int maxCapacity) {
+	public KryoSerializer(MapProxyFactory proxyFactory, ModelMetadata modelMetadata, final int initialCapacity, final int maxCapacity) {
 		this.proxyFactory = proxyFactory;
-		
-		this.typeRegistry = typeRegistry;
-		this.attrRegistry = attrRegistry;
+		this.modelMetadata = modelMetadata;
 		
 		this.kryo = createKryo();
 
@@ -72,7 +68,7 @@ public class KryoSerializer implements MapProxyBinarySerializer {
 			kryo.register(clazz);
 		
 		//kryo.register(InvocationHandler.class, new MapProxyKryoSerializer(kryo));
-		kryo.register(InvocationHandler.class, new AdvancedMapProxyKryoSerializer(kryo, typeRegistry, attrRegistry));
+		kryo.register(InvocationHandler.class, new AdvancedMapProxyKryoSerializer(kryo, modelMetadata));
 		
 		return kryo;
 	}
