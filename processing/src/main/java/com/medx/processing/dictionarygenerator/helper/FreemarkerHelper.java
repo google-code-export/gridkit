@@ -10,9 +10,9 @@ import java.util.Map;
 import javax.annotation.processing.Filer;
 
 import com.medx.framework.annotation.JavaDictionary;
-import com.medx.framework.attribute.AttrKey;
 import com.medx.framework.dictionary.model.AttributeDescriptor;
 import com.medx.framework.dictionary.model.TypeDescriptor;
+import com.medx.framework.metadata.AttrKey;
 import com.medx.framework.metadata.TypeKey;
 import com.medx.framework.util.ClassUtil;
 import com.medx.framework.util.DictUtil;

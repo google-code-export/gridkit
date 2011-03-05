@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.medx.framework.attribute.AttrKey;
 import com.medx.framework.dictionary.model.AttributeDescriptor;
 import com.medx.framework.dictionary.model.Dictionary;
 import com.medx.framework.dictionary.model.TypeDescriptor;

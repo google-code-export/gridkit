@@ -6,7 +6,7 @@ import com.medx.framework.annotation.ModelPackage;
 import com.medx.framework.annotation.handler.NounForm;
 import com.medx.framework.annotation.handler.Plural;
 import com.medx.framework.annotation.handler.Singular;
-import com.medx.framework.attribute.AttrKey;
+import com.medx.framework.metadata.AttrKey;
 import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.util.DictUtil;
 import com.medx.framework.util.ReflectionUtil;

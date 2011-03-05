@@ -1,7 +1,7 @@
 package com.medx.framework.proxy.handler.standard;
 
 import com.medx.framework.annotation.handler.AttributeAccessHandler;
-import com.medx.framework.attribute.AttrKey;
+import com.medx.framework.metadata.AttrKey;
 import com.medx.framework.proxy.handler.MapProxyAttributeProvider;
 import com.medx.framework.proxy.handler.MethodHandler;
 

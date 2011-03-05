@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import com.medx.framework.annotation.handler.AttributeAccessHandler;
-import com.medx.framework.attribute.AttrKey;
+import com.medx.framework.metadata.AttrKey;
 import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.proxy.handler.standard.GetMethodHandler;
 import com.medx.framework.proxy.handler.standard.SetMethodHandler;

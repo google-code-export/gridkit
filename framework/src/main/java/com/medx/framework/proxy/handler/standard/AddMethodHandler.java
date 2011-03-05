@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import com.medx.framework.annotation.handler.AttributeAccessHandler;
 import com.medx.framework.annotation.handler.NounForm;
-import com.medx.framework.attribute.AttrKey;
+import com.medx.framework.metadata.AttrKey;
 import com.medx.framework.proxy.handler.MapProxyAttributeProvider;
 import com.medx.framework.proxy.handler.MethodHandler;
 

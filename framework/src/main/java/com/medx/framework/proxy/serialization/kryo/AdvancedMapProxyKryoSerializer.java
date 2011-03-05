@@ -7,7 +7,7 @@ import java.util.Map;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.serialize.IntSerializer;
-import com.medx.framework.attribute.AttrKey;
+import com.medx.framework.metadata.AttrKey;
 import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.proxy.MapProxyFactory;
 
