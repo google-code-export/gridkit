@@ -15,11 +15,10 @@ import com.medx.framework.dictionary.model.AttributeDescriptor;
 import com.medx.framework.dictionary.model.TypeDescriptor;
 import com.medx.framework.util.ClassUtil;
 import com.medx.framework.util.DictUtil;
+import com.medx.framework.util.ReflectionUtil;
 import com.medx.framework.util.TextUtil;
 
 public class MirrorHelper {
-	private static String GETTER_PATTERN  = "get[A-Z].*";
-	
 	public static String getEnvOption(String option, ProcessingEnvironment processingEnv) {
 		return processingEnv.getOptions().get(option);
 	}
@@ -67,7 +66,7 @@ public class MirrorHelper {
 		if (!(typeKind.isPrimitive() || typeKind == TypeKind.DECLARED || typeKind == TypeKind.ARRAY))
 			return false;
 		
-		if (!element.getSimpleName().toString().matches(GETTER_PATTERN))
+		if (!element.getSimpleName().toString().matches(ReflectionUtil.GETTER_PATTERN))
 			return false;
 		
 		return true;
