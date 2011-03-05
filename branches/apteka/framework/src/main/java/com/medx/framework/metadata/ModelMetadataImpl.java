@@ -21,7 +21,7 @@ public class ModelMetadataImpl implements ModelMetadata {
 	private ConcurrentMap<Integer, AttrKey<?>> attrKeyById = new ConcurrentHashMap<Integer, AttrKey<?>>();
 	private ConcurrentMap<String, AttrKey<?>> attrKeyByName = new ConcurrentHashMap<String, AttrKey<?>>();
 
-	private ConcurrentMap<Integer, TypeKey<?>>  typeKeyById = new ConcurrentHashMap<Integer, TypeKey<?>>();
+	private ConcurrentMap<Integer, TypeKey<?>> typeKeyById = new ConcurrentHashMap<Integer, TypeKey<?>>();
 	private ConcurrentMap<Class<?>, TypeKey<?>> typeKeyByClass = new ConcurrentHashMap<Class<?>, TypeKey<?>>();
 	
 	public ModelMetadataImpl(Dictionary... dictionaries) {
@@ -91,6 +91,16 @@ public class ModelMetadataImpl implements ModelMetadata {
 		}
 	}
 
+	@Override
+	public Set<Integer> getTypeIds(Set<Integer> candidates) {
+		HashSet<Integer> result = new HashSet<Integer>();
+		
+		for (Integer typeId : candidates)
+			if (typeKeyById.containsKey(typeId))
+				result.add(typeId);
+		
+		return result;
+	}
 	
 	@Override
 	@SuppressWarnings("unchecked")
@@ -102,17 +112,6 @@ public class ModelMetadataImpl implements ModelMetadata {
 	@SuppressWarnings("unchecked")
 	public <T> AttrKey<T> getAttrKey(String name) {
 		return (AttrKey<T>)attrKeyByName.get(name);
-	}
-
-	@Override
-	public Set<Integer> getTypeIds(Set<Integer> candidates) {
-		HashSet<Integer> result = new HashSet<Integer>();
-		
-		for (Integer typeId : candidates)
-			if (typeKeyById.containsKey(typeId))
-				result.add(typeId);
-		
-		return result;
 	}
 	
 	@Override
