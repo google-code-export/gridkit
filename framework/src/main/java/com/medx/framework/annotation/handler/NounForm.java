@@ -1,6 +1,6 @@
 package com.medx.framework.annotation.handler;
 
-public enum NoonForm {
+public enum NounForm {
 	DEFAULT,
 	SINGULAR,
 	PLURAL

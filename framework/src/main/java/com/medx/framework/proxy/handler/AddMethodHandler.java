@@ -3,10 +3,10 @@ package com.medx.framework.proxy.handler;
 import java.util.Collection;
 
 import com.medx.framework.annotation.handler.AttributeAccessHandler;
-import com.medx.framework.annotation.handler.NoonForm;
+import com.medx.framework.annotation.handler.NounForm;
 import com.medx.framework.attribute.AttrKey;
 
-@AttributeAccessHandler(verb = "add", attributeType = Collection.class, noonForm = NoonForm.SINGULAR)
+@AttributeAccessHandler(verb = "add", attributeType = Collection.class, nounForm = NounForm.SINGULAR)
 public class AddMethodHandler implements MethodHandler {
 	private AttrKey<?> attrKey;
 	

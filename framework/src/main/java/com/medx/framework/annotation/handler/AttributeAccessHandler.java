@@ -10,5 +10,5 @@ import java.lang.annotation.Target;
 public @interface AttributeAccessHandler {
 	String verb();
 	Class<?> attributeType();
-	NoonForm noonForm() default NoonForm.DEFAULT;
+	NounForm nounForm() default NounForm.DEFAULT;
 }
