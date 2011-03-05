@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import com.medx.framework.annotation.handler.AttributeAccessHandler;
 import com.medx.framework.attribute.AttrKey;
-import com.medx.framework.metadata.AttrKeyRegistry;
+import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.proxy.handler.standard.GetMethodHandler;
 import com.medx.framework.proxy.handler.standard.SetMethodHandler;
 
@@ -16,8 +16,8 @@ public class CachingMethodHandlerFactory extends AbstractMethodHandlerFactory {
 	
 	private final ConcurrentMap<String, MethodHandlerConstructor> methodMap = new ConcurrentHashMap<String, MethodHandlerConstructor>();
 
-	public CachingMethodHandlerFactory(AttrKeyRegistry attrKeyRegistry) {
-		super(attrKeyRegistry);
+	public CachingMethodHandlerFactory(ModelMetadata modelMetadata) {
+		super(modelMetadata);
 		
 		registerHandler(GetMethodHandler.class);
 		registerHandler(SetMethodHandler.class);

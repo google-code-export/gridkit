@@ -15,10 +15,8 @@ import org.junit.Test;
 import com.medx.framework.attribute.AttrMap;
 import com.medx.framework.dictionary.DictionaryReader;
 import com.medx.framework.dictionary.model.Dictionary;
-import com.medx.framework.metadata.AttrKeyRegistry;
-import com.medx.framework.metadata.AttrKeyRegistryImpl;
-import com.medx.framework.metadata.TypeRegistry;
-import com.medx.framework.metadata.TypeRegistryImpl;
+import com.medx.framework.metadata.ModelMetadata;
+import com.medx.framework.metadata.ModelMetadataImpl;
 import com.medx.framework.proxy.handler.CachingMethodHandlerFactory;
 import com.medx.framework.proxy.handler.MethodHandlerFactory;
 import com.medx.framework.proxy.serialization.MapProxyBinarySerializer;
@@ -41,11 +39,10 @@ public class MapProxyImplTest {
 		}
 	}
 	
-	private static TypeRegistry typeRegistry = new TypeRegistryImpl(dictionary);
-	private static AttrKeyRegistry attrKeyRegistry = new AttrKeyRegistryImpl(dictionary);
-	private static MethodHandlerFactory methodHandlerFactory = new CachingMethodHandlerFactory(attrKeyRegistry);
-	private static MapProxyFactory proxyFactory = new MapProxyFactoryImpl(typeRegistry, methodHandlerFactory);
-	private static MapProxyBinarySerializer kryoSerializer = new KryoSerializer(proxyFactory, typeRegistry, attrKeyRegistry);
+	private static ModelMetadata modelMetadata = new ModelMetadataImpl(dictionary);
+	private static MethodHandlerFactory methodHandlerFactory = new CachingMethodHandlerFactory(modelMetadata);
+	private static MapProxyFactory proxyFactory = new MapProxyFactoryImpl(modelMetadata, methodHandlerFactory);
+	private static MapProxyBinarySerializer kryoSerializer = new KryoSerializer(proxyFactory, modelMetadata);
 	
 	public static Map<Integer, Object> customerMap = null;
 	public static Map<Integer, Object> orderMap = null;

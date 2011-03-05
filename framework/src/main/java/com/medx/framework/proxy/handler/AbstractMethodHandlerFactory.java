@@ -7,16 +7,16 @@ import com.medx.framework.annotation.handler.NounForm;
 import com.medx.framework.annotation.handler.Plural;
 import com.medx.framework.annotation.handler.Singular;
 import com.medx.framework.attribute.AttrKey;
-import com.medx.framework.metadata.AttrKeyRegistry;
+import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.util.DictUtil;
 import com.medx.framework.util.ReflectionUtil;
 import com.medx.framework.util.TextUtil;
 
 public abstract class AbstractMethodHandlerFactory implements MethodHandlerFactory {
-	protected final AttrKeyRegistry attrRegistry;
+	protected final ModelMetadata modelMetadata;
 	
-	public AbstractMethodHandlerFactory(AttrKeyRegistry attrRegistry) {
-		this.attrRegistry = attrRegistry;
+	public AbstractMethodHandlerFactory(ModelMetadata modelMetadata) {
+		this.modelMetadata = modelMetadata;
 	}
 	
 	protected MethodInfo getMethodInfo(Method method) {
@@ -44,7 +44,7 @@ public abstract class AbstractMethodHandlerFactory implements MethodHandlerFacto
 			
 			String modelAttrName = DictUtil.getAttrName(modelPackage, modelPackageName, clazz.getCanonicalName(), getterName);
 			
-			AttrKey<?> attrKey = attrRegistry.getAttrKey(modelAttrName);
+			AttrKey<?> attrKey = modelMetadata.getAttrKey(modelAttrName);
 			
 			if (!hasNounlForm(getter)) 
 				result.getAttrKeyByUnknown().put(getterName, attrKey);
