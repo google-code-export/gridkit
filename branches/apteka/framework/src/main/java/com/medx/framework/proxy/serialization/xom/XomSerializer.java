@@ -1,4 +1,4 @@
-package com.medx.framework.proxy.serialization.xml;
+package com.medx.framework.proxy.serialization.xom;
 
 import nu.xom.Element;
 
