@@ -19,4 +19,6 @@ public interface Bean {
 	public <V> void setAttribute(AttrKey<V> key, V value);
 		
 	public Map<Integer, Object> asMap();
+	
+	public BeanManager getBeanManager();
 }
