@@ -13,6 +13,7 @@ import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.proxy.MapProxy;
 import com.medx.framework.proxy.MapProxyFactory;
 
+//TODO implement key compaction using delta with minimum key value
 public class MapProxyKryoSerializer extends Serializer {
 	private final Kryo kryo;
 	
