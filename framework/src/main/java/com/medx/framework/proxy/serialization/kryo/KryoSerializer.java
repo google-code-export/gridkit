@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationHandler;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
@@ -11,6 +12,7 @@ import java.util.TreeSet;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.ObjectBuffer;
+import com.esotericsoftware.kryo.Serializer;
 import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.proxy.MapProxy;
 import com.medx.framework.proxy.MapProxyFactory;
@@ -20,8 +22,12 @@ public class KryoSerializer implements MapProxyBinarySerializer {
     private static final Class<?>[] supportedClasses = {boolean[].class, byte[].class, char[].class, short[].class,
     	int[].class, long[].class, float[].class, double[].class, Boolean[].class, Byte[].class, Character[].class,
     	Short[].class, Long[].class, Float[].class, Double[].class, String[].class, ArrayList.class, LinkedList.class, 
-    	HashMap.class, TreeMap.class, HashSet.class, TreeSet.class};
+    	HashSet.class, TreeSet.class};
 
+    public static final String OBJECT_MAP = "OBJECT_MAP";
+    public static final String IDENTITY_MAP = "IDENTITY_MAP";
+    public static final String OBJECT_COUNTER = "OBJECT_COUNTER";
+    
     private final Kryo kryo;
     
     private final ThreadLocal<ObjectBuffer> objectBuffer;
@@ -51,13 +57,21 @@ public class KryoSerializer implements MapProxyBinarySerializer {
 		};
 	}
 	
+	@SuppressWarnings("static-access")
 	public MapProxy deserialize(byte[] data) {
+		kryo.getContext().putTemp(OBJECT_MAP, new HashMap<Integer, Object>());
+		
 		@SuppressWarnings("unchecked")
 		Map<Integer, Object> rawData = (Map<Integer, Object>)objectBuffer.get().readObjectData(data, InvocationHandler.class);
+		
 		return proxyFactory.createMapProxy(rawData);
 	}
 
+	@SuppressWarnings("static-access")
 	public byte[] serialize(MapProxy mapProxy) {
+		kryo.getContext().putTemp(OBJECT_COUNTER, new Integer(0));
+		kryo.getContext().putTemp(IDENTITY_MAP, new IdentityHashMap<Object, Integer>());
+		
 		return objectBuffer.get().writeObjectData(mapProxy);
 	}
 
@@ -67,8 +81,12 @@ public class KryoSerializer implements MapProxyBinarySerializer {
 		for (Class<?> clazz : supportedClasses)
 			kryo.register(clazz);
 		
-		//kryo.register(InvocationHandler.class, new MapProxyKryoSerializer(kryo));
-		kryo.register(InvocationHandler.class, new AdvancedMapProxyKryoSerializer(kryo, modelMetadata));
+		Serializer mapProxySerializer = new MapProxyKryoSerializer(kryo, modelMetadata);
+		Serializer mapSerializer = new MapKryoSerializer(kryo, proxyFactory, mapProxySerializer);
+
+		kryo.register(HashMap.class, mapSerializer);
+		kryo.register(TreeMap.class, mapSerializer);
+		kryo.register(InvocationHandler.class, mapProxySerializer);
 		
 		return kryo;
 	}

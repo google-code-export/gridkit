@@ -10,4 +10,7 @@ public interface OrderItem {
 	
 	Integer getQuantity();
 	void setQuantity(Integer quantity);
+	
+	Order getOrder();
+	void setOrder(Order order);
 }
