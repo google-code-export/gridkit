@@ -46,7 +46,6 @@ public class MapProxyKryoSerializer extends Serializer {
 		}
 	}
 	
-	
 	@Override
 	public <T> T readObjectData(ByteBuffer buffer, Class<T> type) {
 		@SuppressWarnings({"static-access", "unchecked"})
