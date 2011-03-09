@@ -59,9 +59,10 @@ public class MapProxyKryoSerializer extends Serializer {
 		if (objectMap.containsKey(objectId))
 			result = objectMap.get(objectId);
 		else {
-			Map<Integer, Object> backendMap = readMapProxyData(buffer);
+			Map<Integer, Object> backendMap = new HashMap<Integer, Object>();
 			objectMap.put(objectId, backendMap);
-			result = objectMap;
+			readMapProxyData(buffer, backendMap);
+			result = backendMap;
 		}
 		
 		@SuppressWarnings("unchecked")
@@ -97,13 +98,9 @@ public class MapProxyKryoSerializer extends Serializer {
         		kryo.writeClassAndObject(buffer, entry.getValue());
         	}
         }
-        
-        backendMap.put(MapProxyFactory.PROXIABLE_KEY, Boolean.TRUE);
 	}
 	
-	public Map<Integer, Object> readMapProxyData(ByteBuffer buffer) {
-		Map<Integer, Object> backendMap = new HashMap<Integer, Object>();
-		
+	public Map<Integer, Object> readMapProxyData(ByteBuffer buffer, Map<Integer, Object> backendMap) {
 		int length = IntSerializer.get(buffer, true);
         
 		for (int i = 0; i < length; i++) {
