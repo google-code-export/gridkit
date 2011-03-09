@@ -15,8 +15,6 @@ import com.medx.framework.proxy.MapProxyFactory;
 import com.medx.framework.proxy.MapProxyFactoryImpl;
 import com.medx.framework.proxy.handler.CachingMethodHandlerFactory;
 import com.medx.framework.proxy.handler.MethodHandlerFactory;
-import com.medx.framework.proxy.serialization.MapProxyBinarySerializer;
-import com.medx.framework.proxy.serialization.kryo.KryoSerializer;
 import com.medx.test.model.BlanksFactory;
 import com.medx.test.model.customer.Customer;
 import com.medx.test.model.customer.Sex;
@@ -32,9 +30,7 @@ public class TestData {
 	protected static ModelMetadata modelMetadata;
 	protected static MethodHandlerFactory methodHandlerFactory;
 	protected static MapProxyFactory proxyFactory;
-	
-	protected static MapProxyBinarySerializer kryoSerializer;
-	
+
 	@BeforeClass
 	protected static void beforeClass() throws Exception {
 		DictionaryReader reader = new DictionaryReader();
@@ -45,8 +41,6 @@ public class TestData {
 		modelMetadata = new ModelMetadataImpl(dictionary, devDictionary);
 		methodHandlerFactory = new CachingMethodHandlerFactory(modelMetadata);
 		proxyFactory = new MapProxyFactoryImpl(modelMetadata, methodHandlerFactory);
-		
-		kryoSerializer = new KryoSerializer(proxyFactory, modelMetadata);
 	}
 	
 	protected Map<Integer, Object> tomCustomerMap;

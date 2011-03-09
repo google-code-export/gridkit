@@ -62,6 +62,9 @@ public class BlanksFactory {
 		result.put(Order.customer.getId(), customer);
 		result.put(Order.items.getId(), items);
 		
+		for (Map<Integer, Object> item : items)
+			item.put(OrderItem.order.getId(), result);
+		
 		return result;
 	}
 }
