@@ -19,7 +19,7 @@ import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.metadata.ModelMetadataImpl;
 import com.medx.framework.proxy.handler.CachingMethodHandlerFactory;
 import com.medx.framework.proxy.handler.MethodHandlerFactory;
-import com.medx.framework.proxy.serialization.MapProxyBinarySerializer;
+import com.medx.framework.proxy.serialization.MapProxySerializer;
 import com.medx.framework.proxy.serialization.kryo.KryoSerializer;
 import com.medx.framework.test.TestDictionary;
 import com.medx.framework.test.model.Customer;
@@ -42,7 +42,7 @@ public class MapProxyImplTest {
 	private static ModelMetadata modelMetadata = new ModelMetadataImpl(dictionary);
 	private static MethodHandlerFactory methodHandlerFactory = new CachingMethodHandlerFactory(modelMetadata);
 	private static MapProxyFactory proxyFactory = new MapProxyFactoryImpl(modelMetadata, methodHandlerFactory);
-	private static MapProxyBinarySerializer kryoSerializer = new KryoSerializer(proxyFactory, modelMetadata);
+	private static MapProxySerializer<byte[]> kryoSerializer = new KryoSerializer(proxyFactory, modelMetadata);
 	
 	public static Map<Integer, Object> customerMap = null;
 	public static Map<Integer, Object> orderMap = null;

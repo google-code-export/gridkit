@@ -16,9 +16,9 @@ import com.esotericsoftware.kryo.Serializer;
 import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.proxy.MapProxy;
 import com.medx.framework.proxy.MapProxyFactory;
-import com.medx.framework.proxy.serialization.MapProxyBinarySerializer;
+import com.medx.framework.proxy.serialization.MapProxySerializer;
 
-public class KryoSerializer implements MapProxyBinarySerializer {
+public class KryoSerializer implements MapProxySerializer<byte[]> {
     private static final Class<?>[] supportedClasses = {boolean[].class, byte[].class, char[].class, short[].class,
     	int[].class, long[].class, float[].class, double[].class, Boolean[].class, Byte[].class, Character[].class,
     	Short[].class, Long[].class, Float[].class, Double[].class, String[].class, ArrayList.class, LinkedList.class, 

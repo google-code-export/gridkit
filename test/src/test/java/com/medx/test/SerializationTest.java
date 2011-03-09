@@ -1,18 +1,18 @@
 package com.medx.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.medx.framework.proxy.MapProxy;
-import com.medx.framework.proxy.serialization.MapProxyBinarySerializer;
+import com.medx.framework.proxy.serialization.MapProxySerializer;
 import com.medx.framework.proxy.serialization.kryo.KryoSerializer;
+import com.medx.test.model.order.Order;
 
 public class SerializationTest extends TestData {
-	protected static MapProxyBinarySerializer kryoSerializer;
+	protected static MapProxySerializer<byte[]> kryoSerializer;
 	
 	@Test
 	public void kryoSerializationTest() {
@@ -22,14 +22,16 @@ public class SerializationTest extends TestData {
 		System.out.println("Serialized tomOrder size = " + tomData.length);
 		System.out.println("Serialized polyOrder size = " + polyData.length);
 		
-		MapProxy newTomOrder = kryoSerializer.deserialize(tomData);
-		MapProxy newPolyOrder = kryoSerializer.deserialize(polyData);
+		Order newTomOrder = (Order) kryoSerializer.deserialize(tomData);
+		Order newPolyOrder = (Order) kryoSerializer.deserialize(polyData);
 		
-		assertEquals(tomOrder, newTomOrder);
-		assertEquals(polyOrder, newPolyOrder);
+		assertEquals(tomOrder.getId(), newTomOrder.getId());
+		assertEquals(tomOrder.getCustomer(), newTomOrder.getCustomer());
+		assertEquals(tomOrder.getItems().size(), newTomOrder.getItems().size());
 		
-		assertFalse(tomOrder.equals(newPolyOrder));
-		assertFalse(polyOrder.equals(newTomOrder));
+		assertEquals(polyOrder.getId(), newPolyOrder.getId());
+		assertEquals(polyOrder.getCustomer(), newPolyOrder.getCustomer());
+		assertEquals(polyOrder.getItems().size(), newPolyOrder.getItems().size());
 	}
 	
 	@Before
