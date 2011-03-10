@@ -102,7 +102,7 @@ public class FreemarkerHelper {
 		result.put("version", String.valueOf(desc.getVersion()));
 		result.put("description", "\"" + desc.getDescription() + "\"");
 		result.put("type", desc.getClazz());
-		result.put("clazz", ClassUtil.getCanonicalRawType(desc.getClazz()) + ".class");
+		result.put("clazz", ClassUtil.getCanonicalClass(desc.getClazz()) + ".class");
 		
 		return result;
 	}

@@ -46,7 +46,7 @@ public class ModelMetadataImpl implements ModelMetadata {
 				continue;
 			}
 			
-			String className = ClassUtil.getRawType(attributeDescriptor.getClazz());
+			String className = ClassUtil.getRawClass(attributeDescriptor.getClazz());
 			
 			Class<?> clazz = null;
 			try {

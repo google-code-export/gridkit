@@ -100,7 +100,7 @@ public class MapProxyKryoSerializer extends Serializer {
         }
 	}
 	
-	public Map<Integer, Object> readMapProxyData(ByteBuffer buffer, Map<Integer, Object> backendMap) {
+	public void readMapProxyData(ByteBuffer buffer, Map<Integer, Object> backendMap) {
 		int length = IntSerializer.get(buffer, true);
         
 		for (int i = 0; i < length; i++) {
@@ -126,7 +126,5 @@ public class MapProxyKryoSerializer extends Serializer {
         }
 		
 		backendMap.put(MapProxyFactory.PROXIABLE_KEY, Boolean.TRUE);
-
-		return backendMap;
 	}
 }

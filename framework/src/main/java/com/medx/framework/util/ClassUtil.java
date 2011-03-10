@@ -24,16 +24,17 @@ public class ClassUtil {
 		primitiveArrayChars.put("double", "D");
 	}
 	
-	private static Map<String, Class<?>> primitiveTypeReplacements = new HashMap<String, Class<?>>();
+	private static Map<String, Class<?>> primitiveTypeMapping = new HashMap<String, Class<?>>();
 	
 	static {
-		primitiveTypeReplacements.put("bool", Boolean.class);
-		primitiveTypeReplacements.put("byte", Byte.class);
-		primitiveTypeReplacements.put("int", Integer.class);
-		primitiveTypeReplacements.put("long", Long.class);
-		primitiveTypeReplacements.put("char", Character.class);
-		primitiveTypeReplacements.put("float", Float.class);
-		primitiveTypeReplacements.put("double", Double.class);
+		primitiveTypeMapping.put("bool", Boolean.class);
+		primitiveTypeMapping.put("byte", Byte.class);
+		primitiveTypeMapping.put("char", Character.class);
+		primitiveTypeMapping.put("short", Short.class);
+		primitiveTypeMapping.put("int", Integer.class);
+		primitiveTypeMapping.put("long", Long.class);
+		primitiveTypeMapping.put("float", Float.class);
+		primitiveTypeMapping.put("double", Double.class);
 	}
 	
 	public static String getSimpleClassName(String clazz) {
@@ -73,34 +74,41 @@ public class ClassUtil {
 	}
 	
 	public static String replacePrimitiveType(String clazz) {
-		if (primitiveTypeReplacements.keySet().contains(clazz))
-			return primitiveTypeReplacements.get(clazz).getCanonicalName();
+		if (primitiveTypeMapping.keySet().contains(clazz))
+			return primitiveTypeMapping.get(clazz).getCanonicalName();
 		return clazz;
 	}
 	
-	public static String getCanonicalRawType(String type) {
-		int index = type.indexOf('<');
+	public static String getCanonicalClass(String clazz) {
+		int index = clazz.indexOf('<');
 		
 		if (index != -1) {
-			int lastIndex = type.lastIndexOf('>');
-			type = type.substring(0, index) + type.substring(lastIndex + 1);
+			int lastIndex = clazz.lastIndexOf('>');
+			clazz = clazz.substring(0, index) + clazz.substring(lastIndex + 1);
 		}
 		
-		return type;
+		return clazz;
 	}
 	
-	public static String getRawType(String type) {
-		type = getCanonicalRawType(type);
+	public static String getRawClass(String clazz) {
+		clazz = getCanonicalClass(clazz);
 		
-		return isArray(type) ? getArrayRawType(type) : type;
+		return isArray(clazz) ? getArrayRawClass(clazz) : clazz;
+	}
+	
+	public static Class<?> getRawClassInstance(String clazz) throws ClassNotFoundException {
+		if (primitiveTypeMapping.containsKey(clazz))
+			return primitiveTypeMapping.get(clazz);
+		else
+			return Class.forName(getRawClass(clazz));
 	}
 	
 	private static boolean isArray(String type) {
 		return type.endsWith(ARRAY_POSTFIX);
 	}
 	
-	private static String getArrayRawType(String type) {
-		String clazz = getArrayType(type);
+	private static String getArrayRawClass(String type) {
+		String clazz = getArrayElementClass(type);
 		int dimension = getArrayDimension(type);
 		
 		if (primitiveArrayChars.containsKey(clazz))
@@ -116,7 +124,7 @@ public class ClassUtil {
 			return 1 + getArrayDimension(type.substring(0, type.length() - ARRAY_POSTFIX.length()));
 	}
 	
-	private static String getArrayType(String type) {
+	private static String getArrayElementClass(String type) {
 		return type.substring(0, type.indexOf('['));
 	}
 }

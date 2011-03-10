@@ -1,6 +1,7 @@
 package com.medx.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -27,6 +28,9 @@ public class SerializationTest extends TestData {
 		Order newTomOrder = (Order) kryoSerializer.deserialize(tomData);
 		Order newPolyOrder = (Order) kryoSerializer.deserialize(polyData);
 		
+		byte[] newTomData = kryoSerializer.serialize((MapProxy)newTomOrder);
+		byte[] newPolyData = kryoSerializer.serialize((MapProxy)newPolyOrder);
+		
 		assertEquals(tomOrder.getId(), newTomOrder.getId());
 		assertEquals(tomOrder.getCustomer(), newTomOrder.getCustomer());
 		assertEquals(tomOrder.getItems().size(), newTomOrder.getItems().size());
@@ -34,6 +38,9 @@ public class SerializationTest extends TestData {
 		assertEquals(polyOrder.getId(), newPolyOrder.getId());
 		assertEquals(polyOrder.getCustomer(), newPolyOrder.getCustomer());
 		assertEquals(polyOrder.getItems().size(), newPolyOrder.getItems().size());
+		
+		assertArrayEquals(tomData, newTomData);
+		assertArrayEquals(polyData, newPolyData);
 	}
 	
 	@Test
@@ -41,11 +48,11 @@ public class SerializationTest extends TestData {
 		String tomData = xomSerializer.serialize((MapProxy)tomOrder);
 		String polyData = xomSerializer.serialize((MapProxy)polyOrder);
 		
-		System.out.println(tomData);
-		System.out.println(polyData);
+		Order newTomOrder = (Order) xomSerializer.deserialize(tomData);
+		Order newPolyOrder = (Order) xomSerializer.deserialize(polyData);
 		
-		/*Order newTomOrder = (Order) kryoSerializer.deserialize(tomData);
-		Order newPolyOrder = (Order) kryoSerializer.deserialize(polyData);
+		String newTomData = xomSerializer.serialize((MapProxy)newTomOrder);
+		String newPolyData = xomSerializer.serialize((MapProxy)newPolyOrder);
 		
 		assertEquals(tomOrder.getId(), newTomOrder.getId());
 		assertEquals(tomOrder.getCustomer(), newTomOrder.getCustomer());
@@ -53,7 +60,10 @@ public class SerializationTest extends TestData {
 		
 		assertEquals(polyOrder.getId(), newPolyOrder.getId());
 		assertEquals(polyOrder.getCustomer(), newPolyOrder.getCustomer());
-		assertEquals(polyOrder.getItems().size(), newPolyOrder.getItems().size());*/
+		assertEquals(polyOrder.getItems().size(), newPolyOrder.getItems().size());
+		
+		assertEquals(tomData, newTomData);
+		assertEquals(polyData, newPolyData);
 	}
 	
 	@Before
