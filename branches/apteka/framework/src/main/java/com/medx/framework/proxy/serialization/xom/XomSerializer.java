@@ -1,7 +1,10 @@
 package com.medx.framework.proxy.serialization.xom;
 
+import static com.medx.framework.util.CastUtil.cast;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -9,8 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import nu.xom.Builder;
 import nu.xom.Document;
+import nu.xom.Element;
+import nu.xom.ParsingException;
 import nu.xom.Serializer;
+import nu.xom.ValidityException;
 
 import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.proxy.MapProxy;
@@ -21,6 +28,7 @@ import com.medx.framework.proxy.serialization.xom.internal.EnumXomSerializer;
 import com.medx.framework.proxy.serialization.xom.internal.ListXomSerializer;
 import com.medx.framework.proxy.serialization.xom.internal.MapProxyXomSerializer;
 import com.medx.framework.proxy.serialization.xom.internal.MapXomSerializer;
+import com.medx.framework.proxy.serialization.xom.internal.NullXomSerializer;
 import com.medx.framework.proxy.serialization.xom.internal.PrimitiveXomSerializer;
 import com.medx.framework.proxy.serialization.xom.internal.SetXomSerializer;
 
@@ -29,12 +37,14 @@ public class XomSerializer implements MapProxySerializer<String>, XomSerializati
 	private final ThreadLocal<Map<Object, Integer>> identityMap = new ThreadLocal<Map<Object,Integer>>();
 	private final ThreadLocal<Map<Integer, Object>> objectMap = new ThreadLocal<Map<Integer, Object>>();
 	
+	@SuppressWarnings("unchecked")
+	private final EnumXomSerializer<?> enumSerializer = new EnumXomSerializer();
 	private final ArrayXomSerializer arraySerializer = new ArrayXomSerializer();
-	private final EnumXomSerializer enumSerializer = new EnumXomSerializer();
 	private final ListXomSerializer<?> listSerializer = new ListXomSerializer<Object>();
 	private final MapXomSerializer<?, ?> mapSerializer = new MapXomSerializer<Object, Object>();
 	private final SetXomSerializer<?> setSerializer = new SetXomSerializer<Object>();
 	private final PrimitiveXomSerializer primitiveSerializer = new PrimitiveXomSerializer();
+	private final NullXomSerializer nullSerializer = new NullXomSerializer();
 	
 	private final MapProxyXomSerializer mapProxySerializer;
 	
@@ -80,30 +90,74 @@ public class XomSerializer implements MapProxySerializer<String>, XomSerializati
 	public MapProxy deserialize(String data) {
 		objectMap.set(new HashMap<Integer, Object>());
 		
+		MapProxy result = null;
+		
+		try {
+			result = proxyFactory.createMapProxy(deserializeInternal(data));
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		
 		objectMap.set(null);
 		
-		return null;
+		return result;
+	}
+	
+	public Map<Integer, Object> deserializeInternal(String data) throws ValidityException, ParsingException, IOException {
+		Builder parser = new Builder();
+		
+		Document doc = parser.build(new StringReader(data));
+		
+		Map<Integer, Object> result = cast(mapProxySerializer.deserialize(doc.getRootElement(), this));
+		
+		return result;
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public <T> InternalXomSerializer<T> getXomSerializer(T object) {
+		if (object == null)
+			return cast(nullSerializer);
+		
 		Class<?> clazz = object.getClass();
 		
 		if (Proxy.isProxyClass(clazz) || proxyFactory.isProxiable(object))
-			return (InternalXomSerializer<T>)mapProxySerializer;
+			return cast(mapProxySerializer);
 		else if (clazz.isArray())
-			return (InternalXomSerializer<T>) arraySerializer;
+			return cast(arraySerializer);
 		else if (clazz.isEnum())
-			return (InternalXomSerializer<T>) enumSerializer;
+			return cast(enumSerializer);
 		else if (List.class.isInstance(object))
-			return (InternalXomSerializer<T>) listSerializer;
+			return cast(listSerializer);
 		else if (Map.class.isInstance(object))
-			return (InternalXomSerializer<T>) mapSerializer;
+			return cast(mapSerializer);
 		else if (Set.class.isInstance(object))
-			return (InternalXomSerializer<T>) setSerializer;
-		else if (PrimitiveXomSerializer.tagNameByClass.containsKey(clazz))
-			return (InternalXomSerializer<T>) primitiveSerializer;
+			return cast(setSerializer);
+		else if (PrimitiveXomSerializer.supportedClasses.contains(clazz))
+			return cast(primitiveSerializer);
+		else
+			throw new IllegalArgumentException("object");
+	}
+	
+	@Override
+	public <T> InternalXomSerializer<T> getXomSerializer(Element element) {
+		String tag = element.getLocalName().toLowerCase();
+		
+		if (MapProxyXomSerializer.TAG.equals(tag))
+			return cast(mapProxySerializer);
+		else if (NullXomSerializer.TAG.equals(tag))
+			return cast(nullSerializer);
+		else if (ArrayXomSerializer.TAG.equals(tag))
+			return cast(arraySerializer);
+		else if (EnumXomSerializer.TAG.equals(tag))
+			return cast(enumSerializer);
+		else if (ListXomSerializer.TAG.equals(tag))
+			return cast(listSerializer);
+		else if (MapXomSerializer.TAG.equals(tag))
+			return cast(mapSerializer);
+		else if (SetXomSerializer.TAG.equals(tag))
+			return cast(setSerializer);
+		else if (PrimitiveXomSerializer.supportedTags.contains(tag))
+			return cast(primitiveSerializer);
 		else
 			throw new IllegalArgumentException("object");
 	}

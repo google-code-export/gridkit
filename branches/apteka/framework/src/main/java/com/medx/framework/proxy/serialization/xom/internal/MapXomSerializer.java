@@ -1,13 +1,17 @@
 package com.medx.framework.proxy.serialization.xom.internal;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import nu.xom.Element;
+import nu.xom.Elements;
 
 import com.medx.framework.proxy.serialization.xom.InternalXomSerializer;
 import com.medx.framework.proxy.serialization.xom.XomSerializationContext;
 
 public class MapXomSerializer<K, V> implements InternalXomSerializer<Map<K, V>> {
+	public static final String TAG = "map";
+	
 	@Override
 	public Element serialize(Map<K, V> map, XomSerializationContext context) {
 		Element result = new Element("map");
@@ -27,6 +31,25 @@ public class MapXomSerializer<K, V> implements InternalXomSerializer<Map<K, V>> 
 			
 			keyElement.appendChild(keySerializer.serialize(entry.getKey(), context));
 			valueElement.appendChild(valueSerializer.serialize(entry.getValue(), context));
+		}
+		
+		return result;
+	}
+
+	@Override
+	public Map<K, V> deserialize(Element map, XomSerializationContext context) {
+		Map<K, V> result = new HashMap<K, V>();
+		
+		Elements elements = map.getChildElements();
+		
+		for (int i = 0; i < elements.size(); ++i) {
+			Element key = elements.get(i).getChildElements("key").get(0).getChildElements().get(0);
+			Element value = elements.get(i).getChildElements("value").get(0).getChildElements().get(0);
+			
+			InternalXomSerializer<K> keySerializer = context.getXomSerializer(key);
+			InternalXomSerializer<V> valueSerializer = context.getXomSerializer(value);
+			
+			result.put(keySerializer.deserialize(key, context), valueSerializer.deserialize(value, context));
 		}
 		
 		return result;

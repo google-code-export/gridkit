@@ -208,10 +208,14 @@ public class MapProxyImplTest {
 	
 	@Test
 	public void test10() {
-		MapProxy order = proxyFactory.createMapProxy(orderMap);
+		MapProxy orderItem1 = proxyFactory.createMapProxy(orderItem1Map);
 		
-		String data = xomSerializer.serialize(order);
+		String data = xomSerializer.serialize(orderItem1);
 		
-		System.out.println(data);
+		//System.out.println(data);
+		
+		MapProxy orderItem2 = xomSerializer.deserialize(data);
+		
+		assertEquals(orderItem1, orderItem2);
 	}
 }

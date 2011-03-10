@@ -1,11 +1,14 @@
 package com.medx.framework.proxy.serialization.xom.internal;
 
 import java.lang.reflect.Proxy;
+import java.util.HashMap;
 import java.util.Map;
 
 import nu.xom.Attribute;
 import nu.xom.Element;
+import nu.xom.Elements;
 
+import com.medx.framework.metadata.AttrKey;
 import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.proxy.MapProxy;
 import com.medx.framework.proxy.MapProxyFactory;
@@ -13,6 +16,8 @@ import com.medx.framework.proxy.serialization.xom.InternalXomSerializer;
 import com.medx.framework.proxy.serialization.xom.XomSerializationContext;
 
 public class MapProxyXomSerializer implements InternalXomSerializer<Object> {
+	public static final String TAG = "object";
+	
 	private final ModelMetadata modelMetadata;
 	
 	public MapProxyXomSerializer(ModelMetadata modelMetadata) {
@@ -33,6 +38,30 @@ public class MapProxyXomSerializer implements InternalXomSerializer<Object> {
 			int objectId = context.getNextObjectId();
 			context.getIdentityMap().put(backendMap, objectId);
 			return serializeBackendMap(backendMap, objectId, context);
+		}
+	}
+	
+	@Override
+	public Object deserialize(Element element, XomSerializationContext context) {
+		Attribute idref = element.getAttribute("idref");
+		
+		if (idref != null) {
+			Integer objectId = Integer.valueOf(idref.getValue());
+			
+			if (context.getObjectMap().containsKey(objectId))
+				return context.getObjectMap().get(objectId);
+			else
+				throw new IllegalStateException();
+		}
+		else {
+			Attribute id = element.getAttribute("id");
+			Integer objectId = Integer.valueOf(id.getValue());
+			
+			Map<Integer, Object> backendMap = new HashMap<Integer, Object>();
+			context.getObjectMap().put(objectId, backendMap);
+			deserializeBackendMap(backendMap, element, context);
+			
+			return backendMap;
 		}
 	}
 	
@@ -72,5 +101,38 @@ public class MapProxyXomSerializer implements InternalXomSerializer<Object> {
 		}
 		
 		return result;
+	}
+	
+	private void deserializeBackendMap(Map<Integer, Object> backendMap, Element element, XomSerializationContext context) {
+		deserializeBackendMapClasses(backendMap, element, context);
+		deserializeBackendMapAttributes(backendMap, element, context);
+		backendMap.put(MapProxyFactory.PROXIABLE_KEY, Boolean.TRUE);
+	}
+	
+	private void deserializeBackendMapClasses(Map<Integer, Object> backendMap, Element element, XomSerializationContext context) {
+		Element classesElement = element.getChildElements("classes").get(0);
+		Elements classes = classesElement.getChildElements();
+		
+		for (int i = 0; i < classes.size(); ++i) {
+			String clazz = classes.get(i).getValue();
+			try {
+				backendMap.put(modelMetadata.getTypeKey(Class.forName(clazz)).getId(), Boolean.TRUE);
+			} catch (ClassNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+	
+	private void deserializeBackendMapAttributes(Map<Integer, Object> backendMap, Element element, XomSerializationContext context) {
+		Element attributesElement = element.getChildElements("attributes").get(0);
+		Elements attributes = attributesElement.getChildElements();
+		
+		for (int i = 0; i < attributes.size(); ++i) {
+			AttrKey<?> attrKey = modelMetadata.getAttrKey(attributes.get(i).getAttributeValue("name"));
+			
+			InternalXomSerializer<Object> attrSerializer = context.getXomSerializer(attributes.get(i).getChildElements().get(0));
+			
+			backendMap.put(attrKey.getId(), attrSerializer.deserialize(attributes.get(i).getChildElements().get(0), context));
+		}
 	}
 }
