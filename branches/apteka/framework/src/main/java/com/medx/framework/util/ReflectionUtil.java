@@ -37,7 +37,27 @@ public class ReflectionUtil {
 			return packet;
 		else if (!ClassUtil.hasParentPackage(packet.getName()))
 			throw new IllegalArgumentException("packet");
-		else
-			return getModelPackage(Package.getPackage(ClassUtil.getParentPackage(packet.getName())));
+		else {
+			boolean hasPackageInfo = false;
+			
+			String parentPackage = packet.getName();
+			
+			do {
+				parentPackage = ClassUtil.getParentPackage(parentPackage);
+				
+				try {
+					Class.forName(parentPackage + ".package-info");
+				} catch (ClassNotFoundException e) {
+					continue;
+				}
+				
+				hasPackageInfo = true;
+			} while (ClassUtil.hasParentPackage(parentPackage) && !hasPackageInfo);
+			
+			if (hasPackageInfo)
+				return getModelPackage(Package.getPackage(parentPackage));
+			else
+				throw new IllegalArgumentException("packet");
+		}
 	}
 }
