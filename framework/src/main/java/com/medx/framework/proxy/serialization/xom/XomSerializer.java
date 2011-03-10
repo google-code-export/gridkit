@@ -83,7 +83,9 @@ public class XomSerializer implements MapProxySerializer<String>, XomSerializati
 		
 		outputStream.close();
 		
-		return outputStream.toString("UTF-8");
+		String result = outputStream.toString("UTF-8");
+		
+		return result.substring(result.indexOf("\n") + 1, result.length() - 1);
 	}
 	
 	@Override
