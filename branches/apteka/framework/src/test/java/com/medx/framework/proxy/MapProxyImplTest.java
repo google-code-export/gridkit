@@ -21,6 +21,7 @@ import com.medx.framework.proxy.handler.CachingMethodHandlerFactory;
 import com.medx.framework.proxy.handler.MethodHandlerFactory;
 import com.medx.framework.proxy.serialization.MapProxySerializer;
 import com.medx.framework.proxy.serialization.kryo.KryoSerializer;
+import com.medx.framework.proxy.serialization.xom.XomSerializer;
 import com.medx.framework.test.TestDictionary;
 import com.medx.framework.test.model.Customer;
 import com.medx.framework.test.model.Order;
@@ -43,6 +44,7 @@ public class MapProxyImplTest {
 	private static MethodHandlerFactory methodHandlerFactory = new CachingMethodHandlerFactory(modelMetadata);
 	private static MapProxyFactory proxyFactory = new MapProxyFactoryImpl(modelMetadata, methodHandlerFactory);
 	private static MapProxySerializer<byte[]> kryoSerializer = new KryoSerializer(proxyFactory, modelMetadata);
+	private static MapProxySerializer<String> xomSerializer = new XomSerializer(proxyFactory, modelMetadata);
 	
 	public static Map<Integer, Object> customerMap = null;
 	public static Map<Integer, Object> orderMap = null;
@@ -202,5 +204,14 @@ public class MapProxyImplTest {
 		MapProxy orderItem2 = kryoSerializer.deserialize(data);
 		
 		assertEquals(orderItem1, orderItem2);
+	}
+	
+	@Test
+	public void test10() {
+		MapProxy order = proxyFactory.createMapProxy(orderMap);
+		
+		String data = xomSerializer.serialize(order);
+		
+		System.out.println(data);
 	}
 }
