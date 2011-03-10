@@ -212,7 +212,7 @@ public class MapProxyImplTest {
 		
 		String data = xomSerializer.serialize(orderItem1);
 		
-		//System.out.println(data);
+		System.out.println(data);
 		
 		MapProxy orderItem2 = xomSerializer.deserialize(data);
 		
