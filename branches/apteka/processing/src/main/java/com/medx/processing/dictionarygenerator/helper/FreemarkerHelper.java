@@ -100,7 +100,7 @@ public class FreemarkerHelper {
 		result.put("name", "\"" + entryName + "\"");
 		result.put("varName", entryName.substring(entryName.lastIndexOf('.') + 1));
 		result.put("version", String.valueOf(desc.getVersion()));
-		result.put("description", "\"" + desc.getDescription() + "\"");
+		result.put("description", desc.getDescription() != null ? "\"" + desc.getDescription() + "\"" : "\"\"");
 		result.put("type", desc.getClazz());
 		result.put("clazz", ClassUtil.getCanonicalClass(desc.getClazz()) + ".class");
 		
