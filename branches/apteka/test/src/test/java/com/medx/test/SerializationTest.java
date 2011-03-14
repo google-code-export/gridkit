@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.medx.framework.proxy.MapProxy;
+import com.medx.framework.bean.Bean;
 import com.medx.framework.proxy.serialization.MapProxySerializer;
 import com.medx.framework.proxy.serialization.kryo.KryoSerializer;
 import com.medx.framework.proxy.serialization.xom.XomSerializer;
@@ -19,8 +19,8 @@ public class SerializationTest extends TestData {
 	
 	@Test
 	public void kryoSerializationTest() {
-		byte[] tomData = kryoSerializer.serialize((MapProxy)tomOrder);
-		byte[] polyData = kryoSerializer.serialize((MapProxy)polyOrder);
+		byte[] tomData = kryoSerializer.serialize((Bean)tomOrder);
+		byte[] polyData = kryoSerializer.serialize((Bean)polyOrder);
 		
 		System.out.println("Serialized tomOrder size = " + tomData.length);
 		System.out.println("Serialized polyOrder size = " + polyData.length);
@@ -28,8 +28,8 @@ public class SerializationTest extends TestData {
 		Order newTomOrder = (Order) kryoSerializer.deserialize(tomData);
 		Order newPolyOrder = (Order) kryoSerializer.deserialize(polyData);
 		
-		byte[] newTomData = kryoSerializer.serialize((MapProxy)newTomOrder);
-		byte[] newPolyData = kryoSerializer.serialize((MapProxy)newPolyOrder);
+		byte[] newTomData = kryoSerializer.serialize((Bean)newTomOrder);
+		byte[] newPolyData = kryoSerializer.serialize((Bean)newPolyOrder);
 		
 		assertEquals(tomOrder.getId(), newTomOrder.getId());
 		assertEquals(tomOrder.getCustomer(), newTomOrder.getCustomer());
@@ -45,14 +45,14 @@ public class SerializationTest extends TestData {
 	
 	@Test
 	public void xomSerializationTest() {
-		String tomData = xomSerializer.serialize((MapProxy)tomOrder);
-		String polyData = xomSerializer.serialize((MapProxy)polyOrder);
+		String tomData = xomSerializer.serialize((Bean)tomOrder);
+		String polyData = xomSerializer.serialize((Bean)polyOrder);
 		
 		Order newTomOrder = (Order) xomSerializer.deserialize(tomData);
 		Order newPolyOrder = (Order) xomSerializer.deserialize(polyData);
 		
-		String newTomData = xomSerializer.serialize((MapProxy)newTomOrder);
-		String newPolyData = xomSerializer.serialize((MapProxy)newPolyOrder);
+		String newTomData = xomSerializer.serialize((Bean)newTomOrder);
+		String newPolyData = xomSerializer.serialize((Bean)newPolyOrder);
 		
 		assertEquals(tomOrder.getId(), newTomOrder.getId());
 		assertEquals(tomOrder.getCustomer(), newTomOrder.getCustomer());

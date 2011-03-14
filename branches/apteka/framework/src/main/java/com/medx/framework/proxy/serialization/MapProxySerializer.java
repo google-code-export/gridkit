@@ -1,9 +1,9 @@
 package com.medx.framework.proxy.serialization;
 
-import com.medx.framework.proxy.MapProxy;
+import com.medx.framework.bean.Bean;
 
 public interface MapProxySerializer<T> {
-	T serialize(MapProxy mapProxy);
+	T serialize(Bean mapProxy);
 	
-	MapProxy deserialize(T data);
+	Bean deserialize(T data);
 }

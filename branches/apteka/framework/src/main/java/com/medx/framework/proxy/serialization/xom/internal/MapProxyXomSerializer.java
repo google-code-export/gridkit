@@ -8,10 +8,10 @@ import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Elements;
 
+import com.medx.framework.bean.Bean;
+import com.medx.framework.bean.BeanManager;
 import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.metadata.TypedAttrKey;
-import com.medx.framework.proxy.MapProxy;
-import com.medx.framework.proxy.MapProxyFactory;
 import com.medx.framework.proxy.serialization.xom.InternalXomSerializer;
 import com.medx.framework.proxy.serialization.xom.XomSerializationContext;
 
@@ -27,7 +27,7 @@ public class MapProxyXomSerializer implements InternalXomSerializer<Object> {
 	@Override
 	public Element serialize(Object mapProxy, XomSerializationContext context) {
 		@SuppressWarnings("unchecked")
-		Map<Integer, Object> backendMap = Proxy.isProxyClass(mapProxy.getClass()) ? ((MapProxy)mapProxy).getBackendMap() : (Map<Integer, Object>)mapProxy;
+		Map<Integer, Object> backendMap = Proxy.isProxyClass(mapProxy.getClass()) ? ((Bean)mapProxy).asMap() : (Map<Integer, Object>)mapProxy;
 		
 		if (context.getIdentityMap().containsKey(backendMap)) {
 			Element result = new Element("object");
@@ -79,7 +79,7 @@ public class MapProxyXomSerializer implements InternalXomSerializer<Object> {
 		for (Map.Entry<Integer, Object> entry : backendMap.entrySet()) {
 			int key = entry.getKey();
 	        	
-	       	if (MapProxyFactory.PROXIABLE_KEY.equals(key))
+	       	if (BeanManager.BEAN_KEY.equals(key))
 	       		continue;
 	       	
 	       	if (modelMetadata.getClassKey(key) != null) {
@@ -106,7 +106,7 @@ public class MapProxyXomSerializer implements InternalXomSerializer<Object> {
 	private void deserializeBackendMap(Map<Integer, Object> backendMap, Element element, XomSerializationContext context) {
 		deserializeBackendMapClasses(backendMap, element, context);
 		deserializeBackendMapAttributes(backendMap, element, context);
-		backendMap.put(MapProxyFactory.PROXIABLE_KEY, Boolean.TRUE);
+		backendMap.put(BeanManager.BEAN_KEY, Boolean.TRUE);
 	}
 	
 	private void deserializeBackendMapClasses(Map<Integer, Object> backendMap, Element element, XomSerializationContext context) {

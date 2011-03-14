@@ -5,11 +5,12 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
+import com.medx.framework.bean.Bean;
 import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.proxy.handler.MethodHandlerFactory;
 
 public class MapProxyFactoryImpl implements MapProxyFactoryInternal {
-	private static final Class<?>[] implementedInterfaces = {Map.class, MapProxy.class};
+	private static final Class<?>[] implementedInterfaces = {Map.class, Bean.class};
 
 	private final ModelMetadata modelMetadata;
 	private final MethodHandlerFactory methodHandlerFactory;
@@ -20,15 +21,15 @@ public class MapProxyFactoryImpl implements MapProxyFactoryInternal {
 	}
 
 	@Override
-	public <T> T createMapProxy(Map<Integer, Object> backendMap) {
+	public <T> T createBean(Map<Integer, Object> backendMap) {
 		Set<Integer> typeIds = modelMetadata.getTypeIds(backendMap.keySet());
 		
-		Object proxiableKey = backendMap.get(PROXIABLE_KEY);
+		Object proxiableKey = backendMap.get(BEAN_KEY);
 		
 		if (proxiableKey != null && !Boolean.class.isInstance(proxiableKey) && !(Boolean)proxiableKey)
 			throw new IllegalArgumentException("backendMap");
 		
-		backendMap.put(PROXIABLE_KEY, Boolean.TRUE);
+		backendMap.put(BEAN_KEY, Boolean.TRUE);
 		
 		Class<?>[] interfaces = Arrays.copyOf(implementedInterfaces, implementedInterfaces.length + typeIds.size());
 		
@@ -45,14 +46,14 @@ public class MapProxyFactoryImpl implements MapProxyFactoryInternal {
 	}
 
 	@Override
-	public boolean isProxiable(Object object) {
+	public boolean isBeanMap(Object object) {
 		if (object == null)
 			return false;
 		
 		if (!Map.class.isInstance(object))
 			return false;
 		
-		Object candidate = ((Map<?, ?>)object).get(PROXIABLE_KEY);
+		Object candidate = ((Map<?, ?>)object).get(BEAN_KEY);
 		
 		if (candidate != null && candidate.getClass() == Boolean.class && (Boolean)candidate)
 			return true;

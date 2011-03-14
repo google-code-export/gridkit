@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.medx.framework.bean.Bean;
 import com.medx.framework.metadata.ClassKey;
 import com.medx.framework.metadata.UserAttrKey;
 import com.medx.framework.proxy.handler.MapProxyAttributeProvider;
@@ -18,7 +19,7 @@ import com.medx.framework.proxy.wrapper.ObjectWrapper;
 import com.medx.framework.proxy.wrapper.SetWrapper;
 import com.medx.framework.util.CastUtil;
 
-public class MapProxyImpl implements InvocationHandler, MapProxy, MapProxyAttributeProvider, ObjectWrapper {
+public class MapProxyImpl implements InvocationHandler, Bean, MapProxyAttributeProvider, ObjectWrapper {
 	private static List<CompositeWrapper> wrappers = new ArrayList<CompositeWrapper>();
 	
 	static {
@@ -40,9 +41,9 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, MapProxyAttrib
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		if (method.getDeclaringClass() == Map.class)
-			return method.invoke(getBackendMap(), args);
+			return method.invoke(asMap(), args);
 		
-		if (method.getDeclaringClass() == MapProxy.class || method.getDeclaringClass() == Object.class)
+		if (method.getDeclaringClass() == Bean.class || method.getDeclaringClass() == Object.class)
 			return method.invoke(this, args);
 
 		return mapProxyFactory.getMethodHandlerFactory().createMethodHandler(method).invoke(this, args);
@@ -62,11 +63,11 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, MapProxyAttrib
 
 	@Override
 	public Object wrap(Object object) {
-		if (object instanceof MapProxy)
+		if (object instanceof Bean)
 			return object;
 		
-		if (mapProxyFactory.isProxiable(object))
-			return mapProxyFactory.createMapProxy(CastUtil.<Map<Integer, Object>>cast(object));
+		if (mapProxyFactory.isBeanMap(object))
+			return mapProxyFactory.createBean(CastUtil.<Map<Integer, Object>>cast(object));
 		
 		for (CompositeWrapper wrapper : wrappers)
 			if (wrapper.isWrappable(object))
@@ -77,10 +78,10 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, MapProxyAttrib
 	
 	@Override
 	public void setAttributeValue(int attributeId, Object value) {
-		if (value instanceof MapProxy)
+		if (value instanceof Bean)
 			wrappedAttributeIds.add(attributeId);
 		
-		if (mapProxyFactory.isProxiable(value))
+		if (mapProxyFactory.isBeanMap(value))
 			wrappedAttributeIds.remove(attributeId);
 		
 		backendMap.put(attributeId, value);
@@ -106,11 +107,11 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, MapProxyAttrib
 		
 		backendMap.put(typeKey.getId(), Boolean.TRUE);
 		
-		return CastUtil.<U>cast(mapProxyFactory.createMapProxy(backendMap));
+		return CastUtil.<U>cast(mapProxyFactory.createBean(backendMap));
 	}
 	
 	@Override
-	public Map<Integer, Object> getBackendMap() {
+	public Map<Integer, Object> asMap() {
 		return backendMap;
 	}
 
