@@ -13,9 +13,9 @@ import java.util.TreeSet;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.ObjectBuffer;
 import com.esotericsoftware.kryo.Serializer;
+import com.medx.framework.bean.Bean;
+import com.medx.framework.bean.BeanManager;
 import com.medx.framework.metadata.ModelMetadata;
-import com.medx.framework.proxy.MapProxy;
-import com.medx.framework.proxy.MapProxyFactory;
 import com.medx.framework.proxy.serialization.MapProxySerializer;
 
 public class KryoSerializer implements MapProxySerializer<byte[]> {
@@ -32,19 +32,19 @@ public class KryoSerializer implements MapProxySerializer<byte[]> {
     
     private final ThreadLocal<ObjectBuffer> objectBuffer;
     
-    private final MapProxyFactory proxyFactory;
+    private final BeanManager proxyFactory;
     
 	private final ModelMetadata modelMetadata;
     
-	public KryoSerializer(MapProxyFactory proxyFactory, ModelMetadata modelMetadata) {
+	public KryoSerializer(BeanManager proxyFactory, ModelMetadata modelMetadata) {
 		this(proxyFactory, modelMetadata, 1024);
 	}
     
-	public KryoSerializer(MapProxyFactory proxyFactory, ModelMetadata modelMetadata, int capacity) {
+	public KryoSerializer(BeanManager proxyFactory, ModelMetadata modelMetadata, int capacity) {
 		this(proxyFactory, modelMetadata, capacity, capacity);
 	}
     
-	public KryoSerializer(MapProxyFactory proxyFactory, ModelMetadata modelMetadata, final int initialCapacity, final int maxCapacity) {
+	public KryoSerializer(BeanManager proxyFactory, ModelMetadata modelMetadata, final int initialCapacity, final int maxCapacity) {
 		this.proxyFactory = proxyFactory;
 		this.modelMetadata = modelMetadata;
 		
@@ -58,17 +58,17 @@ public class KryoSerializer implements MapProxySerializer<byte[]> {
 	}
 	
 	@SuppressWarnings("static-access")
-	public MapProxy deserialize(byte[] data) {
+	public Bean deserialize(byte[] data) {
 		kryo.getContext().putTemp(OBJECT_MAP, new HashMap<Integer, Object>());
 		
 		@SuppressWarnings("unchecked")
 		Map<Integer, Object> rawData = (Map<Integer, Object>)objectBuffer.get().readObjectData(data, InvocationHandler.class);
 		
-		return proxyFactory.createMapProxy(rawData);
+		return proxyFactory.createBean(rawData);
 	}
 
 	@SuppressWarnings("static-access")
-	public byte[] serialize(MapProxy mapProxy) {
+	public byte[] serialize(Bean mapProxy) {
 		kryo.getContext().putTemp(OBJECT_COUNTER, new Integer(0));
 		kryo.getContext().putTemp(IDENTITY_MAP, new IdentityHashMap<Object, Integer>());
 		

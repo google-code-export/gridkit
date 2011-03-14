@@ -7,11 +7,11 @@ import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 
+import com.medx.framework.bean.BeanManager;
 import com.medx.framework.dictionary.DictionaryReader;
 import com.medx.framework.dictionary.model.Dictionary;
 import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.metadata.ModelMetadataImpl;
-import com.medx.framework.proxy.MapProxyFactory;
 import com.medx.framework.proxy.MapProxyFactoryImpl;
 import com.medx.framework.proxy.handler.CachingMethodHandlerFactory;
 import com.medx.framework.proxy.handler.MethodHandlerFactory;
@@ -29,7 +29,7 @@ public class TestData {
 	
 	protected static ModelMetadata modelMetadata;
 	protected static MethodHandlerFactory methodHandlerFactory;
-	protected static MapProxyFactory proxyFactory;
+	protected static BeanManager proxyFactory;
 
 	@BeforeClass
 	protected static void beforeClass() throws Exception {
@@ -91,19 +91,19 @@ public class TestData {
 		List<Map<Integer, Object>> polyOrderItems = asList(laptopOrderItemMap, phoneOrderItemMap);
 		polyOrderMap = BlanksFactory.createOrder(1, tomCustomerMap, polyOrderItems);
 		
-		tomCustomer = proxyFactory.createMapProxy(tomCustomerMap);
-		polyCustomer = proxyFactory.createMapProxy(polyCustomerMap);
+		tomCustomer = proxyFactory.createBean(tomCustomerMap);
+		polyCustomer = proxyFactory.createBean(polyCustomerMap);
 		
-		tvProduct = proxyFactory.createMapProxy(tvProductMap);
-		laptopProduct = proxyFactory.createMapProxy(laptopProductMap);
-		phoneProduct = proxyFactory.createMapProxy(phoneProductMap);
+		tvProduct = proxyFactory.createBean(tvProductMap);
+		laptopProduct = proxyFactory.createBean(laptopProductMap);
+		phoneProduct = proxyFactory.createBean(phoneProductMap);
 		
-		tvOrderItem = proxyFactory.createMapProxy(tvOrderItemMap);
-		laptopOrderItem = proxyFactory.createMapProxy(laptopOrderItemMap);
-		phoneOrderItem = proxyFactory.createMapProxy(phoneOrderItemMap);
+		tvOrderItem = proxyFactory.createBean(tvOrderItemMap);
+		laptopOrderItem = proxyFactory.createBean(laptopOrderItemMap);
+		phoneOrderItem = proxyFactory.createBean(phoneOrderItemMap);
 		
-		tomOrder = proxyFactory.createMapProxy(tomOrderMap);
-		polyOrder = proxyFactory.createMapProxy(polyOrderMap);
+		tomOrder = proxyFactory.createBean(tomOrderMap);
+		polyOrder = proxyFactory.createBean(polyOrderMap);
 	}
 	
     public static <T> List<T> asList(T... array) {

@@ -6,16 +6,16 @@ import java.util.HashMap;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.serialize.MapSerializer;
-import com.medx.framework.proxy.MapProxyFactory;
+import com.medx.framework.bean.BeanManager;
 
 public class MapKryoSerializer extends MapSerializer {
 	private static final byte MAP_PROXY = 0;
 	private static final byte GENERAL_MAP = 1;
 	
-	private final MapProxyFactory proxyFactory;
+	private final BeanManager proxyFactory;
 	private final Serializer mapProxySerializer;
 	
-	public MapKryoSerializer(Kryo kryo, MapProxyFactory proxyFactory, Serializer mapProxySerializer) {
+	public MapKryoSerializer(Kryo kryo, BeanManager proxyFactory, Serializer mapProxySerializer) {
 		super(kryo);
 		
 		this.proxyFactory = proxyFactory;
@@ -30,7 +30,7 @@ public class MapKryoSerializer extends MapSerializer {
 	
 	@Override
 	public void writeObjectData (ByteBuffer buffer, Object object) {
-		if (!proxyFactory.isProxiable(object)) {
+		if (!proxyFactory.isBeanMap(object)) {
 			buffer.put(GENERAL_MAP);
 			super.writeObjectData(buffer, object);
 		}

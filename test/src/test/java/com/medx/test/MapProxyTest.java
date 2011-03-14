@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.medx.framework.proxy.MapProxy;
+import com.medx.framework.bean.Bean;
 import com.medx.test.dictionary.Taggable;
 import com.medx.test.dictionary.customer.Customer;
 import com.medx.test.dictionary.order.OrderItem;
@@ -25,7 +25,7 @@ public class MapProxyTest extends TestData {
 	
 	@Test
 	public void equalityTest() {
-		assertTrue(tomOrder.equals(proxyFactory.createMapProxy(new HashMap<Integer, Object>(tomOrderMap))));
+		assertTrue(tomOrder.equals(proxyFactory.createBean(new HashMap<Integer, Object>(tomOrderMap))));
 		
 		assertFalse(tomOrder.equals(polyOrder));
 		assertFalse(tvProduct.equals(laptopProduct));
@@ -35,11 +35,11 @@ public class MapProxyTest extends TestData {
 	@Test
 	public void simpleAttributeGetTest() {
 		assertEquals("Tom", tomCustomer.getName());
-		assertEquals(Sex.FEMALE, ((MapProxy)polyCustomer).getAttribute(Customer.sex));
+		assertEquals(Sex.FEMALE, ((Bean)polyCustomer).getAttribute(Customer.sex));
 		assertEquals(new Integer(2), ((Map)phoneOrderItem).get(OrderItem.quantity.getId()));
 		
 		assertEquals(Arrays.asList("apple", "air"), laptopProduct.getTags());
-		assertEquals(Arrays.asList("samsung", "led"), ((MapProxy)tvProduct).getAttribute(Taggable.tags));
+		assertEquals(Arrays.asList("samsung", "led"), ((Bean)tvProduct).getAttribute(Taggable.tags));
 		assertEquals(Arrays.asList("google", "nexus"), ((Map)phoneProduct).get(Taggable.tags.getId()));
 	}
 	
@@ -53,23 +53,23 @@ public class MapProxyTest extends TestData {
 	@Test
 	public void simpleAttributeSetByIntTest() {
 		tomCustomer.setName("TomTom");
-		((MapProxy)polyCustomer).setAttribute(Customer.sex, Sex.MALE);
+		((Bean)polyCustomer).setAttribute(Customer.sex, Sex.MALE);
 		((Map)phoneOrderItem).put(OrderItem.quantity.getId(), new Integer(3));
 		
 		assertEquals("TomTom", tomCustomer.getName());
-		assertEquals(Sex.MALE, ((MapProxy)polyCustomer).getAttribute(Customer.sex));
+		assertEquals(Sex.MALE, ((Bean)polyCustomer).getAttribute(Customer.sex));
 		assertEquals(new Integer(3), ((Map)phoneOrderItem).get(OrderItem.quantity.getId()));
 	}
 
 	@Test
 	public void simpleAttributeSetByNameTest() {
 		tomCustomer.setName("TomTom");
-		((MapProxy)polyCustomer).setAttribute(Customer.sex, Sex.MALE);
+		((Bean)polyCustomer).setAttribute(Customer.sex, Sex.MALE);
 		// TODO
 		//((Map)phoneOrderItem).put(OrderItem.quantity.getName(), new Integer(3));
 		
 		assertEquals("TomTom", tomCustomer.getName());
-		assertEquals(Sex.MALE, ((MapProxy)polyCustomer).getAttribute(Customer.sex));
+		assertEquals(Sex.MALE, ((Bean)polyCustomer).getAttribute(Customer.sex));
 		// TODO
 		//assertEquals(new Integer(3), ((Map)phoneOrderItem).get(OrderItem.quantity.getId()));
 	}
@@ -77,18 +77,18 @@ public class MapProxyTest extends TestData {
 	@Test
 	public void simpleAttributeSetByKeyTest() {
 		tomCustomer.setName("TomTom");
-		((MapProxy)polyCustomer).setAttribute(Customer.sex, Sex.MALE);
+		((Bean)polyCustomer).setAttribute(Customer.sex, Sex.MALE);
 		((Map)phoneOrderItem).put(OrderItem.quantity.getId(), new Integer(3));
 		
 		assertEquals("TomTom", tomCustomer.getName());
-		assertEquals(Sex.MALE, ((MapProxy)polyCustomer).getAttribute(Customer.sex));
+		assertEquals(Sex.MALE, ((Bean)polyCustomer).getAttribute(Customer.sex));
 		assertEquals(new Integer(3), ((Map)phoneOrderItem).get(OrderItem.quantity.getId()));
 	}
 
 	@Test
 	public void attributeSetMapSizeTest() {
 		tomCustomer.setName("TomTom");
-		((MapProxy)polyCustomer).setAttribute(Customer.sex, Sex.MALE);
+		((Bean)polyCustomer).setAttribute(Customer.sex, Sex.MALE);
 		((Map)phoneOrderItem).put(OrderItem.quantity.getId(), new Integer(3));
 		
 		// TODO
@@ -116,7 +116,7 @@ public class MapProxyTest extends TestData {
 	
 	@Test
 	public void compositeCollectionManipulationTest() {
-		com.medx.test.model.order.OrderItem tvOrderItemCopy = proxyFactory.createMapProxy(tvOrderItemMap);
+		com.medx.test.model.order.OrderItem tvOrderItemCopy = proxyFactory.createBean(tvOrderItemMap);
 		
 		polyOrder.getItems().add(tvOrderItemCopy);
 		assertTrue(polyOrder.getItems().contains(tvOrderItem));
@@ -127,14 +127,14 @@ public class MapProxyTest extends TestData {
 	
 	@Test
 	public void dynamicCastTest() {
-		com.medx.test.model.Taggable taggable = ((MapProxy)tomCustomer).cast(com.medx.test.model.Taggable.class);
+		com.medx.test.model.Taggable taggable = ((Bean)tomCustomer).cast(com.medx.test.model.Taggable.class);
 		
 		assertTrue(com.medx.test.model.customer.Customer.class.isInstance(taggable));
 		
 		taggable.setTags(Collections.singletonList("man"));
 		
 		assertEquals(Collections.singletonList("man"), taggable.getTags());
-		assertEquals(Collections.singletonList("man"), ((MapProxy)taggable).getAttribute(Taggable.tags));
+		assertEquals(Collections.singletonList("man"), ((Bean)taggable).getAttribute(Taggable.tags));
 		assertEquals(Collections.singletonList("man"), ((Map)taggable).get(Taggable.tags.getId()));
 	}
 	

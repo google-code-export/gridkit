@@ -12,6 +12,8 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.medx.framework.bean.Bean;
+import com.medx.framework.bean.BeanManager;
 import com.medx.framework.dictionary.DictionaryReader;
 import com.medx.framework.dictionary.model.Dictionary;
 import com.medx.framework.metadata.ModelMetadata;
@@ -41,7 +43,7 @@ public class MapProxyImplTest {
 	
 	private static ModelMetadata modelMetadata = new ModelMetadataImpl(dictionary);
 	private static MethodHandlerFactory methodHandlerFactory = new CachingMethodHandlerFactory(modelMetadata);
-	private static MapProxyFactory proxyFactory = new MapProxyFactoryImpl(modelMetadata, methodHandlerFactory);
+	private static BeanManager proxyFactory = new MapProxyFactoryImpl(modelMetadata, methodHandlerFactory);
 	private static MapProxySerializer<byte[]> kryoSerializer = new KryoSerializer(proxyFactory, modelMetadata);
 	private static MapProxySerializer<String> xomSerializer = new XomSerializer(proxyFactory, modelMetadata);
 	
@@ -60,7 +62,7 @@ public class MapProxyImplTest {
 		String[] customerTitles = {"a", "b", "c"}; 
 		
 		customerMap.put(6, true);
-		customerMap.put(MapProxyFactory.PROXIABLE_KEY, true);
+		customerMap.put(BeanManager.BEAN_KEY, true);
 		
 		customerMap.put(TestDictionary.Id.customerName, "Ted");
 		customerMap.put(TestDictionary.Id.customerTags, customerTags);
@@ -69,7 +71,7 @@ public class MapProxyImplTest {
 		orderMap = new HashMap<Integer, Object>();
 		
 		orderMap.put(7, true);
-		orderMap.put(MapProxyFactory.PROXIABLE_KEY, true);
+		orderMap.put(BeanManager.BEAN_KEY, true);
 		
 		orderMap.put(TestDictionary.Id.orderId, 0);
 		orderMap.put(TestDictionary.Id.orderCustomer, customerMap);
@@ -77,7 +79,7 @@ public class MapProxyImplTest {
 		orderItem1Map = new HashMap<Integer, Object>(); 
 		
 		orderItem1Map.put(8, true);
-		orderItem1Map.put(MapProxyFactory.PROXIABLE_KEY, true);
+		orderItem1Map.put(BeanManager.BEAN_KEY, true);
 		
 		orderItem1Map.put(TestDictionary.Id.orderItemTitle, "clock");
 		orderItem1Map.put(TestDictionary.Id.orderItemPrice, 1.0);
@@ -85,7 +87,7 @@ public class MapProxyImplTest {
 		orderItem2Map = new HashMap<Integer, Object>(); 
 		
 		orderItem2Map.put(8, true);
-		orderItem2Map.put(MapProxyFactory.PROXIABLE_KEY, true);
+		orderItem2Map.put(BeanManager.BEAN_KEY, true);
 		
 		orderItem2Map.put(TestDictionary.Id.orderItemTitle, "mouse");
 		orderItem2Map.put(TestDictionary.Id.orderItemPrice, 2.0);
@@ -93,7 +95,7 @@ public class MapProxyImplTest {
 		orderItem3Map = new HashMap<Integer, Object>(); 
 		
 		orderItem3Map.put(8, true);
-		orderItem3Map.put(MapProxyFactory.PROXIABLE_KEY, true);
+		orderItem3Map.put(BeanManager.BEAN_KEY, true);
 		
 		orderItem3Map.put(TestDictionary.Id.orderItemTitle, "keyboard");
 		orderItem3Map.put(TestDictionary.Id.orderItemPrice, 3.0);
@@ -108,7 +110,7 @@ public class MapProxyImplTest {
 	
 	@Test
 	public void test1() {
-		Customer customer = proxyFactory.createMapProxy(customerMap);
+		Customer customer = proxyFactory.createBean(customerMap);
 		assertEquals("Ted", customer.getName());
 		customer.setName("Ralph");
 		assertEquals("Ralph", customer.getName());
@@ -116,7 +118,7 @@ public class MapProxyImplTest {
 	
 	@Test
 	public void test2() {
-		Order order = proxyFactory.createMapProxy(orderMap);
+		Order order = proxyFactory.createBean(orderMap);
 		assertEquals("Ted", order.getCustomer().getName());
 		order.getCustomer().setName("Ralph");
 		assertEquals("Ralph", order.getCustomer().getName());
@@ -124,7 +126,7 @@ public class MapProxyImplTest {
 	
 	@Test
 	public void test3() {
-		Order order = proxyFactory.createMapProxy(orderMap);
+		Order order = proxyFactory.createBean(orderMap);
 		assertEquals(0, order.getId());
 		order.setId(1);
 		assertEquals(1, order.getId());
@@ -132,7 +134,7 @@ public class MapProxyImplTest {
 	
 	@Test
 	public void test4() {
-		Order order = proxyFactory.createMapProxy(orderMap);
+		Order order = proxyFactory.createBean(orderMap);
 		
 		assertEquals("clock", order.getItems().get(0).getTitle());
 		assertEquals(1.0, order.getItems().get(0).getPrice(), DELTA);
@@ -155,8 +157,8 @@ public class MapProxyImplTest {
 	
 	@Test
 	public void test5() {
-		Order order = proxyFactory.createMapProxy(orderMap);
-		OrderItem orderItem = proxyFactory.createMapProxy(orderItem3Map);
+		Order order = proxyFactory.createBean(orderMap);
+		OrderItem orderItem = proxyFactory.createBean(orderItem3Map);
 		
 		order.setItems(Collections.singletonList(orderItem));
 
@@ -167,12 +169,12 @@ public class MapProxyImplTest {
 	
 	@Test
 	public void test6() {
-		System.out.println(proxyFactory.createMapProxy(orderMap).toString());
+		System.out.println(proxyFactory.createBean(orderMap).toString());
 	}
 	
 	@Test
 	public void test7(){
-		MapProxy order = (MapProxy)proxyFactory.createMapProxy(orderMap);
+		Bean order = (Bean)proxyFactory.createBean(orderMap);
 		
 		assertEquals(Integer.valueOf(0), order.getAttribute(TestDictionary.orderId));
 		
@@ -183,7 +185,7 @@ public class MapProxyImplTest {
 	
 	@Test
 	public void test8() {
-		Customer customer = proxyFactory.createMapProxy(customerMap);
+		Customer customer = proxyFactory.createBean(customerMap);
 		
 		int[] customerTags = {1,2,3};
 		String[] customerTitles = {"a", "b", "c"}; 
@@ -194,26 +196,26 @@ public class MapProxyImplTest {
 	
 	@Test
 	public void test9() {
-		MapProxy orderItem1 = proxyFactory.createMapProxy(orderItem1Map);
+		Bean orderItem1 = proxyFactory.createBean(orderItem1Map);
 		
 		byte[] data = kryoSerializer.serialize(orderItem1);
 		
 		System.out.println("Serialized array size = " + data.length);
 		
-		MapProxy orderItem2 = kryoSerializer.deserialize(data);
+		Bean orderItem2 = kryoSerializer.deserialize(data);
 		
 		assertEquals(orderItem1, orderItem2);
 	}
 	
 	@Test
 	public void test10() {
-		MapProxy orderItem1 = proxyFactory.createMapProxy(orderItem1Map);
+		Bean orderItem1 = proxyFactory.createBean(orderItem1Map);
 		
 		String data = xomSerializer.serialize(orderItem1);
 		
 		System.out.println(data);
 		
-		MapProxy orderItem2 = xomSerializer.deserialize(data);
+		Bean orderItem2 = xomSerializer.deserialize(data);
 		
 		assertEquals(orderItem1, orderItem2);
 	}

@@ -8,11 +8,11 @@ import java.util.Map;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.serialize.IntSerializer;
+import com.medx.framework.bean.Bean;
+import com.medx.framework.bean.BeanManager;
 import com.medx.framework.metadata.ClassKeyType;
 import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.metadata.TypedAttrKey;
-import com.medx.framework.proxy.MapProxy;
-import com.medx.framework.proxy.MapProxyFactory;
 
 //TODO implement key compaction using delta with minimum key value
 public class MapProxyKryoSerializer extends Serializer {
@@ -32,7 +32,7 @@ public class MapProxyKryoSerializer extends Serializer {
 		Map<Object, Integer> identityMap = (Map<Object, Integer>) kryo.getContext().getTemp(KryoSerializer.IDENTITY_MAP);
 		int objectCounter = (Integer) kryo.getContext().getTemp(KryoSerializer.OBJECT_COUNTER);
 		
-		object = Proxy.isProxyClass(object.getClass()) ? ((MapProxy)object).getBackendMap() : object;
+		object = Proxy.isProxyClass(object.getClass()) ? ((Bean)object).asMap() : object;
 		
 		if (identityMap.containsKey(object)) {
 			IntSerializer.put(buffer, identityMap.get(object), true);
@@ -73,7 +73,7 @@ public class MapProxyKryoSerializer extends Serializer {
 	}
 	
 	public void writeMapProxyData(ByteBuffer buffer, Map<Integer, Object> backendMap) {
-        int length = backendMap.size() - 1; // minus one for MapProxyFactory.PROXIABLE_KEY
+        int length = backendMap.size() - 1; // minus one for BeanManager.BEAN_KEY
         
         IntSerializer.put(buffer, length, true);
         
@@ -83,7 +83,7 @@ public class MapProxyKryoSerializer extends Serializer {
         for (Map.Entry<Integer, Object> entry : backendMap.entrySet()) {
         	int key = entry.getKey();
         	
-        	if (MapProxyFactory.PROXIABLE_KEY.equals(key))
+        	if (BeanManager.BEAN_KEY.equals(key))
         		continue;
         	
         	IntSerializer.put(buffer, key, true);
@@ -126,6 +126,6 @@ public class MapProxyKryoSerializer extends Serializer {
 			}
         }
 		
-		backendMap.put(MapProxyFactory.PROXIABLE_KEY, Boolean.TRUE);
+		backendMap.put(BeanManager.BEAN_KEY, Boolean.TRUE);
 	}
 }

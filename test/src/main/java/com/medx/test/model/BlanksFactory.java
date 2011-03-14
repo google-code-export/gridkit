@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.medx.framework.proxy.MapProxyFactory;
+import com.medx.framework.bean.BeanManager;
 import com.medx.test.dictionary.Taggable;
 import com.medx.test.dictionary.customer.Customer;
 import com.medx.test.dictionary.order.Order;
@@ -17,7 +17,7 @@ public class BlanksFactory {
 	public static Map<Integer, Object> createCustomer(String name, Sex sex) {
 		Map<Integer, Object> result = new HashMap<Integer, Object>();
 		
-		result.put(MapProxyFactory.PROXIABLE_KEY, true);
+		result.put(BeanManager.BEAN_KEY, true);
 		result.put(Customer.Type.descriptor.getId(), true);
 		
 		result.put(Customer.name.getId(), name);
@@ -29,7 +29,7 @@ public class BlanksFactory {
 	public static Map<Integer, Object> createProduct(String title, double price, List<String> tags) {
 		Map<Integer, Object> result = new HashMap<Integer, Object>();
 		
-		result.put(MapProxyFactory.PROXIABLE_KEY, true);
+		result.put(BeanManager.BEAN_KEY, true);
 		result.put(Product.Type.descriptor.getId(), true);
 		result.put(Taggable.Type.descriptor.getId(), true);
 		
@@ -43,7 +43,7 @@ public class BlanksFactory {
 	public static Map<Integer, Object> createOrderItem(Map<Integer, Object> product, int quantity) {
 		Map<Integer, Object> result = new HashMap<Integer, Object>();
 		
-		result.put(MapProxyFactory.PROXIABLE_KEY, true);
+		result.put(BeanManager.BEAN_KEY, true);
 		result.put(OrderItem.Type.descriptor.getId(), true);
 		
 		result.put(OrderItem.product.getId(), product);
@@ -55,7 +55,7 @@ public class BlanksFactory {
 	public static Map<Integer, Object> createOrder(int id, Map<Integer, Object> customer, List<Map<Integer, Object>> items) {
 		Map<Integer, Object> result = new HashMap<Integer, Object>();
 
-		result.put(MapProxyFactory.PROXIABLE_KEY, true);
+		result.put(BeanManager.BEAN_KEY, true);
 		result.put(Order.Type.descriptor.getId(), true);
 		
 		result.put(Order.id.getId(), id);

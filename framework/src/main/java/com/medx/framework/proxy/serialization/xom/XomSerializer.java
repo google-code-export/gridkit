@@ -19,9 +19,9 @@ import nu.xom.ParsingException;
 import nu.xom.Serializer;
 import nu.xom.ValidityException;
 
+import com.medx.framework.bean.Bean;
+import com.medx.framework.bean.BeanManager;
 import com.medx.framework.metadata.ModelMetadata;
-import com.medx.framework.proxy.MapProxy;
-import com.medx.framework.proxy.MapProxyFactory;
 import com.medx.framework.proxy.serialization.MapProxySerializer;
 import com.medx.framework.proxy.serialization.xom.internal.ArrayXomSerializer;
 import com.medx.framework.proxy.serialization.xom.internal.EnumXomSerializer;
@@ -48,15 +48,15 @@ public class XomSerializer implements MapProxySerializer<String>, XomSerializati
 	
 	private final MapProxyXomSerializer mapProxySerializer;
 	
-	private final MapProxyFactory proxyFactory;
+	private final BeanManager proxyFactory;
 	
-	public XomSerializer(MapProxyFactory proxyFactory, ModelMetadata modelMetadata) {
+	public XomSerializer(BeanManager proxyFactory, ModelMetadata modelMetadata) {
 		this.proxyFactory = proxyFactory;
 		this.mapProxySerializer = new MapProxyXomSerializer(modelMetadata);
 	}
 	
 	@Override
-	public String serialize(MapProxy mapProxy) {
+	public String serialize(Bean mapProxy) {
 		objectCounter.set(0);
 		identityMap.set(new IdentityHashMap<Object, Integer>());
 		
@@ -74,7 +74,7 @@ public class XomSerializer implements MapProxySerializer<String>, XomSerializati
 		return result;
 	}
 	
-	private String serializeInternal(MapProxy mapProxy) throws IOException {
+	private String serializeInternal(Bean mapProxy) throws IOException {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		
 		Serializer serializer = new Serializer(outputStream, "UTF-8");
@@ -89,13 +89,13 @@ public class XomSerializer implements MapProxySerializer<String>, XomSerializati
 	}
 	
 	@Override
-	public MapProxy deserialize(String data) {
+	public Bean deserialize(String data) {
 		objectMap.set(new HashMap<Integer, Object>());
 		
-		MapProxy result = null;
+		Bean result = null;
 		
 		try {
-			result = proxyFactory.createMapProxy(deserializeInternal(data));
+			result = proxyFactory.createBean(deserializeInternal(data));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -122,7 +122,7 @@ public class XomSerializer implements MapProxySerializer<String>, XomSerializati
 		
 		Class<?> clazz = object.getClass();
 		
-		if (Proxy.isProxyClass(clazz) || proxyFactory.isProxiable(object))
+		if (Proxy.isProxyClass(clazz) || proxyFactory.isBeanMap(object))
 			return cast(mapProxySerializer);
 		else if (clazz.isArray())
 			return cast(arraySerializer);
