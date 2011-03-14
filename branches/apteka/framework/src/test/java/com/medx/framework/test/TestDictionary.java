@@ -4,8 +4,9 @@ import java.util.List;
 
 import org.junit.Ignore;
 
-import com.medx.framework.metadata.AttrKey;
-import com.medx.framework.metadata.TypeKey;
+import com.medx.framework.metadata.ClassKey;
+import com.medx.framework.metadata.ClassKeyFactory;
+import com.medx.framework.metadata.UserAttrKey;
 import com.medx.framework.test.model.Customer;
 import com.medx.framework.test.model.Order;
 import com.medx.framework.test.model.OrderItem;
@@ -13,19 +14,19 @@ import com.medx.framework.test.model.OrderItem;
 @Ignore
 public class TestDictionary {
 	public static final class Type {
-		public static final TypeKey<Customer> customerType = new TypeKey<Customer>(6, 1, Customer.class);
-		public static final TypeKey<Customer> orderType = new TypeKey<Customer>(7, 1, Order.class);
-		public static final TypeKey<Customer> orderItem = new TypeKey<Customer>(8, 1, OrderItem.class);
+		public static final ClassKey customerType = ClassKeyFactory.createUserClassKey(6, 1, Customer.class);
+		public static final ClassKey orderType = ClassKeyFactory.createUserClassKey(7, 1, Order.class);
+		public static final ClassKey orderItem = ClassKeyFactory.createUserClassKey(8, 1, OrderItem.class);
 	}
 	
-	public static final AttrKey<String> customerName = new AttrKey<String>(0, "testmodel.Customer.name", 1, String.class);
-	public static final AttrKey<Integer> orderId = new AttrKey<Integer>(1, "testmodel.Order.id", 1, Integer.class);
-	public static final AttrKey<String> orderItemTitle = new AttrKey<String>(2, "testmodel.OrderItem.title", 1, String.class);
-	public static final AttrKey<Double> orderItemPrice = new AttrKey<Double>(3, "testmodel.OrderItem.price", 1, Double.class);
-	public static final AttrKey<Customer> orderCustomer = new AttrKey<Customer>(4, "testmodel.Order.customer", 1, Customer.class);
-	public static final AttrKey<List<OrderItem>> orderItems = new AttrKey<List<OrderItem>>(5, "testmodel.Order.items", 1, List.class);
-	public static final AttrKey<int[]> customerTags = new AttrKey<int[]>(9, "testmodel.Customer.tags", 1, int[].class);
-	public static final AttrKey<String[]> customerTitles = new AttrKey<String[]>(10, "testmodel.Customer.titles", 1, String[].class);
+	public static final UserAttrKey<String> customerName = new UserAttrKey<String>(0, "testmodel.Customer.name", 1);
+	public static final UserAttrKey<Integer> orderId = new UserAttrKey<Integer>(1, "testmodel.Order.id", 1);
+	public static final UserAttrKey<String> orderItemTitle = new UserAttrKey<String>(2, "testmodel.OrderItem.title", 1);
+	public static final UserAttrKey<Double> orderItemPrice = new UserAttrKey<Double>(3, "testmodel.OrderItem.price", 1);
+	public static final UserAttrKey<Customer> orderCustomer = new UserAttrKey<Customer>(4, "testmodel.Order.customer", 1);
+	public static final UserAttrKey<List<OrderItem>> orderItems = new UserAttrKey<List<OrderItem>>(5, "testmodel.Order.items", 1);
+	public static final UserAttrKey<int[]> customerTags = new UserAttrKey<int[]>(9, "testmodel.Customer.tags", 1);
+	public static final UserAttrKey<String[]> customerTitles = new UserAttrKey<String[]>(10, "testmodel.Customer.titles", 1);
 	
 	public static final class Id {
 		public static final int customerName = 0;

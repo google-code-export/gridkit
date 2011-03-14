@@ -6,8 +6,8 @@ import com.medx.framework.annotation.ModelPackage;
 import com.medx.framework.annotation.handler.NounForm;
 import com.medx.framework.annotation.handler.Plural;
 import com.medx.framework.annotation.handler.Singular;
-import com.medx.framework.metadata.AttrKey;
 import com.medx.framework.metadata.ModelMetadata;
+import com.medx.framework.metadata.TypedAttrKey;
 import com.medx.framework.util.DictUtil;
 import com.medx.framework.util.ReflectionUtil;
 import com.medx.framework.util.TextUtil;
@@ -25,7 +25,7 @@ public abstract class AbstractMethodHandlerFactory implements MethodHandlerFacto
 		String verb = TextUtil.getCamelPrefix(method.getName());
 		String attrName = TextUtil.getCamelPostfix(method.getName());
 		NounForm nounForm = classNounInfo.getNounForm(attrName);
-		AttrKey<?> attrKey = classNounInfo.getAttrKey(attrName);
+		TypedAttrKey attrKey = classNounInfo.getAttrKey(attrName);
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		
 		return new MethodInfo(verb, attrName, nounForm, attrKey, parameterTypes);
@@ -44,7 +44,7 @@ public abstract class AbstractMethodHandlerFactory implements MethodHandlerFacto
 			
 			String modelAttrName = DictUtil.getAttrName(modelPackage, modelPackageName, clazz.getCanonicalName(), getterName);
 			
-			AttrKey<?> attrKey = modelMetadata.getAttrKey(modelAttrName);
+			TypedAttrKey attrKey = modelMetadata.getAttrKey(modelAttrName);
 			
 			if (!hasNounlForm(getter)) 
 				result.getAttrKeyByUnknown().put(getterName, attrKey);

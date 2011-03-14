@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import com.medx.framework.annotation.handler.AttributeAccessHandler;
 import com.medx.framework.annotation.handler.NounForm;
-import com.medx.framework.metadata.AttrKey;
+import com.medx.framework.metadata.TypedAttrKey;
 import com.medx.framework.proxy.handler.MapProxyAttributeProvider;
 import com.medx.framework.proxy.handler.MethodHandler;
 
@@ -12,7 +12,7 @@ import com.medx.framework.proxy.handler.MethodHandler;
 public class AddMethodHandler implements MethodHandler {
 	private final int attributeId;
 	
-	public AddMethodHandler(AttrKey<?> key) {
+	public AddMethodHandler(TypedAttrKey key) {
 		this.attributeId = key.getId();
 	}
 	

@@ -1,14 +1,15 @@
 package ${package};
 
-import ${typeKeyClass};
-import ${attrKeyClass};
+import ${classKeyClass};
+import ${ClassKeyFactoryClass};
+import ${userAttrKeyClass};
 
 public final class ${className} {
     public static final class Type {
-        public static final TypeKey<${typeDesc.clazz}> descriptor = new TypeKey<${typeDesc.clazz}>(${typeDesc.id}, ${typeDesc.version}, ${typeDesc.clazz}.class);
+        public static final ClassKey descriptor = ClassKeyFactory.createUserClassKey(${typeDesc.id}, ${typeDesc.version}, ${typeDesc.clazz}.class);
     }
 
 <#list attrDescs as a>
-    public static final AttrKey<${a.type}> ${a.varName} = new AttrKey<${a.type}>(${a.id}, ${a.name}, ${a.version}, ${a.clazz}, ${a.description});
+    public static final UserAttrKey<${a.type}> ${a.varName} = new UserAttrKey<${a.type}>(${a.id}, ${a.name}, ${a.version}, ${a.description});
 </#list>
 }

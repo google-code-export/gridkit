@@ -8,8 +8,9 @@ import java.util.Map;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.serialize.IntSerializer;
-import com.medx.framework.metadata.AttrKey;
+import com.medx.framework.metadata.ClassKeyType;
 import com.medx.framework.metadata.ModelMetadata;
+import com.medx.framework.metadata.TypedAttrKey;
 import com.medx.framework.proxy.MapProxy;
 import com.medx.framework.proxy.MapProxyFactory;
 
@@ -87,12 +88,12 @@ public class MapProxyKryoSerializer extends Serializer {
         	
         	IntSerializer.put(buffer, key, true);
         	
-        	if (modelMetadata.getTypeKey(key) != null)
+        	if (modelMetadata.getClassKey(key) != null)
         		continue;
         	
         	if (entry.getValue().getClass().isEnum())
         		IntSerializer.put(buffer, ((Enum<?>)entry.getValue()).ordinal(), true);
-        	else if (modelMetadata.getTypeKey(modelMetadata.getAttrKey(key).getClazz()) != null)
+        	else if (modelMetadata.getClassKey(modelMetadata.getAttrKey(key).getClassKey().getJavaClass()) != null)
         		writeObject(buffer, entry.getValue());
         	else {
         		kryo.writeClassAndObject(buffer, entry.getValue());
@@ -106,17 +107,17 @@ public class MapProxyKryoSerializer extends Serializer {
 		for (int i = 0; i < length; i++) {
 			Integer key = IntSerializer.get(buffer, true);
 			
-			if (modelMetadata.getTypeKey(key) != null) {
+			if (modelMetadata.getClassKey(key) != null) {
 				backendMap.put(key, Boolean.TRUE);
 			}
 			else {
 				Object value = null;
 				
-				AttrKey<?> attrKey = modelMetadata.getAttrKey(key);
+				TypedAttrKey attrKey = modelMetadata.getAttrKey(key);
 				
-				if (attrKey.getClazz().isEnum())
-					value = attrKey.getClazz().getEnumConstants()[IntSerializer.get(buffer, true)];
-				else if (modelMetadata.getTypeKey(attrKey.getClazz()) != null)
+				if (attrKey.getClassKey().getType() == ClassKeyType.ENUM)
+					value = attrKey.getClassKey().getJavaClass().getEnumConstants()[IntSerializer.get(buffer, true)];
+				else if (modelMetadata.getClassKey(attrKey.getClassKey().getJavaClass()) != null)
 					value = readObject(buffer, null);
 				else
 					value = kryo.readClassAndObject(buffer);

@@ -35,7 +35,7 @@ public class MapProxyFactoryImpl implements MapProxyFactoryInternal {
 		
 		int i = 0;
 		for(Integer typeId : typeIds)
-			interfaces[implementedInterfaces.length + i++] = modelMetadata.getTypeKey(typeId).getClazz();
+			interfaces[implementedInterfaces.length + i++] = modelMetadata.getClassKey(typeId).getJavaClass();
 		
 		MapProxyImpl mapProxyImpl = new MapProxyImpl(backendMap, this);
 		

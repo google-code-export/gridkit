@@ -5,8 +5,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import com.medx.framework.annotation.handler.AttributeAccessHandler;
-import com.medx.framework.metadata.AttrKey;
 import com.medx.framework.metadata.ModelMetadata;
+import com.medx.framework.metadata.TypedAttrKey;
 import com.medx.framework.proxy.handler.standard.GetMethodHandler;
 import com.medx.framework.proxy.handler.standard.SetMethodHandler;
 
@@ -52,7 +52,7 @@ public class CachingMethodHandlerFactory extends AbstractMethodHandlerFactory {
 	}
 	
 	private interface MethodHandlerConstructor {
-		public abstract MethodHandler create(Method method, AttrKey<?> key);
+		public abstract MethodHandler create(Method method, TypedAttrKey key);
 	}
 	
 	private class SimpleMethodHandlerFactory implements MethodHandlerConstructor {
@@ -64,13 +64,13 @@ public class CachingMethodHandlerFactory extends AbstractMethodHandlerFactory {
 		
 		// TODO use DI to initialize method handler
 		// transaction management or other aspects could be added in future
-		public MethodHandler create(Method method, AttrKey<?> key) {
+		public MethodHandler create(Method method, TypedAttrKey key) {
 			Object[] args = {key};
 			
 			MethodHandler handler;
 			
 			try {
-				handler = (MethodHandler) handlerClass.getConstructor(AttrKey.class).newInstance(args);
+				handler = (MethodHandler) handlerClass.getConstructor(TypedAttrKey.class).newInstance(args);
 			} catch (Exception e) {
 				// TODO
 				throw new RuntimeException(e);
