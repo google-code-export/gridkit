@@ -42,7 +42,7 @@
 		
 		<attributeDescriptor id="5" version="1">
 			<name>testmodel.Order.items</name>
-			<class>java.util.List&lt;com.medx.proxy.test.model.OrderItem&gt;</class>
+			<class>java.util.List&lt;com.medx.framework.test.model.OrderItem&gt;</class>
 		</attributeDescriptor>
 		
 		<attributeDescriptor id="9" version="1">

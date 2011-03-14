@@ -1,6 +1,6 @@
 package com.medx.framework.metadata;
 
 public interface AttrMap {
-	<V> V getAttribute(AttrKey<V> key);
-	<V> void setAttribute(AttrKey<V> key, V value);
+	<V> V getAttribute(UserAttrKey<V> key);
+	<V> void setAttribute(UserAttrKey<V> key, V value);
 }

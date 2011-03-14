@@ -3,11 +3,11 @@ package com.medx.framework.metadata;
 import java.util.Set;
 
 public interface ModelMetadata {
-	<T> AttrKey<T> getAttrKey(int id);
-	<T> AttrKey<T> getAttrKey(String name);
+	TypedAttrKey getAttrKey(int id);
+	TypedAttrKey getAttrKey(String name);
 	
-	<T> TypeKey<T> getTypeKey(int id);
-	<T> TypeKey<T> getTypeKey(Class<T> clazz);
+	ClassKey getClassKey(int id);
+	ClassKey getClassKey(Class<?> clazz);
 	
 	Set<Integer> getTypeIds(Set<Integer> candidates);
 }

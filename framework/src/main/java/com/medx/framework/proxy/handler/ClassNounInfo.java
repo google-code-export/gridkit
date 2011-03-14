@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.medx.framework.annotation.handler.NounForm;
-import com.medx.framework.metadata.AttrKey;
+import com.medx.framework.metadata.TypedAttrKey;
 
 public final class ClassNounInfo {
-	private final Map<String, AttrKey<?>> attrKeyByUnknown = new HashMap<String, AttrKey<?>>();
+	private final Map<String, TypedAttrKey> attrKeyByUnknown = new HashMap<String, TypedAttrKey>();
 	
-	private final Map<String, AttrKey<?>> attrKeyByPlural = new HashMap<String, AttrKey<?>>();
-	private final Map<String, AttrKey<?>> attrKeyBySingular = new HashMap<String, AttrKey<?>>();
+	private final Map<String, TypedAttrKey> attrKeyByPlural = new HashMap<String, TypedAttrKey>();
+	private final Map<String, TypedAttrKey> attrKeyBySingular = new HashMap<String, TypedAttrKey>();
 	
 	public NounForm getNounForm(String attrName) {
 		if (attrKeyByPlural.containsKey(attrName) && attrKeyBySingular.containsKey(attrName))
@@ -24,7 +24,7 @@ public final class ClassNounInfo {
 			return NounForm.UNKNOWN;
 	}
 	
-	public AttrKey<?> getAttrKey(String attrName) {
+	public TypedAttrKey getAttrKey(String attrName) {
 		if (attrKeyByPlural.containsKey(attrName) && attrKeyBySingular.containsKey(attrName))
 			throw new IllegalStateException("attrKeyByPlural | attrKeyBySingular");
 		
@@ -36,15 +36,15 @@ public final class ClassNounInfo {
 			return attrKeyByUnknown.get(attrName);
 	}
 
-	public Map<String, AttrKey<?>> getAttrKeyByPlural() {
+	public Map<String, TypedAttrKey> getAttrKeyByPlural() {
 		return attrKeyByPlural;
 	}
 
-	public Map<String, AttrKey<?>> getAttrKeyBySingular() {
+	public Map<String, TypedAttrKey> getAttrKeyBySingular() {
 		return attrKeyBySingular;
 	}
 
-	public Map<String, AttrKey<?>> getAttrKeyByUnknown() {
+	public Map<String, TypedAttrKey> getAttrKeyByUnknown() {
 		return attrKeyByUnknown;
 	}
 }

@@ -1,16 +1,16 @@
 package com.medx.framework.proxy.handler;
 
 import com.medx.framework.annotation.handler.NounForm;
-import com.medx.framework.metadata.AttrKey;
+import com.medx.framework.metadata.TypedAttrKey;
 
 public class MethodInfo {
 	private final String verb;
 	private final String attrName;
 	private final NounForm nounForm;
-	private final AttrKey<?> attrKey;
+	private final TypedAttrKey attrKey;
 	private final Class<?>[] parameterTypes;
 	
-	MethodInfo(String verb, String attrName, NounForm nounForm, AttrKey<?> attrKey, Class<?>[] parameterTypes) {
+	MethodInfo(String verb, String attrName, NounForm nounForm, TypedAttrKey attrKey, Class<?>[] parameterTypes) {
 		this.verb = verb;
 		this.attrName = attrName;
 		this.nounForm = nounForm;
@@ -30,7 +30,7 @@ public class MethodInfo {
 		return nounForm;
 	}
 
-	public AttrKey<?> getAttrKey() {
+	public TypedAttrKey getAttrKey() {
 		return attrKey;
 	}
 

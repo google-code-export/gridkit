@@ -12,8 +12,9 @@ import javax.annotation.processing.Filer;
 import com.medx.framework.annotation.JavaDictionary;
 import com.medx.framework.dictionary.model.AttributeDescriptor;
 import com.medx.framework.dictionary.model.TypeDescriptor;
-import com.medx.framework.metadata.AttrKey;
-import com.medx.framework.metadata.TypeKey;
+import com.medx.framework.metadata.ClassKey;
+import com.medx.framework.metadata.ClassKeyFactory;
+import com.medx.framework.metadata.UserAttrKey;
 import com.medx.framework.util.ClassUtil;
 import com.medx.framework.util.DictUtil;
 
@@ -64,8 +65,9 @@ public class FreemarkerHelper {
 
 		templateData.put("package", dictionaryPackage);
 		
-		templateData.put("attrKeyClass", AttrKey.class.getCanonicalName());
-		templateData.put("typeKeyClass", TypeKey.class.getCanonicalName());
+		templateData.put("userAttrKeyClass", UserAttrKey.class.getCanonicalName());
+		templateData.put("classKeyClass", ClassKey.class.getCanonicalName());
+		templateData.put("ClassKeyFactoryClass", ClassKeyFactory.class.getCanonicalName());
 		
 		templateData.put("className", dictionaryClass);
 		

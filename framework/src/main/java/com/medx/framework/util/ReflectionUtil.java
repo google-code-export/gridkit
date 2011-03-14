@@ -2,12 +2,31 @@ package com.medx.framework.util;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.medx.framework.annotation.ModelPackage;
 
 public class ReflectionUtil {
 	public static final String GETTER_PATTERN  = "get[A-Z].*";
+	
+	private static final Map<String, Class<?>> primitiveMap = new HashMap<String, Class<?>>();
+	
+	static {
+		primitiveMap.put("boolean", boolean.class);
+		primitiveMap.put("byte", byte.class);
+		primitiveMap.put("char", char.class);
+		primitiveMap.put("short", short.class);
+		primitiveMap.put("int", int.class);
+		primitiveMap.put("long", long.class);
+		primitiveMap.put("float", float.class);
+		primitiveMap.put("double", double.class);
+	}
+	
+	public static Class<?> getPrimitiveClass(String className) {
+		return primitiveMap.get(className);
+	}
 	
 	public static List<Method> getGetters(Class<?> clazz) {
 		List<Method> result = new ArrayList<Method>();

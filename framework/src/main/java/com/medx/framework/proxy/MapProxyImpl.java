@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.medx.framework.metadata.AttrKey;
 import com.medx.framework.metadata.AttrMap;
-import com.medx.framework.metadata.TypeKey;
+import com.medx.framework.metadata.ClassKey;
+import com.medx.framework.metadata.UserAttrKey;
 import com.medx.framework.proxy.handler.MapProxyAttributeProvider;
 import com.medx.framework.proxy.wrapper.CompositeWrapper;
 import com.medx.framework.proxy.wrapper.ListWrapper;
@@ -89,18 +89,18 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, MapPr
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public <V> V getAttribute(AttrKey<V> key) {
+	public <V> V getAttribute(UserAttrKey<V> key) {
 		return (V)getAttributeValue(key.getId());
 	}
 
 	@Override
-	public <V> void setAttribute(AttrKey<V> key, V value) {
+	public <V> void setAttribute(UserAttrKey<V> key, V value) {
 		setAttributeValue(key.getId(), value);
 	}
 	
 	@Override
 	public <U> U cast(Class<U> clazz) {
-		TypeKey<U> typeKey = mapProxyFactory.getModelMetadata().getTypeKey(clazz);
+		ClassKey typeKey = mapProxyFactory.getModelMetadata().getClassKey(clazz);
 		
 		if (typeKey == null)
 			throw new IllegalArgumentException("clazz");

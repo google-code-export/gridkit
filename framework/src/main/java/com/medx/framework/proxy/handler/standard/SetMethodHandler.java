@@ -1,7 +1,7 @@
 package com.medx.framework.proxy.handler.standard;
 
 import com.medx.framework.annotation.handler.AttributeAccessHandler;
-import com.medx.framework.metadata.AttrKey;
+import com.medx.framework.metadata.TypedAttrKey;
 import com.medx.framework.proxy.handler.MapProxyAttributeProvider;
 import com.medx.framework.proxy.handler.MethodHandler;
 
@@ -9,7 +9,7 @@ import com.medx.framework.proxy.handler.MethodHandler;
 public class SetMethodHandler implements MethodHandler {
 	private final int attributeId;
 	
-	public SetMethodHandler(AttrKey<?> key) {
+	public SetMethodHandler(TypedAttrKey key) {
 		this.attributeId = key.getId();
 	}
 	

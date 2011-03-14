@@ -8,8 +8,8 @@ import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Elements;
 
-import com.medx.framework.metadata.AttrKey;
 import com.medx.framework.metadata.ModelMetadata;
+import com.medx.framework.metadata.TypedAttrKey;
 import com.medx.framework.proxy.MapProxy;
 import com.medx.framework.proxy.MapProxyFactory;
 import com.medx.framework.proxy.serialization.xom.InternalXomSerializer;
@@ -82,11 +82,11 @@ public class MapProxyXomSerializer implements InternalXomSerializer<Object> {
 	       	if (MapProxyFactory.PROXIABLE_KEY.equals(key))
 	       		continue;
 	       	
-	       	if (modelMetadata.getTypeKey(key) != null) {
+	       	if (modelMetadata.getClassKey(key) != null) {
 	       		Element classElement = new Element("class");
 	       		classes.appendChild(classElement);
 	       		
-	       		classElement.appendChild(modelMetadata.getTypeKey(key).getClazz().getCanonicalName());
+	       		classElement.appendChild(modelMetadata.getClassKey(key).getJavaClass().getCanonicalName());
 	       	}
 	        else if (modelMetadata.getAttrKey(key) != null) {
 	        	Element attributeElement = new Element("attribute");
@@ -116,7 +116,7 @@ public class MapProxyXomSerializer implements InternalXomSerializer<Object> {
 		for (int i = 0; i < classes.size(); ++i) {
 			String clazz = classes.get(i).getValue();
 			try {
-				backendMap.put(modelMetadata.getTypeKey(Class.forName(clazz)).getId(), Boolean.TRUE);
+				backendMap.put(modelMetadata.getClassKey(Class.forName(clazz)).getId(), Boolean.TRUE);
 			} catch (ClassNotFoundException e) {
 				throw new RuntimeException(e);
 			}
@@ -128,7 +128,7 @@ public class MapProxyXomSerializer implements InternalXomSerializer<Object> {
 		Elements attributes = attributesElement.getChildElements();
 		
 		for (int i = 0; i < attributes.size(); ++i) {
-			AttrKey<?> attrKey = modelMetadata.getAttrKey(attributes.get(i).getAttributeValue("name"));
+			TypedAttrKey attrKey = modelMetadata.getAttrKey(attributes.get(i).getAttributeValue("name"));
 			
 			InternalXomSerializer<Object> attrSerializer = context.getXomSerializer(attributes.get(i).getChildElements().get(0));
 			

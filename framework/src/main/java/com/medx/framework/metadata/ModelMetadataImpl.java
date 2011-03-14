@@ -1,11 +1,23 @@
 package com.medx.framework.metadata;
 
+import static com.medx.framework.metadata.ClassKeyFactory.createArrayClassKey;
+import static com.medx.framework.metadata.ClassKeyFactory.createCollectionClassKey;
+import static com.medx.framework.metadata.ClassKeyFactory.createEntryClassKey;
+import static com.medx.framework.metadata.ClassKeyFactory.createEnumClassKey;
+import static com.medx.framework.metadata.ClassKeyFactory.createListClassKey;
+import static com.medx.framework.metadata.ClassKeyFactory.createMapClassKey;
+import static com.medx.framework.metadata.ClassKeyFactory.createSetClassKey;
+import static com.medx.framework.metadata.ClassKeyFactory.createUserClassKey;
+import static com.medx.framework.metadata.ClassKeyFactory.getPrimitiveMap;
+import static com.medx.framework.metadata.ClassKeyFactory.getStandardMap;
 import static java.lang.String.format;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,16 +25,22 @@ import org.slf4j.LoggerFactory;
 import com.medx.framework.dictionary.model.AttributeDescriptor;
 import com.medx.framework.dictionary.model.Dictionary;
 import com.medx.framework.dictionary.model.TypeDescriptor;
-import com.medx.framework.util.ClassUtil;
+import com.medx.framework.util.ReflectionUtil;
 
 public class ModelMetadataImpl implements ModelMetadata {
 	private static final Logger log = LoggerFactory.getLogger(ModelMetadataImpl.class);
 	
-	private ConcurrentMap<Integer, AttrKey<?>> attrKeyById = new ConcurrentHashMap<Integer, AttrKey<?>>();
-	private ConcurrentMap<String, AttrKey<?>> attrKeyByName = new ConcurrentHashMap<String, AttrKey<?>>();
+	private static final Pattern mapPattern = Pattern.compile("^java\\.util\\.Map<(.*)\\,(.*)>$");
+	private static final Pattern setPattern = Pattern.compile("^java\\.util\\.Set<(.*)>$");
+	private static final Pattern listPattern = Pattern.compile("^java\\.util\\.List<(.*)>$");
+	private static final Pattern arrayPattern = Pattern.compile("^(.*)\\[\\]$");
+	private static final Pattern collectionPattern = Pattern.compile("^java\\.util\\.Collection<(.*)>$");
+	
+	private ConcurrentMap<Integer, TypedAttrKey> attrKeyById = new ConcurrentHashMap<Integer, TypedAttrKey>();
+	private ConcurrentMap<String, TypedAttrKey> attrKeyByName = new ConcurrentHashMap<String, TypedAttrKey>();
 
-	private ConcurrentMap<Integer, TypeKey<?>> typeKeyById = new ConcurrentHashMap<Integer, TypeKey<?>>();
-	private ConcurrentMap<Class<?>, TypeKey<?>> typeKeyByClass = new ConcurrentHashMap<Class<?>, TypeKey<?>>();
+	private ConcurrentMap<Integer, ClassKey> typeKeyById = new ConcurrentHashMap<Integer, ClassKey>();
+	private ConcurrentMap<Class<?>, ClassKey> typeKeyByClass = new ConcurrentHashMap<Class<?>, ClassKey>();
 	
 	public ModelMetadataImpl(Dictionary... dictionaries) {
 		for (Dictionary dictionary : dictionaries)
@@ -34,37 +52,7 @@ public class ModelMetadataImpl implements ModelMetadata {
 		loadAttrDictionary(dictionary);
 	}
 	
-	private synchronized void loadAttrDictionary(Dictionary dictionary) {
-		for (AttributeDescriptor attributeDescriptor : dictionary.getAttributeDescriptors()) {
-			if (attrKeyById.containsKey(attributeDescriptor.getId())) {
-				log.warn(format("AttrKey with id '%d' already presented", attributeDescriptor.getId()));
-				continue;
-			}
-			
-			if (attrKeyByName.containsKey(attributeDescriptor.getName())) {
-				log.warn(format("AttrKey with name '%s' already presented", attributeDescriptor.getName()));
-				continue;
-			}
-			
-			String className = ClassUtil.getRawClass(attributeDescriptor.getClazz());
-			
-			Class<?> clazz = null;
-			try {
-				clazz = Class.forName(className);
-			} catch (ClassNotFoundException e) {
-				log.warn(format("Failded to find class '%s'", className));
-				continue;
-			}
-			
-			AttrKey<?> attrKey = new AttrKey<Object>(attributeDescriptor.getId(), attributeDescriptor.getName(),
-				attributeDescriptor.getVersion(), clazz, attributeDescriptor.getDescription());
-			
-			attrKeyById.put(attributeDescriptor.getId(), attrKey);
-			attrKeyByName.put(attributeDescriptor.getName(), attrKey);
-		}
-	}
-	
-	private synchronized void loadTypeDictionary(Dictionary dictionary) {
+	private void loadTypeDictionary(Dictionary dictionary) {
 		for (TypeDescriptor typeDescriptor : dictionary.getTypeDescriptors()) {
 			if (typeKeyById.containsKey(typeDescriptor.getId())) {
 				log.warn(format("Type with id '%d' already presented", typeDescriptor.getId()));
@@ -84,10 +72,39 @@ public class ModelMetadataImpl implements ModelMetadata {
 				continue;
 			}
 			
-			TypeKey<?> typeKey = new TypeKey<Object>(typeDescriptor.getId(), typeDescriptor.getVersion(), clazz);
+			ClassKey typeKey = createUserClassKey(typeDescriptor.getId(), typeDescriptor.getVersion(), clazz);
 			
 			typeKeyById.put(typeDescriptor.getId(), typeKey);
 			typeKeyByClass.put(clazz, typeKey);
+		}
+	}
+	
+	private void loadAttrDictionary(Dictionary dictionary) {
+		for (AttributeDescriptor attributeDescriptor : dictionary.getAttributeDescriptors()) {
+			if (attrKeyById.containsKey(attributeDescriptor.getId())) {
+				log.warn(format("AttrKey with id '%d' already presented", attributeDescriptor.getId()));
+				continue;
+			}
+			
+			if (attrKeyByName.containsKey(attributeDescriptor.getName())) {
+				log.warn(format("AttrKey with name '%s' already presented", attributeDescriptor.getName()));
+				continue;
+			}
+			
+			String className = attributeDescriptor.getClazz();
+			
+			ClassKey classKey = createClassKey(className);
+			
+			if (classKey == null) {
+				log.warn(format("Failed to create ClassKey for class '%s'", className));
+				continue;
+			}
+			
+			TypedAttrKey attrKey = new TypedAttrKey(attributeDescriptor.getId(), attributeDescriptor.getName(),
+				attributeDescriptor.getVersion(), attributeDescriptor.getDescription(), classKey);
+			
+			attrKeyById.put(attributeDescriptor.getId(), attrKey);
+			attrKeyByName.put(attributeDescriptor.getName(), attrKey);
 		}
 	}
 
@@ -102,27 +119,106 @@ public class ModelMetadataImpl implements ModelMetadata {
 		return result;
 	}
 	
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> AttrKey<T> getAttrKey(int id) {
-		return (AttrKey<T>)attrKeyById.get(id);
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> AttrKey<T> getAttrKey(String name) {
-		return (AttrKey<T>)attrKeyByName.get(name);
+	private ClassKey createClassKey(String className) {
+		Matcher matcher = mapPattern.matcher(className);
+		
+		if (matcher.find()) {
+			ClassKey keyClassKey = createClassKey(matcher.group(1));
+			ClassKey valueClassKey = createClassKey(matcher.group(2));
+			
+			if (keyClassKey != null && valueClassKey != null && !keyClassKey.getType().isPrimitiveOrEntry() && !valueClassKey.getType().isPrimitiveOrEntry())
+				return createMapClassKey(createEntryClassKey(keyClassKey, valueClassKey));
+			else
+				return null;
+		}
+		
+		matcher = setPattern.matcher(className);
+		
+		if (matcher.find()) {
+			ClassKey classKey = createClassKey(matcher.group(1));
+			
+			if (classKey != null && !classKey.getType().isPrimitiveOrEntry())
+				return createSetClassKey(classKey);
+			else
+				return null;
+		}
+		
+		matcher = listPattern.matcher(className);
+		
+		if (matcher.find()) {
+			ClassKey classKey = createClassKey(matcher.group(1));
+			
+			if (classKey != null && !classKey.getType().isPrimitiveOrEntry())
+				return createListClassKey(classKey);
+			else
+				return null;
+		}
+		
+		matcher = collectionPattern.matcher(className);
+		
+		if (matcher.find()) {
+			ClassKey classKey = createClassKey(matcher.group(1));
+			
+			if (classKey != null && !classKey.getType().isPrimitiveOrEntry())
+				return createCollectionClassKey(classKey);
+			else
+				return null;
+		}
+		
+		matcher = arrayPattern.matcher(className);
+		
+		if (matcher.find()) {
+			ClassKey classKey = createClassKey(matcher.group(1));
+			
+			if (classKey != null && !classKey.getType().isEntry())
+				return createArrayClassKey(classKey);
+			else
+				return null;
+		}
+		
+		Class<?> javaClass = null;
+		
+		try {
+			javaClass = Class.forName(className);
+		} catch (ClassNotFoundException e) {
+			javaClass = ReflectionUtil.getPrimitiveClass(className);
+			
+			if (javaClass == null)
+				return null;
+		}
+		
+		if (javaClass.isEnum())
+			return createEnumClassKey(javaClass);
+		
+		if (getStandardMap().containsKey(javaClass))
+			return getStandardMap().get(javaClass);
+		
+		if (getPrimitiveMap().containsKey(javaClass))
+			return getPrimitiveMap().get(javaClass);
+		
+		if (typeKeyByClass.containsKey(javaClass))
+			return typeKeyByClass.get(javaClass);
+		
+		return null;
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
-	public <T> TypeKey<T> getTypeKey(int id) {
-		return (TypeKey<T>)typeKeyById.get(id);
+	public TypedAttrKey getAttrKey(int id) {
+		return attrKeyById.get(id);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public <T> TypeKey<T> getTypeKey(Class<T> clazz) {
-		return (TypeKey<T>)typeKeyByClass.get(clazz);
+	public TypedAttrKey getAttrKey(String name) {
+		return attrKeyByName.get(name);
+	}
+	
+	@Override
+	public ClassKey getClassKey(int id) {
+		return typeKeyById.get(id);
+	}
+
+	@Override
+	public ClassKey getClassKey(Class<?> clazz) {
+		return typeKeyByClass.get(clazz);
 	}
 }
