@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.medx.framework.metadata.AttrMap;
 import com.medx.framework.metadata.ClassKey;
 import com.medx.framework.metadata.UserAttrKey;
 import com.medx.framework.proxy.handler.MapProxyAttributeProvider;
@@ -19,7 +18,7 @@ import com.medx.framework.proxy.wrapper.ObjectWrapper;
 import com.medx.framework.proxy.wrapper.SetWrapper;
 import com.medx.framework.util.CastUtil;
 
-public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, MapProxyAttributeProvider, ObjectWrapper {
+public class MapProxyImpl implements InvocationHandler, MapProxy, MapProxyAttributeProvider, ObjectWrapper {
 	private static List<CompositeWrapper> wrappers = new ArrayList<CompositeWrapper>();
 	
 	static {
@@ -43,7 +42,7 @@ public class MapProxyImpl implements InvocationHandler, MapProxy, AttrMap, MapPr
 		if (method.getDeclaringClass() == Map.class)
 			return method.invoke(getBackendMap(), args);
 		
-		if (method.getDeclaringClass() == AttrMap.class || method.getDeclaringClass() == MapProxy.class || method.getDeclaringClass() == Object.class)
+		if (method.getDeclaringClass() == MapProxy.class || method.getDeclaringClass() == Object.class)
 			return method.invoke(this, args);
 
 		return mapProxyFactory.getMethodHandlerFactory().createMethodHandler(method).invoke(this, args);

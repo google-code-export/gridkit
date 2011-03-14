@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import com.medx.framework.dictionary.DictionaryReader;
 import com.medx.framework.dictionary.model.Dictionary;
-import com.medx.framework.metadata.AttrMap;
 import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.metadata.ModelMetadataImpl;
 import com.medx.framework.proxy.handler.CachingMethodHandlerFactory;
@@ -173,7 +172,7 @@ public class MapProxyImplTest {
 	
 	@Test
 	public void test7(){
-		AttrMap order = (AttrMap)proxyFactory.createMapProxy(orderMap);
+		MapProxy order = (MapProxy)proxyFactory.createMapProxy(orderMap);
 		
 		assertEquals(Integer.valueOf(0), order.getAttribute(TestDictionary.orderId));
 		

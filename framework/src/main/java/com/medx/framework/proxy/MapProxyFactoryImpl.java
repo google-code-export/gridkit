@@ -5,12 +5,11 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
-import com.medx.framework.metadata.AttrMap;
 import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.proxy.handler.MethodHandlerFactory;
 
 public class MapProxyFactoryImpl implements MapProxyFactoryInternal {
-	private static final Class<?>[] implementedInterfaces = {Map.class, MapProxy.class, AttrMap.class};
+	private static final Class<?>[] implementedInterfaces = {Map.class, MapProxy.class};
 
 	private final ModelMetadata modelMetadata;
 	private final MethodHandlerFactory methodHandlerFactory;
