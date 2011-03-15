@@ -20,9 +20,9 @@ import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.metadata.ModelMetadataImpl;
 import com.medx.framework.proxy.handler.CachingMethodHandlerFactory;
 import com.medx.framework.proxy.handler.MethodHandlerFactory;
-import com.medx.framework.proxy.serialization.MapProxySerializer;
-import com.medx.framework.proxy.serialization.kryo.KryoSerializer;
-import com.medx.framework.proxy.serialization.xom.XomSerializer;
+import com.medx.framework.serialization.BeanSerializer;
+import com.medx.framework.serialization.kryo.KryoSerializer;
+import com.medx.framework.serialization.xom.XomSerializer;
 import com.medx.framework.test.TestDictionary;
 import com.medx.framework.test.model.Customer;
 import com.medx.framework.test.model.Order;
@@ -44,8 +44,8 @@ public class MapProxyImplTest {
 	private static ModelMetadata modelMetadata = new ModelMetadataImpl(dictionary);
 	private static MethodHandlerFactory methodHandlerFactory = new CachingMethodHandlerFactory(modelMetadata);
 	private static BeanManager proxyFactory = new MapProxyFactoryImpl(modelMetadata, methodHandlerFactory);
-	private static MapProxySerializer<byte[]> kryoSerializer = new KryoSerializer(proxyFactory, modelMetadata);
-	private static MapProxySerializer<String> xomSerializer = new XomSerializer(proxyFactory, modelMetadata);
+	private static BeanSerializer<byte[]> kryoSerializer = new KryoSerializer(proxyFactory, modelMetadata);
+	private static BeanSerializer<String> xomSerializer = new XomSerializer(proxyFactory, modelMetadata);
 	
 	public static Map<Integer, Object> customerMap = null;
 	public static Map<Integer, Object> orderMap = null;

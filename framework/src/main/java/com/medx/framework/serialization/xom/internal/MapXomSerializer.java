@@ -1,4 +1,4 @@
-package com.medx.framework.proxy.serialization.xom.internal;
+package com.medx.framework.serialization.xom.internal;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,8 +6,8 @@ import java.util.Map;
 import nu.xom.Element;
 import nu.xom.Elements;
 
-import com.medx.framework.proxy.serialization.xom.InternalXomSerializer;
-import com.medx.framework.proxy.serialization.xom.XomSerializationContext;
+import com.medx.framework.serialization.xom.InternalXomSerializer;
+import com.medx.framework.serialization.xom.XomSerializationContext;
 
 public class MapXomSerializer<K, V> implements InternalXomSerializer<Map<K, V>> {
 	public static final String TAG = "map";

@@ -1,9 +1,9 @@
-package com.medx.framework.proxy.serialization.xom.internal;
+package com.medx.framework.serialization.xom.internal;
 
 import nu.xom.Element;
 
-import com.medx.framework.proxy.serialization.xom.InternalXomSerializer;
-import com.medx.framework.proxy.serialization.xom.XomSerializationContext;
+import com.medx.framework.serialization.xom.InternalXomSerializer;
+import com.medx.framework.serialization.xom.XomSerializationContext;
 
 public class NullXomSerializer implements InternalXomSerializer<Object> {
 	public static final String TAG = "null";

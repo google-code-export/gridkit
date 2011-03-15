@@ -1,4 +1,4 @@
-package com.medx.framework.proxy.serialization.xom.internal;
+package com.medx.framework.serialization.xom.internal;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -8,8 +8,8 @@ import java.util.Map;
 
 import nu.xom.Element;
 
-import com.medx.framework.proxy.serialization.xom.InternalXomSerializer;
-import com.medx.framework.proxy.serialization.xom.XomSerializationContext;
+import com.medx.framework.serialization.xom.InternalXomSerializer;
+import com.medx.framework.serialization.xom.XomSerializationContext;
 
 public class PrimitiveXomSerializer implements InternalXomSerializer<Object> {
 	public static final Collection<String> supportedTags;

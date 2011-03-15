@@ -11,14 +11,14 @@ import org.junit.Test;
 
 import com.medx.framework.bean.Bean;
 import com.medx.framework.generation.BeanGenerator;
-import com.medx.framework.proxy.serialization.MapProxySerializer;
-import com.medx.framework.proxy.serialization.kryo.KryoSerializer;
-import com.medx.framework.proxy.serialization.xom.XomSerializer;
+import com.medx.framework.serialization.BeanSerializer;
+import com.medx.framework.serialization.kryo.KryoSerializer;
+import com.medx.framework.serialization.xom.XomSerializer;
 import com.medx.test.model.order.Order;
 
 public class SerializationTest extends TestData {
-	protected static MapProxySerializer<byte[]> kryoSerializer;
-	private static MapProxySerializer<String> xomSerializer;
+	protected static BeanSerializer<byte[]> kryoSerializer;
+	private static BeanSerializer<String> xomSerializer;
 	
 	@Test
 	public void cyclicKryoSerializationTest() {

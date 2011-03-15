@@ -1,4 +1,4 @@
-package com.medx.framework.proxy.serialization.xom;
+package com.medx.framework.serialization.xom;
 
 import java.util.Map;
 
