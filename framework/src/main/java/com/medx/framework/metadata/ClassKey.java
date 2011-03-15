@@ -10,7 +10,6 @@ public abstract class ClassKey {
 		this.type = type;
 	}
 
-
 	public abstract Class<?> getJavaClass();
 	
 	public int getId() {

@@ -1,13 +1,16 @@
 package com.medx.test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.medx.framework.bean.Bean;
+import com.medx.framework.generation.BeanGenerator;
 import com.medx.framework.proxy.serialization.MapProxySerializer;
 import com.medx.framework.proxy.serialization.kryo.KryoSerializer;
 import com.medx.framework.proxy.serialization.xom.XomSerializer;
@@ -18,7 +21,7 @@ public class SerializationTest extends TestData {
 	private static MapProxySerializer<String> xomSerializer;
 	
 	@Test
-	public void kryoSerializationTest() {
+	public void cyclicKryoSerializationTest() {
 		byte[] tomData = kryoSerializer.serialize((Bean)tomOrder);
 		byte[] polyData = kryoSerializer.serialize((Bean)polyOrder);
 		
@@ -44,7 +47,7 @@ public class SerializationTest extends TestData {
 	}
 	
 	@Test
-	public void xomSerializationTest() {
+	public void cyclicXomSerializationTest() {
 		String tomData = xomSerializer.serialize((Bean)tomOrder);
 		String polyData = xomSerializer.serialize((Bean)polyOrder);
 		
@@ -64,6 +67,48 @@ public class SerializationTest extends TestData {
 		
 		assertEquals(tomData, newTomData);
 		assertEquals(polyData, newPolyData);
+	}
+	
+	@Test
+	public void generatedKryo() {
+		BeanGenerator beanGenerator = new BeanGenerator(modelMetadata, proxyFactory);
+
+		List<Bean> beans = beanGenerator.generate(Order.class);
+		
+		for (Bean bean : beans) {
+			byte[] beanData = kryoSerializer.serialize(bean);
+			
+			Bean newBean = (Bean)kryoSerializer.deserialize(beanData);
+			
+			assertEquals(bean, newBean);
+			
+			byte[] newbeanData = kryoSerializer.serialize(bean);
+			
+			assertArrayEquals(beanData, newbeanData);
+		}
+		
+		System.out.println("Generated Kryo tested on size = " + beans.size());
+	}
+	
+	@Test
+	public void generatedXom() {
+		BeanGenerator beanGenerator = new BeanGenerator(modelMetadata, proxyFactory);
+
+		List<Bean> beans = beanGenerator.generate(Order.class);
+		
+		for (Bean bean : beans) {
+			String beanData = xomSerializer.serialize(bean);
+			
+			Bean newBean = (Bean)xomSerializer.deserialize(beanData);
+			
+			assertEquals(bean, newBean);
+			
+			String newbeanData = xomSerializer.serialize(bean);
+			
+			assertEquals(beanData, newbeanData);
+		}
+		
+		System.out.println("Generated Xom tested on size = " + beans.size());
 	}
 	
 	@Before

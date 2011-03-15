@@ -91,13 +91,14 @@ public class MapProxyKryoSerializer extends Serializer {
         	if (modelMetadata.getClassKey(key) != null)
         		continue;
         	
-        	if (entry.getValue().getClass().isEnum())
-        		IntSerializer.put(buffer, ((Enum<?>)entry.getValue()).ordinal(), true);
+        	IntSerializer intSerializer = new IntSerializer(true);
+        	
+        	if (modelMetadata.getAttrKey(key).getClassKey().getType() == ClassKeyType.ENUM)
+        		intSerializer.writeObject(buffer, entry.getValue() == null ? null : ((Enum<?>)entry.getValue()).ordinal());
         	else if (modelMetadata.getClassKey(modelMetadata.getAttrKey(key).getClassKey().getJavaClass()) != null)
         		writeObject(buffer, entry.getValue());
-        	else {
+        	else
         		kryo.writeClassAndObject(buffer, entry.getValue());
-        	}
         }
 	}
 	
@@ -115,8 +116,12 @@ public class MapProxyKryoSerializer extends Serializer {
 				
 				TypedAttrKey attrKey = modelMetadata.getAttrKey(key);
 				
-				if (attrKey.getClassKey().getType() == ClassKeyType.ENUM)
-					value = attrKey.getClassKey().getJavaClass().getEnumConstants()[IntSerializer.get(buffer, true)];
+				IntSerializer intSerializer = new IntSerializer(true);
+				
+				if (attrKey.getClassKey().getType() == ClassKeyType.ENUM) {
+					Integer ordinal = intSerializer.readObject(buffer, Integer.class);
+					value = ordinal == null ? null : attrKey.getClassKey().getJavaClass().getEnumConstants()[ordinal];
+				}
 				else if (modelMetadata.getClassKey(attrKey.getClassKey().getJavaClass()) != null)
 					value = readObject(buffer, null);
 				else
