@@ -23,14 +23,14 @@ import com.medx.framework.bean.Bean;
 import com.medx.framework.bean.BeanManager;
 import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.serialization.BeanSerializer;
-import com.medx.framework.serialization.xom.internal.ArrayXomSerializer;
-import com.medx.framework.serialization.xom.internal.EnumXomSerializer;
-import com.medx.framework.serialization.xom.internal.ListXomSerializer;
-import com.medx.framework.serialization.xom.internal.MapProxyXomSerializer;
-import com.medx.framework.serialization.xom.internal.MapXomSerializer;
-import com.medx.framework.serialization.xom.internal.NullXomSerializer;
-import com.medx.framework.serialization.xom.internal.PrimitiveXomSerializer;
-import com.medx.framework.serialization.xom.internal.SetXomSerializer;
+import com.medx.framework.serialization.xom.impl.ArrayXomSerializer;
+import com.medx.framework.serialization.xom.impl.EnumXomSerializer;
+import com.medx.framework.serialization.xom.impl.ListXomSerializer;
+import com.medx.framework.serialization.xom.impl.MapProxyXomSerializer;
+import com.medx.framework.serialization.xom.impl.MapXomSerializer;
+import com.medx.framework.serialization.xom.impl.NullXomSerializer;
+import com.medx.framework.serialization.xom.impl.PrimitiveXomSerializer;
+import com.medx.framework.serialization.xom.impl.SetXomSerializer;
 
 public class XomSerializer implements BeanSerializer<String>, XomSerializationContext {
 	private final ThreadLocal<Integer> objectCounter = new ThreadLocal<Integer>();

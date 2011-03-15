@@ -1,4 +1,4 @@
-package com.medx.framework.serialization.xom.internal;
+package com.medx.framework.serialization.xom.impl;
 
 import java.util.HashMap;
 import java.util.Map;

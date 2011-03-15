@@ -1,7 +1,7 @@
-package com.medx.framework.serialization.xom.internal;
+package com.medx.framework.serialization.xom.impl;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import nu.xom.Element;
 import nu.xom.Elements;
@@ -9,14 +9,14 @@ import nu.xom.Elements;
 import com.medx.framework.serialization.xom.InternalXomSerializer;
 import com.medx.framework.serialization.xom.XomSerializationContext;
 
-public class SetXomSerializer<T> implements InternalXomSerializer<Set<T>> {
-	public static final String TAG = "set";
+public class ListXomSerializer<T> implements InternalXomSerializer<List<T>> {
+	public static final String TAG = "list";
 	
 	@Override
-	public Element serialize(Set<T> set, XomSerializationContext context) {
-		Element result = new Element("set");
+	public Element serialize(List<T> list, XomSerializationContext context) {
+		Element result = new Element("list");
 		
-		for (T element : set) {
+		for (T element : list) {
 			Element elementElement = new Element("element");
 			result.appendChild(elementElement);
 			
@@ -28,10 +28,10 @@ public class SetXomSerializer<T> implements InternalXomSerializer<Set<T>> {
 	}
 
 	@Override
-	public Set<T> deserialize(Element set, XomSerializationContext context) {
-		Set<T> result = new HashSet<T>();
+	public List<T> deserialize(Element list, XomSerializationContext context) {
+		List<T> result = new ArrayList<T>();
 		
-		Elements elements = set.getChildElements();
+		Elements elements = list.getChildElements();
 		
 		for (int i = 0; i < elements.size(); ++i) {
 			InternalXomSerializer<T> elementSerializer = context.getXomSerializer(elements.get(i).getChildElements().get(0));
