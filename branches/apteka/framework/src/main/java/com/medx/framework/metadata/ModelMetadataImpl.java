@@ -12,7 +12,10 @@ import static com.medx.framework.metadata.ClassKeyFactory.getPrimitiveMap;
 import static com.medx.framework.metadata.ClassKeyFactory.getStandardMap;
 import static java.lang.String.format;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -22,10 +25,13 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.medx.framework.annotation.ModelPackage;
 import com.medx.framework.dictionary.model.AttributeDescriptor;
 import com.medx.framework.dictionary.model.Dictionary;
 import com.medx.framework.dictionary.model.TypeDescriptor;
+import com.medx.framework.util.DictUtil;
 import com.medx.framework.util.ReflectionUtil;
+import com.medx.framework.util.TextUtil;
 
 public class ModelMetadataImpl implements ModelMetadata {
 	private static final Logger log = LoggerFactory.getLogger(ModelMetadataImpl.class);
@@ -108,6 +114,26 @@ public class ModelMetadataImpl implements ModelMetadata {
 		}
 	}
 
+	@Override
+	public List<TypedAttrKey> getAttrKeys(Class<?> clazz) {
+		List<TypedAttrKey> result = new ArrayList<TypedAttrKey>();
+		
+		Package modelPacket = ReflectionUtil.getModelPackage(clazz.getPackage());
+		
+		String modelPackageName = modelPacket.getName();
+		ModelPackage modelPackage = modelPacket.getAnnotation(ModelPackage.class);
+		
+		for (Method getter : ReflectionUtil.getGetters(clazz)) {
+			String getterName = TextUtil.getCamelPostfix(getter.getName());
+			
+			String modelAttrName = DictUtil.getAttrName(modelPackage, modelPackageName, clazz.getCanonicalName(), getterName);
+			
+			result.add(this.getAttrKey(modelAttrName));
+		}
+		
+		return result;
+	}
+	
 	@Override
 	public Set<Integer> getTypeIds(Set<Integer> candidates) {
 		HashSet<Integer> result = new HashSet<Integer>();
