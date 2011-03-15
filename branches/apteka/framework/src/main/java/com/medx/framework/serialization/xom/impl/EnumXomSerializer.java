@@ -1,4 +1,4 @@
-package com.medx.framework.serialization.xom.internal;
+package com.medx.framework.serialization.xom.impl;
 
 import static com.medx.framework.util.CastUtil.cast;
 
