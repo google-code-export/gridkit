@@ -14,6 +14,7 @@ import static java.lang.String.format;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -48,6 +49,8 @@ public class ModelMetadataImpl implements ModelMetadata {
 	private ConcurrentMap<Integer, ClassKey> typeKeyById = new ConcurrentHashMap<Integer, ClassKey>();
 	private ConcurrentMap<Class<?>, ClassKey> typeKeyByClass = new ConcurrentHashMap<Class<?>, ClassKey>();
 	
+	private ConcurrentMap<Class<?>, List<TypedAttrKey>> attrKeyByClass = new ConcurrentHashMap<Class<?>, List<TypedAttrKey>>();
+	
 	public ModelMetadataImpl(Dictionary... dictionaries) {
 		for (Dictionary dictionary : dictionaries)
 			loadDictionary(dictionary);
@@ -56,6 +59,10 @@ public class ModelMetadataImpl implements ModelMetadata {
 	public synchronized void loadDictionary(Dictionary dictionary) {
 		loadTypeDictionary(dictionary);
 		loadAttrDictionary(dictionary);
+		
+		for (Class<?> javaClass : typeKeyByClass.keySet())
+			if (!attrKeyByClass.containsKey(javaClass))
+				attrKeyByClass.put(javaClass, getAttrKeysInternal(javaClass));
 	}
 	
 	private void loadTypeDictionary(Dictionary dictionary) {
@@ -115,7 +122,11 @@ public class ModelMetadataImpl implements ModelMetadata {
 	}
 
 	@Override
-	public List<TypedAttrKey> getAttrKeys(Class<?> clazz) {
+	public List<TypedAttrKey> getAttrKeys(Class<?> javaClass) {
+		return Collections.unmodifiableList(attrKeyByClass.get(javaClass));
+	}
+	
+	private List<TypedAttrKey> getAttrKeysInternal(Class<?> clazz) {
 		List<TypedAttrKey> result = new ArrayList<TypedAttrKey>();
 		
 		Package modelPacket = ReflectionUtil.getModelPackage(clazz.getPackage());
