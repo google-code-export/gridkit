@@ -1,4 +1,4 @@
-package com.medx.framework.proxy.serialization.xom.internal;
+package com.medx.framework.serialization.xom.internal;
 
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
@@ -12,8 +12,8 @@ import com.medx.framework.bean.Bean;
 import com.medx.framework.bean.BeanManager;
 import com.medx.framework.metadata.ModelMetadata;
 import com.medx.framework.metadata.TypedAttrKey;
-import com.medx.framework.proxy.serialization.xom.InternalXomSerializer;
-import com.medx.framework.proxy.serialization.xom.XomSerializationContext;
+import com.medx.framework.serialization.xom.InternalXomSerializer;
+import com.medx.framework.serialization.xom.XomSerializationContext;
 
 public class MapProxyXomSerializer implements InternalXomSerializer<Object> {
 	public static final String TAG = "object";

@@ -1,4 +1,4 @@
-package com.medx.framework.proxy.serialization.kryo;
+package com.medx.framework.serialization.kryo;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;

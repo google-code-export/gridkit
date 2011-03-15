@@ -1,12 +1,12 @@
-package com.medx.framework.proxy.serialization.xom.internal;
+package com.medx.framework.serialization.xom.internal;
 
 import static com.medx.framework.util.CastUtil.cast;
 
 import nu.xom.Attribute;
 import nu.xom.Element;
 
-import com.medx.framework.proxy.serialization.xom.InternalXomSerializer;
-import com.medx.framework.proxy.serialization.xom.XomSerializationContext;
+import com.medx.framework.serialization.xom.InternalXomSerializer;
+import com.medx.framework.serialization.xom.XomSerializationContext;
 
 public class EnumXomSerializer<T extends Enum<T>> implements InternalXomSerializer<Enum<T>> {
 	public static final String TAG = "enum";

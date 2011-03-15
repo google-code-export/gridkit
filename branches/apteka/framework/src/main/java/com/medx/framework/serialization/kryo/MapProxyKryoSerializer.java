@@ -1,4 +1,4 @@
-package com.medx.framework.proxy.serialization.kryo;
+package com.medx.framework.serialization.kryo;
 
 import java.lang.reflect.Proxy;
 import java.nio.ByteBuffer;

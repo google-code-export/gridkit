@@ -1,4 +1,4 @@
-package com.medx.framework.proxy.serialization.xom;
+package com.medx.framework.serialization.xom;
 
 import static com.medx.framework.util.CastUtil.cast;
 
@@ -22,17 +22,17 @@ import nu.xom.ValidityException;
 import com.medx.framework.bean.Bean;
 import com.medx.framework.bean.BeanManager;
 import com.medx.framework.metadata.ModelMetadata;
-import com.medx.framework.proxy.serialization.MapProxySerializer;
-import com.medx.framework.proxy.serialization.xom.internal.ArrayXomSerializer;
-import com.medx.framework.proxy.serialization.xom.internal.EnumXomSerializer;
-import com.medx.framework.proxy.serialization.xom.internal.ListXomSerializer;
-import com.medx.framework.proxy.serialization.xom.internal.MapProxyXomSerializer;
-import com.medx.framework.proxy.serialization.xom.internal.MapXomSerializer;
-import com.medx.framework.proxy.serialization.xom.internal.NullXomSerializer;
-import com.medx.framework.proxy.serialization.xom.internal.PrimitiveXomSerializer;
-import com.medx.framework.proxy.serialization.xom.internal.SetXomSerializer;
+import com.medx.framework.serialization.BeanSerializer;
+import com.medx.framework.serialization.xom.internal.ArrayXomSerializer;
+import com.medx.framework.serialization.xom.internal.EnumXomSerializer;
+import com.medx.framework.serialization.xom.internal.ListXomSerializer;
+import com.medx.framework.serialization.xom.internal.MapProxyXomSerializer;
+import com.medx.framework.serialization.xom.internal.MapXomSerializer;
+import com.medx.framework.serialization.xom.internal.NullXomSerializer;
+import com.medx.framework.serialization.xom.internal.PrimitiveXomSerializer;
+import com.medx.framework.serialization.xom.internal.SetXomSerializer;
 
-public class XomSerializer implements MapProxySerializer<String>, XomSerializationContext {
+public class XomSerializer implements BeanSerializer<String>, XomSerializationContext {
 	private final ThreadLocal<Integer> objectCounter = new ThreadLocal<Integer>();
 	private final ThreadLocal<Map<Object, Integer>> identityMap = new ThreadLocal<Map<Object,Integer>>();
 	private final ThreadLocal<Map<Integer, Object>> objectMap = new ThreadLocal<Map<Integer, Object>>();

@@ -1,4 +1,4 @@
-package com.medx.framework.proxy.serialization.kryo;
+package com.medx.framework.serialization.kryo;
 
 import java.lang.reflect.InvocationHandler;
 import java.util.ArrayList;
@@ -16,9 +16,9 @@ import com.esotericsoftware.kryo.Serializer;
 import com.medx.framework.bean.Bean;
 import com.medx.framework.bean.BeanManager;
 import com.medx.framework.metadata.ModelMetadata;
-import com.medx.framework.proxy.serialization.MapProxySerializer;
+import com.medx.framework.serialization.BeanSerializer;
 
-public class KryoSerializer implements MapProxySerializer<byte[]> {
+public class KryoSerializer implements BeanSerializer<byte[]> {
     private static final Class<?>[] supportedClasses = {boolean[].class, byte[].class, char[].class, short[].class,
     	int[].class, long[].class, float[].class, double[].class, Boolean[].class, Byte[].class, Character[].class,
     	Short[].class, Long[].class, Float[].class, Double[].class, String[].class, ArrayList.class, LinkedList.class, 
