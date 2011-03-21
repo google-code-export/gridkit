@@ -19,6 +19,8 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
+import azul.test.data.Record;
+import azul.test.data.SmartRecord;
 import azul.test.output.DummyObservationLogger;
 import azul.test.output.GCLogger;
 import azul.test.output.ObservationLogger;
@@ -28,10 +30,9 @@ import azul.test.output.OutputWriter;
 import azul.test.runner.BaseRunner;
 import azul.test.runner.LimitedRunner;
 import azul.test.runner.UnlimitedRunner;
-import azul.test.util.ArrayUtil;
 
 public class Main {
-	private static String mode = getProperty("mode") == null ? "heap" : getProperty("mode");
+	private static String mode = getProperty("mode") == null ? "offHeap" : getProperty("mode");
 	
 	private static String outputDir = getProperty("outputDir") == null ? "output" : getProperty("outputDir");
 	
@@ -40,10 +41,10 @@ public class Main {
 	private static int warmUpCount = Integer.valueOf(getProperty("warmUpCount") == null ? "2" : getProperty("warmUpCount"));
 	
 	private static String offHeapSize = getProperty("offHeapSize") == null ? "256" : getProperty("sampleSize");
-	private static int initCacheSize = Integer.valueOf(getProperty("initCacheSize") == null ? "100000" : getProperty("initCacheSize"));
-	private static int maxCacheSize = Integer.valueOf(getProperty("maxCacheSize") == null ? "100000" : getProperty("maxCacheSize"));
+	private static int initCacheSize = Integer.valueOf(getProperty("initCacheSize") == null ? "100" : getProperty("initCacheSize"));
+	private static int maxCacheSize = Integer.valueOf(getProperty("maxCacheSize") == null ? "100" : getProperty("maxCacheSize"));
 	
-	private static int arraySize = Integer.valueOf(getProperty("arraySize") == null ? "1024" : getProperty("arraySize"));
+	private static int recordSize = Integer.valueOf(getProperty("recordSize") == null ? "1024" : getProperty("recordSize"));
 	private static int dispersion = Integer.valueOf(getProperty("dispersion") == null ? "256" : getProperty("dispersion"));
 	
 	private static int bulkSize = Integer.valueOf(getProperty("bulkSize") == null ? "1024" : getProperty("bulkSize"));
@@ -53,11 +54,13 @@ public class Main {
 	
 	private static int loggersCount = Integer.valueOf(getProperty("loggersCount") == null ? "2" : getProperty("loggersCount"));
 	
-	private static int readersCount = Integer.valueOf(getProperty("readersCount") == null ? "8" : getProperty("readersCount"));
-	private static int writersCount = Integer.valueOf(getProperty("writersCount") == null ? "8" : getProperty("writersCount"));
+	private static int readersCount = Integer.valueOf(getProperty("readersCount") == null ? "4" : getProperty("readersCount"));
+	private static int writersCount = Integer.valueOf(getProperty("writersCount") == null ? "0" : getProperty("writersCount"));
 	
 	private static int readersOps = Integer.valueOf(getProperty("readersOps") == null ? "0" : getProperty("readersOps"));
 	private static int writersOps = Integer.valueOf(getProperty("writersOps") == null ? "50" : getProperty("writersOps"));
+	
+	private static boolean useSmartRecord = Boolean.valueOf(getProperty("useSmartRecord") == null ? "true" : getProperty("useSmartRecord"));
 	
 	private static Map<String, String> overallResults = new ConcurrentHashMap<String, String>();
 	
@@ -124,7 +127,7 @@ public class Main {
 			if (isRealRun)
 				logger = new OutputObservationLogger(outputDir + "/writer" + i + ".txt", logQueue, sampleSize, bufferSize);
 			
-			Writer writer = new Writer(cache, maxCacheSize, arraySize, dispersion, bulkSize);
+			Writer writer = new Writer(cache, maxCacheSize, recordSize, dispersion, useSmartRecord, bulkSize);
 			
 			if (writersOps > 0)
 				runners.add(new LimitedRunner(writer, time, writersOps, logger));
@@ -187,7 +190,10 @@ public class Main {
 		long initFreeMemory = Runtime.getRuntime().freeMemory();
 		
 		while (cache.getSize() < initCacheSize)
-			cache.put(new Element(rand.nextInt(maxCacheSize), ArrayUtil.createRandomArray(rand, arraySize, dispersion)));
+	    	if (!useSmartRecord)
+	    		cache.put(new Element(rand.nextInt(maxCacheSize), new Record(rand, recordSize, dispersion)));
+	    	else
+	    		cache.put(new Element(rand.nextInt(maxCacheSize), new SmartRecord(rand, recordSize, dispersion)));
 		
 		System.gc();
 		overallResults.put("heapSizeForCache", (initFreeMemory - Runtime.getRuntime().freeMemory()) / (1024.0 * 1024) + "");

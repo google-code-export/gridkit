@@ -18,10 +18,8 @@ public class Record implements Serializable {
 
 	}
 
-	public Record(int size, int dispersion) {
+	public Record(Random rand, int size, int dispersion) {
 		int[] sizes = new int[4];
-		
-		Random rand = new Random();
 		
 		if (rand.nextBoolean())
 			size += rand.nextInt(dispersion);
@@ -40,24 +38,28 @@ public class Record implements Serializable {
 		}
 		
 		sizes[sizes.length - 1] = size;
+		
 		char[] chars = new char[sizes[0] * 2];
+		
 		for (int i = 0; i < chars.length; i++) {
-			chars[i] = (char) ('A' + rand.nextInt(26));
+			chars[i] = (char) ('A' + i %26);
 		}
 		
 		first = new String(chars);
+		
 		chars = new char[sizes[1] * 2];
+		
 		for (int i = 0; i < chars.length; i++) {
-			chars[i] = (char) ('A' + rand.nextInt(26));
+			chars[i] = (char) ('A' + i %26);
 		}
 		
 		second = new String(chars);
+		
 		bytes = new byte[sizes[2] * 4 + remainder];
-		rand.nextBytes(bytes);
 		
 		ints = new LinkedList<Integer>();
 		for (int i = 0; i < sizes[3]; i++) {
-			ints.add(rand.nextInt());
+			ints.add(Integer.MIN_VALUE + i);
 		}
 	}
 
