@@ -4,8 +4,11 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryPoolMXBean;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GCLogger implements Callable<Void> {
+	public static final AtomicInteger closed = new AtomicInteger(0);
+	
 	private final long timeOut;
 	
 	private final ObservationLogger logger;
@@ -22,7 +25,7 @@ public class GCLogger implements Callable<Void> {
 	}
 
 	@Override
-	public Void call() throws Exception {
+	public Void call() {
 		long startTime = System.currentTimeMillis();
 		
 		try {
@@ -40,9 +43,10 @@ public class GCLogger implements Callable<Void> {
 				Thread.sleep(timeOut);
 			}
 		}
-		finally {
-			logger.close();
-		}
+		catch (InterruptedException ignored) {}
+		
+		logger.close();
+		closed.incrementAndGet();
 		
 		return null;
 	}

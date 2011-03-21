@@ -2,9 +2,10 @@ package azul.test.output;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class OutputWriter implements Callable<Void> {
-	public static volatile int filesClosed = 0;
+	public static volatile AtomicInteger filesClosed = new AtomicInteger(0);
 	
 	private final BlockingQueue<OutputTask> queue;
 	
@@ -23,7 +24,7 @@ public class OutputWriter implements Callable<Void> {
 			if (task.isLast) {
 				task.writer.flush();
 				task.writer.close();
-				++filesClosed;
+				filesClosed.incrementAndGet();
 			}
 		}
 		

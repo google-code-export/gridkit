@@ -53,7 +53,7 @@ public class Main {
 
 	private static boolean useSmartRecord = Boolean.valueOf(getProperty("useSmartRecord") == null ? "true" : getProperty("useSmartRecord"));
 	
-	private static int readersCount = Integer.valueOf(getProperty("readersCount") == null ? "4" : getProperty("readersCount"));
+	private static int readersCount = Integer.valueOf(getProperty("readersCount") == null ? "20" : getProperty("readersCount"));
 	private static int writersCount = Integer.valueOf(getProperty("writersCount") == null ? "0" : getProperty("writersCount"));
 	
 	private static int readersOps = Integer.valueOf(getProperty("readersOps") == null ? "0" : getProperty("readersOps"));
@@ -61,7 +61,7 @@ public class Main {
 	
 	private static int sampleSize = Integer.valueOf(getProperty("sampleSize") == null ? "1024" : getProperty("sampleSize"));
 	private static int bufferSize = Integer.valueOf(getProperty("bufferSize") == null ? "2" : getProperty("bufferSize"));
-	private static int loggersCount = Integer.valueOf(getProperty("loggersCount") == null ? "2" : getProperty("loggersCount"));
+	private static int loggersCount = Integer.valueOf(getProperty("loggersCount") == null ? "1" : getProperty("loggersCount"));
 	
 	private static Map<String, String> overallResults = new ConcurrentHashMap<String, String>();
 	
@@ -85,10 +85,15 @@ public class Main {
         runTest(true, time);
         System.out.println("Completed");
         
-        System.out.println("files written: " + OutputWriter.filesClosed);
+        System.out.println("files written: " + OutputWriter.filesClosed.get());
+        System.out.println("workers closed " + UnlimitedRunner.closed.get());
+        System.out.println("gc closed " + GCLogger.closed.get());
 	}
 	
 	public static void runTest(boolean isRealRun, int time) throws InterruptedException, ExecutionException, IOException {
+		UnlimitedRunner.closed.set(0);
+		GCLogger.closed.set(0);
+		
 		System.gc();
 		
 		if (isRealRun)
@@ -148,6 +153,7 @@ public class Main {
 		gcTask.cancel(true);
 		try {gcTask.get();} catch (Exception e) {}
 		
+        //Thread.sleep(10000);
 		while (!logQueue.isEmpty());
 		
 		serveThreadPool.shutdownNow();

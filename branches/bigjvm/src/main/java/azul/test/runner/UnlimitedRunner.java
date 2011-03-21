@@ -29,6 +29,7 @@ public class UnlimitedRunner extends BaseRunner {
 		}
 		
 		logger.close();
+		closed.incrementAndGet();
 		
 		return null;
 	}
