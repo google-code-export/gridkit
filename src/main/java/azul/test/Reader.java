@@ -2,11 +2,13 @@ package azul.test;
 
 import java.util.Random;
 
+import azul.test.data.Record;
+
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
 public class Reader implements Runnable {
-	public static byte sum = 0;
+	public static int sum = 0;
 	
 	private final Cache cache;
 	private final int maxCacheSize;
@@ -32,9 +34,9 @@ public class Reader implements Runnable {
     			element = cache.get(key);
     		}
     		
-    		byte[] array = (byte[])element.getValue();
+    		Record record = (Record)element.getValue();
     		
-    		sum += array[rand.nextInt(array.length)];
+    		sum += record.getId();
     	}
 	}
 }
