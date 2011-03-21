@@ -5,6 +5,7 @@ import static java.lang.System.getProperty;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -41,7 +42,7 @@ public class Main {
 	private static int warmUptime = Integer.valueOf(getProperty("warmUptime") == null ? "2" : getProperty("warmUptime"));
 	private static int warmUpCount = Integer.valueOf(getProperty("warmUpCount") == null ? "2" : getProperty("warmUpCount"));
 	
-	private static String offHeapSize = getProperty("offHeapSize") == null ? "256" : getProperty("sampleSize");
+	private static String offHeapSize = getProperty("offHeapSize") == null ? "256" : getProperty("offHeapSize");
 	private static int initCacheSize = Integer.valueOf(getProperty("initCacheSize") == null ? "1000" : getProperty("initCacheSize"));
 	private static int maxCacheSize = Integer.valueOf(getProperty("maxCacheSize") == null ? "1000" : getProperty("maxCacheSize"));
 	
@@ -175,6 +176,8 @@ public class Main {
 		
 		config.setOverflowToOffHeap(true);
 		
+		
+		System.out.println("-------- Allocating " + offHeapSize + "M for off heap");
 		config.setMaxMemoryOffHeap(offHeapSize + "M");
 		
 		cache = new Cache(config);
@@ -192,13 +195,20 @@ public class Main {
 		System.gc();
 		long initFreeMemory = Runtime.getRuntime().freeMemory();
 		
-		while (cache.getSize() < initCacheSize)
+		List<Integer> allKeys = new ArrayList<Integer>(maxCacheSize);
+		for (int i = 0; i < maxCacheSize; ++i)
+			allKeys.add(i);
+		Collections.shuffle(allKeys, rand);
+		
+		for (int i = 0; i < initCacheSize; ++i) {
 	    	if (!useSmartRecord)
-	    		cache.put(new Element(rand.nextInt(maxCacheSize), new Record(rand, recordSize, dispersion)));
+	    		cache.put(new Element(allKeys.get(i), new Record(rand, recordSize, dispersion)));
 	    	else
-	    		cache.put(new Element(rand.nextInt(maxCacheSize), new SmartRecord(rand, recordSize, dispersion)));
+	    		cache.put(new Element(allKeys.get(i), new SmartRecord(rand, recordSize, dispersion)));
+		}
 		
 		System.gc();
+		overallResults.put("cacheSize", cache.getSize() + "");
 		overallResults.put("heapSizeForCache", (initFreeMemory - Runtime.getRuntime().freeMemory()) / (1024.0 * 1024) + "");
 	}
 	
