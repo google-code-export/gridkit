@@ -4,6 +4,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 
 public class OutputWriter implements Callable<Void> {
+	public static volatile int filesClosed = 0;
+	
 	private final BlockingQueue<OutputTask> queue;
 	
 	public OutputWriter(BlockingQueue<OutputTask> queue) {
@@ -21,6 +23,7 @@ public class OutputWriter implements Callable<Void> {
 			if (task.isLast) {
 				task.writer.flush();
 				task.writer.close();
+				++filesClosed;
 			}
 		}
 		

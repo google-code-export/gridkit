@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -32,35 +33,34 @@ import azul.test.runner.LimitedRunner;
 import azul.test.runner.UnlimitedRunner;
 
 public class Main {
-	private static String mode = getProperty("mode") == null ? "offHeap" : getProperty("mode");
+	private static String mode = getProperty("mode") == null ? "heap" : getProperty("mode");
 	
 	private static String outputDir = getProperty("outputDir") == null ? "output" : getProperty("outputDir");
 	
-	private static int time = Integer.valueOf(getProperty("time") == null ? "5" : getProperty("time"));
+	private static int time = Integer.valueOf(getProperty("time") == null ? "2" : getProperty("time"));
 	private static int warmUptime = Integer.valueOf(getProperty("warmUptime") == null ? "2" : getProperty("warmUptime"));
 	private static int warmUpCount = Integer.valueOf(getProperty("warmUpCount") == null ? "2" : getProperty("warmUpCount"));
 	
 	private static String offHeapSize = getProperty("offHeapSize") == null ? "256" : getProperty("sampleSize");
-	private static int initCacheSize = Integer.valueOf(getProperty("initCacheSize") == null ? "100" : getProperty("initCacheSize"));
-	private static int maxCacheSize = Integer.valueOf(getProperty("maxCacheSize") == null ? "100" : getProperty("maxCacheSize"));
+	private static int initCacheSize = Integer.valueOf(getProperty("initCacheSize") == null ? "1000" : getProperty("initCacheSize"));
+	private static int maxCacheSize = Integer.valueOf(getProperty("maxCacheSize") == null ? "1000" : getProperty("maxCacheSize"));
 	
 	private static int recordSize = Integer.valueOf(getProperty("recordSize") == null ? "1024" : getProperty("recordSize"));
 	private static int dispersion = Integer.valueOf(getProperty("dispersion") == null ? "256" : getProperty("dispersion"));
 	
 	private static int bulkSize = Integer.valueOf(getProperty("bulkSize") == null ? "1024" : getProperty("bulkSize"));
-	
-	private static int sampleSize = Integer.valueOf(getProperty("sampleSize") == null ? "1024" : getProperty("sampleSize"));
-	private static int bufferSize = Integer.valueOf(getProperty("bufferSize") == null ? "2" : getProperty("bufferSize"));
-	
-	private static int loggersCount = Integer.valueOf(getProperty("loggersCount") == null ? "2" : getProperty("loggersCount"));
+
+	private static boolean useSmartRecord = Boolean.valueOf(getProperty("useSmartRecord") == null ? "true" : getProperty("useSmartRecord"));
 	
 	private static int readersCount = Integer.valueOf(getProperty("readersCount") == null ? "4" : getProperty("readersCount"));
 	private static int writersCount = Integer.valueOf(getProperty("writersCount") == null ? "0" : getProperty("writersCount"));
 	
 	private static int readersOps = Integer.valueOf(getProperty("readersOps") == null ? "0" : getProperty("readersOps"));
-	private static int writersOps = Integer.valueOf(getProperty("writersOps") == null ? "50" : getProperty("writersOps"));
+	private static int writersOps = Integer.valueOf(getProperty("writersOps") == null ? "0" : getProperty("writersOps"));
 	
-	private static boolean useSmartRecord = Boolean.valueOf(getProperty("useSmartRecord") == null ? "true" : getProperty("useSmartRecord"));
+	private static int sampleSize = Integer.valueOf(getProperty("sampleSize") == null ? "1024" : getProperty("sampleSize"));
+	private static int bufferSize = Integer.valueOf(getProperty("bufferSize") == null ? "2" : getProperty("bufferSize"));
+	private static int loggersCount = Integer.valueOf(getProperty("loggersCount") == null ? "2" : getProperty("loggersCount"));
 	
 	private static Map<String, String> overallResults = new ConcurrentHashMap<String, String>();
 	
@@ -84,7 +84,7 @@ public class Main {
         runTest(true, time);
         System.out.println("Completed");
         
-        System.exit(Reader.sum);
+        System.out.println("files written: " + OutputWriter.filesClosed);
 	}
 	
 	public static void runTest(boolean isRealRun, int time) throws InterruptedException, ExecutionException, IOException {
@@ -141,13 +141,16 @@ public class Main {
 		
 		overallResults.put("workTime", (System.currentTimeMillis() - t)/1000.0 + "");
 		
-		mainThreadPool.shutdown();
+		mainThreadPool.shutdownNow();
+		mainThreadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
 		
 		gcTask.cancel(true);
+		try {gcTask.get();} catch (Exception e) {}
 		
-		while (!gcTask.isDone() && !logQueue.isEmpty());
+		while (!logQueue.isEmpty());
 		
-		serveThreadPool.shutdown();
+		serveThreadPool.shutdownNow();
+		serveThreadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
 		
 		if (isRealRun)
 			printOverallResults();
