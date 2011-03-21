@@ -57,7 +57,6 @@ public class LimitedRunner extends BaseRunner {
 		}
 		
 		logger.close();
-		closed.incrementAndGet();
 		
 		return null;
 	}

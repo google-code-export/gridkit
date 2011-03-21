@@ -13,7 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -27,8 +26,9 @@ import azul.test.output.DummyObservationLogger;
 import azul.test.output.GCLogger;
 import azul.test.output.ObservationLogger;
 import azul.test.output.OutputObservationLogger;
-import azul.test.output.OutputTask;
 import azul.test.output.OutputWriter;
+import azul.test.output.PoisonTask;
+import azul.test.output.Task;
 import azul.test.runner.BaseRunner;
 import azul.test.runner.LimitedRunner;
 import azul.test.runner.UnlimitedRunner;
@@ -85,29 +85,25 @@ public class Main {
         runTest(true, time);
         System.out.println("Completed");
         
-        System.out.println("files written: " + OutputWriter.filesClosed.get());
-        System.out.println("workers closed " + UnlimitedRunner.closed.get());
-        System.out.println("gc closed " + GCLogger.closed.get());
+        System.out.println("Files written: " + OutputWriter.filesClosed.get());
 	}
 	
 	public static void runTest(boolean isRealRun, int time) throws InterruptedException, ExecutionException, IOException {
-		UnlimitedRunner.closed.set(0);
-		GCLogger.closed.set(0);
-		
 		System.gc();
 		
 		if (isRealRun)
 			(new File(outputDir)).mkdirs();
 		
-		LinkedBlockingQueue<OutputTask> logQueue = new LinkedBlockingQueue<OutputTask>();
+		LinkedBlockingQueue<Task> logQueue = new LinkedBlockingQueue<Task>();
 		
-		ExecutorService serveThreadPool = Executors.newFixedThreadPool(loggersCount + 1);
+		ExecutorService logThreadPool = Executors.newFixedThreadPool(loggersCount);
 		
 		for (int i=0; i < loggersCount; ++i)
-			serveThreadPool.submit(new OutputWriter(logQueue));
+			logThreadPool.submit(new OutputWriter(logQueue));
 		
+		ExecutorService serveThreadPool = Executors.newSingleThreadExecutor();
 		ObservationLogger gcLogger = isRealRun ? new OutputObservationLogger(outputDir + "/gc.txt", logQueue, sampleSize, bufferSize) : new DummyObservationLogger();
-		Future<Void> gcTask = serveThreadPool.submit(new GCLogger(gcLogger));
+		serveThreadPool.submit(new GCLogger(gcLogger));
 		
 		ExecutorService mainThreadPool = Executors.newFixedThreadPool(readersCount + writersCount);
 		
@@ -147,17 +143,16 @@ public class Main {
 		
 		overallResults.put("workTime", (System.currentTimeMillis() - t)/1000.0 + "");
 		
-		mainThreadPool.shutdownNow();
-		mainThreadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
-		
-		gcTask.cancel(true);
-		try {gcTask.get();} catch (Exception e) {}
-		
-        //Thread.sleep(10000);
-		while (!logQueue.isEmpty());
+		mainThreadPool.shutdown();
 		
 		serveThreadPool.shutdownNow();
 		serveThreadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+		
+		for (int i=0; i < loggersCount; ++i)
+			logQueue.add(new PoisonTask());
+		
+		logThreadPool.shutdown();
+		logThreadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
 		
 		if (isRealRun)
 			printOverallResults();

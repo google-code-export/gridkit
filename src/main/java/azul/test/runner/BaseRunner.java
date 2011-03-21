@@ -2,13 +2,10 @@ package azul.test.runner;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import azul.test.output.ObservationLogger;
 
 public abstract class BaseRunner implements Callable<Void> {
-	public static volatile AtomicInteger closed = new AtomicInteger(0);
-	
 	protected final long time; //milliseconds
 	protected final Runnable command;
 	protected final ObservationLogger logger;

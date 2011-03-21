@@ -7,23 +7,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class OutputWriter implements Callable<Void> {
 	public static volatile AtomicInteger filesClosed = new AtomicInteger(0);
 	
-	private final BlockingQueue<OutputTask> queue;
+	private final BlockingQueue<Task> queue;
 	
-	public OutputWriter(BlockingQueue<OutputTask> queue) {
+	public OutputWriter(BlockingQueue<Task> queue) {
 		this.queue = queue;
 	}
 	
 	@Override
 	public Void call() throws Exception {
-		while (!Thread.interrupted()) {
-			OutputTask task = queue.take();
+		while (true) {
+			Task task = queue.take();
 			
-			for (int i = 0; i < task.data.size(); ++i)
-				task.writer.write(task.timestamp.get(i) + ", " + task.data.get(i) + "\n");
+			if (task.isPoison())
+				break;
 			
-			if (task.isLast) {
-				task.writer.flush();
-				task.writer.close();
+			OutputTask outputTask = (OutputTask)task;
+			
+			for (int i = 0; i < outputTask.data.size(); ++i)
+				outputTask.writer.write(outputTask.timestamp.get(i) + ", " + outputTask.data.get(i) + "\n");
+			
+			if (outputTask.isLast) {
+				outputTask.writer.flush();
+				outputTask.writer.close();
 				filesClosed.incrementAndGet();
 			}
 		}

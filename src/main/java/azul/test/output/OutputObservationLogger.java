@@ -10,14 +10,14 @@ import java.util.concurrent.BlockingQueue;
 
 public class OutputObservationLogger implements ObservationLogger {
 	private Writer writer;
-	private BlockingQueue<OutputTask> queue;
+	private BlockingQueue<Task> queue;
 	
 	private int sampleSize;
 	
 	protected List<Long> data;
 	protected List<Long> timestamp;
 	
-	public OutputObservationLogger(String fileName, BlockingQueue<OutputTask> queue, int sampleSize, int bufferSize) throws IOException {
+	public OutputObservationLogger(String fileName, BlockingQueue<Task> queue, int sampleSize, int bufferSize) throws IOException {
 		Writer out = new FileWriter(fileName);
 		writer = new BufferedWriter(out, bufferSize * 1024 * 1024);
 		
