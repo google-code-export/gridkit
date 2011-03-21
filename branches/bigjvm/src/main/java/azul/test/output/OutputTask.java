@@ -3,7 +3,7 @@ package azul.test.output;
 import java.io.Writer;
 import java.util.List;
 
-public class OutputTask {
+public class OutputTask implements Task {
 	final Writer writer;
 	
 	final List<Long> data;
@@ -24,5 +24,10 @@ public class OutputTask {
 		this.timestamp = timestamp;
 		
 		this.isLast = isLast;
+	}
+
+	@Override
+	public boolean isPoison() {
+		return false;
 	}
 }
