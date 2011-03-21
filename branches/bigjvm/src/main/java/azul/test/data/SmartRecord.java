@@ -9,6 +9,10 @@ import java.util.List;
 public class SmartRecord extends Record implements Externalizable {
 	private static final long serialVersionUID = 2752720712140523020L;
 
+	public SmartRecord() {
+		
+	}
+	
 	public void writeExternal(ObjectOutput out) throws IOException {
 		out.writeLong(id);
 		out.writeUTF(first);
