@@ -38,16 +38,19 @@ public class Record implements Serializable {
 			sizes[i] = rand.nextInt(size - j);
 			size -= sizes[i];
 		}
+		
 		sizes[sizes.length - 1] = size;
 		char[] chars = new char[sizes[0] * 2];
 		for (int i = 0; i < chars.length; i++) {
 			chars[i] = (char) ('A' + rand.nextInt(26));
 		}
+		
 		first = new String(chars);
 		chars = new char[sizes[1] * 2];
 		for (int i = 0; i < chars.length; i++) {
 			chars[i] = (char) ('A' + rand.nextInt(26));
 		}
+		
 		second = new String(chars);
 		bytes = new byte[sizes[2] * 4 + remainder];
 		rand.nextBytes(bytes);
