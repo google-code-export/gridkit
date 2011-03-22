@@ -34,17 +34,17 @@ import azul.test.runner.LimitedRunner;
 import azul.test.runner.UnlimitedRunner;
 
 public class Main {
-	private static String mode = getProperty("mode") == null ? "heap" : getProperty("mode");
+	private static String mode = getProperty("mode") == null ? "offHeap" : getProperty("mode");
 	
 	private static String outputDir = getProperty("outputDir") == null ? "output" : getProperty("outputDir");
 	
-	private static int time = Integer.valueOf(getProperty("time") == null ? "2" : getProperty("time"));
-	private static int warmUptime = Integer.valueOf(getProperty("warmUptime") == null ? "2" : getProperty("warmUptime"));
-	private static int warmUpCount = Integer.valueOf(getProperty("warmUpCount") == null ? "2" : getProperty("warmUpCount"));
+	private static int time = Integer.valueOf(getProperty("time") == null ? "10" : getProperty("time"));
+	private static int warmUptime = Integer.valueOf(getProperty("warmUptime") == null ? "5" : getProperty("warmUptime"));
+	private static int warmUpCount = Integer.valueOf(getProperty("warmUpCount") == null ? "1" : getProperty("warmUpCount"));
 	
 	private static String offHeapSize = getProperty("offHeapSize") == null ? "256" : getProperty("offHeapSize");
-	private static int initCacheSize = Integer.valueOf(getProperty("initCacheSize") == null ? "1000" : getProperty("initCacheSize"));
-	private static int maxCacheSize = Integer.valueOf(getProperty("maxCacheSize") == null ? "1000" : getProperty("maxCacheSize"));
+	private static int initCacheSize = Integer.valueOf(getProperty("initCacheSize") == null ? "256000" : getProperty("initCacheSize"));
+	private static int maxCacheSize = Integer.valueOf(getProperty("maxCacheSize") == null ? "256000" : getProperty("maxCacheSize"));
 	
 	private static int recordSize = Integer.valueOf(getProperty("recordSize") == null ? "1024" : getProperty("recordSize"));
 	private static int dispersion = Integer.valueOf(getProperty("dispersion") == null ? "256" : getProperty("dispersion"));
@@ -53,15 +53,15 @@ public class Main {
 
 	private static boolean useSmartRecord = Boolean.valueOf(getProperty("useSmartRecord") == null ? "true" : getProperty("useSmartRecord"));
 	
-	private static int readersCount = Integer.valueOf(getProperty("readersCount") == null ? "20" : getProperty("readersCount"));
-	private static int writersCount = Integer.valueOf(getProperty("writersCount") == null ? "0" : getProperty("writersCount"));
+	private static int readersCount = Integer.valueOf(getProperty("readersCount") == null ? "1" : getProperty("readersCount"));
+	private static int writersCount = Integer.valueOf(getProperty("writersCount") == null ? "1" : getProperty("writersCount"));
 	
-	private static int readersOps = Integer.valueOf(getProperty("readersOps") == null ? "0" : getProperty("readersOps"));
-	private static int writersOps = Integer.valueOf(getProperty("writersOps") == null ? "0" : getProperty("writersOps"));
+	private static float readersOps = Float.valueOf(getProperty("readersOps") == null ? "50" : getProperty("readersOps"));
+	private static float writersOps = Float.valueOf(getProperty("writersOps") == null ? "50" : getProperty("writersOps"));
 	
 	private static int sampleSize = Integer.valueOf(getProperty("sampleSize") == null ? "1024" : getProperty("sampleSize"));
 	private static int bufferSize = Integer.valueOf(getProperty("bufferSize") == null ? "2" : getProperty("bufferSize"));
-	private static int loggersCount = Integer.valueOf(getProperty("loggersCount") == null ? "1" : getProperty("loggersCount"));
+	private static int loggersCount = Integer.valueOf(getProperty("loggersCount") == null ? "2" : getProperty("loggersCount"));
 	
 	private static Map<String, String> overallResults = new ConcurrentHashMap<String, String>();
 	
@@ -74,6 +74,7 @@ public class Main {
         
         createCache();
         
+        System.out.println("Filling cache ...");
         fillCache();
         
         for (int i = 0; i < warmUpCount; ++i) {
@@ -89,8 +90,6 @@ public class Main {
 	}
 	
 	public static void runTest(boolean isRealRun, int time) throws InterruptedException, ExecutionException, IOException {
-		System.gc();
-		
 		if (isRealRun)
 			(new File(outputDir)).mkdirs();
 		
@@ -137,6 +136,8 @@ public class Main {
 				runners.add(new UnlimitedRunner(writer, time, logger));
 		}
 		
+		System.gc();
+		
 		long t = System.currentTimeMillis();
 		
 		mainThreadPool.invokeAll(runners);
@@ -177,8 +178,6 @@ public class Main {
 		
 		config.setOverflowToOffHeap(true);
 		
-		
-		System.out.println("-------- Allocating " + offHeapSize + "M for off heap");
 		config.setMaxMemoryOffHeap(offHeapSize + "M");
 		
 		cache = new Cache(config);

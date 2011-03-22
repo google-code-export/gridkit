@@ -10,9 +10,9 @@ public class LimitedRunner extends BaseRunner {
 	
 	private final long operationTime;
 	
-	public LimitedRunner(Runnable command, long seconds, long opsPerSec, ObservationLogger logger) {
+	public LimitedRunner(Runnable command, long seconds, float opsPerSec, ObservationLogger logger) {
 		super(command, seconds, logger);
-		this.operationTime = TimeUnit.SECONDS.toNanos(1) / opsPerSec;
+		this.operationTime = (long)(TimeUnit.SECONDS.toNanos(1) / opsPerSec);
 	}
 
 	@Override
