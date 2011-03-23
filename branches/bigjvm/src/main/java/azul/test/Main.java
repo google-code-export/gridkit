@@ -34,17 +34,17 @@ import azul.test.runner.LimitedRunner;
 import azul.test.runner.UnlimitedRunner;
 
 public class Main {
-	private static String mode = getProperty("mode") == null ? "offHeap" : getProperty("mode");
+	private static String mode = getProperty("mode") == null ? "heap" : getProperty("mode");
 	
 	private static String outputDir = getProperty("outputDir") == null ? "output" : getProperty("outputDir");
 	
-	private static int time = Integer.valueOf(getProperty("time") == null ? "10" : getProperty("time"));
+	private static int time = Integer.valueOf(getProperty("time") == null ? "180" : getProperty("time"));
 	private static int warmUptime = Integer.valueOf(getProperty("warmUptime") == null ? "5" : getProperty("warmUptime"));
 	private static int warmUpCount = Integer.valueOf(getProperty("warmUpCount") == null ? "1" : getProperty("warmUpCount"));
 	
 	private static String offHeapSize = getProperty("offHeapSize") == null ? "256" : getProperty("offHeapSize");
-	private static int initCacheSize = Integer.valueOf(getProperty("initCacheSize") == null ? "256000" : getProperty("initCacheSize"));
-	private static int maxCacheSize = Integer.valueOf(getProperty("maxCacheSize") == null ? "256000" : getProperty("maxCacheSize"));
+	private static int initCacheSize = Integer.valueOf(getProperty("initCacheSize") == null ? "25600" : getProperty("initCacheSize"));
+	private static int maxCacheSize = Integer.valueOf(getProperty("maxCacheSize") == null ? "25600" : getProperty("maxCacheSize"));
 	
 	private static int recordSize = Integer.valueOf(getProperty("recordSize") == null ? "1024" : getProperty("recordSize"));
 	private static int dispersion = Integer.valueOf(getProperty("dispersion") == null ? "256" : getProperty("dispersion"));
@@ -53,11 +53,11 @@ public class Main {
 
 	private static boolean useSmartRecord = Boolean.valueOf(getProperty("useSmartRecord") == null ? "true" : getProperty("useSmartRecord"));
 	
-	private static int readersCount = Integer.valueOf(getProperty("readersCount") == null ? "1" : getProperty("readersCount"));
+	private static int readersCount = Integer.valueOf(getProperty("readersCount") == null ? "5" : getProperty("readersCount"));
 	private static int writersCount = Integer.valueOf(getProperty("writersCount") == null ? "1" : getProperty("writersCount"));
 	
-	private static float readersOps = Float.valueOf(getProperty("readersOps") == null ? "50" : getProperty("readersOps"));
-	private static float writersOps = Float.valueOf(getProperty("writersOps") == null ? "50" : getProperty("writersOps"));
+	private static float readersOps = Float.valueOf(getProperty("readersOps") == null ? "4" : getProperty("readersOps"));
+	private static float writersOps = Float.valueOf(getProperty("writersOps") == null ? "7.2" : getProperty("writersOps"));
 	
 	private static int sampleSize = Integer.valueOf(getProperty("sampleSize") == null ? "1024" : getProperty("sampleSize"));
 	private static int bufferSize = Integer.valueOf(getProperty("bufferSize") == null ? "2" : getProperty("bufferSize"));
@@ -145,6 +145,7 @@ public class Main {
 		overallResults.put("workTime", (System.currentTimeMillis() - t)/1000.0 + "");
 		
 		mainThreadPool.shutdown();
+		mainThreadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
 		
 		serveThreadPool.shutdownNow();
 		serveThreadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
