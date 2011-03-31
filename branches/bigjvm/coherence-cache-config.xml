@@ -1,0 +1,22 @@
+<!DOCTYPE cache-config SYSTEM "cache-config.dtd">
+
+<cache-config>
+    <caching-scheme-mapping>
+        <cache-mapping>
+            <cache-name>test</cache-name>
+            <scheme-name>testscheme</scheme-name>
+        </cache-mapping>
+    </caching-scheme-mapping>
+
+    <caching-schemes>
+        <distributed-scheme>
+            <scheme-name>testscheme</scheme-name>
+            <backing-map-scheme>
+                <local-scheme/>
+            </backing-map-scheme>
+            <autostart>
+                true
+            </autostart>
+        </distributed-scheme>
+    </caching-schemes>
+</cache-config>

@@ -9,12 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -32,6 +27,8 @@ import azul.test.output.Task;
 import azul.test.runner.BaseRunner;
 import azul.test.runner.LimitedRunner;
 import azul.test.runner.UnlimitedRunner;
+import com.tangosol.net.CacheFactory;
+import com.tangosol.net.NamedCache;
 
 public class Main {
 	private static String mode = getProperty("mode") == null ? "heap" : getProperty("mode");
@@ -62,20 +59,32 @@ public class Main {
 	private static int sampleSize = Integer.valueOf(getProperty("sampleSize") == null ? "1024" : getProperty("sampleSize"));
 	private static int bufferSize = Integer.valueOf(getProperty("bufferSize") == null ? "2" : getProperty("bufferSize"));
 	private static int loggersCount = Integer.valueOf(getProperty("loggersCount") == null ? "2" : getProperty("loggersCount"));
+    private static boolean useEhcache = Boolean.valueOf(getProperty("useEhcache") == null ? "true" : getProperty("useEhcache"));
+    private static boolean useCoherence = Boolean.valueOf(getProperty("useCoherence") == null ? "false" : getProperty("useCoherence"));
 	
 	private static Map<String, String> overallResults = new ConcurrentHashMap<String, String>();
 	
 	private static CacheManager manager;
 	private static Cache cache;
+    private static Map<Integer, Record> map;
 	
 	public static void main(String args[]) throws InterruptedException, ExecutionException, IOException {
 		System.setProperty("org.terracotta.license.path", "terracotta-license.key");
-        manager = new CacheManager("ehcache.xml");
+        if(useEhcache)
+            manager = new CacheManager("ehcache.xml");
         
-        createCache();
+        if(useEhcache)
+            createCache();
+        else if(useCoherence)
+            createNamedCache();
+        else
+            createMap();
         
         System.out.println("Filling cache ...");
-        fillCache();
+        if(useEhcache)
+            fillCache();
+        else
+            fillMap();
         
         for (int i = 0; i < warmUpCount; ++i) {
         	System.out.println("Warming Up " + i + " ...");
@@ -114,7 +123,12 @@ public class Main {
 			if (isRealRun)
 				logger = new OutputObservationLogger(outputDir + "/reader" + i + ".txt", logQueue, sampleSize, bufferSize);
 			
-				Reader reader = new Reader(cache, maxCacheSize, bulkSize);
+		    Runnable reader;
+
+            if(useEhcache)
+                reader = new Reader(cache, maxCacheSize, bulkSize);
+            else
+                reader = new MapReader(map, maxCacheSize, bulkSize);
 			
 			if (readersOps > 0)
 				runners.add(new LimitedRunner(reader, time, readersOps, logger));
@@ -128,7 +142,12 @@ public class Main {
 			if (isRealRun)
 				logger = new OutputObservationLogger(outputDir + "/writer" + i + ".txt", logQueue, sampleSize, bufferSize);
 			
-			Writer writer = new Writer(cache, maxCacheSize, recordSize, dispersion, useSmartRecord, bulkSize);
+			Runnable writer;
+
+            if(useEhcache)
+                writer = new Writer(cache, maxCacheSize, recordSize, dispersion, useSmartRecord, bulkSize);
+            else
+                writer = new MapWriter(map, maxCacheSize, recordSize, dispersion, useSmartRecord, bulkSize);
 			
 			if (writersOps > 0)
 				runners.add(new LimitedRunner(writer, time, writersOps, logger));
@@ -163,6 +182,20 @@ public class Main {
 	public static void createCache() {
 		if ("offHeap".equalsIgnoreCase(mode)) createOffHeapCache(); else createHeapCache();
 	}
+    
+    public static void createMap(){
+        System.out.println("Using ConcurrentHashMap.");
+        map = new ConcurrentHashMap<Integer, Record>(initCacheSize);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static void createNamedCache(){
+        System.out.println("Using Coherence.");
+        System.setProperty("tangosol.coherence.cacheconfig", "coherence-cache-config.xml");
+        System.setProperty("tangosol.coherence.distributed.localstorage", "false");
+        map = CacheFactory.getCache("test");
+
+    }
 	
 	public static Cache createHeapCache() {
 		CacheConfiguration config = new CacheConfiguration("heap", maxCacheSize);
@@ -210,6 +243,31 @@ public class Main {
 		
 		System.gc();
 		overallResults.put("cacheSize", cache.getSize() + "");
+		overallResults.put("heapSizeForCache", (initFreeMemory - Runtime.getRuntime().freeMemory()) / (1024.0 * 1024) + "");
+	}
+
+    public static void fillMap() {
+		map.clear();
+
+		Random rand = new Random(System.currentTimeMillis());
+
+		System.gc();
+		long initFreeMemory = Runtime.getRuntime().freeMemory();
+
+		List<Integer> allKeys = new ArrayList<Integer>(maxCacheSize);
+		for (int i = 0; i < maxCacheSize; ++i)
+			allKeys.add(i);
+		Collections.shuffle(allKeys, rand);
+
+		for (int i = 0; i < initCacheSize; ++i) {
+	    	if (!useSmartRecord)
+	    		map.put(allKeys.get(i), new Record(rand, recordSize, dispersion));
+	    	else
+	    		map.put(allKeys.get(i), new SmartRecord(rand, recordSize, dispersion));
+		}
+
+		System.gc();
+		overallResults.put("cacheSize", map.size() + "");
 		overallResults.put("heapSizeForCache", (initFreeMemory - Runtime.getRuntime().freeMemory()) / (1024.0 * 1024) + "");
 	}
 	
