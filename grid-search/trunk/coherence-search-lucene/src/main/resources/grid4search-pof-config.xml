@@ -1,0 +1,152 @@
+<?xml version="1.0"?>
+
+<!--
+    Grid Dynamics Consulting Services, Inc.
+    
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+        http://www.apache.org/licenses/LICENSE-2.0
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License. 
+-->
+
+<!DOCTYPE pof-config SYSTEM "pof-config.dtd">
+
+<pof-config>
+
+    <user-type-list>
+
+<!-- 
+        <include>coherence-pof-config.xml</include>
+        <include>txn-pof-config.xml</include>
+ -->
+
+        <user-type>
+            <type-id>3001</type-id>
+            <class-name>org.gridkit.coherence.search.DefaultIndexEngineConfig</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+
+        <user-type>
+            <type-id>3002</type-id>
+            <class-name>org.gridkit.coherence.search.lucene.DefaultLuceneIndexConfig</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+        
+        <user-type>
+            <type-id>3003</type-id>
+            <class-name>org.gridkit.coherence.search.lucene.GenericNamedLuceneIndexToken</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+        
+        <user-type>
+            <type-id>3004</type-id>
+            <class-name>org.gridkit.coherence.search.lucene.LuceneDocumentExtractor</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+
+        <user-type>
+            <type-id>3005</type-id>
+            <class-name>org.gridkit.coherence.search.lucene.LuceneDocumentExtractor$GenericFieldFactory</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+
+        <user-type>
+            <type-id>3006</type-id>
+            <class-name>org.gridkit.coherence.search.lucene.LuceneSearchPlugin</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+        
+        <user-type>
+            <type-id>3007</type-id>
+            <class-name>org.gridkit.coherence.search.lucene.RAMDirectoryProvider</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+
+        <user-type>
+            <type-id>3008</type-id>
+            <class-name>org.gridkit.coherence.search.lucene.WhitespaceAnalyzerProvider</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+
+        <user-type>
+            <type-id>3009</type-id>
+            <class-name>org.gridkit.coherence.search.SearchFactory$QueryFilter</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+        
+        <user-type>
+            <type-id>3010</type-id>
+            <class-name>org.gridkit.coherence.search.SearchFactory$SearchIndexExtractor</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+        
+        <user-type>
+            <type-id>3101</type-id>
+            <class-name>org.apache.lucene.search.BooleanQuery</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.search.lucene.util.JavaSerializationSerializer</class-name>
+            </serializer>
+        </user-type>
+        
+        <user-type>
+            <type-id>3102</type-id>
+            <class-name>org.apache.lucene.search.TermQuery</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.search.lucene.util.JavaSerializationSerializer</class-name>
+            </serializer>
+        </user-type>
+        
+        <user-type>
+            <type-id>3103</type-id>
+            <class-name>org.apache.lucene.search.PhraseQuery</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.search.lucene.util.JavaSerializationSerializer</class-name>
+            </serializer>
+        </user-type>
+        
+        <user-type>
+            <type-id>3104</type-id>
+            <class-name>org.apache.lucene.search.MultiPhraseQuery</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.search.lucene.util.JavaSerializationSerializer</class-name>
+            </serializer>
+        </user-type>
+
+        <user-type>
+            <type-id>3105</type-id>
+            <class-name>org.apache.lucene.search.TermRangeQuery</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.search.lucene.util.JavaSerializationSerializer</class-name>
+            </serializer>
+        </user-type>
+        
+    </user-type-list>
+
+</pof-config>
