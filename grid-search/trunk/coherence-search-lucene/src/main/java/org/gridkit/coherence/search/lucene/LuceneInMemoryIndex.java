@@ -59,8 +59,7 @@ class LuceneInMemoryIndex {
 	}
 	
 	public synchronized void update(Map<Object, IndexUpdateEvent> events, IndexInvocationContext ctx) {
-//		IndexReader reader = null;// = IndexReader.open(storage);
-		IndexWriter writer = null;//new IndexWriter(storage, analyzer, IndexWriter.MaxFieldLength.UNLIMITED);
+		IndexWriter writer = null;
 
 		try {
 			if (searcher != null) {
@@ -92,7 +91,6 @@ class LuceneInMemoryIndex {
 			finally {
 				writer.optimize();
 				writer.close();
-				System.out.println("Writer closed #" + writer.hashCode() + " @ " + Thread.currentThread().getName());
 				searcher = new IndexSearcher(storage);
 			}
 			
