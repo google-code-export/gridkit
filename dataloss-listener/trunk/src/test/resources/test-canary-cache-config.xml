@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE cache-config SYSTEM "cache-config.dtd">
+
+<cache-config>
+	
+	<caching-scheme-mapping>
+		<cache-mapping>
+			<cache-name>canary-cache</cache-name>
+			<scheme-name>canary-distributed</scheme-name>
+		</cache-mapping>
+	</caching-scheme-mapping>
+	
+	<caching-schemes>
+		<distributed-scheme>
+			<scheme-name>canary-distributed</scheme-name>
+			<service-name>DistributedCache</service-name> 
+			<backing-map-scheme>
+				<!-- How to ensure no eviction? -->
+				<local-scheme/>
+			</backing-map-scheme>
+			<key-partitioning>
+				<class-name>org.gridkit.coherence.util.dataloss.CanaryKeyPartitioningStrategy</class-name>
+			</key-partitioning>
+			<partition-listener>
+				<class-name>org.gridkit.coherence.util.dataloss.CanaryPartitionListener</class-name>
+			</partition-listener>
+			<autostart>true</autostart>
+		</distributed-scheme>
+	</caching-schemes>
+	
+</cache-config>
