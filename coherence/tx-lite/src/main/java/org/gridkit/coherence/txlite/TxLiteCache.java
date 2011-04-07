@@ -104,6 +104,11 @@ public class TxLiteCache extends NearCache implements XmlConfigurable, TxWrapped
 		return cache;
 	}
 
+	@Override
+	public TxSession getSession() {
+		return proxy.getSession();
+	}
+
 	@SuppressWarnings("unchecked")
 	public void addIndex(ValueExtractor extractor, boolean fOrdered, Comparator comparator) {
 		proxy.addIndex(extractor, fOrdered, comparator);

@@ -22,6 +22,8 @@ import com.tangosol.net.NamedCache;
  */
 interface TxWrappedCache {
 
+	public TxSession getSession();
+	
 	public NamedCache getVersionedCache();
 	
 }

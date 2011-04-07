@@ -44,7 +44,8 @@ class TxSuperviser {
 	private Map<Integer, Integer> versionLocks = new HashMap<Integer, Integer>();
 	
 	private Integer activeTx = null;
-	
+
+	// TODO in JVM multiple write session support
 	public TxSuperviser(NamedCache cache) {
 		this.txControl = cache;
 	}
@@ -162,8 +163,12 @@ class TxSuperviser {
 	}
 	
 	// for internal use
-	NamedCache getCache(String cacheName) {
-		return CacheFactory.getCache(cacheName);
+	NamedCache getVersionedCache(String cacheName) {
+		NamedCache cache = CacheFactory.getCache(cacheName);
+		if (cache instanceof TxWrappedCache) {
+			cache = ((TxWrappedCache)cache).getVersionedCache();
+		}
+		return cache;
 	}
 	
 	public synchronized void rollbackWriteTx() {
@@ -208,7 +213,7 @@ class TxSuperviser {
 		}
 		
 		for(Map.Entry<String, List<Object>> entry :  updateMap.entrySet()) {
-			NamedCache cache = getCache(entry.getKey());
+			NamedCache cache = getVersionedCache(entry.getKey());
 			cache.invokeAll(entry.getValue(), new RollbackProcessor(activeTx));
 			cache.keySet().removeAll(markerMap.get(entry.getKey()));
 		}
@@ -297,7 +302,7 @@ class TxSuperviser {
 		}
 		
 		for(Map.Entry<String, List<Object>> entry :  updateMap.entrySet()) {
-			NamedCache cache = getCache(entry.getKey());
+			NamedCache cache = getVersionedCache(entry.getKey());
 			cache.invokeAll(entry.getValue(), new RecycleProcessor(minVersion - 1));
 			cache.keySet().removeAll(markerMap.get(entry.getKey()));
 		}

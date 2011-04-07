@@ -36,9 +36,18 @@
             <scheme-name>simple-transactional-scheme</scheme-name>
         </cache-mapping>
 
+        <cache-mapping>
+            <cache-name>tx-*</cache-name>
+            <scheme-name>coh-transactional-scheme</scheme-name>
+        </cache-mapping>
+
     </caching-scheme-mapping>
 
     <caching-schemes>
+
+		<transactional-scheme>
+            <scheme-name>coh-transactional-scheme</scheme-name>
+		</transactional-scheme>
 
         <distributed-scheme>
             <scheme-name>tx-lite-system-scheme</scheme-name>

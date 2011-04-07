@@ -18,8 +18,6 @@ package org.gridkit.coherence.txlite;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import com.tangosol.io.pof.PofReader;
@@ -58,18 +56,12 @@ public class TxVersionExtractorWrapper implements ValueExtractor, PortableObject
 	public Object extract(Object object) {
 		if (object instanceof ValueContatiner) {
 			ValueContatiner vc = (ValueContatiner) object;
-			Set<Object> extracts = new HashSet<Object>();
-			for(Object val : vc.getAllVersions()) {
-				if (val != null) {
-					Object extract = nested.extract(val);
-					add(extracts, extract);
-				}
-			}
-			if (!extracts.isEmpty()) {
-				return extracts;
+			Object value = vc.getLatestVersion();
+			if (value != null) {
+				return nested.extract(value);
 			}
 			else {
-				return Collections.EMPTY_SET;
+				return null;
 			}
 		}
 		else {
@@ -77,6 +69,7 @@ public class TxVersionExtractorWrapper implements ValueExtractor, PortableObject
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void add(Set<Object> extracts, Object extract) {
 		if (extract instanceof Collection<?> && !(nested instanceof MultiExtractor)) {
 			extracts.addAll((Collection<?>)extract);
