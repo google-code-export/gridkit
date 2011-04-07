@@ -1,3 +1,18 @@
+/**
+ * Copyright 2011 Grid Dynamics Consulting Services, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gridkit.coherence.txlite;
 
 import java.util.ArrayList;
@@ -14,7 +29,11 @@ import com.tangosol.net.NamedCache;
 import com.tangosol.net.ServiceInfo;
 import com.tangosol.util.UID;
 
-public class TxSuperviser {
+/**
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ */
+@SuppressWarnings("deprecation")
+class TxSuperviser {
 	
 	private static final String TX_COUNTER = "TX_COUNTER";
 	private static final String TX_COMMITED = "TX_COMMITED";
@@ -160,6 +179,7 @@ public class TxSuperviser {
 	}
 	
 	// for internal use
+	@SuppressWarnings("unchecked")
 	synchronized void rollbackTxUpdates() {
 		if (activeTx == null) {
 			throw new IllegalStateException("No active transaction");
@@ -197,6 +217,7 @@ public class TxSuperviser {
 	}
 	
 	// for internal use
+	@SuppressWarnings("unchecked")
 	boolean isAlive(UID nodeId) {
 		ServiceInfo si = txControl.getCacheService().getInfo();
 		Set<Member> members = si.getServiceMembers();
@@ -209,6 +230,7 @@ public class TxSuperviser {
 	}
 	
 	// for internal use
+	@SuppressWarnings("unchecked")
 	synchronized void cleanUpVersions(int batchLimit) {
 		Set<UID> liveNodes = new HashSet<UID>();
 		Set<UID> deadNodes = new HashSet<UID>();

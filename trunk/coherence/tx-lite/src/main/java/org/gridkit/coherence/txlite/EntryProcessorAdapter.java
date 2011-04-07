@@ -1,3 +1,18 @@
+/**
+ * Copyright 2011 Grid Dynamics Consulting Services, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gridkit.coherence.txlite;
 
 import java.io.IOException;
@@ -14,8 +29,16 @@ import com.tangosol.util.ValueUpdater;
 import com.tangosol.util.InvocableMap.Entry;
 import com.tangosol.util.InvocableMap.EntryProcessor;
 
+/**
+ * 
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ *
+ * @deprecated class is for internal use, kept public to support POF deserialization 
+ */
 public class EntryProcessorAdapter implements EntryProcessor, PortableObject, Serializable  {
 
+	private static final long serialVersionUID = 20110407L;
+	
 	private int version = Integer.MAX_VALUE;
 	private boolean readOnly = true;
 	private EntryProcessor nestedProcessor;
@@ -36,6 +59,7 @@ public class EntryProcessorAdapter implements EntryProcessor, PortableObject, Se
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Map processAll(Set entries) {
 		Set<Entry> eset = new HashSet<Entry>(entries.size());
 		for(Object e: entries) {
@@ -115,9 +139,14 @@ public class EntryProcessorAdapter implements EntryProcessor, PortableObject, Se
 
 		@Override
 		public void update(ValueUpdater updater, Object oValue) {
-			Object oTarget = entry.getValue();
-			updater.update(oTarget, oValue);
-			entry.setValue(oTarget, false);
+			if (readOnly) {
+				throw new UnsupportedOperationException("Cache connection is read only ");
+			}
+			else {
+				Object oTarget = entry.getValue();
+				updater.update(oTarget, oValue);
+				entry.setValue(oTarget, false);
+			}
 		}
 
 		@Override
@@ -129,15 +158,16 @@ public class EntryProcessorAdapter implements EntryProcessor, PortableObject, Se
 
 	@Override
 	public void readExternal(PofReader in) throws IOException {
-		// TODO Auto-generated method stub
+		nestedProcessor = (EntryProcessor) in.readObject(1);
+		version = in.readInt(2);
+		readOnly = in.readBoolean(3);
 		
 	}
 
 	@Override
 	public void writeExternal(PofWriter out) throws IOException {
-		// TODO Auto-generated method stub
-		
+		out.writeObject(1, nestedProcessor);
+		out.writeInt(2, version);
+		out.writeBoolean(3, readOnly);
 	}
-	
-	
 }

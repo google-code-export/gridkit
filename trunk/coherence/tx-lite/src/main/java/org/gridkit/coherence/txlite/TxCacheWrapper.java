@@ -1,3 +1,18 @@
+/**
+ * Copyright 2011 Grid Dynamics Consulting Services, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gridkit.coherence.txlite;
 
 import java.util.Collection;
@@ -14,7 +29,11 @@ import com.tangosol.util.ValueExtractor;
 import com.tangosol.util.extractor.IdentityExtractor;
 import com.tangosol.util.filter.EqualsFilter;
 
-public class TxCacheWrapper implements NamedCache, TxWrappedCache {
+/**
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ */
+@SuppressWarnings("deprecation")
+class TxCacheWrapper implements NamedCache, TxWrappedCache {
 
 	private NamedCache nestedCache;
 	private CacheAccessAdapter adapter;
@@ -73,6 +92,7 @@ public class TxCacheWrapper implements NamedCache, TxWrappedCache {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Map getAll(Collection keys) {
 		adapter.beforeOperation(this);
 		Map vclist = nestedCache.getAll(keys);
@@ -104,6 +124,7 @@ public class TxCacheWrapper implements NamedCache, TxWrappedCache {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void putAll(Map m) {
 		if (adapter.isReadOnly(this)) {
 			throw new UnsupportedOperationException("Read only mode");
@@ -133,24 +154,28 @@ public class TxCacheWrapper implements NamedCache, TxWrappedCache {
 	 * to a transaction.
 	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	public Set keySet() {
 		// view semantic handler
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Set keySet(Filter paramFilter) {
 		// TODO
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Set entrySet() {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Set entrySet(Filter filter) {
 		// TODO
 		throw new UnsupportedOperationException();
@@ -159,6 +184,7 @@ public class TxCacheWrapper implements NamedCache, TxWrappedCache {
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public Set entrySet(Filter filter, Comparator comparator) {
 		// TODO
 		throw new UnsupportedOperationException();
@@ -166,12 +192,14 @@ public class TxCacheWrapper implements NamedCache, TxWrappedCache {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Collection values() {
 		// TODO
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Object aggregate(Collection collKeys, EntryAggregator agent) {
 		adapter.beforeOperation(this);
 		EntryAggregator transformedAgent = adapter.transformAggregator(this, agent);
@@ -210,6 +238,7 @@ public class TxCacheWrapper implements NamedCache, TxWrappedCache {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Map invokeAll(Collection keys, EntryProcessor agent) {
 		if (adapter.isReadOnly(this)) {
 			adapter.beforeOperation(this);
@@ -229,6 +258,7 @@ public class TxCacheWrapper implements NamedCache, TxWrappedCache {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Map invokeAll(Filter filter, EntryProcessor agent) {
 		if (adapter.isReadOnly(this)) {
 			adapter.beforeOperation(this);
@@ -298,6 +328,7 @@ public class TxCacheWrapper implements NamedCache, TxWrappedCache {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void addIndex(ValueExtractor extractor, boolean fOrdered, Comparator comparator) {
 		// does not count as cache operation
 		ValueExtractor transformed = adapter.transformIndexExtractor(this, extractor);

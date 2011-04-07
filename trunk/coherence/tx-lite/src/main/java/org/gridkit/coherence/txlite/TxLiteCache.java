@@ -1,3 +1,18 @@
+/**
+ * Copyright 2011 Grid Dynamics Consulting Services, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gridkit.coherence.txlite;
 
 import java.util.Collection;
@@ -20,8 +35,15 @@ import com.tangosol.util.Filter;
 import com.tangosol.util.MapListener;
 import com.tangosol.util.ValueExtractor;
 
+/**
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ *
+ * @deprecated class is to be used in cache config XML not in java code 
+ */
+@SuppressWarnings("serial")
 public class TxLiteCache extends NearCache implements XmlConfigurable, TxWrappedCache {
 
+	@SuppressWarnings("unchecked")
 	private final static Map FAKE_MAP = new HashMap();
 	private final static WrapperNamedCache FAKE_CACHE = new WrapperNamedCache() {
 
@@ -41,12 +63,14 @@ public class TxLiteCache extends NearCache implements XmlConfigurable, TxWrapped
 	
 	protected XmlElement config;
 	
+	@SuppressWarnings("unchecked")
 	public TxLiteCache(Map mapFront, NamedCache mapBack) {
 		super(FAKE_MAP, FAKE_CACHE);
 		cache = createNearCache(mapFront, mapBack, CachingMap.LISTEN_AUTO);
 		reinit();
 	}	
 
+	@SuppressWarnings("unchecked")
 	public TxLiteCache(Map mapFront, NamedCache mapBack, int nStrategy) {
 		super(FAKE_MAP, FAKE_CACHE);
 		cache = createNearCache(mapFront, mapBack, nStrategy);
@@ -68,6 +92,7 @@ public class TxLiteCache extends NearCache implements XmlConfigurable, TxWrapped
 		proxy = new TxCacheWrapper(cache, new DirtyReadCacheAccessAdapter());
 	}
 
+	@SuppressWarnings("unchecked")
 	protected NamedCache createNearCache(Map mapFront, NamedCache mapBack, int nStrategy) {
 		return new NearCache(mapFront, mapBack, nStrategy);
 	}
@@ -79,8 +104,8 @@ public class TxLiteCache extends NearCache implements XmlConfigurable, TxWrapped
 		return cache;
 	}
 
-	public void addIndex(ValueExtractor extractor, boolean fOrdered,
-			Comparator comparator) {
+	@SuppressWarnings("unchecked")
+	public void addIndex(ValueExtractor extractor, boolean fOrdered, Comparator comparator) {
 		proxy.addIndex(extractor, fOrdered, comparator);
 	}
 
@@ -96,6 +121,7 @@ public class TxLiteCache extends NearCache implements XmlConfigurable, TxWrapped
 		proxy.addMapListener(listener);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Object aggregate(Collection collKeys, EntryAggregator agent) {
 		return proxy.aggregate(collKeys, agent);
 	}
@@ -120,14 +146,17 @@ public class TxLiteCache extends NearCache implements XmlConfigurable, TxWrapped
 		proxy.destroy();
 	}
 
+	@SuppressWarnings("unchecked")
 	public Set entrySet() {
 		return proxy.entrySet();
 	}
 
+	@SuppressWarnings("unchecked")
 	public Set entrySet(Filter filter, Comparator comparator) {
 		return proxy.entrySet(filter, comparator);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Set entrySet(Filter filter) {
 		return proxy.entrySet(filter);
 	}
@@ -140,6 +169,7 @@ public class TxLiteCache extends NearCache implements XmlConfigurable, TxWrapped
 		return proxy.get(oKey);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Map getAll(Collection keys) {
 		return proxy.getAll(keys);
 	}
@@ -160,10 +190,12 @@ public class TxLiteCache extends NearCache implements XmlConfigurable, TxWrapped
 		return proxy.invoke(key, agent);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Map invokeAll(Collection keys, EntryProcessor agent) {
 		return proxy.invokeAll(keys, agent);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Map invokeAll(Filter filter, EntryProcessor agent) {
 		return proxy.invokeAll(filter, agent);
 	}
@@ -176,10 +208,12 @@ public class TxLiteCache extends NearCache implements XmlConfigurable, TxWrapped
 		return proxy.isEmpty();
 	}
 
+	@SuppressWarnings("unchecked")
 	public Set keySet() {
 		return proxy.keySet();
 	}
 
+	@SuppressWarnings("unchecked")
 	public Set keySet(Filter paramFilter) {
 		return proxy.keySet(paramFilter);
 	}
@@ -200,6 +234,7 @@ public class TxLiteCache extends NearCache implements XmlConfigurable, TxWrapped
 		return proxy.put(key, value);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void putAll(Map m) {
 		proxy.putAll(m);
 	}
@@ -240,12 +275,14 @@ public class TxLiteCache extends NearCache implements XmlConfigurable, TxWrapped
 		return proxy.unlock(key);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Collection values() {
 		return proxy.values();
 	}
 	
 	// delegates of NearCache
 	
+	@SuppressWarnings("unchecked")
 	public Map getBackMap() {
 		return ((CachingMap)cache).getBackMap();
 	}
@@ -258,6 +295,7 @@ public class TxLiteCache extends NearCache implements XmlConfigurable, TxWrapped
 		return ((CachingMap)cache).getControlMap();
 	}
 
+	@SuppressWarnings("unchecked")
 	public Map getFrontMap() {
 		return ((CachingMap)cache).getFrontMap();
 	}
