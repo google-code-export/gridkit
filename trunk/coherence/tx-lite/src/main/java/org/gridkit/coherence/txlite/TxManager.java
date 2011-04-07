@@ -69,6 +69,11 @@ public class TxManager {
 		}
 
 		@Override
+		public boolean isReadOnly() {
+			return true;
+		}
+
+		@Override
 		public void close() {
 			readVersion = Versions.BASELINE_VERSION;
 			wrapperCaches.clear();
@@ -125,6 +130,11 @@ public class TxManager {
 		
 		public ReadWriteTxSession(TxSuperviser superviser) {
 			super(superviser);
+		}
+
+		@Override
+		public boolean isReadOnly() {
+			return false;
 		}
 		
 		@Override

@@ -22,6 +22,8 @@ import com.tangosol.net.NamedCache;
  */
 public interface TxSession {
 
+	public boolean isReadOnly();
+	
 	public NamedCache connect(NamedCache cache); 
 	
 	public void commit();

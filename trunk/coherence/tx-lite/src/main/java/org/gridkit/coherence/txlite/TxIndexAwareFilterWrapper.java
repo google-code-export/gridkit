@@ -69,11 +69,14 @@ public class TxIndexAwareFilterWrapper extends TxFilterWrapper implements IndexA
 			return;
 		}
 		else {
-			Map<?, ?> map = new HashMap(indexMap);
-			for (Map.Entry entry : map.entrySet()) {
-				TxIndexExtractorWrapper extr = (TxIndexExtractorWrapper) entry.getValue();
-				entry.setValue(extr.getValueExtractor());
+			Map map = new HashMap(indexMap.size());
+			for (Object obj : indexMap.entrySet()) {
+				Map.Entry entry = (Entry) obj;
+				TxIndexExtractorWrapper extr = (TxIndexExtractorWrapper) entry.getKey();
+				map.put(extr.getValueExtractor(), entry.getValue());
 			}
+			originalIndexMap = indexMap;
+			convertedIndexMap = map;
 		}
 	}
 }

@@ -15,9 +15,15 @@
  */
 package org.gridkit.coherence.txlite;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,6 +33,7 @@ import com.tangosol.util.Filter;
 import com.tangosol.util.MapListener;
 import com.tangosol.util.ValueExtractor;
 import com.tangosol.util.extractor.IdentityExtractor;
+import com.tangosol.util.filter.AlwaysFilter;
 import com.tangosol.util.filter.EqualsFilter;
 
 /**
@@ -50,6 +57,11 @@ class TxCacheWrapper implements NamedCache, TxWrappedCache {
 	
 	public NamedCache getVersionedCache() {
 		return nestedCache;
+	}
+	
+	@Override
+	public TxSession getSession() {
+		return (TxSession) (adapter instanceof TxSession ? adapter : null);
 	}
 
 	@Override
@@ -132,7 +144,7 @@ class TxCacheWrapper implements NamedCache, TxWrappedCache {
 		adapter.beforeOperation(this);
 		// TODO not efficient but functional
 		adapter.markDirty(this, m.keySet());
-		nestedCache.invoke(m.keySet(), adapter.newPutProcessor(this, new HashMap(m)));
+		nestedCache.invokeAll(new HashSet(m.keySet()), adapter.newPutProcessor(this, new HashMap(m)));
 		adapter.afterOperation(this);
 	}
 
@@ -156,46 +168,149 @@ class TxCacheWrapper implements NamedCache, TxWrappedCache {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Set keySet() {
-		// view semantic handler
-		throw new UnsupportedOperationException();
+		Set keys = new HashSet(nestedCache.keySet());
+		return new WrapperSetView(keys) {
+						
+			@Override
+			protected void delete(Object element) {
+				remove(element);
+				delegate.remove(element);
+			}
+			
+			@Override
+			protected void deleteAll(Collection elements) {
+				removeAll(elements);
+				delegate.removeAll(elements);
+			}
+		};
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Set keySet(Filter paramFilter) {
-		// TODO
-		throw new UnsupportedOperationException();
+	public Set keySet(Filter filter) {
+		adapter.beforeOperation(this);
+		Filter transformed = adapter.transformFilter(this, filter);
+		Set keys = new HashSet(nestedCache.keySet(transformed));
+		WrapperSetView wrapperSetView = new WrapperSetView(keys) {
+						
+			@Override
+			protected void delete(Object element) {
+				remove(element);
+				delegate.remove(element);
+			}
+			
+			@Override
+			protected void deleteAll(Collection elements) {
+				removeAll(elements);
+				delegate.removeAll(elements);
+			}
+		};
+		adapter.afterOperation(this);
+		return wrapperSetView;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Set entrySet() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		return entrySet(AlwaysFilter.INSTANCE);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Set entrySet(Filter filter) {
-		// TODO
-		throw new UnsupportedOperationException();
-//		Filter transformedFilter = adapter.transformFilter(filter);
-//		return super.entrySet(filter);
+		adapter.beforeOperation(this);
+		Filter transformedFilter = adapter.transformFilter(this, filter);
+		Set entries = new HashSet(nestedCache.entrySet(transformedFilter));
+		Set result = new HashSet(entries.size());
+		for(Object x: entries) {
+			Map.Entry centry = (Map.Entry) x;
+			result.add(new EntryWrapper(centry.getKey(), adapter.transformValue(this, (ValueContatiner) centry.getValue())));
+		}
+		
+		WrapperSetView wrapperSetView = new WrapperSetView(result) {
+						
+			@Override
+			protected void delete(Object element) {
+				remove(((Map.Entry)element).getKey());
+				delegate.remove(element);
+			}
+			
+			@Override
+			protected void deleteAll(Collection elements) {
+				List keys = new ArrayList();
+				for (Object e : elements) {
+					keys.add(((Map.Entry)e).getKey());
+				}
+				removeAll(keys);
+				delegate.removeAll(elements);
+			}
+		};
+		adapter.afterOperation(this);
+		return wrapperSetView;
 	}
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public Set entrySet(Filter filter, Comparator comparator) {
-		// TODO
-		throw new UnsupportedOperationException();
-//		return super.entrySet(filter, comparator);
+	public Set entrySet(Filter filter, final Comparator comparator) {
+		adapter.beforeOperation(this);
+		Filter transformedFilter = adapter.transformFilter(this, filter);
+		Set entries = new HashSet(nestedCache.entrySet(transformedFilter));
+		List result = new ArrayList(entries.size());
+		for(Object x: entries) {
+			Map.Entry centry = (Map.Entry) x;
+			result.add(new EntryWrapper(centry.getKey(), adapter.transformValue(this, (ValueContatiner) centry.getValue())));
+		}
+		
+		Collections.sort(result, new Comparator() {
+			@Override
+			public int compare(Object o1, Object o2) {
+				o1 = ((Map.Entry)o1).getValue();
+				o2 = ((Map.Entry)o2).getValue();
+				if (comparator == null) {
+					return ((Comparable)o1).compareTo(o2);
+				}
+				else {
+					return comparator.compare(o1, o2);
+				}
+			}
+		}); 
+		
+		WrapperSetView wrapperSetView = new WrapperSetView(result) {
+						
+			@Override
+			protected void delete(Object element) {
+				remove(((Map.Entry)element).getKey());
+				delegate.remove(element);
+			}
+			
+			@Override
+			protected void deleteAll(Collection elements) {
+				List keys = new ArrayList();
+				for (Object e : elements) {
+					keys.add(((Map.Entry)e).getKey());
+				}
+				removeAll(keys);
+				delegate.removeAll(elements);
+			}
+		};
+		adapter.afterOperation(this);
+		return wrapperSetView;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Collection values() {
-		// TODO
-		throw new UnsupportedOperationException();
+		adapter.beforeOperation(this);
+		Collection values = nestedCache.values();
+		List result = new ArrayList(values.size());
+		for(Object value : values) {
+			Object cv = adapter.transformValue(this, (ValueContatiner) value);
+			if (cv != null) {
+				result.add(cv);
+			}
+		}		
+		adapter.afterOperation(this);
+		return result;
 	}
 
 	@Override
@@ -378,5 +493,238 @@ class TxCacheWrapper implements NamedCache, TxWrappedCache {
 		MapListener transformend = adapter.transformListener(this, listener);
 		Filter transformedFilter = adapter.transformListenerFilter(this, filter);
 		nestedCache.removeMapListener(transformend, transformedFilter);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private abstract static class WrapperSetView implements Set {
+
+		protected Collection delegate;
+	
+		public WrapperSetView(Collection delegate) {
+			this.delegate = delegate;
+		}
+		
+		protected boolean isConverted() {
+			return false;
+		}
+		
+		protected Object convert(Object element) {
+			return element;
+		}
+		
+		protected abstract void delete(Object element);
+
+		protected abstract void deleteAll(Collection element);
+
+		@Override
+		public boolean add(Object e) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public boolean addAll(Collection c) {
+			if (!c.isEmpty()) {
+				throw new UnsupportedOperationException();
+			}
+			else {
+				return false;
+			}
+		}
+
+		@Override
+		public void clear() {
+			if (!isConverted()) {
+				deleteAll(delegate);
+			}
+			else {
+				deleteAll(Arrays.asList(toArray()));
+			}
+		}
+
+		@Override
+		public boolean contains(Object o) {
+			if (o == null) {
+				return false;
+			}
+			else if (!isConverted()) {
+				return delegate.contains(o);
+			}
+			else {
+				for(Object obj : delegate) {
+					if (o.equals(convert(obj))) {
+						return true;
+					}
+				}
+				return false;
+			}
+		}
+
+		@Override
+		public boolean containsAll(Collection c) {
+			for(Object o : c) {
+				if (!contains(o)) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return delegate.isEmpty();
+		}
+
+		@Override
+		public Iterator iterator() {
+			final Iterator nested = delegate.iterator();
+			return new Iterator() {
+				
+				Object last = null;
+				
+				@Override
+				public boolean hasNext() {
+					return nested.hasNext();
+				}
+
+				@Override
+				public Object next() {
+					last = nested.next();
+					return convert(last);
+				}
+
+				@Override
+				public void remove() {
+					if (last == null) {
+						throw new IllegalStateException();
+					}
+					else {
+						delete(convert(last));
+					}
+				}
+			};
+		}
+
+		@Override
+		public boolean remove(Object o) {
+			boolean contains = contains(o);
+			delete(o);
+			return contains;
+		}
+
+		@Override
+		public boolean removeAll(Collection c) {
+			int size = delegate.size();
+			deleteAll(c);
+			return size != delegate.size();
+		}
+
+		@Override
+		public boolean retainAll(Collection c) {
+			List forRemoval = new ArrayList(); 
+			for(Object x : delegate) {
+				Object y = convert(x);
+				if (!c.contains(y)) {
+					forRemoval.add(y);
+				}
+			}
+			deleteAll(forRemoval);
+			return forRemoval.size() > 0;
+		}
+
+		@Override
+		public int size() {
+			return delegate.size();
+		}
+
+		@Override
+		public Object[] toArray() {
+			return toArray(new Object[size()]);
+		}
+
+		@Override
+		public Object[] toArray(Object[] a) {
+			if (a.length < size()) {
+				a = Arrays.copyOf(a, size());
+			}
+			int n = 0;
+			for(Object x : delegate) {
+				Object y = convert(x);
+				a[n] = y;
+				++n;
+			}
+			return a;
+		}
+		
+		@Override
+		public String toString() {
+			return Arrays.toString(toArray());
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private class EntryWrapper implements Map.Entry {
+
+		private Object key;
+		private Object value;
+
+		public EntryWrapper(Object key, Object value) {
+			this.key = key;
+			this.value = value;
+		}
+
+		@Override
+		public Object getKey() {
+			return key;
+		}
+
+		@Override
+		public Object getValue() {
+			return value;
+		}
+
+		@Override
+		public Object setValue(Object value) {
+			Object old = put(key, value);
+			this.value = get(key);
+			return old;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((key == null) ? 0 : key.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			EntryWrapper other = (EntryWrapper) obj;
+			if (!getOuterType().equals(other.getOuterType()))
+				return false;
+			if (key == null) {
+				if (other.key != null)
+					return false;
+			} else if (!key.equals(other.key))
+				return false;
+			return true;
+		}
+
+		private TxCacheWrapper getOuterType() {
+			return TxCacheWrapper.this;
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append(key).append("->").append(value);
+			return builder.toString();
+		}
 	}
 }

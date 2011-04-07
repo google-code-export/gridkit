@@ -46,7 +46,7 @@ public class TxFilterWrapper implements Filter, PortableObject, Serializable {
 		if (value instanceof ValueContatiner) {
 			value = ((ValueContatiner)value).getVersionAt(readVersion);
 		}
-		return nested.evaluate(value);
+		return value == null ? false : nested.evaluate(value);
 	}
 
 	@Override
