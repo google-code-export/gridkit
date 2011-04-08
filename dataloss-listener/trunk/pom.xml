@@ -4,26 +4,45 @@
 	<artifactId>coherence-dataloss-listener</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>coherence-dataloss-listener</name>
-	<description>Data loss listener for Oracle Coherence.</description>
+	<description>Data loss detection utils for Oracle Coherence.</description>
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<coherence.version>3.6.1.0b19636</coherence.version>
 		<junit.version>4.8.2</junit.version>
+		<slf4j.version>1.6.0</slf4j.version>
+		<logback.version>0.9.21</logback.version>
 	</properties>
 	
 	<dependencies>
+		<!-- Coherence -->
 		<dependency>
 			<groupId>com.oracle</groupId>
 			<artifactId>coherence</artifactId>
 			<version>${coherence.version}</version>
 		</dependency>
+		
+		<!-- SLF4J Logging -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+		
+		<!-- Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>${logback.version}</version>
+			<scope>test</scope>
+		</dependency>
+		
 	</dependencies>
 	
 	<build>

@@ -15,15 +15,18 @@
 			<scheme-name>canary-distributed</scheme-name>
 			<service-name>DistributedCache</service-name> 
 			<backing-map-scheme>
-				<!-- How to ensure no eviction? -->
 				<local-scheme/>
 			</backing-map-scheme>
-			<key-partitioning>
-				<class-name>org.gridkit.coherence.util.dataloss.CanaryKeyPartitioningStrategy</class-name>
-			</key-partitioning>
 			<partition-listener>
-				<class-name>org.gridkit.coherence.util.dataloss.CanaryPartitionListener</class-name>
+				<class-name>org.gridkit.coherence.util.dataloss.PartitionLossListener</class-name>
+				<init-params>
+					<init-param>
+						<param-type>java.lang.String</param-type>
+						<param-value>org.gridkit.coherence.util.dataloss.DataLossListenerImpl</param-value>
+					</init-param>
+				</init-params>
 			</partition-listener>
+			<backup-count>0</backup-count>
 			<autostart>true</autostart>
 		</distributed-scheme>
 	</caching-schemes>
