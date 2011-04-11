@@ -50,9 +50,11 @@ Add "canary" cache declaration to your Coherence cache configuration file, mappi
 
 Note that cache name is fixed and should be "canary-cache", and monitored distributed scheme should get a `<partition-listener>` implementation as shown above. This listener takes one mandatory `<init-param>` - an application-provided implementation of *org.gridkit.coherence.util.dataloss.!DataLossListener* interface.
 
+These 3 changes are all you need to enable partition loss monitoring in your Coherence configuration: cache declaration, gridkit !PartitionLossListener binding and custom !DataLossListener implementation. 
+
 == Listener implementation ==
 
-Application provides its own implementation of !DataLossListener, and can perform node shutdown, audit and/or log message creation, or recovery attempt. onPartitionLost() method accepts partitioned service reference and array of lost partition numbers.
+Application provides its own implementation of !DataLossListener, and can perform node shutdown, audit and/or log message creation, or recovery attempt. onPartitionLost() method accepts Coherence Partitioned service reference and array of lost partition numbers.
 Example implementation below just prints a list of lost partition numbers to standard output.
 
 {{{
