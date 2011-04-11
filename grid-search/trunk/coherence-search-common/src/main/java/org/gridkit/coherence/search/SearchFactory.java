@@ -16,6 +16,7 @@
 
 package org.gridkit.coherence.search;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,6 +30,9 @@ import java.util.Map.Entry;
 import org.gridkit.coherence.search.IndexUpdateEvent.Type;
 
 import com.tangosol.io.Serializer;
+import com.tangosol.io.pof.PofReader;
+import com.tangosol.io.pof.PofWriter;
+import com.tangosol.io.pof.PortableObject;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.Binary;
 import com.tangosol.util.BinaryEntry;
@@ -87,11 +91,11 @@ public class SearchFactory<I, IC, Q> {
 		cache.addIndex(extractor, false, null);
 	}
 	
-	private SearchIndexExtractor<I, IC, Q> createConfiguredExtractor() {
+	protected SearchIndexExtractor<I, IC, Q> createConfiguredExtractor() {
 		return new SearchIndexExtractor<I, IC, Q>(indexPlugin, token, indexConfig, engineConfig, extractor);
 	}
 
-	private SearchIndexExtractor<I, IC, Q> createFilterExtractor() {
+	protected SearchIndexExtractor<I, IC, Q> createFilterExtractor() {
 		return new SearchIndexExtractor<I, IC, Q>(indexPlugin, token, extractor);
 	}
 
@@ -392,7 +396,7 @@ public class SearchFactory<I, IC, Q> {
 		}
 	}
 	
-	public static class SearchIndexExtractor<I, IC, Q> implements IndexAwareExtractor, Serializable {
+	public static class SearchIndexExtractor<I, IC, Q> implements IndexAwareExtractor, Serializable, PortableObject {
 
 		private static final long serialVersionUID = 20100813L;
 		
@@ -474,15 +478,35 @@ public class SearchFactory<I, IC, Q> {
 		public PlugableSearchIndex<I, IC, Q> getPSI() {
 			return psi;
 		}
-		
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public void readExternal(PofReader in) throws IOException {
+			int i = 1;
+			psi = (PlugableSearchIndex<I, IC, Q>) in.readObject(i++);
+			token = in.readObject(i++);
+			indexConfiguration = (IC) in.readObject(i++);
+			engineConfig = (IndexEngineConfig) in.readObject(i++);
+			extractor = (ValueExtractor) in.readObject(i++);
+		}
+
+		@Override
+		public void writeExternal(PofWriter out) throws IOException {
+			int i = 1;
+			out.writeObject(i++, psi);
+			out.writeObject(i++, token);
+			out.writeObject(i++, indexConfiguration);
+			out.writeObject(i++, engineConfig);
+			out.writeObject(i++, extractor);
+		}
 	}
 	
 	public static class QueryFilter<I, Q> implements IndexAwareFilter, Serializable {
 		
 		private static final long serialVersionUID = 20100813L;
 
-		private SearchIndexExtractor<I, ?, Q> extractor;
-		private Q query;
+		protected SearchIndexExtractor<I, ?, Q> extractor;
+		protected Q query;
 		
 		public QueryFilter() {
 			// for remoting

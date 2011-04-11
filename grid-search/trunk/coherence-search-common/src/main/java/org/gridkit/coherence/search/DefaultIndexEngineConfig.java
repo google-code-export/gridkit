@@ -16,13 +16,18 @@
 
 package org.gridkit.coherence.search;
 
+import java.io.IOException;
 import java.io.Serializable;
+
+import com.tangosol.io.pof.PofReader;
+import com.tangosol.io.pof.PofWriter;
+import com.tangosol.io.pof.PortableObject;
 
 /**
  * Default implementation of {@link IndexEngineConfig}. 
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class DefaultIndexEngineConfig implements IndexEngineConfig, Serializable {
+public class DefaultIndexEngineConfig implements IndexEngineConfig, Serializable, PortableObject {
 
 	private static final long serialVersionUID = 20100814L;
 	
@@ -51,6 +56,9 @@ public class DefaultIndexEngineConfig implements IndexEngineConfig, Serializable
 		return attributeIndexEnabled;
 	}
 	
+	/**
+	 * @deprecated Doesn't work well, do not use
+	 */
 	public void setAttributeIndexEnabled(boolean attributeIndexEnabled) {
 		this.attributeIndexEnabled = attributeIndexEnabled;
 	}
@@ -61,5 +69,23 @@ public class DefaultIndexEngineConfig implements IndexEngineConfig, Serializable
 
 	public void setOldValueOnUpdateEnabled(boolean oldValueOnUpdateEnabled) {
 		this.oldValueOnUpdateEnabled = oldValueOnUpdateEnabled;
+	}
+
+	@Override
+	public void readExternal(PofReader in) throws IOException {
+		int i = 1;
+		attributeIndexEnabled = in.readBoolean(i++);
+		oldValueOnUpdateEnabled = in.readBoolean(i++);
+		indexUpdateDelay = in.readInt(i++);
+		indexUpdateQueueSizeLimit = in.readInt(i++);
+	}
+
+	@Override
+	public void writeExternal(PofWriter out) throws IOException {
+		int i = 1;
+		out.writeBoolean(i++, attributeIndexEnabled);
+		out.writeBoolean(i++, oldValueOnUpdateEnabled);
+		out.writeInt(i++, indexUpdateDelay);
+		out.writeInt(i++, indexUpdateQueueSizeLimit);
 	}
 }
