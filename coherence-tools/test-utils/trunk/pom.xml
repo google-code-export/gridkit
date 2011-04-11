@@ -30,6 +30,14 @@
 		<url>http://gridkit.googlecode.com/svn/coherence-tools/test-utils/tags/test-utils-0.0.1</url>
 	</scm>
 	
+	<distributionManagement>
+		<!-- GridKit maven2 repository location -->
+		<repository>
+			<id>gridkit-repo.googlecode.com</id>
+			<url>dav:https://gridkit.googlecode.com/svn/repo/</url>
+		</repository>
+	</distributionManagement>
+	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<coherence.version>3.6.1.0b19636</coherence.version>
@@ -105,13 +113,5 @@
 			</extension>
 		</extensions>
 	</build>
-	
-	<distributionManagement>
-		<!-- GridKit maven2 repository location -->
-		<repository>
-			<id>gridkit-repo.googlecode.com</id>
-			<url>dav:https://gridkit.googlecode.com/svn/repo/</url>
-		</repository>
-	</distributionManagement>
 	
 </project>
