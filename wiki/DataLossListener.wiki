@@ -4,7 +4,7 @@
 = Introduction =
 
 Its a rare but possible situation, when data stored in Coherence cluster is lost (due to hardware fault, network partitioning, or even software bug). 
-Since Coherence version 3.3, there is a PARTITION_LOST event type declared in !com.tangosol.net.partition.PartitionEvent class, and corresponding !PartiotionListener may be implemented. However, stability of this solution is not proven yet, and we decided to implement custom, version-independent and 100% reliable solution here in !GridDynamics Coherence team.
+Since Coherence version 3.3, there is a PARTITION_LOST event type declared in com.tangosol.net.partition.!PartitionEvent class, and corresponding !PartiotionListener may be implemented. However, stability of this solution is not proven yet, and we decided to implement custom, version-independent and 100% reliable solution here in !GridDynamics Coherence team.
 
 = Solution =
 
