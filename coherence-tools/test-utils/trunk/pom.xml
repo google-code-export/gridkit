@@ -20,7 +20,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.gridkit.coherence-tools</groupId>
 	<artifactId>test-utils</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<name>test-utils</name>
 	<description>Utility classes for unit and integration testing</description>
 	
