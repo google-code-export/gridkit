@@ -45,12 +45,11 @@
 			<optional>true</optional>
 		</dependency>
 		
-		<!-- Test dependencies -->
+		<!-- Note that JUnit is added as compile dep -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit.version}</version>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	
