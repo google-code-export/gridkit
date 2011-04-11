@@ -2,7 +2,7 @@
 
 [http://code.google.com/p/gridkit/ GridKit] project is hosting own Maven repository for its artifacts.
 
-Repository URL is [https://gridkit.googlecode.com/svn/repo]
+Repository URL is [http://gridkit.googlecode.com/svn/repo/]
 
 You can add reference to our repository to your POM to download [http://code.google.com/p/gridkit/ GridKit] artifacts automatically.
 
@@ -12,13 +12,14 @@ You can add reference to our repository to your POM to download [http://code.goo
     <repository>
         <id>gridkit.org</id>
         <name>GridKit.org repository</name>
-        <url>https://gridkit.googlecode.com/svn/repo</url>
-        <snapshots>
-            <enabled>false</enabled>
-        </snapshots>
-        <releases>
-            <enabled>true</enabled>
-        </releases>
+        <url>http://gridkit.googlecode.com/svn/repo/</url>
+	<releases>
+	    <enabled>true</enabled>
+	    <updatePolicy>never</updatePolicy>
+	</releases>
+	<snapshots>
+	    <enabled>false</enabled>
+	</snapshots>
     </repository>
 </repositories>
 }}} 
