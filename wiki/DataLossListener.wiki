@@ -27,7 +27,7 @@ Both jar-files, javadocs and source code are available via maven:
 </dependency>
 }}}
 
-Don't forget to add [http://code.google.com/p/gridkit/wiki/MavenRepo GridKit Maven Repository] to your parent POM to get this dependency properly resolved.
+Don't forget to add [MavenRepo GridKit Maven Repository] to your parent POM to get this dependency properly resolved.
 
 = Resources =
 
