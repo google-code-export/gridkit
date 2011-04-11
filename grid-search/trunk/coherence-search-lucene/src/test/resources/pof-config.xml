@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+
+<!--
+    Grid Dynamics Consulting Services, Inc.
+    
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+        http://www.apache.org/licenses/LICENSE-2.0
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License. 
+-->
+
+<!DOCTYPE pof-config SYSTEM "pof-config.dtd">
+
+<pof-config>
+
+    <user-type-list>
+
+        <include>coherence-pof-config.xml</include>
+        <include>grid4search-pof-config.xml</include>
+<!-- 
+        <include>txn-pof-config.xml</include>
+
+        <user-type>
+            <type-id>1001</type-id>
+            <class-name>sample.DomainObjAttrib</class-name>
+            <serializer>
+                <class-name>com.griddynamics.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+
+        <user-type>
+            <type-id>1002</type-id>
+            <class-name>sample.DomainObject</class-name>
+            <serializer>
+                <class-name>com.griddynamics.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+
+        <user-type>
+            <type-id>1003</type-id>
+            <class-name>sample.DomainObjKey</class-name>
+            <serializer>
+                <class-name>com.griddynamics.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+
+
+        <user-type>
+            <type-id>1100</type-id>
+            <class-name>com.griddynamics.gridkit.coherence.utils.pof.ReflectionPofExtractor</class-name>
+        </user-type>
+ -->
+        <user-type>
+            <type-id>1004</type-id>
+            <class-name>org.gridkit.coherence.search.lucene.TestDocument</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.search.lucene.util.JavaSerializationSerializer</class-name>
+            </serializer>
+        </user-type>
+        
+        <user-type>
+            <type-id>1005</type-id>
+            <class-name>org.gridkit.coherence.search.comparation.MemUsageAggregator</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.search.lucene.util.JavaSerializationSerializer</class-name>
+            </serializer>
+        </user-type>
+        
+    </user-type-list>
+
+    <allow-interfaces>true</allow-interfaces>
+    <allow-subclasses>false</allow-subclasses>
+
+    <default-serializer>
+        <class-name>com.griddynamics.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+    </default-serializer>
+
+</pof-config>

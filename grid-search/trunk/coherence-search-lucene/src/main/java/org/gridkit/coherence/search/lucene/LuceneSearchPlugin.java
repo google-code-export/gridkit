@@ -26,6 +26,11 @@ import org.gridkit.coherence.search.IndexInvocationContext;
 import org.gridkit.coherence.search.IndexUpdateEvent;
 import org.gridkit.coherence.search.PlugableSearchIndex;
 
+import com.tangosol.io.pof.PofReader;
+import com.tangosol.io.pof.PofWriter;
+import com.tangosol.io.pof.PortableObject;
+
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +38,7 @@ import java.util.Set;
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class LuceneSearchPlugin implements PlugableSearchIndex<LuceneInMemoryIndex, LuceneIndexConfig, Query>, Serializable {
+public class LuceneSearchPlugin implements PlugableSearchIndex<LuceneInMemoryIndex, LuceneIndexConfig, Query>, Serializable, PortableObject {
 
 	private static final long serialVersionUID = 20100813L;
 	
@@ -88,5 +93,16 @@ public class LuceneSearchPlugin implements PlugableSearchIndex<LuceneInMemoryInd
 			memIndex.addField(field.name(), field.tokenStreamValue(), field.getBoost());
 		}
 		return memIndex.search(query) > 0.0f;
+	}
+
+	@Override
+	public void readExternal(PofReader in) throws IOException {
+		name = in.readString(1);
+		
+	}
+
+	@Override
+	public void writeExternal(PofWriter out) throws IOException {
+		out.writeString(1, name);		
 	}
 }

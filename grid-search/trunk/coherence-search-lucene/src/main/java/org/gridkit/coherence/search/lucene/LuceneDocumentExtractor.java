@@ -16,6 +16,7 @@
 
 package org.gridkit.coherence.search.lucene;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -26,13 +27,16 @@ import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.Field.TermVector;
 
+import com.tangosol.io.pof.PofReader;
+import com.tangosol.io.pof.PofWriter;
+import com.tangosol.io.pof.PortableObject;
 import com.tangosol.util.Binary;
 import com.tangosol.util.ValueExtractor;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class LuceneDocumentExtractor implements ValueExtractor, Serializable {
+public class LuceneDocumentExtractor implements ValueExtractor, Serializable, PortableObject {
 
 	private static final long serialVersionUID = 20090804L;
 
@@ -69,7 +73,7 @@ public class LuceneDocumentExtractor implements ValueExtractor, Serializable {
 	}
 	
 	public void addBinaryField(String name, ValueExtractor extractor, Field.Store store) {
-		fieldMap.add(new GenericFieldFactory(name, extractor, null, true, store, null, null));
+		fieldMap.add(new GenericFieldFactory(name, extractor, null, true, store, Index.NOT_ANALYZED, TermVector.NO));
 	}
 	
 	public void addCustomField(FieldFactory ff) {
@@ -95,7 +99,18 @@ public class LuceneDocumentExtractor implements ValueExtractor, Serializable {
 		
 	}
 	
-	public static class GenericFieldFactory implements FieldFactory {
+	@Override
+	@SuppressWarnings("unchecked")
+	public void readExternal(PofReader in) throws IOException {
+		fieldMap = (List<FieldFactory>) in.readCollection(1, new ArrayList<GenericFieldFactory>()); 
+	}
+
+	@Override
+	public void writeExternal(PofWriter out) throws IOException {
+		out.writeCollection(1, fieldMap);
+	}
+
+	public static class GenericFieldFactory implements FieldFactory, PortableObject {
 
 		private static final long serialVersionUID = 20100813L;
 		
@@ -117,8 +132,17 @@ public class LuceneDocumentExtractor implements ValueExtractor, Serializable {
 			this.textAnalyzer = analyzer;
 			this.binary = binary;
 			this.store = store;
+			if (store == null) {
+				throw new NullPointerException("'store' flag is null");
+			}
 			this.index = index;
+			if (index == null) {
+				throw new NullPointerException("'index' flag is null");
+			}
 			this.termVector = termVector;
+			if (termVector == null) {
+				throw new NullPointerException("'termVector' flag is null");
+			}
 		}
 
 		@Override
@@ -148,6 +172,30 @@ public class LuceneDocumentExtractor implements ValueExtractor, Serializable {
 				field.setTokenStream(textAnalyzer.getAnalyzer().tokenStream(name, new StringReader(text)));
 				return field;
 			}
+		}
+
+		@Override
+		public void readExternal(PofReader in) throws IOException {
+			int i = 1;
+			name = in.readString(i++);
+			extractor = (ValueExtractor) in.readObject(i++);
+			textAnalyzer = (LuceneAnalyzerProvider) in.readObject(i++);
+			binary = in.readBoolean(i++);
+			store = Store.values()[in.readInt(i++)];
+			index = Index.values()[in.readInt(i++)];
+			termVector = TermVector.values()[in.readInt(i++)];
+		}
+
+		@Override
+		public void writeExternal(PofWriter out) throws IOException {
+			int i = 1;
+			out.writeString(i++, name);
+			out.writeObject(i++, extractor);
+			out.writeObject(i++, textAnalyzer);
+			out.writeBoolean(i++, binary);
+			out.writeInt(i++, store.ordinal());
+			out.writeInt(i++, index.ordinal());
+			out.writeInt(i++, termVector.ordinal());
 		}
 	}
 }

@@ -38,6 +38,9 @@ public abstract class IndexComparisonTestBase {
 
         System.setProperty("tangosol.coherence.distributed.localstorage", "false");
 
+	    System.setProperty("tangosol.pof.enabled", "true");
+	    System.setProperty("tangosol.pof.config", "pof-config.xml");
+        
         CacheFactory.setConfigurableCacheFactory(new DefaultConfigurableCacheFactory("lucene-cache-config.xml"));
     }
 

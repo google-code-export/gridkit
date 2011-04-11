@@ -19,18 +19,24 @@ package org.gridkit.coherence.search.lucene;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
 
+import com.tangosol.io.pof.PofReader;
+import com.tangosol.io.pof.PofWriter;
+import com.tangosol.io.pof.PortableObject;
+
+import java.io.IOException;
 import java.io.Serializable;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-class WhitespaceAnalyzerProvider implements LuceneAnalyzerProvider, Serializable {
+public class WhitespaceAnalyzerProvider implements LuceneAnalyzerProvider, Serializable, PortableObject {
 
 	private static final long serialVersionUID = 20100720L;
 	
 	public static final WhitespaceAnalyzerProvider INSTANCE = new WhitespaceAnalyzerProvider();
 	
-	int x;
+	public WhitespaceAnalyzerProvider() {		
+	}
 	
 	public Analyzer getAnalyzer() {
 		return new WhitespaceAnalyzer();
@@ -50,5 +56,13 @@ class WhitespaceAnalyzerProvider implements LuceneAnalyzerProvider, Serializable
 		if (getClass() != obj.getClass())
 			return false;
 		return true;
+	}
+
+	@Override
+	public void readExternal(PofReader in) throws IOException {
+	}
+
+	@Override
+	public void writeExternal(PofWriter out) throws IOException {
 	}	
 }

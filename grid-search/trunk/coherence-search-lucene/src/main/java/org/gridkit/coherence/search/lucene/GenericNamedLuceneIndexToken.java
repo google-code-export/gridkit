@@ -16,12 +16,17 @@
 
 package org.gridkit.coherence.search.lucene;
 
+import java.io.IOException;
 import java.io.Serializable;
+
+import com.tangosol.io.pof.PofReader;
+import com.tangosol.io.pof.PofWriter;
+import com.tangosol.io.pof.PortableObject;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-class GenericNamedLuceneIndexToken implements Serializable {
+public class GenericNamedLuceneIndexToken implements Serializable, PortableObject {
 
 	private static final long serialVersionUID = 20100721L;
 	
@@ -57,5 +62,15 @@ class GenericNamedLuceneIndexToken implements Serializable {
 		} else if (!name.equals(other.name))
 			return false;
 		return true;
+	}
+
+	@Override
+	public void readExternal(PofReader in) throws IOException {
+		name = in.readString(1);
+	}
+
+	@Override
+	public void writeExternal(PofWriter out) throws IOException {
+		out.writeString(1, name);
 	}
 }

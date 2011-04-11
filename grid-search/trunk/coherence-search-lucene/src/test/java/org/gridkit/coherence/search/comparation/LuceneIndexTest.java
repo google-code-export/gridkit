@@ -8,13 +8,14 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.TermQuery;
 import org.gridkit.coherence.search.lucene.LuceneDocumentExtractor;
 import org.gridkit.coherence.search.lucene.LuceneSearchFactory;
+import org.junit.Ignore;
 
 import com.tangosol.util.Filter;
 
 /**
  * @author Alexander Solovyov
  */
-
+@Ignore
 public class LuceneIndexTest extends IndexComparisonTestBase {
 
     private LuceneSearchFactory factory;

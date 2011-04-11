@@ -6,10 +6,15 @@ import java.util.Collection;
 import java.util.Set;
 
 import com.tangosol.util.aggregator.AbstractAggregator;
+import com.tangosol.util.extractor.IdentityExtractor;
 
 @SuppressWarnings("serial")
 public class MemUsageAggregator extends AbstractAggregator implements Serializable {
 
+	public MemUsageAggregator() {
+		super(IdentityExtractor.INSTANCE);
+	}
+	
 	@Override
 	protected void init(boolean paramBoolean) {
 	}

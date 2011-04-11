@@ -19,7 +19,10 @@ public abstract class IndexComparisonTestServer {
         System.setProperty("tangosol.coherence.cluster", "index-comparison-test");
 
         System.setProperty("tangosol.coherence.distributed.localstorage", "true");
-         
+        
+	    System.setProperty("tangosol.pof.enabled", "true");
+	    System.setProperty("tangosol.pof.config", "pof-config.xml");
+        
         CacheFactory.setConfigurableCacheFactory(new DefaultConfigurableCacheFactory("lucene-cache-config.xml"));
         
         CacheFactory.ensureCluster();

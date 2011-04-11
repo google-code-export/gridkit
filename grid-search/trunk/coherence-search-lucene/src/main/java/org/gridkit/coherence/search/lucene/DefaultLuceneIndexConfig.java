@@ -18,12 +18,17 @@ package org.gridkit.coherence.search.lucene;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.store.Directory;
 
+import com.tangosol.io.pof.PofReader;
+import com.tangosol.io.pof.PofWriter;
+import com.tangosol.io.pof.PortableObject;
+
+import java.io.IOException;
 import java.io.Serializable;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class DefaultLuceneIndexConfig implements LuceneIndexConfig, Serializable {
+public class DefaultLuceneIndexConfig implements LuceneIndexConfig, Serializable, PortableObject {
 
 	private static final long serialVersionUID = 20100728L;
 
@@ -54,5 +59,21 @@ public class DefaultLuceneIndexConfig implements LuceneIndexConfig, Serializable
 
 	public void setDirectoryProvider(LuceneDirectoryProvider directoryProvider) {
 		this.directoryProvider = directoryProvider;
+	}
+
+	@Override
+	public void readExternal(PofReader in) throws IOException {
+		int i = 1;
+
+		analyzerProvider = (LuceneAnalyzerProvider) in.readObject(i++);
+		directoryProvider = (LuceneDirectoryProvider) in.readObject(i++);
+	}
+
+	@Override
+	public void writeExternal(PofWriter out) throws IOException {
+		int i = 1;
+
+		out.writeObject(i++, analyzerProvider);
+		out.writeObject(i++, directoryProvider);
 	}
 }

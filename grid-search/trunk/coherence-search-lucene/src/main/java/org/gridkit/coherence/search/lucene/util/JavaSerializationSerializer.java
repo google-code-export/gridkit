@@ -35,6 +35,26 @@ import com.tangosol.io.pof.PofWriter;
  */
 public class JavaSerializationSerializer implements Serializer, PofSerializer {
 
+	public static Object fromBytes(byte[] buf) throws IOException {
+		try {
+			ByteArrayInputStream bis = new ByteArrayInputStream(buf);
+			ObjectInputStream ois = new ObjectInputStream(bis);
+			Object result = ois.readObject();
+			return result;
+		} catch (ClassNotFoundException e) {
+			throw new IOException("Class not found '" + e.getMessage() + "'");
+		}
+	}
+
+	public static byte[] toBytes(Object object) throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream(bos);
+		oos.writeObject(object);
+		oos.close();
+		byte[] byteArray = bos.toByteArray();
+		return byteArray;
+	}
+
 	@Override
 	public Object deserialize(BufferInput in) throws IOException {
 		byte[] buf = new byte[in.available()];
@@ -49,17 +69,6 @@ public class JavaSerializationSerializer implements Serializer, PofSerializer {
 		return fromBytes(data);
 	}
 	
-	private Object fromBytes(byte[] buf) throws IOException {
-		try {
-			ByteArrayInputStream bis = new ByteArrayInputStream(buf);
-			ObjectInputStream ois = new ObjectInputStream(bis);
-			Object result = ois.readObject();
-			return result;
-		} catch (ClassNotFoundException e) {
-			throw new IOException("Class not found '" + e.getMessage() + "'");
-		}
-	}
-
 	@Override
 	public void serialize(BufferOutput out, Object object) throws IOException {
 		byte[] byteArray = toBytes(object);
@@ -71,14 +80,5 @@ public class JavaSerializationSerializer implements Serializer, PofSerializer {
 		byte[] data = toBytes(object);
 		out.writeByteArray(0, data);
 		out.writeRemainder(null);
-	}
-
-	private byte[] toBytes(Object object) throws IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		ObjectOutputStream oos = new ObjectOutputStream(bos);
-		oos.writeObject(object);
-		oos.close();
-		byte[] byteArray = bos.toByteArray();
-		return byteArray;
 	}
 }

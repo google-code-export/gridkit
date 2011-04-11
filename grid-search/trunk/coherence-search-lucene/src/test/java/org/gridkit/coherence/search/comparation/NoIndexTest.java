@@ -7,10 +7,12 @@ import com.tangosol.util.filter.EqualsFilter;
 
 import java.util.Set;
 
+import org.junit.Ignore;
+
 /**
  * @author Alexander Solovyov
  */
-
+@Ignore
 public class NoIndexTest extends IndexComparisonTestBase {
 
     public static void main(String[] args) {

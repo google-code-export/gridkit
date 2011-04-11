@@ -20,6 +20,10 @@ public class TestDocument implements Serializable {
 	private String[] stringField;
     private int[] intField;
 
+    public TestDocument() {
+		// for deserialization
+	}
+    
     public TestDocument(int seqNo) {
         int dim = ((32 - Integer.numberOfLeadingZeros(seqNo)) / BITS_PER_ATTRIB) + 1;
         
