@@ -54,9 +54,9 @@ public class ListenerTest {
 		is1.submit(TouchCache.class.getName());
 		is2.submit(TouchCache.class.getName());
 		
-		Thread.sleep(5 * 1000L);
+		Thread.sleep(10 * 1000L); // FIXME try JMX waiters based on cluster statuses
 		is2.submit(NodeCrash.class.getName());
-		Thread.sleep(50 * 1000L);
+		Thread.sleep(5 * 1000L); // FIXME try JMX waiters based on cluster statuses
 		
 		is1.submit(StopNode.class.getName());
 		
