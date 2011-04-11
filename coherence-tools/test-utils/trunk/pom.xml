@@ -95,6 +95,14 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-scm-plugin</artifactId>
+				<configuration>
+					<!-- Required for proper release plugin work -->
+					<connectionType>developerConnection</connectionType>
+				</configuration>
+			</plugin>
 		</plugins>
 		<extensions>
 			<!-- This is support for maven repo, stored in SVN -->
