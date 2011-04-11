@@ -13,7 +13,7 @@ That's why one cannot lose a separate key in the cluster - minimal loss is a who
 
 Proposed solution consists of a special marker cache, called "canary"-cache (©Alexey Ragozin), and a !PartitionListener implementation, listening for partition movement events (as of Coherence 3.6.1, these include PARTITION_LOST, PARTITION_TRANSMIT_ROLLBACK and PARTITION_TRANSMIT_COMMIT) and checking "canary" cache size. Cache contains exactly _partitionNumber_ entries, one per partition. Other said, each cache partition contains one and only one "canary" cache entry.
 
-If some cluster nodes crash or other way become inaccessible, tearing down both primary and backup copies of particular cache partitions, these partitions are considered lost. "Canary" cache size reduced by the number of partitions lost, and listener detects loss event. This solution does not depend on deployed Coherence version, does not bring significant overhead due to asynchronous implementation, and enables custom, application-provided recovery or stopping logic.
+If some cluster nodes crash or other way become inaccessible, tearing down both primary and backup copies of particular cache partitions, these partitions are considered lost. "Canary" cache size reduced by the number of partitions lost, and listener detects data loss. This solution does not depend on deployed Coherence version, does not bring significant overhead due to asynchronous implementation, and enables custom, application-provided recovery or stopping logic.
 
 = Source code and documentation =
 
