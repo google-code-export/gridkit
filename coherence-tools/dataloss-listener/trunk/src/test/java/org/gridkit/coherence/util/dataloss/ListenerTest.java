@@ -17,7 +17,7 @@ package org.gridkit.coherence.util.dataloss;
 
 import junit.framework.Assert;
 
-import org.gridkit.coherence.util.classloader.Isolate;
+import org.gridkit.coherence.utils.classloader.Isolate;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;

@@ -18,19 +18,50 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.gridkit</groupId>
+	<groupId>org.gridkit.coherence-tools</groupId>
 	<artifactId>coherence-dataloss-listener</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>coherence-dataloss-listener</name>
 	<description>Data loss detection utils for Oracle Coherence.</description>
 	
+	<scm>
+		<connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/dataloss-listener/trunk</connection>
+		<developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/dataloss-listener/trunk</developerConnection>
+		<url>http://gridkit.googlecode.com/svn/coherence-tools/dataloss-listener/trunk</url>
+	</scm>
+	
+	<distributionManagement>
+		<!-- GridKit maven2 repository location -->
+		<repository>
+			<id>gridkit-repo.googlecode.com</id>
+			<url>dav:https://gridkit.googlecode.com/svn/repo/</url>
+		</repository>
+	</distributionManagement>
+	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<coherence.version>3.6.1.0b19636</coherence.version>
+		<test-utils.version>0.0.1</test-utils.version>
 		<junit.version>4.8.2</junit.version>
 		<slf4j.version>1.6.0</slf4j.version>
 		<logback.version>0.9.21</logback.version>
 	</properties>
+	
+	<repositories>
+		<!-- GridKit maven2 repository -->
+		<repository>
+			<id>gridkit-releases</id>
+			<name>gridkit-repo.googlecode.com</name>
+			<url>http://gridkit.googlecode.com/svn/repo/</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 	
 	<dependencies>
 		<!-- Coherence -->
@@ -48,6 +79,12 @@
 		</dependency>
 		
 		<!-- Test dependencies -->
+		<dependency>
+			<groupId>org.gridkit.coherence-tools</groupId>
+			<artifactId>test-utils</artifactId>
+			<version>${test-utils.version}</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -73,10 +110,17 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
-			<!-- 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadoc</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
 				<configuration>
 					<links>
 						<link>http://gridkit.googlecode.com/svn/jdocs/coherence-tools/dataloss-listener/latest</link>
@@ -86,8 +130,27 @@
 					<linksource>true</linksource>
 				</configuration>
 			</plugin>
-			 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-source</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
+		<extensions>
+			<!-- Enables webdav repository access -->
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-webdav-jackrabbit</artifactId>
+				<version>1.0-beta-7</version>
+			</extension>
+		</extensions>
 	</build>
 	
 </project>
