@@ -61,6 +61,7 @@ Example implementation below just prints a list of lost partition numbers to sta
 package my.application;
 
 import com.tangosol.net.PartitionedService;
+import org.gridkit.coherence.util.dataloss.DataLossListener;
 
 /**
  * DataLossListener demonstration implementation
