@@ -20,14 +20,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.gridkit.coherence-tools</groupId>
 	<artifactId>test-utils</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.2</version>
 	<name>test-utils</name>
 	<description>Utility classes for unit and integration testing</description>
 	
 	<scm>
-		<connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/test-utils/tags/test-utils-0.0.1</connection>
-		<developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/test-utils/tags/test-utils-0.0.1</developerConnection>
-		<url>http://gridkit.googlecode.com/svn/coherence-tools/test-utils/tags/test-utils-0.0.1</url>
+		<connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/test-utils/tags/test-utils-0.0.2</connection>
+		<developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/test-utils/tags/test-utils-0.0.2</developerConnection>
+		<url>http://gridkit.googlecode.com/svn/coherence-tools/test-utils/tags/test-utils-0.0.2</url>
 	</scm>
 	
 	<distributionManagement>
