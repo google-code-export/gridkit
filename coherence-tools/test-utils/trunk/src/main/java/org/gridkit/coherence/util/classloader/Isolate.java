@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gridkit.coherence.utils.classloader;
+package org.gridkit.coherence.util.classloader;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -38,7 +38,7 @@ public class Isolate {
 	private Thread isolatedThread;
 	private IsolatedClassloader cl;
 	
-	private BlockingQueue<String> queue = new SynchronousQueue<String>();
+	private BlockingQueue<WorkUnit> queue = new SynchronousQueue<WorkUnit>();
 	
 	public Isolate(String name, String... packages) {		
 		this.name = name;
@@ -56,10 +56,10 @@ public class Isolate {
 		cl.exclude(excludes);
 	}
 	
-	public void submit(String classname) {
+	public void submit(Class<?> clazz, Object... constructorArgs) {
 		try {
-			queue.put(classname);
-			queue.put(Nop.class.getName());
+			queue.put(new WorkUnit(clazz.getName(), constructorArgs));
+			queue.put(new WorkUnit(Nop.class.getName()));
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -67,7 +67,7 @@ public class Isolate {
 	
 	public void stop() {
 		try {
-			queue.put("");
+			queue.put(new WorkUnit(""));
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -82,6 +82,16 @@ public class Isolate {
 		return cl;
 	}
 	
+	private class WorkUnit {
+		final String className;
+		final Object[] constructorArgs;
+		
+		public WorkUnit(String className, Object... constructorArgs) {
+			this.className = className;
+			this.constructorArgs = constructorArgs;
+		}
+	}
+	
 	private class Runner implements Runnable {
 
 		@Override
@@ -89,15 +99,15 @@ public class Isolate {
 			Thread.currentThread().setContextClassLoader(cl);
 			while(true) {
 				try {
-					String msg = queue.take();
-					if (msg.length() == 0) {
+					WorkUnit unit = queue.take();
+					if (unit.className.length() == 0) {
 						break;
 					}
 					else {
-						Class<?> task = cl.loadClass(msg);						
+						Class<?> task = cl.loadClass(unit.className);						
 						Constructor<?> c = task.getConstructors()[0];
 						c.setAccessible(true);
-						Runnable r = (Runnable) c.newInstance();
+						Runnable r = (Runnable) c.newInstance(unit.constructorArgs);
 						r.run();
 					}
 				} catch (Exception e) {
@@ -109,13 +119,10 @@ public class Isolate {
 	}
 	
 	public static class Nop implements Runnable {
-		
-		public Nop() {
-		}
+		public Nop() {}
 		
 		@Override
-		public void run() {
-		}
+		public void run() {}
 	}
 	
 	private class IsolatedClassloader extends ClassLoader {
@@ -195,7 +202,7 @@ public class Isolate {
 					}
 				}
 				byte[] cd = bos.toByteArray();
-				Class<?> baseC = baseClassloader.loadClass(classname);				
+				Class<?> baseC = baseClassloader.loadClass(classname);
 				Class<?> c = defineClass(classname, cd, 0, cd.length, baseC.getProtectionDomain());
 				//System.out.println("IS-" + name + " > " + classname);
 				return c;
