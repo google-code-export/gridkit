@@ -17,12 +17,12 @@ package org.gridkit.coherence.util.dataloss;
 
 import junit.framework.Assert;
 
-import org.gridkit.coherence.utils.classloader.Isolate;
+import org.gridkit.coherence.util.classloader.Isolate;
+import org.gridkit.coherence.util.classloader.NodeActions;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.tangosol.net.CacheFactory;
-import com.tangosol.net.DefaultConfigurableCacheFactory;
 
 /**
  * Integration test with two cluster nodes
@@ -47,28 +47,20 @@ public class ListenerTest {
 		is1.start();
 		is2.start();
 		
-		is1.submit(StartNode.class.getName());
-		is2.submit(StartNode.class.getName());
+		is1.submit(NodeActions.Start.class, "test-canary-cache-config.xml");
+		is2.submit(NodeActions.Start.class, "test-canary-cache-config.xml");
 		
-		is1.submit(TouchCache.class.getName());
-		is2.submit(TouchCache.class.getName());
+		is1.submit(TouchCache.class);
+		is2.submit(TouchCache.class);
 		
 		Thread.sleep(10 * 1000L); // FIXME try JMX waiters based on cluster statuses
-		is2.submit(CrashNode.class.getName());
+		is2.submit(NodeActions.Crash.class, 1);
 		Thread.sleep(5 * 1000L); // FIXME try JMX waiters based on cluster statuses
 		
-		is1.submit(StopNode.class.getName());
+		is1.submit(NodeActions.Stop.class);
 		
 		Assert.assertEquals("true", System.getProperty("DistributedCache-1"));
 		Assert.assertEquals("true", System.getProperty("DistributedCache-2"));
-	}
-	
-	public static class StartNode implements Runnable {
-		@Override
-		public void run() {
-			CacheFactory.setConfigurableCacheFactory(new DefaultConfigurableCacheFactory("test-canary-cache-config.xml"));
-			CacheFactory.ensureCluster();
-		}
 	}
 	
 	public static class TouchCache implements Runnable {
@@ -76,25 +68,6 @@ public class ListenerTest {
 		public void run() {
 			CacheFactory.getCache("canary-cache-1");
 			CacheFactory.getCache("canary-cache-2");
-		}
-	}
-	
-	public static class CrashNode implements Runnable {
-		@Override @SuppressWarnings("deprecation")
-		public void run() {
-			ThreadGroup parent = Thread.currentThread().getThreadGroup();
-			ThreadGroup[] childs = new ThreadGroup[parent.activeGroupCount()];
-			parent.enumerate(childs, false);
-			
-			ThreadGroup cluster2 = childs[1];
-			cluster2.stop();
-		}
-	}
-	
-	public static class StopNode implements Runnable {
-		@Override
-		public void run() {
-			CacheFactory.getCluster().shutdown();
 		}
 	}
 	
