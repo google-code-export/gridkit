@@ -33,11 +33,9 @@ public class PartitionLossListener implements PartitionListener {
 	
 	private static final Logger logger = LoggerFactory.getLogger(PartitionLossListener.class);
 	
-	public static final String CACHE_NAME = "canary-cache";
-	
 	private final DataLossMonitor dataLossMonitor;
 	
-	public PartitionLossListener(String dataLossListenerClass) {
+	public PartitionLossListener(String cacheName, String dataLossListenerClass) {
 		try {
 			Class<?> listenerClass = Class.forName(dataLossListenerClass);
 			if (!DataLossListener.class.isAssignableFrom(listenerClass)) {
@@ -47,7 +45,7 @@ public class PartitionLossListener implements PartitionListener {
 						"] does not implement " +
 						DataLossListener.class.getCanonicalName());
 			}
-			this.dataLossMonitor = new DataLossMonitor(CACHE_NAME, (DataLossListener) listenerClass.newInstance());
+			this.dataLossMonitor = new DataLossMonitor(cacheName, (DataLossListener) listenerClass.newInstance());
 		} catch (Exception e) {
 			logger.error("Exception occured during partition listener initialization", e);
 			throw new RuntimeException(e);

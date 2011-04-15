@@ -28,11 +28,14 @@ public class DataLossListenerImpl implements DataLossListener {
 	@Override
 	public void onPartitionLost(PartitionedService partitionedService, int[] lostPartitions) {
 		
-		System.out.print("Test listener got lost partitions list:");
+		System.out.print("Test listener got lost partitions list for service '");
+		System.out.print(partitionedService.getInfo().getServiceName());
+		System.out.print("':");
+		
 		for (int p : lostPartitions) System.out.print(" " + lostPartitions[p]);
 		System.out.println();
 		
-		System.setProperty("ListenerTest.lossDetected", "true");
+		System.setProperty(partitionedService.getInfo().getServiceName(), "true");
 		
 	}
 

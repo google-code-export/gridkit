@@ -118,13 +118,15 @@ class DataLossMonitor {
 			long elapsed = System.nanoTime() - start;
 			
 			if (partitionsMap.size() < partitionsCount) {
-				StringBuilder sb = new StringBuilder("Unable to fill \"canary\" cache partitions with sample data: parts no");
+				StringBuilder sb = new StringBuilder("Unable to fill \"canary\" cache partitions with sample data: parts no ");
 				for (int i = 0; i < partitionsCount; i++) {
 					if (!partitionsMap.containsKey(i)) {
-						sb.append(' ');
 						sb.append(i);
+						sb.append(' ');
 					}
 				}
+				sb.append("for service ");
+				sb.append(partitionedService.getInfo().getServiceName());
 				logger.error(sb.toString());
 				logger.error("Consider using " + CanaryKeyPartitioningStrategy.class.getCanonicalName());
 				throw new IllegalStateException("Canary cache construction failed");
@@ -135,7 +137,9 @@ class DataLossMonitor {
 			try {
 				if (canaryCache.size() == 0) {
 					canaryCache.putAll(cacheMap);
-					logger.info("Canary cache filled successfully in " + MILLISECONDS.convert(elapsed, NANOSECONDS) + " ms");
+					logger.info("Canary cache for service '{}' filled successfully in {} ms", 
+							partitionedService.getInfo().getServiceName(), 
+							MILLISECONDS.convert(elapsed, NANOSECONDS));
 				}
 			} catch(Exception e) {
 				logger.error("Exception during \"canary\" cache population.", e);
@@ -185,7 +189,7 @@ class DataLossMonitor {
 			if (cacheMap.size() != service.getPartitionCount()) {
 				// write log message
 				logger.error(lossMessage(service, cacheMap));
-
+				
 				// calculate lost partitions list
 				int lostCount = 0, lostPartitions[] = new int[service.getPartitionCount()];
 				for (int i = 0; i < service.getPartitionCount(); i++) {
@@ -206,7 +210,8 @@ class DataLossMonitor {
 						lostCanaryPart.put(partitionsMap.get(lostPartitions[i]), lostPartitions[i]);
 					}
 					canaryCache.putAll(lostCanaryPart);
-					logger.info("Canary cache partitions restored successfully");
+					logger.info("Canary cache partitions for service '{}' restored successfully", 
+							service.getInfo().getServiceName());
 				} catch (InterruptedException e) {
 					logger.error("Exception during \"canary\" cache recovery", e);
 					throw new RuntimeException(e);
@@ -216,12 +221,14 @@ class DataLossMonitor {
 				}
 			}
 		}
-
+		
 		private static String lossMessage(PartitionedService service, Map<Integer, Integer> cacheMap) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("Detected loss of ");
 			sb.append(service.getPartitionCount() - cacheMap.size());
-			sb.append(" partitions, delegating to application-provided listener");
+			sb.append(" partitions for service '");
+			sb.append(service.getInfo().getServiceName());
+			sb.append("', delegating to application-provided listener");
 			return sb.toString();
 		}
 		

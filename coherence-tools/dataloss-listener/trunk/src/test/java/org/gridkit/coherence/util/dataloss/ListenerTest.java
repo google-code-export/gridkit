@@ -18,7 +18,6 @@ package org.gridkit.coherence.util.dataloss;
 import junit.framework.Assert;
 
 import org.gridkit.coherence.utils.classloader.Isolate;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -55,17 +54,13 @@ public class ListenerTest {
 		is2.submit(TouchCache.class.getName());
 		
 		Thread.sleep(10 * 1000L); // FIXME try JMX waiters based on cluster statuses
-		is2.submit(NodeCrash.class.getName());
+		is2.submit(CrashNode.class.getName());
 		Thread.sleep(5 * 1000L); // FIXME try JMX waiters based on cluster statuses
 		
 		is1.submit(StopNode.class.getName());
 		
-		Assert.assertEquals("true", System.getProperty("ListenerTest.lossDetected"));
-	}
-	
-	@AfterClass
-	public static void shutdown() {
-		CacheFactory.getCluster().shutdown();
+		Assert.assertEquals("true", System.getProperty("DistributedCache-1"));
+		Assert.assertEquals("true", System.getProperty("DistributedCache-2"));
 	}
 	
 	public static class StartNode implements Runnable {
@@ -79,11 +74,12 @@ public class ListenerTest {
 	public static class TouchCache implements Runnable {
 		@Override
 		public void run() {
-			CacheFactory.getCache(PartitionLossListener.CACHE_NAME);
+			CacheFactory.getCache("canary-cache-1");
+			CacheFactory.getCache("canary-cache-2");
 		}
 	}
 	
-	public static class NodeCrash implements Runnable {
+	public static class CrashNode implements Runnable {
 		@Override @SuppressWarnings("deprecation")
 		public void run() {
 			ThreadGroup parent = Thread.currentThread().getThreadGroup();
