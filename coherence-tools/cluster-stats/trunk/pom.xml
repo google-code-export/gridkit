@@ -19,15 +19,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.gridkit.coherence-tools</groupId>
-	<artifactId>coherence-profiling-tools</artifactId>
+	<artifactId>cluster-stats</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
-	<name>coherence-profiling-tools</name>
-	<description>Profiling tool classes for Oracle Coherence.</description>
+	<name>cluster-stats</name>
+	<description>Statistics tool classes for Oracle Coherence.</description>
 	
 	<scm>
-		<connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/profiling-tools/trunk</connection>
-		<developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/profiling-tools/trunk</developerConnection>
-		<url>http://gridkit.googlecode.com/svn/coherence-tools/profiling-tools/trunk</url>
+		<connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/cluster-stats/trunk</connection>
+		<developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/cluster-stats/trunk</developerConnection>
+		<url>http://gridkit.googlecode.com/svn/coherence-tools/cluster-stats/trunk</url>
 	</scm>
 	
 	<distributionManagement>
@@ -47,7 +47,7 @@
 	<dependencies>
 		<!-- Coherence -->
 		<dependency>
-			<groupId>com.oracle.coherence</groupId>
+			<groupId>com.oracle</groupId>
 			<artifactId>coherence</artifactId>
 			<version>${coherence.version}</version>
 			<optional>true</optional>
@@ -85,8 +85,8 @@
 				</executions>
 				<configuration>
 					<links>
-						<link>http://gridkit.googlecode.com/svn/jdocs/coherence-tools/profiling-tools/latest</link>
-						<link>http://gridkit.googlecode.com/svn/jdocs/coherence-tools/profiling-tools/latest</link>
+						<link>http://gridkit.googlecode.com/svn/jdocs/coherence-tools/cluster-stats/latest</link>
+						<link>http://gridkit.googlecode.com/svn/jdocs/coherence-tools/cluster-stats/latest</link>
 						<link>http://download.oracle.com/docs/cd/E15357_01/coh.360/e15725</link>
 					</links>
 					<linksource>true</linksource>
