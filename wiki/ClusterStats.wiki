@@ -1,0 +1,48 @@
+#summary Cluster statistics tool for Coherence.
+
+= Introduction =
+
+Coherence saves a lots of telemetry data and exposes it via JMX. Hundreds of metrics are published this way. However, this data is mostly per-node and requires additional aggregation to present system as a whole.
+That's why GridDynamics developed cluster-stats utility library to accommodate distributes statistics across all cluster nodes.
+
+= Cluster-stats =
+
+Library focuses mainly on requests processing, providing following metrics:
+ * requests count
+ * average request time
+ * total processing time
+ * std deviation
+ * maximum request time
+ * 95, 99 and 99.9 percentiles (requests count)
+
+These metrics are exposed via cluster-stats JMX bean, and can also be accessed from within application via special cache (see "Implementation notes" below). 
+
+Also, JMX bean supports several methods, such as turning profiling on and off, and resetting metrics values - either all or by mask.
+
+= Implementation notes =
+
+Cluster-stats processing is sampler-based, and raw data is accumulated in a special cache. This data is aggregated on metrics data request.
+Metrics cache name is "distributed.cluster-info".
+
+= Source code and documentation =
+
+Both jar-files, javadocs and source code are available via maven:
+
+{{{
+<dependency>
+    <groupId>org.gridkit.coherence-tools</groupId>
+    <artifactId>cluster-stats</artifactId>
+    <version>0.1.0</version>
+</dependency>
+}}}
+
+Don't forget to add [MavenRepo GridKit Maven Repository] to your parent POM to get this dependency properly resolved.
+
+= Configuration and Usage =
+
+TBD
+
+= Resources =
+
+Follow these links to get additional information on Coherence data loss listener configuration and usage.
+  * [HowToDataLossListener Configuration and usage]
