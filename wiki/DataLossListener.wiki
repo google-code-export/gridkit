@@ -51,7 +51,7 @@ Both jar-files, javadocs and source code are available via maven:
 <dependency>
     <groupId>org.gridkit.coherence-tools</groupId>
     <artifactId>coherence-dataloss-listener</artifactId>
-    <version>0.9.0</version>
+    <version>0.9.1</version>
 </dependency>
 }}}
 
