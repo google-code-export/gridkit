@@ -1,0 +1,146 @@
+package org.gridkit.coherence.offheap.storage.memlog;
+
+import java.nio.ByteBuffer;
+
+/**
+ * A kind of {@link ByteBuffer}, byte buffer itself is a bit too complicated
+ * @author aragozin
+ *
+ */
+public final class ByteChunk {
+
+	private final byte[] bytes;
+	private final int offset;
+	private final int len;
+	
+	public ByteChunk(byte[] bytes) {
+		this.bytes = bytes;
+		this.offset = 0;
+		this.len = bytes.length;
+	}
+	
+	public ByteChunk(byte[] bytes, int offset, int len) {
+		this.bytes = bytes;
+		this.offset = offset;
+		this.len = len;
+	}
+
+	public int lenght() {
+		return len;
+	}
+
+	public byte at(int i) {
+		return bytes[offset + i];
+	}
+
+	public void set(int i, byte b) {
+		bytes[offset + i] = b;
+	}
+
+	public ByteChunk subChunk(int offs, int len) {
+		if (offs + len > this.len) {
+			throw new IllegalArgumentException();
+		}
+		return new ByteChunk(bytes, offset + offs, len);
+	}
+
+	public int intAt(int offs) {
+		if (offs + 4 > len) {
+			throw new IllegalArgumentException("Out of bounds");
+		}
+		// internal byte order - little endian
+		int value =   (0xFF & bytes[offset + offs]) << 24 
+					| (0xFF & bytes[offset + offs + 1]) << 16
+					| (0xFF & bytes[offset + offs + 2]) << 8
+					| (0xFF & bytes[offset + offs + 3]);
+		return value;
+	}
+
+	public void putInt(int offs, int val) {
+		if (offs + 4 > len) {
+			throw new IllegalArgumentException("Out of bounds");
+		}
+		// internal byte order - little endian
+		bytes[offset + offs] = (byte) (val >> 24);
+		bytes[offset + offs + 1] = (byte) (val >> 16);
+		bytes[offset + offs + 2] = (byte) (val >> 8);
+		bytes[offset + offs + 3] = (byte) val;
+		
+	}
+
+	public long longAt(int offs) {
+		if (offs + 8 > len) {
+			throw new IllegalArgumentException("Out of bounds");
+		}
+		// internal byte order - little endian
+		long value =   (0xFFl & bytes[offset + offs]) << 56 
+					 | (0xFFl & bytes[offset + offs + 1]) << 48
+					 | (0xFFl & bytes[offset + offs + 2]) << 40
+					 | (0xFFl & bytes[offset + offs + 3]) << 32
+					 | (0xFFl & bytes[offset + offs + 4]) << 24
+					 | (0xFFl & bytes[offset + offs + 5]) << 16
+				   	 | (0xFFl & bytes[offset + offs + 6]) << 8
+					 | (0xFFl & bytes[offset + offs + 7]);
+		return value;
+	}
+
+	public void putLong(int offs, long val) {
+		if (offs + 8 > len) {
+			throw new IllegalArgumentException("Out of bounds");
+		}
+		// internal byte order - little endian
+		bytes[offset + offs] = (byte) (val >> 56);
+		bytes[offset + offs + 1] = (byte) (val >> 48);
+		bytes[offset + offs + 2] = (byte) (val >> 40);
+		bytes[offset + offs + 3] = (byte) (val >> 32);
+		bytes[offset + offs + 4] = (byte) (val >> 24);
+		bytes[offset + offs + 5] = (byte) (val >> 16);
+		bytes[offset + offs + 6] = (byte) (val >> 8);
+		bytes[offset + offs + 7] = (byte) val;
+		
+	}
+	
+	public void putBytes(ByteChunk bytes) {
+		if (bytes.len > len) {
+			throw new IllegalArgumentException("Out of bounds");
+		}
+		System.arraycopy(bytes.bytes, bytes.offset, this.bytes, offset, bytes.len);		
+	}
+
+	public void putBytes(int offs, ByteChunk bytes) {
+		if (offs + bytes.len > len) {
+			throw new IllegalArgumentException("Out of bounds");
+		}
+		System.arraycopy(bytes.bytes, bytes.offset, this.bytes, offset + offs, bytes.len);		
+	}
+
+	public boolean sameBytes(ByteChunk that) {
+		if (len != that.len) {
+			return false;
+		}
+		else {
+			for(int i = 0;  i != len; ++i) {
+				if (at(i) != that.at(i)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder buf = new StringBuilder();
+		buf.append('[');
+		for(int i = 0; i != len; ++i) {
+			byte val = at(i);
+			buf.append(Integer.toHexString((val >> 4) & 0xF)).append(Integer.toHexString(val & 0xF));
+			if (i > 63) {
+				buf.append("...");
+				break;
+			}
+		}
+		buf.append(']');
+		return buf.toString();
+	}
+}
