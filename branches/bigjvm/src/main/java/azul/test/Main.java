@@ -4,11 +4,7 @@ import static java.lang.System.getProperty;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.*;
 
 import net.sf.ehcache.Cache;
@@ -28,7 +24,6 @@ import azul.test.runner.BaseRunner;
 import azul.test.runner.LimitedRunner;
 import azul.test.runner.UnlimitedRunner;
 import com.tangosol.net.CacheFactory;
-import com.tangosol.net.NamedCache;
 
 public class Main {
 	private static String mode = getProperty("mode") == null ? "heap" : getProperty("mode");
@@ -67,6 +62,7 @@ public class Main {
 	private static CacheManager manager;
 	private static Cache cache;
     private static Map<Integer, Record> map;
+
 	
 	public static void main(String args[]) throws InterruptedException, ExecutionException, IOException {
 		System.setProperty("org.terracotta.license.path", "terracotta-license.key");
@@ -146,6 +142,8 @@ public class Main {
 
             if(useEhcache)
                 writer = new Writer(cache, maxCacheSize, recordSize, dispersion, useSmartRecord, bulkSize);
+            //else if(useCoherence)
+            //    writer = new BatchWriter(map, maxCacheSize, recordSize, dispersion, useSmartRecord, bulkSize);
             else
                 writer = new MapWriter(map, maxCacheSize, recordSize, dispersion, useSmartRecord, bulkSize);
 			
@@ -255,16 +253,23 @@ public class Main {
 		long initFreeMemory = Runtime.getRuntime().freeMemory();
 
 		List<Integer> allKeys = new ArrayList<Integer>(maxCacheSize);
+        Map<Integer, Record> tmp = new HashMap<Integer, Record>(10000);
 		for (int i = 0; i < maxCacheSize; ++i)
 			allKeys.add(i);
 		Collections.shuffle(allKeys, rand);
 
 		for (int i = 0; i < initCacheSize; ++i) {
 	    	if (!useSmartRecord)
-	    		map.put(allKeys.get(i), new Record(rand, recordSize, dispersion));
+	    		tmp.put(allKeys.get(i), new Record(rand, recordSize, dispersion));
 	    	else
-	    		map.put(allKeys.get(i), new SmartRecord(rand, recordSize, dispersion));
+	    		tmp.put(allKeys.get(i), new SmartRecord(rand, recordSize, dispersion));
+            if(i % 10000 == 0){
+                map.putAll(tmp);
+                tmp.clear();
+            }
 		}
+        map.putAll(tmp);
+        tmp.clear();
 
 		System.gc();
 		overallResults.put("cacheSize", map.size() + "");
