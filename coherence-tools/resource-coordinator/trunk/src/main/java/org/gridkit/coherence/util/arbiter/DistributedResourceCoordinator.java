@@ -15,6 +15,8 @@
  */
 package org.gridkit.coherence.util.arbiter;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,6 +29,9 @@ import java.util.concurrent.locks.LockSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tangosol.io.pof.PofReader;
+import com.tangosol.io.pof.PofWriter;
+import com.tangosol.io.pof.PortableObject;
 import com.tangosol.util.ConcurrentMap;
 
 /**
@@ -47,7 +52,7 @@ public class DistributedResourceCoordinator {
 
 	private ConcurrentMap controlCache;
 	private ResourceControl manager;
-	private FairShare fairSourceCalculator;
+	private FairShare fairShare;
 
 	private int checkPeriod = 200;
 	private int balancePeriodMillis = 10000;
@@ -101,6 +106,20 @@ public class DistributedResourceCoordinator {
 		return standByCount;
 	}
 
+	void printStatus() {
+		List<Object> active = new ArrayList<Object>(sources.size());
+		List<Object> standby = new ArrayList<Object>(sources.size());
+		for(SourceControl control: sources.values()) {
+			if (control.active) {
+				active.add(control.sourceId);
+			}
+			if (control.standby) {
+				standby.add(control.sourceId);
+			}
+		}
+		System.out.println("Active " + active.toString() + ", standby " + standby.toString());
+	}
+
 	private void shutdown() {
 		for(SourceControl control: sources.values()) {
 			if (control.active) {
@@ -116,7 +135,7 @@ public class DistributedResourceCoordinator {
 	}
 
 	private void checkLocks() {
-		int fairSourceNumber = fairSourceCalculator.getFairShare(sources.size());
+		int fairSourceNumber = fairShare.getFairShare(sources.size());
 
 		if (activeCount < fairSourceNumber) {
 			// fast locking cycle
@@ -146,7 +165,7 @@ public class DistributedResourceCoordinator {
 	}
 
 	private void balance() {
-		int fairSourceNumber = fairSourceCalculator.getFairShare(sources.size());
+		int fairSourceNumber = fairShare.getFairShare(sources.size());
 
 		// release stand by slots
 		for(SourceControl control: controls()) {
@@ -270,8 +289,8 @@ public class DistributedResourceCoordinator {
 		}
 	}
 
-	public void setFairSourceCalculator(FairShare fairSourceCalculator) {
-		this.fairSourceCalculator = fairSourceCalculator;
+	public void setFairShare(FairShare fairShare) {
+		this.fairShare = fairShare;
 	}
 
 	public void setLockCheckPeriodMillis(int period) {
@@ -311,7 +330,7 @@ public class DistributedResourceCoordinator {
 	public class ControlThread extends Thread {
 
 		public ControlThread() {
-			setName("DistributedDataSyncCoordinatorControl");
+			setName("DistributedResourceCoordinator");
 		}
 
 		@Override
@@ -336,7 +355,7 @@ public class DistributedResourceCoordinator {
 			}
 		}
 	}
-
+	
 	
 	
 	
@@ -350,11 +369,13 @@ public class DistributedResourceCoordinator {
 	
 	
 	
-	public static class ResourceLockKey {
+	public static class ResourceLockKey implements Serializable, PortableObject {
+		
+		private static final long serialVersionUID = -4331553392611241865L;
 		
 		public static final String KEYTYPE_ACTIVE  = "ACTIVE";
 		public static final String KEYTYPE_STANDBY = "STANDBY";
-
+		
 		private Object resourceId;
 		private String keyType;
 		
@@ -362,12 +383,12 @@ public class DistributedResourceCoordinator {
 		private ResourceLockKey() {
 			//for serialization
 		}
-
+		
 		public ResourceLockKey(String keyType, Object resourceId) {
 			this.resourceId = resourceId;
 			this.keyType = keyType;
 		}
-
+		
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -378,7 +399,7 @@ public class DistributedResourceCoordinator {
 					+ ((resourceId == null) ? 0 : resourceId.hashCode());
 			return result;
 		}
-
+		
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
@@ -400,12 +421,24 @@ public class DistributedResourceCoordinator {
 				return false;
 			return true;
 		}
-
+		
 		@Override
 		public String toString() {
 			StringBuilder builder = new StringBuilder();
 			builder.append("LockKey-").append(keyType).append("[").append(resourceId).append("]");
 			return builder.toString();
+		}
+
+		@Override
+		public void readExternal(PofReader pofReader) throws IOException {
+			keyType = pofReader.readString(0);
+			resourceId = pofReader.readObject(1);
+		}
+
+		@Override
+		public void writeExternal(PofWriter pofWriter) throws IOException {
+			pofWriter.writeString(0, keyType);
+			pofWriter.writeObject(1, resourceId);
 		}
 	}
 	

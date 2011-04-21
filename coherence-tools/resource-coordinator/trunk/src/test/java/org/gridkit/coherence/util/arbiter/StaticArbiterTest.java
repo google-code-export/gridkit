@@ -43,7 +43,7 @@ import com.tangosol.util.SegmentedConcurrentMap;
  * @author malekseev
  * 20.04.2011
  */
-public class DistributedArbiterTest {
+public class StaticArbiterTest {
 	
 	private static enum Sources { S1, S2, S3, S4, S5, S6, S7 };
 
@@ -63,7 +63,7 @@ public class DistributedArbiterTest {
 	}
 
 	@After
-	public void tearUp() throws InterruptedException, ExecutionException {
+	public void finish() throws InterruptedException, ExecutionException {
 		executor.submit(new Runnable() {
 			@Override
 			public void run() {
@@ -77,7 +77,7 @@ public class DistributedArbiterTest {
 	public void test_takeOver() throws Exception {
 		StaticFairShare fsc = new StaticFairShare();
 		fsc.setPeerCount(3);
-		coordinator.setFairSourceCalculator(fsc);
+		coordinator.setFairShare(fsc);
 		execPrivate(coordinator, "initSourceControls");
 
 		call_checkLocks();
@@ -99,7 +99,7 @@ public class DistributedArbiterTest {
 	public void test_takeOverAlternative() throws Exception {
 		StaticFairShare fsc = new StaticFairShare();
 		fsc.setPeerCount(4);
-		coordinator.setFairSourceCalculator(fsc);
+		coordinator.setFairShare(fsc);
 		execPrivate(coordinator, "initSourceControls");
 
 		call_checkLocks();
@@ -122,7 +122,7 @@ public class DistributedArbiterTest {
 		StaticFairShare fsc = new StaticFairShare();
 		fsc.setPeerCount(3);
 
-		coordinator.setFairSourceCalculator(fsc);
+		coordinator.setFairShare(fsc);
 		execPrivate(coordinator, "initSourceControls");
 
 		call_checkLocks();

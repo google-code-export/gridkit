@@ -41,6 +41,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<coherence.version>3.6.1.0b19636</coherence.version>
+		<test-utils.version>0.0.2</test-utils.version>
 		<junit.version>4.8.2</junit.version>
 		<slf4j.version>1.6.0</slf4j.version>
 		<logback.version>0.9.21</logback.version>
@@ -78,6 +79,12 @@
 		</dependency>
 		
 		<!-- Test dependencies -->
+		<dependency>
+			<groupId>org.gridkit.coherence-tools</groupId>
+			<artifactId>test-utils</artifactId>
+			<version>${test-utils.version}</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
