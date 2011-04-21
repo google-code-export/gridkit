@@ -4,7 +4,7 @@
 
 Coherence has a very powerful cluster MBean which allows you to monitor whole cluster via JMX connection to single node. In cluster applications such ability is very desirable. While it is easy to collection statics within single node and expose it via MBean, collecting aggregated statistics from whole cluster is challenging.
 
-That's why GridDynamics developed cluster-stats utility library to accommodate distributes statistics across all cluster nodes.
+That's why [http://griddynamics.com GridDynamics] developed cluster-stats utility library to accommodate distributes statistics across all cluster nodes.
 
 = Cluster-stats =
 
