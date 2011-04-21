@@ -2,7 +2,9 @@
 
 = Test utils package =
 
-This package contains useful utility classes for unit- and integration-testing of Coherence libraries. These currently include Isolate, enabling clusters creation within single JVM, and !IsolateTestRunner - same thing for JUnit integration.
+This package contains useful utility classes for unit- and integration-testing of data grid applications. These currently include:
+ * Isolate - enabling clusters creation within single JVM,
+ * !IsolateTestRunner - JUnit test runner forcing test suite to be executed in isolated ClassLoader (helpfull if you want different global Coherence setting in different test suites).
 
 == Isolate ==
 
