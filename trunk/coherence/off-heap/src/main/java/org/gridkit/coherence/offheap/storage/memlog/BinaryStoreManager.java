@@ -6,4 +6,6 @@ public interface BinaryStoreManager {
 	
 	public void destroy(BinaryStore store);
 	
+	public void close();
+	
 }
