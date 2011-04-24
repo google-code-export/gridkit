@@ -12,4 +12,6 @@ public interface BinaryStore {
 	
 	public Iterator<ByteChunk> keys();
 	
+	public int size();
+	
 }

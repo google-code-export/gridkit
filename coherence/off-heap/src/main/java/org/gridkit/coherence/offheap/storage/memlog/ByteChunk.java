@@ -25,6 +25,14 @@ public final class ByteChunk {
 		this.len = len;
 	}
 
+	public byte[] array() {
+		return bytes;
+	}
+	
+	public int offset() {
+		return offset;
+	}
+	
 	public int lenght() {
 		return len;
 	}
@@ -39,7 +47,7 @@ public final class ByteChunk {
 
 	public ByteChunk subChunk(int offs, int len) {
 		if (offs + len > this.len) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Chunk " + bytes + " offs: " + offset + " len: " + len + ". Required subrange " + offs + " by " + len);
 		}
 		return new ByteChunk(bytes, offset + offs, len);
 	}
