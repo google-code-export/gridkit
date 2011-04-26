@@ -33,7 +33,7 @@ import com.tangosol.net.NamedCache;
  * Integration DRC test, using role-based share implementation to calculate fair numbers
  * 
  * @see DistributedResourceCoordinator
- * @see RoleBasedArbiterTest
+ * @see RoleBasedFairShare
  * 
  * @author malekseev
  * 20.04.2011
