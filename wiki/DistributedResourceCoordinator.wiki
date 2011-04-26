@@ -1,0 +1,106 @@
+#summary Distributed Resource Coordinator homepage
+#labels Featured,Phase-Design
+
+= Introduction =
+
+It is an often seen situation in distributed systems, when some resources should be shared among several application instances, or cluster node. Resource may be of any nature, such as database connection, Coherence*Extend connection, JMS queue or topic, etc. 
+
+For example, 6 database instances may be used by a 3-nodes cluster. To enable load balancing and high availability, it would be good to hold 2 connections per node and, when some node dies, rebalance connections to 3 per node.
+
+!GridDynamics developed a generic solution for resources sharing and live rebalancing, called Distributed Resource Coordinator. This library works with Oracle Coherence clusters and uses Coherence cache locks to enable resource balancing feature.
+
+
+= Resources Locks =
+
+Resources, shared among cluster nodes, are called "sources" here and after. Nodes to share sources among are called "peers".
+
+So, the implementation task may be stated the following way: enable live sources sharing among peers, closest to the "fair" one (i.e., when at any moment in time sources,,i,, is as close to sourcesCount/peersCount as possible). Sources should be rebalanced on periodical basis, giving some to arriving peers and taking all from leaving ones.
+
+Resource Coordinator uses two types of locks to reach the requirements: "standby" lock and "active" lock. Lock is acquired per source. There may be only one active lock and at most one standby lock per source. Lock are implemented as Coherence cache locks on a special control cache user by Resource Coordinator. Additionally, Coherence implementation guarantees that all locks are dropped when some node dies.
+
+When active lock is acquired by cluster node, this node may work with source - use database connection or do something else. When standby lock is acquired - it means that this peer will get the source when peer holding active one dies or decides to give excessive sources (for example, when additional peers join the cluster).
+
+In other words, locks hold sources distribution state and define sources transfer rules - from active to standby peers.
+
+
+= Configuration and Extension Points =
+
+Resource Coordinator user some accompanying classes to get all the stuff running:
+ * lockMap - generally, Coherence distributed cache instance to hold source locks in
+ * !ResourceControl - application-provided class instance, containing business logic. Implements ResourceControl interface with 3 callback methods:
+{{{
+/**
+ * A base interface for managing HA connections to resources in cluster.
+ * 
+ * @author Alexey Ragozin (aragozin@griddynamics.com)
+ */
+public interface ResourceControl {
+
+	/**
+	 * Returns collection of currently locked resources
+	 */
+	public Collection<?> getResourcesList();
+
+	/**
+	 * Locks resource by id
+	 */
+	public void connect(Object resourceId);
+
+	/**
+	 * Unlocks resource by id
+	 */
+	public void disconnect(Object resourceId);
+
+}
+}}}
+ * FairShare - application-provided implementation of this interface, returning "fair" number of per-peer sources by sourcesCount
+{{{
+/**
+ * Fair share interface. 
+ * Implementations return "fair" number of resource to lock per-peer.
+ * 
+ * @author malekseev
+ * 20.04.2011
+ */
+public interface FairShare {
+	
+	/**
+	 * Returns "fair" number of resources to lock per-peer
+	 * @param sourcesCount number or resources to share
+	 */
+	public int getFairShare(int sourcesCount);
+	
+}
+}}}
+Resource Coordinator ships with 2 implementations: !StaticFairShare (preconfigured by number of peers, useful for simple cases or tests) and !RoleBasedFairShare - uses Coherence member roles to automatically calculate peers count at runtime (recommended for real-life usage).
+ * lockCheckPeriodMillis - locks check period (200ms default)
+ * rebalancePeriodMillis - rebalance period (10s default)
+
+For more information on periods, see sequence diagram below.
+
+= Sequence diagram =
+
+Below is a simplified sequence diagram for Resource Coordinator library
+
+
+
+
+
+
+= Source code and documentation =
+
+Both jar-files, javadocs and source code are available via maven:
+
+{{{
+<dependency>
+    <groupId>org.gridkit.coherence-tools</groupId>
+    <artifactId>distributed-resource-coordinator</artifactId>
+    <version>0.9.0</version>
+</dependency>
+}}}
+
+Don't forget to add [MavenRepo GridKit Maven Repository] to your parent POM to get this dependency properly resolved.
+
+= Resources =
+
+  * [HowToDataLossListener Configuration and usage]
