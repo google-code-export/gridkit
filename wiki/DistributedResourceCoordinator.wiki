@@ -14,7 +14,7 @@ For example, 6 database instances may be used by a 3-nodes cluster. To enable lo
 
 Resources, shared among cluster nodes, are called "sources" here and after. Nodes to share sources among are called "peers".
 
-So, the implementation task may be stated the following way: enable live sources sharing among peers, closest to the "fair" one (i.e., when at any moment in time sources,,i,, is as close to sourcesCount/peersCount as possible). Sources should be rebalanced on periodical basis, giving some to arriving peers and taking all from leaving ones.
+So, the implementation task may be stated the following way: enable live sources sharing among peers, closest to the "fair" one (i.e., when at any moment in time sources,,n,, is as close to sourcesCount/peersCount as possible). Sources should be rebalanced on periodical basis, giving some to arriving peers and taking all from leaving ones.
 
 Resource Coordinator uses two types of locks to reach the requirements: "standby" lock and "active" lock. Lock is acquired per source. There may be only one active lock and at most one standby lock per source. Lock are implemented as Coherence cache locks on a special control cache user by Resource Coordinator. Additionally, Coherence implementation guarantees that all locks are dropped when some node dies.
 
@@ -82,9 +82,7 @@ For more information on periods, see sequence diagram below.
 
 Below is a simplified sequence diagram for Resource Coordinator library
 
-
-
-
+http://gridkit.googlecode.com/svn/wiki/attachments/drc_sequence.png
 
 
 = Source code and documentation =
@@ -103,4 +101,4 @@ Don't forget to add [MavenRepo GridKit Maven Repository] to your parent POM to g
 
 = Resources =
 
-  * [HowToDataLossListener Configuration and usage]
+  * -
