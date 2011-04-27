@@ -39,9 +39,21 @@
 		</repository>
 	</distributionManagement>
 	
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+	<repositories>
+		<!-- GridKit maven2 repository -->
+		<repository>
+			<id>gridkit-releases</id>
+			<name>gridkit-repo.googlecode.com</name>
+			<url>http://gridkit.googlecode.com/svn/repo/</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 	
 	<build>
 		<plugins>
@@ -87,5 +99,9 @@
 			</extension>
 		</extensions>
 	</build>
+	
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	
 </project>
