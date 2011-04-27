@@ -25,7 +25,7 @@
     </parent>
 	<groupId>org.gridkit.coherence-tools</groupId>
 	<artifactId>coherence-dataloss-listener</artifactId>
-	<version>0.9.3</version>
+	<version>0.9.4-SNAPSHOT</version>
 	<name>coherence-dataloss-listener</name>
 	<description>Data loss detection utils for Oracle Coherence.</description>
 	
@@ -73,11 +73,4 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
-
-  <scm>
-    <connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/tags/coherence-dataloss-listener-0.9.3</connection>
-    <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/tags/coherence-dataloss-listener-0.9.3</developerConnection>
-    <url>http://gridkit.googlecode.com/svn/coherence-tools/tags/coherence-dataloss-listener-0.9.3</url>
-  </scm>
 </project>
