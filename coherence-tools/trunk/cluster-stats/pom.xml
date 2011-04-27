@@ -25,7 +25,7 @@
     </parent>
 	<groupId>org.gridkit.coherence-tools</groupId>
 	<artifactId>cluster-stats</artifactId>
-	<version>0.1.1-SNAPSHOT</version>
+	<version>0.2.0</version>
 	<name>cluster-stats</name>
 	<description>Statistics tool classes for Oracle Coherence.</description>
 	
@@ -52,4 +52,10 @@
 	    </dependency>
 	</dependencies>
 	
+
+  <scm>
+    <connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/tags/cluster-stats-0.2.0</connection>
+    <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/tags/cluster-stats-0.2.0</developerConnection>
+    <url>http://gridkit.googlecode.com/svn/coherence-tools/tags/cluster-stats-0.2.0</url>
+  </scm>
 </project>
