@@ -20,15 +20,15 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.gridkit.coherence-tools</groupId>
 	<artifactId>coherence-tools-parent</artifactId>
-	<version>1.0</version>
+	<version>1.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>coherence-tools-parent</name>
 	<description>Tools collection for Oracle Coherence IMDG (parent project).</description>
 	
 	<scm>
-		<connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/tags/coherence-tools-parent-1.0</connection>
-		<developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/tags/coherence-tools-parent-1.0</developerConnection>
-		<url>http://gridkit.googlecode.com/svn/coherence-tools/tags/coherence-tools-parent-1.0</url>
+		<connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/trunk</connection>
+		<developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/trunk</developerConnection>
+		<url>http://gridkit.googlecode.com/svn/coherence-tools/trunk</url>
 	</scm>
 	
 	<distributionManagement>
