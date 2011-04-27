@@ -25,7 +25,7 @@
     </parent>
 	<groupId>org.gridkit.coherence-tools</groupId>
 	<artifactId>test-utils</artifactId>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>0.1.0</version>
 	<name>test-utils</name>
 	<description>Utility classes for unit and integration testing</description>
 	
@@ -51,4 +51,10 @@
 		</dependency>
 	</dependencies>
 	
+
+  <scm>
+    <connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/tags/test-utils-0.1.0</connection>
+    <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/tags/test-utils-0.1.0</developerConnection>
+    <url>http://gridkit.googlecode.com/svn/coherence-tools/tags/test-utils-0.1.0</url>
+  </scm>
 </project>
