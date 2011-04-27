@@ -18,28 +18,18 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.gridkit.coherence-tools</groupId>
+        <artifactId>coherence-tools-parent</artifactId>
+        <version>1.0</version>
+    </parent>
 	<groupId>org.gridkit.coherence-tools</groupId>
 	<artifactId>test-utils</artifactId>
 	<version>0.0.3-SNAPSHOT</version>
 	<name>test-utils</name>
 	<description>Utility classes for unit and integration testing</description>
 	
-	<scm>
-		<connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/test-utils/tags/test-utils-0.0.1</connection>
-		<developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/test-utils/tags/test-utils-0.0.1</developerConnection>
-		<url>http://gridkit.googlecode.com/svn/coherence-tools/test-utils/tags/test-utils-0.0.1</url>
-	</scm>
-	
-	<distributionManagement>
-		<!-- GridKit maven2 repository location -->
-		<repository>
-			<id>gridkit-repo.googlecode.com</id>
-			<url>dav:https://gridkit.googlecode.com/svn/repo/</url>
-		</repository>
-	</distributionManagement>
-	
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<coherence.version>3.6.1.0b19636</coherence.version>
 		<junit.version>4.8.2</junit.version>
 	</properties>
@@ -53,65 +43,12 @@
 			<optional>true</optional>
 		</dependency>
 		
-		<!-- Note that JUnit is added as compile dep -->
+		<!-- Note that JUnit is added with compile scope -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit.version}</version>
 		</dependency>
 	</dependencies>
-	
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-javadoc</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<links>
-						<link>http://gridkit.googlecode.com/svn/jdocs/coherence-tools/test-utils/latest</link>
-						<link>http://gridkit.googlecode.com/svn/jdocs/coherence-tools/test-utils/latest</link>
-						<link>http://download.oracle.com/docs/cd/E15357_01/coh.360/e15725</link>
-					</links>
-					<linksource>true</linksource>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-source</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-		<extensions>
-			<!-- This is support for maven repo, stored in SVN -->
-			<extension>
-				<groupId>org.apache.maven.wagon</groupId>
-				<artifactId>wagon-webdav-jackrabbit</artifactId>
-				<version>1.0-beta-7</version>
-			</extension>
-		</extensions>
-	</build>
 	
 </project>
