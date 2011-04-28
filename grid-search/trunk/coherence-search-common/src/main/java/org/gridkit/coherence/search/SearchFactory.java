@@ -33,6 +33,7 @@ import com.tangosol.io.Serializer;
 import com.tangosol.io.pof.PofReader;
 import com.tangosol.io.pof.PofWriter;
 import com.tangosol.io.pof.PortableObject;
+import com.tangosol.net.BackingMapContext;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.Binary;
 import com.tangosol.util.BinaryEntry;
@@ -147,7 +148,7 @@ public class SearchFactory<I, IC, Q> {
 
 			psi.configure(config);			
 			if (config.isAttributeIndexEnabled()) {
-				attributeIndex = new SimpleMapIndex(attributeExtrator, false, null);
+				attributeIndex = new SimpleMapIndex(attributeExtrator, false, null, null);
 			}
 		
 			queueSizeLimit = config.getIndexUpdateQueueSizeLimit();
@@ -450,13 +451,22 @@ public class SearchFactory<I, IC, Q> {
 			return true;
 		}
 
-		@Override
+		//Override in Coherence 3.6
 		@SuppressWarnings("unchecked")
 		public MapIndex createIndex(boolean sorted, Comparator comparator, Map indexMap) {
 			SearchIndexEngine<I, Q> engine = new SearchIndexEngine<I, Q>(psi.createIndexInstance(indexConfiguration), extractor, psi);
 			engine.init(engineConfig, indexMap);
 			indexMap.put(this, engine);
 			return engine;
+		}
+		
+		
+
+		//@Override in Coherence 3.7
+		@SuppressWarnings("unchecked")
+		public MapIndex createIndex(boolean sorted, Comparator comparator, Map indexMap, BackingMapContext backingMapContext) {
+			// TODO use backing map information to full extent
+			return createIndex(sorted, comparator, indexMap);
 		}
 
 		@Override
