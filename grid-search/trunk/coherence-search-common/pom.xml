@@ -22,13 +22,13 @@
 	<groupId>org.gridkit.search</groupId>
 	<artifactId>coherence-search-common</artifactId>
 	<packaging>jar</packaging>
-	<version>0.9.3-SNAPSHOT</version>
+	<version>0.9.1-SNAPSHOT</version>
 	<name>Grid Search / Coherence common (code.google.com/p/gridkit)</name>
 
 	<scm>
-		<connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/trunk</connection>
-		<developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/trunk</developerConnection>
-		<url>http://gridkit.googlecode.com/svn/coherence-tools/trunk</url>
+		<connection>scm:svn:http://gridkit.googlecode.com/svn/grid-search/trunk</connection>
+		<developerConnection>scm:svn:https://gridkit.googlecode.com/svn/grid-search/trunk</developerConnection>
+		<url>http://gridkit.googlecode.com/svn/grid-search/trunk</url>
 	</scm>
 
 
