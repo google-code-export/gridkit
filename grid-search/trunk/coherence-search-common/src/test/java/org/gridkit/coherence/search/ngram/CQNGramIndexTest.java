@@ -30,6 +30,4 @@ public class CQNGramIndexTest extends BaseNGramIndexTest {
 	protected NamedCache getCache() {
 		return new ContinuousQueryCache(CacheFactory.getCache("local-cache"), new AlwaysFilter());
 	}
-
-	
 }

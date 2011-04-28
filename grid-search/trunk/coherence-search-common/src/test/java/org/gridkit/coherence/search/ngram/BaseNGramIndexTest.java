@@ -16,26 +16,32 @@
 
 package org.gridkit.coherence.search.ngram;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.gridkit.coherence.search.SearchFactory;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
-import com.tangosol.util.extractor.ReflectionExtractor;
-import org.gridkit.coherence.search.SearchFactory;
-import org.junit.*;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.tangosol.util.extractor.IdentityExtractor;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
 public abstract class BaseNGramIndexTest {
 
-	private int NGRAM_SIZE;
+	private int NGRAM_SIZE = 3;
     private static final String[] CHARSET1 = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O"};
 
 	private NamedCache cache;
-	private SearchFactory<NGramIndex, Integer, String> factory = new SearchFactory<NGramIndex, Integer, String>(new NGramIndexPlugin(), NGRAM_SIZE, new ReflectionExtractor("toString"));
+	private SearchFactory<NGramIndex, Integer, String> factory = new SearchFactory<NGramIndex, Integer, String>(new NGramIndexPlugin(), NGRAM_SIZE, IdentityExtractor.INSTANCE);
 	
 	@BeforeClass
 	public static void configure() {
@@ -77,8 +83,8 @@ public abstract class BaseNGramIndexTest {
 	
     static Map<String, String> generateEncodedNumber(long from, long to, String[] charset) {
         Map<String, String> result = new HashMap<String, String>();
-        for (int i = 0; i != to; ++i) {
-            String text = encodeBitPositions(i, charset);
+        for (int i = 0; i != (to - from); ++i) {
+            String text = encodeBitPositions(from + i, charset);
             result.put(text, text);
         }
         return result;
