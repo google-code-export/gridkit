@@ -23,7 +23,7 @@ JMX bean supports several methods, such as turning profiling on and off, and res
 
 = Implementation notes =
 
-Cluster-stats processing is sampler-based, and raw data is accumulated in a special cache. This data is aggregated on metrics data request.
+Cluster-stats processing is sampler-based, and raw data is accumulated in a special cache. Raw data is aggregated on metrics data request.
 Metrics cache name is "distributed.cluster-info".
 
 = Source code and documentation =
@@ -42,8 +42,92 @@ Don't forget to add [MavenRepo GridKit Maven Repository] to your parent POM to g
 
 = Configuration and Usage =
 
-TBD
+To get cluster statistics working, 
 
-= Resources =
+1. Add a maven dependency above 
 
-TBD
+2. Configure Coherence statistics cache and its caching scheme.
+
+Typical configuration may look like the following:
+
+{{{
+<?xml version="1.0"?>
+
+<!DOCTYPE cache-config SYSTEM "cache-config.dtd">
+
+<cache-config>
+    <caching-scheme-mapping>
+
+        <cache-mapping>
+            <cache-name>distributed.cluster-info</cache-name>
+            <scheme-name>StatisticsCacheScheme</scheme-name>
+        </cache-mapping>
+
+        ... (business caches omitted)
+
+    </caching-scheme-mapping>
+    <caching-schemes>
+
+        <distributed-scheme>
+            <scheme-name>StatisticsCacheScheme</scheme-name>
+            <service-name>StatisticsCacheService</service-name>
+            <backing-map-scheme>
+                <local-scheme/>
+            </backing-map-scheme>
+            <thread-count>0</thread-count>
+            <local-storage system-property="coherence.cache.storage-enabled">false</local-storage>
+            <backup-count>1</backup-count>
+        </distributed-scheme>
+
+        ... (business schemes omitted)
+
+    </caching-schemes>
+</cache-config>
+}}}
+
+3. Set system property "org.gridkit.coherence.profile.enabled" to "true"
+
+4. Acquire sampler and populate it with data. This depends on profiling aims. 
+
+*Example 1.* 
+A typical use case - latency sampler defined to measure a particular cache gets by means of StopWatch.
+
+Sampler
+{{{
+public class PerformanceMetrics {
+	public static final Sampler CACHE_GET_SAMPLER = RuntimeStats.getLatencyTimer("cache.get", 1000);
+}
+}}}
+
+Sampler population code
+{{{
+	private NamedCache cache;
+
+	public Object lookup(Serializable key) {
+		StopWatch sw = new StopWatch();
+		Object result = cache.get(key);
+		sw.stop(PerformanceMetrics.CACHE_GET_SAMPLER);
+
+		return result;
+	}
+
+	// ...
+}}}
+
+After application is started and some raw data is submitted into statistics cache, it is possible to get aggregated statistics via JMX or directly from cache. Entry name is "cache.get", as defined in the above code.
+
+*Example 2.*
+More complex use case with custom sampler definition, measuring processing delays of some "records"
+
+Sampler and usage
+{{{
+	private Sampler delaySampler = ClusterInfoService.getInstance().getHistogramService().defineSampler(
+		"custom", 1L, 0L, 50000, 500);
+
+	public void processRecords(List<Record> records) {
+		for (Record record : records) {
+			long delay = System.currentTimeMillis() - record.getLastUpdated();
+			delaySampler.addSample(delay);
+		}
+	}
+}}}
