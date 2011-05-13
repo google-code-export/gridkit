@@ -1,6 +1,6 @@
 #summary Coherence ToolBox projects overview.
 
-Coherence ToolBox contains several utility projects for Oracle Coherence IMDG.
+Coherence !ToolBox contains several utility projects for Oracle Coherence IMDG.
 
 = Data Loss Listener =
 
@@ -8,12 +8,10 @@ Coherence ToolBox contains several utility projects for Oracle Coherence IMDG.
 
 = Cluster Statistics Tool =
 
-
+[ClusterStats Statistics Tool] provides cache-based, cluster-wide statistics, such as cache access latencies or other application-specific metrics.
 
 = Distributed Resource Coordinator =
 
 
 
 = Test Utils =
-
-
