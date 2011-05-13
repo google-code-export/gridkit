@@ -1,0 +1,31 @@
+<!DOCTYPE cache-config SYSTEM "cache-config.dtd">
+
+<cache-config>
+    <caching-scheme-mapping>
+        <cache-mapping>
+            <cache-name>test</cache-name>
+            <scheme-name>testscheme</scheme-name>
+        </cache-mapping>
+    </caching-scheme-mapping>
+
+    <caching-schemes>
+        <distributed-scheme>
+            <scheme-name>testscheme</scheme-name>
+            <backing-map-scheme>
+                <ramjournal-scheme/>
+            </backing-map-scheme>
+            <backup-count>1</backup-count>
+            <thread-count>15</thread-count>
+            <autostart>
+                true
+            </autostart>
+            <backup-storage>
+                <type>scheme</type>
+                <scheme-name>ramjournal</scheme-name>
+            </backup-storage>
+        </distributed-scheme>
+        <ramjournal-scheme>
+            <scheme-name>ramjournal</scheme-name>
+        </ramjournal-scheme>
+    </caching-schemes>
+</cache-config>
