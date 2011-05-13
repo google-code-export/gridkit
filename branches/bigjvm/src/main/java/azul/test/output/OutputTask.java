@@ -6,13 +6,14 @@ import java.util.List;
 public class OutputTask implements Task {
 	final Writer writer;
 	
-	final List<Long> data;
-	final List<Long> timestamp;
+	final long[] data;
+	final long[] timestamp;
+    final int datasize;
 	
 	final boolean isLast;
 	
-	public OutputTask(Writer writer, List<Long> data, List<Long> timestamp, boolean isLast) {
-		if(data.size() != timestamp.size())
+	public OutputTask(Writer writer, long[] data, int datasize, long[] timestamp, int timestampsize, boolean isLast) {
+		if(datasize != timestampsize)
 			throw new IllegalArgumentException("data || data");
 		
 		if (writer == null)
@@ -22,6 +23,7 @@ public class OutputTask implements Task {
 		
 		this.data = data;
 		this.timestamp = timestamp;
+        this.datasize = datasize;
 		
 		this.isLast = isLast;
 	}

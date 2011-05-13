@@ -14,8 +14,10 @@ public class OutputObservationLogger implements ObservationLogger {
 	
 	private int sampleSize;
 	
-	protected List<Long> data;
-	protected List<Long> timestamp;
+	protected long[] data;
+    protected int datasize;
+	protected long[] timestamp;
+    protected int timestampsize;
 	
 	public OutputObservationLogger(String fileName, BlockingQueue<Task> queue, int sampleSize, int bufferSize) throws IOException {
 		Writer out = new FileWriter(fileName);
@@ -24,25 +26,27 @@ public class OutputObservationLogger implements ObservationLogger {
 		this.queue = queue;
 		this.sampleSize = sampleSize;
 		
-		data = new ArrayList<Long>(sampleSize);
-		timestamp = new ArrayList<Long>(sampleSize);
+		data = new long[sampleSize];
+		timestamp = new long[sampleSize];
 	}
 	
 	@Override
 	public void logObservation(long timestamp, long data) {
-		this.data.add(data);
-		this.timestamp.add(timestamp);
+		this.data[datasize++] = data;
+		this.timestamp[timestampsize++] = timestamp;
 		
-		if (this.data.size() == sampleSize) {
-			queue.add(new OutputTask(writer, this.data, this.timestamp, false));
+		if (datasize == sampleSize) {
+			queue.add(new OutputTask(writer, this.data, datasize, this.timestamp, timestampsize, false));
 			
-			this.data = new ArrayList<Long>(sampleSize);
-			this.timestamp = new ArrayList<Long>(sampleSize);
+			this.data = new long[sampleSize];
+			this.timestamp = new long[sampleSize];
+            datasize = 0;
+            timestampsize = 0;
 		}
 	}
 	
 	@Override
 	public void close() {
-		queue.add(new OutputTask(writer, this.data, this.timestamp, true));
+		queue.add(new OutputTask(writer, this.data, datasize, this.timestamp, timestampsize, true));
 	}
 }
