@@ -27,7 +27,17 @@ Add "canary" caches declaration to your Coherence cache configuration file, mapp
 		</cache-mapping>
 		
 		<cache-mapping>
+			<cache-name>DataCacheA</cache-name>
+			<scheme-name>distributed-1</scheme-name>
+		</cache-mapping>
+		
+		<cache-mapping>
 			<cache-name>canary-cache-2</cache-name>
+			<scheme-name>distributed-2</scheme-name>
+		</cache-mapping>
+		
+		<cache-mapping>
+			<cache-name>DataCacheB</cache-name>
 			<scheme-name>distributed-2</scheme-name>
 		</cache-mapping>
 		
