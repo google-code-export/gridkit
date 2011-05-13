@@ -31,7 +31,6 @@ public class LimitedRunner extends BaseRunner {
 
 			do {
 				command.run();
-				
 				ft = System.nanoTime();
 				
 				logger.logObservation((ft - startTime) / TimeUnit.MILLISECONDS.toNanos(1), ft - st);
@@ -55,7 +54,6 @@ public class LimitedRunner extends BaseRunner {
 			
 			st = ft;
 		}
-		
 		logger.close();
 		
 		return null;

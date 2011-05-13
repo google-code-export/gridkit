@@ -41,5 +41,6 @@ public class MapReader implements Runnable {
 
     		sum += record.getId();
     	}
+
 	}
 }

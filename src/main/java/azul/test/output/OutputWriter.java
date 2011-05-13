@@ -23,9 +23,9 @@ public class OutputWriter implements Callable<Void> {
 			
 			OutputTask outputTask = (OutputTask)task;
 			
-			for (int i = 0; i < outputTask.data.size(); ++i)
-				outputTask.writer.write(outputTask.timestamp.get(i) + ", " + outputTask.data.get(i) + "\n");
-			
+			for (int i = 0; i < outputTask.datasize; ++i)
+				outputTask.writer.write(outputTask.timestamp[i] + ", " + outputTask.data[i] + "\n");
+
 			if (outputTask.isLast) {
 				outputTask.writer.flush();
 				outputTask.writer.close();

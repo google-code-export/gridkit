@@ -56,6 +56,9 @@ public class Main {
 	private static int loggersCount = Integer.valueOf(getProperty("loggersCount") == null ? "2" : getProperty("loggersCount"));
     private static boolean useEhcache = Boolean.valueOf(getProperty("useEhcache") == null ? "true" : getProperty("useEhcache"));
     private static boolean useCoherence = Boolean.valueOf(getProperty("useCoherence") == null ? "false" : getProperty("useCoherence"));
+    private static boolean useGemFire = Boolean.getBoolean("useGemFire");
+    private static final String LOCATOR_ADDRESS = System.getProperty("locatoraddress", "localhost");
+    private static final String LOCATOR_PORT = System.getProperty("locatorport", "10355");
 	
 	private static Map<String, String> overallResults = new ConcurrentHashMap<String, String>();
 	
@@ -66,6 +69,9 @@ public class Main {
 	
 	public static void main(String args[]) throws InterruptedException, ExecutionException, IOException {
 		System.setProperty("org.terracotta.license.path", "terracotta-license.key");
+
+        long progstart = System.nanoTime();
+
         if(useEhcache)
             manager = new CacheManager("ehcache.xml");
         
@@ -73,25 +79,31 @@ public class Main {
             createCache();
         else if(useCoherence)
             createNamedCache();
+        else if(useGemFire)
+            createRegion();
         else
             createMap();
         
-        System.out.println("Filling cache ...");
+        System.out.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - progstart) + ": Filling cache ...");
         if(useEhcache)
             fillCache();
+        else if(useCoherence)
+            fillNamedCache();
+        else if(useGemFire)
+            fillNamedCache();
         else
             fillMap();
         
         for (int i = 0; i < warmUpCount; ++i) {
-        	System.out.println("Warming Up " + i + " ...");
+        	System.out.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - progstart) + ": Warming Up " + i + " ...");
         	runTest(false, warmUptime);
         }
         
-        System.out.println("Running ... ");
+        System.out.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - progstart) + ": Running ... ");
         runTest(true, time);
-        System.out.println("Completed");
+        System.out.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - progstart) + ": Completed");
         
-        System.out.println("Files written: " + OutputWriter.filesClosed.get());
+        System.out.println(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - progstart) + ": Files written: " + OutputWriter.filesClosed.get());
 	}
 	
 	public static void runTest(boolean isRealRun, int time) throws InterruptedException, ExecutionException, IOException {
@@ -189,10 +201,21 @@ public class Main {
     @SuppressWarnings("unchecked")
     public static void createNamedCache(){
         System.out.println("Using Coherence.");
-        System.setProperty("tangosol.coherence.cacheconfig", "coherence-cache-config.xml");
         System.setProperty("tangosol.coherence.distributed.localstorage", "false");
         map = CacheFactory.getCache("test");
 
+    }
+
+    public static void createRegion(){
+        System.out.println("Using GemFire.");
+        com.gemstone.gemfire.cache.Cache cache =
+                new com.gemstone.gemfire.cache.CacheFactory()
+                        .set("mcast-port", "0")
+                        .set("locators", LOCATOR_ADDRESS + "[" + LOCATOR_PORT + "]")
+                        .create();
+        com.gemstone.gemfire.cache.RegionFactory<Integer, Record> factory =
+                cache.createRegionFactory(com.gemstone.gemfire.cache.RegionShortcut.REPLICATE_PROXY);
+        map = factory.create("test");
     }
 	
 	public static Cache createHeapCache() {
@@ -244,6 +267,70 @@ public class Main {
 		overallResults.put("heapSizeForCache", (initFreeMemory - Runtime.getRuntime().freeMemory()) / (1024.0 * 1024) + "");
 	}
 
+    private static final int BATCHSIZE = 100;
+
+    public static void fillNamedCache(){
+        /*
+        map.clear();
+        Random rand = new Random();
+        */
+        System.gc();
+        long initFreeMemory = Runtime.getRuntime().freeMemory();
+        /*
+        List<Integer> allKeys = new ArrayList<Integer>(maxCacheSize);
+        Map<Integer, Record> tmp = new HashMap<Integer, Record>(BATCHSIZE);
+		for (int i = 0; i < maxCacheSize; ++i)
+			allKeys.add(i);
+		Collections.shuffle(allKeys, rand);
+        NamedCache nmcache = (NamedCache)map;
+        nmcache.lock(0, -1);
+        Iterator<Integer> key = allKeys.iterator();
+        for(int i = 0, j = initCacheSize % BATCHSIZE; i < j; i++){
+            if(map.size() >= initCacheSize)
+                break;
+            if (!useSmartRecord)
+	    		tmp.put(key.next(), new Record(rand, recordSize, dispersion));
+	    	else
+	    		tmp.put(key.next(), new SmartRecord(rand, recordSize, dispersion));
+        }
+        if(map.size() < initCacheSize)
+            map.putAll(tmp);
+        tmp.clear();
+
+        for(int i = 0, j = initCacheSize / BATCHSIZE; i < j; i++){
+            if(map.size() >= initCacheSize)
+                break;
+            for(int k = 0; k < BATCHSIZE; k++){
+                if (!useSmartRecord)
+                    tmp.put(key.next(), new Record(rand, recordSize, dispersion));
+                else
+                    tmp.put(key.next(), new SmartRecord(rand, recordSize, dispersion));
+            }
+            map.putAll(tmp);
+            tmp.clear();
+        }
+        nmcache.unlock(0);
+        */
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+        System.gc();
+
+		overallResults.put("cacheSize", map.size() + "");
+		overallResults.put("heapSizeForCache", (initFreeMemory - Runtime.getRuntime().freeMemory()) / (1024.0 * 1024) + "");
+    }
     public static void fillMap() {
 		map.clear();
 
@@ -253,24 +340,17 @@ public class Main {
 		long initFreeMemory = Runtime.getRuntime().freeMemory();
 
 		List<Integer> allKeys = new ArrayList<Integer>(maxCacheSize);
-        Map<Integer, Record> tmp = new HashMap<Integer, Record>(10000);
 		for (int i = 0; i < maxCacheSize; ++i)
 			allKeys.add(i);
 		Collections.shuffle(allKeys, rand);
 
-		for (int i = 0; i < initCacheSize; ++i) {
+        for (int i = 0; i < initCacheSize; ++i) {
 	    	if (!useSmartRecord)
-	    		tmp.put(allKeys.get(i), new Record(rand, recordSize, dispersion));
+	    		map.put(allKeys.get(i), new Record(rand, recordSize, dispersion));
 	    	else
-	    		tmp.put(allKeys.get(i), new SmartRecord(rand, recordSize, dispersion));
-            if(i % 10000 == 0){
-                map.putAll(tmp);
-                tmp.clear();
-            }
+	    		map.put(allKeys.get(i), new SmartRecord(rand, recordSize, dispersion));
 		}
-        map.putAll(tmp);
-        tmp.clear();
-
+        
 		System.gc();
 		overallResults.put("cacheSize", map.size() + "");
 		overallResults.put("heapSizeForCache", (initFreeMemory - Runtime.getRuntime().freeMemory()) / (1024.0 * 1024) + "");
