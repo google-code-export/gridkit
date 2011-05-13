@@ -5,7 +5,7 @@ Coherence !ToolBox contains several utility projects for Oracle Coherence IMDG.
 
 = Data Loss Listener =
 
-[DataLossListener Data Loss Listener] enables lost partitions detection for hardware fault or network split situation. Supports application-provided callback for emergency shutdown or recovery.
+[DataLossListener Data Loss Listener] enables lost partitions detection in hardware fault or network split scenarios. Supports application-provided callback for emergency shutdown or recovery.
 
 = Cluster Statistics Tool =
 
