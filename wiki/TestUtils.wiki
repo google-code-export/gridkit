@@ -4,7 +4,7 @@
 
 This package contains useful utility classes for unit- and integration-testing of data grid applications. These currently include:
  * Isolate - enabling clusters creation within single JVM,
- * !IsolateTestRunner - JUnit test runner forcing test suite to be executed in isolated ClassLoader (helpfull if you want different global Coherence setting in different test suites).
+ * !IsolateTestRunner - JUnit test runner forcing test suite to be executed in isolated !ClassLoader (helpful if you want different global Coherence setting in different test suites).
 
 == Isolate ==
 
@@ -57,7 +57,38 @@ Note that Isolate takes a list of packages to be isolated from each other. It is
 
 == !IsolateTestRunner ==
 
-TBD
+!IsolateTestRunner is a JUnit4 custom test runner, that runs test classes in a isolated class loader. It may be used for emulating remote Coherence clients in a single JVM during unit and integration tests.
+
+{{{
+/**
+ * Need to run in isolated class loader, otherwise Coherence defaults 
+ * are not going to be overridden by system properties
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ */
+@RunWith(IsolateTestRunner.class)
+public class RemoteStorageSchemeContextTest extends BaseSimpleContextTest {
+        
+        static Isolate node1;
+        
+        @BeforeClass
+        public static void init() {
+
+                node1 = new Isolate("node1", "com.tangosol", "org.gridkit");
+                node1.start();
+                node1.submit(StartCmd.class.getName());
+
+                // TODO default property reset for tests
+                System.setProperty("tangosol.coherence.wka", "localhost");
+                System.setProperty("tangosol.coherence.distributed.localstorage", "false");
+                context = new ClassPathXmlApplicationContext("schema/simple-coherence-context.xml");
+        }
+
+        // tests skipped
+
+}
+        }}}
+
+You can get complete example code [http://code.google.com/p/gridkit/source/browse/spring-cache-config/branches/preview/spring-integration/src/test/java/org/gridkit/coherence/integration/RemoteStorageSchemeContextTest.java?spec=svn340&r=340 here].
 
 = Source code and documentation =
 
