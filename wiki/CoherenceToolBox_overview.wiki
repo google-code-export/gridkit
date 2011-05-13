@@ -1,4 +1,5 @@
 #summary Coherence ToolBox projects overview.
+#labels Featured
 
 Coherence !ToolBox contains several utility projects for Oracle Coherence IMDG.
 
