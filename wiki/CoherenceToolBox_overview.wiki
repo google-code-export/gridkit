@@ -12,6 +12,8 @@ Coherence !ToolBox contains several utility projects for Oracle Coherence IMDG.
 
 = Distributed Resource Coordinator =
 
-[DistributedResourceCoordinator Resource Coordinator] is a reliable resource sharing, balancing and re-balancing (HA) library. May be used to share database connections, *Extend connections, JMX topics or queues, and any other resources among Coherence cluster nodes.
+[DistributedResourceCoordinator Resource Coordinator] is a reliable resource sharing, balancing and re-balancing (HA) library. May be used to share database connections, Extend connections, JMX topics or queues, and any other resources among Coherence cluster nodes.
 
 = Test Utils =
+
+[TestUtils Test Utils] may be efficiently used for unit- and integration-testing of tools and projects. Run Coherence cluster, or two clusters, in a single JVM to perform JUnit tests without any external infrastructure.
