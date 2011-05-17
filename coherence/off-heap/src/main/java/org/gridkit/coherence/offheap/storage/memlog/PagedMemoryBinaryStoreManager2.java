@@ -17,23 +17,24 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class PagedMemoryBinaryStoreManager2 implements BinaryStoreManager {
 
 	private static int EMPTY = 0;
-	private static int LOCKED = 1;
+	
+	private static int HASH_POS = 0;
+	private static int KEY_SIZE_POS = 4;
+	private static int VALUE_SIZE_POS = 8;
+	private static int DATA_POS = 12;
 	
 	private static int ALLOC_NEW_VALUE = 0;
-	private static int ALLOC_NEW_LIST = 0;
-	private static int ALLOC_RELOCATE_VALUE = 1;
-	private static int ALLOC_RELOCATE_LIST = 1;
+	private static int ALLOC_NEW_LIST = 1;
+	private static int ALLOC_RELOCATE_VALUE = 0;
 	
-	private static long TABLE_SERVICE_PERIOD = TimeUnit.SECONDS.toNanos(30);
-//	private static long MEM_DIAG_REPORT_PERIOD = TimeUnit.SECONDS.toNanos(30);
 	private static long MEM_DIAG_REPORT_PERIOD = TimeUnit.SECONDS.toNanos(10);
 	
 	private final String name;
 	private List<BinaryHashTable> tables = new ArrayList<BinaryHashTable>();
-	private PageLogManager pageManager;
+	private MemoryStoreBackend pageManager;
 	private Thread maintenanceDaemon;
 	
-	public PagedMemoryBinaryStoreManager2(String name, PageLogManager pageManager) {
+	public PagedMemoryBinaryStoreManager2(String name, MemoryStoreBackend pageManager) {
 		this.name = name;
 		this.pageManager = pageManager;
 		this.maintenanceDaemon = createMaintenanceThread();
@@ -91,7 +92,18 @@ public class PagedMemoryBinaryStoreManager2 implements BinaryStoreManager {
 		int n = 0;
 		int idle = 0;
 		long diagTimestamp = System.nanoTime();
+		
+		int[] evacuationHashes = new int[1024];
+		
+		BinaryHashTable[] tableSet = new BinaryHashTable[0];
 		while(true) {
+			
+			if (n % 500 == 0) {
+				synchronized(this) {
+					tableSet = tables.toArray(tableSet);
+				}
+			}
+			
 			if (diagTimestamp + MEM_DIAG_REPORT_PERIOD < System.nanoTime()) {
 				pageManager.dumpStatistics();
 				synchronized (this) {
@@ -108,61 +120,80 @@ public class PagedMemoryBinaryStoreManager2 implements BinaryStoreManager {
 				}
 				diagTimestamp = System.nanoTime();
 			}
-			if (idle > 10) {
-				LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500));
-				idle = 0;
-			}
-			BinaryHashTable table;
-			synchronized(this) {
-				if (tables.size() > n) {
-					table = tables.get(0);
-				}
-				else {
-					n = 0;
-					continue;
-				}
-			}	
-			if (table.maintenanceTimestamp + TABLE_SERVICE_PERIOD > System.nanoTime()) {
+		
+			if (tableSet.length == 0) {
 				++idle;
-				continue;
 			}
 			else {
-				doTableMaintenance(table);
+				int len = pageManager.collectHashesForEvacuation(evacuationHashes, 0);
+				if (len == 0) {
+					++idle;
+				}
+				else {
+					evacuateEntries(tableSet, evacuationHashes, len);
+					Thread.yield();
+				}
 			}
+			
 			++n;
+			
+			if (idle > 10) {
+				LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(300));
+				idle = 0;
+			}
 		}
 	}
 
-	private void doTableMaintenance(BinaryHashTable table) {
-		int n = 0;
-		
-		try {
-			table.checkTablePhysicalSize();		
-			refresh:
-			while(true) {
-				table.tableLock.readLock().lock();
-				try {
-					for(int i = 0; i != 16; ++i) {
-						table.recycleEntry(n++);
-						if (n > table.capacity) {
-							break refresh;
-						}
+	private void evacuateEntries(BinaryHashTable[] tableSet, int[] evacuationHashes, int hashCount) {
+		for(BinaryHashTable table: tableSet) {
+			table.tableLock.readLock().lock();
+			try {
+				int pervHash = evacuationHashes[0] + 1;
+				for (int i = 0; i != hashCount; ++i) {
+					int hash = evacuationHashes[i];
+					if (hash != pervHash) {
+						table.recycleHash(hash);
 					}
+					pervHash = hash;
 				}
-				finally {
-					table.tableLock.readLock().unlock();
-				}
-				if (n % (1 << 10) == 0) {
-					table.checkTablePhysicalSize();
-				}
-			}	
-			
-			table.maintenanceTimestamp = System.nanoTime();
+			}
+			finally {
+				table.tableLock.readLock().unlock();
+			}
 		}
-		catch(NullPointerException e) {
-			// may happen if table is erased
-		}
+		
 	}
+
+//	private void doTableMaintenance(BinaryHashTable table) {
+//		int n = 0;
+//		
+//		try {
+//			table.checkTablePhysicalSize();		
+//			refresh:
+//			while(true) {
+//				table.tableLock.readLock().lock();
+//				try {
+//					for(int i = 0; i != 16; ++i) {
+//						table.recycleEntry(n++);
+//						if (n > table.capacity) {
+//							break refresh;
+//						}
+//					}
+//				}
+//				finally {
+//					table.tableLock.readLock().unlock();
+//				}
+//				if (n % (1 << 10) == 0) {
+//					table.checkTablePhysicalSize();
+//				}
+//			}	
+//			
+//			table.maintenanceTimestamp = System.nanoTime();
+//		}
+//		catch(NullPointerException e) {
+//			// may happen if table is erased
+//		}
+//	}
 
 	private class BinaryHashTable implements BinaryStore {
 
@@ -175,8 +206,6 @@ public class PagedMemoryBinaryStoreManager2 implements BinaryStoreManager {
 		float targetLoadFactor = 0.8f;
 		float thresholdLoadFactor = 0.99f;
 		
-		long maintenanceTimestamp = System.nanoTime();
-
 		// lock assumed
 		private int[] getEntries(int index) {
 			int pointer;
@@ -190,9 +219,9 @@ public class PagedMemoryBinaryStoreManager2 implements BinaryStoreManager {
 			else {
 				pointer = -pointer;
 				ByteChunk chunk = pageManager.get(pointer);
-				int[] entries = new int[chunk.lenght() / 4];
+				int[] entries = new int[chunk.lenght() / 4 - 1];
 				for(int i = 0; i != entries.length; ++i) {
-					entries[i] = chunk.intAt(i * 4);
+					entries[i] = chunk.intAt(4 + i * 4);
 				}
 				return entries;
 			}
@@ -213,11 +242,23 @@ public class PagedMemoryBinaryStoreManager2 implements BinaryStoreManager {
 				hashtable.set(index, entries[0]);
 			}
 			else {
-				int npp = pageManager.allocate(4 * entries.length, ALLOC_NEW_LIST);
+				ByteChunk first = pageManager.get(entries[0]);
+				int hash = first.intAt(0);				
+				int npp = pageManager.allocate(4 + 4 * entries.length, ALLOC_NEW_LIST);
 				ByteChunk list = pageManager.get(npp);
-				for(int i = 0; i != entries.length; ++i) {
-					list.putInt(4 * i, entries[i]);
+				try {
+					list.assertEmpty();
 				}
+				catch(AssertionError e) {
+					System.out.println("Problem pointer is " + pageManager.page(npp) + ":" + pageManager.offset(npp));
+					throw e;
+				}
+				list.putInt(0, hash);
+				for(int i = 0; i != entries.length; ++i) {
+					list.putInt(4 + 4 * i, entries[i]);
+				}
+				// not required for in-heap backend
+				pageManager.update(npp, list);
 				hashtable.set(index, -npp);
 			}
 		}
@@ -246,10 +287,10 @@ public class PagedMemoryBinaryStoreManager2 implements BinaryStoreManager {
 		}
 
 		private boolean sameKey(ByteChunk entry, ByteChunk key) {
-			int keySize = entry.intAt(0);
+			int keySize = entry.intAt(KEY_SIZE_POS);
 			if (keySize == key.lenght()) {
 				for (int i = 0; i != keySize; ++i) {
-					if (entry.at(8 + i) != key.at(i)) {
+					if (entry.at(DATA_POS + i) != key.at(i)) {
 						return false;
 					}
 				}
@@ -261,9 +302,9 @@ public class PagedMemoryBinaryStoreManager2 implements BinaryStoreManager {
 		}
 		
 		private ByteChunk getValue(ByteChunk entry) {
-			int keySize = entry.intAt(0);
-			int valueSize = entry.intAt(4);
-			return entry.subChunk(8 + keySize, valueSize);
+			int keySize = entry.intAt(KEY_SIZE_POS);
+			int valueSize = entry.intAt(VALUE_SIZE_POS);
+			return entry.subChunk(DATA_POS + keySize, valueSize);
 		}
 
 		@Override
@@ -296,7 +337,6 @@ public class PagedMemoryBinaryStoreManager2 implements BinaryStoreManager {
 			finally {
 				tableLock.readLock().unlock();
 			}
-			
 		}
 
 		@Override
@@ -358,7 +398,8 @@ public class PagedMemoryBinaryStoreManager2 implements BinaryStoreManager {
 		// table lock is assumed
 		private void internalPut(ByteChunk key, ByteChunk value) {
 
-			int index = hashIndex(key, capacity);
+			int hash = BinHash.hash(key);
+			int index = splitHash(hash, capacity);
 			writeLock(index);
 			try {			
 				int[] entries = getEntries(index);
@@ -370,12 +411,8 @@ public class PagedMemoryBinaryStoreManager2 implements BinaryStoreManager {
 						if (sameKey(entry, key)) {
 							// overriding value
 							pageManager.release(pp);
-							int npp = pageManager.allocate(8 + key.lenght() + value.lenght(), ALLOC_NEW_VALUE);
-							ByteChunk chunk = pageManager.get(npp);
-							chunk.putInt(0, key.lenght());
-							chunk.putInt(4, value.lenght());
-							chunk.putBytes(8, key);
-							chunk.putBytes(8 + key.lenght(), value);
+							int npp = pageManager.allocate(DATA_POS + key.lenght() + value.lenght(), ALLOC_NEW_VALUE);
+							createEntry(npp, key, value, hash);
 							entries[i] = npp;
 							setEntries(index, entries);
 							return;
@@ -383,13 +420,10 @@ public class PagedMemoryBinaryStoreManager2 implements BinaryStoreManager {
 					}
 				}
 					
+				// TODO refactoring, move allocation to createEntry method
 				// add new entry
-				int npp = pageManager.allocate(8 + key.lenght() + value.lenght(), ALLOC_NEW_VALUE);
-				ByteChunk chunk = pageManager.get(npp);
-				chunk.putInt(0, key.lenght());
-				chunk.putInt(4, value.lenght());
-				chunk.putBytes(8, key);
-				chunk.putBytes(8 + key.lenght(), value);
+				int npp = pageManager.allocate(DATA_POS + key.lenght() + value.lenght(), ALLOC_NEW_VALUE);
+				createEntry(npp, key, value, hash);
 
 				int[] newEntries;
 				if (entries == null || entries.length == 0) {
@@ -408,47 +442,74 @@ public class PagedMemoryBinaryStoreManager2 implements BinaryStoreManager {
 				writeUnlock(index);
 			}
 		}
+
+		private void createEntry(int npp, ByteChunk key, ByteChunk value, int hash) {
+			ByteChunk chunk = pageManager.get(npp);
+			try {
+				chunk.assertEmpty();
+			}
+			catch(AssertionError e) {
+				System.out.println("Problem pointer is " + pageManager.page(npp) + ":" + pageManager.offset(npp));
+				throw e;
+			}
+			chunk.putInt(HASH_POS, hash);
+			chunk.putInt(KEY_SIZE_POS, key.lenght());
+			chunk.putInt(VALUE_SIZE_POS, value.lenght());
+			chunk.putBytes(DATA_POS, key);
+			chunk.putBytes(DATA_POS + key.lenght(), value);
+
+			// no need for in-heap storage
+			pageManager.update(npp, chunk);
+		}
 		
 		// tableLock assumed
-		void recycleEntry(int index) {
-			writeLock(index);
-			try {
-				if (index >= capacity) {
-					return;
-				}
-				
-				int[] entries = getEntries(index);
-				
-				if (entries != null && entries.length > 0) {
-					boolean modified = false;
-					for(int i = 0; i != entries.length; ++i) {
-						int pp = entries[i];
-						if (needRecycle(pp)) {
-							ByteChunk chunk = pageManager.get(pp);
-							int npp = pageManager.allocate(chunk.lenght(), ALLOC_RELOCATE_VALUE);
-							ByteChunk newChunk = pageManager.get(npp);
-							newChunk.putBytes(chunk);
-							pageManager.release(pp);
-							entries[i] = npp;
-							modified = true;
-						}
+		void recycleHash(int hash) {
+			while(true) {
+				int index = splitHash(hash, capacity); 
+				writeLock(index);
+				try {
+					if (splitHash(hash, capacity) != index) {
+						// capacity has been updated
+						// need to recalculate index
+						continue;
 					}
 					
-					if (!modified) {
-						int pe = hashtable.get(index);
-						pe = pe > 0 ? pe : -pe;
-						if (needRecycle(pe)) {
-							modified = true;
+					int[] entries = getEntries(index);
+					
+					if (entries != null && entries.length > 0) {
+						boolean modified = false;
+						for(int i = 0; i != entries.length; ++i) {
+							int pp = entries[i];
+							if (needRecycle(pp)) {
+								ByteChunk chunk = pageManager.get(pp);
+								int npp = pageManager.allocate(chunk.lenght(), ALLOC_RELOCATE_VALUE);
+								ByteChunk newChunk = pageManager.get(npp);
+								newChunk.putBytes(chunk);
+								pageManager.release(pp);
+								// not required for in-heap storage
+								pageManager.update(npp, newChunk);
+								entries[i] = npp;
+								modified = true;
+							}
+						}
+						
+						if (!modified) {
+							int pe = hashtable.get(index);
+							pe = pe > 0 ? pe : -pe;
+							if (needRecycle(pe)) {
+								modified = true;
+							}
+						}
+						
+						if (modified) {
+							setEntries(index, entries);
 						}
 					}
-					
-					if (modified) {
-						setEntries(index, entries);
-					}
 				}
-			}
-			finally {
-				writeUnlock(index);
+				finally {
+					writeUnlock(index);
+				}
+				break;
 			}
 		}
 		
@@ -513,9 +574,8 @@ public class PagedMemoryBinaryStoreManager2 implements BinaryStoreManager {
 		                	
 		                	for(int pp: entries) {
 		                		ByteChunk chunk = pageManager.get(pp);
-		        				int keySize = chunk.intAt(0);
-		        				ByteChunk key = chunk.subChunk(8, keySize);
-		                		int index = hashIndex(key, capacity);
+		                		int hash = chunk.intAt(HASH_POS);
+		                		int index = splitHash(hash, capacity);
 		                		if (index == nSplit) {
 		                			el1[n1++] = pp;
 		                		}
@@ -523,7 +583,7 @@ public class PagedMemoryBinaryStoreManager2 implements BinaryStoreManager {
 		                			el2[n2++] = pp;
 		                		}
 		                		else {
-		                			throw new AssertionError();
+		                			throw new AssertionError("New index of hash " + Integer.toHexString(hash) +" is " + index + ", expected values eigther " + nSplit + " or " + nLast);
 		                		}
 		                	}
 		                	el1 = Arrays.copyOf(el1, n1);
