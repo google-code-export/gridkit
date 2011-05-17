@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 /**
  * A kind of {@link ByteBuffer}, byte buffer itself is a bit too complicated
- * @author aragozin
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  *
  */
 public final class ByteChunk {
@@ -47,14 +47,14 @@ public final class ByteChunk {
 
 	public ByteChunk subChunk(int offs, int len) {
 		if (offs + len > this.len) {
-			throw new IllegalArgumentException("Chunk " + bytes + " offs: " + offset + " len: " + len + ". Required subrange " + offs + " by " + len);
+			throw new IllegalArgumentException("Chunk " + bytes + " offs: " + offset + " len: " + this.len + ". Required subrange " + offs + " by " + len + "(" + Integer.toHexString(len) + ")");			
 		}
 		return new ByteChunk(bytes, offset + offs, len);
 	}
 
 	public int intAt(int offs) {
 		if (offs + 4 > len) {
-			throw new IllegalArgumentException("Out of bounds");
+			throw new IllegalArgumentException("Chunk " + bytes + " offs: " + offset + " len: " + len + ". Required subrange " + offs + " by " + 4);
 		}
 		// internal byte order - little endian
 		int value =   (0xFF & bytes[offset + offs]) << 24 
@@ -112,12 +112,22 @@ public final class ByteChunk {
 		if (bytes.len > len) {
 			throw new IllegalArgumentException("Out of bounds");
 		}
+		for(int i = 0; i != bytes.len; ++i) {
+			if (this.bytes[offset + i] != 0) {
+				throw new AssertionError("Chunk " + bytes + " offs: " + offset + " len: " + len + ". Dirty data for putBytes. Params " + 0 + " by " + bytes.len);
+			}
+		}
 		System.arraycopy(bytes.bytes, bytes.offset, this.bytes, offset, bytes.len);		
 	}
 
 	public void putBytes(int offs, ByteChunk bytes) {
 		if (offs + bytes.len > len) {
 			throw new IllegalArgumentException("Out of bounds");
+		}
+		for(int i = 0; i != bytes.len; ++i) {
+			if (this.bytes[offset + offs + i] != 0) {
+				throw new AssertionError("Chunk " + bytes + " offs: " + offset + " len: " + len + ". Dirty data for putBytes. Params " + offs + " by " + bytes.len);
+			}
 		}
 		System.arraycopy(bytes.bytes, bytes.offset, this.bytes, offset + offs, bytes.len);		
 	}
@@ -142,13 +152,24 @@ public final class ByteChunk {
 		buf.append('[');
 		for(int i = 0; i != len; ++i) {
 			byte val = at(i);
+			if (i > 0 && i % 4 == 0) {
+				buf.append(".");
+			}
 			buf.append(Integer.toHexString((val >> 4) & 0xF)).append(Integer.toHexString(val & 0xF));
-			if (i > 63) {
+			if (i > 126) {
 				buf.append("...");
 				break;
 			}
 		}
 		buf.append(']');
 		return buf.toString();
+	}
+
+	public void assertEmpty() {
+		for(int i = 0; i != len; ++i) {
+			if (bytes[offset + i] != 0) {
+				throw new AssertionError("Not empty " + this.toString());
+			}
+		}
 	}
 }
