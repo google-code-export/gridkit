@@ -128,7 +128,6 @@ class DataLossMonitor {
 				sb.append("for service ");
 				sb.append(partitionedService.getInfo().getServiceName());
 				logger.error(sb.toString());
-				logger.error("Consider using " + CanaryKeyPartitioningStrategy.class.getCanonicalName());
 				throw new IllegalStateException("Canary cache construction failed");
 			}
 			
