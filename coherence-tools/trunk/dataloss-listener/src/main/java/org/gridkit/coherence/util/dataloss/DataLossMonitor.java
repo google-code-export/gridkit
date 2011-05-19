@@ -26,6 +26,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,15 +50,25 @@ class DataLossMonitor {
 	
 	private final DataLossListener listener;
 	private final String cacheName;
+	private final Lock checkLock;
 	private final ExecutorService executor;
 	private final Future<Map<Integer, Integer>> wrappedPartitionsMap;
 	
 	public DataLossMonitor(String cacheName, DataLossListener listener) {
 		this.listener = listener;
 		this.cacheName = cacheName;
+		this.checkLock = new ReentrantLock();
 		this.executor = Executors.newSingleThreadExecutor();
 		try {
-			wrappedPartitionsMap = executor.submit(new CachePopulator(cacheName));
+			wrappedPartitionsMap = executor.submit(new CachePopulator());
+			executor.submit(new Callable<Object>() {
+				@Override
+				public Object call() throws Exception {
+					checkLock.lock();
+					return null;
+				}
+			});
+			new Thread(new ConsistencyValidator(), "Consistency validator" + cacheName).start();
 		} catch (Exception e) {
 			logger.error("Exception during \"canary\" cache init.", e);
 			throw new RuntimeException(e);
@@ -64,7 +76,14 @@ class DataLossMonitor {
 	}
 	
 	public void checkConsistency() {
-		executor.execute(new ConsistencyValidator(cacheName, listener, wrappedPartitionsMap));
+		logger.trace("Posting consistency check request...");
+		executor.execute(new Runnable() {
+			@Override
+			public void run() {
+				checkLock.unlock();
+				checkLock.lock();
+			}
+		});
 	}
 	
 	
@@ -78,19 +97,14 @@ class DataLossMonitor {
 	 * Callable returns partitions map (partition no -> "canary" key), i.e. reverse canary cache, 
 	 * for future restores after partitions loss. 
 	 */
-	private static class CachePopulator implements Callable<Map<Integer, Integer>> {
-		
-		private static final Logger logger = LoggerFactory.getLogger(CachePopulator.class);
+	private class CachePopulator implements Callable<Map<Integer, Integer>> {
 		
 		private static final int LOOP_LIMIT_PER_PARTITION = 10000;
 		
-		private final String cacheName;
+		private final Logger logger = LoggerFactory.getLogger(CachePopulator.class);
+		
 		private Map<Integer, Integer> cacheMap;
 		private Map<Integer, Integer> partitionsMap;
-		
-		public CachePopulator(String cacheName) {
-			this.cacheName = cacheName;
-		}
 		
 		@Override
 		public Map<Integer, Integer> call() throws Exception {
@@ -160,68 +174,66 @@ class DataLossMonitor {
 	 * When found, delegates processing to application-provided listener class, then 
 	 * restores "canary" cache contents using previously generated partitions map.
 	 */
-	private static class ConsistencyValidator implements Runnable {
+	private class ConsistencyValidator implements Runnable {
 		
-		private static final Logger logger = LoggerFactory.getLogger(ConsistencyValidator.class);
-		
-		private final String cacheName;
-		private final DataLossListener listener;
-		private final Future<Map<Integer, Integer>> partitionsMapFuture;
-		
-		public ConsistencyValidator(
-				String cacheName, 
-				DataLossListener listener, 
-				Future<Map<Integer, Integer>> partitionsMapFuture) {
-			this.cacheName = cacheName;
-			this.listener = listener;
-			this.partitionsMapFuture = partitionsMapFuture;
-		}
+		private final Logger logger = LoggerFactory.getLogger(ConsistencyValidator.class);
 		
 		@Override
 		public void run() {
-			NamedCache canaryCache = CacheFactory.getCache(cacheName);
-			PartitionedService service = (PartitionedService) canaryCache.getCacheService();
+			final NamedCache canaryCache = CacheFactory.getCache(cacheName);
+			final PartitionedService service = (PartitionedService) canaryCache.getCacheService();
 			
-			@SuppressWarnings("unchecked")
-			// canaryCache.size() may work too, but we'll stick with getAll() to be absolutely sure
-			Map<Integer, Integer> cacheMap = canaryCache.getAll(canaryCache.keySet());
-			if (cacheMap.size() != service.getPartitionCount()) {
-				// write log message
-				logger.error(lossMessage(service, cacheMap));
-				
-				// calculate lost partitions list
-				int lostCount = 0, lostPartitions[] = new int[service.getPartitionCount()];
-				for (int i = 0; i < service.getPartitionCount(); i++) {
-					if (!cacheMap.containsValue(i)) {
-						lostPartitions[lostCount] = i;
-						lostCount++;
-					}
+			while (true) {
+				try {
+					checkLock.lockInterruptibly();
+					checkLock.unlock();
+				} catch (InterruptedException e) {
+					
 				}
 				
-				// delegate to application-provided listener
-				listener.onPartitionLost(service, Arrays.copyOf(lostPartitions, lostCount));
+				logger.trace("Processing consistency check request...");
 				
-				// recover lost "canary" cache partitions
-				try {
-					Map<Integer, Integer> partitionsMap = partitionsMapFuture.get();
-					Map<Integer, Integer> lostCanaryPart = new HashMap<Integer, Integer>(lostCount);
-					for (int i = 0; i < lostCount; i++) {
-						lostCanaryPart.put(partitionsMap.get(lostPartitions[i]), lostPartitions[i]);
+				@SuppressWarnings("unchecked")
+				// canaryCache.size() may work too, but we'll stick with getAll() to be absolutely sure
+				Map<Integer, Integer> cacheMap = canaryCache.getAll(canaryCache.keySet());
+				if (cacheMap.size() != service.getPartitionCount()) {
+					// write log message
+					logger.error(lossMessage(service, cacheMap));
+					
+					// calculate lost partitions list
+					int lostCount = 0, lostPartitions[] = new int[service.getPartitionCount()];
+					for (int i = 0; i < service.getPartitionCount(); i++) {
+						if (!cacheMap.containsValue(i)) {
+							lostPartitions[lostCount] = i;
+							lostCount++;
+						}
 					}
-					canaryCache.putAll(lostCanaryPart);
-					logger.info("Canary cache partitions for service '{}' restored successfully", 
-							service.getInfo().getServiceName());
-				} catch (InterruptedException e) {
-					logger.error("Exception during \"canary\" cache recovery", e);
-					throw new RuntimeException(e);
-				} catch (ExecutionException e) {
-					logger.error("Exception during \"canary\" cache recovery", e);
-					throw new RuntimeException(e);
+					
+					// delegate to application-provided listener
+					listener.onPartitionLost(service, Arrays.copyOf(lostPartitions, lostCount));
+					
+					// recover lost "canary" cache partitions
+					try {
+						Map<Integer, Integer> partitionsMap = wrappedPartitionsMap.get();
+						Map<Integer, Integer> lostCanaryPart = new HashMap<Integer, Integer>(lostCount);
+						for (int i = 0; i < lostCount; i++) {
+							lostCanaryPart.put(partitionsMap.get(lostPartitions[i]), lostPartitions[i]);
+						}
+						canaryCache.putAll(lostCanaryPart);
+						logger.info("Canary cache partitions for service '{}' restored successfully", 
+								service.getInfo().getServiceName());
+					} catch (InterruptedException e) {
+						logger.error("Exception during \"canary\" cache recovery", e);
+						throw new RuntimeException(e);
+					} catch (ExecutionException e) {
+						logger.error("Exception during \"canary\" cache recovery", e);
+						throw new RuntimeException(e);
+					}
 				}
 			}
 		}
 		
-		private static String lossMessage(PartitionedService service, Map<Integer, Integer> cacheMap) {
+		private String lossMessage(PartitionedService service, Map<Integer, Integer> cacheMap) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("Detected loss of ");
 			sb.append(service.getPartitionCount() - cacheMap.size());
