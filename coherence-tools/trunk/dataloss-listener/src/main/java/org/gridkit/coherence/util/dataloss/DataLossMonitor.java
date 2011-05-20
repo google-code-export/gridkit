@@ -26,8 +26,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.Semaphore;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,40 +49,35 @@ class DataLossMonitor {
 	
 	private final DataLossListener listener;
 	private final String cacheName;
-	private final Lock checkLock;
-	private final ExecutorService executor;
+	private final Semaphore lock;
 	private final Future<Map<Integer, Integer>> wrappedPartitionsMap;
 	
 	public DataLossMonitor(String cacheName, DataLossListener listener) {
 		this.listener = listener;
 		this.cacheName = cacheName;
-		this.checkLock = new ReentrantLock();
-		this.executor = Executors.newSingleThreadExecutor();
+		this.lock = new Semaphore(0);
+		ExecutorService executor = Executors.newSingleThreadExecutor();
 		try {
 			wrappedPartitionsMap = executor.submit(new CachePopulator());
-			executor.submit(new Callable<Object>() {
+			// ensure that validator thread is started after population is completed
+			final String validatorThreadName = "Consistency validator: " + cacheName;
+			executor.execute(new Runnable() {
 				@Override
-				public Object call() throws Exception {
-					checkLock.lock();
-					return null;
+				public void run() {
+					new Thread(new ConsistencyValidator(), validatorThreadName).start();
 				}
 			});
-			new Thread(new ConsistencyValidator(), "Consistency validator" + cacheName).start();
 		} catch (Exception e) {
 			logger.error("Exception during \"canary\" cache init.", e);
 			throw new RuntimeException(e);
+		} finally {
+			executor.shutdown();
 		}
 	}
 	
 	public void checkConsistency() {
 		logger.trace("Posting consistency check request...");
-		executor.execute(new Runnable() {
-			@Override
-			public void run() {
-				checkLock.unlock();
-				checkLock.lock();
-			}
-		});
+		lock.release();
 	}
 	
 	
@@ -185,10 +179,11 @@ class DataLossMonitor {
 			
 			while (true) {
 				try {
-					checkLock.lockInterruptibly();
-					checkLock.unlock();
+					lock.acquire();
+					lock.drainPermits();
 				} catch (InterruptedException e) {
-					
+					logger.error("Consistency validation thread interrupted", e);
+					break;
 				}
 				
 				logger.trace("Processing consistency check request...");
@@ -196,6 +191,7 @@ class DataLossMonitor {
 				@SuppressWarnings("unchecked")
 				// canaryCache.size() may work too, but we'll stick with getAll() to be absolutely sure
 				Map<Integer, Integer> cacheMap = canaryCache.getAll(canaryCache.keySet());
+				
 				if (cacheMap.size() != service.getPartitionCount()) {
 					// write log message
 					logger.error(lossMessage(service, cacheMap));
