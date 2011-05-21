@@ -27,7 +27,7 @@ import com.tangosol.net.Member;
  * @author malekseev
  * 20.04.2011
  */
-public class RoleBasedFairShare implements FairShare {
+public class RoleBasedFairShare implements FairShareCalculator {
 	
 	@Override
 	public int getFairShare(int sourcesSize) {
@@ -45,6 +45,5 @@ public class RoleBasedFairShare implements FairShare {
 		}
 
 		return (int) Math.ceil(((double) sourcesSize) / sameMemberCount);
-	}
-	
+	}	
 }

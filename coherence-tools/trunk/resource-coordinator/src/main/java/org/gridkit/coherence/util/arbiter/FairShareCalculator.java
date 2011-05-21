@@ -22,7 +22,7 @@ package org.gridkit.coherence.util.arbiter;
  * @author malekseev
  * 20.04.2011
  */
-public interface FairShare {
+public interface FairShareCalculator {
 	
 	/**
 	 * Returns "fair" number of resources to lock per-peer

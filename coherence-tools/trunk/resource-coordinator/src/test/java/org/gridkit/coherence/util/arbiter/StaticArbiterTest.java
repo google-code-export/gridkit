@@ -24,7 +24,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.gridkit.coherence.util.arbiter.DistributedResourceCoordinator.ResourceLockKey;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -57,7 +56,7 @@ public class StaticArbiterTest {
 		cache = new WrapperNamedCache(new SegmentedConcurrentMap(), "controlCache");
 		manager = new MockResourceControl(Arrays.asList(Sources.values()));
 		coordinator = new DistributedResourceCoordinator();
-		coordinator.setDatasyncManager(manager);
+		coordinator.setResourceHandler(manager);
 		coordinator.setLockMap(cache);
 		executor = Executors.newFixedThreadPool(1);
 	}
@@ -100,6 +99,7 @@ public class StaticArbiterTest {
 		StaticFairShare fsc = new StaticFairShare();
 		fsc.setPeerCount(4);
 		coordinator.setFairShare(fsc);
+
 		execPrivate(coordinator, "initSourceControls");
 
 		call_checkLocks();
@@ -129,7 +129,7 @@ public class StaticArbiterTest {
 		call_checkLocks();
 		Assert.assertEquals(7, coordinator.getActiveCount());
 
-		cache.lock(new DistributedResourceCoordinator.ResourceLockKey(ResourceLockKey.KEYTYPE_STANDBY, Sources.S1));
+		cache.lock(DistributedResourceCoordinator.standbyKey(Sources.S1));
 
 		call_balance();
 		Assert.assertEquals(6, coordinator.getActiveCount());
@@ -140,7 +140,7 @@ public class StaticArbiterTest {
 		executor.submit(new Runnable() {
 			@Override
 			public void run() {
-				execPrivate(coordinator, "checkLocks");
+				execPrivate(coordinator, "greedyBalance");
 			}
 		}).get();
 	};
@@ -149,14 +149,14 @@ public class StaticArbiterTest {
 		executor.submit(new Runnable() {
 			@Override
 			public void run() {
-				execPrivate(coordinator, "balance");
+				execPrivate(coordinator, "fairBalance");
 			}
 		}).get();
 	};
 	
 	
 	private boolean isPrimaryLocked(Object source) {
-		return !cache.lock(new DistributedResourceCoordinator.ResourceLockKey(ResourceLockKey.KEYTYPE_ACTIVE, source), 1);
+		return !cache.lock(DistributedResourceCoordinator.activeKey(source), 1);
 	}
 
 	
@@ -176,7 +176,7 @@ public class StaticArbiterTest {
 	}
 	
 	
-	static class MockResourceControl implements ResourceControl {
+	static class MockResourceControl implements ResourceHandler {
 
 		private List<Object> sources = new ArrayList<Object>();
 		private List<Object> activeSources = new ArrayList<Object>();
@@ -197,6 +197,10 @@ public class StaticArbiterTest {
 		@Override
 		public void disconnect(Object source) {
 			activeSources.remove(source);
+		}
+
+		@Override
+		public void terminate(Object resourceId) {
 		}
 
 		@Override

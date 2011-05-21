@@ -22,7 +22,7 @@ package org.gridkit.coherence.util.arbiter;
  * @author malekseev
  * 20.04.2011
  */
-public class StaticFairShare implements FairShare {
+public class StaticFairShare implements FairShareCalculator {
 	
 	private int peerCount;
 	

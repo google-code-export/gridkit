@@ -15,28 +15,14 @@
  */
 package org.gridkit.coherence.util.arbiter;
 
-import java.util.Collection;
+import org.junit.Ignore;
 
-/**
- * A base interface for managing HA connections to resources in cluster.
- * 
- * @author Alexey Ragozin (aragozin@griddynamics.com)
- */
-public interface ResourceControl {
+@Ignore
+public class Sample {
 
-	/**
-	 * Returns collection of currently locked resources
-	 */
-	public Collection<?> getResourcesList();
+}
 
-	/**
-	 * Locks resource by id
-	 */
-	public void connect(Object resourceId);
 
-	/**
-	 * Unlocks resource by id
-	 */
-	public void disconnect(Object resourceId);
-
+class ResourceControl {
+	
 }

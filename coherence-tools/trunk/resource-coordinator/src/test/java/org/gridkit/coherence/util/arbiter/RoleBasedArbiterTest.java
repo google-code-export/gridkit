@@ -76,13 +76,13 @@ public class RoleBasedArbiterTest {
 		is3.submit(CheckArbiterState.class);
 		
 		Assert.assertEquals("2", System.getProperty("NODE-1-activeCount"));
-		Assert.assertEquals("2", System.getProperty("NODE-1-standbyCount"));
+//		Assert.assertEquals("0", System.getProperty("NODE-1-standbyCount"));
 		
 		Assert.assertEquals("2", System.getProperty("NODE-2-activeCount"));
-		Assert.assertEquals("2", System.getProperty("NODE-2-standbyCount"));
+//		Assert.assertEquals("0", System.getProperty("NODE-2-standbyCount"));
 		
 		Assert.assertEquals("2", System.getProperty("NODE-3-activeCount"));
-		Assert.assertEquals("2", System.getProperty("NODE-3-standbyCount"));
+//		Assert.assertEquals("0", System.getProperty("NODE-3-standbyCount"));
 		
 		is3.submit(Stop.class);
 		Thread.sleep(3 * 1000L); // wait for sources rebalancing
@@ -91,10 +91,10 @@ public class RoleBasedArbiterTest {
 		is2.submit(CheckArbiterState.class);
 		
 		Assert.assertEquals("3", System.getProperty("NODE-1-activeCount"));
-		Assert.assertEquals("3", System.getProperty("NODE-1-standbyCount"));
+//		Assert.assertEquals("3", System.getProperty("NODE-1-standbyCount"));
 		
 		Assert.assertEquals("3", System.getProperty("NODE-2-activeCount"));
-		Assert.assertEquals("3", System.getProperty("NODE-2-standbyCount"));
+//		Assert.assertEquals("3", System.getProperty("NODE-2-standbyCount"));
 		
 		is2.submit(Stop.class);
 //		is2.submit(NodeActions.Crash.class, 1);
@@ -121,12 +121,12 @@ public class RoleBasedArbiterTest {
 		@Override
 		public void run() {
 			NamedCache cache = CacheFactory.getCache(lockCacheName);
-			ResourceControl manager = new MockResourceControl(Arrays.asList(Sources.values()));
-			FairShare fairShare = new RoleBasedFairShare();
+			ResourceHandler manager = new MockResourceControl(Arrays.asList(Sources.values()));
+			FairShareCalculator fairShare = new RoleBasedFairShare();
 			DistributedResourceCoordinator arbiter = new DistributedResourceCoordinator();
 			NodeHolder.arbiterInstance = arbiter;
 			arbiter.setLockMap(cache);
-			arbiter.setDatasyncManager(manager);
+			arbiter.setResourceHandler(manager);
 			arbiter.setFairShare(fairShare);
 			arbiter.setLockCheckPeriodMillis(100); // 10 per sec
 			arbiter.setRebalancePeriodMillis(500); // 2 per sec
@@ -165,7 +165,7 @@ public class RoleBasedArbiterTest {
 		}
 	}
 	
-	static class MockResourceControl implements ResourceControl {
+	static class MockResourceControl implements ResourceHandler {
 
 		private List<Object> sources = new ArrayList<Object>();
 		private List<Object> activeSources = new ArrayList<Object>();
@@ -186,6 +186,10 @@ public class RoleBasedArbiterTest {
 		@Override
 		public void disconnect(Object source) {
 			activeSources.remove(source);
+		}
+
+		@Override
+		public void terminate(Object resourceId) {
 		}
 
 		@Override

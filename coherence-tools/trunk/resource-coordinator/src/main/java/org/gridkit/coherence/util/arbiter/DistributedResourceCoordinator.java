@@ -15,8 +15,6 @@
  */
 package org.gridkit.coherence.util.arbiter;
 
-import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,9 +27,6 @@ import java.util.concurrent.locks.LockSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tangosol.io.pof.PofReader;
-import com.tangosol.io.pof.PofWriter;
-import com.tangosol.io.pof.PortableObject;
 import com.tangosol.util.ConcurrentMap;
 
 /**
@@ -41,18 +36,18 @@ import com.tangosol.util.ConcurrentMap;
  * 
  * Call start() method to enable live rebalancing.
  * 
- * @see FairShare
- * @see ResourceControl
+ * @see FairShareCalculator
+ * @see ResourceHandler
  *
- * @author Alexey Ragozin (aragozin@griddynamics.com)
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
 public class DistributedResourceCoordinator {
 
 	private static final Logger log = LoggerFactory.getLogger(DistributedResourceCoordinator.class);
 
 	private ConcurrentMap controlCache;
-	private ResourceControl manager;
-	private FairShare fairShare;
+	private ResourceHandler resourceHandler;
+	private FairShareCalculator fairShare = new RoleBasedFairShare(); // default strategy
 
 	private int checkPeriod = 200;
 	private int balancePeriodMillis = 10000;
@@ -66,10 +61,42 @@ public class DistributedResourceCoordinator {
 
 	private ControlThread thread;
 
+	public void setFairShare(FairShareCalculator fairShare) {
+		this.fairShare = fairShare;
+	}
+
+	public void setLockCheckPeriodMillis(int period) {
+		checkPeriod = period;
+	}
+
+	public void setRebalancePeriodMillis(int period) {
+		balancePeriodMillis = period;
+	}
+
 	/**
-	 * Starts live sources rebalancing among peers
+	 * <b>Required</b>
+	 */
+	public void setLockMap(ConcurrentMap cache) {
+		this.controlCache = cache;
+	}
+
+	/**
+	 * <b>Required</b>
+	 */
+	public void setResourceHandler(ResourceHandler handler) {
+		this.resourceHandler = handler;
+	}
+
+	/**
+	 * Starts coordinator, once started coordinator will participate in resource balancing.
 	 */
 	public void start() {
+		if (controlCache == null) {
+			throw new IllegalStateException("Control map is not set!");
+		}
+		if (resourceHandler == null) {
+			throw new IllegalStateException("Resource handler is not set!");
+		}
 		// init sources
 		initSourceControls();
 		
@@ -80,7 +107,7 @@ public class DistributedResourceCoordinator {
 	}
 
 	/**
-	 * Stops live sources rebalancing
+	 * Stops active sources, release locks and stops watch dog thread.
 	 */
 	public void stop() {
 		try {
@@ -93,7 +120,7 @@ public class DistributedResourceCoordinator {
 
 	private void initSourceControls() {
 		sources = new HashMap<Object, SourceControl>();
-		for(Object id: manager.getResourcesList()) {
+		for(Object id: resourceHandler.getResourcesList()) {
 			sources.put(id, new SourceControl(id));
 		}
 	}
@@ -106,6 +133,7 @@ public class DistributedResourceCoordinator {
 		return standByCount;
 	}
 
+	/* for debug, called only from tests */
 	void printStatus() {
 		List<Object> active = new ArrayList<Object>(sources.size());
 		List<Object> standby = new ArrayList<Object>(sources.size());
@@ -123,25 +151,29 @@ public class DistributedResourceCoordinator {
 	private void shutdown() {
 		for(SourceControl control: sources.values()) {
 			if (control.active) {
-				manager.disconnect(control.sourceId);
-				controlCache.unlock(activeKey(control));
+				resourceHandler.disconnect(control.sourceId);
+				controlCache.unlock(activeKey(control.sourceId));
 			}
 			if (control.standby) {
-				controlCache.unlock(standbyKey(control));
+				controlCache.unlock(standbyKey(control.sourceId));
 			}
 		}
 		activeCount = 0;
 		standByCount = 0;
 	}
 
-	private void checkLocks() {
+	/**
+	 * Quick check. Only resource acquisition is performed.
+	 */
+	private void greedyBalance() {
+
 		int fairSourceNumber = fairShare.getFairShare(sources.size());
 
 		if (activeCount < fairSourceNumber) {
 			// fast locking cycle
 			for(SourceControl control: controls()) {
 				if (!control.active) {
-					tryLock(control);
+					requestOwnership(control);
 				}
 				if (activeCount >= fairSourceNumber) {
 					break;
@@ -152,7 +184,7 @@ public class DistributedResourceCoordinator {
 		// acquire pending locks / slow locking cycle
 		for(SourceControl control: controls()) {
 			if (control.standby) {
-				tryLock(control);
+				requestOwnership(control);
 			}
 		}
 
@@ -164,13 +196,14 @@ public class DistributedResourceCoordinator {
 		}
 	}
 
-	private void balance() {
+	private void fairBalance() {
+		
 		int fairSourceNumber = fairShare.getFairShare(sources.size());
 
 		// release stand by slots
 		for(SourceControl control: controls()) {
 
-			if (standByCount <= fairSourceNumber) {
+			if ((standByCount + activeCount) <= fairSourceNumber) {
 				break;
 			}
 
@@ -187,46 +220,63 @@ public class DistributedResourceCoordinator {
 			}
 
 			if (control.active) {
-				deactivate(control);
+				withdrawOwnership(control);
 			}
 		}
 	}
 
-	private void tryLock(SourceControl control) {
+	private void requestOwnership(SourceControl control) {
+		
 		if (control.active) {
 			return;
 		}
 
-		boolean locked = controlCache.lock(activeKey(control), 1);
+		boolean locked = controlCache.lock(activeKey(control.sourceId), 1);
 		if (locked) {
-			log.info("Master lock acquired for " + control.sourceId);
+			log.info("Master lock acquired for [" + control.sourceId + "]");
 			if (control.standby) {
-				controlCache.unlock(standbyKey(control));
+				controlCache.unlock(standbyKey(control.sourceId));
 				--standByCount;
-				log.info("StandBy lock released for " + control.sourceId);
+				log.info("Stand by lock released for [" + control.sourceId + "]");
 			}
 			control.active = true;
 			control.standby = false;
 			++activeCount;
 			control.timestamp = System.currentTimeMillis();
-			manager.connect(control.sourceId);
+			try {
+				resourceHandler.connect(control.sourceId);
+			}
+			catch(Exception e) {
+				log.error("Exception in ResourceControl.connect for resource [" + control.sourceId + "]" , e);
+				log.error("Releasing master lock for [" + control.sourceId + "]");
+				--activeCount;
+				controlCache.unlock(activeKey(control.sourceId));
+				control.active = false;
+				control.standby = false;
+			}
 		}
 	}
 
-	private void deactivate(SourceControl control) {
+	private void withdrawOwnership(SourceControl control) {
+		
 		if (!control.active) {
 			return;
 		}
 
-		boolean locked = controlCache.lock(standbyKey(control), 1);
+		boolean locked = controlCache.lock(standbyKey(control.sourceId), 1);
 		if (locked) {
 			log.info("Cannot release master lock (no standby present) " + control.sourceId);
 			// no stand by present, will not give up ownership
-			controlCache.unlock(standbyKey(control));
+			controlCache.unlock(standbyKey(control.sourceId));
 		} else {
 			log.info("Releasing master lock for " + control.sourceId);
-			manager.disconnect(control.sourceId);
-			controlCache.unlock(activeKey(control));
+			try {
+				resourceHandler.disconnect(control.sourceId);
+			}
+			catch(Exception e) {
+				log.error("Exception in ResourceControl.disconnect for resource [" + control.sourceId + "]" , e);
+			}
+			controlCache.unlock(activeKey(control.sourceId));
 			control.active = false;
 			--activeCount;
 			log.info("Master lock released for " + control.sourceId);
@@ -234,11 +284,12 @@ public class DistributedResourceCoordinator {
 	}
 
 	private void enterLine(SourceControl control) {
+		
 		if (control.active || control.standby) {
 			return;
 		}
 
-		boolean locked = controlCache.lock(standbyKey(control), 1);
+		boolean locked = controlCache.lock(standbyKey(control.sourceId), 1);
 		if (locked) {
 			log.info("StandBy lock acquired for " + control.sourceId);
 			++standByCount;
@@ -248,29 +299,39 @@ public class DistributedResourceCoordinator {
 	}
 
 	private void leaveLine(SourceControl control) {
+		
 		if (!control.standby) {
 			return;
 		}
 
-		boolean locked = controlCache.lock(activeKey(control), 1);
+		boolean locked = controlCache.lock(activeKey(control.sourceId), 1);
 		if (locked) {
 			log.info("StandBy lock cannot be released (no owner) " + control.sourceId);
 			// not active owner, will not leave line
-			controlCache.unlock(activeKey(control));
+			controlCache.unlock(activeKey(control.sourceId));
 		} else {
-			controlCache.unlock(standbyKey(control));
+			controlCache.unlock(standbyKey(control.sourceId));
 			control.standby = false;
 			--standByCount;
 			log.info("StandBy lock released for " + control.sourceId);
 		}
 	}
 
-	private ResourceLockKey activeKey(SourceControl control) {
-		return new ResourceLockKey(ResourceLockKey.KEYTYPE_ACTIVE, control.sourceId);
+	// package visibility for test access
+	static Object activeKey(Object sourceId) {
+		// ArrayList is used to use default serialization
+		List<Object> key = new ArrayList<Object>(2);
+		key.add("active");
+		key.add(sourceId);
+		return key;
 	}
 
-	private ResourceLockKey standbyKey(SourceControl control) {
-		return new ResourceLockKey(ResourceLockKey.KEYTYPE_STANDBY, control.sourceId);
+	// package visibility for test access
+	static Object standbyKey(Object sourceId) {
+		List<Object> key = new ArrayList<Object>(2);
+		key.add("stand-by");
+		key.add(sourceId);
+		return key;
 	}
 
 	private List<SourceControl> controls() {
@@ -289,29 +350,6 @@ public class DistributedResourceCoordinator {
 		}
 	}
 
-	public void setFairShare(FairShare fairShare) {
-		this.fairShare = fairShare;
-	}
-
-	public void setLockCheckPeriodMillis(int period) {
-		checkPeriod = period;
-	}
-
-	public void setRebalancePeriodMillis(int period) {
-		balancePeriodMillis = period;
-	}
-
-	public void setLockMap(ConcurrentMap cache) {
-		this.controlCache = cache;
-	}
-
-	public void setDatasyncManager(ResourceControl manager) {
-		this.manager = manager;
-	}
-
-	
-	
-	
 	private static class SourceControl {
 
 		Object sourceId;
@@ -323,9 +361,6 @@ public class DistributedResourceCoordinator {
 			this.sourceId = ref;
 		}
 	}
-
-	
-	
 	
 	public class ControlThread extends Thread {
 
@@ -335,7 +370,7 @@ public class DistributedResourceCoordinator {
 
 		@Override
 		public void run() {
-			long lastBalance = System.currentTimeMillis();
+			long lastFairBalance = System.currentTimeMillis();
 
 			while(true) {
 				if (stopped) {
@@ -345,10 +380,10 @@ public class DistributedResourceCoordinator {
 
 				long lastCheck = System.currentTimeMillis();
 
-				checkLocks();
-				if (lastBalance + balancePeriodMillis < System.currentTimeMillis()) {
-					lastBalance = System.currentTimeMillis();
-					balance();
+				greedyBalance();
+				if (lastFairBalance + balancePeriodMillis < System.currentTimeMillis()) {
+					lastFairBalance = System.currentTimeMillis();
+					fairBalance();
 				}
 
 				sleepUntil(lastCheck + checkPeriod);
@@ -356,10 +391,9 @@ public class DistributedResourceCoordinator {
 		}
 	}
 	
-	
-	
-	
-	
+	/**
+	 * Comparator to sort SourceControls by timestamps (from older to newer).
+	 */
 	private static class SourceControlComparator implements Comparator<SourceControl> {
 		@Override
 		public int compare(SourceControl o1, SourceControl o2) {
@@ -367,79 +401,76 @@ public class DistributedResourceCoordinator {
 		}
 	}
 	
-	
-	
-	public static class ResourceLockKey implements Serializable, PortableObject {
-		
-		private static final long serialVersionUID = -4331553392611241865L;
-		
-		public static final String KEYTYPE_ACTIVE  = "ACTIVE";
-		public static final String KEYTYPE_STANDBY = "STANDBY";
-		
-		private Object resourceId;
-		private String keyType;
-		
-		@SuppressWarnings("unused")
-		private ResourceLockKey() {
-			//for serialization
-		}
-		
-		public ResourceLockKey(String keyType, Object resourceId) {
-			this.resourceId = resourceId;
-			this.keyType = keyType;
-		}
-		
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result
-					+ ((keyType == null) ? 0 : keyType.hashCode());
-			result = prime * result
-					+ ((resourceId == null) ? 0 : resourceId.hashCode());
-			return result;
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			ResourceLockKey other = (ResourceLockKey) obj;
-			if (keyType == null) {
-				if (other.keyType != null)
-					return false;
-			} else if (!keyType.equals(other.keyType))
-				return false;
-			if (resourceId == null) {
-				if (other.resourceId != null)
-					return false;
-			} else if (!resourceId.equals(other.resourceId))
-				return false;
-			return true;
-		}
-		
-		@Override
-		public String toString() {
-			StringBuilder builder = new StringBuilder();
-			builder.append("LockKey-").append(keyType).append("[").append(resourceId).append("]");
-			return builder.toString();
-		}
-
-		@Override
-		public void readExternal(PofReader pofReader) throws IOException {
-			keyType = pofReader.readString(0);
-			resourceId = pofReader.readObject(1);
-		}
-
-		@Override
-		public void writeExternal(PofWriter pofWriter) throws IOException {
-			pofWriter.writeString(0, keyType);
-			pofWriter.writeObject(1, resourceId);
-		}
-	}
-	
+//	public static class ResourceLockKey implements Serializable, PortableObject {
+//		
+//		private static final long serialVersionUID = -4331553392611241865L;
+//		
+//		public static final String KEYTYPE_ACTIVE  = "ACTIVE";
+//		public static final String KEYTYPE_STANDBY = "STANDBY";
+//		
+//		private Object resourceId;
+//		private String keyType;
+//		
+//		@SuppressWarnings("unused")
+//		private ResourceLockKey() {
+//			//for serialization
+//		}
+//		
+//		public ResourceLockKey(String keyType, Object resourceId) {
+//			this.resourceId = resourceId;
+//			this.keyType = keyType;
+//		}
+//		
+//		@Override
+//		public int hashCode() {
+//			final int prime = 31;
+//			int result = 1;
+//			result = prime * result
+//					+ ((keyType == null) ? 0 : keyType.hashCode());
+//			result = prime * result
+//					+ ((resourceId == null) ? 0 : resourceId.hashCode());
+//			return result;
+//		}
+//		
+//		@Override
+//		public boolean equals(Object obj) {
+//			if (this == obj)
+//				return true;
+//			if (obj == null)
+//				return false;
+//			if (getClass() != obj.getClass())
+//				return false;
+//			ResourceLockKey other = (ResourceLockKey) obj;
+//			if (keyType == null) {
+//				if (other.keyType != null)
+//					return false;
+//			} else if (!keyType.equals(other.keyType))
+//				return false;
+//			if (resourceId == null) {
+//				if (other.resourceId != null)
+//					return false;
+//			} else if (!resourceId.equals(other.resourceId))
+//				return false;
+//			return true;
+//		}
+//		
+//		@Override
+//		public String toString() {
+//			StringBuilder builder = new StringBuilder();
+//			builder.append("LockKey-").append(keyType).append("[").append(resourceId).append("]");
+//			return builder.toString();
+//		}
+//
+//		@Override
+//		public void readExternal(PofReader pofReader) throws IOException {
+//			keyType = pofReader.readString(0);
+//			resourceId = pofReader.readObject(1);
+//		}
+//
+//		@Override
+//		public void writeExternal(PofWriter pofWriter) throws IOException {
+//			pofWriter.writeString(0, keyType);
+//			pofWriter.writeObject(1, resourceId);
+//		}
+//	}
 }
