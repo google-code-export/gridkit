@@ -27,6 +27,7 @@ import java.util.concurrent.locks.LockSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.tangosol.util.CompositeKey;
 import com.tangosol.util.ConcurrentMap;
 
 /**
@@ -319,19 +320,12 @@ public class DistributedResourceCoordinator {
 
 	// package visibility for test access
 	static Object activeKey(Object sourceId) {
-		// ArrayList is used to use default serialization
-		List<Object> key = new ArrayList<Object>(2);
-		key.add("active");
-		key.add(sourceId);
-		return key;
+		return new CompositeKey(sourceId, "active");
 	}
 
 	// package visibility for test access
 	static Object standbyKey(Object sourceId) {
-		List<Object> key = new ArrayList<Object>(2);
-		key.add("stand-by");
-		key.add(sourceId);
-		return key;
+		return new CompositeKey(sourceId, "stand-by");
 	}
 
 	private List<SourceControl> controls() {
@@ -399,78 +393,5 @@ public class DistributedResourceCoordinator {
 		public int compare(SourceControl o1, SourceControl o2) {
 			return (int)(o1.timestamp - o2.timestamp);
 		}
-	}
-	
-//	public static class ResourceLockKey implements Serializable, PortableObject {
-//		
-//		private static final long serialVersionUID = -4331553392611241865L;
-//		
-//		public static final String KEYTYPE_ACTIVE  = "ACTIVE";
-//		public static final String KEYTYPE_STANDBY = "STANDBY";
-//		
-//		private Object resourceId;
-//		private String keyType;
-//		
-//		@SuppressWarnings("unused")
-//		private ResourceLockKey() {
-//			//for serialization
-//		}
-//		
-//		public ResourceLockKey(String keyType, Object resourceId) {
-//			this.resourceId = resourceId;
-//			this.keyType = keyType;
-//		}
-//		
-//		@Override
-//		public int hashCode() {
-//			final int prime = 31;
-//			int result = 1;
-//			result = prime * result
-//					+ ((keyType == null) ? 0 : keyType.hashCode());
-//			result = prime * result
-//					+ ((resourceId == null) ? 0 : resourceId.hashCode());
-//			return result;
-//		}
-//		
-//		@Override
-//		public boolean equals(Object obj) {
-//			if (this == obj)
-//				return true;
-//			if (obj == null)
-//				return false;
-//			if (getClass() != obj.getClass())
-//				return false;
-//			ResourceLockKey other = (ResourceLockKey) obj;
-//			if (keyType == null) {
-//				if (other.keyType != null)
-//					return false;
-//			} else if (!keyType.equals(other.keyType))
-//				return false;
-//			if (resourceId == null) {
-//				if (other.resourceId != null)
-//					return false;
-//			} else if (!resourceId.equals(other.resourceId))
-//				return false;
-//			return true;
-//		}
-//		
-//		@Override
-//		public String toString() {
-//			StringBuilder builder = new StringBuilder();
-//			builder.append("LockKey-").append(keyType).append("[").append(resourceId).append("]");
-//			return builder.toString();
-//		}
-//
-//		@Override
-//		public void readExternal(PofReader pofReader) throws IOException {
-//			keyType = pofReader.readString(0);
-//			resourceId = pofReader.readObject(1);
-//		}
-//
-//		@Override
-//		public void writeExternal(PofWriter pofWriter) throws IOException {
-//			pofWriter.writeString(0, keyType);
-//			pofWriter.writeObject(1, resourceId);
-//		}
-//	}
+	}	
 }
