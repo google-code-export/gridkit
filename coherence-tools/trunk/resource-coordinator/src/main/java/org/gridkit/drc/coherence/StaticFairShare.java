@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gridkit.coherence.util.arbiter;
+package org.gridkit.drc.coherence;
 
 /**
  * Configurable fair share implementation.
@@ -22,9 +22,17 @@ package org.gridkit.coherence.util.arbiter;
  * @author malekseev
  * 20.04.2011
  */
-public class StaticFairShare implements FairShareCalculator {
+public class StaticFairShare implements ShareCalculator {
 	
 	private int peerCount;
+	
+	public StaticFairShare() {
+		// for IoC initialization
+	}
+	
+	public StaticFairShare(int peerCount) {
+		this.peerCount = peerCount;
+	}
 	
 	/**
 	 * Constructs StaticFairShare
@@ -35,7 +43,7 @@ public class StaticFairShare implements FairShareCalculator {
 	}
 	
 	@Override
-	public int getFairShare(int sourcesSize) {
+	public int getShare(int sourcesSize) {
 		return (int) Math.ceil(((double) sourcesSize) / (peerCount - 1));
 	}
 	

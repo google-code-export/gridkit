@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gridkit.coherence.util.arbiter;
+package org.gridkit.drc.coherence;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
@@ -37,7 +40,7 @@ import com.tangosol.util.ConcurrentMap;
  * 
  * Call start() method to enable live rebalancing.
  * 
- * @see FairShareCalculator
+ * @see ShareCalculator
  * @see ResourceHandler
  *
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
@@ -48,7 +51,7 @@ public class DistributedResourceCoordinator {
 
 	private ConcurrentMap controlCache;
 	private ResourceHandler resourceHandler;
-	private FairShareCalculator fairShare = new RoleBasedFairShare(); // default strategy
+	private ShareCalculator fairShare = new RoleBasedShareCalculator(); // default strategy
 
 	private int checkPeriod = 200;
 	private int balancePeriodMillis = 10000;
@@ -56,13 +59,15 @@ public class DistributedResourceCoordinator {
 	private int activeCount;
 	private int standByCount;
 
+	private boolean started = false;
 	private volatile boolean stopped = false;
 
+	private Set<Object> resources = new HashSet<Object>();
 	private Map<Object, SourceControl> sources;
 
 	private ControlThread thread;
 
-	public void setFairShare(FairShareCalculator fairShare) {
+	public void setShareCalculator(ShareCalculator fairShare) {
 		this.fairShare = fairShare;
 	}
 
@@ -78,20 +83,34 @@ public class DistributedResourceCoordinator {
 	 * <b>Required</b>
 	 */
 	public void setLockMap(ConcurrentMap cache) {
+		if (started) {
+			throw new IllegalStateException("This setter is for initialization only");
+		}
 		this.controlCache = cache;
 	}
 
+	public void setResources(Collection<?> ids) {
+		if (started) {
+			throw new IllegalStateException("This setter is for initialization only");
+		}
+		resources.addAll(ids);
+	}
+	
 	/**
 	 * <b>Required</b>
 	 */
 	public void setResourceHandler(ResourceHandler handler) {
+		if (started) {
+			throw new IllegalStateException("This setter is for initialization only");
+		}
 		this.resourceHandler = handler;
 	}
 
 	/**
 	 * Starts coordinator, once started coordinator will participate in resource balancing.
 	 */
-	public void start() {
+	public synchronized void start() {
+		started = true;
 		if (controlCache == null) {
 			throw new IllegalStateException("Control map is not set!");
 		}
@@ -110,7 +129,13 @@ public class DistributedResourceCoordinator {
 	/**
 	 * Stops active sources, release locks and stops watch dog thread.
 	 */
-	public void stop() {
+	public synchronized void stop() {
+		if (!started) {
+			throw new IllegalStateException("DRC is not started");
+		}
+		if (stopped) {
+			throw new IllegalStateException("DRC is already stopped");
+		}
 		try {
 			stopped = true;
 			thread.join();
@@ -120,8 +145,11 @@ public class DistributedResourceCoordinator {
 	}
 
 	private void initSourceControls() {
+		if (resources.isEmpty()) {
+			throw new IllegalArgumentException("Resource list is empty");
+		}
 		sources = new HashMap<Object, SourceControl>();
-		for(Object id: resourceHandler.getResourcesList()) {
+		for(Object id: resources) {
 			sources.put(id, new SourceControl(id));
 		}
 	}
@@ -168,7 +196,7 @@ public class DistributedResourceCoordinator {
 	 */
 	private void greedyBalance() {
 
-		int fairSourceNumber = fairShare.getFairShare(sources.size());
+		int fairSourceNumber = fairShare.getShare(sources.size());
 
 		if (activeCount < fairSourceNumber) {
 			// fast locking cycle
@@ -197,9 +225,18 @@ public class DistributedResourceCoordinator {
 		}
 	}
 
+	/**
+	 * While greedy balance algorithm goal is to distribute ownership of orphaned nodes as fast as possible,
+	 * fair balance algorithm goal is to keep distribution of resources between nodes fairly even.
+	 * Fair balance may choose to withdraw ownership of resource if node is owning more resources than recommended by
+	 * {@link ShareCalculator}. But before giving up resource, fair balance ensures that other node is ready to take it.
+	 * 
+	 * Fair balance is invoked not so often as greedy balance, because overloaded node is considered less problemetic than
+	 * orphaned resource.
+	 */
 	private void fairBalance() {
 		
-		int fairSourceNumber = fairShare.getFairShare(sources.size());
+		int fairSourceNumber = fairShare.getShare(sources.size());
 
 		// release stand by slots
 		for(SourceControl control: controls()) {

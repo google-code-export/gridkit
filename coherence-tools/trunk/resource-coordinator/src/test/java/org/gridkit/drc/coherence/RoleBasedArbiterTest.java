@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gridkit.coherence.util.arbiter;
+package org.gridkit.drc.coherence;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +22,10 @@ import java.util.List;
 
 import org.gridkit.coherence.util.classloader.Isolate;
 import org.gridkit.coherence.util.classloader.NodeActions;
+import org.gridkit.drc.coherence.DistributedResourceCoordinator;
+import org.gridkit.drc.coherence.ResourceHandler;
+import org.gridkit.drc.coherence.RoleBasedShareCalculator;
+import org.gridkit.drc.coherence.ShareCalculator;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -33,7 +37,7 @@ import com.tangosol.net.NamedCache;
  * Integration DRC test, using role-based share implementation to calculate fair numbers
  * 
  * @see DistributedResourceCoordinator
- * @see RoleBasedFairShare
+ * @see RoleBasedShareCalculator
  * 
  * @author malekseev
  * 20.04.2011
@@ -44,8 +48,10 @@ public class RoleBasedArbiterTest {
 	
 	@BeforeClass
 	public static void initCoherence() {
-		System.setProperty("tangosol.coherence.wka", "localhost");
-		System.setProperty("tangosol.coherence.localhost", "localhost");
+		// TODO 
+		System.setProperty("tangosol.coherence.wka", "localbox");
+		System.setProperty("tangosol.coherence.localhost", "localbox");
+		System.setProperty("tangosol.coherence.ttl", "0");
 		System.setProperty("tangosol.coherence.distributed.localstorage", "true");
 	}
 	
@@ -59,9 +65,11 @@ public class RoleBasedArbiterTest {
 		is2.start();
 		is3.start();
 		
-		is1.submit(Start.class, "NODE-1", "test-cache-config.xml");
-		is2.submit(Start.class, "NODE-2", "test-cache-config.xml");
-		is3.submit(Start.class, "NODE-3", "test-cache-config.xml");
+		String config = getClass().getResource("/test-cache-config.xml").toExternalForm();
+		
+		is1.submit(Start.class, "NODE-1", config);
+		is2.submit(Start.class, "NODE-2", config);
+		is3.submit(Start.class, "NODE-3", config);
 
 		Thread.sleep(10 * 1000L); // wait for cluster formation
 		
@@ -121,13 +129,14 @@ public class RoleBasedArbiterTest {
 		@Override
 		public void run() {
 			NamedCache cache = CacheFactory.getCache(lockCacheName);
-			ResourceHandler manager = new MockResourceControl(Arrays.asList(Sources.values()));
-			FairShareCalculator fairShare = new RoleBasedFairShare();
+			MockResourceControl manager = new MockResourceControl(Arrays.asList(Sources.values()));
+			ShareCalculator fairShare = new RoleBasedShareCalculator();
 			DistributedResourceCoordinator arbiter = new DistributedResourceCoordinator();
 			NodeHolder.arbiterInstance = arbiter;
 			arbiter.setLockMap(cache);
+			arbiter.setResources(manager.getResourcesList());
 			arbiter.setResourceHandler(manager);
-			arbiter.setFairShare(fairShare);
+			arbiter.setShareCalculator(fairShare);
 			arbiter.setLockCheckPeriodMillis(100); // 10 per sec
 			arbiter.setRebalancePeriodMillis(500); // 2 per sec
 			arbiter.start();
@@ -192,8 +201,7 @@ public class RoleBasedArbiterTest {
 		public void terminate(Object resourceId) {
 		}
 
-		@Override
-		public Collection<?> getResourcesList() {
+		public Collection<Object> getResourcesList() {
 			return sources;
 		}
 	}

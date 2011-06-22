@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gridkit.coherence.util.arbiter;
+package org.gridkit.drc.coherence;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -24,6 +24,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.gridkit.drc.coherence.DistributedResourceCoordinator;
+import org.gridkit.drc.coherence.ResourceHandler;
+import org.gridkit.drc.coherence.StaticFairShare;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -56,6 +59,7 @@ public class StaticArbiterTest {
 		cache = new WrapperNamedCache(new SegmentedConcurrentMap(), "controlCache");
 		manager = new MockResourceControl(Arrays.asList(Sources.values()));
 		coordinator = new DistributedResourceCoordinator();
+		coordinator.setResources(((MockResourceControl)manager).getResourcesList());
 		coordinator.setResourceHandler(manager);
 		coordinator.setLockMap(cache);
 		executor = Executors.newFixedThreadPool(1);
@@ -76,7 +80,7 @@ public class StaticArbiterTest {
 	public void test_takeOver() throws Exception {
 		StaticFairShare fsc = new StaticFairShare();
 		fsc.setPeerCount(3);
-		coordinator.setFairShare(fsc);
+		coordinator.setShareCalculator(fsc);
 		execPrivate(coordinator, "initSourceControls");
 
 		call_checkLocks();
@@ -98,7 +102,7 @@ public class StaticArbiterTest {
 	public void test_takeOverAlternative() throws Exception {
 		StaticFairShare fsc = new StaticFairShare();
 		fsc.setPeerCount(4);
-		coordinator.setFairShare(fsc);
+		coordinator.setShareCalculator(fsc);
 
 		execPrivate(coordinator, "initSourceControls");
 
@@ -122,7 +126,7 @@ public class StaticArbiterTest {
 		StaticFairShare fsc = new StaticFairShare();
 		fsc.setPeerCount(3);
 
-		coordinator.setFairShare(fsc);
+		coordinator.setShareCalculator(fsc);
 		execPrivate(coordinator, "initSourceControls");
 
 		call_checkLocks();
@@ -203,7 +207,6 @@ public class StaticArbiterTest {
 		public void terminate(Object resourceId) {
 		}
 
-		@Override
 		public Collection<?> getResourcesList() {
 			return sources;
 		}

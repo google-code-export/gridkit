@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gridkit.coherence.util.arbiter;
+package org.gridkit.drc.coherence;
 
 import java.util.Set;
 
@@ -27,10 +27,10 @@ import com.tangosol.net.Member;
  * @author malekseev
  * 20.04.2011
  */
-public class RoleBasedFairShare implements FairShareCalculator {
+public class RoleBasedShareCalculator implements ShareCalculator {
 	
 	@Override
-	public int getFairShare(int sourcesSize) {
+	public int getShare(int sourcesSize) {
 		Cluster cluster = CacheFactory.ensureCluster();
 		String localRoleName = cluster.getLocalMember().getRoleName();
 		

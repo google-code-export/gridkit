@@ -13,16 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gridkit.coherence.util.arbiter;
+package org.gridkit.drc.coherence;
 
-import org.junit.Ignore;
+import java.util.concurrent.TimeUnit;
 
-@Ignore
-public class Sample {
+/**
+ * This interfaces defines flexible scheduling policy. It may be as simple as "run in fixed interval" or much more complicated.
 
-}
-
-
-class ResourceControl {
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ */
+public interface SchedulingPolicy {
+	
+	public long getTimeForNextSchedule(TimeUnit tu);
+	
+	public void taskStarted();
+	
+	public void taskFinished();
 	
 }

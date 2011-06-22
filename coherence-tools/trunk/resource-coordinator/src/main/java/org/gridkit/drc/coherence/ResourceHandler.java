@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gridkit.coherence.util.arbiter;
+package org.gridkit.drc.coherence;
 
-import java.util.Collection;
 
 /**
  * A base interface for managing HA connections to resources in cluster.
@@ -23,13 +22,6 @@ import java.util.Collection;
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
 public interface ResourceHandler {
-
-	/**
-	 * Returns collection of all resources which are managed by this {@link ResourceHandler}.
-	 * This method called by {@link DistributedResourceCoordinator} to initialize resources locks. 
-	 * Once {@link DistributedResourceCoordinator} is started set of resources cannot be changed.
-	 */
-	public Collection<?> getResourcesList();
 
 	/**
 	 * Notifies {@link ResourceHandler} what this JVM has acquired a lock for particular resources 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gridkit.coherence.util.arbiter;
+package org.gridkit.drc.coherence;
 
 /**
  * Fair share interface. 
@@ -22,12 +22,12 @@ package org.gridkit.coherence.util.arbiter;
  * @author malekseev
  * 20.04.2011
  */
-public interface FairShareCalculator {
+public interface ShareCalculator {
 	
 	/**
 	 * Returns "fair" number of resources to lock per-peer
 	 * @param sourcesCount number or resources to share
 	 */
-	public int getFairShare(int sourcesCount);
+	public int getShare(int sourcesCount);
 	
 }
