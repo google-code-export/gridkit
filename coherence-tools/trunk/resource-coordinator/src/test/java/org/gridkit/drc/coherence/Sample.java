@@ -89,7 +89,7 @@ class Main {
 	public void init() {
 	
 		// all Distributed Resource Coordination in same resource group
-		// should use same Coherence cache (eigther distribute or replicated scheme)
+		// should use same Coherence cache (either distribute or replicated scheme)
 		// but you may create multiple DRC groups using different caches
 		ConcurrentMap cache = CacheFactory.getCache("some-cache-name");
 		

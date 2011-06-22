@@ -49,8 +49,8 @@ public class RoleBasedArbiterTest {
 	@BeforeClass
 	public static void initCoherence() {
 		// TODO 
-		System.setProperty("tangosol.coherence.wka", "localbox");
-		System.setProperty("tangosol.coherence.localhost", "localbox");
+		System.setProperty("tangosol.coherence.wka", "localhost");
+		System.setProperty("tangosol.coherence.localhost", "localhost");
 		System.setProperty("tangosol.coherence.ttl", "0");
 		System.setProperty("tangosol.coherence.distributed.localstorage", "true");
 	}
