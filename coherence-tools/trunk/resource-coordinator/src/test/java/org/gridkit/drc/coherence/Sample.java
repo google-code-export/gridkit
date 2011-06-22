@@ -114,7 +114,7 @@ class Main {
 		// This is default share calculator which is using process role to count all DRC in cluster
 		//coordinator.setShareCalculator(new RoleBasedShareCalculator());
 		
-		// Now minimal configuartion is done and we can start DRC node
+		// Now minimal configuration is done and we can start DRC node
 		coordinator.start();
 		
 		// ...
