@@ -23,6 +23,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -94,7 +95,7 @@ public class ReflectionPofSerializer implements PofSerializer {
         }
     }
     
-    private ConcurrentMap<Class<?>, ObjectFormat> formats = new ConcurrentHashMap<Class<?>, ObjectFormat>();
+    private ConcurrentMap<Class<?>, PofSerializer> formats = new ConcurrentHashMap<Class<?>, PofSerializer>();
     
     
     @Override
@@ -105,7 +106,7 @@ public class ReflectionPofSerializer implements PofSerializer {
 
     protected Object internalDeserialize(PofReader in) throws IOException {
         Class<?> type = in.getPofContext().getClass(in.getUserTypeId());
-        ObjectFormat format = getClassCodec(type);
+        PofSerializer format = getClassCodec(type);
         Object result = resolve(format.deserialize(in));
         return result;
     }
@@ -118,15 +119,15 @@ public class ReflectionPofSerializer implements PofSerializer {
     protected void internalSerialize(PofWriter out, Object origValue) throws IOException {
         Object value = replace(origValue);
         Class<?> type = value.getClass();
-        ObjectFormat format = getClassCodec(type);
+        PofSerializer format = getClassCodec(type);
         format.serialize(out, value);
     }
 
-    private ObjectFormat getClassCodec(Class<?> type) throws IOException {
-        ObjectFormat format = formats.get(type);
+    private PofSerializer getClassCodec(Class<?> type) throws IOException {
+        PofSerializer format = formats.get(type);
         if (format == null) {
             try {
-                format = new ObjectFormat(type);
+                format = createSerializer(type);
             } catch (Exception e) {
                 throw new IOException("Failed to create reflection format for " + type.getName(), e);
             }
@@ -136,7 +137,56 @@ public class ReflectionPofSerializer implements PofSerializer {
         return format;
     }
 
-    private static Object resolve(Object deserialized) {
+	private PofSerializer createSerializer(Class<?> type) throws NoSuchMethodException {
+		if (isCollectionClass(type)) {
+			return new CollectionSerializer(type);
+		}
+		else if (isMapClass(type)) {
+			return new MapSerializer(type);
+		}
+		else {
+			return new ObjectFormat(type);
+		}
+	}
+
+    private boolean isCollectionClass(Class<?> type) {
+		if (!Collection.class.isAssignableFrom(type)) {
+			return false;
+		}
+		for(Constructor<?> c: type.getConstructors()) {
+			if (c.getParameterTypes().length == 0) {
+				return true;
+			}
+			else if (c.getParameterTypes().length == 1
+					&& c.getParameterTypes()[0].isAssignableFrom(List.class)) {
+				return true;
+			}
+			else if (c.getParameterTypes().length == 1
+					&& c.getParameterTypes()[0].isArray()
+					&& !c.getParameterTypes()[0].getComponentType().isPrimitive()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+    private boolean isMapClass(Class<?> type) {
+    	if (!Map.class.isAssignableFrom(type)) {
+    		return false;
+    	}
+    	for(Constructor<?> c: type.getConstructors()) {
+    		if (c.getParameterTypes().length == 0) {
+    			return true;
+    		}
+    		else if (c.getParameterTypes().length == 1
+    				&& c.getParameterTypes()[0].isAssignableFrom(Map.class)) {
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+
+	private static Object resolve(Object deserialized) {
         if (deserialized.getClass() == WKO.class) {
             return WELL_KNOWN_OBJECTS.get(((WKO)deserialized).objectRef);
         }
@@ -171,8 +221,135 @@ public class ReflectionPofSerializer implements PofSerializer {
         }
         return codec;
     }
-    
-    private static class ObjectFormat implements PofSerializer {
+
+	private static class CollectionSerializer implements PofSerializer {
+	
+		private final Class<?> type;
+		private final Constructor<?> constructor;
+		private final Object[] proto;
+		
+		public CollectionSerializer(Class<?> type)	throws SecurityException, NoSuchMethodException {
+			this.type = type;
+			this.constructor = initConstructor(type);
+			if (constructor.getParameterTypes().length == 1 && constructor.getParameterTypes()[0].isArray()) {
+				proto = (Object[]) Array.newInstance(constructor.getParameterTypes()[0].getComponentType(), 0);
+			}
+			else {
+				proto = null;
+			}
+		}
+
+		private Constructor<?> initConstructor(Class<?> type) {
+			Constructor<?> cc = null;
+			for(Constructor<?> c : type.getDeclaredConstructors()) {
+				if (c.getParameterTypes().length == 0) {
+					if (cc == null) {
+						cc = c;
+					}
+				}
+				if (c.getParameterTypes().length == 1 
+						&& c.getParameterTypes()[0].isAssignableFrom(Collection.class)) {
+					cc = c;
+				}
+				if (c.getParameterTypes().length == 1 
+						&& c.getParameterTypes()[0].isArray() && !c.getParameterTypes()[0].getComponentType().isPrimitive() ) {
+					if (cc == null) {
+						cc = c;
+					}
+				}
+			}
+			cc.setAccessible(true);
+			return cc;
+		}
+		
+		@Override
+		public void serialize(PofWriter writer, Object object)	 throws IOException {
+			Collection<?> col = (Collection<?>) object;
+			writer.writeCollection(0, col);
+			writer.writeRemainder(null);			
+		}
+
+		@Override
+		public Object deserialize(PofReader reader) throws IOException {
+			try {
+				if (proto != null) {
+					Object[] objects = reader.readObjectArray(0, proto);
+					reader.readRemainder();
+					return constructor.newInstance(objects);
+				}
+				else if (constructor.getParameterTypes().length == 0) {
+					Collection<?> col = (Collection<?>) constructor.newInstance();
+					reader.readCollection(0, col);
+					reader.readRemainder();
+					return col;
+				}
+				else {
+					Collection<?> col = reader.readCollection(0, null);
+					reader.readRemainder();
+					return constructor.newInstance(col);
+				}
+			} catch (Exception e) {
+				throw new IOException("Failed to deserialize " + type.getName() + " instance", e);
+			}
+		}
+	}
+
+    private static class MapSerializer implements PofSerializer {
+	
+		private final Class<?> type;
+		private final Constructor<?> constructor;
+		
+		public MapSerializer(Class<?> type)	throws SecurityException, NoSuchMethodException {
+			this.type = type;
+			this.constructor = initConstructor(type);
+		}
+
+		private Constructor<?> initConstructor(Class<?> type) {
+			Constructor<?> cc = null;
+			for(Constructor<?> c : type.getDeclaredConstructors()) {
+				if (c.getParameterTypes().length == 0) {
+					if (cc == null) {
+						cc = c;
+					}
+				}
+				if (c.getParameterTypes().length == 1 
+						&& c.getParameterTypes()[0].isAssignableFrom(Map.class)) {
+					cc = c;
+				}
+			}
+			cc.setAccessible(true);
+			return cc;
+		}
+
+		@Override
+		public void serialize(PofWriter writer, Object object)	 throws IOException {
+			Map<?, ?> map = (Map<?, ?>) object;
+			writer.writeMap(0, map);
+			writer.writeRemainder(null);			
+		}
+
+		@Override
+		public Object deserialize(PofReader reader) throws IOException {
+			try {
+				Map<?, ?> proto;
+				if (constructor.getParameterTypes().length == 0) {
+					proto = (Map<?, ?>) constructor.newInstance();
+				}
+				else {
+					proto = null;
+				}
+				Map<?, ?> map = reader.readMap(0, proto);
+				if (constructor.getParameterTypes().length != 0) {
+					map = (Map<?, ?>) constructor.newInstance(map);
+				}
+				return map;
+			} catch (Exception e) {
+				throw new IOException("Failed to deserialize " + type.getName() + " instance", e);
+			}
+		}
+	}
+
+	private static class ObjectFormat implements PofSerializer {
         private Constructor<?> constructor;
         private ObjectFieldCodec[] propCodec;
         
@@ -352,43 +529,30 @@ public class ReflectionPofSerializer implements PofSerializer {
 
     private static class EnumPropCodec implements ObjectPropCodec {
         
-        private final EnumSet<?> universe;
+        @SuppressWarnings("rawtypes")
+		private final Enum[] universe;
         
-        @SuppressWarnings("unchecked")
-        public EnumPropCodec(Class<?> type) {
-            this.universe = EnumSet.allOf((Class)type);
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+		public EnumPropCodec(Class<?> type) {
+            this.universe = (Enum[]) EnumSet.allOf((Class)type).toArray(new Enum[0]);
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public Object readProp(PofReader reader, int propId, Field field) throws IOException {
             int val = reader.readShort(propId);
-            // TODO may be vastly inefficient
-            for(Object x: universe) {
-                if (((Enum)x).ordinal() == val) {
-                    return x;
-                }
-            }
-            throw new IOException("Illegal " + field.getType().getName() + " ordinal " + val);
+            return universe[val];
         }
         
         @Override
-        @SuppressWarnings("unchecked")
         public void writeProp(PofWriter writer, int propId, Object obj, Field field) throws IOException {
-            writer.writeShort(propId, (short) ((Enum)obj).ordinal());
+            writer.writeShort(propId, (short) ((Enum<?>)obj).ordinal());
         }
         
         @Override
-        @SuppressWarnings("unchecked")
         public String extract(PofValue cursor, String path, Object[] valueOut) throws IOException {
             int val = (Integer) cursor.getValue(Integer.class);
-            for(Object x: universe) {
-                if (((Enum)x).ordinal() == val) {
-                    valueOut[0] = x;
-                    return path;
-                }
-            }
-            throw new IOException("Illegal " + universe.iterator().next().getClass().getName() + " ordinal " + val);
+            valueOut[0] = universe[val];
+            return path;
         }
     }
 
@@ -589,7 +753,7 @@ public class ReflectionPofSerializer implements PofSerializer {
         
         ObjectFormat format;
         try {
-            format = getClassCodec(type);
+            format = (ObjectFormat)getClassCodec(type);
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e.getCause());
         }        

@@ -64,6 +64,78 @@
             </serializer>
         </user-type>
 
+        <user-type>
+            <type-id>1006</type-id>
+            <class-name>org.gridkit.coherence.utils.pof.PofSerializerComplexObjectTest$Triple</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+
+        <user-type>
+            <type-id>1007</type-id>
+            <class-name>org.gridkit.coherence.utils.pof.PofSerializerComplexObjectTest$ComplexObjectA</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+
+        <user-type>
+            <type-id>1008</type-id>
+            <class-name>org.gridkit.coherence.utils.pof.PofSerializerComplexObjectTest$ComplexObjectB</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+
+        <user-type>
+            <type-id>1009</type-id>
+            <class-name>org.gridkit.coherence.utils.pof.PofSerializerComplexObjectTest$ComplexObjectC</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+
+        <user-type>
+            <type-id>1010</type-id>
+            <class-name>org.gridkit.coherence.utils.pof.PofSerializerComplexObjectTest$ComplexObjectD</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+
+        <user-type>
+            <type-id>1011</type-id>
+            <class-name>org.gridkit.coherence.utils.pof.PofSerializerComplexObjectTest$ComplexObjectE</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+
+        <user-type>
+            <type-id>2000</type-id>
+            <class-name>java.util.ArrayList</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+
+        <user-type>
+            <type-id>2001</type-id>
+            <class-name>java.util.LinkedList</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+
+        <user-type>
+            <type-id>2002</type-id>
+            <class-name>java.util.TreeMap</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+
 	</user-type-list>
 	
     <allow-interfaces>true</allow-interfaces>
