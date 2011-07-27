@@ -87,8 +87,8 @@ public class ReflectionPofExtractor extends PofExtractor implements PortableObje
         return "ReflectionPofExtractor(" + target + ":" + path + ")";
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
+	@Override
+	@SuppressWarnings("rawtypes")
     public Object extractFromEntry(Entry entry) {
         return extractInternal(entry, m_nTarget);
     }
@@ -97,7 +97,7 @@ public class ReflectionPofExtractor extends PofExtractor implements PortableObje
         return extractInternal(entry, -1);
     }
     
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     private Object extractInternal(Entry entry, int target) {
         if (entry instanceof BinaryEntry) {
             BinaryEntry be = (BinaryEntry) entry;
@@ -162,8 +162,8 @@ public class ReflectionPofExtractor extends PofExtractor implements PortableObje
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private Object extractPojo(Entry entry, int target) {
+    @SuppressWarnings("rawtypes")
+	private Object extractPojo(Entry entry, int target) {
         Object ot;
         if (target == AbstractExtractor.KEY) {
             ot = entry.getKey();
