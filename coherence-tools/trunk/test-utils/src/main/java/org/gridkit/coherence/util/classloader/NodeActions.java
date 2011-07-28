@@ -29,7 +29,7 @@ public abstract class NodeActions {
 	/**
 	 * Starts Coherence cluster node
 	 * 
-	 * @author aragozin
+	 * @author Alexey Ragozin (alexey.ragozin@gmail.com)
 	 */
 	public static class Start implements Runnable {
 		private final String config;
@@ -37,8 +37,27 @@ public abstract class NodeActions {
 
 		@Override
 		public void run() {
+			System.out.println(Thread.currentThread().getName() + " starting Coherence node ...");
 			CacheFactory.setConfigurableCacheFactory(new DefaultConfigurableCacheFactory(config));
 			CacheFactory.ensureCluster();
+			System.out.println(Thread.currentThread().getName() + " Coherence node has started");
+		}
+	}
+
+	/**
+	 * Initializes a cache
+	 * 
+	 * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+	 */
+	public static class InitCache implements Runnable {
+		private final String cacheName;
+		public InitCache(String cacheName) { this.cacheName = cacheName; }
+		
+		@Override
+		public void run() {
+			System.out.println(Thread.currentThread().getName() + " initializing cache [" + cacheName + "] ...");
+			CacheFactory.getCache(cacheName);
+			System.out.println(Thread.currentThread().getName() + " cache [" + cacheName + " initialized");
 		}
 	}
 	
