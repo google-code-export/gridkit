@@ -54,7 +54,7 @@ import com.tangosol.util.processor.ConditionalPut;
  * 
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class AutoPofContext implements Serializer, PofContext {
+public class AutoPofSerializer implements Serializer, PofContext {
 
 	private static final String AUTO_POF_SERVICE = "AUTO-POF-SERVICE";
 	private static final String AUTO_POF_MAPPING = "AUTO_POF_MAPPING";
@@ -68,8 +68,9 @@ public class AutoPofContext implements Serializer, PofContext {
 +		"</caching-scheme-mapping>"
 + 		"<caching-schemes>"
 +			"<replicated-scheme>"
-+				"<scheme-name>AUTO_POF_SERVICE</scheme-name>"
++				"<scheme-name>AUTO_POF_SCHEME</scheme-name>"
 +				"<service-name>AUTO_POF_SERVICE</service-name>"
++               "<backing-map-scheme><local-scheme/></backing-map-scheme>"
 +			"</replicated-scheme>"
 +		"</caching-schemes>"
 +	"</cache-config>";
@@ -83,19 +84,19 @@ public class AutoPofContext implements Serializer, PofContext {
 	
 	private ReflectionPofSerializer autoSerializer = new ReflectionPofSerializer();
 	
-	public AutoPofContext() {
+	public AutoPofSerializer() {
 		context = new ConfigurablePofContext();
-		initTypeMap();
+//		initTypeMap();
 		initContextMap();
 	}
 	
-	public AutoPofContext(String pofConfig) {
+	public AutoPofSerializer(String pofConfig) {
 		context = new ConfigurablePofContext(pofConfig);
-		initTypeMap();
+//		initTypeMap();
 		initContextMap();
 	}
 
-	public AutoPofContext(String pofConfig, NamedCache typeMap) {
+	public AutoPofSerializer(String pofConfig, NamedCache typeMap) {
 		this.context = new ConfigurablePofContext(pofConfig);
 		this.typeMap = typeMap;
 		initContextMap();
@@ -304,18 +305,21 @@ public class AutoPofContext implements Serializer, PofContext {
 		ctx.type = cls;
 		ctx.serializer = serializer;
 		
-		Map<Class<?>, SerializationContext> cm = new HashMap<Class<?>, AutoPofContext.SerializationContext>(classMap);
+		Map<Class<?>, SerializationContext> cm = new HashMap<Class<?>, AutoPofSerializer.SerializationContext>(classMap);
 		cm.put(cls, ctx);
 		classMap = cm;
 		
 		rebuildTypeIdMap(Math.max(typeIdMap.length - 1, userType));
 	}
 	
-	private synchronized SerializationContext ensureContextById(int id) {
+	private synchronized SerializationContext ensureContextById(int id) {		
 		if (typeIdMap.length > id && typeIdMap[id] != null) {
 			return typeIdMap[id];
 		}
 		else {
+			if (typeMap == null) {
+				initTypeMap();
+			}
 			String cname = (String) typeMap.get(id); // new java.util.HashMap(typeMap)
 			if (cname == null) {
 				throw new IllegalArgumentException("Unknown POF user type " + id);
@@ -331,7 +335,10 @@ public class AutoPofContext implements Serializer, PofContext {
 		}
 	}
 
-	private int registerUserType(String name) {
+	private synchronized int registerUserType(String name) {
+		if (typeMap == null) {
+			initTypeMap();
+		}
 		while(true) {
 			if (typeMap.lock(name, 100)) {
 				try {
