@@ -32,8 +32,43 @@
         <javaVersion>1.6</javaVersion>
     </properties>
 
-     <repositories>
-    </repositories>
+
+	<repositories>
+		<!-- GridKit maven2 repository -->
+		<repository>
+			<id>gridkit-releases</id>
+			<name>gridkit-repo.googlecode.com</name>
+			<url>http://gridkit.googlecode.com/svn/repo/</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+
+    <dependencies>
+        <dependency>
+        	<groupId>com.oracle.coherence</groupId>
+        	<artifactId>coherence</artifactId>
+        	<version>3.6.0b17229</version>
+        </dependency>
+        <dependency>
+        	<groupId>junit</groupId>
+        	<artifactId>junit</artifactId>
+        	<version>4.8.2</version>
+        	<scope>test</scope>
+        </dependency>        
+        <dependency>
+        	<groupId>org.gridkit.coherence-tools</groupId>
+ 	        <artifactId>test-utils</artifactId>
+	        <version>0.1.1-SNAPSHOT</version>
+                <scope>test</scope>
+        </dependency>
+    </dependencies>
 
     <pluginRepositories>
         <pluginRepository>
@@ -48,20 +83,6 @@
             </releases>
         </pluginRepository>
     </pluginRepositories>
-
-    <dependencies>
-        <dependency>
-        	<groupId>com.oracle.coherence</groupId>
-        	<artifactId>coherence</artifactId>
-        	<version>3.6.0b17229</version>
-        </dependency>
-        <dependency>
-        	<groupId>junit</groupId>
-        	<artifactId>junit</artifactId>
-        	<version>4.8.1</version>
-        	<scope>test</scope>
-        </dependency>        
-    </dependencies>
 
     <build>
         <plugins>
