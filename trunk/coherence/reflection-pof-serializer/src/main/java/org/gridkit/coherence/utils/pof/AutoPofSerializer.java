@@ -59,7 +59,8 @@ public class AutoPofSerializer implements Serializer, PofContext {
 	private static final String AUTO_POF_SERVICE = "AUTO-POF-SERVICE";
 	private static final String AUTO_POF_MAPPING = "AUTO_POF_MAPPING";
 	
-	private static final int MAX_CONFIG_ID = Integer.getInteger("gridkit.auto-pof-context.max-config-id", 1000);
+	private static final int MAX_CONFIG_ID = Integer.getInteger("gridkit.auto-pof.max-config-id", 1000);
+	private static final int MIN_AUTO_ID = Integer.getInteger("gridkit.auto-pof.min-auto-id", 10000);
 	
 	private static final String XML_FRAGMENT =
 	"<cache-config>"
@@ -80,7 +81,8 @@ public class AutoPofSerializer implements Serializer, PofContext {
 	private NamedCache typeMap;
 	
 	private volatile Map<Class<?>, SerializationContext> classMap;  
-	private volatile SerializationContext[] typeIdMap = new SerializationContext[1024];
+	private volatile SerializationContext[] lowTypeIdMap = new SerializationContext[1024];
+	private volatile SerializationContext[] highTypeIdMap = new SerializationContext[256];
 	
 	private ReflectionPofSerializer autoSerializer = new ReflectionPofSerializer();
 	
@@ -117,8 +119,7 @@ public class AutoPofSerializer implements Serializer, PofContext {
 
 	private synchronized void initContextMap() {
 		Map<Class<?>, SerializationContext> map = new HashMap<Class<?>, SerializationContext>();
-		int nmax = 0;
-		for(int i = 0; i != 1000; ++i) {
+		for(int i = 0; i != Math.min(MIN_AUTO_ID, 1000); ++i) {
 			try {
 				PofSerializer serializer = context.getPofSerializer(i);
 				Class<?> cls = context.getClass(i);
@@ -127,22 +128,13 @@ public class AutoPofSerializer implements Serializer, PofContext {
 				ctx.type = cls;
 				ctx.serializer = serializer;
 				map.put(cls, ctx);
-				nmax = i > nmax ? i : nmax;
+				putContext(ctx.pofId, ctx);
 			}
 			catch(IllegalArgumentException e) {
 				continue;
 			}
 		}
 		classMap = map;
-		rebuildTypeIdMap(nmax);
-	}
-
-	private void rebuildTypeIdMap(int maxId) {
-		SerializationContext[] imap = typeIdMap.length > maxId ? typeIdMap : new SerializationContext[(maxId + 1024 >> 10) << 10];
-		for(SerializationContext ctx: classMap.values()) {
-			imap[ctx.pofId] = ctx;
-		}
-		typeIdMap = imap;
 	}
 
 	@Override
@@ -209,11 +201,44 @@ public class AutoPofSerializer implements Serializer, PofContext {
 	}
 	
 	private SerializationContext contextById(int id) {
-		if (id >= typeIdMap.length || typeIdMap[id] == null) {
+		SerializationContext context = typeIdMap(id);
+		if (context == null) {
 			return ensureContextById(id);
 		}
 		else {
-			return typeIdMap[id];
+			return context;
+		}
+	}
+	
+	private SerializationContext typeIdMap(int id) {
+		if (id < MIN_AUTO_ID) {
+			return id >= lowTypeIdMap.length ? null : lowTypeIdMap[id];
+		}
+		else {
+			int iid = id - MIN_AUTO_ID;
+			return iid >= highTypeIdMap.length ? null : highTypeIdMap[iid];
+		}		
+	}
+	
+	private synchronized void putContext(int id, SerializationContext ctx) {
+		if (id < MIN_AUTO_ID) {
+			if (id >= lowTypeIdMap.length) {
+				int newSize = (id + 1023) & (~1023);
+				SerializationContext[] lowArray = new SerializationContext[newSize];
+				System.arraycopy(lowTypeIdMap, 0, lowArray, 0, lowTypeIdMap.length);
+				lowTypeIdMap = lowArray;
+			}
+			lowTypeIdMap[id] = ctx;
+		}
+		else {
+			int iid = id - MIN_AUTO_ID;
+			if (iid >= highTypeIdMap.length) {
+				int newSize = (iid + 255) & (~255);
+				SerializationContext[] highArray = new SerializationContext[newSize];
+				System.arraycopy(highTypeIdMap, 0, highArray, 0, highTypeIdMap.length);
+				highTypeIdMap = highArray;
+			}
+			highTypeIdMap[iid] = ctx;
 		}
 	}
 	
@@ -223,6 +248,18 @@ public class AutoPofSerializer implements Serializer, PofContext {
 			return ctx;
 		}
 		else {
+			
+			// try to import configure serializer on demand
+			if (context.isUserType(cls)) {
+				int id = context.getUserTypeIdentifier(cls);
+				if (typeIdMap(id) != null && id < MIN_AUTO_ID) {
+					ctx = importPofSerializer(id);
+					if (classMap.get(cls) == ctx) {
+						return ctx;
+					}
+				}
+			}
+			
 			if (cls.isArray()) {
 				registerArraySerializer(-1, cls);
 			}
@@ -309,30 +346,54 @@ public class AutoPofSerializer implements Serializer, PofContext {
 		cm.put(cls, ctx);
 		classMap = cm;
 		
-		rebuildTypeIdMap(Math.max(typeIdMap.length - 1, userType));
+		putContext(userType, ctx);
 	}
 	
-	private synchronized SerializationContext ensureContextById(int id) {		
-		if (typeIdMap.length > id && typeIdMap[id] != null) {
-			return typeIdMap[id];
+	private synchronized SerializationContext ensureContextById(int id) {
+		SerializationContext ctx = typeIdMap(id);
+		if (ctx != null) {
+			return ctx;
 		}
 		else {
-			if (typeMap == null) {
-				initTypeMap();
+			
+			if (id < MIN_AUTO_ID) {
+				return importPofSerializer(id);
 			}
-			String cname = (String) typeMap.get(id); // new java.util.HashMap(typeMap)
-			if (cname == null) {
-				throw new IllegalArgumentException("Unknown POF user type " + id);
-			}
-			try {
-//				Class<?> cls = Thread.currentThread().getContextClassLoader().loadClass(cname);
-				Class<?> cls = Class.forName(cname, true, Thread.currentThread().getContextClassLoader());
-				ensureContextByClass(cls);
-				return typeIdMap[id];
-			} catch (ClassNotFoundException e) {
-				throw new IllegalArgumentException("Class is not found " + cname);
+			else {
+				
+				if (typeMap == null) {
+					initTypeMap();
+				}
+				
+				String cname = (String) typeMap.get(id); // new java.util.HashMap(typeMap)
+				if (cname == null) {
+					throw new IllegalArgumentException("Unknown POF user type " + id);
+				}
+				try {
+					Class<?> cls = Class.forName(cname, true, Thread.currentThread().getContextClassLoader());
+					ensureContextByClass(cls);
+					return typeIdMap(id);
+				} catch (ClassNotFoundException e) {
+					throw new IllegalArgumentException("Class is not found " + cname);
+				}
 			}
 		}
+	}
+
+	private SerializationContext importPofSerializer(int id) {
+		SerializationContext ctx;
+		PofSerializer serializer = context.getPofSerializer(id);
+		Class<?> cls = context.getClass(id);
+		ctx = new SerializationContext();
+		ctx.pofId = id;
+		ctx.type = cls;
+		ctx.serializer = serializer;
+		Map<Class<?>, SerializationContext> map = new HashMap<Class<?>, AutoPofSerializer.SerializationContext>(classMap);
+		map.put(cls, ctx);
+		classMap = map;
+		putContext(ctx.pofId, ctx);
+		
+		return ctx;
 	}
 
 	private synchronized int registerUserType(String name) {
@@ -350,7 +411,7 @@ public class AutoPofSerializer implements Serializer, PofContext {
 					while(true) {
 						n = (Integer) typeMap.get("");
 						if (n == null) {
-							nn = MAX_CONFIG_ID + 1;
+							nn = MIN_AUTO_ID;
 						}
 						else {
 							nn = n + 1;
