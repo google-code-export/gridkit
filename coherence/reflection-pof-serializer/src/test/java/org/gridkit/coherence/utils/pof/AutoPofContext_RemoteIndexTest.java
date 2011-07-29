@@ -14,24 +14,20 @@
 
 package org.gridkit.coherence.utils.pof;
 
-import java.util.ArrayList;
-
-import junit.framework.Assert;
-
 import org.gridkit.coherence.util.classloader.Isolate;
 import org.gridkit.coherence.util.classloader.IsolateTestRunner;
 import org.gridkit.coherence.util.classloader.NodeActions;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
+import com.tangosol.util.extractor.IdentityExtractor;
 
 @RunWith(IsolateTestRunner.class)
-public class AutoPofContext_DistributedTest extends AutoPofContext_FunctionalTest {
+public class AutoPofContext_RemoteIndexTest extends AutoPofContext_FunctionalTest {
 
 	private static Isolate isolate;
 	private static NamedCache cache;
@@ -64,7 +60,8 @@ public class AutoPofContext_DistributedTest extends AutoPofContext_FunctionalTes
     	System.setProperty("tangosol.coherence.localhost", "localhost");
 
         CacheFactory.setConfigurableCacheFactory(new DefaultConfigurableCacheFactory("auto-pof-cache-config-client.xml"));
-        cache = CacheFactory.getCache("objects");        
+        cache = CacheFactory.getCache("objects");
+        cache.addIndex(IdentityExtractor.INSTANCE, false, null);
     }
 
 	
@@ -72,33 +69,4 @@ public class AutoPofContext_DistributedTest extends AutoPofContext_FunctionalTes
 		cache.put("123", value);
 		return cache.get("123");
 	}	
-	
-	@Test
-	public void testUnsoliticed() {
-
-		cache.remove("ok");
-		cache.put("123", new Chars("123"));
-		cache.put("456", new Chars("456"));
-		cache.put("789", new Chars("789"));
-		cache.put("111-222-333", new Chars[]{new Chars("111"), new Chars("111"), new Chars("111")});
-		
-		Isolate node = new Isolate("Remote-2", "org.gridkit", "com.tangosol");
-		node.start();
-		node.submit(NodeActions.Start.class, "auto-pof-cache-config-server.xml");
-		node.submit(GetAll.class);
-		node.submit(NodeActions.Stop.class);
-		node.stop();		
-		
-		Assert.assertEquals("ok", cache.get("ok"));
-	}
-	
-	public static class GetAll implements Runnable {
-
-		@Override
-		@SuppressWarnings({ "rawtypes", "unchecked" })
-		public void run() {
-			System.out.println(new ArrayList(CacheFactory.getCache("objects").entrySet()).toString());
-			CacheFactory.getCache("objects").put("ok", "ok");
-		}
-	}
 }
