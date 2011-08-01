@@ -45,6 +45,7 @@ import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
 import com.tangosol.run.xml.XmlElement;
 import com.tangosol.run.xml.XmlHelper;
+import com.tangosol.util.UUID;
 import com.tangosol.util.extractor.IdentityExtractor;
 import com.tangosol.util.filter.EqualsFilter;
 import com.tangosol.util.processor.ConditionalPut;
@@ -61,6 +62,7 @@ public class AutoPofSerializer implements Serializer, PofContext {
 	
 	private static final int MAX_CONFIG_ID = Integer.getInteger("gridkit.auto-pof.max-config-id", 1000);
 	private static final int MIN_AUTO_ID = Integer.getInteger("gridkit.auto-pof.min-auto-id", 10000);
+	private static final Boolean USE_PUBLIC_CACHE_CONFIG = Boolean.getBoolean("gridkit.auto-pof.use-public-cache-config");
 	
 	private static final String XML_FRAGMENT =
 	"<cache-config>"
@@ -85,56 +87,70 @@ public class AutoPofSerializer implements Serializer, PofContext {
 	private volatile SerializationContext[] highTypeIdMap = new SerializationContext[256];
 	
 	private ReflectionPofSerializer autoSerializer = new ReflectionPofSerializer();
+	private int minAutoId = MIN_AUTO_ID;
 	
 	public AutoPofSerializer() {
 		context = new ConfigurablePofContext();
 //		initTypeMap();
 		initContextMap();
+		initCustomPredefines();
 	}
 	
 	public AutoPofSerializer(String pofConfig) {
 		context = new ConfigurablePofContext(pofConfig);
 //		initTypeMap();
 		initContextMap();
+		initCustomPredefines();
 	}
 
 	public AutoPofSerializer(String pofConfig, NamedCache typeMap) {
 		this.context = new ConfigurablePofContext(pofConfig);
 		this.typeMap = typeMap;
 		initContextMap();
+		initCustomPredefines();
 	}
 	
 		
 	private void initTypeMap() {
-		Cluster cluster = CacheFactory.getCluster();
-		if (cluster.getServiceInfo(AUTO_POF_SERVICE) != null) {
-			CacheService service = (CacheService) cluster.getService(AUTO_POF_SERVICE);
-			typeMap = service.ensureCache(AUTO_POF_MAPPING, null);
+		if (USE_PUBLIC_CACHE_CONFIG) {
+			typeMap = CacheFactory.getCache(AUTO_POF_MAPPING);
 		}
 		else {
-			XmlElement xml = XmlHelper.loadXml(XML_FRAGMENT);
-			typeMap = new DefaultConfigurableCacheFactory(xml).ensureCache(AUTO_POF_MAPPING, null);
+			Cluster cluster = CacheFactory.getCluster();
+			if (cluster.getServiceInfo(AUTO_POF_SERVICE) != null) {
+				CacheService service = (CacheService) cluster.getService(AUTO_POF_SERVICE);
+				typeMap = service.ensureCache(AUTO_POF_MAPPING, null);
+			}
+			else {
+				XmlElement xml = XmlHelper.loadXml(XML_FRAGMENT);
+				typeMap = new DefaultConfigurableCacheFactory(xml).ensureCache(AUTO_POF_MAPPING, null);
+			}
 		}
 	}
 
 	private synchronized void initContextMap() {
-		Map<Class<?>, SerializationContext> map = new HashMap<Class<?>, SerializationContext>();
-		for(int i = 0; i != Math.min(MIN_AUTO_ID, 1000); ++i) {
-			try {
-				PofSerializer serializer = context.getPofSerializer(i);
-				Class<?> cls = context.getClass(i);
-				SerializationContext ctx = new SerializationContext();
-				ctx.pofId = i;
-				ctx.type = cls;
-				ctx.serializer = serializer;
-				map.put(cls, ctx);
-				putContext(ctx.pofId, ctx);
-			}
-			catch(IllegalArgumentException e) {
-				continue;
-			}
-		}
-		classMap = map;
+ 		Map<Class<?>, SerializationContext> map = new HashMap<Class<?>, SerializationContext>();
+ 		for(int i = 0; i != MAX_CONFIG_ID; ++i) {
+ 			try {
+ 				PofSerializer serializer = context.getPofSerializer(i);
+ 				Class<?> cls = context.getClass(i);
+ 				SerializationContext ctx = new SerializationContext();
+ 				ctx.pofId = i;
+ 				ctx.type = cls;
+ 				ctx.serializer = serializer;
+ 				map.put(cls, ctx);
+ 				putContext(ctx.pofId, ctx);
+ 			}
+ 			catch(IllegalArgumentException e) {
+ 				continue;
+ 			}
+ 		}
+ 		classMap = map; 		
+	}
+	
+	private synchronized void initCustomPredefines() {
+//		registerSerializationContext(minAutoId++, Throwable.class, new JavaSerializationSerializer());
+		registerArraySerializer(minAutoId++ , UUID[].class);
 	}
 
 	@Override
@@ -243,6 +259,12 @@ public class AutoPofSerializer implements Serializer, PofContext {
 	}
 	
 	private synchronized SerializationContext ensureContextByClass(Class<?> cls) {
+		
+		if (Throwable.class.isAssignableFrom(cls)) {
+			SerializationContext ctx = classMap.get(Throwable.class);
+			registerSerializationContext(ctx.pofId, cls, ctx.serializer);			
+		}
+
 		SerializationContext ctx = classMap.get(cls);
 		if (ctx != null) {
 			return ctx;
@@ -274,6 +296,8 @@ public class AutoPofSerializer implements Serializer, PofContext {
 		if (userType < 0) {
 			userType = registerUserType(cls.getName());
 		}
+		
+//		System.out.println("AUTOPOF: " + userType + "->" + cls.getName());
 		
 		PofSerializer serializer;
 		Class<?> base = cls.getComponentType();
@@ -319,6 +343,8 @@ public class AutoPofSerializer implements Serializer, PofContext {
 			userType = registerUserType(cls.getName());
 		}
 
+		System.out.println("AUTOPOF: " + userType + "->" + cls.getName());
+		
 		PofSerializer serializer;
 		if (PortableObject.class.isAssignableFrom(cls)) {
 			serializer = new PortableObjectSerializer(userType);
@@ -411,7 +437,7 @@ public class AutoPofSerializer implements Serializer, PofContext {
 					while(true) {
 						n = (Integer) typeMap.get("");
 						if (n == null) {
-							nn = MIN_AUTO_ID;
+							nn = minAutoId;
 						}
 						else {
 							nn = n + 1;
@@ -675,6 +701,34 @@ public class AutoPofSerializer implements Serializer, PofContext {
 			return result;
 		}		
 	}
+
+//	private static class ExceptionSerializer implements PofSerializer {
+//		
+//		private final Class<?> type;
+//		
+//		public ObjectMapSerializer(Class<?> type) {
+//			this.type = type;
+//		}
+//
+//		@Override
+//		public void serialize(PofWriter writer, Object obj) throws IOException {
+//			Map<?,?> map = (Map<?,?>) obj;
+//			writer.writeMap(0, map);
+//			writer.writeRemainder(null);
+//		}
+//
+//		@Override
+//		public Object deserialize(PofReader reader) throws IOException {
+//			Object result;
+//			try {
+//				result = reader.readMap(0, ((Map<?,?>)type.newInstance()));
+//			} catch (Exception e) {
+//				throw new IOException(e);
+//			}
+//			reader.readRemainder();
+//			return result;
+//		}		
+//	}
 	
 	public static class JavaSerializationSerializer implements Serializer, PofSerializer {
 

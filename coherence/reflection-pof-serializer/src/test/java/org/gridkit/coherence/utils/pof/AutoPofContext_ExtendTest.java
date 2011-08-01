@@ -31,20 +31,24 @@ import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
 
 @RunWith(IsolateTestRunner.class)
-public class AutoPofContext_DistributedTest extends AutoPofContext_FunctionalTest {
+public class AutoPofContext_ExtendTest extends AutoPofContext_FunctionalTest {
 
 	private static Isolate isolate;
 	private static NamedCache cache;
 
 	@BeforeClass
 	public static void init_storage_node() throws SecurityException, IllegalArgumentException, NoSuchFieldException, IllegalAccessException {
-    	System.setProperty("tangosol.coherence.wka", "localhost");
+    	System.setProperty("gridkit.auto-pof.use-public-cache-config", "true");
+		
+		System.setProperty("tangosol.coherence.wka", "localhost");
     	System.setProperty("tangosol.coherence.localhost", "localhost");
 		
 		isolate = new Isolate("Remote", "org.gridkit", "com.tangosol");
 		isolate.start();
-		isolate.submit(NodeActions.Start.class, "auto-pof-cache-config-server.xml");
-		isolate.submit(NodeActions.GetCache.class, "objects");
+		isolate.submit(NodeActions.Start.class, "auto-pof-cache-config-extend-server.xml");
+		isolate.submit(NodeActions.GetService.class, "AUTO_POF_SERVICE");
+		isolate.submit(NodeActions.GetService.class, "TcpProxyService");
+//		isolate.submit(NodeActions.GetService.class, "TcpAutoPofProxyService");
 		
 		initCache();
 	}
@@ -54,6 +58,7 @@ public class AutoPofContext_DistributedTest extends AutoPofContext_FunctionalTes
 		isolate.submit(NodeActions.Stop.class);
 		isolate.stop();
 		CacheFactory.getCluster().shutdown();
+		System.getProperties().remove("gridkit.auto-pof.use-public-cache-config");
 	}
 
     public static void initCache() throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
@@ -63,7 +68,8 @@ public class AutoPofContext_DistributedTest extends AutoPofContext_FunctionalTes
     	System.setProperty("tangosol.coherence.wka", "localhost");
     	System.setProperty("tangosol.coherence.localhost", "localhost");
 
-        CacheFactory.setConfigurableCacheFactory(new DefaultConfigurableCacheFactory("auto-pof-cache-config-client.xml"));
+        CacheFactory.setConfigurableCacheFactory(new DefaultConfigurableCacheFactory("auto-pof-cache-config-extend-client.xml"));
+        cache = CacheFactory.getCache("AUTO_POF_MAPPING");
         cache = CacheFactory.getCache("objects");        
     }
 
@@ -84,12 +90,28 @@ public class AutoPofContext_DistributedTest extends AutoPofContext_FunctionalTes
 		
 		Isolate node = new Isolate("Remote-2", "org.gridkit", "com.tangosol");
 		node.start();
-		node.submit(NodeActions.Start.class, "auto-pof-cache-config-server.xml");
+		node.submit(NodeActions.Start.class, "auto-pof-cache-config-extend-server.xml");
 		node.submit(GetAll.class);
 		node.submit(NodeActions.Stop.class);
 		node.stop();		
 		
 		Assert.assertEquals("ok", cache.get("ok"));
+	}
+
+	@Test
+	public void testBackPush() {
+		
+		cache.remove("dummy");
+		
+		Isolate node = new Isolate("Remote-2", "org.gridkit", "com.tangosol");
+		node.start();
+		node.submit(NodeActions.Start.class, "auto-pof-cache-config-extend-server.xml");
+		node.submit(PushObject.class);
+		node.submit(NodeActions.Stop.class);
+		node.stop();		
+		
+		Dummy dm = (Dummy) cache.get("dummy");
+		Assert.assertEquals("ok", dm.dummyOk);
 	}
 	
 	public static class GetAll implements Runnable {
@@ -100,5 +122,19 @@ public class AutoPofContext_DistributedTest extends AutoPofContext_FunctionalTes
 			System.out.println(new ArrayList(CacheFactory.getCache("objects").entrySet()).toString());
 			CacheFactory.getCache("objects").put("ok", "ok");
 		}
+	}
+
+	public static class PushObject implements Runnable {
+		
+		@Override
+		public void run() {
+			Dummy dm = new Dummy();
+			dm.dummyOk = "ok";
+			CacheFactory.getCache("objects").put("dummy", dm);
+		}
+	}
+	
+	public static class Dummy {
+		public String dummyOk;
 	}
 }
