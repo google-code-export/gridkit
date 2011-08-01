@@ -105,10 +105,16 @@ public class ReflectionPofSerializer implements PofSerializer {
     }
 
     protected Object internalDeserialize(PofReader in) throws IOException {
-        Class<?> type = in.getPofContext().getClass(in.getUserTypeId());
-        PofSerializer format = getClassCodec(type);
-        Object result = resolve(format.deserialize(in));
-        return result;
+    	PofSerializer format = null;
+    	try {
+	        Class<?> type = in.getPofContext().getClass(in.getUserTypeId());
+			format = getClassCodec(type);
+	        Object result = resolve(format.deserialize(in));
+	        return result;
+    	}
+    	catch(IOException e) {
+    		throw new IOException("Deserialization failed, format " + format, e);
+    	}
     }
 
     @Override
@@ -292,6 +298,11 @@ public class ReflectionPofSerializer implements PofSerializer {
 				throw new IOException("Failed to deserialize " + type.getName() + " instance", e);
 			}
 		}
+
+		@Override
+		public String toString() {
+			return "CollectionFormat(" + constructor.toGenericString() +")";
+		}
 	}
 
     private static class MapSerializer implements PofSerializer {
@@ -346,6 +357,11 @@ public class ReflectionPofSerializer implements PofSerializer {
 			} catch (Exception e) {
 				throw new IOException("Failed to deserialize " + type.getName() + " instance", e);
 			}
+		}
+		
+		@Override
+		public String toString() {
+			return "CollectionFormat(" + constructor.toGenericString() +")";
 		}
 	}
 
@@ -471,6 +487,11 @@ public class ReflectionPofSerializer implements PofSerializer {
                 }
             }
         }
+
+		@Override
+		public String toString() {
+			return "ObjectFormat(" + constructor.getDeclaringClass().toString() + ")";
+		}
     }
     
     private static class  ObjectFieldCodec {

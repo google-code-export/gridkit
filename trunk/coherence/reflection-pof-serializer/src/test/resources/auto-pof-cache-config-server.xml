@@ -27,6 +27,7 @@
     </caching-scheme-mapping>
 
     <caching-schemes>
+        
         <distributed-scheme>
             <scheme-name>simple-distributed-scheme</scheme-name>
             <serializer>
@@ -39,7 +40,7 @@
             <autostart>true</autostart>
             <local-storage>true</local-storage>
         </distributed-scheme>
-
+        
     </caching-schemes>
 
 </cache-config>

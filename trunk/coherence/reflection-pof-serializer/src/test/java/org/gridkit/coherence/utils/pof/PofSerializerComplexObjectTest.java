@@ -14,26 +14,38 @@
 
 package org.gridkit.coherence.utils.pof;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
+import org.gridkit.coherence.util.classloader.IsolateTestRunner;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
+import com.tangosol.util.Filter;
+import com.tangosol.util.extractor.IdentityExtractor;
+import com.tangosol.util.filter.AllFilter;
+import com.tangosol.util.filter.InFilter;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
+@RunWith(IsolateTestRunner.class)
 public class PofSerializerComplexObjectTest {
 
     private static NamedCache cache;
@@ -45,18 +57,10 @@ public class PofSerializerComplexObjectTest {
 
     	System.setProperty("tangosol.coherence.wka", "localhost");
     	System.setProperty("tangosol.coherence.localhost", "localhost");
-//        System.setProperty("tangosol.pof.enabled", "true");
-//        System.setProperty("tangosol.pof.config", "test-pof-config.xml");
-//        System.setProperty("tangosol.coherence.cacheconfig", "test-pof-cache-config.xml");
         System.setProperty("tangosol.coherence.distributed.localstorage", "true");
 
         CacheFactory.setConfigurableCacheFactory(new DefaultConfigurableCacheFactory("test-pof-cache-config.xml"));
-        
-//        // Hack around, to switch default pof config after class is loaded
-//        Field f = ConfigurablePofContext.class.getField("DEFAULT_RESOURCE");
-//        f.setAccessible(true);
-//        f.set(null, System.getProperty("tangosol.pof.config"));
-        
+                
         cache = CacheFactory.getCache("objects");        
     }
     
@@ -123,6 +127,47 @@ public class PofSerializerComplexObjectTest {
     	((ComplexObjectE)o2).strings.put("Final", new Triple("Final"));
     	Assert.assertEquals(o1.toString(), o2.toString());
     }    
+    
+    @Test
+    public void testCoherenceFilter() throws IOException {
+    	Set<String> set = new TreeSet<String>();
+    	
+    	cache.put("1", "A");
+    	cache.put("2", "B");
+    	cache.put("3", "C");
+    	cache.put("4", "AA");
+    	cache.put("5", "BB");
+    	cache.put("6", "CC");
+    	
+    	set.add("A");
+    	set.add("B");
+    	set.add("AA");
+    	set.add("CC");
+    	
+    	InFilter f = new InFilter(IdentityExtractor.INSTANCE, set);
+    	AllFilter af = new AllFilter(new Filter[]{f});
+    	
+    	cache.put("---", af);
+    	Filter af2 = (Filter) cache.get("---");
+    	
+    	ObjectOutputStream oos = new ObjectOutputStream(new ByteArrayOutputStream());
+    	oos.writeObject(af2);
+    	oos.close();
+    	
+    	Assert.assertEquals(4, cache.keySet(af2).size());    	
+    }
+    
+//    @Test
+//    public void mapExtractor() {
+//    	Map<String, String> map = new HashMap<String, String>();
+//    	
+//    	map.put("1", "A");
+//    	map.put("2", "B");
+//    	map.put("3", "C");
+//    	
+//    	ReflectionExtractor re = new ReflectionExtractor("get", new Object[]{"1"});
+//    	Assert.assertEquals("A", re.extract(map));
+//    }
     
     public static class ComplexObjectA {
         

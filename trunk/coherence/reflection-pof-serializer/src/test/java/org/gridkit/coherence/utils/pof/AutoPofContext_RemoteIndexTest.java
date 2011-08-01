@@ -40,7 +40,7 @@ public class AutoPofContext_RemoteIndexTest extends AutoPofContext_FunctionalTes
 		isolate = new Isolate("Remote", "org.gridkit", "com.tangosol");
 		isolate.start();
 		isolate.submit(NodeActions.Start.class, "auto-pof-cache-config-server.xml");
-		isolate.submit(NodeActions.InitCache.class, "objects");
+		isolate.submit(NodeActions.GetCache.class, "objects");
 		
 		initCache();
 	}

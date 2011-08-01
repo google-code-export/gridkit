@@ -136,6 +136,22 @@
             </serializer>
         </user-type>
 
+        <user-type>
+            <type-id>2003</type-id>
+            <class-name>java.util.HashSet</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+
+        <user-type>
+            <type-id>2004</type-id>
+            <class-name>java.util.TreeSet</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+ 
 	</user-type-list>
 	
     <allow-interfaces>true</allow-interfaces>
