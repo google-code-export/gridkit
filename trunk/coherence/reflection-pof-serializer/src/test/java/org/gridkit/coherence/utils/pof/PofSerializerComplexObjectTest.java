@@ -19,9 +19,11 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -156,6 +158,41 @@ public class PofSerializerComplexObjectTest {
     	
     	Assert.assertEquals(4, cache.keySet(af2).size());    	
     }
+    
+	@Test
+	public void testByteArrayTreeMap() {
+		TreeMap<byte[], String> map1 = new TreeMap<byte[], String>(new ByteArrayComparator());
+		map1.put("abc".getBytes(), "abc");
+		map1.put("ABC".getBytes(), "ABC");
+		map1.put("123".getBytes(), "123");
+		map1.put("CDE".getBytes(), "CDE");
+		map1.put("dec".getBytes(), "dec");
+
+    	cache.put("---", map1);
+    	Object map2 = cache.get("---");
+
+		Assert.assertSame(map1.getClass(), map2.getClass());
+		Assert.assertEquals(map1.values().toString(), ((Map<?,?>)map2).values().toString());
+	}
+
+	public static class ByteArrayComparator implements Comparator<byte[]> {
+
+		@Override
+		public int compare(byte[] o1, byte[] o2) {
+			int l = Math.min(o1.length, o2.length);
+			for (int i = 0; i != l; ++i) {
+				int b1 = 0xFF & o1[i];
+				int b2 = 0xFF & o2[i];
+				if (b1 == b2) {
+					continue;
+				}
+				else {
+					return b1 < b2 ? -1 : 1;
+				}
+			}
+			return o1.length == o2.length ? 0 : o1.length < o2.length ? -1 : 1;
+		}		
+	}
     
 //    @Test
 //    public void mapExtractor() {

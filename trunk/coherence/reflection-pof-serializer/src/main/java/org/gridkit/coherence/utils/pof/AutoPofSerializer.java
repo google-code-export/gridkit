@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Array;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -349,14 +348,12 @@ public class AutoPofSerializer implements Serializer, PofContext {
 		if (PortableObject.class.isAssignableFrom(cls)) {
 			serializer = new PortableObjectSerializer(userType);
 		}
-		else if (Collection.class.isAssignableFrom(cls)){
-			serializer = new ObjectCollectionSerializer(cls);
-		}
-		else if (Map.class.isAssignableFrom(cls)){
-			serializer = new ObjectMapSerializer(cls);
-		}
 		else {
-			serializer = autoSerializer;
+			try {
+				serializer = autoSerializer.getClassCodec(cls);
+			} catch (IOException e) {
+				throw new IllegalArgumentException(e.getMessage(), e.getCause());
+			}
 		}
 
 		registerSerializationContext(userType, cls, serializer);
@@ -645,90 +642,6 @@ public class AutoPofSerializer implements Serializer, PofContext {
 			}
 		}		
 	}
-
-	private static class ObjectCollectionSerializer implements PofSerializer {
-		
-		private final Class<?> type;
-		
-		public ObjectCollectionSerializer(Class<?> type) {
-			this.type = type;
-		}
-
-		@Override
-		public void serialize(PofWriter writer, Object obj) throws IOException {
-			Collection<?> col = (Collection<?>) obj;
-			writer.writeCollection(0, col);
-			writer.writeRemainder(null);
-		}
-
-		@Override
-		public Object deserialize(PofReader reader) throws IOException {
-			Object result;
-			try {
-				result = reader.readCollection(0, ((Collection<?>)type.newInstance()));
-			} catch (Exception e) {
-				throw new IOException(e);
-			}
-			reader.readRemainder();
-			return result;
-		}		
-	}
-
-	private static class ObjectMapSerializer implements PofSerializer {
-		
-		private final Class<?> type;
-		
-		public ObjectMapSerializer(Class<?> type) {
-			this.type = type;
-		}
-
-		@Override
-		public void serialize(PofWriter writer, Object obj) throws IOException {
-			Map<?,?> map = (Map<?,?>) obj;
-			writer.writeMap(0, map);
-			writer.writeRemainder(null);
-		}
-
-		@Override
-		public Object deserialize(PofReader reader) throws IOException {
-			Object result;
-			try {
-				result = reader.readMap(0, ((Map<?,?>)type.newInstance()));
-			} catch (Exception e) {
-				throw new IOException(e);
-			}
-			reader.readRemainder();
-			return result;
-		}		
-	}
-
-//	private static class ExceptionSerializer implements PofSerializer {
-//		
-//		private final Class<?> type;
-//		
-//		public ObjectMapSerializer(Class<?> type) {
-//			this.type = type;
-//		}
-//
-//		@Override
-//		public void serialize(PofWriter writer, Object obj) throws IOException {
-//			Map<?,?> map = (Map<?,?>) obj;
-//			writer.writeMap(0, map);
-//			writer.writeRemainder(null);
-//		}
-//
-//		@Override
-//		public Object deserialize(PofReader reader) throws IOException {
-//			Object result;
-//			try {
-//				result = reader.readMap(0, ((Map<?,?>)type.newInstance()));
-//			} catch (Exception e) {
-//				throw new IOException(e);
-//			}
-//			reader.readRemainder();
-//			return result;
-//		}		
-//	}
 	
 	public static class JavaSerializationSerializer implements Serializer, PofSerializer {
 
