@@ -113,6 +113,16 @@
         </user-type>
 
         <user-type>
+            <type-id>1012</type-id>
+            <class-name>org.gridkit.coherence.utils.pof.PofSerializerComplexObjectTest$ByteArrayComparator</class-name>
+            <serializer>
+                <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
+            </serializer>
+        </user-type>
+
+
+
+        <user-type>
             <type-id>2000</type-id>
             <class-name>java.util.ArrayList</class-name>
             <serializer>

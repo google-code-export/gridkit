@@ -28,6 +28,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -39,6 +40,7 @@ import com.tangosol.io.pof.PortableObject;
 import com.tangosol.io.pof.reflect.ComplexPofValue;
 import com.tangosol.io.pof.reflect.PofArray;
 import com.tangosol.io.pof.reflect.PofValue;
+import com.tangosol.util.ImmutableArrayList;
 
 /**
  * An implementation of generic {@link PofSerializer} capable to serialize any object using
@@ -129,7 +131,10 @@ public class ReflectionPofSerializer implements PofSerializer {
         format.serialize(out, value);
     }
 
-    private PofSerializer getClassCodec(Class<?> type) throws IOException {
+    /**
+     * Exposed to be used in AutoPofSerializer.
+     */
+    public PofSerializer getClassCodec(Class<?> type) throws IOException {
         PofSerializer format = formats.get(type);
         if (format == null) {
             try {
@@ -159,12 +164,14 @@ public class ReflectionPofSerializer implements PofSerializer {
 		if (!Collection.class.isAssignableFrom(type)) {
 			return false;
 		}
-		for(Constructor<?> c: type.getConstructors()) {
+		for(Constructor<?> c: type.getDeclaredConstructors()) {
 			if (c.getParameterTypes().length == 0) {
 				return true;
 			}
-			else if (c.getParameterTypes().length == 1
-					&& c.getParameterTypes()[0].isAssignableFrom(List.class)) {
+			else if (c.getParameterTypes().length == 1 
+					&& (   c.getParameterTypes()[0].isAssignableFrom(Collection.class) 
+						|| c.getParameterTypes()[0].isAssignableFrom(Set.class)
+						|| c.getParameterTypes()[0].isAssignableFrom(List.class) ) ) {
 				return true;
 			}
 			else if (c.getParameterTypes().length == 1
@@ -180,7 +187,7 @@ public class ReflectionPofSerializer implements PofSerializer {
     	if (!Map.class.isAssignableFrom(type)) {
     		return false;
     	}
-    	for(Constructor<?> c: type.getConstructors()) {
+    	for(Constructor<?> c: type.getDeclaredConstructors()) {
     		if (c.getParameterTypes().length == 0) {
     			return true;
     		}
@@ -232,16 +239,31 @@ public class ReflectionPofSerializer implements PofSerializer {
 	
 		private final Class<?> type;
 		private final Constructor<?> constructor;
+		private final ObjectFormat format;
 		private final Object[] proto;
+		private final boolean listProto;
 		
 		public CollectionSerializer(Class<?> type)	throws SecurityException, NoSuchMethodException {
 			this.type = type;
 			this.constructor = initConstructor(type);
+			if (constructor.getParameterTypes().length == 0) {
+				ObjectFormat of = new ObjectFormat(type);
+				format = of;
+			}
+			else {
+				format = null;
+			}
 			if (constructor.getParameterTypes().length == 1 && constructor.getParameterTypes()[0].isArray()) {
 				proto = (Object[]) Array.newInstance(constructor.getParameterTypes()[0].getComponentType(), 0);
 			}
 			else {
 				proto = null;
+			}
+			if (constructor.getParameterTypes().length == 1 && constructor.getParameterTypes()[0].isAssignableFrom(List.class)) {
+				listProto = true;
+			}
+			else {
+				listProto = false;
 			}
 		}
 
@@ -249,12 +271,13 @@ public class ReflectionPofSerializer implements PofSerializer {
 			Constructor<?> cc = null;
 			for(Constructor<?> c : type.getDeclaredConstructors()) {
 				if (c.getParameterTypes().length == 0) {
-					if (cc == null) {
-						cc = c;
-					}
+					cc = c;
+					break;
 				}
 				if (c.getParameterTypes().length == 1 
-						&& c.getParameterTypes()[0].isAssignableFrom(Collection.class)) {
+						&& (   c.getParameterTypes()[0].isAssignableFrom(Collection.class) 
+							|| c.getParameterTypes()[0].isAssignableFrom(Set.class)
+							|| c.getParameterTypes()[0].isAssignableFrom(List.class) ) ) {
 					cc = c;
 				}
 				if (c.getParameterTypes().length == 1 
@@ -271,7 +294,11 @@ public class ReflectionPofSerializer implements PofSerializer {
 		@Override
 		public void serialize(PofWriter writer, Object object)	 throws IOException {
 			Collection<?> col = (Collection<?>) object;
-			writer.writeCollection(0, col);
+			if (format != null) {
+				PofWriter header = writer.createNestedPofWriter(0);
+				format.serialize(header, object);
+			}
+			writer.writeCollection(1, col);
 			writer.writeRemainder(null);			
 		}
 
@@ -279,18 +306,22 @@ public class ReflectionPofSerializer implements PofSerializer {
 		public Object deserialize(PofReader reader) throws IOException {
 			try {
 				if (proto != null) {
-					Object[] objects = reader.readObjectArray(0, proto);
+					Object[] objects = reader.readObjectArray(1, proto);
 					reader.readRemainder();
-					return constructor.newInstance(objects);
+					return constructor.newInstance((Object)objects);
 				}
-				else if (constructor.getParameterTypes().length == 0) {
-					Collection<?> col = (Collection<?>) constructor.newInstance();
-					reader.readCollection(0, col);
+				else if (format != null) {
+					PofReader header = reader.createNestedPofReader(0);
+					Collection<?> col = (Collection<?>) format.deserialize(header);
+					//this is workaround for incorrect transient markers usage in ArrayList
+					col.clear();
+					reader.readCollection(1, col);
 					reader.readRemainder();
 					return col;
 				}
 				else {
-					Collection<?> col = reader.readCollection(0, null);
+					ImmutableArrayList data = new ImmutableArrayList(reader.readObjectArray(1, null));
+					Collection<?> col = listProto ? data.getList() : data.getSet();
 					reader.readRemainder();
 					return constructor.newInstance(col);
 				}
@@ -309,23 +340,32 @@ public class ReflectionPofSerializer implements PofSerializer {
 	
 		private final Class<?> type;
 		private final Constructor<?> constructor;
+		private final ObjectFormat format;
 		
 		public MapSerializer(Class<?> type)	throws SecurityException, NoSuchMethodException {
 			this.type = type;
 			this.constructor = initConstructor(type);
+			if (constructor.getParameterTypes().length == 0) {
+				ObjectFormat of = new ObjectFormat(type);
+				format = of;
+			}
+			else {
+				format = null;
+			}
 		}
 
 		private Constructor<?> initConstructor(Class<?> type) {
 			Constructor<?> cc = null;
 			for(Constructor<?> c : type.getDeclaredConstructors()) {
 				if (c.getParameterTypes().length == 0) {
-					if (cc == null) {
-						cc = c;
-					}
+					cc = c;
+					break;
 				}
 				if (c.getParameterTypes().length == 1 
 						&& c.getParameterTypes()[0].isAssignableFrom(Map.class)) {
-					cc = c;
+					if (cc == null) {
+						cc = c;
+					}
 				}
 			}
 			cc.setAccessible(true);
@@ -335,7 +375,11 @@ public class ReflectionPofSerializer implements PofSerializer {
 		@Override
 		public void serialize(PofWriter writer, Object object)	 throws IOException {
 			Map<?, ?> map = (Map<?, ?>) object;
-			writer.writeMap(0, map);
+			if (format != null) {
+				PofWriter header = writer.createNestedPofWriter(0);
+				format.serialize(header, object);
+			}
+			writer.writeMap(1, map);
 			writer.writeRemainder(null);			
 		}
 
@@ -343,13 +387,15 @@ public class ReflectionPofSerializer implements PofSerializer {
 		public Object deserialize(PofReader reader) throws IOException {
 			try {
 				Map<?, ?> proto;
-				if (constructor.getParameterTypes().length == 0) {
-					proto = (Map<?, ?>) constructor.newInstance();
+				if (format != null) {
+					PofReader header = reader.createNestedPofReader(0);
+					proto = (Map<?, ?>) format.deserialize(header);
+					proto.clear();
 				}
 				else {
 					proto = null;
 				}
-				Map<?, ?> map = reader.readMap(0, proto);
+				Map<?, ?> map = reader.readMap(1, proto);
 				if (constructor.getParameterTypes().length != 0) {
 					map = (Map<?, ?>) constructor.newInstance(map);
 				}
@@ -361,7 +407,7 @@ public class ReflectionPofSerializer implements PofSerializer {
 		
 		@Override
 		public String toString() {
-			return "CollectionFormat(" + constructor.toGenericString() +")";
+			return "MapFormat(" + constructor.toGenericString() +")";
 		}
 	}
 
@@ -388,13 +434,12 @@ public class ReflectionPofSerializer implements PofSerializer {
             for(int i = 0; i != fields.length; ++i) {
                 Field field = fields[i];
                 int mod = field.getModifiers();
-                if (!Modifier.isFinal(mod) 
-                        && !Modifier.isStatic(mod)
+                if (       !Modifier.isStatic(mod)
                         && !Modifier.isTransient(mod)) {
 
                     field.setAccessible(true);
                     ObjectPropCodec codec = getCodec(field);
-                    ObjectFieldCodec fc = new ObjectFieldCodec(field, codec);
+                    ObjectFieldCodec fc = new ObjectFieldCodec(field, codec, Modifier.isTransient(mod));
                     list.add(fc);
                 }
             }            
@@ -415,6 +460,10 @@ public class ReflectionPofSerializer implements PofSerializer {
                 if (!nulls[i]) {
                     ObjectFieldCodec codec = propCodec[i];
                     try {
+	                    if (codec.noOverride && (codec.field.get(val) != null)) {
+	                    	// final field has been already initialized in constructor
+	                    	continue;
+	                    }
                         codec.field.set(val, codec.codec.readProp(in, propId++, codec.field));
                     } catch (Exception e) {
                         throw new IOException("Deserialization failed (" + e.getMessage() + ")", e);
@@ -497,10 +546,12 @@ public class ReflectionPofSerializer implements PofSerializer {
     private static class  ObjectFieldCodec {
         final Field field;
         final ObjectPropCodec codec;
+        final boolean noOverride;
         
-        public ObjectFieldCodec(Field field, ObjectPropCodec codec) {
+        public ObjectFieldCodec(Field field, ObjectPropCodec codec, boolean noOverride) {
             this.field = field;
             this.codec = codec;
+            this.noOverride = noOverride;
         }        
     }
 

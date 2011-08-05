@@ -2,9 +2,12 @@ package org.gridkit.coherence.utils.pof;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 import junit.framework.Assert;
@@ -56,6 +59,16 @@ public abstract class AutoPofContext_FunctionalTest {
 	}
 
 	@Test
+	public void testUnmodificableObjectList() {
+		Chars[] ss = {new Chars("Quick brown fox"), null, new Chars("over lazy dog")};
+		List<Chars> l1 = new ArrayList<Chars>(Arrays.asList(ss));
+		l1 = Collections.unmodifiableList(l1);
+		Object l2 = serDeser(l1);
+		Assert.assertSame(l1.getClass(), l2.getClass());
+		Assert.assertEquals(l1.toString(), l2.toString());
+	}
+
+	@Test
 	public void testObjectSet() {
 		Chars[] ss = {new Chars("Quick brown fox"), null, new Chars("over lazy dog")};
 		HashSet<Chars> l1 = new HashSet<Chars>(Arrays.asList(ss));
@@ -88,6 +101,41 @@ public abstract class AutoPofContext_FunctionalTest {
 		Object map2 = serDeser(map1);
 		Assert.assertSame(map1.getClass(), map2.getClass());
 		Assert.assertEquals(map1, map2);
+	}
+
+	@Test
+	public void testUnmodificableObjectTreeMap() {
+		Map<String, Integer> map1 = new TreeMap<String, Integer>();
+		map1.put("A", 1);
+		map1.put("B", 2);
+		map1.put("C", 3);
+		map1.put("D", 5);
+		map1.put("E", 10);
+		map1 = Collections.unmodifiableMap(map1);
+		Object map2 = serDeser(map1);
+		Assert.assertSame(map1.getClass(), map2.getClass());
+		Assert.assertEquals(map1, map2);
+	}
+
+	@Test
+	public void testByteArrayTreeMap() {
+		TreeMap<byte[], String> map1 = new TreeMap<byte[], String>(new ByteArrayComparator());
+		map1.put("abc".getBytes(), "abc");
+		map1.put("ABC".getBytes(), "ABC");
+		map1.put("123".getBytes(), "123");
+		map1.put("CDE".getBytes(), "CDE");
+		map1.put("dec".getBytes(), "dec");
+		Object map2 = serDeser(map1);
+		Assert.assertSame(map1.getClass(), map2.getClass());
+		Assert.assertEquals(map1.values().toString(), ((Map<?,?>)map2).values().toString());
+	}
+
+	@Test
+	public void testStaticArrayList() {
+		List<String> list1 = Arrays.asList(new String[]{"Quick", "bronw", "fox","has","jumped","over","lazy","dog"});
+		Object list2 = serDeser(list1);
+		Assert.assertSame(list1.getClass(), list2.getClass());
+		Assert.assertEquals(list1.toString(), list2.toString());
 	}
 
 	public static class Chars {
@@ -129,4 +177,22 @@ public abstract class AutoPofContext_FunctionalTest {
 		}
 	}
 
+	public static class ByteArrayComparator implements Comparator<byte[]> {
+
+		@Override
+		public int compare(byte[] o1, byte[] o2) {
+			int l = Math.min(o1.length, o2.length);
+			for (int i = 0; i != l; ++i) {
+				int b1 = 0xFF & o1[i];
+				int b2 = 0xFF & o2[i];
+				if (b1 == b2) {
+					continue;
+				}
+				else {
+					return b1 < b2 ? -1 : 1;
+				}
+			}
+			return o1.length == o2.length ? 0 : o1.length < o2.length ? -1 : 1;
+		}		
+	}
 }
