@@ -65,7 +65,7 @@ As of version 1.1 {{{ReflectionPofSerializer}}} support serialization of collect
 </user-type>
 }}}
 
-== Support for object arrays ==
+== Support for typed object arrays ==
 If base type of object array is registered in {{{pof-config.xml}}}, ReflectionPofSerializer will preserve exact array type.
 
 == [AutoPofSerializer] ==
