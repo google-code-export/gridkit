@@ -23,7 +23,7 @@ Unlike {{{PortableObject}}} interface, {{{ReflectionPofSerializer}}} does not fo
 POF protocol is known for bad habbit of substitute collections and maps with its own implementations, which may not necessary be compatible application needs. A few complains I was hearing about ReflectionPofSerializer is bad support for collections. Actually these complains should have been addressed to POF protocol implementation in Coherence, ReflectionPofSerializer just were using it as it is.
 
 As of version 1.1 {{{ReflectionPofSerializer}}} support serialization of collections and map (both standard JDK collections and custom collections). If you are having problems with your collections being replaced with classes like {{ImmutableList}} or sorted maps replaced by unordered maps, you can just add collection classes you need to preserve in {{{pof-config.xml}}} and it will protect them from conversion.
-{code:xml}
+{{{
 <user-type>
     <type-id>2000</type-id>
     <class-name>java.util.ArrayList</class-name>
@@ -63,7 +63,7 @@ As of version 1.1 {{{ReflectionPofSerializer}}} support serialization of collect
         <class-name>org.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
     </serializer>
 </user-type>
-{code}
+}}}
 
 == Support for object arrays ==
 If base type of object array is registered in {{{pof-config.xml}}}, ReflectionPofSerializer will preserve exact array type.
