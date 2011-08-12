@@ -37,6 +37,9 @@ public abstract class NodeActions {
 
 		@Override
 		public void run() {
+			System.setProperty("tangosol.coherence.member", Thread.currentThread().getName());
+			System.setProperty("tangosol.coherence.cluster", "local-test");
+			
 			System.out.println(Thread.currentThread().getName() + " starting Coherence node ...");
 			CacheFactory.setConfigurableCacheFactory(new DefaultConfigurableCacheFactory(config));
 			CacheFactory.ensureCluster();
@@ -49,15 +52,32 @@ public abstract class NodeActions {
 	 * 
 	 * @author Alexey Ragozin (alexey.ragozin@gmail.com)
 	 */
-	public static class InitCache implements Runnable {
+	public static class GetCache implements Runnable {
 		private final String cacheName;
-		public InitCache(String cacheName) { this.cacheName = cacheName; }
+		public GetCache(String cacheName) { this.cacheName = cacheName; }
 		
 		@Override
 		public void run() {
 			System.out.println(Thread.currentThread().getName() + " initializing cache [" + cacheName + "] ...");
 			CacheFactory.getCache(cacheName);
-			System.out.println(Thread.currentThread().getName() + " cache [" + cacheName + " initialized");
+			System.out.println(Thread.currentThread().getName() + " cache [" + cacheName + "] initialized");
+		}
+	}
+
+	/**
+	 * Initializes a service
+	 * 
+	 * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+	 */
+	public static class GetService implements Runnable {
+		private final String serviceName;
+		public GetService(String serviceName) { this.serviceName = serviceName; }
+		
+		@Override
+		public void run() {
+			System.out.println(Thread.currentThread().getName() + " initializing service [" + serviceName + "] ...");
+			CacheFactory.getService(serviceName);
+			System.out.println(Thread.currentThread().getName() + " service [" + serviceName + "] initialized");
 		}
 	}
 	
