@@ -69,7 +69,7 @@ As of version 1.1 {{{ReflectionPofSerializer}}} support serialization of collect
 If base type of object array is registered in {{{pof-config.xml}}}, ReflectionPofSerializer will preserve exact array type.
 
 == [AutoPofSerializer] ==
-Even if you are using {{{ReflectionPofSerializer}}} you still have to maintain class to ID mapping in {{{pof-config.xml}}}. In some cases it may be a problem. E.g. you have an application using TopLink and want to try Coherence as second level cache. Your application may have hundreds of classes to be registered in {{{pof-config.xml}}}. This enter cost may prevent you from trying.
+Even if you are using {{{ReflectionPofSerializer}}} you still have to maintain class to ID mapping in {{{pof-config.xml}}}. In some cases it may be a problem. E.g. you have an application using !TopLink and want to try Coherence as second level cache. Your application may have hundreds of classes to be registered in {{{pof-config.xml}}}. This enter cost may prevent you from trying.
 
 {{{AutoPofSerializier}}} does not require to register all classes in {{{pof-config.xml}}}, instead it can add classes to mapping in runtime using special Coherence cache for synchronizing mapping between all nodes.
 
