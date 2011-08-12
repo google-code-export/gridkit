@@ -25,8 +25,8 @@ With {{{AutoPofSerializer}}} you have just to configure it for cache ...
 
 
 = Limitations =
- * Works only with Java
- * All nodes should have same version of code base
+  * Works only with Java
+  * All nodes should have same version of code base
 
 = Using {{{AutoPofSerializer}}} with Coherence*Extends =
 {{{AutoPofSerializer}}} could work with extend, but more complicated configuration id required.
