@@ -17,37 +17,62 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.gridkit.coherence-tools</groupId>
         <artifactId>coherence-tools-parent</artifactId>
         <version>1.0</version>
     </parent>
-	<groupId>org.gridkit.coherence-tools</groupId>
-	<artifactId>test-utils</artifactId>
-	<version>0.1.1-SNAPSHOT</version>
-	<name>test-utils</name>
-	<description>Utility classes for unit and integration testing</description>
-	
-	<properties>
-		<coherence.version>3.6.1.0b19636</coherence.version>
-		<junit.version>4.8.2</junit.version>
-	</properties>
-	
-	<dependencies>
-		<!-- Coherence -->
-		<dependency>
-			<groupId>com.oracle</groupId>
-			<artifactId>coherence</artifactId>
-			<version>${coherence.version}</version>
-			<optional>true</optional>
-		</dependency>
-		
-		<!-- Note that JUnit is added with compile scope -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
-		</dependency>
-	</dependencies>
+
+    <groupId>org.gridkit.coherence-tools</groupId>
+    <artifactId>test-utils</artifactId>
+    <version>0.1.1</version>
+    <name>test-utils</name>
+    <description>Utility classes for unit and integration testing</description>
+
+	<!-- this repository is required to get parent POM -->    
+	<repositories>
+		<!-- GridKit maven2 repository -->
+		<repository>
+			<id>gridkit-releases</id>
+			<name>gridkit-repo.googlecode.com</name>
+			<url>http://gridkit.googlecode.com/svn/repo/</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+    <properties>
+        <coherence.version>3.6.1.0b19636</coherence.version>
+        <junit.version>4.8.2</junit.version>
+    </properties>
+    
+    <dependencies>
+        <!-- Coherence -->
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>coherence</artifactId>
+            <version>${coherence.version}</version>
+            <optional>true</optional>
+        </dependency>
+        
+        <!-- Note that JUnit is added with compile scope -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+        </dependency>
+    </dependencies>
+
+  <scm>
+    <connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/tags/test-utils-0.1.1</connection>
+    <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/tags/test-utils-0.1.1</developerConnection>
+    <url>http://gridkit.googlecode.com/svn/coherence-tools/tags/test-utils-0.1.1</url>
+  </scm>
 </project>
