@@ -1,3 +1,18 @@
+/**
+ * Copyright Alexey Ragozin 2011
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.gridkit.coherence.utils.pof;
 
 import java.util.ArrayList;
@@ -6,6 +21,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -131,11 +147,26 @@ public abstract class AutoPofContext_FunctionalTest {
 	}
 
 	@Test
-	public void testStaticArrayList() {
+	public void testArraysAsList() {
 		List<String> list1 = Arrays.asList(new String[]{"Quick", "bronw", "fox","has","jumped","over","lazy","dog"});
 		Object list2 = serDeser(list1);
 		Assert.assertSame(list1.getClass(), list2.getClass());
 		Assert.assertEquals(list1.toString(), list2.toString());
+	}
+	
+	@Test
+	public void testLinkedHashMap() {
+		Map<String, String> map1 = new LinkedHashMap<String, String>();
+		map1.put("A", "aaa");
+		map1.put("C", "ccc");
+		map1.put("B", "bbb");
+		map1.put("3", "333");
+		map1.put("2", "222");
+		map1.put("1", "111");
+		
+		Object map2 = serDeser(map1);
+		Assert.assertSame(map1.getClass(), map2.getClass());
+		Assert.assertEquals(map1.toString(), map2.toString());		
 	}
 
 	public static class Chars {

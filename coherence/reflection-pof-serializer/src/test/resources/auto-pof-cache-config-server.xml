@@ -28,18 +28,18 @@
 
     <caching-schemes>
         
-        <distributed-scheme>
-            <scheme-name>simple-distributed-scheme</scheme-name>
-            <serializer>
-  				<class-name>org.gridkit.coherence.utils.pof.AutoPofSerializer</class-name>
-			</serializer>
-            <backing-map-scheme>
-                <local-scheme />
-            </backing-map-scheme>
-            <backup-count>0</backup-count>
-            <autostart>true</autostart>
-            <local-storage>true</local-storage>
-        </distributed-scheme>
+		<distributed-scheme>
+		    <scheme-name>simple-distributed-scheme</scheme-name>
+		    <serializer>
+		        <class-name>org.gridkit.coherence.utils.pof.AutoPofSerializer</class-name>
+		    </serializer>
+		    <backing-map-scheme>
+		        <local-scheme />
+		    </backing-map-scheme>
+		    <backup-count>0</backup-count>
+		    <autostart>true</autostart>
+		    <local-storage>true</local-storage>
+		</distributed-scheme>
         
     </caching-schemes>
 
