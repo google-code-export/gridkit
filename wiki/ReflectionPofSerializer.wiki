@@ -22,7 +22,7 @@ Unlike {{{PortableObject}}} interface, {{{ReflectionPofSerializer}}} does not fo
 == Prescise collections support in POF ==
 POF protocol is known for bad habbit of substitute collections and maps with its own implementations, which may not necessary be compatible application needs. A few complains I was hearing about ReflectionPofSerializer is bad support for collections. Actually these complains should have been addressed to POF protocol implementation in Coherence, ReflectionPofSerializer just were using it as it is.
 
-As of version 1.1 {{{ReflectionPofSerializer}}} support serialization of collections and map (both standard JDK collections and custom collections). If you are having problems with your collections being replaced with classes like {{ImmutableList}} or sorted maps replaced by unordered maps, you can just add collection classes you need to preserve in {{{pof-config.xml}}} and it will protect them from conversion.
+As of version 1.1 {{{ReflectionPofSerializer}}} support serialization of collections and map (both standard JDK collections and custom collections). If you are having problems with your collections being replaced with classes like {{{ImmutableList}}} or sorted maps replaced by unordered maps, you can just add collection classes you need to preserve in {{{pof-config.xml}}} and it will protect them from conversion.
 {{{
 <user-type>
     <type-id>2000</type-id>
@@ -80,11 +80,12 @@ TODO
 
 = Source code =
 Trunk
-*svn co* [https://gridkit.googlecode.com/svn/trunk/coherence/reflection-pof-serializer]
+*svn co* [https://gridkit.googlecode.com/svn/coherence-tools/trunk/reflection-pof-serializer]
 
 
 = Releases =
 
-Lastest version is 0.5.1
+== Latest 1.2.0-RC1 ==
 
+== 0.5.1 ==
 You can checkout project sources for SVN url [https://gridkit.googlecode.com/svn/releases/reflection-pof-serializer-0.5.1]
