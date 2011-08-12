@@ -17,91 +17,99 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.gridkit.coherence-tools</groupId>
-	<artifactId>coherence-tools-parent</artifactId>
-	<version>1.1-SNAPSHOT</version>
-	<packaging>pom</packaging>
-	<name>coherence-tools-parent</name>
-	<description>Tools collection for Oracle Coherence IMDG (parent project).</description>
-	
-	<scm>
-		<connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/trunk</connection>
-		<developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/trunk</developerConnection>
-		<url>http://gridkit.googlecode.com/svn/coherence-tools/trunk</url>
-	</scm>
-	
-	<distributionManagement>
-		<!-- GridKit maven2 repository location -->
-		<repository>
-			<id>gridkit-repo.googlecode.com</id>
-			<url>dav:https://gridkit.googlecode.com/svn/repo/</url>
-		</repository>
-	</distributionManagement>
-	
-	<repositories>
-		<!-- GridKit maven2 repository -->
-		<repository>
-			<id>gridkit-releases</id>
-			<name>gridkit-repo.googlecode.com</name>
-			<url>http://gridkit.googlecode.com/svn/repo/</url>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>never</updatePolicy>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-	
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-javadoc</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-source</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-		<extensions>
-			<!-- Enables webdav repository access -->
-			<extension>
-				<groupId>org.apache.maven.wagon</groupId>
-				<artifactId>wagon-webdav-jackrabbit</artifactId>
-				<version>1.0-beta-7</version>
-			</extension>
-		</extensions>
-	</build>
-	
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
-	
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.gridkit.coherence-tools</groupId>
+    <artifactId>coherence-tools-parent</artifactId>
+    <version>1.1</version>
+    <packaging>pom</packaging>
+    <name>coherence-tools-parent</name>
+    <description>Tools collection for Oracle Coherence IMDG (parent project).</description>
+    
+    <scm>
+        <connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/tags/coherence-tools-parent-1.1</connection>
+        <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/tags/coherence-tools-parent-1.1</developerConnection>
+        <url>http://gridkit.googlecode.com/svn/coherence-tools/tags/coherence-tools-parent-1.1</url>
+    </scm>
+    
+    <distributionManagement>
+        <!-- GridKit maven2 repository location -->
+        <repository>
+            <id>gridkit-repo.googlecode.com</id>
+            <url>dav:https://gridkit.googlecode.com/svn/repo/</url>
+        </repository>
+    </distributionManagement>
+    
+    <repositories>
+        <!-- GridKit maven2 repository -->
+        <repository>
+            <id>gridkit-releases</id>
+            <name>gridkit-repo.googlecode.com</name>
+            <url>http://gridkit.googlecode.com/svn/repo/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadoc</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-source</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration> 
+            </plugin>                
+        </plugins>
+        <extensions>
+            <!-- Enables webdav repository access -->
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-webdav-jackrabbit</artifactId>
+                <version>1.0-beta-7</version>
+            </extension>
+        </extensions>
+    </build>
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    
 </project>
