@@ -149,7 +149,10 @@ public class ReflectionPofSerializer implements PofSerializer {
     }
 
 	private PofSerializer createSerializer(Class<?> type) throws NoSuchMethodException {
-		if (isCollectionClass(type)) {
+		if (Enum.class.isAssignableFrom(type)) {
+			return new EnumSerializer(type);
+		}
+		else if (isCollectionClass(type)) {
 			return new CollectionSerializer(type);
 		}
 		else if (isMapClass(type)) {
@@ -411,6 +414,33 @@ public class ReflectionPofSerializer implements PofSerializer {
 		}
 	}
 
+    private static class EnumSerializer implements PofSerializer {
+    	
+    	private final Class<?> enumType;
+        @SuppressWarnings("rawtypes")
+		private final Enum[] universe;
+        
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+		public EnumSerializer(Class<?> type) {
+            this.enumType = type;
+        	this.universe = (Enum[]) EnumSet.allOf((Class)type).toArray(new Enum[0]);
+        }
+
+        @Override
+		public Object deserialize(PofReader reader) throws IOException {
+            int val = reader.readShort(1);
+            reader.readRemainder();
+            return universe[val];
+		}
+
+		@Override
+		public void serialize(PofWriter out, Object obj) throws IOException {
+			Enum<?> e = (Enum<?>)enumType.cast(obj);
+			out.writeInt(1, e.ordinal());
+			out.writeRemainder(null);
+		}
+    }
+    
 	private static class ObjectFormat implements PofSerializer {
         private Constructor<?> constructor;
         private ObjectFieldCodec[] propCodec;

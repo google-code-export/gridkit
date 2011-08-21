@@ -169,6 +169,32 @@ public abstract class AutoPofContext_FunctionalTest {
 		Assert.assertEquals(map1.toString(), map2.toString());		
 	}
 
+	@Test
+	public void testEnum() {
+		State s = State.STATE1;
+		Object s1 = serDeser(s);
+		Assert.assertSame(s, s1);
+	}	
+
+	@Test
+	public void testEnumCollection() {
+		List<State> l1 = new ArrayList<State>();
+		l1.add(State.STATE1);
+		l1.add(State.STATE1);
+		l1.add(State.STATE2);
+		l1.add(State.STATE3);
+		
+		Object l2 = serDeser(l1);
+		Assert.assertSame(l1.getClass(), l2.getClass());
+		Assert.assertEquals(l1.toString(), l2.toString());
+	}		
+	
+	public static enum State {
+		STATE1,
+		STATE2,
+		STATE3
+	}
+	
 	public static class Chars {
 		char[] chars;
 		

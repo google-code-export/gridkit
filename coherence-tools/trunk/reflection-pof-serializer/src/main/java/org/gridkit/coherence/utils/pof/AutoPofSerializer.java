@@ -342,7 +342,7 @@ public class AutoPofSerializer implements Serializer, PofContext {
 			userType = registerUserType(cls.getName());
 		}
 
-		System.out.println("AUTOPOF: " + userType + "->" + cls.getName());
+//		System.out.println("AUTOPOF: " + userType + "->" + cls.getName());
 		
 		PofSerializer serializer;
 		if (PortableObject.class.isAssignableFrom(cls)) {
