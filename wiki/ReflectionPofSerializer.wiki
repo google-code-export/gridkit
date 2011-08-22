@@ -85,17 +85,17 @@ Trunk
 
 = Releases =
 
-== 1.2.0-RC1 ==
-SVN: *svn co* [https://gridkit.googlecode.com/svn/coherence-tools/tags/reflection-pof-serializer-1.2.0-rc1]
+== 1.2.1-RC1 ==
+SVN: *svn co* [https://gridkit.googlecode.com/svn/coherence-tools/tags/reflection-pof-serializer-1.2.1-rc1]
 
-JAR: [https://gridkit.googlecode.com/svn/repo/org/gridkit/coherence/utils/reflection-pof-serializer/1.2.0-rc1/reflection-pof-serializer-1.2.0-rc1.jar]
+JAR: [https://gridkit.googlecode.com/svn/repo/org/gridkit/coherence/utils/reflection-pof-serializer/1.2.1-rc1/reflection-pof-serializer-1.2.1-rc1.jar]
 
 MAVEN:
 {{{
 <dependency>
 	<groupId>org.gridkit.coherence.utils</groupId>
 	<artifactId>reflection-pof-serializer</artifactId>
-	<version>1.2.0-rc1</version>
+	<version>1.2.1-rc1</version>
 </dependency>
 }}}
 
