@@ -7,6 +7,9 @@ import java.io.DataOutputStream;
 
 import com.gemstone.gemfire.DataSerializer;
 
+/**
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ */
 public class KeyCodec {
 
 	public static Object stringToObject(String str) {

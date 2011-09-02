@@ -1,7 +1,6 @@
 package org.gridkit.search.gemfire;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.lucene.document.Document;

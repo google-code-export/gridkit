@@ -1,11 +1,13 @@
 package org.gridkit.search.gemfire;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.lucene.search.IndexSearcher;
 
+/**
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ */
 class LuceneIndexManager {
 
 	public static final String DOCUMENT_KEY = "#dockey#";

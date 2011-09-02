@@ -5,7 +5,6 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.search.PhraseQuery;
 import org.gridkit.search.gemfire.SearchService;
 
-import com.gemstone.gemfire.addon.pogo.KeyTypeManager;
 import com.gemstone.gemfire.cache.Cache;
 import com.gemstone.gemfire.cache.CacheFactory;
 import com.gemstone.gemfire.cache.query.FunctionDomainException;
@@ -14,16 +13,12 @@ import com.gemstone.gemfire.cache.query.QueryInvocationTargetException;
 import com.gemstone.gemfire.cache.query.TypeMismatchException;
 import com.gemstone.gemfire.internal.cache.CacheServerLauncher;
 
-import domain.ObjectX;
-
 
 public class StartSearchExecutor {
 	
 	public static void main(String[] args) throws InterruptedException, IOException, FunctionDomainException, TypeMismatchException, NameResolutionException, QueryInvocationTargetException {
 		
 		System.out.println(CacheServerLauncher.class.getSimpleName() + ".PRINT_LAUNCH_COMMAND");
-		
-		KeyTypeManager.registerKeyType(ObjectX.getKeyType());
 		
 		Cache cache = new CacheFactory()
         .set("mcast-port", "0")

@@ -1,18 +1,12 @@
 import java.io.IOException;
 
-import com.gemstone.gemfire.addon.pogo.KeyTypeManager;
 import com.gemstone.gemfire.cache.Cache;
 import com.gemstone.gemfire.cache.CacheFactory;
 import com.gemstone.gemfire.cache.PartitionAttributes;
 import com.gemstone.gemfire.cache.PartitionAttributesFactory;
 import com.gemstone.gemfire.cache.Region;
 import com.gemstone.gemfire.cache.RegionShortcut;
-import com.gemstone.gemfire.cache.query.IndexExistsException;
-import com.gemstone.gemfire.cache.query.IndexType;
-import com.gemstone.gemfire.cache.server.CacheServer;
 import com.gemstone.gemfire.internal.cache.CacheServerLauncher;
-
-import domain.ObjectX;
 
 
 public class StartEmptyNode {
@@ -20,8 +14,6 @@ public class StartEmptyNode {
 	public static void main(String[] args) throws InterruptedException, IOException {
 		
 		System.out.println(CacheServerLauncher.class.getSimpleName() + ".PRINT_LAUNCH_COMMAND");
-		
-		KeyTypeManager.registerKeyType(ObjectX.getKeyType());
 		
 		Cache cache = new CacheFactory()
         .set("mcast-port", "0")
