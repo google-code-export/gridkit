@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE compass-core-mapping PUBLIC "-//Compass/Compass Core Mapping DTD 2.2//EN"
+                                      "http://www.compass-project.org/dtd/compass-core-mapping-2.2.dtd">
+
+<compass-core-mapping package="org.gridkit.gemfire.search.example.model">
+    <class name="Author" alias="author">
+        <id name="id">
+            <meta-data>id</meta-data>
+        </id>
+
+        <property name="name">
+            <meta-data>name</meta-data>
+        </property>
+
+        <property name="birthday">
+            <meta-data format="yyyy-MM-dd">birthday</meta-data>
+        </property>
+    </class>
+    
+    <class name="Book" alias="book">
+        <id name="id">
+            <meta-data>id</meta-data>
+        </id>
+    </class>
+</compass-core-mapping>
