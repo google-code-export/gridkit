@@ -1,4 +1,4 @@
-package org.gridkit.gemfire.search.example.model;
+package org.gridkit.gemfire.search.demo.model;
 
 public class Book {
     private Integer id;

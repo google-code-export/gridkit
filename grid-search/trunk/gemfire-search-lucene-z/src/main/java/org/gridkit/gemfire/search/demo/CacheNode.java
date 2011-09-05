@@ -1,14 +1,13 @@
 package org.gridkit.gemfire.search.demo;
 
 import com.gemstone.gemfire.cache.*;
-import com.gemstone.gemfire.cache.execute.Function;
 import com.gemstone.gemfire.cache.execute.FunctionService;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
-import org.gridkit.gemfire.search.example.model.Author;
+import org.gridkit.gemfire.search.demo.model.Author;
 import org.gridkit.gemfire.search.lucene.IndexDiscoveryFunction;
-import org.gridkit.gemfire.search.lucene.LuceneGemfireSearcher;
+import org.gridkit.gemfire.search.lucene.GridIndexSearcher;
 import org.gridkit.gemfire.search.lucene.IndexSearchFunction;
 
 import java.io.IOException;
@@ -35,7 +34,7 @@ public class CacheNode {
 
         Thread.sleep(1000);
 
-        LuceneGemfireSearcher searcher = new LuceneGemfireSearcher();
+        GridIndexSearcher searcher = new GridIndexSearcher();
         Query query = new TermQuery(new Term("name", "pushkin"));
         System.out.println(searcher.search(authorRegion.getFullPath(), query));
     }

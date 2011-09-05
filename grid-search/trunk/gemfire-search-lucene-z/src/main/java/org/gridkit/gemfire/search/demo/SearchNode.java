@@ -33,7 +33,7 @@ public class SearchNode {
             cache, authorRegionName, authorHubName, false
         );
 
-        LuceneGemfireFactory luceneGemfireFactory = new LuceneGemfireFactory(
+        SearchServerFactory luceneGemfireFactory = new SearchServerFactory(
             authorRegion.getFullPath(), compass, directory, indexWriterConfig, luceneGemfireConfig
         );
 
@@ -55,7 +55,7 @@ public class SearchNode {
     }
 
     private static IndexWriterConfig createIndexWriterConfig(InternalCompass compass) {
-        return new IndexWriterConfig(Version.LUCENE_33, LuceneGemfireFactory.getDefaultAnalyzer(compass));
+        return new IndexWriterConfig(Version.LUCENE_33, SearchServerFactory.getDefaultAnalyzer(compass));
     }
 
     private static Directory createDirectory(InternalCompass compass) throws IOException {

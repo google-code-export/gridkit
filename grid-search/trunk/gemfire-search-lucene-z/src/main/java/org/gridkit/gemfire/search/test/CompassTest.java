@@ -9,8 +9,8 @@ import org.compass.core.engine.SearchEngine;
 import org.compass.core.marshall.MarshallingStrategy;
 import org.compass.core.spi.InternalCompass;
 import org.gridkit.gemfire.search.compass.marshall.GridkitMarshallingStrategy;
-import org.gridkit.gemfire.search.example.model.Author;
-import org.gridkit.gemfire.search.example.model.Book;
+import org.gridkit.gemfire.search.demo.model.Author;
+import org.gridkit.gemfire.search.demo.model.Book;
 
 public class CompassTest {
     static Author author = new Author();

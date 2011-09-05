@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 //TODO implement discovery retries logic
-public class LuceneGemfireSearcher {
+public class GridIndexSearcher {
     private ConcurrentMap<String, DistributedMember> indexLocationMap = new ConcurrentHashMap<String, DistributedMember>();
 
     public <K> List<K> search(String regionFullPath, Query query) {

@@ -13,7 +13,7 @@ import org.gridkit.gemfire.search.compass.marshall.GridkitMarshallingStrategy;
 
 import java.io.IOException;
 
-public class LuceneGemfireFactory {
+public class SearchServerFactory {
     private String regionFullPath;
 
     private InternalCompass compass;
@@ -30,11 +30,11 @@ public class LuceneGemfireFactory {
     private IndexGatewayListener gatewayListener;
     private IndexSearchFunction searchFunction;
 
-    public LuceneGemfireFactory(String regionFullPath,
-                                InternalCompass compass,
-                                Directory directory,
-                                IndexWriterConfig indexWriterConfig,
-                                SearchServerConfig luceneGemfireConfig) throws IOException {
+    public SearchServerFactory(String regionFullPath,
+                               InternalCompass compass,
+                               Directory directory,
+                               IndexWriterConfig indexWriterConfig,
+                               SearchServerConfig luceneGemfireConfig) throws IOException {
         this.regionFullPath = regionFullPath;
 
         this.compass = compass;
