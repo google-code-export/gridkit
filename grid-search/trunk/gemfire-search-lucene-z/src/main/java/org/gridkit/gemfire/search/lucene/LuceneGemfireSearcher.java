@@ -1,38 +1,53 @@
 package org.gridkit.gemfire.search.lucene;
 
+import com.gemstone.gemfire.cache.Cache;
+import com.gemstone.gemfire.cache.CacheFactory;
 import com.gemstone.gemfire.cache.Region;
 import com.gemstone.gemfire.cache.execute.Execution;
 import com.gemstone.gemfire.cache.execute.FunctionService;
 import com.gemstone.gemfire.cache.execute.ResultCollector;
+import com.gemstone.gemfire.distributed.DistributedMember;
 import com.gemstone.gemfire.distributed.DistributedSystem;
 import org.apache.lucene.search.Query;
 
-import java.util.Map;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-public class LuceneGemfireSearcher<K, V> {
-    private Region<K, V> region;
+//TODO implement discovery retries logic
+public class LuceneGemfireSearcher {
+    private ConcurrentMap<String, DistributedMember> indexLocationMap = new ConcurrentHashMap<String, DistributedMember>();
 
-    private DistributedSystem distributedSystem;
+    public <K> List<K> search(String regionFullPath, Query query) {
+        String searchFunctionId = IndexSearchFunction.getId(regionFullPath);
+        ResultCollector resultCollector = new IndexSearchResultCollector();
 
-    private String searchFunctionId;
+        Cache cache = CacheFactory.getAnyInstance();
+        DistributedMember indexMemberId = findIndexMemberId(regionFullPath, cache);
 
-    public LuceneGemfireSearcher(Region<K, V> region,
-                                 DistributedSystem distributedSystem,
-                                 String searchFunctionId) {
-        this.region = region;
-        this.distributedSystem = distributedSystem;
-        this.searchFunctionId = searchFunctionId;
+        Execution execution = FunctionService.onMembers(cache.getDistributedSystem(), Collections.singleton(indexMemberId))
+                                             .withArgs(query).withCollector(resultCollector);
+
+        return (List<K>)execution.execute(searchFunctionId).getResult();
     }
 
-    public Map<K, V> search(Query query) {
-        ResultCollector luceneResultCollector = new LuceneResultCollector(region);
+    private DistributedMember findIndexMemberId(String regionFullPath, Cache cache) {
+        if (!indexLocationMap.containsKey(regionFullPath)) {
+            ResultCollector resultCollector = new IndexDiscoveryResultCollector();
 
-        Execution execution = FunctionService.onMembers(distributedSystem)
-                                             .withArgs(query)
-                                             .withCollector(luceneResultCollector);
+            DistributedSystem distributedSystem = cache.getDistributedSystem();
+            String indexHubId = cache.getRegion(regionFullPath).getAttributes().getGatewayHubId();
 
-        ResultCollector finalResultCollector = execution.execute(searchFunctionId);
+            Execution execution = FunctionService.onMembers(distributedSystem)
+                                                 .withArgs(indexHubId)
+                                                 .withCollector(resultCollector);
 
-        return (Map<K, V>)finalResultCollector.getResult();
+            DistributedMember indexMemberId = (DistributedMember)execution.execute(IndexDiscoveryFunction.Id).getResult();
+
+            indexLocationMap.put(regionFullPath, indexMemberId);
+        }
+
+        return indexLocationMap.get(regionFullPath);
     }
 }

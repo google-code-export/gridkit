@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 
-public class LuceneIndexGatewayListener implements GatewayEventListener {
-    private static Logger log = LoggerFactory.getLogger(LuceneIndexGatewayListener.class);
+public class IndexGatewayListener implements GatewayEventListener {
+    private static Logger log = LoggerFactory.getLogger(IndexGatewayListener.class);
 
     private String keyFieldName;
     private String compassAllProperty;
@@ -23,9 +23,9 @@ public class LuceneIndexGatewayListener implements GatewayEventListener {
     private LuceneIndexProcessor indexProcessor;
     private MarshallingStrategy marshallingStrategy;
 
-    public LuceneIndexGatewayListener(MarshallingStrategy marshallingStrategy,
-                                      LuceneIndexProcessor indexProcessor,
-                                      String keyFieldName, String compassAllProperty) {
+    public IndexGatewayListener(MarshallingStrategy marshallingStrategy,
+                                LuceneIndexProcessor indexProcessor,
+                                String keyFieldName, String compassAllProperty) {
         this.marshallingStrategy = marshallingStrategy;
         this.indexProcessor = indexProcessor;
 

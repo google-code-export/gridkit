@@ -1,6 +1,5 @@
 package org.gridkit.gemfire.search.lucene;
 
-import com.gemstone.gemfire.cache.Region;
 import com.gemstone.gemfire.cache.execute.FunctionException;
 import com.gemstone.gemfire.cache.execute.ResultCollector;
 import com.gemstone.gemfire.distributed.DistributedMember;
@@ -9,22 +8,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-public class LuceneResultCollector<K, V> implements ResultCollector<Serializable, HashMap<K, V>> {
-    private static Logger log = LoggerFactory.getLogger(LuceneResultCollector.class);
+public class IndexSearchResultCollector implements ResultCollector<Serializable, ArrayList<Object>> {
+    private static Logger log = LoggerFactory.getLogger(IndexSearchResultCollector.class);
 
-    private Region<K, V> region;
-    private HashMap result = new HashMap<K, V>();
-
-    public LuceneResultCollector(Region<K, V> region) {
-        this.region = region;
-    }
+    private ArrayList<Object> objectKeys = new ArrayList<Object>();
 
     @Override
     public void addResult(DistributedMember memberID, Serializable optionKey) {
-        if (String.class.isInstance(optionKey) && !LuceneSearchFunction.lastResult.equals(optionKey)) {
+        if (String.class.isInstance(optionKey) && !IndexSearchFunction.lastResultMarker.equals(optionKey)) {
             Object objectKey;
 
             try {
@@ -34,28 +28,23 @@ public class LuceneResultCollector<K, V> implements ResultCollector<Serializable
                 return;
             }
 
-            V objectValue = region.get(objectKey);
-
-            if (objectValue != null)
-                result.put(objectKey, objectValue);
+            objectKeys.add(objectKey);
         } else if (Throwable.class.isInstance(optionKey))
             log.warn("Exception on remote member " + memberID.toString(), (Throwable)optionKey);
     }
 
     @Override
-    public HashMap<K, V> getResult() throws FunctionException {
-        return result;
+    public ArrayList<Object> getResult() throws FunctionException {
+        return objectKeys;
     }
 
     @Override
-    public HashMap<K, V> getResult(long timeout, TimeUnit unit) throws FunctionException, InterruptedException {
-        return result;
+    public ArrayList<Object> getResult(long timeout, TimeUnit unit) throws FunctionException, InterruptedException {
+        return objectKeys;
     }
 
     @Override
-    public void clearResults() {
-        throw new UnsupportedOperationException();
-    }
+    public void clearResults() {}
 
     @Override
     public void endResults() {}

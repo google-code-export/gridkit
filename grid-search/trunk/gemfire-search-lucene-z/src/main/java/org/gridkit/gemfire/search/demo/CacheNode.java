@@ -1,6 +1,4 @@
-package org.gridkit.gemfire.search;
-
-import static org.gridkit.gemfire.search.DemoFactory.*;
+package org.gridkit.gemfire.search.demo;
 
 import com.gemstone.gemfire.cache.*;
 import com.gemstone.gemfire.cache.execute.Function;
@@ -9,8 +7,9 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.gridkit.gemfire.search.example.model.Author;
+import org.gridkit.gemfire.search.lucene.IndexDiscoveryFunction;
 import org.gridkit.gemfire.search.lucene.LuceneGemfireSearcher;
-import org.gridkit.gemfire.search.lucene.LuceneSearchFunction;
+import org.gridkit.gemfire.search.lucene.IndexSearchFunction;
 
 import java.io.IOException;
 import java.util.Date;
@@ -22,25 +21,22 @@ public class CacheNode {
     };
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        Cache cache = createCache();
+        Cache cache = DemoFactory.createCache();
 
-        Region<Integer, Author> authorRegion = createPartitionedRegion(
-            cache, authorRegionName, authorHubName, true
+        Region<Integer, Author> authorRegion = DemoFactory.createPartitionedRegion(
+                cache, DemoFactory.authorRegionName, DemoFactory.authorHubName, true
         );
-
-        Function searchFunction = LuceneSearchFunction.getStubSearchFunction(authorFunctionId);
-        FunctionService.registerFunction(searchFunction);
 
         for (int i = 0; i < authors.length; ++i)
             authorRegion.put(i, new Author(i, authors[i], new Date()));
 
-        LuceneGemfireSearcher<Integer, Author> searcher = new LuceneGemfireSearcher<Integer, Author>(
-            authorRegion, cache.getDistributedSystem(), authorFunctionId
-        );
+        FunctionService.registerFunction(IndexSearchFunction.getIndexSearchFunctionStub(authorRegion.getFullPath()));
+        FunctionService.registerFunction(IndexDiscoveryFunction.Instance);
 
         Thread.sleep(1000);
 
+        LuceneGemfireSearcher searcher = new LuceneGemfireSearcher();
         Query query = new TermQuery(new Term("name", "pushkin"));
-        System.out.println(searcher.search(query));
+        System.out.println(searcher.search(authorRegion.getFullPath(), query));
     }
 }

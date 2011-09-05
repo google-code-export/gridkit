@@ -1,4 +1,4 @@
-package org.gridkit.gemfire.search;
+package org.gridkit.gemfire.search.demo;
 
 import com.gemstone.gemfire.cache.*;
 import com.gemstone.gemfire.internal.cache.PartitionAttributesImpl;

@@ -1,6 +1,6 @@
-package org.gridkit.gemfire.search;
+package org.gridkit.gemfire.search.demo;
 
-import static org.gridkit.gemfire.search.DemoFactory.*;
+import static org.gridkit.gemfire.search.demo.DemoFactory.*;
 
 import com.gemstone.gemfire.cache.*;
 import com.gemstone.gemfire.cache.execute.FunctionService;
@@ -17,7 +17,7 @@ import org.gridkit.gemfire.search.lucene.*;
 
 import java.io.IOException;
 
-import static org.gridkit.gemfire.search.DemoFactory.createCache;
+import static org.gridkit.gemfire.search.demo.DemoFactory.createCache;
 
 public class SearchNode {
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -25,16 +25,16 @@ public class SearchNode {
         Directory directory = createDirectory(compass);
         IndexWriterConfig indexWriterConfig = createIndexWriterConfig(compass);
 
-        LuceneGemfireConfig luceneGemfireConfig = new LuceneGemfireConfig(authorFunctionId);
-
-        LuceneGemfireFactory luceneGemfireFactory = new LuceneGemfireFactory(
-            compass, directory, indexWriterConfig, luceneGemfireConfig
-        );
+        SearchServerConfig luceneGemfireConfig = new SearchServerConfig();
 
         Cache cache = createCache();
 
-        createPartitionedRegion (
+        Region authorRegion = createPartitionedRegion (
             cache, authorRegionName, authorHubName, false
+        );
+
+        LuceneGemfireFactory luceneGemfireFactory = new LuceneGemfireFactory(
+            authorRegion.getFullPath(), compass, directory, indexWriterConfig, luceneGemfireConfig
         );
 
         GatewayHub searchHub = cache.addGatewayHub(authorHubName, -1);
@@ -43,6 +43,7 @@ public class SearchNode {
         searchGateway.addListener(luceneGemfireFactory.getGatewayListener());
         searchHub.start();
 
+        FunctionService.registerFunction(IndexDiscoveryFunction.Instance);
         FunctionService.registerFunction(luceneGemfireFactory.getSearchFunction());
 
         Thread.sleep(Long.MAX_VALUE);

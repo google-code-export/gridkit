@@ -14,24 +14,29 @@ import org.gridkit.gemfire.search.compass.marshall.GridkitMarshallingStrategy;
 import java.io.IOException;
 
 public class LuceneGemfireFactory {
+    private String regionFullPath;
+
     private InternalCompass compass;
 
     private Directory directory;
     private IndexWriterConfig indexWriterConfig;
 
-    private LuceneGemfireConfig luceneGemfireConfig;
+    private SearchServerConfig luceneGemfireConfig;
 
     private String compassAllProperty;
     private MarshallingStrategy marshallingStrategy;
 
     private LuceneIndexProcessor indexProcessor;
-    private LuceneIndexGatewayListener gatewayListener;
-    private LuceneSearchFunction searchFunction;
+    private IndexGatewayListener gatewayListener;
+    private IndexSearchFunction searchFunction;
 
-    public LuceneGemfireFactory(InternalCompass compass,
+    public LuceneGemfireFactory(String regionFullPath,
+                                InternalCompass compass,
                                 Directory directory,
                                 IndexWriterConfig indexWriterConfig,
-                                LuceneGemfireConfig luceneGemfireConfig) throws IOException {
+                                SearchServerConfig luceneGemfireConfig) throws IOException {
+        this.regionFullPath = regionFullPath;
+
         this.compass = compass;
         this.directory = directory;
         this.indexWriterConfig = indexWriterConfig;
@@ -67,7 +72,7 @@ public class LuceneGemfireFactory {
     }
 
     private void createGatewayListener() {
-        gatewayListener = new LuceneIndexGatewayListener(
+        gatewayListener = new IndexGatewayListener(
                 marshallingStrategy, indexProcessor,
                 luceneGemfireConfig.getKeyFieldName(),
                 compassAllProperty
@@ -75,18 +80,18 @@ public class LuceneGemfireFactory {
     }
 
     private void createSearchFunction() {
-        searchFunction = new LuceneSearchFunction(
+        searchFunction = new IndexSearchFunction(
             indexProcessor,
-            luceneGemfireConfig.getSearchFunctionId(),
-            luceneGemfireConfig.getKeyFieldName()
+            luceneGemfireConfig.getKeyFieldName(),
+            regionFullPath
         );
     }
 
-    public LuceneIndexGatewayListener getGatewayListener() {
+    public IndexGatewayListener getGatewayListener() {
         return gatewayListener;
     }
 
-    public LuceneSearchFunction getSearchFunction() {
+    public IndexSearchFunction getSearchFunction() {
         return searchFunction;
     }
 
