@@ -16,11 +16,13 @@ import org.compass.core.spi.InternalCompass;
 import org.gridkit.gemfire.search.lucene.*;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
 
 import static org.gridkit.gemfire.search.demo.DemoFactory.createCache;
 
-public class SearchNode {
-    public static void main(String[] args) throws IOException, InterruptedException {
+public class SearchNode implements Callable<Void> {
+    @Override
+    public Void call() throws Exception {
         InternalCompass compass = createCompass();
         Directory directory = createDirectory(compass);
         IndexWriterConfig indexWriterConfig = createIndexWriterConfig(compass);
@@ -41,24 +43,27 @@ public class SearchNode {
         searchHub.setStartupPolicy(GatewayHub.STARTUP_POLICY_NONE);
         Gateway searchGateway = searchHub.addGateway(authorGatewayName);
         searchGateway.addListener(luceneGemfireFactory.getGatewayListener());
-        searchHub.start();
 
         FunctionService.registerFunction(IndexDiscoveryFunction.Instance);
         FunctionService.registerFunction(luceneGemfireFactory.getSearchFunction());
 
+        searchHub.start();
+
         Thread.sleep(Long.MAX_VALUE);
+
+        return null;
     }
 
-    private static InternalCompass createCompass() {
+    private InternalCompass createCompass() {
         CompassConfiguration configuration = new CompassConfiguration().configure("/compass.cfg.xml");
         return (InternalCompass)configuration.buildCompass();
     }
 
-    private static IndexWriterConfig createIndexWriterConfig(InternalCompass compass) {
+    private IndexWriterConfig createIndexWriterConfig(InternalCompass compass) {
         return new IndexWriterConfig(Version.LUCENE_33, SearchServerFactory.getDefaultAnalyzer(compass));
     }
 
-    private static Directory createDirectory(InternalCompass compass) throws IOException {
+    private Directory createDirectory(InternalCompass compass) throws IOException {
         Directory directory = new RAMDirectory();
 
         IndexWriterConfig indexWriterConfig = createIndexWriterConfig(compass);

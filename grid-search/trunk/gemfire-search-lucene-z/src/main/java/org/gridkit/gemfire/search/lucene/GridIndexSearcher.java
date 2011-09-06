@@ -4,6 +4,7 @@ import com.gemstone.gemfire.cache.Cache;
 import com.gemstone.gemfire.cache.CacheFactory;
 import com.gemstone.gemfire.cache.Region;
 import com.gemstone.gemfire.cache.execute.Execution;
+import com.gemstone.gemfire.cache.execute.FunctionException;
 import com.gemstone.gemfire.cache.execute.FunctionService;
 import com.gemstone.gemfire.cache.execute.ResultCollector;
 import com.gemstone.gemfire.distributed.DistributedMember;
@@ -26,6 +27,9 @@ public class GridIndexSearcher {
         Cache cache = CacheFactory.getAnyInstance();
         DistributedMember indexMemberId = findIndexMemberId(regionFullPath, cache);
 
+        if (indexMemberId == null)
+            throw new FunctionException("Failed to find index member");
+
         Execution execution = FunctionService.onMembers(cache.getDistributedSystem(), Collections.singleton(indexMemberId))
                                              .withArgs(query).withCollector(resultCollector);
 
@@ -45,7 +49,8 @@ public class GridIndexSearcher {
 
             DistributedMember indexMemberId = (DistributedMember)execution.execute(IndexDiscoveryFunction.Id).getResult();
 
-            indexLocationMap.put(regionFullPath, indexMemberId);
+            if (indexMemberId != null)
+                indexLocationMap.put(regionFullPath, indexMemberId);
         }
 
         return indexLocationMap.get(regionFullPath);

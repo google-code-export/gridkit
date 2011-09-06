@@ -10,16 +10,19 @@ import org.gridkit.gemfire.search.lucene.IndexDiscoveryFunction;
 import org.gridkit.gemfire.search.lucene.GridIndexSearcher;
 import org.gridkit.gemfire.search.lucene.IndexSearchFunction;
 
-import java.io.IOException;
 import java.util.Date;
+import java.util.concurrent.Callable;
 
-public class CacheNode {
+public class CacheNode implements Callable<Void> {
     public static String authors[] = {
         "Gavrila Derzhavin", "Nikolai Karamzin", "Alexander Pushkin",  "Mikhail Lermontov", "Nikolai Gogol",
         "Ivan Turgenev",     "Leo Tolstoy",      "Fyodor Dostoyevsky", "Anton Chekhov",     "Ivan Bunin"
     };
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    @Override
+    public Void call() throws Exception {
+        Thread.sleep(5000);
+
         Cache cache = DemoFactory.createCache();
 
         Region<Integer, Author> authorRegion = DemoFactory.createPartitionedRegion(
@@ -36,6 +39,8 @@ public class CacheNode {
 
         GridIndexSearcher searcher = new GridIndexSearcher();
         Query query = new TermQuery(new Term("name", "pushkin"));
-        System.out.println(searcher.search(authorRegion.getFullPath(), query));
+        System.out.println("#############" + searcher.search(authorRegion.getFullPath(), query));
+
+        return null;
     }
 }
