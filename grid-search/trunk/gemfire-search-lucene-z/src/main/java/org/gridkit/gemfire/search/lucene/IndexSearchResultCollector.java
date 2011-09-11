@@ -18,7 +18,10 @@ public class IndexSearchResultCollector implements ResultCollector<Serializable,
 
     @Override
     public void addResult(DistributedMember memberID, Serializable optionKey) {
-        if (String.class.isInstance(optionKey) && !IndexSearchFunction.lastResultMarker.equals(optionKey)) {
+        if (IndexSearchFunction.indexProcessorNotFoundMarker.equals(optionKey)) {
+            //TODO implement
+        }
+        else if (String.class.isInstance(optionKey) && !IndexSearchFunction.lastResultMarker.equals(optionKey)) {
             Object objectKey;
 
             try {

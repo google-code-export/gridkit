@@ -1,7 +1,6 @@
 package org.gridkit.gemfire.search.lucene;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -14,7 +13,7 @@ import java.io.IOException;
 
 //TODO allow bulk index updates without interruption by read request
 //TODO disable index commit in the middle of bulk write request
-public class LuceneIndexProcessor {
+public class LuceneNRTIndexProcessor implements IndexProcessor {
     private int changesBeforeCommit;
     private String keyFieldName;
 
@@ -26,8 +25,8 @@ public class LuceneIndexProcessor {
     // when index commit is in progress indexChanged must be false
     private volatile boolean indexChanged = false;
 
-    public LuceneIndexProcessor(Directory directory, IndexWriterConfig indexWriterConfig,
-                                int changesBeforeCommit, String keyFieldName) throws IOException {
+    public LuceneNRTIndexProcessor(Directory directory, IndexWriterConfig indexWriterConfig,
+                                   int changesBeforeCommit, String keyFieldName) throws IOException {
         this.indexWriter = new IndexWriter(directory, indexWriterConfig);
         this.indexSearcher = new IndexSearcher(IndexReader.open(directory, true));
 
@@ -35,20 +34,36 @@ public class LuceneIndexProcessor {
         this.keyFieldName = keyFieldName;
     }
 
-    public synchronized void insert(Document document, Analyzer analyzer) throws IOException {
-        indexWriter.addDocument(document, getVerifiedAnalyzer(analyzer));
-        recordIndexChangeAndTryCommit();
+    @Override
+    public synchronized void insert(ObjectDocument objDoc) throws IOException {
+        if (objDoc.getDocument() != null) {
+            if (objDoc.getAnalyzer() != null)
+                indexWriter.addDocument(objDoc.getDocument(), getVerifiedAnalyzer(objDoc.getAnalyzer()));
+            else
+                indexWriter.addDocument(objDoc.getDocument());
+
+            recordIndexChangeAndTryCommit();
+        }
     }
 
-    public synchronized void update(Document document, Analyzer analyzer) throws IOException {
-        String cacheKey = document.getFieldable(keyFieldName).stringValue();
+    @Override
+    public synchronized void update(ObjectDocument objDoc) throws IOException {
+        if (objDoc.getDocument() != null) {
+            String cacheKey = objDoc.getDocument().getFieldable(keyFieldName).stringValue();
 
-        indexWriter.updateDocument(getCacheKeyTerm(cacheKey), document, getVerifiedAnalyzer(analyzer));
-        recordIndexChangeAndTryCommit();
+            if (objDoc.getAnalyzer() != null)
+                indexWriter.updateDocument(getCacheKeyTerm(cacheKey), objDoc.getDocument(),
+                                           getVerifiedAnalyzer(objDoc.getAnalyzer()));
+            else
+                indexWriter.updateDocument(getCacheKeyTerm(cacheKey), objDoc.getDocument());
+
+            recordIndexChangeAndTryCommit();
+        }
     }
 
-    public synchronized void delete(String cacheKey) throws IOException {
-        indexWriter.deleteDocuments(getCacheKeyTerm(cacheKey));
+    @Override
+    public synchronized void delete(String objectKey) throws IOException {
+        indexWriter.deleteDocuments(getCacheKeyTerm(objectKey));
         recordIndexChangeAndTryCommit();
     }
 
@@ -78,6 +93,7 @@ public class LuceneIndexProcessor {
     }
 
     // TODO avoid double checking locking
+    @Override
     public IndexSearcher getIndexSearcher() throws IOException {
         if (indexChanged) {
             synchronized (this) {
@@ -88,6 +104,9 @@ public class LuceneIndexProcessor {
 
         return indexSearcher;
     }
+
+    @Override
+    public void releaseIndexSearcher(IndexSearcher indexSearcher) {}
 
     private void reopenIndexSearcher() throws IOException {
         IndexReader indexReader = IndexReader.open(indexWriter, true);

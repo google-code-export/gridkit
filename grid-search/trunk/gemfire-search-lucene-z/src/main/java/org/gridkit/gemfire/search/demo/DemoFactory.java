@@ -1,20 +1,40 @@
 package org.gridkit.gemfire.search.demo;
 
 import com.gemstone.gemfire.cache.*;
+import com.gemstone.gemfire.cache.client.ClientCache;
+import com.gemstone.gemfire.cache.client.ClientCacheFactory;
+import com.gemstone.gemfire.cache.client.ClientRegionShortcut;
 import com.gemstone.gemfire.internal.cache.PartitionAttributesImpl;
+import org.compass.core.config.CompassConfiguration;
+import org.compass.core.spi.InternalCompass;
 
 public class DemoFactory {
-    public static final String authorRegionName = "author-region";
-    public static final String authorHubName = "author-hub";
-    public static final String authorGatewayName = "author-gateway";
-    public static final String authorFunctionId = "author-function";
+    public static final int locatorPort = 5555;
+    public static final String locatorHost = "127.0.0.1";
 
-    public static <K, V> Region<K, V> createPartitionedRegion(Cache cache, String name, String hub,
-                                                              boolean storeLocalData) {
+    public static final String authorRegionName = "authorRegion";
+
+    public static Cache createServerCache() {
+        CacheFactory cacheFactory = new CacheFactory();
+
+        cacheFactory.set("locators", String.format("%s[%d]", locatorHost, locatorPort))
+					.set("bind-address", locatorHost)
+		            .set("mcast-port", "0");
+
+        return cacheFactory.create();
+    }
+
+    public static ClientCache createClientCache() {
+        ClientCacheFactory clientCacheFactory = new ClientCacheFactory();
+
+        clientCacheFactory.addPoolLocator(locatorHost, locatorPort);
+        clientCacheFactory.setPoolSubscriptionEnabled(true);
+
+        return clientCacheFactory.create();
+    }
+
+    public static <K, V> Region<K, V> createServerRegion(Cache cache, String name, boolean storeLocalData) {
         RegionFactory regionFactory = cache.<K, V>createRegionFactory(RegionShortcut.PARTITION);
-
-        regionFactory.setEnableGateway(true);
-        regionFactory.setGatewayHubId(hub);
 
         if (!storeLocalData) {
             PartitionAttributesImpl partitionAttributes = new PartitionAttributesImpl();
@@ -25,16 +45,12 @@ public class DemoFactory {
         return regionFactory.create(name);
     }
 
-    public static Cache createCache() {
-        System.setProperty("java.net.preferIPv4Stack", "true");
+    public static <K, V> Region<K, V> createClientRegion(ClientCache cache, String name) {
+        return cache.<K, V>createClientRegionFactory(ClientRegionShortcut.PROXY).create(name);
+    }
 
-        CacheFactory cacheFactory = new CacheFactory();
-
-        cacheFactory.set("name", "author-store-node")
-					.set("bind-address", "127.0.0.1")
-					.set("mcast-address", "239.192.81.1")
-					.set("mcast-port", "10334");
-
-        return cacheFactory.create();
+    public static InternalCompass createCompass() {
+        CompassConfiguration configuration = new CompassConfiguration().configure("/compass.cfg.xml");
+        return (InternalCompass)configuration.buildCompass();
     }
 }

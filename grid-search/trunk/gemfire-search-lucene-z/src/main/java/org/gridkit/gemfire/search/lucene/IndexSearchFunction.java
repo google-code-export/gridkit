@@ -13,50 +13,60 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+//TODO check if results are buffered by GemFire before send
 public class IndexSearchFunction implements Function {
     private static Logger log = LoggerFactory.getLogger(IndexSearchFunction.class);
 
+    public static final String Id = IndexSearchFunction.class.getName();
+
     public static final String lastResultMarker = "#lr#";
+    public static final String indexProcessorNotFoundMarker = "#ipnf#";
 
-    private String id;
-
-    private String keyFieldName;
-    private LuceneIndexProcessor indexProcessor;
+    private final String keyFieldName;
+    private final IndexProcessorRegistry indexProcessorRegistry;
 
     private FieldSelector keyFieldSelector = new KeyFieldSelector();
 
-    public IndexSearchFunction(LuceneIndexProcessor indexProcessor,
-                               String keyFieldName, String regionFullPath) {
-        this.indexProcessor = indexProcessor;
+    public IndexSearchFunction(String keyFieldName, IndexProcessorRegistry indexProcessorRegistry) {
         this.keyFieldName = keyFieldName;
-
-        this.id = getId(regionFullPath);
+        this.indexProcessorRegistry = indexProcessorRegistry;
     }
 
     @Override
     public void execute(FunctionContext functionContext) {
-        Query query = (Query)functionContext.getArguments();
+        Object[] arguments = (Object[])functionContext.getArguments();
+
+        String indexProcessorName = (String)arguments[0];
+        Query query = (Query)arguments[1];
+
         ResultSender<String> resultSender = functionContext.getResultSender();
 
+        IndexProcessor indexProcessor = indexProcessorRegistry.getIndexProcessor(indexProcessorName);
+
+        if (indexProcessor == null) {
+            resultSender.lastResult(indexProcessorNotFoundMarker);
+            return;
+        }
+
+        IndexSearcher indexSearcher = null;
+
         try {
-            IndexSearcher indexSearcher = indexProcessor.getIndexSearcher();
+            indexSearcher = indexProcessor.getIndexSearcher();
             Collector documentCollector = new DocumentCollector(indexSearcher, resultSender);
 
-            indexSearcher.search(query ,documentCollector);
+            indexSearcher.search(query, documentCollector);
             resultSender.lastResult(lastResultMarker);
         } catch (IOException e) {
             log.warn("Exception during query execution " + query, e);
             functionContext.getResultSender().sendException(e);
+        } finally {
+            indexProcessor.releaseIndexSearcher(indexSearcher);
         }
-    }
-
-    public static String getId(String regionFullPath) {
-        return String.format("%s(%s)", IndexSearchFunction.class.getName(), regionFullPath);
     }
 
     @Override
     public String getId() {
-        return id;
+        return Id;
     }
 
     @Override
@@ -111,19 +121,19 @@ public class IndexSearchFunction implements Function {
         public void setNextReader(IndexReader reader, int docBase) throws IOException {}
     }
 
-    public static Function getIndexSearchFunctionStub(final String regionFullPath) {
+    public static Function getIndexSearchFunctionStub() {
         return new Function() {
             @Override
             public boolean hasResult() { return true; }
 
             @Override
-            public void execute(FunctionContext paramFunctionContext) {
-                throw new UnsupportedOperationException();
+            public void execute(FunctionContext functionContext) {
+                functionContext.getResultSender().lastResult(indexProcessorNotFoundMarker);
             }
 
             @Override
             public String getId() {
-                return IndexSearchFunction.getId(regionFullPath);
+                return Id;
             }
 
             @Override

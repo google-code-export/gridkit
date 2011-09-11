@@ -42,17 +42,4 @@ public class ImdgClassLoader extends URLClassLoader {
                 return true;
         return false;
     }
-
-    public static <T> T getIsolatedClass(String className,  List<String> isolatePrefixList) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        URLClassLoader systemClassLoader = (URLClassLoader)getSystemClassLoader();
-
-        ImdgClassLoader imdgClassLoader = new ImdgClassLoader(
-            systemClassLoader.getURLs(), isolatePrefixList, Collections.<String>emptyList()
-        );
-
-        @SuppressWarnings("unchecked")
-        Class<T> isolatedClazz = (Class<T>)Class.forName(className, true, imdgClassLoader);
-
-        return (T)isolatedClazz.newInstance();
-    }
 }

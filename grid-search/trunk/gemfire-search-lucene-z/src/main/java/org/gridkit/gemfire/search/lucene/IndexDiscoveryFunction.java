@@ -1,34 +1,30 @@
 package org.gridkit.gemfire.search.lucene;
 
-import com.gemstone.gemfire.DataSerializable;
-import com.gemstone.gemfire.cache.Cache;
-import com.gemstone.gemfire.cache.CacheFactory;
 import com.gemstone.gemfire.cache.execute.Function;
 import com.gemstone.gemfire.cache.execute.FunctionContext;
-import com.gemstone.gemfire.cache.util.GatewayHub;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-
-public class IndexDiscoveryFunction implements Function, DataSerializable {
-    public static final Function Instance = new IndexDiscoveryFunction();
+public class IndexDiscoveryFunction implements Function {
+    private static Logger log = LoggerFactory.getLogger(IndexDiscoveryFunction.class);
 
     public static final String Id = IndexDiscoveryFunction.class.getName();
 
+    private final IndexProcessorRegistry indexProcessorRegistry;
+
+    public IndexDiscoveryFunction(IndexProcessorRegistry indexProcessorRegistry) {
+        this.indexProcessorRegistry = indexProcessorRegistry;
+    }
+
     @Override
     public void execute(FunctionContext functionContext) {
-        String hubId = (String)functionContext.getArguments();
+        log.info("Starting execution of " + IndexDiscoveryFunction.class.getName());
 
-        Cache cache = CacheFactory.getAnyInstance();
-        boolean hubExists = false;
+        String indexProcessorName = (String)functionContext.getArguments();
 
-        for (GatewayHub hub : cache.getGatewayHubs()) {
-            if (hub.getId().equals(hubId) && hub.isPrimary())
-                hubExists = true;
-        }
-
-        functionContext.getResultSender().lastResult(hubExists);
+        functionContext.getResultSender().lastResult(
+            indexProcessorRegistry.hasIndexProcessor(indexProcessorName)
+        );
     }
 
     @Override
@@ -51,9 +47,26 @@ public class IndexDiscoveryFunction implements Function, DataSerializable {
         return false;
     }
 
-    @Override
-    public void toData(DataOutput output) throws IOException {}
+    public static Function getIndexDiscoveryFunctionStub() {
+        return new Function() {
+            @Override
+            public boolean hasResult() { return true; }
 
-    @Override
-    public void fromData(DataInput paramDataInput) throws IOException, ClassNotFoundException {}
+            @Override
+            public void execute(FunctionContext functionContext) {
+                functionContext.getResultSender().lastResult(false);
+            }
+
+            @Override
+            public String getId() {
+                return Id;
+            }
+
+            @Override
+            public boolean optimizeForWrite() { return false; }
+
+            @Override
+            public boolean isHA() { return false; }
+        };
+    }
 }
