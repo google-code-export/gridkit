@@ -14,12 +14,17 @@ public class DemoFactory {
 
     public static final String authorRegionName = "authorRegion";
 
-    public static Cache createServerCache() {
+    public static Cache createServerCache(){
+        return createServerCache("");
+    }
+
+    public static Cache createServerCache(String roles) {
         CacheFactory cacheFactory = new CacheFactory();
 
         cacheFactory.set("locators", String.format("%s[%d]", locatorHost, locatorPort))
 					.set("bind-address", locatorHost)
-		            .set("mcast-port", "0");
+		            .set("mcast-port", "0")
+                    .set("roles", roles);
 
         return cacheFactory.create();
     }

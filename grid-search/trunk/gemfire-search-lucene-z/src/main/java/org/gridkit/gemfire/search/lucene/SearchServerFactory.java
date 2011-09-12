@@ -1,6 +1,5 @@
 package org.gridkit.gemfire.search.lucene;
 
-import com.gemstone.gemfire.cache.Region;
 import com.gemstone.gemfire.cache.query.*;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.IndexWriter;
@@ -17,6 +16,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 
 public class SearchServerFactory {
+    public static final String searchServerRole = String.format("Role(%s)", SearchServerFactory.class.getName());
+
     private SearchServerConfig searchServerConfig;
 
     private InternalCompass compass;
@@ -37,7 +38,7 @@ public class SearchServerFactory {
         this.searchFunction = new IndexSearchFunction(searchServerConfig.getKeyFieldName(), indexProcessorRegistry);
     }
 
-    public CqQuery createRegionIndex(Region<?, ?> region, ExecutorService executorService) throws IOException, CqExistsException, CqException, RegionNotFoundException {
+    public CqQuery createRegionIndex(String regionFullPath, QueryService queryService, ExecutorService executorService) throws IOException, CqExistsException, CqException, RegionNotFoundException {
         CountDownLatch preloadLatch = new CountDownLatch(1);
 
         IndexWriterConfig indexWriterConfig = createIndexWriterConfig();
@@ -51,14 +52,12 @@ public class SearchServerFactory {
             preloadLatch, documentFactory, indexProcessor
         );
 
-        QueryService queryService = region.getRegionService().getQueryService();
-
         CqAttributesFactory cqAttrFact = new CqAttributesFactory();
         cqAttrFact.addCqListener(indexCqListener);
         CqAttributes cqAttrs = cqAttrFact.create();
 
-        String cqName = getCqName(region.getFullPath());
-        String cqQueryStr = String.format("SELECT * FROM %s", region.getFullPath());
+        String cqName = getCqName(regionFullPath);
+        String cqQueryStr = String.format("SELECT * FROM %s", regionFullPath);
 
         CqQuery cqQuery = queryService.newCq(cqName, cqQueryStr, cqAttrs);
 
@@ -67,6 +66,8 @@ public class SearchServerFactory {
         Runnable indexPreloadTask = new IndexPreloadTask (
             cqResults, indexProcessor, documentFactory, preloadLatch
         );
+
+        indexProcessorRegistry.registerIndexProcessor(regionFullPath, indexProcessor);
 
         executorService.submit(indexPreloadTask);
 

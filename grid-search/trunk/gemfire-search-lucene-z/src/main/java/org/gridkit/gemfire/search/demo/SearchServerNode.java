@@ -4,7 +4,11 @@ import static org.gridkit.gemfire.search.demo.DemoFactory.*;
 
 import com.gemstone.gemfire.cache.*;
 import com.gemstone.gemfire.cache.client.ClientCache;
+import com.gemstone.gemfire.cache.client.Pool;
+import com.gemstone.gemfire.cache.client.PoolFactory;
+import com.gemstone.gemfire.cache.client.PoolManager;
 import com.gemstone.gemfire.cache.execute.FunctionService;
+import com.gemstone.gemfire.cache.server.CacheServer;
 import org.compass.core.spi.InternalCompass;
 import org.gridkit.gemfire.search.lucene.*;
 
@@ -29,15 +33,19 @@ public class SearchServerNode implements Callable<Void> {
 
         InternalCompass compass = createCompass();
 
-        ClientCache cache = createClientCache();
-        Region authorRegion = createClientRegion(cache, authorRegionName);
+        createServerCache(SearchServerFactory.searchServerRole);
+
+        PoolFactory poolFactory = PoolManager.createFactory();
+        poolFactory.addLocator(locatorHost, locatorPort);
+        poolFactory.setSubscriptionEnabled(true);
+        Pool pool = poolFactory.create("search-pool");
 
         SearchServerFactory searchServerFactory = new SearchServerFactory(searchServerConfig, compass);
 
         FunctionService.registerFunction(searchServerFactory.getDiscoveryFunction());
         FunctionService.registerFunction(searchServerFactory.getSearchFunction());
 
-        searchServerFactory.createRegionIndex(authorRegion, Executors.newSingleThreadExecutor());
+        searchServerFactory.createRegionIndex("/" + authorRegionName, pool.getQueryService(), Executors.newSingleThreadExecutor());
 
         searchServerLatch.countDown();
 

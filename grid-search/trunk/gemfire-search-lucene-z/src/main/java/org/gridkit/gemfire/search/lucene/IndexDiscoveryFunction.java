@@ -54,6 +54,7 @@ public class IndexDiscoveryFunction implements Function {
 
             @Override
             public void execute(FunctionContext functionContext) {
+                log.info("Starting execution of " + IndexDiscoveryFunction.class.getName() + " stub");
                 functionContext.getResultSender().lastResult(false);
             }
 
