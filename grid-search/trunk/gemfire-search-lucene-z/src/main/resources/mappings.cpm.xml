@@ -16,10 +16,4 @@
             <meta-data format="yyyy-MM-dd">birthday</meta-data>
         </property>
     </class>
-    
-    <class name="Book" alias="book">
-        <id name="id">
-            <meta-data>id</meta-data>
-        </id>
-    </class>
 </compass-core-mapping>

@@ -30,7 +30,7 @@ public class GemfireIndexSearcher {
     private final ConcurrentMap<String, List<DistributedMember>> indexLocationsMap =
         new ConcurrentHashMap<String, List<DistributedMember>>();
 
-    public <K> List<K> search(String regionFullPath, Query query) {
+    public List<String> search(String regionFullPath, Query query) {
         ResultCollector resultCollector = new IndexSearchResultCollector();
 
         DistributedMember indexMemberId = selectIndexMemberId(regionFullPath);
@@ -45,7 +45,12 @@ public class GemfireIndexSearcher {
         Execution execution = FunctionService.onMembers(distributedSystem, Collections.singleton(indexMemberId))
                                              .withArgs(arguments).withCollector(resultCollector);
 
-        return (List<K>)execution.execute(IndexSearchFunction.Id).getResult();
+        List<String> result = (List<String>)execution.execute(IndexSearchFunction.Id).getResult();
+
+        if (result.contains(IndexSearchFunction.indexProcessorNotFoundMarker))
+            throw new FunctionException("Failed to find index member");
+        else
+            return result;
     }
 
     private void findIndexMemberIds(String regionFullPath) {
