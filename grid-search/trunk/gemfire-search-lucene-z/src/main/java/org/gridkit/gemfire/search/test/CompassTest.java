@@ -10,19 +10,14 @@ import org.compass.core.marshall.MarshallingStrategy;
 import org.compass.core.spi.InternalCompass;
 import org.gridkit.gemfire.search.compass.marshall.GridkitMarshallingStrategy;
 import org.gridkit.gemfire.search.demo.model.Author;
-import org.gridkit.gemfire.search.demo.model.Book;
 
 public class CompassTest {
     static Author author = new Author();
-    static Book book = new Book();
 
     static {
         author.setId(0);
         author.setName("The quick brown fox jumped over the lazy dogs");
         author.setBirthday(new Date());
-
-        book.setId(0);
-        book.setAuthor(author);
     }
 
     public static void main(String[] args) throws InterruptedException {

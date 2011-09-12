@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<fts xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="http://ec.europa.eu/budget/fts/xsd/fts.xsd">
+
+    <commitment>
+        <year>2007</year>
+        <beneficiaries>
+            <beneficiary>
+                <name><![CDATA[ROMANIA*ROUMANIE]]></name>
+                <coordinator>0</coordinator>
+                <address><![CDATA[]]></address>
+                <city></city>
+                <post_code></post_code>
+                <country>Romania</country>
+                <detail_amount>85.679,96</detail_amount>
+                <geozone></geozone>
+
+                <expensetype>Operational</expensetype>
+
+            </beneficiary>
+        </beneficiaries>
+
+        <cofinancing_rate>100,00 %</cofinancing_rate>
+
+        <amount>289.108.435,00</amount>
+        <position_key>SI2.457748.1</position_key>
+        <grant_subject><![CDATA[]]></grant_subject>
+        <responsible_department><![CDATA[Budget]]></responsible_department>
+        <budget_line>Temporary and lump-sum compensation for the new Member States (27.02.02)</budget_line>
+        <actiontype></actiontype>
+
+    </commitment>
+
+    <commitment>
+        <beneficiaries>
+            <beneficiary>
+                <name><![CDATA[REPUBLIC OF MALAWI*REPUBLIQUE DU MALAWI]]></name>
+                <coordinator>0</coordinator>
+                <address><![CDATA[-]]></address>
+                <city>-</city>
+                <post_code></post_code>
+                <country>Malawi</country>
+                <detail_amount>88.679,96</detail_amount>
+                <geozone>Malawi</geozone>
+                <expensetype>Operational</expensetype>
+            </beneficiary>
+        </beneficiaries>
+
+        <cofinancing_rate>N.A.</cofinancing_rate>
+
+        <amount>65.000.000,00</amount>
+        <position_key>AID.CTR.259800.01.1</position_key>
+        <grant_subject><![CDATA[Road Transport Sector Policy Support Programme - Budget Support]]></grant_subject>
+        <responsible_department><![CDATA[Development and Cooperation  EuropeAid]]></responsible_department>
+        <budget_line>A Envelope - programmable aid (02.10.10.01)</budget_line>
+        <actiontype>European Development Fund (10th EDF)</actiontype>
+        <year>2010</year>
+    </commitment>
+</fts>
