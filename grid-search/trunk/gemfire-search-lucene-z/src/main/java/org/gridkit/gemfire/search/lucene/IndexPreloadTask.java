@@ -2,6 +2,9 @@ package org.gridkit.gemfire.search.lucene;
 
 import com.gemstone.gemfire.cache.query.CqResults;
 import com.gemstone.gemfire.cache.query.Struct;
+import org.gridkit.search.lucene.Indexable;
+import org.gridkit.search.lucene.IndexableFactory;
+import org.gridkit.search.lucene.SearchEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
@@ -12,19 +15,19 @@ public class IndexPreloadTask implements Runnable {
 
     private CqResults<Struct> cqResults;
 
-    private IndexProcessor indexProcessor;
+    private SearchEngine searchEngine;
 
-    private DocumentFactory documentFactory;
+    private IndexableFactory indexableFactory;
 
     private CountDownLatch preloadLatch;
 
     public IndexPreloadTask(CqResults<Struct> cqResults,
-                            IndexProcessor indexProcessor,
-                            DocumentFactory documentFactory,
-                            CountDownLatch preloadLatch) {
+                            CountDownLatch preloadLatch,
+                            IndexableFactory indexableFactory,
+                            SearchEngine searchEngine) {
         this.cqResults = cqResults;
-        this.documentFactory = documentFactory;
-        this.indexProcessor = indexProcessor;
+        this.indexableFactory = indexableFactory;
+        this.searchEngine = searchEngine;
         this.preloadLatch = preloadLatch;
     }
 
@@ -34,10 +37,9 @@ public class IndexPreloadTask implements Runnable {
             Object key = cqResult.get("key");
             Object value = cqResult.get("value");
 
-            ObjectDocument objectDocument = documentFactory.createObjectDocument(key, value);
-
             try {
-                indexProcessor.insert(objectDocument);
+                Indexable indexable = indexableFactory.createIndexable(key, value);
+                searchEngine.insert(indexable);
             } catch (IOException e) {
                 log.warn("IOException while processing initial result " + cqResult, e);
             }

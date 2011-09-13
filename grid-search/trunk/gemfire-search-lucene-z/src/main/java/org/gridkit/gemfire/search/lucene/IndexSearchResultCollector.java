@@ -11,7 +11,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-//TODO implement more general error handling (indexProcessorNotFoundMarker)
+//TODO implement more general error handling (searchEngineNotFoundMarker)
 public class IndexSearchResultCollector implements ResultCollector<Serializable, ArrayList<Object>> {
     private static Logger log = LoggerFactory.getLogger(IndexSearchResultCollector.class);
 
@@ -19,8 +19,8 @@ public class IndexSearchResultCollector implements ResultCollector<Serializable,
 
     @Override
     public void addResult(DistributedMember memberID, Serializable optionKey) {
-        if (IndexSearchFunction.indexProcessorNotFoundMarker.equals(optionKey)) {
-            objectKeys.add(IndexSearchFunction.indexProcessorNotFoundMarker);
+        if (IndexSearchFunction.searchEngineNotFoundMarker.equals(optionKey)) {
+            objectKeys.add(IndexSearchFunction.searchEngineNotFoundMarker);
         }
         else if (String.class.isInstance(optionKey) && !IndexSearchFunction.lastResultMarker.equals(optionKey)) {
             Object objectKey;

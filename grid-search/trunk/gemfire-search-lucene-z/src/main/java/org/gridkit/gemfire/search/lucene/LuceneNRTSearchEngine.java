@@ -1,21 +1,20 @@
 package org.gridkit.gemfire.search.lucene;
 
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.Directory;
-import org.compass.core.lucene.engine.all.AllAnalyzer;
+import org.gridkit.search.lucene.Indexable;
+import org.gridkit.search.lucene.SearchEngine;
 
 import java.io.IOException;
 
 //TODO allow bulk index updates without interruption by read request
 //TODO disable index commit in the middle of bulk write request
-public class LuceneNRTIndexProcessor implements IndexProcessor {
+public class LuceneNRTSearchEngine implements SearchEngine {
     private int changesBeforeCommit;
-    private String keyFieldName;
 
     private IndexWriter indexWriter;
     private IndexSearcher indexSearcher;
@@ -25,44 +24,37 @@ public class LuceneNRTIndexProcessor implements IndexProcessor {
     // when index commit is in progress indexChanged must be false
     private volatile boolean indexChanged = false;
 
-    public LuceneNRTIndexProcessor(Directory directory, IndexWriterConfig indexWriterConfig,
-                                   int changesBeforeCommit, String keyFieldName) throws IOException {
+    public LuceneNRTSearchEngine(Directory directory,
+                                 IndexWriterConfig indexWriterConfig,
+                                 int changesBeforeCommit) throws IOException {
         this.indexWriter = new IndexWriter(directory, indexWriterConfig);
         this.indexSearcher = new IndexSearcher(IndexReader.open(directory, true));
-
         this.changesBeforeCommit = changesBeforeCommit;
-        this.keyFieldName = keyFieldName;
     }
 
     @Override
-    public synchronized void insert(ObjectDocument objDoc) throws IOException {
-        if (objDoc.getDocument() != null) {
-            if (objDoc.getAnalyzer() != null)
-                indexWriter.addDocument(objDoc.getDocument(), objDoc.getAnalyzer());
-            else
-                indexWriter.addDocument(objDoc.getDocument());
+    public synchronized void insert(Indexable indexable) throws IOException {
+        if (indexable.getAnalyzer() != null)
+            indexWriter.addDocument(indexable.getDocument(), indexable.getAnalyzer());
+        else
+            indexWriter.addDocument(indexable.getDocument());
 
             recordIndexChangeAndTryCommit();
-        }
     }
 
     @Override
-    public synchronized void update(ObjectDocument objDoc) throws IOException {
-        if (objDoc.getDocument() != null) {
-            String cacheKey = objDoc.getDocument().getFieldable(keyFieldName).stringValue();
+    public synchronized void update(Indexable indexable) throws IOException {
+        if (indexable.getAnalyzer() != null)
+            indexWriter.updateDocument(indexable.getKeyTerm(), indexable.getDocument(), indexable.getAnalyzer());
+        else
+            indexWriter.updateDocument(indexable.getKeyTerm(), indexable.getDocument());
 
-            if (objDoc.getAnalyzer() != null)
-                indexWriter.updateDocument(getCacheKeyTerm(cacheKey), objDoc.getDocument(), objDoc.getAnalyzer());
-            else
-                indexWriter.updateDocument(getCacheKeyTerm(cacheKey), objDoc.getDocument());
-
-            recordIndexChangeAndTryCommit();
-        }
+        recordIndexChangeAndTryCommit();
     }
 
     @Override
-    public synchronized void delete(String objectKey) throws IOException {
-        indexWriter.deleteDocuments(getCacheKeyTerm(objectKey));
+    public synchronized void delete(Term term) throws IOException {
+        indexWriter.deleteDocuments(term);
         recordIndexChangeAndTryCommit();
     }
 
@@ -79,13 +71,10 @@ public class LuceneNRTIndexProcessor implements IndexProcessor {
         }
     }
 
-    private Term getCacheKeyTerm(String cacheKey) {
-        return new Term(keyFieldName, cacheKey);
-    }
 
     // TODO avoid double checking locking
     @Override
-    public IndexSearcher getIndexSearcher() throws IOException {
+    public IndexSearcher acquireSearcher() throws IOException {
         if (indexChanged) {
             synchronized (this) {
                 if (indexChanged)
@@ -97,7 +86,7 @@ public class LuceneNRTIndexProcessor implements IndexProcessor {
     }
 
     @Override
-    public void releaseIndexSearcher(IndexSearcher indexSearcher) {}
+    public void releaseSearcher(IndexSearcher indexSearcher) {}
 
     private void reopenIndexSearcher() throws IOException {
         IndexReader indexReader = IndexReader.open(indexWriter, true);

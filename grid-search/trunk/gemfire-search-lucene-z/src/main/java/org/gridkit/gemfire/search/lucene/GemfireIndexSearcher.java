@@ -47,7 +47,7 @@ public class GemfireIndexSearcher {
 
         List<String> result = (List<String>)execution.execute(IndexSearchFunction.Id).getResult();
 
-        if (result.contains(IndexSearchFunction.indexProcessorNotFoundMarker))
+        if (result.contains(IndexSearchFunction.searchEngineNotFoundMarker))
             throw new FunctionException("Failed to find index member");
         else
             return result;

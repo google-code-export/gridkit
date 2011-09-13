@@ -10,6 +10,8 @@ import org.apache.lucene.util.Version;
 import org.compass.core.lucene.LuceneEnvironment;
 import org.compass.core.lucene.engine.LuceneSearchEngineFactory;
 import org.compass.core.spi.InternalCompass;
+import org.gridkit.search.lucene.IndexableFactory;
+import org.gridkit.search.lucene.SearchEngine;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
@@ -21,8 +23,8 @@ public class SearchServerFactory {
     private SearchServerConfig searchServerConfig;
 
     private InternalCompass compass;
-    private DocumentFactory documentFactory;
-    private IndexProcessorRegistry indexProcessorRegistry;
+    private IndexableFactory indexableFactory;
+    private SearchEngineRegistry searchEngineRegistry;
 
     private IndexDiscoveryFunction discoveryFunction;
     private IndexSearchFunction searchFunction;
@@ -31,11 +33,11 @@ public class SearchServerFactory {
         this.searchServerConfig = searchServerConfig;
 
         this.compass = compass;
-        this.documentFactory = new CompassDocumentFactory(compass, searchServerConfig.getKeyFieldName());
-        this.indexProcessorRegistry = new ConcurrentIndexProcessorRegistry();
+        this.indexableFactory = new CompassIndexableFactory(compass, searchServerConfig.getKeyFieldName());
+        this.searchEngineRegistry = new ConcurrentSearchEngineRegistry();
 
-        this.discoveryFunction = new IndexDiscoveryFunction(indexProcessorRegistry);
-        this.searchFunction = new IndexSearchFunction(searchServerConfig.getKeyFieldName(), indexProcessorRegistry);
+        this.discoveryFunction = new IndexDiscoveryFunction(searchEngineRegistry);
+        this.searchFunction = new IndexSearchFunction(searchServerConfig.getKeyFieldName(), searchEngineRegistry);
     }
 
     public CqQuery createRegionIndex(String regionFullPath, QueryService queryService, ExecutorService executorService) throws IOException, CqExistsException, CqException, RegionNotFoundException {
@@ -44,12 +46,12 @@ public class SearchServerFactory {
         IndexWriterConfig indexWriterConfig = createIndexWriterConfig();
         Directory directory = createMemoryDirectory();
 
-        IndexProcessor indexProcessor = createIndexProcessor(
+        SearchEngine indexProcessor = createSearchEngine(
             directory, indexWriterConfig, searchServerConfig
         );
 
         IndexCqListener indexCqListener = new IndexCqListener(
-            preloadLatch, documentFactory, indexProcessor
+            preloadLatch, indexableFactory, indexProcessor
         );
 
         CqAttributesFactory cqAttrFact = new CqAttributesFactory();
@@ -64,23 +66,26 @@ public class SearchServerFactory {
         CqResults<Struct> cqResults = cqQuery.executeWithInitialResults();
 
         Runnable indexPreloadTask = new IndexPreloadTask (
-            cqResults, indexProcessor, documentFactory, preloadLatch
+            cqResults, preloadLatch, indexableFactory, indexProcessor
         );
 
-        indexProcessorRegistry.registerIndexProcessor(regionFullPath, indexProcessor);
+        searchEngineRegistry.registerSearchEngine(regionFullPath, indexProcessor);
 
         executorService.submit(indexPreloadTask);
 
         return cqQuery;
     }
 
-    private IndexProcessor createIndexProcessor(Directory directory,
-                                                IndexWriterConfig indexWriterConfig,
-                                                SearchServerConfig searchServerConfig) throws IOException {
-        return new LuceneNRTIndexProcessor(
+    public void close() {
+        searchEngineRegistry.close();
+    }
+
+    private SearchEngine createSearchEngine(Directory directory,
+                                            IndexWriterConfig indexWriterConfig,
+                                            SearchServerConfig searchServerConfig) throws IOException {
+        return new LuceneNRTSearchEngine(
             directory, indexWriterConfig,
-            searchServerConfig.getChangesBeforeCommit(),
-            searchServerConfig.getKeyFieldName()
+            searchServerConfig.getChangesBeforeCommit()
         );
     }
 

@@ -14,4 +14,6 @@ public interface SearchEngine {
 	
 	public IndexSearcher acquireSearcher() throws IOException;
 	public void releaseSearcher(IndexSearcher searcher);
+
+    public void close();
 }

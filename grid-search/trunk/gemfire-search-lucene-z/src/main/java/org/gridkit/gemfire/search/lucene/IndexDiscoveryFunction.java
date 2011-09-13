@@ -10,9 +10,9 @@ public class IndexDiscoveryFunction implements Function {
 
     public static final String Id = IndexDiscoveryFunction.class.getName();
 
-    private final IndexProcessorRegistry indexProcessorRegistry;
+    private final SearchEngineRegistry indexProcessorRegistry;
 
-    public IndexDiscoveryFunction(IndexProcessorRegistry indexProcessorRegistry) {
+    public IndexDiscoveryFunction(SearchEngineRegistry indexProcessorRegistry) {
         this.indexProcessorRegistry = indexProcessorRegistry;
     }
 
@@ -23,7 +23,7 @@ public class IndexDiscoveryFunction implements Function {
         String indexProcessorName = (String)functionContext.getArguments();
 
         functionContext.getResultSender().lastResult(
-            indexProcessorRegistry.hasIndexProcessor(indexProcessorName)
+            indexProcessorRegistry.hasSearchEngine(indexProcessorName)
         );
     }
 

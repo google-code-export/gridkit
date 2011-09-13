@@ -8,6 +8,7 @@ import org.apache.lucene.document.FieldSelector;
 import org.apache.lucene.document.FieldSelectorResult;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.*;
+import org.gridkit.search.lucene.SearchEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,16 +21,16 @@ public class IndexSearchFunction implements Function {
     public static final String Id = IndexSearchFunction.class.getName();
 
     public static final String lastResultMarker = "#lr#";
-    public static final String indexProcessorNotFoundMarker = "#ipnf#";
+    public static final String searchEngineNotFoundMarker = "#senf#";
 
     private final String keyFieldName;
-    private final IndexProcessorRegistry indexProcessorRegistry;
+    private final SearchEngineRegistry searchEngineRegistry;
 
     private FieldSelector keyFieldSelector = new KeyFieldSelector();
 
-    public IndexSearchFunction(String keyFieldName, IndexProcessorRegistry indexProcessorRegistry) {
+    public IndexSearchFunction(String keyFieldName, SearchEngineRegistry searchEngineRegistry) {
         this.keyFieldName = keyFieldName;
-        this.indexProcessorRegistry = indexProcessorRegistry;
+        this.searchEngineRegistry = searchEngineRegistry;
     }
 
     @Override
@@ -41,17 +42,17 @@ public class IndexSearchFunction implements Function {
 
         ResultSender<String> resultSender = functionContext.getResultSender();
 
-        IndexProcessor indexProcessor = indexProcessorRegistry.getIndexProcessor(indexProcessorName);
+        SearchEngine searchEngine = searchEngineRegistry.getSearchEngine(indexProcessorName);
 
-        if (indexProcessor == null) {
-            resultSender.lastResult(indexProcessorNotFoundMarker);
+        if (searchEngine == null) {
+            resultSender.lastResult(searchEngineNotFoundMarker);
             return;
         }
 
         IndexSearcher indexSearcher = null;
 
         try {
-            indexSearcher = indexProcessor.getIndexSearcher();
+            indexSearcher = searchEngine.acquireSearcher();
             Collector documentCollector = new DocumentCollector(indexSearcher, resultSender);
 
             indexSearcher.search(query, documentCollector);
@@ -60,7 +61,7 @@ public class IndexSearchFunction implements Function {
             log.warn("Exception during query execution " + query, e);
             functionContext.getResultSender().sendException(e);
         } finally {
-            indexProcessor.releaseIndexSearcher(indexSearcher);
+            searchEngine.releaseSearcher(indexSearcher);
         }
     }
 
@@ -128,7 +129,7 @@ public class IndexSearchFunction implements Function {
 
             @Override
             public void execute(FunctionContext functionContext) {
-                functionContext.getResultSender().lastResult(indexProcessorNotFoundMarker);
+                functionContext.getResultSender().lastResult(searchEngineNotFoundMarker);
             }
 
             @Override
