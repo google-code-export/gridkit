@@ -38,7 +38,7 @@ public class LuceneNRTIndexProcessor implements IndexProcessor {
     public synchronized void insert(ObjectDocument objDoc) throws IOException {
         if (objDoc.getDocument() != null) {
             if (objDoc.getAnalyzer() != null)
-                indexWriter.addDocument(objDoc.getDocument(), getVerifiedAnalyzer(objDoc.getAnalyzer()));
+                indexWriter.addDocument(objDoc.getDocument(), objDoc.getAnalyzer());
             else
                 indexWriter.addDocument(objDoc.getDocument());
 
@@ -52,8 +52,7 @@ public class LuceneNRTIndexProcessor implements IndexProcessor {
             String cacheKey = objDoc.getDocument().getFieldable(keyFieldName).stringValue();
 
             if (objDoc.getAnalyzer() != null)
-                indexWriter.updateDocument(getCacheKeyTerm(cacheKey), objDoc.getDocument(),
-                                           getVerifiedAnalyzer(objDoc.getAnalyzer()));
+                indexWriter.updateDocument(getCacheKeyTerm(cacheKey), objDoc.getDocument(), objDoc.getAnalyzer());
             else
                 indexWriter.updateDocument(getCacheKeyTerm(cacheKey), objDoc.getDocument());
 
@@ -78,14 +77,6 @@ public class LuceneNRTIndexProcessor implements IndexProcessor {
         else {
             indexChanged = true;
         }
-    }
-
-    //TODO fix org.compass.core.lucene.engine.all.AllAnalyzer
-    private Analyzer getVerifiedAnalyzer(Analyzer analyzer) {
-        if (analyzer.getClass().getName().equals(AllAnalyzer.class.getName()))
-            return indexWriter.getAnalyzer();
-        else
-            return analyzer;
     }
 
     private Term getCacheKeyTerm(String cacheKey) {

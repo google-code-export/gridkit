@@ -5,8 +5,13 @@ import com.gemstone.gemfire.cache.client.ClientCache;
 import com.gemstone.gemfire.cache.client.ClientCacheFactory;
 import com.gemstone.gemfire.cache.client.ClientRegionShortcut;
 import com.gemstone.gemfire.internal.cache.PartitionAttributesImpl;
+import org.compass.core.Property;
 import org.compass.core.config.CompassConfiguration;
+import org.compass.core.config.CompassEnvironment;
 import org.compass.core.spi.InternalCompass;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class DemoFactory {
     public static final int locatorPort = 5555;
@@ -56,6 +61,14 @@ public class DemoFactory {
 
     public static InternalCompass createCompass() {
         CompassConfiguration configuration = new CompassConfiguration().configure("/compass.cfg.xml");
+
+        configuration.setSetting(CompassEnvironment.ExecutorManager.Concurrent.CORE_POOL_SIZE, "1");
+        configuration.setSetting(CompassEnvironment.ExecutorManager.Concurrent.MAXIMUM_POOL_SIZE, "1");
+        configuration.setSetting(CompassEnvironment.ExecutorManager.Concurrent.SCHEDULED_CORE_POOL_SIZE, "1");
+
+        configuration.setSetting(CompassEnvironment.Mapping.GLOBAL_STORE, Property.Store.NO.toString());
+        configuration.setSetting(CompassEnvironment.Osem.SUPPORT_UNMARSHALL, "false");
+
         return (InternalCompass)configuration.buildCompass();
     }
 }

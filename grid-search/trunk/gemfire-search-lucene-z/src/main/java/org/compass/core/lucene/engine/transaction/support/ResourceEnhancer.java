@@ -77,11 +77,18 @@ public class ResourceEnhancer {
         //TODO check resource class for correct cast
         LuceneResource luceneResource = (LuceneResource)((LuceneMultiResource)resource).currentResource();
         LuceneSearchEngineFactory searchEngineFactory = luceneResource.getSearchEngineFactory();
+
         applyBoostIfNeeded(resource, searchEngineFactory);
-        addExtendedProeprty(resource, searchEngineFactory);
+
+        //TODO remove all compass meta info
+        //addExtendedProeprty(resource, searchEngineFactory);
+
         Analyzer analyzer = searchEngineFactory.getAnalyzerManager().getAnalyzerByResource(resource);
         Document document = luceneResource.getDocument();
-        analyzer = addAllProperty(document, resource, analyzer, searchEngineFactory);
+
+        //TODO fix org.compass.core.lucene.engine.all.AllAnalyzer
+        //analyzer = addAllProperty(document, resource, analyzer, searchEngineFactory);
+
         return new Result(analyzer, document);
     }
 
@@ -122,5 +129,4 @@ public class ResourceEnhancer {
         document.add(allField);
         return allAnalyzer;
     }
-
 }
