@@ -24,6 +24,8 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.TimeUnit;
 
 import com.tangosol.io.ReadBuffer.BufferInput;
 import com.tangosol.io.Serializer;
@@ -44,6 +46,7 @@ import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
 import com.tangosol.run.xml.XmlElement;
 import com.tangosol.run.xml.XmlHelper;
+import com.tangosol.util.Base;
 import com.tangosol.util.UUID;
 import com.tangosol.util.extractor.IdentityExtractor;
 import com.tangosol.util.filter.EqualsFilter;
@@ -58,6 +61,8 @@ public class AutoPofSerializer implements Serializer, PofContext {
 
 	private static final String AUTO_POF_SERVICE = "AUTO-POF-SERVICE";
 	private static final String AUTO_POF_MAPPING = "AUTO_POF_MAPPING";
+
+	private static final long TYPE_MAP_CONNECT_TIMEOUT = Long.getLong("gridkit.auto-pof.type-map-timeout", 10000);
 	
 	private static final int MAX_CONFIG_ID = Integer.getInteger("gridkit.auto-pof.max-config-id", 1000);
 	private static final int MIN_AUTO_ID = Integer.getInteger("gridkit.auto-pof.min-auto-id", 10000);
@@ -80,6 +85,7 @@ public class AutoPofSerializer implements Serializer, PofContext {
 	// base context to delegate system class serialization
 	private ConfigurablePofContext context;
 	private NamedCache typeMap;
+	private SynchronousQueue<NamedCache> typeMapGetter = new SynchronousQueue<NamedCache>();
 	
 	private volatile Map<Class<?>, SerializationContext> classMap;  
 	private volatile SerializationContext[] lowTypeIdMap = new SerializationContext[1024];
@@ -89,40 +95,56 @@ public class AutoPofSerializer implements Serializer, PofContext {
 	private int minAutoId = MIN_AUTO_ID;
 	
 	public AutoPofSerializer() {
-		context = new ConfigurablePofContext();
-//		initTypeMap();
-		initContextMap();
-		initCustomPredefines();
+		this(new ConfigurablePofContext(), null);
 	}
 	
 	public AutoPofSerializer(String pofConfig) {
-		context = new ConfigurablePofContext(pofConfig);
-//		initTypeMap();
-		initContextMap();
-		initCustomPredefines();
+		this(new ConfigurablePofContext(pofConfig), null);
 	}
 
 	public AutoPofSerializer(String pofConfig, NamedCache typeMap) {
-		this.context = new ConfigurablePofContext(pofConfig);
+		this(new ConfigurablePofContext(pofConfig), typeMap);
+	}
+
+	public AutoPofSerializer(ConfigurablePofContext serializer, NamedCache typeMap) {
+		this.context = serializer;
 		this.typeMap = typeMap;
 		initContextMap();
 		initCustomPredefines();
+		scheduleTypeMapConnection();
 	}
 	
 		
 	private void initTypeMap() {
+		if (typeMap == null) {
+			try {
+				typeMap = typeMapGetter.poll(TYPE_MAP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {
+				// do nothing
+			}
+			if (typeMap == null) {
+				Base.err("AutoPofSerailizer cannot get type map cache, wait time exceeded");
+				throw new IllegalStateException("Type map cache is not available");
+			}			
+			else {
+				typeMapGetter = null;
+			}
+		}
+	}
+
+	private NamedCache getTypeMap() {
 		if (USE_PUBLIC_CACHE_CONFIG) {
-			typeMap = CacheFactory.getCache(AUTO_POF_MAPPING);
+			return CacheFactory.getCache(AUTO_POF_MAPPING);
 		}
 		else {
 			Cluster cluster = CacheFactory.getCluster();
 			if (cluster.getServiceInfo(AUTO_POF_SERVICE) != null) {
 				CacheService service = (CacheService) cluster.getService(AUTO_POF_SERVICE);
-				typeMap = service.ensureCache(AUTO_POF_MAPPING, null);
+				return service.ensureCache(AUTO_POF_MAPPING, null);
 			}
 			else {
 				XmlElement xml = XmlHelper.loadXml(XML_FRAGMENT);
-				typeMap = new DefaultConfigurableCacheFactory(xml).ensureCache(AUTO_POF_MAPPING, null);
+				return new DefaultConfigurableCacheFactory(xml).ensureCache(AUTO_POF_MAPPING, null);
 			}
 		}
 	}
@@ -150,6 +172,24 @@ public class AutoPofSerializer implements Serializer, PofContext {
 	private synchronized void initCustomPredefines() {
 //		registerSerializationContext(minAutoId++, Throwable.class, new JavaSerializationSerializer());
 		registerArraySerializer(minAutoId++ , UUID[].class);
+	}
+
+	private void scheduleTypeMapConnection() {
+		Runnable getter = new Runnable() {
+			@Override
+			public void run() {
+				try {
+					NamedCache typeMap = getTypeMap();
+					typeMapGetter.put(typeMap);
+				} catch (Exception e) {
+					Base.err("Failed to connect to AutoPofSerializer type map cache");
+				}
+			}
+		};
+		Thread thread = new Thread(getter);
+		thread.setDaemon(true);
+		thread.setName("AutoPofSerializer async cache connection");
+		thread.start();
 	}
 
 	@Override
