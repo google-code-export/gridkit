@@ -140,8 +140,11 @@ public class Commitment implements DataSerializable {
         this.actionType = DataSerializer.readString(input);
         this.cofinancingRate = DataSerializer.readString(input);
 
-        Beneficiary[] beneficiariesArray = (Beneficiary[])DataSerializer.readObjectArray(input);
-        this.beneficiaries = new ArrayList<Beneficiary>(Arrays.asList(beneficiariesArray));
+        this.beneficiaries = new ArrayList<Beneficiary>();
+
+        Object[] beneficiariesArray = DataSerializer.readObjectArray(input);
+        for (Object beneficiary : beneficiariesArray)
+            this.beneficiaries.add((Beneficiary)beneficiary);
     }
 
     @Override

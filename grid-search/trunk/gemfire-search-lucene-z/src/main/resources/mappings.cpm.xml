@@ -15,4 +15,21 @@
             <meta-data format="yyyy-MM-dd">birthday</meta-data>
         </property>
     </class>
+
+    <class name="Commitment" alias="commitment">
+        <id name="positionKey">
+            <meta-data>positionKey</meta-data>
+        </id>
+
+        <component name="beneficiaries" ref-alias="beneficiary"/>
+    </class>
+
+    <class name="Beneficiary" alias="beneficiary" root="false">
+        <property name="city">
+            <meta-data term-vector="positions">city</meta-data>
+        </property>
+        <property name="country">
+            <meta-data term-vector="positions">country</meta-data>
+        </property>
+    </class>
 </compass-core-mapping>

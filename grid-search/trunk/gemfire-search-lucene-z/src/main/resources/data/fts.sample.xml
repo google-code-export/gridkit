@@ -9,9 +9,23 @@
                 <name><![CDATA[ROMANIA*ROUMANIE]]></name>
                 <coordinator>0</coordinator>
                 <address><![CDATA[]]></address>
-                <city></city>
+                <city>Moscow</city>
                 <post_code></post_code>
-                <country>Romania</country>
+                <country>Russia</country>
+                <detail_amount>85.679,96</detail_amount>
+                <geozone></geozone>
+
+                <expensetype>Operational</expensetype>
+
+            </beneficiary>
+
+            <beneficiary>
+                <name><![CDATA[ROMANIA*ROUMANIE]]></name>
+                <coordinator>0</coordinator>
+                <address><![CDATA[]]></address>
+                <city>Madrid</city>
+                <post_code></post_code>
+                <country>Spain</country>
                 <detail_amount>85.679,96</detail_amount>
                 <geozone></geozone>
 
