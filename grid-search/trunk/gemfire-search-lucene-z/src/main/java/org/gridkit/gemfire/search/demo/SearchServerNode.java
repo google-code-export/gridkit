@@ -2,15 +2,13 @@ package org.gridkit.gemfire.search.demo;
 
 import static org.gridkit.gemfire.search.demo.DemoFactory.*;
 
-import com.gemstone.gemfire.cache.*;
-import com.gemstone.gemfire.cache.client.ClientCache;
 import com.gemstone.gemfire.cache.client.Pool;
 import com.gemstone.gemfire.cache.client.PoolFactory;
 import com.gemstone.gemfire.cache.client.PoolManager;
 import com.gemstone.gemfire.cache.execute.FunctionService;
-import com.gemstone.gemfire.cache.server.CacheServer;
 import org.compass.core.spi.InternalCompass;
-import org.gridkit.gemfire.search.lucene.*;
+import org.gridkit.search.gemfire.SearchServerConfig;
+import org.gridkit.search.gemfire.SearchServerFactory;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;

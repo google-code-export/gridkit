@@ -1,4 +1,4 @@
-package org.gridkit.gemfire.search.lucene;
+package org.gridkit.search.gemfire;
 
 public class SearchServerConfig {
     private int changesBeforeCommit = 8192;

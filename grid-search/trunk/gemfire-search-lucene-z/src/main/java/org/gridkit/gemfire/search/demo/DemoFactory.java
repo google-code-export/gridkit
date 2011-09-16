@@ -66,7 +66,7 @@ public class DemoFactory {
         configuration.setSetting(CompassEnvironment.ExecutorManager.Concurrent.MAXIMUM_POOL_SIZE, "1");
         configuration.setSetting(CompassEnvironment.ExecutorManager.Concurrent.SCHEDULED_CORE_POOL_SIZE, "1");
 
-        configuration.setSetting(CompassEnvironment.Mapping.GLOBAL_STORE, Property.Store.NO.toString());
+        //configuration.setSetting(CompassEnvironment.Mapping.GLOBAL_STORE, Property.Store.NO.toString());
         configuration.setSetting(CompassEnvironment.Osem.SUPPORT_UNMARSHALL, "false");
 
         return (InternalCompass)configuration.buildCompass();

@@ -1,4 +1,4 @@
-package org.gridkit.gemfire.search.util;
+package org.gridkit.util;
 
 import java.util.Arrays;
 

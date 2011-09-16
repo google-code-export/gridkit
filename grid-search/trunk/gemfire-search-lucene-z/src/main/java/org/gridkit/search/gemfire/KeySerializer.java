@@ -1,10 +1,11 @@
-package org.gridkit.gemfire.search.util;
+package org.gridkit.search.gemfire;
 
 import com.gemstone.gemfire.DataSerializer;
+import org.gridkit.util.Base64;
 
 import java.io.*;
 
-public class Serialization {
+public class KeySerializer {
     public static String toString(Object key) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream(64);
         DataOutputStream dataOutputStream = new DataOutputStream(outputStream);

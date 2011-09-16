@@ -1,9 +1,8 @@
-package org.gridkit.gemfire.search.lucene;
+package org.gridkit.search.gemfire;
 
 import com.gemstone.gemfire.cache.execute.FunctionException;
 import com.gemstone.gemfire.cache.execute.ResultCollector;
 import com.gemstone.gemfire.distributed.DistributedMember;
-import org.gridkit.gemfire.search.util.Serialization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +25,7 @@ public class IndexSearchResultCollector implements ResultCollector<Serializable,
             Object objectKey;
 
             try {
-                objectKey = Serialization.toObject((String)optionKey);
+                objectKey = KeySerializer.toObject((String) optionKey);
             } catch (Exception e) {
                 log.warn("Exception while deserializing string key " + optionKey, e);
                 return;

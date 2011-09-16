@@ -1,4 +1,4 @@
-package org.gridkit.gemfire.search.lucene;
+package org.gridkit.search.gemfire;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -12,8 +12,7 @@ import org.compass.core.lucene.engine.transaction.support.ResourceEnhancer;
 import org.compass.core.marshall.MarshallingStrategy;
 import org.compass.core.spi.InternalCompass;
 import org.compass.core.spi.InternalResource;
-import org.gridkit.gemfire.search.compass.marshall.GridkitMarshallingStrategy;
-import org.gridkit.gemfire.search.util.Serialization;
+import org.gridkit.search.compass.marshall.GridkitMarshallingStrategy;
 import org.gridkit.search.lucene.Indexable;
 import org.gridkit.search.lucene.IndexableFactory;
 import org.slf4j.Logger;
@@ -63,7 +62,7 @@ public class CompassIndexableFactory implements IndexableFactory {
 
         removeInternalProperties(result.getDocument());
 
-        Field keyField = new Field(keyFieldName, Serialization.toString(key),
+        Field keyField = new Field(keyFieldName, KeySerializer.toString(key),
                                    Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS);
         result.getDocument().add(keyField);
 
@@ -72,7 +71,7 @@ public class CompassIndexableFactory implements IndexableFactory {
 
     @Override
     public Term createKeyTerm(Object key) throws IOException {
-        return new Term(keyFieldName, Serialization.toString(key));
+        return new Term(keyFieldName, KeySerializer.toString(key));
     }
 
     private void removeInternalProperties(Document document) {

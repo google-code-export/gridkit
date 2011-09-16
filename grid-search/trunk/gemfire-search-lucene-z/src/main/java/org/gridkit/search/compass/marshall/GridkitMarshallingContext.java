@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.gridkit.gemfire.search.compass.marshall;
+package org.gridkit.search.compass.marshall;
 
 import java.util.HashMap;
 import java.util.Map;

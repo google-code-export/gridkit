@@ -1,4 +1,4 @@
-package org.gridkit.gemfire.search.lucene;
+package org.gridkit.search.gemfire;
 
 public class SearchClientConfig {
     private int indexDiscoveryRetries = 3;

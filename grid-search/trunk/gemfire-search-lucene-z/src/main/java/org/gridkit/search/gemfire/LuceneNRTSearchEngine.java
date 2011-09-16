@@ -1,4 +1,4 @@
-package org.gridkit.gemfire.search.lucene;
+package org.gridkit.search.gemfire;
 
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;

@@ -123,7 +123,7 @@ public class Beneficiary implements DataSerializable {
         DataSerializer.writeString(city ,output);
         DataSerializer.writeString(postCode ,output);
         DataSerializer.writeString(country ,output);
-        DataSerializer.writeDouble(detailAmount, output);
+        DataSerializer.writeObject(detailAmount, output);
         DataSerializer.writeString(geoZone ,output);
         DataSerializer.writeString(expenseType ,output);
     }
@@ -136,7 +136,7 @@ public class Beneficiary implements DataSerializable {
         this.city = DataSerializer.readString(input);
         this.postCode = DataSerializer.readString(input);
         this.country = DataSerializer.readString(input);
-        this.detailAmount = DataSerializer.readDouble(input);
+        this.detailAmount = DataSerializer.readObject(input);
         this.geoZone = DataSerializer.readString(input);
         this.expenseType = DataSerializer.readString(input);
     }

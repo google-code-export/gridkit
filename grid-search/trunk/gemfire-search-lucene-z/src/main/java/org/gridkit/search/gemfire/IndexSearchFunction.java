@@ -1,4 +1,4 @@
-package org.gridkit.gemfire.search.lucene;
+package org.gridkit.search.gemfire;
 
 import com.gemstone.gemfire.cache.execute.Function;
 import com.gemstone.gemfire.cache.execute.FunctionContext;
@@ -53,7 +53,7 @@ public class IndexSearchFunction implements Function {
 
         try {
             indexSearcher = searchEngine.acquireSearcher();
-            Collector documentCollector = new DocumentCollector(indexSearcher, resultSender);
+            Collector documentCollector = new DocumentCollector(resultSender);
 
             indexSearcher.search(query, documentCollector);
             resultSender.lastResult(lastResultMarker);
@@ -96,18 +96,17 @@ public class IndexSearchFunction implements Function {
     }
 
     private class DocumentCollector extends Collector {
-        private IndexSearcher indexSearcher;
+        private IndexReader reader;
+
         private ResultSender<String> resultSender;
 
-        private DocumentCollector(IndexSearcher indexSearcher,
-                                  ResultSender<String> resultSender) {
-            this.indexSearcher = indexSearcher;
+        private DocumentCollector(ResultSender<String> resultSender) {
             this.resultSender = resultSender;
         }
 
         @Override
         public void collect(int docNum) throws IOException {
-            Document document = indexSearcher.doc(docNum, keyFieldSelector);
+            Document document = reader.document(docNum, keyFieldSelector);
             String stringKey = document.getFieldable(keyFieldName).stringValue();
             resultSender.sendResult(stringKey);
         }
@@ -119,7 +118,9 @@ public class IndexSearchFunction implements Function {
         public void setScorer(Scorer scorer) throws IOException {}
 
         @Override
-        public void setNextReader(IndexReader reader, int docBase) throws IOException {}
+        public void setNextReader(IndexReader reader, int docBase) throws IOException {
+            this.reader = reader;
+        }
     }
 
     public static Function getIndexSearchFunctionStub() {

@@ -1,4 +1,4 @@
-package org.gridkit.gemfire.search.lucene;
+package org.gridkit.search.gemfire;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;

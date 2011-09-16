@@ -1,4 +1,4 @@
-package org.gridkit.gemfire.search.lucene;
+package org.gridkit.search.gemfire;
 
 import com.gemstone.gemfire.cache.query.*;
 import org.apache.lucene.analysis.Analyzer;

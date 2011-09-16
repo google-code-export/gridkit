@@ -1,4 +1,4 @@
-package org.gridkit.gemfire.search.lucene;
+package org.gridkit.search.gemfire;
 
 import com.gemstone.gemfire.cache.query.CqResults;
 import com.gemstone.gemfire.cache.query.Struct;

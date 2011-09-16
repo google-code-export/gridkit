@@ -1,9 +1,8 @@
-package org.gridkit.gemfire.search.lucene;
+package org.gridkit.search.gemfire;
 
 import com.gemstone.gemfire.cache.Operation;
 import com.gemstone.gemfire.cache.query.CqEvent;
 import com.gemstone.gemfire.cache.query.CqListener;
-import org.gridkit.gemfire.search.util.Serialization;
 import org.gridkit.search.lucene.Indexable;
 import org.gridkit.search.lucene.IndexableFactory;
 import org.gridkit.search.lucene.SearchEngine;

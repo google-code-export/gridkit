@@ -118,8 +118,8 @@ public class Commitment implements DataSerializable {
 
     @Override
     public void toData(DataOutput output) throws IOException {
-        DataSerializer.writeInteger(year, output);
-        DataSerializer.writeDouble(amount ,output);
+        DataSerializer.writeObject(year, output);
+        DataSerializer.writeObject(amount ,output);
         DataSerializer.writeString(positionKey ,output);
         DataSerializer.writeString(grantSubject ,output);
         DataSerializer.writeString(responsibleDepartment ,output);
@@ -131,8 +131,8 @@ public class Commitment implements DataSerializable {
 
     @Override
     public void fromData(DataInput input) throws IOException, ClassNotFoundException {
-        this.year = DataSerializer.readInteger(input);
-        this.amount = DataSerializer.readDouble(input);
+        this.year = DataSerializer.readObject(input);
+        this.amount = DataSerializer.readObject(input);
         this.positionKey = DataSerializer.readString(input);
         this.grantSubject = DataSerializer.readString(input);
         this.responsibleDepartment = DataSerializer.readString(input);

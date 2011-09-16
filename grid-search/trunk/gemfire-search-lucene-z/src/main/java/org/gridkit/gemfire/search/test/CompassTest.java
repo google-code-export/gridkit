@@ -8,7 +8,7 @@ import org.compass.core.config.RuntimeCompassSettings;
 import org.compass.core.engine.SearchEngine;
 import org.compass.core.marshall.MarshallingStrategy;
 import org.compass.core.spi.InternalCompass;
-import org.gridkit.gemfire.search.compass.marshall.GridkitMarshallingStrategy;
+import org.gridkit.search.compass.marshall.GridkitMarshallingStrategy;
 import org.gridkit.gemfire.search.demo.model.Author;
 
 public class CompassTest {
