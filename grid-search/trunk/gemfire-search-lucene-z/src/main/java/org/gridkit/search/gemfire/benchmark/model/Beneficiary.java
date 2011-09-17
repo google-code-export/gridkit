@@ -1,4 +1,4 @@
-package org.gridkit.gemfire.search.demo.model;
+package org.gridkit.search.gemfire.benchmark.model;
 
 import com.gemstone.gemfire.DataSerializable;
 import com.gemstone.gemfire.DataSerializer;
@@ -16,32 +16,32 @@ import java.io.IOException;
 @XmlRootElement(name = "beneficiary")
 public class Beneficiary implements DataSerializable {
     @XmlElement(name="name")
-    private String name;
+    private String name = "";
 
     @XmlElement(name="coordinator")
-    private String coordinator;
+    private String coordinator = "";
 
     @XmlElement(name="address")
-    private String address;
+    private String address = "";
 
     @XmlElement(name="city")
-    private String city;
+    private String city = "";
 
     @XmlElement(name="post_code")
-    private String postCode;
+    private String postCode = "";
 
     @XmlElement(name="country")
-    private String country;
+    private String country = "";
 
     @XmlJavaTypeAdapter(AmountXmlAdapter.class)
     @XmlElement(name="detail_amount")
     private Double detailAmount;
 
     @XmlElement(name="geozone")
-    private String geoZone;
+    private String geoZone = "";
 
     @XmlElement(name="expensetype", required=true)
-    private String expenseType;
+    private String expenseType = "";
 
     public String getName() {
         return name;

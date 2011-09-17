@@ -1,4 +1,4 @@
-package org.gridkit.gemfire.search.demo.model;
+package org.gridkit.search.gemfire.benchmark.model;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;

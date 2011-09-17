@@ -1,4 +1,4 @@
-package org.gridkit.gemfire.search.demo.model;
+package org.gridkit.search.gemfire.benchmark.model;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

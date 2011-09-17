@@ -1,4 +1,4 @@
-package org.gridkit.gemfire.search.demo;
+package org.gridkit.util.classloader;
 
 import java.util.concurrent.Callable;
 
@@ -19,7 +19,7 @@ public class IsolatedCallable<T> implements Callable<T> {
             return delegate.call();
         }
         catch (Throwable t) {
-            t.printStackTrace();
+            t.printStackTrace(System.err);
             throw new RuntimeException(t);
         }
         finally {

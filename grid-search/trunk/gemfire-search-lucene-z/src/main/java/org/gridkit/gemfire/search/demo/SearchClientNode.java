@@ -11,12 +11,13 @@ import org.apache.lucene.search.spans.SpanNearQuery;
 import org.apache.lucene.search.spans.SpanQuery;
 import org.apache.lucene.search.spans.SpanTermQuery;
 import org.apache.lucene.util.Version;
-import org.gridkit.gemfire.search.demo.model.Commitment;
-import org.gridkit.gemfire.search.demo.model.Fts;
-import org.gridkit.gemfire.search.demo.model.JaxbFactory;
+import org.gridkit.search.gemfire.benchmark.model.Commitment;
+import org.gridkit.search.gemfire.benchmark.model.*;
+import org.gridkit.search.gemfire.benchmark.model.Fts;
 import org.gridkit.search.gemfire.GemfireIndexSearcher;
 import org.gridkit.search.gemfire.IndexDiscoveryFunction;
 import org.gridkit.search.gemfire.IndexSearchFunction;
+import org.gridkit.search.gemfire.benchmark.model.JaxbFactory;
 
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;

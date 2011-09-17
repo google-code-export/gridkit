@@ -1,4 +1,4 @@
-package org.gridkit.gemfire.search.demo.model;
+package org.gridkit.search.gemfire.benchmark.model;
 
 import com.gemstone.gemfire.DataSerializable;
 import com.gemstone.gemfire.DataSerializer;
@@ -23,22 +23,22 @@ public class Commitment implements DataSerializable {
     private Double amount;
 
     @XmlElement(name="position_key")
-    private String positionKey;
+    private String positionKey = "";
 
     @XmlElement(name="grant_subject")
-    private String grantSubject;
+    private String grantSubject = "";
 
     @XmlElement(name="responsible_department")
-    private String responsibleDepartment;
+    private String responsibleDepartment = "";
 
     @XmlElement(name="budget_line")
-    private String budgetLine;
+    private String budgetLine = "";
 
     @XmlElement(name="actiontype")
-    private String actionType;
+    private String actionType = "";
 
     @XmlElement(name="cofinancing_rate")
-    private String cofinancingRate;
+    private String cofinancingRate = "";
 
     @XmlElementWrapper(name="beneficiaries")
     @XmlElement(name="beneficiary")
