@@ -32,10 +32,10 @@ public class SingleNode {
         threadPool.submit(new IsolatedCallable<Void>(locator)).get();
         threadPool.submit(new IsolatedCallable<Void>(store)).get();
 
-        //threadPool.submit(new IsolatedCallable<Void>(search)).get();
-        //threadPool.submit(new IsolatedCallable<Void>(lucene)).get();
+        threadPool.submit(new IsolatedCallable<Void>(search)).get();
+        threadPool.submit(new IsolatedCallable<Void>(lucene)).get();
 
-        threadPool.submit(new IsolatedCallable<Void>(gemstone)).get();
+        //threadPool.submit(new IsolatedCallable<Void>(gemstone)).get();
 
         System.exit(0);
     }

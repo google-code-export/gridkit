@@ -17,7 +17,7 @@ public class LucenePositionKeyTask extends PositionKeyTask {
     private Region<String, Commitment> commitmentRegion;
 
     private Stopwatch keySearch = new Stopwatch();
-    private Stopwatch objectGet = new Stopwatch();
+    private Stopwatch hashGet = new Stopwatch();
 
     public LucenePositionKeyTask(GemfireIndexSearcher indexSearcher, Region<String, Commitment> commitmentRegion) {
         this.indexSearcher = indexSearcher;
@@ -28,7 +28,7 @@ public class LucenePositionKeyTask extends PositionKeyTask {
     public void reset() {
         super.reset();
         statistics.put("keySearch", new DescriptiveStatistics());
-        statistics.put("objectGet", new DescriptiveStatistics());
+        statistics.put("hashGet", new DescriptiveStatistics());
     }
 
     @Override
@@ -39,9 +39,9 @@ public class LucenePositionKeyTask extends PositionKeyTask {
         Object key = indexSearcher.search(commitmentRegion.getFullPath(), query).get(0);
         keySearch.stop();
 
-        objectGet.start();
+        hashGet.start();
         Commitment result = commitmentRegion.get(key);
-        objectGet.stop();
+        hashGet.stop();
 
         return result;
     }
@@ -49,9 +49,9 @@ public class LucenePositionKeyTask extends PositionKeyTask {
     @Override
     public void record() {
         statistics.get("keySearch").addValue(keySearch.elapsedTime(TimeUnit.MICROSECONDS));
-        statistics.get("objectGet").addValue(objectGet.elapsedTime(TimeUnit.MICROSECONDS));
+        statistics.get("hashGet").addValue(hashGet.elapsedTime(TimeUnit.MICROSECONDS));
 
         keySearch.reset();
-        objectGet.reset();
+        hashGet.reset();
     }
 }
