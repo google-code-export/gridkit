@@ -5,7 +5,6 @@ import com.gemstone.gemfire.cache.Region;
 import com.gemstone.gemfire.cache.query.IndexType;
 import com.gemstone.gemfire.cache.query.QueryService;
 import com.gemstone.gemfire.distributed.DistributedSystem;
-import org.gridkit.search.gemfire.GemfireIndexSearcher;
 import org.gridkit.search.gemfire.benchmark.model.Commitment;
 import org.gridkit.search.gemfire.benchmark.task.BenchmarkTask;
 import org.gridkit.search.gemfire.benchmark.task.GemfireTaskExecutor;
@@ -41,7 +40,7 @@ public class GemstoneBenchmark implements Callable<Void> {
 
         BenchmarkTask bt = new GemstonePositionKeyTask(commitmentRegion);
         bt.setFtsData(ftsData);
-        GemfireTaskExecutor te = new GemfireTaskExecutor(bt, 3, ds);
+        GemfireTaskExecutor te = new GemfireTaskExecutor(bt, config.warmUpCount, ds);
 
         te.benchmark();
 

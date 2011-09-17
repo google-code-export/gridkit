@@ -6,6 +6,7 @@ import com.google.common.base.Stopwatch;
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.gridkit.search.gemfire.benchmark.GcFunction;
 
+import java.text.DecimalFormat;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -57,9 +58,19 @@ public class GemfireTaskExecutor {
     }
 
     private static void printResult(Map<String, DescriptiveStatistics> results) {
+        DecimalFormat df = new DecimalFormat("#.##");
+
         for (Map.Entry<String, DescriptiveStatistics> result : results.entrySet())
-            System.out.println(String.format("%s [mean = %s | std = %s]",
-                result.getKey(), result.getValue().getMean(), result.getValue().getStandardDeviation()
+            System.out.println(String.format(
+                "%s [mean = %s | std = %s | k.1 = %s | k.5 = %s | k.9 = %s | min = %s | max = %s]",
+                result.getKey(),
+                df.format(result.getValue().getMean()),
+                df.format(result.getValue().getStandardDeviation()),
+                df.format(result.getValue().getPercentile(0.1)),
+                df.format(result.getValue().getPercentile(0.5)),
+                df.format(result.getValue().getPercentile(0.9)),
+                df.format(result.getValue().getMin()),
+                df.format(result.getValue().getMax())
             ));
     }
 }

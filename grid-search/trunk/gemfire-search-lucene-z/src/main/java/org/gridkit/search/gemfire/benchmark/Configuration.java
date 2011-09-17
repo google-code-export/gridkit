@@ -18,6 +18,8 @@ public class Configuration {
 
     public final String ftsDataFolder;
 
+    public final Integer warmUpCount;
+
     public Configuration(Properties properties) throws UnknownHostException {
         String localAddress = InetAddress.getLocalHost().getHostAddress();
 
@@ -27,6 +29,8 @@ public class Configuration {
         this.bindAddress = properties.getProperty("bind.address", localAddress);
 
         this.ftsDataFolder = properties.getProperty("fts.data.folder");
+
+        this.warmUpCount = Integer.valueOf(properties.getProperty("warm.up.count", "3"));
     }
 
     public Configuration(String propertiesLocation) throws IOException {

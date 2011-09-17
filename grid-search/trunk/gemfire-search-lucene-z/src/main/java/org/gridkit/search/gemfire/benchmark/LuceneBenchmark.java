@@ -42,7 +42,7 @@ public class LuceneBenchmark implements Callable<Void> {
 
         BenchmarkTask bt = new LucenePositionKeyTask(searcher, commitmentRegion);
         bt.setFtsData(ftsData);
-        GemfireTaskExecutor te = new GemfireTaskExecutor(bt, 5, ds);
+        GemfireTaskExecutor te = new GemfireTaskExecutor(bt, config.warmUpCount, ds);
         te.benchmark();
 
         return null;
