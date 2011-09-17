@@ -1,4 +1,4 @@
-package org.gridkit.gemfire.search.test;
+package org.gridkit.test;
 
 import org.gridkit.search.gemfire.benchmark.model.Fts;
 import org.gridkit.search.gemfire.benchmark.model.JaxbFactory;

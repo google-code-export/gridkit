@@ -1,4 +1,4 @@
-package org.gridkit.gemfire.search.test;
+package org.gridkit.test;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;

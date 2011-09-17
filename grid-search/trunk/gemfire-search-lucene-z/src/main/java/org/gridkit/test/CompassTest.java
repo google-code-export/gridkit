@@ -1,4 +1,4 @@
-package org.gridkit.gemfire.search.test;
+package org.gridkit.test;
 
 import org.compass.core.*;
 import org.compass.core.config.CompassConfiguration;
