@@ -14,6 +14,6 @@
 
 	mvn release:perform -Dusername=malexejev -Dpassword=*********
 
-Note that it is required to give your credentials in two places (settings.xml and in mvn command itself).
+Note that it is required to provide your credentials in two places (settings.xml and in mvn command itself).
 If any upload error happens on steps 2-3 (for example, Google Code likes to return HTTP 50x sometimes) - just rerun command as is. 
 Release plugin keeps temporary log of already performed steps. 
