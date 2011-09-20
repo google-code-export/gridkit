@@ -30,6 +30,7 @@ public class LuceneBenchmark implements Callable<Void> {
             cache, commitmentRegionName, false
         );
 
+        System.out.println("Loading data ...");
         ftsData.fillRegion(commitmentRegion);
 
         Thread.sleep(10000);

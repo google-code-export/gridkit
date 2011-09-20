@@ -11,7 +11,9 @@ import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.gridkit.search.gemfire.benchmark.BenchmarkFactory.commitmentRegionName;
 
@@ -39,8 +41,20 @@ public class FtsData {
     }
 
     public void fillRegion(Region<String, Commitment> commitmentRegion) {
-        for (Commitment commitment : commitments)
-            commitmentRegion.put(commitment.getPositionKey(), commitment);
+    	int n = 0;
+    	Map<String, Commitment> buffer = new HashMap<String, Commitment>();        
+    	for (Commitment commitment : commitments) {
+    		++n;
+            buffer.put(commitment.getPositionKey(), commitment);
+            if (buffer.size() > 100) {
+            	commitmentRegion.putAll(buffer);
+            	buffer.clear();
+            }            
+            if (n % 10000 == 0) {
+            	System.out.println("Loading " + n + "/" + commitments.size());
+            }
+        }
+        commitmentRegion.putAll(buffer);
     }
 
     public List<Commitment> getCommitments() {

@@ -34,6 +34,7 @@ public class GemstoneBenchmark implements Callable<Void> {
             "positionKey", IndexType.PRIMARY_KEY, "positionKey", commitmentRegion.getFullPath()
         );
 
+        System.out.println("Loading data ...");
         ftsData.fillRegion(commitmentRegion);
 
         DistributedSystem ds = cache.getDistributedSystem();

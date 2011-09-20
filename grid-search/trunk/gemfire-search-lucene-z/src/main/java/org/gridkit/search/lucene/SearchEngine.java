@@ -6,6 +6,7 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 
 public interface SearchEngine {
+	
 	public void insert(Indexable indexable) throws IOException;
 
 	public void update(Indexable indexable) throws IOException;
@@ -16,4 +17,5 @@ public interface SearchEngine {
 	public void releaseSearcher(IndexSearcher searcher);
 
     public void close();
+    
 }

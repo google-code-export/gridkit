@@ -1,7 +1,7 @@
 package org.gridkit.search.gemfire.benchmark.task;
 
-import com.gemstone.gemfire.cache.Region;
-import com.google.common.base.Stopwatch;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Query;
@@ -9,8 +9,8 @@ import org.apache.lucene.search.TermQuery;
 import org.gridkit.search.gemfire.GemfireIndexSearcher;
 import org.gridkit.search.gemfire.benchmark.model.Commitment;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import com.gemstone.gemfire.cache.Region;
+import com.google.common.base.Stopwatch;
 
 public class LucenePositionKeyTask extends PositionKeyTask {
     private GemfireIndexSearcher indexSearcher;

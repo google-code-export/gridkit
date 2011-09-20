@@ -30,7 +30,7 @@ public class Configuration {
 
         this.ftsDataFolder = properties.getProperty("fts.data.folder");
 
-        this.warmUpCount = Integer.valueOf(properties.getProperty("warm.up.count", "3"));
+        this.warmUpCount = Integer.valueOf(properties.getProperty("warm.up.count", "1"));
     }
 
     public Configuration(String propertiesLocation) throws IOException {
