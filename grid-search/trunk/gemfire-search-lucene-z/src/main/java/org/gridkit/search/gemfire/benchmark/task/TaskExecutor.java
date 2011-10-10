@@ -10,12 +10,12 @@ import java.text.DecimalFormat;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class GemfireTaskExecutor {
+public class TaskExecutor {
     private int warmUpCount;
     private BenchmarkTask task;
     private DistributedSystem ds;
 
-    public GemfireTaskExecutor(BenchmarkTask task, int warmUpCount, DistributedSystem ds) {
+    public TaskExecutor(BenchmarkTask task, int warmUpCount, DistributedSystem ds) {
         this.warmUpCount = warmUpCount;
         this.task = task;
         this.ds = ds;
@@ -60,15 +60,18 @@ public class GemfireTaskExecutor {
     private static void printResult(Map<String, DescriptiveStatistics> results) {
         DecimalFormat df = new DecimalFormat("#.##");
 
+        System.out.println("Name,N,Mean,Std,k.1,k.5,k.9,Min,Max");
+        
         for (Map.Entry<String, DescriptiveStatistics> result : results.entrySet())
             System.out.println(String.format(
-                "%s [mean = %s | std = %s | k.1 = %s | k.5 = %s | k.9 = %s | min = %s | max = %s]",
+                "%s,%s,%s,%s,%s,%s,%s,%s,%s",
                 result.getKey(),
+                String.valueOf(result.getValue().getN()),
                 df.format(result.getValue().getMean()),
                 df.format(result.getValue().getStandardDeviation()),
-                df.format(result.getValue().getPercentile(0.1)),
-                df.format(result.getValue().getPercentile(0.5)),
-                df.format(result.getValue().getPercentile(0.9)),
+                df.format(result.getValue().getPercentile(10)),
+                df.format(result.getValue().getPercentile(50)),
+                df.format(result.getValue().getPercentile(90)),
                 df.format(result.getValue().getMin()),
                 df.format(result.getValue().getMax())
             ));

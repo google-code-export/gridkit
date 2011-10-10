@@ -7,7 +7,8 @@ import com.gemstone.gemfire.cache.query.QueryService;
 import com.gemstone.gemfire.distributed.DistributedSystem;
 import org.gridkit.search.gemfire.benchmark.model.Commitment;
 import org.gridkit.search.gemfire.benchmark.task.BenchmarkTask;
-import org.gridkit.search.gemfire.benchmark.task.GemfireTaskExecutor;
+import org.gridkit.search.gemfire.benchmark.task.TaskExecutor;
+import org.gridkit.search.gemfire.benchmark.task.GemstoneLineDistributionTask;
 import org.gridkit.search.gemfire.benchmark.task.GemstonePositionKeyTask;
 
 import java.util.concurrent.Callable;
@@ -30,18 +31,27 @@ public class GemstoneBenchmark implements Callable<Void> {
 
         QueryService qs = commitmentRegion.getRegionService().getQueryService();
 
+        //qs.createIndex(
+        //    "positionKey", IndexType.PRIMARY_KEY, "positionKey", commitmentRegion.getFullPath()
+        //);
+        
+        //qs.createIndex(
+        //    "responsibleDepartment", IndexType.FUNCTIONAL, "responsibleDepartment", commitmentRegion.getFullPath()
+        //);
+
         qs.createIndex(
-            "positionKey", IndexType.PRIMARY_KEY, "positionKey", commitmentRegion.getFullPath()
+            "budgetLine", IndexType.FUNCTIONAL, "budgetLine", commitmentRegion.getFullPath()
         );
+
 
         System.out.println("Loading data ...");
         ftsData.fillRegion(commitmentRegion);
 
         DistributedSystem ds = cache.getDistributedSystem();
 
-        BenchmarkTask bt = new GemstonePositionKeyTask(commitmentRegion);
+        BenchmarkTask bt = new GemstoneLineDistributionTask(true, commitmentRegion);
         bt.setFtsData(ftsData);
-        GemfireTaskExecutor te = new GemfireTaskExecutor(bt, config.warmUpCount, ds);
+        TaskExecutor te = new TaskExecutor(bt, config.warmUpCount, ds);
 
         te.benchmark();
 

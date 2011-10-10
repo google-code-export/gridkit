@@ -1,13 +1,5 @@
 package org.gridkit.search.gemfire.benchmark;
 
-import com.gemstone.gemfire.cache.Region;
-import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.gridkit.search.gemfire.benchmark.model.Commitment;
-import org.gridkit.search.gemfire.benchmark.model.Fts;
-import org.gridkit.search.gemfire.benchmark.model.JaxbFactory;
-
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
@@ -15,7 +7,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.gridkit.search.gemfire.benchmark.BenchmarkFactory.commitmentRegionName;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
+import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.gridkit.search.gemfire.benchmark.model.Commitment;
+import org.gridkit.search.gemfire.benchmark.model.Fts;
+import org.gridkit.search.gemfire.benchmark.model.JaxbFactory;
+
+import com.gemstone.gemfire.cache.Region;
 
 public class FtsData {
     private Unmarshaller unmarshaller = JaxbFactory.createUnmarshaller();
@@ -57,6 +57,27 @@ public class FtsData {
         commitmentRegion.putAll(buffer);
     }
 
+    public Map<String, Map<String, Integer>> getLineDistribution() {
+        Map<String, Map<String, Integer>> result = new HashMap<String, Map<String, Integer>>();
+        
+        for (Commitment commitment : commitments) {
+            String department = commitment.getResponsibleDepartment();
+            String budgetLine = commitment.getBudgetLine();
+            
+            if (!result.containsKey(department))
+                result.put(department, new HashMap<String, Integer>());
+            
+            Map<String, Integer> departmentMap = result.get(department);
+            
+            if (departmentMap.containsKey(budgetLine))
+                departmentMap.put(budgetLine, departmentMap.get(budgetLine) + 1);
+            else
+                departmentMap.put(budgetLine, 1);
+        }
+        
+        return result;
+    }
+    
     public List<Commitment> getCommitments() {
         return commitments;
     }

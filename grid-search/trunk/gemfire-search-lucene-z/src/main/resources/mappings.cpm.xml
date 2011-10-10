@@ -6,6 +6,14 @@
         <id name="positionKey">
             <meta-data index="not_analyzed">positionKey</meta-data>
         </id>
+        
+        <property name="responsibleDepartment">
+            <meta-data index="not_analyzed">responsibleDepartment</meta-data>
+        </property>
+        
+        <property name="budgetLine">
+            <meta-data index="not_analyzed">budgetLine</meta-data>
+        </property>
 
         <component name="beneficiaries" ref-alias="beneficiary"/>
     </class>

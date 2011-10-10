@@ -1,14 +1,14 @@
 package org.gridkit.search.gemfire.benchmark.task;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.gridkit.search.gemfire.benchmark.FtsData;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public abstract class BenchmarkTask {
     protected Map<String, DescriptiveStatistics> statistics =
-        new HashMap<String, DescriptiveStatistics>();
+        new TreeMap<String, DescriptiveStatistics>();
 
     protected FtsData ftsData;
 
@@ -26,5 +26,20 @@ public abstract class BenchmarkTask {
 
     public Map<String, DescriptiveStatistics> getStatistics() {
         return statistics;
+    }
+    
+    public DescriptiveStatistics getStatistics(String key) {
+        DescriptiveStatistics result = statistics.get(key);
+        
+        if (result == null) {
+            result = new DescriptiveStatistics();
+            statistics.put(key, result);
+        }
+        
+        return result;
+    }
+    
+    protected DescriptiveStatistics getStatistics(String prefix, Integer count) {
+        return getStatistics(prefix + "." + count);
     }
 }

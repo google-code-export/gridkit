@@ -22,6 +22,7 @@ public class BenchmarkFactory {
         cacheFactory.set("locators", String.format("%s[%d]", config.locatorHost, config.locatorPort))
 					.set("bind-address", config.bindAddress)
 		            .set("mcast-port", "0")
+                    .set("disable-tcp", "true")
                     .set("roles", roles);
 
         return cacheFactory.create();

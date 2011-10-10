@@ -11,7 +11,8 @@ import org.gridkit.search.gemfire.IndexDiscoveryFunction;
 import org.gridkit.search.gemfire.IndexSearchFunction;
 import org.gridkit.search.gemfire.benchmark.model.Commitment;
 import org.gridkit.search.gemfire.benchmark.task.BenchmarkTask;
-import org.gridkit.search.gemfire.benchmark.task.GemfireTaskExecutor;
+import org.gridkit.search.gemfire.benchmark.task.TaskExecutor;
+import org.gridkit.search.gemfire.benchmark.task.LuceneLineDistributionTask;
 import org.gridkit.search.gemfire.benchmark.task.LucenePositionKeyTask;
 
 import java.util.concurrent.Callable;
@@ -33,7 +34,7 @@ public class LuceneBenchmark implements Callable<Void> {
         System.out.println("Loading data ...");
         ftsData.fillRegion(commitmentRegion);
 
-        Thread.sleep(10000);
+        Thread.sleep(1000);
 
         FunctionService.registerFunction(IndexDiscoveryFunction.getIndexDiscoveryFunctionStub());
         FunctionService.registerFunction(IndexSearchFunction.getIndexSearchFunctionStub());
@@ -41,9 +42,9 @@ public class LuceneBenchmark implements Callable<Void> {
         DistributedSystem ds = cache.getDistributedSystem();
         GemfireIndexSearcher searcher = new GemfireIndexSearcher(ds);
 
-        BenchmarkTask bt = new LucenePositionKeyTask(searcher, commitmentRegion);
+        BenchmarkTask bt = new LuceneLineDistributionTask(true, searcher, commitmentRegion);
         bt.setFtsData(ftsData);
-        GemfireTaskExecutor te = new GemfireTaskExecutor(bt, config.warmUpCount, ds);
+        TaskExecutor te = new TaskExecutor(bt, config.warmUpCount, ds);
         te.benchmark();
 
         return null;

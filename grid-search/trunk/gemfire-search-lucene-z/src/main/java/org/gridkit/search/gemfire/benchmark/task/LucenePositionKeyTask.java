@@ -2,7 +2,6 @@ package org.gridkit.search.gemfire.benchmark.task;
 
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
@@ -25,13 +24,6 @@ public class LucenePositionKeyTask extends PositionKeyTask {
     }
 
     @Override
-    public void reset() {
-        super.reset();
-        statistics.put("keySearch", new DescriptiveStatistics());
-        statistics.put("hashGet", new DescriptiveStatistics());
-    }
-
-    @Override
     protected Commitment getCommitment(String positionKey) {
         Query query = new TermQuery(new Term("positionKey", positionKey));
 
@@ -48,6 +40,8 @@ public class LucenePositionKeyTask extends PositionKeyTask {
 
     @Override
     public void record() {
+        super.record();
+        
         statistics.get("keySearch").addValue(keySearch.elapsedTime(TimeUnit.MICROSECONDS));
         statistics.get("hashGet").addValue(hashGet.elapsedTime(TimeUnit.MICROSECONDS));
 

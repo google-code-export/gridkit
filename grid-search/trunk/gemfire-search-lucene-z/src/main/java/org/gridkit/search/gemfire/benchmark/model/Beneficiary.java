@@ -15,6 +15,8 @@ import java.io.IOException;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "beneficiary")
 public class Beneficiary implements DataSerializable {
+    private static final long serialVersionUID = -2395811566085693631L;
+
     @XmlElement(name="name")
     private String name = "";
 
