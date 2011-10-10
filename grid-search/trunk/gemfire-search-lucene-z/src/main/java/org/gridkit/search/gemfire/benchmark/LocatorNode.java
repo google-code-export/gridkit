@@ -15,7 +15,7 @@ public class LocatorNode implements Callable<Void> {
 
         Properties properties = new Properties();
 		properties.setProperty("mcast-port", "0");
-        properties.setProperty("disable-tcp", "true");
+        //properties.setProperty("disable-tcp", "true");
 
         Locator.startLocatorAndDS(config.locatorPort, null, locatorAddress, properties);
 

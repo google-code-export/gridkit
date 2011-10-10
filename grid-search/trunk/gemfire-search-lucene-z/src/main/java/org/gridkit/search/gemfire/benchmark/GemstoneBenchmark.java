@@ -49,8 +49,9 @@ public class GemstoneBenchmark implements Callable<Void> {
 
         DistributedSystem ds = cache.getDistributedSystem();
 
-        BenchmarkTask bt = new GemstoneLineDistributionTask(true, commitmentRegion);
+        GemstoneLineDistributionTask bt = new GemstoneLineDistributionTask(false, commitmentRegion);
         bt.setFtsData(ftsData);
+        bt.setIterationsCount(5);
         TaskExecutor te = new TaskExecutor(bt, config.warmUpCount, ds);
 
         te.benchmark();

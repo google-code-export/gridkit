@@ -23,12 +23,16 @@ public abstract class LineDistributionTask extends BenchmarkTask {
     protected String line;
     protected Integer count;
     
+    protected int iterationsCount = 1;
+    protected int iterationsLeft;
+    
     private Stopwatch overallSw = new Stopwatch();
     
     @Override
     public void reset() {
         super.reset();
         
+        iterationsLeft = iterationsCount - 1;
         deps = ftsData.getLineDistribution().entrySet().iterator();
         lines = Collections.<Map.Entry<String, Integer>>emptySet().iterator();
     }
@@ -36,7 +40,13 @@ public abstract class LineDistributionTask extends BenchmarkTask {
     @Override
     public boolean execute() throws Exception {
         if (!deps.hasNext() && !lines.hasNext())
-            return false;
+            if (iterationsLeft < 1)
+                return false;
+            else {
+                iterationsLeft -= 1;
+                deps = ftsData.getLineDistribution().entrySet().iterator();
+                lines = Collections.<Map.Entry<String, Integer>>emptySet().iterator();                
+            }
         
         if (!lines.hasNext()) {
             Map.Entry<String, Map<String, Integer>> nextDep = deps.next();
@@ -67,5 +77,9 @@ public abstract class LineDistributionTask extends BenchmarkTask {
         overallSw.reset();
     }
     
+    public void setIterationsCount(int iterationsCount) {
+        this.iterationsCount = iterationsCount;
+    }
+
     protected abstract Collection<Commitment> getCommitments(String dep, String line) throws Exception;
 }

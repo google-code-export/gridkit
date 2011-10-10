@@ -32,6 +32,8 @@ public class TaskExecutor {
     }
 
     private Map<String, DescriptiveStatistics> execute() throws Exception{
+        int testNumber = 0;
+        
         Stopwatch overallSw = new Stopwatch();
         DescriptiveStatistics overallSt = new DescriptiveStatistics();
 
@@ -41,6 +43,11 @@ public class TaskExecutor {
 
         boolean doNext = false;
         do {
+            testNumber += 1;
+            
+            if (testNumber % 500 == 1)
+                System.out.println("Running test number " + testNumber);
+            
             overallSw.start();
             doNext = task.execute();
             overallSw.stop();
