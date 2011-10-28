@@ -27,9 +27,8 @@
     <packaging>jar</packaging>
     <version>0.1-SNAPSHOT</version>
     <description>A tool to upload a bulk of entries to the cache with synchronious write to the underlaying storage.
-		This is done by issinig a set of per-node entry processors which performs a per-partition batch put operation directly to the backing map.
-		This will work for for write-through backing maps
-	</description>
+This is done by issinig a set of per-node entry processors which performs a per-partition batch put operation directly to the backing map.
+This will work for for write-through backing maps</description>
 
     <properties>
         <javaVersion>1.6</javaVersion>

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.tangosol.net.cache.ReadWriteBackingMap;
+import com.tangosol.util.Binary;
 import com.tangosol.util.BinaryEntry;
 import com.tangosol.util.InvocableMap.Entry;
 import com.tangosol.util.processor.AbstractProcessor;
@@ -13,9 +14,9 @@ import com.tangosol.util.processor.AbstractProcessor;
 public class BatchStoreProcessor extends AbstractProcessor {
 	private static final long serialVersionUID = 1L;
 	
-	private Map<Object, Object> payload;
+	private Map<Binary, Binary> payload;
 	
-	public BatchStoreProcessor(Map<Object, Object> payload) {
+	public BatchStoreProcessor(Map<Binary, Binary> payload) {
 		this.payload = payload;
 	}
 
@@ -36,9 +37,9 @@ public class BatchStoreProcessor extends AbstractProcessor {
                 backingMap = entry.getBackingMap();
             }
             
-            Object candidateValue = payload.get(entry.getKey());
+            Binary candidateValue = payload.get(entry.getBinaryKey());
             if (candidateValue != null) {
-            	candidates.put(entry.getKey(), candidateValue);
+            	candidates.put(entry.getBinaryKey(), candidateValue);
             }
         }
         
