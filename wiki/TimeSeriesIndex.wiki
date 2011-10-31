@@ -1,3 +1,1 @@
-#TimeSeriesIndex for Coherence
-
 One big TODO
