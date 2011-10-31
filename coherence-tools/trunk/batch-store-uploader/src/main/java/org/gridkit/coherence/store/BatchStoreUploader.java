@@ -3,12 +3,11 @@ package org.gridkit.coherence.store;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.tangosol.io.Serializer;
 import com.tangosol.net.Member;
 import com.tangosol.net.NamedCache;
 import com.tangosol.net.PartitionedService;
 import com.tangosol.util.Binary;
-import com.tangosol.util.ExternalizableHelper;
+import com.tangosol.util.Converter;
 import com.tangosol.util.UID;
 
 public class BatchStoreUploader {
@@ -28,11 +27,12 @@ public class BatchStoreUploader {
     }
     
 	private void push(Map<Object, Object> batch) {
-        Serializer serializer = cache.getCacheService().getSerializer();
+        Converter keyConverter = cache.getCacheService().getBackingMapManager().getContext().getKeyToInternalConverter();
+        Converter valueConverter = cache.getCacheService().getBackingMapManager().getContext().getValueToInternalConverter();
         Map<Binary, Binary> binMap = new HashMap<Binary, Binary>(batch.size());
         for(Map.Entry<Object, Object> entry: batch.entrySet()) {
-                Binary key = ExternalizableHelper.toBinary(entry.getKey(), serializer);
-                Binary value = ExternalizableHelper.toBinary(entry.getValue(), serializer);
+                Binary key = (Binary) keyConverter.convert(entry.getKey());
+                Binary value = (Binary) valueConverter.convert(entry.getValue());
                 binMap.put(key, value);
         };
         cache.invokeAll(batch.keySet(), new BatchStoreProcessor(binMap));

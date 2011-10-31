@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.tangosol.net.cache.ReadWriteBackingMap;
+import com.tangosol.net.cache.ReadWriteBackingMap.CacheStoreWrapper;
 import com.tangosol.util.Binary;
 import com.tangosol.util.BinaryEntry;
 import com.tangosol.util.InvocableMap.Entry;
@@ -30,9 +31,10 @@ public class BatchStoreProcessor extends AbstractProcessor {
 	@Override
 	public Map processAll(Set entries) {
 		Map backingMap = null;
-		Map<Object, Object> candidates = new HashMap<Object, Object>(entries.size());
+		Map<Binary, Binary> candidates = new HashMap<Binary, Binary>(entries.size());
         for(Object e: entries) {
             BinaryEntry entry = (BinaryEntry) e;
+            
             if (backingMap == null) {
                 backingMap = entry.getBackingMap();
             }
@@ -42,9 +44,18 @@ public class BatchStoreProcessor extends AbstractProcessor {
             	candidates.put(entry.getBinaryKey(), candidateValue);
             }
         }
-        
-        ReadWriteBackingMap rwmap = (ReadWriteBackingMap) backingMap;
-        rwmap.putAll(candidates);
+
+        if (!candidates.isEmpty()) {
+	        ReadWriteBackingMap rwmap = (ReadWriteBackingMap) backingMap;
+	        ((CacheStoreWrapper)rwmap.getCacheStore()).getCacheStore().storeAll(candidates);
+	        Map missesCache = rwmap.getMissesCache();
+	        if (missesCache != null) {
+		        for (Binary key : candidates.keySet()) {
+		        	missesCache.remove(key);
+		        }
+	        }
+	        rwmap.getInternalCache().putAll(candidates);
+        }
         
         return Collections.emptyMap();
 	}
