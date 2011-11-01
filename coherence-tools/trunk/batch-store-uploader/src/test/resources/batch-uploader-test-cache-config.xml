@@ -1,6 +1,4 @@
 <?xml version="1.0"?>
-<!DOCTYPE cache-config SYSTEM "cache-config.dtd">
-
 <cache-config>
 	<caching-scheme-mapping>
 		<cache-mapping>
@@ -13,6 +11,7 @@
 		<distributed-scheme>
 			<scheme-name>distributed-store</scheme-name>
 			<service-name>DistributedStore</service-name>
+			<partition-count system-property="org.gridkit.batch-store-uploader.partition-count">257</partition-count>
 			<backing-map-scheme>
 				<read-write-backing-map-scheme>
 					<internal-cache-scheme>

@@ -55,14 +55,20 @@ This will work for for write-through backing maps</description>
         <dependency>
             <groupId>com.oracle.coherence</groupId>
             <artifactId>coherence</artifactId>
-            <version>3.7.1.0b27797</version>
+            <version>3.6.1.0b19636</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.8.2</version>
             <scope>test</scope>
-        </dependency>        
+        </dependency>
+        <dependency>
+	        <groupId>org.gridkit.coherence-tools</groupId>
+	        <artifactId>test-utils</artifactId>
+	        <version>0.1.2-SNAPSHOT</version>
+	        <scope>test</scope>
+		</dependency>
     </dependencies>
 
     <pluginRepositories>
@@ -89,36 +95,6 @@ This will work for for write-through backing maps</description>
                     <target>${javaVersion}</target>
                 </configuration>
             </plugin>
-
-            <plugin> <!-- usage: http://code.google.com/p/maven-license-plugin/wiki/HowTo -->
-                <artifactId>maven-license-plugin</artifactId>
-                <groupId>com.mathieucarbou.mojo</groupId>
-                <configuration>
-                    <basedir>${project.parent.basedir}</basedir>
-                    <header>etc/header.txt</header>
-                    <includes>
-                        <include>**/src/**/*.java</include>
-                        <include>**/src/**/*.xml</include>
-                        <include>**/pom.xml</include>
-                    </includes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.9</version>
-                <configuration>
-                    <forkMode>always</forkMode>
-                </configuration>
-            </plugin>            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>

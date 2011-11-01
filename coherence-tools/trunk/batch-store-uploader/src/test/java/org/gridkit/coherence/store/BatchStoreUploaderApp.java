@@ -5,9 +5,8 @@ import com.tangosol.net.NamedCache;
 
 public class BatchStoreUploaderApp {
 	public static void main(String[] args) {
-		System.setProperty("tangosol.coherence.cacheconfig", "test-cache-config.xml");
+		System.setProperty("tangosol.coherence.cacheconfig", "batch-uploader-test-cache-config.xml");
 		System.setProperty("tangosol.coherence.localhost", "127.0.0.1");
-		System.setProperty("tangosol.coherence.distributed.localstorage", "false");
 		
 		NamedCache cache = CacheFactory.getCache("store-cache");
 		
