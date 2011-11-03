@@ -41,7 +41,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.SynchronousQueue;
 
@@ -153,6 +152,7 @@ public class Isolate {
 		}
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public void exec(Runnable task) {
 		try {
 			queue.put(new CallableWorkUnit(task));
@@ -164,7 +164,7 @@ public class Isolate {
 
 	@SuppressWarnings("unchecked")
 	public <V> V exec(Callable<V> task) {
-		CallableWorkUnit future = new CallableWorkUnit((Callable<V>) convertIn(task));
+		CallableWorkUnit<V> future = new CallableWorkUnit<V>((Callable<V>) convertIn(task));
 		try {			
 			queue.put(future);
 			queue.put(NOP);
@@ -258,6 +258,7 @@ public class Isolate {
 		}					
 	}
 	
+	@SuppressWarnings("unused")
 	private static Object fromBytes(byte[] serialized) {
 		return fromBytes(serialized, Thread.currentThread().getContextClassLoader());
 	}
