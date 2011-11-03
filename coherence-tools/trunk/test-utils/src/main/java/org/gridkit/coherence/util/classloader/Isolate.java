@@ -15,15 +15,34 @@
  */
 package org.gridkit.coherence.util.classloader;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.InvalidPropertiesFormatException;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.SynchronousQueue;
 
 import org.junit.Ignore;
@@ -34,15 +53,84 @@ import org.junit.Ignore;
 @Ignore
 public class Isolate {
 	
+	private static final InheritableThreadLocal<Isolate> ISOLATE = new InheritableThreadLocal<Isolate>();
+	
+	private static PrintStream rootOut;
+	private static PrintStream rootErr;
+	private static Properties rootProperties;
+	
+	static {
+		
+		System.err.println("Installing java.lang.System multiplexor");
+		
+		rootOut = System.out;
+		rootErr = System.err;
+		rootProperties = System.getProperties();
+		
+		PrintStream mOut = new PrintStreamMultiplexor() {
+			@Override
+			protected PrintStream resolve() {
+				Isolate i = ISOLATE.get();
+				if (i == null) {
+					return rootOut;
+				}
+				else {
+					return i.stdOut;
+				}
+			}
+		};
+
+		PrintStream mErr = new PrintStreamMultiplexor() {
+			@Override
+			protected PrintStream resolve() {
+				Isolate i = ISOLATE.get();
+				if (i == null) {
+					return rootErr;
+				}
+				else {
+					return i.stdErr;
+				}
+			}
+		};
+		
+		@SuppressWarnings("serial")
+		Properties mProps = new PropertiesMultiplexor() {
+			@Override
+			protected Properties resolve() {
+				Isolate i = ISOLATE.get();
+				if (i == null) {
+					return rootProperties;
+				}
+				else {
+					return i.sysProps;
+				}
+			}
+		};
+		
+		System.setOut(mOut);
+		System.setErr(mErr);
+		System.setProperties(mProps);
+	}
+	
 	private String name;
 	private Thread isolatedThread;
 	private IsolatedClassloader cl;
+	
+	private PrintStream stdOut;
+	private PrintStream stdErr;
+	private Properties sysProps;
 	
 	private BlockingQueue<WorkUnit> queue = new SynchronousQueue<WorkUnit>();
 	
 	public Isolate(String name, String... packages) {		
 		this.name = name;
 		this.cl = new IsolatedClassloader(getClass().getClassLoader(), packages);
+		
+		sysProps = new Properties();
+		sysProps.putAll(System.getProperties());
+		
+		stdOut = new PrintStream(new WrapperPrintStream("[" + name + "] ", rootOut));
+		stdErr = new PrintStream(new WrapperPrintStream("[" + name + "] ", rootErr));
 	}
 	
 	public synchronized void start() {
@@ -58,16 +146,53 @@ public class Isolate {
 	
 	public void submit(Class<?> clazz, Object... constructorArgs) {
 		try {
-			queue.put(new WorkUnit(clazz.getName(), constructorArgs));
-			queue.put(new WorkUnit(Nop.class.getName()));
+			queue.put(new ClassWorkUnit(clazz.getName(), constructorArgs));
+			queue.put(NOP);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
 	
+	public void exec(Runnable task) {
+		try {
+			queue.put(new CallableWorkUnit(task));
+			queue.put(NOP);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}		
+	}
+
+	@SuppressWarnings("unchecked")
+	public <V> V exec(Callable<V> task) {
+		CallableWorkUnit future = new CallableWorkUnit((Callable<V>) convertIn(task));
+		try {			
+			queue.put(future);
+			queue.put(NOP);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}		
+		Object res; 
+		try {
+			res = future.future.get();
+			return (V) convertOut(res);
+		}
+		catch(Throwable e) {
+			AnyThrow.throwUncheked((Throwable)convertOut(e));
+			return null;
+		}
+	}
+	
+	protected Object convertIn(Object obj) {
+		return fromBytes(toBytes(obj), cl);
+	}
+
+	protected Object convertOut(Object obj) {
+		return fromBytes(toBytes(obj), cl.getParent());
+	}
+	
 	public void stop() {
 		try {
-			queue.put(new WorkUnit(""));
+			queue.put(new ClassWorkUnit(""));
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -81,14 +206,96 @@ public class Isolate {
 	public ClassLoader getClassLoader() {
 		return cl;
 	}
+
+	private interface WorkUnit {		
+		public void exec() throws Exception;
+	}
 	
-	private class WorkUnit {
+	private class StopMarker implements WorkUnit {
+		@Override
+		public void exec() {
+			throw new UnsupportedOperationException();
+		}
+	}
+	
+	private static Nop NOP = new Nop();
+	
+	private static class Nop implements WorkUnit {
+		@Override
+		public void exec() {
+			// nop
+		}
+	}
+	
+	private static class ClassWorkUnit implements WorkUnit {
 		final String className;
 		final Object[] constructorArgs;
 		
-		public WorkUnit(String className, Object... constructorArgs) {
+		public ClassWorkUnit(String className, Object... constructorArgs) {
 			this.className = className;
 			this.constructorArgs = constructorArgs;
+		}
+
+		@Override
+		public void exec() throws Exception {
+			Class<?> task = Thread.currentThread().getContextClassLoader().loadClass(className);						
+			Constructor<?> c = task.getConstructors()[0];
+			c.setAccessible(true);
+			Runnable r = (Runnable) c.newInstance(constructorArgs);
+			r.run();
+		}
+	}
+
+	private static byte[] toBytes(Object x) {
+		try {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(bos);
+			oos.writeObject(x);
+			oos.close();
+			return bos.toByteArray();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}					
+	}
+	
+	private static Object fromBytes(byte[] serialized) {
+		return fromBytes(serialized, Thread.currentThread().getContextClassLoader());
+	}
+
+	private static Object fromBytes(byte[] serialized, final ClassLoader cl) {
+		try {
+			ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(serialized)) {
+				@Override
+				protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+					String name = desc.getName();
+					try {
+					    return Class.forName(name, false, cl);
+					} catch (ClassNotFoundException ex) {
+						return super.resolveClass(desc);
+					}
+				}				
+			};
+			return ois.readObject();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}		
+	}
+	
+	private static class CallableWorkUnit<V> implements WorkUnit {
+
+		final FutureTask<V> future;
+		
+		public CallableWorkUnit(Callable<V> x) {			
+			future = new FutureTask<V>(x);
+		}
+
+		public CallableWorkUnit(Runnable x) {			
+			future = new FutureTask<V>(x,(V) null);
+		}
+
+		@Override
+		public void exec() throws Exception {
+			future.run();
 		}
 	}
 	
@@ -97,18 +304,16 @@ public class Isolate {
 		@Override
 		public void run() {
 			Thread.currentThread().setContextClassLoader(cl);
+			ISOLATE.set(Isolate.this);
+			
 			while(true) {
 				try {
 					WorkUnit unit = queue.take();
-					if (unit.className.length() == 0) {
+					if (unit instanceof StopMarker) {
 						break;
 					}
 					else {
-						Class<?> task = cl.loadClass(unit.className);						
-						Constructor<?> c = task.getConstructors()[0];
-						c.setAccessible(true);
-						Runnable r = (Runnable) c.newInstance(unit.constructorArgs);
-						r.run();
+						unit.exec();
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -118,20 +323,13 @@ public class Isolate {
 		
 	}
 	
-	public static class Nop implements Runnable {
-		public Nop() {}
-		
-		@Override
-		public void run() {}
-	}
-	
 	private class IsolatedClassloader extends ClassLoader {
 		
 		private ClassLoader baseClassloader;
 		private String[] packages;
 		private Set<String> excludes;
 		
-		public IsolatedClassloader(ClassLoader base, String[] packages) {
+		IsolatedClassloader(ClassLoader base, String[] packages) {
 			super(null);
 			this.baseClassloader = base;
 			this.packages = packages;
@@ -174,6 +372,13 @@ public class Isolate {
 
 		@Override
 		public Class<?> loadClass(String name) throws ClassNotFoundException {
+//			if (System.class.getName().equals(name)) {
+//				String url = name.replace('.', '/') + ".class";				
+//				byte[] classData = asBytes(baseClassloader.getResourceAsStream(url));
+//				Class<?> sysClass = this.defineClass(null, classData, 0, classData.length);
+////				Class<?> sysClass = this.loadClass(name, false);
+//				return sysClass;
+//			}
 			if (!excludes.contains(name)) {
 				for(String prefix: packages) {
 					if (name.startsWith(prefix)) {
@@ -183,6 +388,25 @@ public class Isolate {
 			}
 			Class<?> cc = baseClassloader.loadClass(name);
 			return cc;
+		}
+
+		@SuppressWarnings("unused")
+		private byte[] asBytes(InputStream is) {
+			try {
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				byte[] buf = new byte[4 << 10];
+				while(true) {
+					int n = is.read(buf);
+					if (n < 0) {
+						return bos.toByteArray();
+					}
+					else if (n != 0) {
+						bos.write(buf, 0, n);
+					}
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
 
 		@Override
@@ -210,6 +434,336 @@ public class Isolate {
 			catch(Exception e) {
 				throw new ClassNotFoundException(classname);
 			}
+		}
+	}
+	
+	public static class AnyThrow {
+
+	    public static void throwUncheked(Throwable e) {
+	        AnyThrow.<RuntimeException>throwAny(e);
+	    }
+	   
+	    @SuppressWarnings("unchecked")
+	    private static <E extends Throwable> void throwAny(Throwable e) throws E {
+	        throw (E)e;
+	    }
+	}
+	
+	private class WrapperPrintStream extends FilterOutputStream {
+
+		private String prefix;
+		private boolean startOfLine;
+		private PrintStream printStream;
+		
+		public WrapperPrintStream(String prefix, PrintStream printStream) {
+			super(printStream);
+			this.prefix = prefix;
+			this.startOfLine = true;
+			this.printStream = printStream;
+		}
+		
+		@Override
+		public synchronized void write(int c) throws IOException {
+			synchronized(printStream) {
+				checkNewLine();
+				if (c == '\n') {
+					startOfLine = true;
+				}
+				super.write(c);
+			}
+		}
+
+		private void checkNewLine() {
+			if (startOfLine) {
+				printStream.append(prefix);
+				startOfLine = false;
+			}
+		}
+	
+		@Override
+		public void write(byte[] b, int off, int len) throws IOException {
+			synchronized(printStream) {
+				checkNewLine();
+				for (int i = 0; i != len; ++i) {
+					if (b[off + i] == '\n') {
+						writeByChars(b, off, len);
+						return;
+					}
+				}
+				super.write(b, off, len);
+			}
+		}
+
+		private void writeByChars(byte[] cbuf, int off, int len) throws IOException {
+			for (int i = 0; i != len; ++i) {
+				write(cbuf[off + i]);
+			}
+		}
+
+		@Override
+		public void close() throws IOException {
+			super.flush();
+		}
+	}
+	
+	static abstract class PrintStreamMultiplexor extends PrintStream {
+		
+		protected abstract PrintStream resolve();
+		
+		public PrintStreamMultiplexor() {
+			super(new ByteArrayOutputStream(8));
+		}
+		
+		public int hashCode() {
+			return resolve().hashCode();
+		}
+		public void write(byte[] b) throws IOException {
+			resolve().write(b);
+		}
+		public boolean equals(Object obj) {
+			return resolve().equals(obj);
+		}
+		public String toString() {
+			return resolve().toString();
+		}
+		public void flush() {
+			resolve().flush();
+		}
+		public void close() {
+			resolve().close();
+		}
+		public boolean checkError() {
+			return resolve().checkError();
+		}
+		public void write(int b) {
+			resolve().write(b);
+		}
+		public void write(byte[] buf, int off, int len) {
+			resolve().write(buf, off, len);
+		}
+		public void print(boolean b) {
+			resolve().print(b);
+		}
+		public void print(char c) {
+			resolve().print(c);
+		}
+		public void print(int i) {
+			resolve().print(i);
+		}
+		public void print(long l) {
+			resolve().print(l);
+		}
+		public void print(float f) {
+			resolve().print(f);
+		}
+		public void print(double d) {
+			resolve().print(d);
+		}
+		public void print(char[] s) {
+			resolve().print(s);
+		}
+		public void print(String s) {
+			resolve().print(s);
+		}
+		public void print(Object obj) {
+			resolve().print(obj);
+		}
+		public void println() {
+			resolve().println();
+		}
+		public void println(boolean x) {
+			resolve().println(x);
+		}
+		public void println(char x) {
+			resolve().println(x);
+		}
+		public void println(int x) {
+			resolve().println(x);
+		}
+		public void println(long x) {
+			resolve().println(x);
+		}
+		public void println(float x) {
+			resolve().println(x);
+		}
+		public void println(double x) {
+			resolve().println(x);
+		}
+		public void println(char[] x) {
+			resolve().println(x);
+		}
+		public void println(String x) {
+			resolve().println(x);
+		}
+		public void println(Object x) {
+			resolve().println(x);
+		}
+		public PrintStream printf(String format, Object... args) {
+			return resolve().printf(format, args);
+		}
+		public PrintStream printf(Locale l, String format, Object... args) {
+			return resolve().printf(l, format, args);
+		}
+		public PrintStream format(String format, Object... args) {
+			return resolve().format(format, args);
+		}
+		public PrintStream format(Locale l, String format, Object... args) {
+			return resolve().format(l, format, args);
+		}
+		public PrintStream append(CharSequence csq) {
+			return resolve().append(csq);
+		}
+		public PrintStream append(CharSequence csq, int start, int end) {
+			return resolve().append(csq, start, end);
+		}
+		public PrintStream append(char c) {
+			return resolve().append(c);
+		}
+	}
+	
+	@SuppressWarnings("serial")
+	static abstract class PropertiesMultiplexor extends Properties {
+		
+		protected abstract Properties resolve();
+
+		public Object setProperty(String key, String value) {
+			return resolve().setProperty(key, value);
+		}
+
+		public void load(Reader reader) throws IOException {
+			resolve().load(reader);
+		}
+
+		public int size() {
+			return resolve().size();
+		}
+
+		public boolean isEmpty() {
+			return resolve().isEmpty();
+		}
+
+		public Enumeration<Object> keys() {
+			return resolve().keys();
+		}
+
+		public Enumeration<Object> elements() {
+			return resolve().elements();
+		}
+
+		public boolean contains(Object value) {
+			return resolve().contains(value);
+		}
+
+		public boolean containsValue(Object value) {
+			return resolve().containsValue(value);
+		}
+
+		public boolean containsKey(Object key) {
+			return resolve().containsKey(key);
+		}
+
+		public Object get(Object key) {
+			return resolve().get(key);
+		}
+
+		public void load(InputStream inStream) throws IOException {
+			resolve().load(inStream);
+		}
+
+		public Object put(Object key, Object value) {
+			return resolve().put(key, value);
+		}
+
+		public Object remove(Object key) {
+			return resolve().remove(key);
+		}
+
+		public void putAll(Map<? extends Object, ? extends Object> t) {
+			resolve().putAll(t);
+		}
+
+		public void clear() {
+			resolve().clear();
+		}
+
+		public Object clone() {
+			return resolve().clone();
+		}
+
+		public String toString() {
+			return resolve().toString();
+		}
+
+		public Set<Object> keySet() {
+			return resolve().keySet();
+		}
+
+		public Set<Entry<Object, Object>> entrySet() {
+			return resolve().entrySet();
+		}
+
+		public Collection<Object> values() {
+			return resolve().values();
+		}
+
+		public boolean equals(Object o) {
+			return resolve().equals(o);
+		}
+
+		@SuppressWarnings("deprecation")
+		public void save(OutputStream out, String comments) {
+			resolve().save(out, comments);
+		}
+
+		public int hashCode() {
+			return resolve().hashCode();
+		}
+
+		public void store(Writer writer, String comments) throws IOException {
+			resolve().store(writer, comments);
+		}
+
+		public void store(OutputStream out, String comments) throws IOException {
+			resolve().store(out, comments);
+		}
+
+		public void loadFromXML(InputStream in) throws IOException,
+				InvalidPropertiesFormatException {
+			resolve().loadFromXML(in);
+		}
+
+		public void storeToXML(OutputStream os, String comment)
+				throws IOException {
+			resolve().storeToXML(os, comment);
+		}
+
+		public void storeToXML(OutputStream os, String comment, String encoding)
+				throws IOException {
+			resolve().storeToXML(os, comment, encoding);
+		}
+
+		public String getProperty(String key) {
+			return resolve().getProperty(key);
+		}
+
+		public String getProperty(String key, String defaultValue) {
+			return resolve().getProperty(key, defaultValue);
+		}
+
+		public Enumeration<?> propertyNames() {
+			return resolve().propertyNames();
+		}
+
+		public Set<String> stringPropertyNames() {
+			return resolve().stringPropertyNames();
+		}
+
+		public void list(PrintStream out) {
+			resolve().list(out);
+		}
+
+		public void list(PrintWriter out) {
+			resolve().list(out);
 		}
 	}
 }

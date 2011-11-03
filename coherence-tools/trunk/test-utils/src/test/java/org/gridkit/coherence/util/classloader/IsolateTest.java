@@ -15,6 +15,11 @@
  */
 package org.gridkit.coherence.util.classloader;
 
+import java.io.Serializable;
+import java.util.concurrent.Callable;
+
+import junit.framework.Assert;
+
 import org.junit.Test;
 
 /**
@@ -26,7 +31,7 @@ import org.junit.Test;
 public class IsolateTest {
 	
 	@Test
-	public void twoNodes() throws InterruptedException {
+	public void twoNodes() throws Exception {
 		
 		// Initialize and start isolates
 		Isolate is1 = new Isolate("node-1", "com.tangosol", "org.gridkit");
@@ -42,9 +47,20 @@ public class IsolateTest {
 		Thread.sleep(3 * 1000L);
 		is2.submit(NodeActions.Crash.class, 1);
 		Thread.sleep(3 * 1000L);
+
+		Assert.assertFalse(new ClassloaderAssert().call().contains("Isolate"));
+		Assert.assertTrue(is1.exec(new ClassloaderAssert()).contains("Isolate"));
 		
 		// Stop first node
 		is1.submit(NodeActions.Stop.class);
+		
 	}
 	
+	@SuppressWarnings("serial")
+	static class ClassloaderAssert implements Serializable, Callable<String> {
+		@Override
+		public String call() throws Exception {
+			return this.getClass().getClassLoader().getClass().getName();
+		}		
+	}	
 }
