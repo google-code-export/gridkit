@@ -30,6 +30,8 @@ import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -330,8 +332,11 @@ public class Isolate {
 		private String[] packages;
 		private Set<String> excludes;
 		
+//		private URLClassLoader extendedC
+		private Collection<String> forbidenPaths = new ArrayList<String>(); 
+		
 		IsolatedClassloader(ClassLoader base, String[] packages) {
-			super(null);
+			super(null);			
 			this.baseClassloader = base;
 			this.packages = packages;
 			this.excludes = new HashSet<String>();
