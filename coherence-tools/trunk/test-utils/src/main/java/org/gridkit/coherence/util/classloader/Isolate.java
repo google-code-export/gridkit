@@ -41,8 +41,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Vector;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.SynchronousQueue;
 
@@ -144,7 +146,15 @@ public class Isolate {
 	public void exclude(Class<?>... excludes) {
 		cl.exclude(excludes);
 	}
-	
+
+	public void removeFromClasspath(URL basePath) {
+		cl.removeFromClasspath(basePath);
+	}
+
+	public void addToClasspath(URL path) {
+		cl.addToClasspath(path);
+	}
+
 	public void submit(Class<?> clazz, Object... constructorArgs) {
 		try {
 			queue.put(new ClassWorkUnit(clazz.getName(), constructorArgs));
@@ -157,11 +167,15 @@ public class Isolate {
 	@SuppressWarnings("rawtypes")
 	public void exec(Runnable task) {
 		try {
-			queue.put(new CallableWorkUnit(task));
+			CallableWorkUnit wu = new CallableWorkUnit((Runnable) convertIn(task));
+			queue.put(wu);
 			queue.put(NOP);
+			wu.future.get();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}		
+		} catch (ExecutionException e) {
+			AnyThrow.throwUncheked(e.getCause());
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -184,7 +198,7 @@ public class Isolate {
 		}
 	}
 	
-	protected Object convertIn(Object obj) {
+	protected <T> Object convertIn(T obj) {
 		return fromBytes(toBytes(obj), cl);
 	}
 
@@ -194,7 +208,7 @@ public class Isolate {
 	
 	public void stop() {
 		try {
-			queue.put(new ClassWorkUnit(""));
+			queue.put(STOP);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -213,7 +227,9 @@ public class Isolate {
 		public void exec() throws Exception;
 	}
 	
-	private class StopMarker implements WorkUnit {
+	private static StopMarker STOP = new StopMarker();
+
+	private static class StopMarker implements WorkUnit {
 		@Override
 		public void exec() {
 			throw new UnsupportedOperationException();
@@ -332,8 +348,9 @@ public class Isolate {
 		private String[] packages;
 		private Set<String> excludes;
 		
-//		private URLClassLoader extendedC
-		private Collection<String> forbidenPaths = new ArrayList<String>(); 
+		private Collection<String> forbidenPaths = new ArrayList<String>();
+		private Collection<URL> externalPaths = new ArrayList<URL>();
+		private URLClassLoader cpExtention;
 		
 		IsolatedClassloader(ClassLoader base, String[] packages) {
 			super(null);			
@@ -348,22 +365,71 @@ public class Isolate {
 			}
 		}
 		
+		public void removeFromClasspath(URL basePath) {
+			forbidenPaths.add(basePath.toString());			
+		}
+		
+		public synchronized void addToClasspath(URL path) {
+			externalPaths.add(path);
+			cpExtention = null;
+		}
+		
 		public void clearAssertionStatus() {
 			baseClassloader.clearAssertionStatus();
 		}
 
-		public URL getResource(String name) {
-			return baseClassloader.getResource(name);
+		public synchronized URL getResource(String name) {
+			if (cpExtention == null) {
+				cpExtention = new URLClassLoader(externalPaths.toArray(new URL[0]));
+			}
+			URL r = cpExtention.findResource(name);
+			if (r != null) {
+				return r;
+			}
+			r = baseClassloader.getResource(name);
+			if (isForbiden(r)) {
+				return null;
+			}
+			else {
+				return r;
+			}
 		}
 
-		public InputStream getResourceAsStream(String name) {
-			return baseClassloader.getResourceAsStream(name);
+		public synchronized Enumeration<URL> getResources(String name) throws IOException {
+			if (cpExtention == null) {
+				cpExtention = new URLClassLoader(externalPaths.toArray(new URL[0]));
+			}
+			Vector<URL> result = new Vector<URL>();
+			// TODO my have several names
+			URL r = cpExtention.findResource(name);
+			if (r != null) {
+				result.add(r);
+			}
+			
+			Enumeration<URL> en = baseClassloader.getResources(name);
+			
+			while(en.hasMoreElements()) {
+				r = en.nextElement();
+				if (!isForbiden(r)) {
+					result.add(r);
+				}
+			}
+			
+			return result.elements();
 		}
 
-		public Enumeration<URL> getResources(String name) throws IOException {
-			return baseClassloader.getResources(name);
+		private boolean isForbiden(URL r) {
+			if (!forbidenPaths.isEmpty()) {
+				String s = r.toString();
+				for(String path: forbidenPaths) {
+					if (s.startsWith(path)) {
+						return true;
+					}
+				}
+			}
+			return false;
 		}
-
+		
 		public void setClassAssertionStatus(String className, boolean enabled) {
 			baseClassloader.setClassAssertionStatus(className, enabled);
 		}
@@ -378,17 +444,10 @@ public class Isolate {
 
 		@Override
 		public Class<?> loadClass(String name) throws ClassNotFoundException {
-//			if (System.class.getName().equals(name)) {
-//				String url = name.replace('.', '/') + ".class";				
-//				byte[] classData = asBytes(baseClassloader.getResourceAsStream(url));
-//				Class<?> sysClass = this.defineClass(null, classData, 0, classData.length);
-////				Class<?> sysClass = this.loadClass(name, false);
-//				return sysClass;
-//			}
 			if (!excludes.contains(name)) {
 				for(String prefix: packages) {
 					if (name.startsWith(prefix)) {
-						return this.loadClass(name, false);
+						return super.loadClass(name, false);
 					}
 				}
 			}
