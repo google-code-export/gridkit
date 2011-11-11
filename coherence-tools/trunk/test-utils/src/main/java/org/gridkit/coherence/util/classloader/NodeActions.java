@@ -100,8 +100,8 @@ public abstract class NodeActions {
 	 * @author malekseev
 	 */
 	public static class Crash implements Runnable {
-		private final int node;
-		public Crash(int node) { this.node = node; }
+
+		public Crash(int node) {}
 
 		@Override @SuppressWarnings("deprecation")
 		public void run() {
@@ -109,7 +109,8 @@ public abstract class NodeActions {
 			ThreadGroup[] childs = new ThreadGroup[parent.activeGroupCount()];
 			parent.enumerate(childs, false);
 			
-			ThreadGroup cluster2 = childs[node];
+			// each Isolate has own thread group now, so Coherence cluster has always at index 0
+			ThreadGroup cluster2 = childs[0];
 			cluster2.stop();
 		}
 	}

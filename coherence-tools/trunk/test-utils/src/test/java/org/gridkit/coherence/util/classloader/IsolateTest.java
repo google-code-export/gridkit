@@ -56,8 +56,10 @@ public class IsolateTest {
 		Assert.assertTrue(is1.exec(new ClassloaderAssert()).contains("Isolate"));
 		
 		// Stop first node
-		is1.submit(NodeActions.Stop.class);
+		is1.submit(NodeActions.Stop.class);	
 		
+		is1.stop();
+		is2.stop();
 	}
 
 	@Test
@@ -140,9 +142,10 @@ public class IsolateTest {
 
 		Assert.assertEquals("Cache size ", 0, cache1.size());
 		Assert.assertEquals("Value at 'A' ", null, cache1.get("A"));
+		
+		is1.stop();
+		is2.stop();
 	}
-	
-	
 	
 	@SuppressWarnings("serial")
 	static class ClassloaderAssert implements Serializable, Callable<String> {
