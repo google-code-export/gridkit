@@ -29,15 +29,20 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.Writer;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.InvalidPropertiesFormatException;
 import java.util.List;
@@ -128,11 +133,21 @@ public class Isolate {
 	private PrintStream stdErr;
 	private Properties sysProps;
 	
+	private ThreadGroup threadGroup;
+	
 	private BlockingQueue<WorkUnit> queue = new SynchronousQueue<WorkUnit>();
 	
 	public Isolate(String name, String... packages) {		
 		this.name = name;
 		this.cl = new IsolatedClassloader(getClass().getClassLoader(), packages);
+
+		threadGroup = new ThreadGroup(name) {
+			@Override
+			public void uncaughtException(Thread t, Throwable e) {
+				stdErr.println("Uncaught exception at thread " + t.getName());
+				e.printStackTrace(stdErr);
+			}
+		};
 		
 		sysProps = new Properties();
 		sysProps.putAll(System.getProperties());
@@ -142,7 +157,7 @@ public class Isolate {
 	}
 	
 	public synchronized void start() {
-		isolatedThread = new Thread(new Runner());
+		isolatedThread = new Thread(threadGroup, new Runner());
 		isolatedThread.setName("Isolate-" + name);
 		isolatedThread.setDaemon(true);
 		isolatedThread.start();		
@@ -160,6 +175,17 @@ public class Isolate {
 		cl.addToClasspath(path);
 	}
 
+	public void setProp(String prop, String value) {
+		sysProps.setProperty(prop, value);
+	}
+
+	public String getProp(String prop) {
+		return sysProps.getProperty(prop);
+	}
+	
+	/**
+	 * @deprecated Use {@link #exec(Runnable)} and normal object passing
+	 */
 	@Deprecated
 	public void submit(Class<?> clazz, Object... constructorArgs) {
 		try {
@@ -186,17 +212,37 @@ public class Isolate {
 
 	@SuppressWarnings("unchecked")
 	public <V> V exec(Callable<V> task) {
-		CallableWorkUnit<V> future = new CallableWorkUnit<V>((Callable<V>) convertIn(task));
+		CallableWorkUnit<V> wu = new CallableWorkUnit<V>((Callable<V>) convertIn(task));
 		try {			
-			queue.put(future);
+			queue.put(wu);
 			queue.put(NOP);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}		
 		Object res; 
 		try {
-			res = future.future.get();
+			res = wu.future.get();
 			return (V) convertOut(res);
+		}
+		catch(Throwable e) {
+			AnyThrow.throwUncheked((Throwable)convertOut(e));
+			return null;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public <V> V export(Callable<V> task, Class<?>... interfaces) {
+		CallableWorkUnit<V> wu = new CallableWorkUnit<V>((Callable<V>) convertIn(task));
+		try {			
+			queue.put(wu);
+			queue.put(NOP);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}		
+		Object res; 
+		try {
+			res = wu.future.get();
+			return (V) exportOut(res, interfaces);
 		}
 		catch(Throwable e) {
 			AnyThrow.throwUncheked((Throwable)convertOut(e));
@@ -218,6 +264,11 @@ public class Isolate {
 
 	protected Object convertOut(Object obj) {
 		return fromBytes(toBytes(obj), cl.getParent());
+	}
+	
+	protected Object exportOut(Object obj, Class<?>[] interfaces) {
+		ProxyOut po = new ProxyOut(obj, interfaces);
+		return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), interfaces, po);		
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -272,12 +323,24 @@ public class Isolate {
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
+	public void suspend() {
+		threadGroup.suspend();
+	}
+
+	@SuppressWarnings("deprecation")
+	public void resume() {
+		threadGroup.resume();
+	}
+	
+	@SuppressWarnings("deprecation")
 	public void stop() {
 		try {
 			queue.put(STOP);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		threadGroup.stop();
 		cl = null;
 	}
 	
@@ -366,6 +429,90 @@ public class Isolate {
 		}		
 	}
 	
+	private class ProxyOut implements InvocationHandler {
+		
+		private Map<Method, Method> methodMap = new HashMap<Method, Method>();
+		private Object target;
+		
+		public ProxyOut(Object target, Class<?>[] interfaces) {
+			this.target = target;
+			for(Class<?> i : interfaces) {
+				try {
+					mapMethods(i);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+
+		private void mapMethods(Class<?> i) throws SecurityException, NoSuchMethodException, ClassNotFoundException {
+			if (i.getDeclaredMethods() != null) {
+				for(Method m : i.getDeclaredMethods()) {
+					if (!Modifier.isStatic(m.getModifiers())) {
+						Method m2 = target.getClass().getMethod(m.getName(), convertClassesIn(m.getParameterTypes()));
+						m2.setAccessible(true);
+						methodMap.put(m, m2);
+					}
+				}
+			}
+			if (i.getInterfaces() != null) {
+				for(Class<?> ii: i.getInterfaces()) {
+					mapMethods(ii);
+				}
+			}
+		}
+
+		@SuppressWarnings("rawtypes")
+		private Class<?>[] convertClassesIn(Class<?>[] cls) throws ClassNotFoundException {
+			Class[] cls2 = new Class[cls.length];
+			int n = 0;
+			for(Class c: cls) {
+				if (c.isPrimitive()) {
+					cls2[n++] = c;
+				}
+				else if (c.isArray()) {
+					Class cc = c.getComponentType();
+					if (c.getComponentType().isPrimitive()) {
+						cls2[n++] = c;
+					}
+					else {
+						Class cc2= convertClassesIn(new Class[]{cc})[0];
+						cls2[n++] = Array.newInstance(cc2, 0).getClass();
+					}
+				}
+				else {
+					cls2[n++] = cl.loadClass(c.getName());
+				}
+			}
+			return cls2;
+		}
+
+		@Override
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			Method m2 = methodMap.get(method);
+			Object[] args2 = null;
+			if (args != null) {
+				args2 = new Object[args.length];
+				for(int i = 0; i != args.length; ++i) {
+					args2[i] = convertIn(args[i]);
+				}
+			}
+			
+			try {
+				Object r = m2.invoke(target, args2);
+				if (r != null) {
+					return convertOut(r);
+				}
+				else {
+					return null;
+				}
+			}
+			catch(Exception e) {
+				throw (Throwable)convertOut(e);
+			}
+		}
+	}
+	
 	private static class CallableWorkUnit<V> implements WorkUnit {
 
 		final FutureTask<V> future;
@@ -400,12 +547,15 @@ public class Isolate {
 					else {
 						unit.exec();
 					}
-				} catch (Exception e) {
+				}
+				catch (ThreadDeath e) {
+					return;
+				}
+				catch (Exception e) {
 					e.printStackTrace();
 				};
 			}
-		};
-		
+		};		
 	}
 	
 	private class IsolatedClassloader extends ClassLoader {
@@ -568,7 +718,7 @@ public class Isolate {
 		}
 	}
 	
-	public static class AnyThrow {
+	private static class AnyThrow {
 
 	    public static void throwUncheked(Throwable e) {
 	        AnyThrow.<RuntimeException>throwAny(e);
@@ -580,7 +730,7 @@ public class Isolate {
 	    }
 	}
 	
-	private class WrapperPrintStream extends FilterOutputStream {
+	private static class WrapperPrintStream extends FilterOutputStream {
 
 		private String prefix;
 		private boolean startOfLine;
@@ -637,7 +787,7 @@ public class Isolate {
 		}
 	}
 	
-	static abstract class PrintStreamMultiplexor extends PrintStream {
+	private static abstract class PrintStreamMultiplexor extends PrintStream {
 		
 		protected abstract PrintStream resolve();
 		
@@ -753,7 +903,7 @@ public class Isolate {
 	}
 	
 	@SuppressWarnings("serial")
-	static abstract class PropertiesMultiplexor extends Properties {
+	private static abstract class PropertiesMultiplexor extends Properties {
 		
 		protected abstract Properties resolve();
 

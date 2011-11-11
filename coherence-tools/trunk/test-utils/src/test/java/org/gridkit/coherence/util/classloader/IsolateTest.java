@@ -22,6 +22,9 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.tangosol.net.CacheFactory;
+import com.tangosol.net.NamedCache;
+
 /**
  * Some unit tests for Isolate
  * 
@@ -102,6 +105,40 @@ public class IsolateTest {
 		});		
 		
 		Assert.assertNull(System.getProperty("local-prop"));				
+	}
+	
+	@Test
+	public void proxyTest() throws Exception {
+		
+		// Initialize and start isolates
+		Isolate is1 = new Isolate("node-1", "com.tangosol", "org.gridkit");
+		Isolate is2 = new Isolate("node-2", "com.tangosol", "org.gridkit");
+		is1.start();
+		is2.start();
+
+		NamedCache cache1 = is1.export(new Callable<NamedCache>() {
+			@Override
+			public NamedCache call() throws Exception {
+				return CacheFactory.getCache("distr-A");
+			}
+		}, NamedCache.class);
+
+		NamedCache cache2 = is2.export(new Callable<NamedCache>() {
+			@Override
+			public NamedCache call() throws Exception {
+				return CacheFactory.getCache("distr-A");
+			}
+		}, NamedCache.class);
+		
+		cache1.put("A", "A");
+		
+		Assert.assertEquals("Cache size ", 1, cache2.size());
+		Assert.assertEquals("Value at 'A' ", "A", cache2.get("A"));
+		
+		cache2.remove("A");
+
+		Assert.assertEquals("Cache size ", 0, cache1.size());
+		Assert.assertEquals("Value at 'A' ", null, cache1.get("A"));
 	}
 	
 	
