@@ -33,6 +33,7 @@ import com.tangosol.net.NamedCache;
  */
 public class IsolateTest {
 	
+	@SuppressWarnings("deprecation")
 	@Test
 	public void twoNodes() throws Exception {
 		
