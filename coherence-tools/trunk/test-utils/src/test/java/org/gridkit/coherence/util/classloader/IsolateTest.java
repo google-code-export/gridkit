@@ -55,6 +55,56 @@ public class IsolateTest {
 		is1.submit(NodeActions.Stop.class);
 		
 	}
+
+	@Test
+	public void propertyTest() throws Exception {
+		
+		// Initialize and start isolates
+		Isolate is1 = new Isolate("node-1", "com.tangosol", "org.gridkit");
+		Isolate is2 = new Isolate("node-2", "com.tangosol", "org.gridkit");
+		is1.start();
+		is2.start();
+
+		is1.exec(new Runnable() {
+			@Override
+			public void run() {
+				System.setProperty("local-prop", "Isolate1");				
+			}
+		});
+
+		is2.exec(new Runnable() {
+			@Override
+			public void run() {
+				System.setProperty("local-prop", "Isolate2");				
+			}
+		});
+
+		is1.exec(new Runnable() {
+			@Override
+			public void run() {
+				Assert.assertEquals("Isolate1", System.getProperty("local-prop"));				
+			}
+		});
+		
+		is2.exec(new Runnable() {
+			@Override
+			public void run() {
+				Assert.assertEquals("Isolate2", System.getProperty("local-prop"));				
+			}
+		});		
+
+		final String xxx = new String("Hallo from Isolate2");
+		is2.exec(new Runnable() {
+			@Override
+			public void run() {
+				Assert.assertEquals("Hallo from Isolate2", xxx);				
+			}
+		});		
+		
+		Assert.assertNull(System.getProperty("local-prop"));				
+	}
+	
+	
 	
 	@SuppressWarnings("serial")
 	static class ClassloaderAssert implements Serializable, Callable<String> {

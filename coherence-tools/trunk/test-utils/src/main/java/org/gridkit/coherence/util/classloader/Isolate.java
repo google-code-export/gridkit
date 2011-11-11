@@ -27,8 +27,12 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -36,6 +40,7 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.InvalidPropertiesFormatException;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -155,6 +160,7 @@ public class Isolate {
 		cl.addToClasspath(path);
 	}
 
+	@Deprecated
 	public void submit(Class<?> clazz, Object... constructorArgs) {
 		try {
 			queue.put(new ClassWorkUnit(clazz.getName(), constructorArgs));
@@ -198,12 +204,72 @@ public class Isolate {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected <T> Object convertIn(T obj) {
+		if (obj != null && !(obj instanceof Serializable) && obj.getClass().isAnonymousClass()) {
+			try {
+				return (T)convertAnonimous(obj);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
 		return fromBytes(toBytes(obj), cl);
 	}
 
 	protected Object convertOut(Object obj) {
 		return fromBytes(toBytes(obj), cl.getParent());
+	}
+	
+	@SuppressWarnings("rawtypes")
+	protected Object convertAnonimous(Object obj) throws IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, ClassNotFoundException {
+		Class c_out = obj.getClass();
+		Class c_in = cl.findClass(c_out.getName());
+		
+		if (c_in == c_out) {
+			return obj;
+		}
+		else {
+			Field[] f_out = collectFields(c_out);
+			Field[] f_in = collectFields(c_in);
+			Constructor<?> c = c_in.getDeclaredConstructors()[0];
+			
+			c.setAccessible(true);
+			Object oo = c.newInstance(new Object[c.getParameterTypes().length]);
+			
+			for(Field fo : f_out) {
+				if (fo.getName().startsWith("this$")) {
+					continue;
+				}
+				fo.setAccessible(true);
+				Object v = fo.get(obj);
+				for(Field fi : f_in) {
+					if (fi.getName().equals(fo.getName()) && fi.getDeclaringClass().getName().equals(fo.getDeclaringClass().getName())) {
+						fi.setAccessible(true);
+						fi.set(oo, convertIn(v));
+					}
+				}
+			}
+			
+			return oo;
+		}
+	}
+	
+	private Field[] collectFields(Class<?> c) {
+		List<Field> result = new ArrayList<Field>();
+		collectFields(result, c);
+		return result.toArray(new Field[result.size()]);
+	}
+	
+	private void collectFields(List<Field> result, Class<?> c) {
+		Class<?> s = c.getSuperclass();
+		if (s != Object.class) {
+			collectFields(result, s);
+		}
+		for(Field f: c.getDeclaredFields()) {
+			if (!Modifier.isStatic(f.getModifiers())) {
+				result.add(f);
+			}
+		}
 	}
 	
 	public void stop() {
