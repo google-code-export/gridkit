@@ -124,6 +124,10 @@ public class Isolate {
 		System.setErr(mErr);
 		System.setProperties(mProps);
 	}
+
+	public static Isolate currentIsolate() {
+		return ISOLATE.get();
+	}
 	
 	private String name;
 	private Thread isolatedThread;
@@ -151,9 +155,14 @@ public class Isolate {
 		
 		sysProps = new Properties();
 		sysProps.putAll(System.getProperties());
+		sysProps.put("isolate.name", name);
 		
 		stdOut = new PrintStream(new WrapperPrintStream("[" + name + "] ", rootOut));
 		stdErr = new PrintStream(new WrapperPrintStream("[" + name + "] ", rootErr));
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 	public synchronized void start() {
@@ -175,14 +184,18 @@ public class Isolate {
 		cl.addToClasspath(path);
 	}
 
-	public void setProp(String prop, String value) {
-		sysProps.setProperty(prop, value);
-	}
-
 	public String getProp(String prop) {
 		return sysProps.getProperty(prop);
 	}
+
+	public void setProp(String prop, String value) {
+		sysProps.setProperty(prop, value);
+	}
 	
+	public void setProp(Map<String, String> props) {
+		sysProps.putAll(props);
+	}
+
 	/**
 	 * @deprecated Use {@link #exec(Runnable)} and normal object passing
 	 */
@@ -249,6 +262,26 @@ public class Isolate {
 			return null;
 		}
 	}
+
+	@SuppressWarnings("unchecked")
+	public <V> V exportNoProxy(Callable<V> task) {
+		CallableWorkUnit<V> wu = new CallableWorkUnit<V>((Callable<V>) convertIn(task));
+		try {			
+			queue.put(wu);
+			queue.put(NOP);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}		
+		Object res; 
+		try {
+			res = wu.future.get();
+			return (V)res;
+		}
+		catch(Throwable e) {
+			AnyThrow.throwUncheked((Throwable)convertOut(e));
+			return null;
+		}
+	}
 	
 	@SuppressWarnings("unchecked")
 	protected <T> Object convertIn(T obj) {
@@ -274,7 +307,7 @@ public class Isolate {
 	@SuppressWarnings("rawtypes")
 	protected Object convertAnonimous(Object obj) throws IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, ClassNotFoundException {
 		Class c_out = obj.getClass();
-		Class c_in = cl.findClass(c_out.getName());
+		Class c_in = cl.loadClass(c_out.getName());
 		
 		if (c_in == c_out) {
 			return obj;
@@ -506,6 +539,9 @@ public class Isolate {
 				else {
 					return null;
 				}
+			}
+			catch(InvocationTargetException e) {
+				throw (Throwable)convertOut(e.getCause());
 			}
 			catch(Exception e) {
 				throw (Throwable)convertOut(e);
