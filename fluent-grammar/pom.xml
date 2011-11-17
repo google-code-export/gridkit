@@ -4,12 +4,10 @@
   <artifactId>fluent-grammar</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <dependencies>
-<!--
   	<dependency>
-  		<groupId>com.oracle.coherence</groupId>
-  		<artifactId>coherence</artifactId>
-  		<version>3.6.0b17229</version>
+  		<groupId>junit</groupId>
+  		<artifactId>junit</artifactId>
+  		<version>4.8</version>
   	</dependency>
--->
   </dependencies>
 </project>
