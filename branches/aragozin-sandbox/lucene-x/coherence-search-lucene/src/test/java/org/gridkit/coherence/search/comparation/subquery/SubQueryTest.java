@@ -75,13 +75,15 @@ public class SubQueryTest {
 			addDoc(iw, i);
 			
 			if ((i + 1) % (count / 10) == 0) {
-				System.out.format("[%s] Done %d\n", Formats.currentDatestamp(), i + 1);
+				iw.commit();		
+				System.out.format("[%s] Done %d (%dMiB)\n", Formats.currentDatestamp(), i + 1, directory.sizeInBytes() >> 20);
 			}
 		}
 		
 		System.out.format("[%s] Text generation finished\n", Formats.currentDatestamp());
 		System.out.format("[%s] Hint freqs %s\n", Formats.currentDatestamp(), Arrays.toString(hintFreqs));
-		iw.commit();		
+		iw.commit();	
+		iw.optimize(true);
 	}
 
 	public void generate(int... ids) throws IOException {
@@ -413,15 +415,10 @@ public class SubQueryTest {
 			hterms[i] = new Term("hint", hints[i] + "_0");
 		}
 		
-		Query q = new ConstantScoreQuery(query);
+//		Query q = new ConstantScoreQuery(query);
+		Query q = query;
 		q = new FilteredQuery(q, hterms);
 
-//		final OpenBitSet mask = new OpenBitSet(searcher.maxDoc());
-//		for(int i = 0; i != mask.size()/1000; ++i) {
-//			mask.fastSet(1000 * i);
-//		}
-		
-		
 		if (!testOnce) {
 			searcher.search(q, 100);
 			searcher.search(q, 100);
@@ -476,8 +473,8 @@ public class SubQueryTest {
 		public static void main(String[] args) throws IOException {
 			
 			SubQueryTest test = new SubQueryTest();
-			test.generate(26990);
-			test.testOnce = true;
+			test.generate(200000);
+//			test.testOnce = true;
 			
 			test.testQueries();
 		}
