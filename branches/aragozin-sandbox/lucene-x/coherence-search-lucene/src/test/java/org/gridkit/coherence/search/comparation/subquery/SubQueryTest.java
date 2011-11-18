@@ -329,32 +329,13 @@ public class SubQueryTest {
 		
 		int totalHits = 0;
 		
+		TopDocs td = null;
 		while(deadline > System.nanoTime()) {
 			
 			++count; 
-			final int[] docCount = {0};
-			searcher.search(q, new Collector() {
-				
-				@Override
-				public void setScorer(Scorer scorer) throws IOException {
-				}
-				
-				@Override
-				public void setNextReader(IndexReader reader, int docBase)	throws IOException {
-				}
-				
-				@Override
-				public void collect(int doc) throws IOException {
-					docCount[0]++;					
-				}
-				
-				@Override
-				public boolean acceptsDocsOutOfOrder() {
-					return true;
-				}
-			});
-			totalHits = docCount[0];
-		
+			td = searcher.search(q, 50);
+			totalHits = td.totalHits;
+			
 			if (testOnce) {
 				break;
 			}
@@ -363,7 +344,7 @@ public class SubQueryTest {
 		long time = System.nanoTime() - start;
 		long qtime = TimeUnit.NANOSECONDS.toMillis(time / count);
 		
-		System.out.format("Query %s (%d hits) - %dms\n", name, totalHits, qtime);
+		System.out.format("Query %s (%d hits) - %dms  top docs: %s\n", name, totalHits, qtime, Arrays.toString(td.scoreDocs));
 		
 	}
 
@@ -397,33 +378,17 @@ public class SubQueryTest {
 		long deadline = start + TimeUnit.SECONDS.toNanos(5);
 		
 		int totalHits = 0;
-		
+
+		TopDocs td = null;
 		while(deadline > System.nanoTime()) {
 			
 			++count; 
-			final int[] docCount = {0};
-			searcher.search(q, new Collector() {
-				
-				@Override
-				public void setScorer(Scorer scorer) throws IOException {
-				}
-				
-				@Override
-				public void setNextReader(IndexReader reader, int docBase)	throws IOException {
-				}
-				
-				@Override
-				public void collect(int doc) throws IOException {
-					docCount[0]++;					
-				}
-				
-				@Override
-				public boolean acceptsDocsOutOfOrder() {
-					return true;
-				}
-			});
-			totalHits = docCount[0];
+			td = searcher.search(q, 50);
+			totalHits = td.totalHits;
 			
+			if (testOnce) {
+				break;
+			}
 		}
 		
 		long time = System.nanoTime() - start;
@@ -456,6 +421,7 @@ public class SubQueryTest {
 //			mask.fastSet(1000 * i);
 //		}
 		
+		
 		if (!testOnce) {
 			searcher.search(q, 100);
 			searcher.search(q, 100);
@@ -469,11 +435,12 @@ public class SubQueryTest {
 		
 		int totalHits = 0;
 		
+		TopDocs td = null;
 		while(deadline > System.nanoTime()) {
 			
 			++count; 
 
-			TopDocs td = searcher.search(q, 1);
+			td = searcher.search(q, 50);
 			totalHits = td.totalHits;
 			
 			if (testOnce) {
@@ -484,7 +451,7 @@ public class SubQueryTest {
 		long time = System.nanoTime() - start;
 		long qtime = TimeUnit.NANOSECONDS.toMillis(time / count);
 		
-		System.out.format("Query %s (%d hits) - %dms (Hints %s)\n", name, totalHits, qtime, Arrays.toString(hints));
+		System.out.format("Query %s (%d hits) - %dms (Hints %s) top: %s\n", name, totalHits, qtime, Arrays.toString(hints), Arrays.toString(td.scoreDocs));
 
 		BooleanQuery ho =  new BooleanQuery();
 		initHints(ho, hints);
@@ -509,7 +476,8 @@ public class SubQueryTest {
 		public static void main(String[] args) throws IOException {
 			
 			SubQueryTest test = new SubQueryTest();
-			test.generate(10000);
+			test.generate(26990);
+			test.testOnce = true;
 			
 			test.testQueries();
 		}
