@@ -1,0 +1,1308 @@
+Memory 158132216
+
+java version "1.6.0_26"
+Java(TM) SE Runtime Environment (build 1.6.0_26-b03)
+Java HotSpot(TM) 64-Bit Server VM (build 20.1-b02, mixed mode)
+[Global flags]
+    uintx AdaptivePermSizeWeight                    = 20              {product}           
+    uintx AdaptiveSizeDecrementScaleFactor          = 4               {product}           
+    uintx AdaptiveSizeMajorGCDecayTimeScale         = 10              {product}           
+    uintx AdaptiveSizePausePolicy                   = 0               {product}           
+    uintx AdaptiveSizePolicyCollectionCostMargin    = 50              {product}           
+    uintx AdaptiveSizePolicyInitializingSteps       = 20              {product}           
+    uintx AdaptiveSizePolicyOutputInterval          = 0               {product}           
+    uintx AdaptiveSizePolicyWeight                  = 10              {product}           
+    uintx AdaptiveSizeThroughPutPolicy              = 0               {product}           
+    uintx AdaptiveTimeWeight                        = 25              {product}           
+     bool AdjustConcurrency                         = false           {product}           
+     bool AggressiveOpts                            = false           {product}           
+     intx AliasLevel                                = 3               {product}           
+     intx AllocatePrefetchDistance                  = 192             {product}           
+     intx AllocatePrefetchInstr                     = 0               {product}           
+     intx AllocatePrefetchLines                     = 4               {product}           
+     intx AllocatePrefetchStepSize                  = 64              {product}           
+     intx AllocatePrefetchStyle                     = 1               {product}           
+     bool AllowJNIEnvProxy                          = false           {product}           
+     bool AllowParallelDefineClass                  = false           {product}           
+     bool AllowUserSignalHandlers                   = false           {product}           
+     bool AlwaysActAsServerClassMachine             = false           {product}           
+     bool AlwaysCompileLoopMethods                  = false           {product}           
+     intx AlwaysInflate                             = 0               {product}           
+     bool AlwaysLockClassLoader                     = false           {product}           
+     bool AlwaysPreTouch                            = false           {product}           
+     bool AlwaysRestoreFPU                          = false           {product}           
+     bool AlwaysTenure                              = false           {product}           
+     bool AnonymousClasses                          = false           {product}           
+     bool AssertOnSuspendWaitFailure                = false           {product}           
+     intx Atomics                                   = 0               {product}           
+     intx AutoBoxCacheMax                           = 128             {C2 product}        
+    uintx AutoGCSelectPauseMillis                   = 5000            {product}           
+     intx BCEATraceLevel                            = 0               {product}           
+     intx BackEdgeThreshold                         = 100000          {pd product}        
+     bool BackgroundCompilation                     = true            {pd product}        
+    uintx BaseFootPrintEstimate                     = 268435456       {product}           
+     intx BiasedLockingBulkRebiasThreshold          = 20              {product}           
+     intx BiasedLockingBulkRevokeThreshold          = 40              {product}           
+     intx BiasedLockingDecayTime                    = 25000           {product}           
+     intx BiasedLockingStartupDelay                 = 4000            {product}           
+     bool BindGCTaskThreadsToCPUs                   = false           {product}           
+     bool BlockLayoutByFrequency                    = true            {C2 product}        
+     intx BlockLayoutMinDiamondPercentage           = 20              {C2 product}        
+     bool BlockLayoutRotateLoops                    = true            {C2 product}        
+     bool BlockOffsetArrayUseUnallocatedBlock       = true            {product}           
+     bool BranchOnRegister                          = false           {C2 product}        
+     bool BytecodeVerificationLocal                 = false           {product}           
+     bool BytecodeVerificationRemote                = true            {product}           
+     bool C1OptimizeVirtualCallProfiling            = true            {C1 product}        
+     bool C1ProfileBranches                         = true            {C1 product}        
+     bool C1ProfileCalls                            = true            {C1 product}        
+     bool C1ProfileCheckcasts                       = true            {C1 product}        
+     bool C1ProfileInlinedCalls                     = true            {C1 product}        
+     bool C1ProfileVirtualCalls                     = true            {C1 product}        
+     bool C1UpdateMethodData                        = true            {C1 product}        
+     intx CICompilerCount                           = 2               {product}           
+     bool CICompilerCountPerCPU                     = false           {product}           
+     bool CITime                                    = false           {product}           
+     bool CMSAbortSemantics                         = false           {product}           
+    uintx CMSAbortablePrecleanMinWorkPerIteration   = 100             {product}           
+     intx CMSAbortablePrecleanWaitMillis            = 100             {manageable}        
+    uintx CMSBitMapYieldQuantum                     = 10485760        {product}           
+    uintx CMSBootstrapOccupancy                     = 50              {product}           
+     bool CMSClassUnloadingEnabled                  = false           {product}           
+    uintx CMSClassUnloadingMaxInterval              = 0               {product}           
+     bool CMSCleanOnEnter                           = true            {product}           
+     bool CMSCompactWhenClearAllSoftRefs            = true            {product}           
+    uintx CMSConcMarkMultiple                       = 32              {product}           
+     bool CMSConcurrentMTEnabled                    = true            {product}           
+    uintx CMSCoordinatorYieldSleepCount             = 10              {product}           
+     bool CMSDumpAtPromotionFailure                 = false           {product}           
+    uintx CMSExpAvgFactor                           = 50              {product}           
+     bool CMSExtrapolateSweep                       = false           {product}           
+    uintx CMSFullGCsBeforeCompaction                = 0               {product}           
+    uintx CMSIncrementalDutyCycle                   = 10              {product}           
+    uintx CMSIncrementalDutyCycleMin                = 0               {product}           
+     bool CMSIncrementalMode                        = false           {product}           
+    uintx CMSIncrementalOffset                      = 0               {product}           
+     bool CMSIncrementalPacing                      = true            {product}           
+    uintx CMSIncrementalSafetyFactor                = 10              {product}           
+    uintx CMSIndexedFreeListReplenish               = 4               {product}           
+     intx CMSInitiatingOccupancyFraction            = -1              {product}           
+     intx CMSInitiatingPermOccupancyFraction        = -1              {product}           
+     intx CMSIsTooFullPercentage                    = 98              {product}           
+   double CMSLargeCoalSurplusPercent                = 0.950000        {product}           
+   double CMSLargeSplitSurplusPercent               = 1.000000        {product}           
+     bool CMSLoopWarn                               = false           {product}           
+    uintx CMSMaxAbortablePrecleanLoops              = 0               {product}           
+     intx CMSMaxAbortablePrecleanTime               = 5000            {product}           
+    uintx CMSOldPLABMax                             = 1024            {product}           
+    uintx CMSOldPLABMin                             = 16              {product}           
+    uintx CMSOldPLABNumRefills                      = 4               {product}           
+    uintx CMSOldPLABReactivityCeiling               = 10              {product}           
+    uintx CMSOldPLABReactivityFactor                = 2               {product}           
+     bool CMSOldPLABResizeQuicker                   = false           {product}           
+    uintx CMSOldPLABToleranceFactor                 = 4               {product}           
+     bool CMSPLABRecordAlways                       = true            {product}           
+    uintx CMSParPromoteBlocksToClaim                = 16              {product}           
+     bool CMSParallelRemarkEnabled                  = true            {product}           
+     bool CMSParallelSurvivorRemarkEnabled          = true            {product}           
+     bool CMSPermGenPrecleaningEnabled              = true            {product}           
+    uintx CMSPrecleanDenominator                    = 3               {product}           
+    uintx CMSPrecleanIter                           = 3               {product}           
+    uintx CMSPrecleanNumerator                      = 2               {product}           
+     bool CMSPrecleanRefLists1                      = true            {product}           
+     bool CMSPrecleanRefLists2                      = false           {product}           
+     bool CMSPrecleanSurvivors1                     = false           {product}           
+     bool CMSPrecleanSurvivors2                     = true            {product}           
+    uintx CMSPrecleanThreshold                      = 1000            {product}           
+     bool CMSPrecleaningEnabled                     = true            {product}           
+     bool CMSPrintChunksInDump                      = false           {product}           
+     bool CMSPrintObjectsInDump                     = false           {product}           
+    uintx CMSRemarkVerifyVariant                    = 1               {product}           
+     bool CMSReplenishIntermediate                  = true            {product}           
+    uintx CMSRescanMultiple                         = 32              {product}           
+    uintx CMSRevisitStackSize                       = 1048576         {product}           
+    uintx CMSSamplingGrain                          = 16384           {product}           
+     bool CMSScavengeBeforeRemark                   = false           {product}           
+    uintx CMSScheduleRemarkEdenPenetration          = 50              {product}           
+    uintx CMSScheduleRemarkEdenSizeThreshold        = 2097152         {product}           
+    uintx CMSScheduleRemarkSamplingRatio            = 5               {product}           
+   double CMSSmallCoalSurplusPercent                = 1.050000        {product}           
+   double CMSSmallSplitSurplusPercent               = 1.100000        {product}           
+     bool CMSSplitIndexedFreeListBlocks             = true            {product}           
+     intx CMSTriggerPermRatio                       = 80              {product}           
+     intx CMSTriggerRatio                           = 80              {product}           
+     bool CMSUseOldDefaults                         = false           {product}           
+     intx CMSWaitDuration                           = 2000            {manageable}        
+    uintx CMSWorkQueueDrainThreshold                = 10              {product}           
+     bool CMSYield                                  = true            {product}           
+    uintx CMSYieldSleepCount                        = 0               {product}           
+     intx CMSYoungGenPerWorker                      = 16777216        {product}           
+    uintx CMS_FLSPadding                            = 1               {product}           
+    uintx CMS_FLSWeight                             = 75              {product}           
+    uintx CMS_SweepPadding                          = 1               {product}           
+    uintx CMS_SweepTimerThresholdMillis             = 10              {product}           
+    uintx CMS_SweepWeight                           = 75              {product}           
+     bool CheckJNICalls                             = false           {product}           
+     bool ClassUnloading                            = true            {product}           
+     intx ClearFPUAtPark                            = 0               {product}           
+     bool ClipInlining                              = true            {product}           
+    uintx CodeCacheExpansionSize                    = 65536           {pd product}        
+    uintx CodeCacheFlushingMinimumFreeSpace         = 1536000         {product}           
+    uintx CodeCacheMinimumFreeSpace                 = 512000          {product}           
+     bool CollectGen0First                          = false           {product}           
+     bool CompactFields                             = true            {product}           
+     intx CompilationPolicyChoice                   = 0               {product}           
+     intx CompilationRepeat                         = 0               {C1 product}        
+ccstrlist CompileCommand                            =                 {product}           
+    ccstr CompileCommandFile                        =                 {product}           
+ccstrlist CompileOnly                               =                 {product}           
+     intx CompileThreshold                          = 10000           {pd product}        
+     bool CompilerThreadHintNoPreempt               = true            {product}           
+     intx CompilerThreadPriority                    = -1              {product}           
+     intx CompilerThreadStackSize                   = 0               {pd product}        
+    uintx ConcGCThreads                             = 0               {product}           
+     intx ConditionalMoveLimit                      = 3               {C2 pd product}     
+     bool ConvertSleepToYield                       = true            {pd product}        
+     bool ConvertYieldToSleep                       = false           {product}           
+     bool DTraceAllocProbes                         = false           {product}           
+     bool DTraceMethodProbes                        = false           {product}           
+     bool DTraceMonitorProbes                       = false           {product}           
+    uintx DefaultMaxRAMFraction                     = 4               {product}           
+     intx DefaultThreadPriority                     = -1              {product}           
+     intx DeferPollingPageLoopCount                 = -1              {product}           
+     intx DeferThrSuspendLoopCount                  = 4000            {product}           
+     bool DeoptimizeRandom                          = false           {product}           
+     intx DesiredMethodLimit                        = 8000            {product}           
+     bool DisableAttachMechanism                    = false           {product}           
+     bool DisableExplicitGC                         = false           {product}           
+     bool DisplayVMOutputToStderr                   = false           {product}           
+     bool DisplayVMOutputToStdout                   = false           {product}           
+     bool DoEscapeAnalysis                          = true            {C2 product}        
+     intx DominatorSearchLimit                      = 1000            {C2 diagnostic}     
+     bool DontCompileHugeMethods                    = true            {product}           
+     bool DontYieldALot                             = false           {pd product}        
+     bool DumpSharedSpaces                          = false           {product}           
+     bool EagerXrunInit                             = false           {product}           
+     intx EliminateAllocationArraySizeLimit         = 64              {C2 product}        
+     bool EliminateAllocations                      = true            {C2 product}        
+     bool EliminateAutoBox                          = false           {C2 diagnostic}     
+     bool EliminateLocks                            = true            {C2 product}        
+     intx EmitSync                                  = 0               {product}           
+    uintx ErgoHeapSizeLimit                         = 0               {product}           
+    ccstr ErrorFile                                 =                 {product}           
+     bool EstimateArgEscape                         = true            {product}           
+     intx EventLogLength                            = 2000            {product}           
+     bool ExplicitGCInvokesConcurrent               = false           {product}           
+     bool ExplicitGCInvokesConcurrentAndUnloadsClasses  = false           {product}           
+     bool ExtendedDTraceProbes                      = false           {product}           
+     bool FLSAlwaysCoalesceLarge                    = false           {product}           
+    uintx FLSCoalescePolicy                         = 2               {product}           
+   double FLSLargestBlockCoalesceProximity          = 0.990000        {product}           
+     bool FailOverToOldVerifier                     = true            {product}           
+     bool FastTLABRefill                            = true            {product}           
+     intx FenceInstruction                          = 0               {product}           
+     intx FieldsAllocationStyle                     = 1               {product}           
+     bool FilterSpuriousWakeups                     = true            {product}           
+     bool ForceNUMA                                 = false           {product}           
+     bool ForceTimeHighResolution                   = false           {product}           
+     intx FreqInlineSize                            = 325             {pd product}        
+     intx G1ConcRefinementGreenZone                 = 0               {product}           
+     intx G1ConcRefinementRedZone                   = 0               {product}           
+     intx G1ConcRefinementServiceIntervalMillis     = 300             {product}           
+    uintx G1ConcRefinementThreads                   = 0               {product}           
+     intx G1ConcRefinementThresholdStep             = 0               {product}           
+     intx G1ConcRefinementYellowZone                = 0               {product}           
+     intx G1ConfidencePercent                       = 50              {product}           
+    uintx G1HeapRegionSize                          = 0               {product}           
+     intx G1MarkRegionStackSize                     = 1048576         {product}           
+     intx G1RSetRegionEntries                       = 0               {product}           
+    uintx G1RSetScanBlockSize                       = 64              {product}           
+     intx G1RSetSparseRegionEntries                 = 0               {product}           
+     intx G1RSetUpdatingPauseTimePercent            = 10              {product}           
+     intx G1ReservePercent                          = 10              {product}           
+    uintx G1SATBBufferEnqueueingThresholdPercent    = 60              {product}           
+     intx G1SATBBufferSize                          = 1024            {product}           
+     intx G1UpdateBufferSize                        = 256             {product}           
+     bool G1UseAdaptiveConcRefinement               = true            {product}           
+    uintx GCDrainStackTargetSize                    = 64              {product}           
+    uintx GCHeapFreeLimit                           = 2               {product}           
+    uintx GCLockerEdenExpansionPercent              = 5               {product}           
+     bool GCLockerInvokesConcurrent                 = false           {product}           
+     bool GCOverheadReporting                       = false           {product}           
+     intx GCOverheadReportingPeriodMS               = 100             {product}           
+    uintx GCPauseIntervalMillis                     = 0               {product}           
+    uintx GCTaskTimeStampEntries                    = 200             {product}           
+    uintx GCTimeLimit                               = 98              {product}           
+    uintx GCTimeRatio                               = 99              {product}           
+    ccstr HPILibPath                                =                 {product}           
+    uintx HeapBaseMinAddress                        = 2147483648      {pd product}        
+     bool HeapDumpAfterFullGC                       = false           {manageable}        
+     bool HeapDumpBeforeFullGC                      = false           {manageable}        
+     bool HeapDumpOnOutOfMemoryError                = false           {manageable}        
+    ccstr HeapDumpPath                              =                 {manageable}        
+    uintx HeapFirstMaximumCompactionCount           = 3               {product}           
+    uintx HeapMaximumCompactionInterval             = 20              {product}           
+     bool IgnoreUnrecognizedVMOptions               = false           {product}           
+    uintx InitialCodeCacheSize                      = 2555904         {pd product}        
+    uintx InitialHeapSize                          := 3221225472      {product}           
+    uintx InitialRAMFraction                        = 64              {product}           
+    uintx InitialSurvivorRatio                      = 8               {product}           
+     intx InitialTenuringThreshold                  = 7               {product}           
+    uintx InitiatingHeapOccupancyPercent            = 45              {product}           
+     bool Inline                                    = true            {product}           
+     intx InlineSmallCode                           = 1000            {pd product}        
+     bool InsertMemBarAfterArraycopy                = true            {C2 product}        
+     intx InteriorEntryAlignment                    = 16              {C2 pd product}     
+     intx InterpreterProfilePercentage              = 33              {product}           
+     bool JNIDetachReleasesMonitors                 = true            {product}           
+     bool JavaMonitorsInStackTrace                  = true            {product}           
+     intx JavaPriority10_To_OSPriority              = -1              {product}           
+     intx JavaPriority1_To_OSPriority               = -1              {product}           
+     intx JavaPriority2_To_OSPriority               = -1              {product}           
+     intx JavaPriority3_To_OSPriority               = -1              {product}           
+     intx JavaPriority4_To_OSPriority               = -1              {product}           
+     intx JavaPriority5_To_OSPriority               = -1              {product}           
+     intx JavaPriority6_To_OSPriority               = -1              {product}           
+     intx JavaPriority7_To_OSPriority               = -1              {product}           
+     intx JavaPriority8_To_OSPriority               = -1              {product}           
+     intx JavaPriority9_To_OSPriority               = -1              {product}           
+     bool LIRFillDelaySlots                         = false           {C1 pd product}     
+    uintx LargePageHeapSizeThreshold                = 134217728       {product}           
+    uintx LargePageSizeInBytes                      = 0               {product}           
+     bool LazyBootClassLoader                       = true            {product}           
+     intx LoopOptsCount                             = 43              {C2 product}        
+     intx LoopUnrollLimit                           = 60              {C2 pd product}     
+     intx LoopUnrollMin                             = 4               {C2 product}        
+     bool LoopUnswitching                           = true            {C2 product}        
+     bool ManagementServer                          = false           {product}           
+    uintx MarkStackSize                             = 4194304         {product}           
+    uintx MarkStackSizeMax                          = 536870912       {product}           
+     intx MarkSweepAlwaysCompactCount               = 4               {product}           
+    uintx MarkSweepDeadRatio                        = 5               {product}           
+     intx MaxBCEAEstimateLevel                      = 5               {product}           
+     intx MaxBCEAEstimateSize                       = 150             {product}           
+     intx MaxDirectMemorySize                       = -1              {product}           
+     bool MaxFDLimit                                = true            {product}           
+    uintx MaxGCMinorPauseMillis                     = 18446744073709551615{product}           
+    uintx MaxGCPauseMillis                          = 18446744073709551615{product}           
+    uintx MaxHeapFreeRatio                          = 70              {product}           
+    uintx MaxHeapSize                              := 3221225472      {product}           
+     intx MaxInlineLevel                            = 9               {product}           
+     intx MaxInlineSize                             = 35              {product}           
+     intx MaxJavaStackTraceDepth                    = 1024            {product}           
+     intx MaxJumpTableSize                          = 65000           {C2 product}        
+     intx MaxJumpTableSparseness                    = 5               {C2 product}        
+     intx MaxLabelRootDepth                         = 1100            {C2 product}        
+     intx MaxLoopPad                                = 11              {C2 product}        
+    uintx MaxNewSize                               := 2147483648      {product}           
+     intx MaxNodeLimit                              = 65000           {C2 product}        
+    uintx MaxPermHeapExpansion                      = 5439488         {product}           
+    uintx MaxPermSize                               = 85983232        {pd product}        
+ uint64_t MaxRAM                                    = 137438953472    {pd product}        
+    uintx MaxRAMFraction                            = 4               {product}           
+     intx MaxRecursiveInlineLevel                   = 1               {product}           
+     intx MaxTenuringThreshold                      = 15              {product}           
+     intx MaxTrivialSize                            = 6               {product}           
+     bool MethodFlushing                            = true            {product}           
+     intx MinCodeCacheFlushingInterval              = 30              {product}           
+    uintx MinHeapDeltaBytes                         = 196608          {product}           
+    uintx MinHeapFreeRatio                          = 40              {product}           
+     intx MinInliningThreshold                      = 250             {product}           
+     intx MinJumpTableSize                          = 18              {C2 product}        
+    uintx MinPermHeapExpansion                      = 327680          {product}           
+    uintx MinRAMFraction                            = 2               {product}           
+    uintx MinSurvivorRatio                          = 3               {product}           
+    uintx MinTLABSize                               = 2048            {product}           
+     intx MonitorBound                              = 0               {product}           
+     bool MonitorInUseLists                         = false           {product}           
+     intx MultiArrayExpandLimit                     = 6               {C2 product}        
+     bool MustCallLoadClassInternal                 = false           {product}           
+     intx NUMAChunkResizeWeight                     = 20              {product}           
+     intx NUMAPageScanRate                          = 256             {product}           
+     intx NUMASpaceResizeRate                       = 1073741824      {product}           
+     bool NUMAStats                                 = false           {product}           
+     intx NativeMonitorFlags                        = 0               {product}           
+     intx NativeMonitorSpinLimit                    = 20              {product}           
+     intx NativeMonitorTimeout                      = -1              {product}           
+     bool NeedsDeoptSuspend                         = false           {pd product}        
+     bool NeverActAsServerClassMachine              = false           {pd product}        
+     bool NeverTenure                               = false           {product}           
+     intx NewRatio                                  = 2               {product}           
+    uintx NewSize                                   = 1310720         {product}           
+    uintx NewSizeThreadIncrease                     = 5320            {pd product}        
+     intx NmethodSweepCheckInterval                 = 5               {product}           
+     intx NmethodSweepFraction                      = 4               {product}           
+     intx NodeLimitFudgeFactor                      = 1000            {C2 product}        
+     intx NumberOfLoopInstrToAlign                  = 4               {C2 product}        
+     intx ObjectAlignmentInBytes                    = 8               {lp64_product}      
+    uintx OldPLABSize                               = 1024            {product}           
+    uintx OldPLABWeight                             = 50              {product}           
+    uintx OldSize                                   = 5439488         {product}           
+     bool OmitStackTraceInFastThrow                 = true            {product}           
+ccstrlist OnError                                   =                 {product}           
+ccstrlist OnOutOfMemoryError                        =                 {product}           
+     intx OnStackReplacePercentage                  = 140             {pd product}        
+     bool OptimizeFill                              = false           {C2 product}        
+     bool OptimizeStringConcat                      = false           {C2 product}        
+     bool OptoBundling                              = false           {C2 pd product}     
+     intx OptoLoopAlignment                         = 16              {pd product}        
+     bool OptoScheduling                            = false           {C2 pd product}     
+    uintx PLABWeight                                = 75              {product}           
+     bool PSChunkLargeArrays                        = true            {product}           
+     intx ParGCArrayScanChunk                       = 50              {product}           
+    uintx ParGCDesiredObjsFromOverflowList          = 20              {product}           
+     bool ParGCTrimOverflow                         = true            {product}           
+     bool ParGCUseLocalOverflow                     = false           {product}           
+     intx ParallelGCBufferWastePct                  = 10              {product}           
+     bool ParallelGCRetainPLAB                      = true            {product}           
+    uintx ParallelGCThreads                        := 13              {product}           
+     bool ParallelGCVerbose                         = false           {product}           
+    uintx ParallelOldDeadWoodLimiterMean            = 50              {product}           
+    uintx ParallelOldDeadWoodLimiterStdDev          = 80              {product}           
+     bool ParallelRefProcBalancingEnabled           = true            {product}           
+     bool ParallelRefProcEnabled                    = false           {product}           
+     bool PartialPeelAtUnsignedTests                = true            {C2 product}        
+     bool PartialPeelLoop                           = true            {C2 product}        
+     intx PartialPeelNewPhiDelta                    = 0               {C2 product}        
+    uintx PausePadding                              = 1               {product}           
+     intx PerBytecodeRecompilationCutoff            = 200             {product}           
+     intx PerBytecodeTrapLimit                      = 4               {product}           
+     intx PerMethodRecompilationCutoff              = 400             {product}           
+     intx PerMethodTrapLimit                        = 100             {product}           
+     bool PerfAllowAtExitRegistration               = false           {product}           
+     bool PerfBypassFileSystemCheck                 = false           {product}           
+     intx PerfDataMemorySize                        = 32768           {product}           
+     intx PerfDataSamplingInterval                  = 50              {product}           
+    ccstr PerfDataSaveFile                          =                 {product}           
+     bool PerfDataSaveToFile                        = false           {product}           
+     bool PerfDisableSharedMem                      = false           {product}           
+     intx PerfMaxStringConstLength                  = 1024            {product}           
+    uintx PermGenPadding                            = 3               {product}           
+    uintx PermMarkSweepDeadRatio                    = 20              {product}           
+    uintx PermSize                                  = 21757952        {pd product}        
+     bool PostSpinYield                             = true            {product}           
+     intx PreBlockSpin                              = 10              {product}           
+     intx PreInflateSpin                            = 10              {pd product}        
+     bool PreSpinYield                              = false           {product}           
+     bool PreferInterpreterNativeStubs              = false           {pd product}        
+     intx PrefetchCopyIntervalInBytes               = 576             {product}           
+     intx PrefetchFieldsAhead                       = 1               {product}           
+     intx PrefetchScanIntervalInBytes               = 576             {product}           
+     bool PreserveAllAnnotations                    = false           {product}           
+    uintx PreserveMarkStackSize                     = 1024            {product}           
+    uintx PretenureSizeThreshold                    = 0               {product}           
+     bool PrintAdaptiveSizePolicy                   = false           {product}           
+     bool PrintCMSInitiationStatistics              = false           {product}           
+     intx PrintCMSStatistics                        = 0               {product}           
+     bool PrintClassHistogram                       = false           {manageable}        
+     bool PrintClassHistogramAfterFullGC            = false           {manageable}        
+     bool PrintClassHistogramBeforeFullGC           = false           {manageable}        
+     bool PrintCommandLineFlags                     = false           {product}           
+     bool PrintCompilation                          = false           {product}           
+     bool PrintConcurrentLocks                      = false           {manageable}        
+     intx PrintFLSCensus                            = 0               {product}           
+     intx PrintFLSStatistics                        = 0               {product}           
+     bool PrintFlagsFinal                          := true            {product}           
+     bool PrintFlagsInitial                         = false           {product}           
+     bool PrintGC                                  := true            {manageable}        
+     bool PrintGCApplicationConcurrentTime          = false           {product}           
+     bool PrintGCApplicationStoppedTime             = false           {product}           
+     bool PrintGCDateStamps                         = false           {manageable}        
+     bool PrintGCDetails                           := true            {manageable}        
+     bool PrintGCTaskTimeStamps                     = false           {product}           
+     bool PrintGCTimeStamps                         = false           {manageable}        
+     bool PrintHeapAtGC                             = false           {product rw}        
+     bool PrintHeapAtGCExtended                     = false           {product rw}        
+     bool PrintHeapAtSIGBREAK                       = true            {product}           
+     bool PrintJNIGCStalls                          = false           {product}           
+     bool PrintJNIResolving                         = false           {product}           
+     bool PrintOldPLAB                              = false           {product}           
+     bool PrintOopAddress                           = false           {product}           
+     bool PrintPLAB                                 = false           {product}           
+     bool PrintParallelOldGCPhaseTimes              = false           {product}           
+     bool PrintPreciseBiasedLockingStatistics       = false           {C2 diagnostic}     
+     bool PrintPromotionFailure                     = false           {product}           
+     bool PrintReferenceGC                          = false           {product}           
+     bool PrintRevisitStats                         = false           {product}           
+     bool PrintSafepointStatistics                  = false           {product}           
+     intx PrintSafepointStatisticsCount             = 300             {product}           
+     intx PrintSafepointStatisticsTimeout           = -1              {product}           
+     bool PrintSharedSpaces                         = false           {product}           
+     bool PrintTLAB                                 = false           {product}           
+     bool PrintTenuringDistribution                := false           {product}           
+     bool PrintTieredEvents                         = false           {product}           
+     bool PrintVMOptions                            = false           {product}           
+     bool PrintVMQWaitTime                          = false           {product}           
+     bool PrintWarnings                             = true            {product}           
+    uintx ProcessDistributionStride                 = 4               {product}           
+     bool ProfileInterpreter                        = true            {pd product}        
+     bool ProfileIntervals                          = false           {product}           
+     intx ProfileIntervalsTicks                     = 100             {product}           
+     intx ProfileMaturityPercentage                 = 20              {product}           
+     bool ProfileVM                                 = false           {product}           
+     bool ProfilerPrintByteCodeStatistics           = false           {product}           
+     bool ProfilerRecordPC                          = false           {product}           
+    uintx PromotedPadding                           = 3               {product}           
+     intx QueuedAllocationWarningCount              = 0               {product}           
+     bool RangeCheckElimination                     = true            {product}           
+     intx ReadPrefetchInstr                         = 0               {product}           
+     intx ReadSpinIterations                        = 100             {product}           
+     bool ReassociateInvariants                     = true            {C2 product}        
+     bool ReduceBulkZeroing                         = true            {C2 product}        
+     bool ReduceFieldZeroing                        = true            {C2 product}        
+     bool ReduceInitialCardMarks                    = true            {C2 product}        
+     bool ReduceSignalUsage                         = false           {product}           
+     intx RefDiscoveryPolicy                        = 0               {product}           
+     bool ReflectionWrapResolutionErrors            = true            {product}           
+     bool RegisterFinalizersAtInit                  = true            {product}           
+     bool RelaxAccessControlCheck                   = false           {product}           
+     bool RequireSharedSpaces                       = false           {product}           
+    uintx ReservedCodeCacheSize                     = 50331648        {pd product}        
+     bool ResizeOldPLAB                             = true            {product}           
+     bool ResizePLAB                                = true            {product}           
+     bool ResizeTLAB                                = true            {pd product}        
+     bool RestoreMXCSROnJNICalls                    = false           {product}           
+     bool RewriteBytecodes                          = true            {pd product}        
+     bool RewriteFrequentPairs                      = true            {pd product}        
+     intx SafepointPollOffset                       = 256             {C1 pd product}     
+     intx SafepointSpinBeforeYield                  = 2000            {product}           
+     bool SafepointTimeout                          = false           {product}           
+     intx SafepointTimeoutDelay                     = 10000           {product}           
+     bool ScavengeBeforeFullGC                      = true            {product}           
+     intx SelfDestructTimer                         = 0               {product}           
+    uintx SharedDummyBlockSize                      = 536870912       {product}           
+    uintx SharedMiscCodeSize                        = 4194304         {product}           
+    uintx SharedMiscDataSize                        = 4194304         {product}           
+    uintx SharedReadOnlySize                        = 10485760        {product}           
+    uintx SharedReadWriteSize                       = 14680064        {product}           
+     bool ShowMessageBoxOnError                     = false           {product}           
+     intx SoftRefLRUPolicyMSPerMB                   = 1000            {product}           
+     bool SpecialStringCompareToCC                  = true            {product}           
+     bool SpecialStringCompress                     = true            {product}           
+     bool SpecialStringEqualsCC                     = true            {product}           
+     bool SpecialStringIndexOfCC                    = true            {product}           
+     bool SpecialStringInflate                      = true            {product}           
+     bool SplitIfBlocks                             = true            {product}           
+     intx StackRedPages                             = 1               {pd product}        
+     intx StackShadowPages                          = 6               {pd product}        
+     bool StackTraceInThrowable                     = true            {product}           
+     intx StackYellowPages                          = 2               {pd product}        
+     bool StartAttachListener                       = false           {product}           
+     intx StarvationMonitorInterval                 = 200             {product}           
+     bool StressLdcRewrite                          = false           {product}           
+     bool StressTieredRuntime                       = false           {product}           
+     bool SuppressFatalErrorMessage                 = false           {product}           
+    uintx SurvivorPadding                           = 3               {product}           
+     intx SurvivorRatio                             = 8               {product}           
+     intx SuspendRetryCount                         = 50              {product}           
+     intx SuspendRetryDelay                         = 5               {product}           
+     intx SyncFlags                                 = 0               {product}           
+    ccstr SyncKnobs                                 =                 {product}           
+     intx SyncVerbose                               = 0               {product}           
+    uintx TLABAllocationWeight                      = 35              {product}           
+    uintx TLABRefillWasteFraction                   = 64              {product}           
+    uintx TLABSize                                  = 0               {product}           
+     bool TLABStats                                 = true            {product}           
+    uintx TLABWasteIncrement                        = 4               {product}           
+    uintx TLABWasteTargetPercent                    = 1               {product}           
+     intx TargetPLABWastePct                        = 10              {product}           
+     intx TargetSurvivorRatio                       = 50              {product}           
+    uintx TenuredGenerationSizeIncrement            = 20              {product}           
+    uintx TenuredGenerationSizeSupplement           = 80              {product}           
+    uintx TenuredGenerationSizeSupplementDecay      = 2               {product}           
+     intx ThreadPriorityPolicy                      = 0               {product}           
+     bool ThreadPriorityVerbose                     = false           {product}           
+    uintx ThreadSafetyMargin                        = 52428800        {product}           
+     intx ThreadStackSize                           = 1024            {pd product}        
+    uintx ThresholdTolerance                        = 10              {product}           
+     intx Tier0BackedgeNotifyFreqLog                = 10              {product}           
+     intx Tier0InvokeNotifyFreqLog                  = 7               {product}           
+     intx Tier0ProfilingStartPercentage             = 200             {product}           
+     intx Tier1FreqInlineSize                       = 35              {C2 product}        
+     intx Tier1Inline                               = 0               {C2 product}        
+     intx Tier1LoopOptsCount                        = 0               {C2 product}        
+     intx Tier1MaxInlineSize                        = 8               {C2 product}        
+     intx Tier2BackEdgeThreshold                    = 0               {product}           
+     intx Tier2BackedgeNotifyFreqLog                = 14              {product}           
+     intx Tier2CompileThreshold                     = 0               {product}           
+     intx Tier2InvokeNotifyFreqLog                  = 11              {product}           
+     intx Tier3BackEdgeThreshold                    = 7000            {product}           
+     intx Tier3BackedgeNotifyFreqLog                = 13              {product}           
+     intx Tier3CompileThreshold                     = 2000            {product}           
+     intx Tier3DelayOff                             = 2               {product}           
+     intx Tier3DelayOn                              = 5               {product}           
+     intx Tier3InvocationThreshold                  = 200             {product}           
+     intx Tier3InvokeNotifyFreqLog                  = 10              {product}           
+     intx Tier3LoadFeedback                         = 5               {product}           
+     intx Tier3MinInvocationThreshold               = 100             {product}           
+     intx Tier4BackEdgeThreshold                    = 40000           {product}           
+     intx Tier4CompileThreshold                     = 15000           {product}           
+     intx Tier4InvocationThreshold                  = 5000            {product}           
+     intx Tier4LoadFeedback                         = 3               {product}           
+     intx Tier4MinInvocationThreshold               = 600             {product}           
+     bool TieredCompilation                         = false           {pd product}        
+     intx TieredCompileTaskTimeout                  = 50              {product}           
+     intx TieredRateUpdateMaxTime                   = 25              {product}           
+     intx TieredRateUpdateMinTime                   = 1               {product}           
+     intx TieredStopAtLevel                         = 4               {product}           
+     bool TimeLinearScan                            = false           {C1 product}        
+     bool TraceBiasedLocking                        = false           {product}           
+     bool TraceClassLoading                         = false           {product rw}        
+     bool TraceClassLoadingPreorder                 = false           {product}           
+     bool TraceClassResolution                      = false           {product}           
+     bool TraceClassUnloading                       = false           {product rw}        
+     bool TraceGen0Time                             = false           {product}           
+     bool TraceGen1Time                             = false           {product}           
+    ccstr TraceJVMTI                                =                 {product}           
+     bool TraceLoaderConstraints                    = false           {product rw}        
+     bool TraceMonitorInflation                     = false           {product}           
+     bool TraceParallelOldGCTasks                   = false           {product}           
+     intx TraceRedefineClasses                      = 0               {product}           
+     bool TraceSafepointCleanupTime                 = false           {product}           
+     bool TraceSuperWord                            = false           {C2 product}        
+     bool TraceSuspendWaitFailures                  = false           {product}           
+     intx TrackedInitializationLimit                = 50              {C2 product}        
+     intx TypeProfileMajorReceiverPercent           = 90              {product}           
+     intx TypeProfileWidth                          = 2               {product}           
+     intx UnguardOnExecutionViolation               = 0               {product}           
+     bool Use486InstrsOnly                          = false           {product}           
+     bool UseAdaptiveGCBoundary                     = false           {product}           
+     bool UseAdaptiveGenerationSizePolicyAtMajorCollection  = true            {product}           
+     bool UseAdaptiveGenerationSizePolicyAtMinorCollection  = true            {product}           
+     bool UseAdaptiveNUMAChunkSizing                = true            {product}           
+     bool UseAdaptiveSizeDecayMajorGCCost           = true            {product}           
+     bool UseAdaptiveSizePolicy                     = true            {product}           
+     bool UseAdaptiveSizePolicyFootprintGoal        = true            {product}           
+     bool UseAdaptiveSizePolicyWithSystemGC         = false           {product}           
+     bool UseAddressNop                             = true            {product}           
+     bool UseAltSigs                                = false           {product}           
+     bool UseAutoGCSelectPolicy                     = false           {product}           
+     bool UseBiasedLocking                          = true            {product}           
+     bool UseBimorphicInlining                      = true            {C2 product}        
+     bool UseBoundThreads                           = true            {product}           
+     bool UseCMSBestFit                             = true            {product}           
+     bool UseCMSCollectionPassing                   = true            {product}           
+     bool UseCMSCompactAtFullCollection             = true            {product}           
+     bool UseCMSInitiatingOccupancyOnly             = false           {product}           
+     bool UseCodeCacheFlushing                      = false           {product}           
+     bool UseCompiler                               = true            {product}           
+     bool UseCompilerSafepoints                     = true            {product}           
+     bool UseCompressedOops                        := false           {lp64_product}      
+     bool UseCompressedStrings                      = false           {product}           
+     bool UseConcMarkSweepGC                        = false           {product}           
+     bool UseCountLeadingZerosInstruction           = false           {product}           
+     bool UseCounterDecay                           = true            {product}           
+     bool UseDivMod                                 = true            {C2 product}        
+     bool UseFPUForSpilling                         = false           {C2 product}        
+     bool UseFastAccessorMethods                    = true            {product}           
+     bool UseFastEmptyMethods                       = true            {product}           
+     bool UseFastJNIAccessors                       = true            {product}           
+     bool UseG1GC                                   = false           {product}           
+     bool UseGCOverheadLimit                        = true            {product}           
+     bool UseGCTaskAffinity                         = false           {product}           
+     bool UseHeavyMonitors                          = false           {product}           
+     bool UseInlineCaches                           = true            {product}           
+     bool UseInterpreter                            = true            {product}           
+     bool UseJumpTables                             = true            {C2 product}        
+     bool UseLWPSynchronization                     = true            {product}           
+     bool UseLargePages                             = false           {pd product}        
+     bool UseLargePagesIndividualAllocation         = false           {pd product}        
+     bool UseLinuxPosixThreadCPUClocks              = false           {product}           
+     bool UseLoopCounter                            = true            {product}           
+     bool UseLoopPredicate                          = true            {C2 product}        
+     bool UseMaximumCompactionOnSystemGC            = true            {product}           
+     bool UseMembar                                 = false           {pd product}        
+     bool UseNUMA                                   = false           {product}           
+     bool UseNewLongLShift                          = false           {product}           
+     bool UseNiagaraInstrs                          = false           {product}           
+     bool UseOSErrorReporting                       = false           {pd product}        
+     bool UseOldInlining                            = true            {C2 product}        
+     bool UseOnStackReplacement                     = true            {pd product}        
+     bool UseOnlyInlinedBimorphic                   = true            {C2 product}        
+     bool UseOprofile                               = false           {product}           
+     bool UseOptoBiasInlining                       = true            {C2 product}        
+     bool UsePPCLWSYNC                              = true            {product}           
+     bool UsePSAdaptiveSurvivorSizePolicy           = true            {product}           
+     bool UseParNewGC                               = false           {product}           
+     bool UseParallelDensePrefixUpdate              = true            {product}           
+     bool UseParallelGC                            := true            {product}           
+     bool UseParallelOldGC                          = false           {product}           
+     bool UseParallelOldGCCompacting                = true            {product}           
+     bool UseParallelOldGCDensePrefix               = true            {product}           
+     bool UsePerfData                               = true            {product}           
+     bool UsePopCountInstruction                    = true            {product}           
+     bool UseRDPCForConstantTableBase               = false           {C2 product}        
+     intx UseSSE                                    = 4               {product}           
+     bool UseSSE42Intrinsics                        = true            {product}           
+     bool UseSerialGC                               = false           {product}           
+     bool UseSharedSpaces                           = false           {product}           
+     bool UseSignalChaining                         = true            {product}           
+     bool UseSpinning                               = false           {product}           
+     bool UseSplitVerifier                          = true            {product}           
+     bool UseStoreImmI16                            = false           {product}           
+     bool UseStringCache                            = false           {product}           
+     bool UseSuperWord                              = true            {C2 product}        
+     bool UseTLAB                                   = true            {pd product}        
+     bool UseThreadPriorities                       = true            {pd product}        
+     bool UseTypeProfile                            = true            {product}           
+     bool UseUnalignedLoadStores                    = true            {product}           
+     bool UseVMInterruptibleIO                      = true            {product}           
+     bool UseVectoredExceptions                     = false           {pd product}        
+     bool UseXMMForArrayCopy                        = true            {product}           
+     bool UseXmmI2D                                 = false           {product}           
+     bool UseXmmI2F                                 = false           {product}           
+     bool UseXmmLoadAndClearUpper                   = true            {product}           
+     bool UseXmmRegToRegMoveAll                     = true            {product}           
+     bool VMThreadHintNoPreempt                     = false           {product}           
+     intx VMThreadPriority                          = -1              {product}           
+     intx VMThreadStackSize                         = 1024            {pd product}        
+     intx ValueMapInitialSize                       = 11              {C1 product}        
+     intx ValueMapMaxLoopSize                       = 8               {C1 product}        
+     intx ValueSearchLimit                          = 1000            {C2 product}        
+     bool VerifyMergedCPBytecodes                   = true            {product}           
+     intx WorkAroundNPTLTimedWaitHang               = 1               {product}           
+    uintx YoungGenerationSizeIncrement              = 20              {product}           
+    uintx YoungGenerationSizeSupplement             = 80              {product}           
+    uintx YoungGenerationSizeSupplementDecay        = 8               {product}           
+    uintx YoungPLABSize                             = 4096            {product}           
+     bool ZeroTLAB                                  = false           {product}           
+     intx hashCode                                  = 0               {product}           
+sysProp: tangosol.pof.enabled: true
+sysProp: tangosol.pof.config: pof-config.xml
+sysProp: tangosol.coherence.cacheconfig: index-test-cache-config.xml
+sysProp: tangosol.coherence.distributed.localstorage: false
+2011-08-29 12:29:53.593/0.408 Oracle Coherence 3.7.0.0 <Info> (thread=main, member=n/a): Loaded operational configuration from "jar:file:/home/ubuntu/jbench/coherence.jar!/tangosol-coherence.xml"
+2011-08-29 12:29:53.656/0.471 Oracle Coherence 3.7.0.0 <Info> (thread=main, member=n/a): Loaded operational overrides from "jar:file:/home/ubuntu/jbench/coherence.jar!/tangosol-coherence-override-dev.xml"
+2011-08-29 12:29:53.656/0.471 Oracle Coherence 3.7.0.0 <D5> (thread=main, member=n/a): Optional configuration override "/tangosol-coherence-override.xml" is not specified
+2011-08-29 12:29:53.660/0.475 Oracle Coherence 3.7.0.0 <D5> (thread=main, member=n/a): Optional configuration override "/custom-mbeans.xml" is not specified
+
+Oracle Coherence Version 3.7.0.0 Build 23397
+ Grid Edition: Development mode
+Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+
+2011-08-29 12:29:53.885/0.700 Oracle Coherence GE 3.7.0.0 <Info> (thread=main, member=n/a): Loaded cache configuration from "jar:file:/home/ubuntu/jbench/lucene-grid-test.jar!/index-test-cache-config.xml"
+2011-08-29 12:29:54.195/1.010 Oracle Coherence GE 3.7.0.0 <Warning> (thread=main, member=n/a): UnicastUdpSocket failed to set receive buffer size to 722 packets (1023KB); actual size is 12%, 90 packets (127KB). Consult your OS documentation regarding increasing the maximum socket buffer size. Proceeding with the actual value may cause sub-optimal performance.
+2011-08-29 12:29:54.196/1.011 Oracle Coherence GE 3.7.0.0 <Warning> (thread=main, member=n/a): PreferredUnicastUdpSocket failed to set receive buffer size to 1444 packets (1.99MB); actual size is 6%, 90 packets (127KB). Consult your OS documentation regarding increasing the maximum socket buffer size. Proceeding with the actual value may cause sub-optimal performance.
+2011-08-29 12:29:54.196/1.011 Oracle Coherence GE 3.7.0.0 <D4> (thread=main, member=n/a): TCMP bound to /10.17.176.230:8090 using SystemSocketProvider
+2011-08-29 12:29:54.196/1.011 Oracle Coherence GE 3.7.0.0 <Warning> (thread=main, member=n/a): MulticastUdpSocket failed to set receive buffer size to 722 packets (1023KB); actual size is 12%, 90 packets (127KB). Consult your OS documentation regarding increasing the maximum socket buffer size. Proceeding with the actual value may cause sub-optimal performance.
+2011-08-29 12:29:54.476/1.291 Oracle Coherence GE 3.7.0.0 <Info> (thread=Cluster, member=n/a): This Member(Id=2, Timestamp=2011-08-29 12:29:54.3, Address=10.17.176.230:8090, MachineId=44006, Location=site:ec2.internal,machine:ip-10-17-176-230,process:2906, Role=GridkitLuceneIndexTestSequence, Edition=Grid Edition, Mode=Development, CpuCount=16, SocketCount=4) joined cluster "cluster:0x96AB" with senior Member(Id=1, Timestamp=2011-08-29 12:29:47.464, Address=10.17.176.230:8088, MachineId=44006, Location=site:ec2.internal,machine:ip-10-17-176-230,process:2845, Role=GridkitCoherenceTestStorageNode, Edition=Grid Edition, Mode=Development, CpuCount=16, SocketCount=4)
+2011-08-29 12:29:54.485/1.300 Oracle Coherence GE 3.7.0.0 <D5> (thread=Cluster, member=n/a): Member 1 joined Service Cluster with senior member 1
+2011-08-29 12:29:54.485/1.300 Oracle Coherence GE 3.7.0.0 <D5> (thread=Cluster, member=n/a): Member 1 joined Service Management with senior member 1
+2011-08-29 12:29:54.485/1.300 Oracle Coherence GE 3.7.0.0 <D5> (thread=Cluster, member=n/a): Member 1 joined Service DistributedCache with senior member 1
+2011-08-29 12:29:54.486/1.304 Oracle Coherence GE 3.7.0.0 <Info> (thread=main, member=n/a): Started cluster Name=cluster:0x96AB
+
+Group{Address=224.3.7.0, Port=37000, TTL=4}
+
+MasterMemberSet
+  (
+  ThisMember=Member(Id=2, Timestamp=2011-08-29 12:29:54.3, Address=10.17.176.230:8090, MachineId=44006, Location=site:ec2.internal,machine:ip-10-17-176-230,process:2906, Role=GridkitLuceneIndexTestSequence)
+  OldestMember=Member(Id=1, Timestamp=2011-08-29 12:29:47.464, Address=10.17.176.230:8088, MachineId=44006, Location=site:ec2.internal,machine:ip-10-17-176-230,process:2845, Role=GridkitCoherenceTestStorageNode)
+  ActualMemberSet=MemberSet(Size=2, BitSetCount=2
+    Member(Id=1, Timestamp=2011-08-29 12:29:47.464, Address=10.17.176.230:8088, MachineId=44006, Location=site:ec2.internal,machine:ip-10-17-176-230,process:2845, Role=GridkitCoherenceTestStorageNode)
+    Member(Id=2, Timestamp=2011-08-29 12:29:54.3, Address=10.17.176.230:8090, MachineId=44006, Location=site:ec2.internal,machine:ip-10-17-176-230,process:2906, Role=GridkitLuceneIndexTestSequence)
+    )
+  RecycleMillis=1200000
+  RecycleSet=MemberSet(Size=0, BitSetCount=0
+    )
+  )
+
+TcpRing{Connections=[1]}
+IpMonitor{AddressListSize=0}
+
+2011-08-29 12:29:54.505/1.320 Oracle Coherence GE 3.7.0.0 <Info> (thread=Cluster, member=2): Loaded POF configuration from "jar:file:/home/ubuntu/jbench/lucene-grid-test.jar!/pof-config.xml"
+2011-08-29 12:29:54.528/1.343 Oracle Coherence GE 3.7.0.0 <Info> (thread=Cluster, member=2): Loaded included POF configuration from "jar:file:/home/ubuntu/jbench/coherence.jar!/coherence-pof-config.xml"
+2011-08-29 12:29:54.529/1.344 Oracle Coherence GE 3.7.0.0 <Info> (thread=Cluster, member=2): Loaded included POF configuration from "jar:file:/home/ubuntu/jbench/lucene-grid.jar!/grid4search-pof-config.xml"
+2011-08-29 12:29:54.594/1.409 Oracle Coherence GE 3.7.0.0 <D5> (thread=Invocation:Management, member=2): Service Management joined the cluster with senior service member 1
+2011-08-29 12:29:54.769/1.584 Oracle Coherence GE 3.7.0.0 <D5> (thread=DistributedCache, member=2): Service DistributedCache joined the cluster with senior service member 1
+[12:29:54.798] Generating 100000 documents
+[12:29:56.589] Loaded 10000
+[12:29:57.516] Loaded 20000
+[12:29:58.320] Loaded 30000
+[12:29:59.024] Loaded 40000
+[12:29:59.719] Loaded 50000
+[12:30:00.404] Loaded 60000
+[12:30:01.121] Loaded 70000
+[12:30:01.882] Loaded 80000
+[12:30:02.517] Loaded 90000
+[GC [PSYoungGen: 1572864K->8379K(1835008K)] 1572864K->8379K(2883584K), 0.0070560 secs] [Times: user=0.04 sys=0.03, real=0.01 secs] 
+[12:30:03.136] Loaded 100000
+[12:30:03.138] Creating indexes
+[12:31:56.223] Cache loaded
+[12:31:56.225] Query test: Single term Sparse1(C=0.1). Expected result set size 0.09999999999999999
+[12:31:58.438] Filter stats: average time 4.394ms average result set 0.078
+[12:31:58.439] Query test: Single term Sparse2s(C=0.1). Expected result set size 0.09999999999999999
+[12:31:58.984] Filter stats: average time 1.076ms average result set 0.120
+[12:31:58.985] Query test: Single term A1(C=1.0). Expected result set size 1.0
+[12:31:59.534] Filter stats: average time 1.084ms average result set 1.030
+[12:31:59.534] Query test: Single term A2s(C=1.0). Expected result set size 1.0
+[12:32:00.049] Filter stats: average time 1.015ms average result set 1.004
+[12:32:00.049] Query test: Single term B1(C=10.0). Expected result set size 10.0
+[12:32:00.628] Filter stats: average time 1.146ms average result set 10.102
+[12:32:00.628] Query test: Single term B2s(C=10.0). Expected result set size 10.0
+[12:32:01.282] Filter stats: average time 1.294ms average result set 9.968
+[12:32:01.282] Query test: Single term C1(C=50.0). Expected result set size 50.0
+[12:32:01.877] Filter stats: average time 1.175ms average result set 50.186
+[12:32:01.877] Query test: Single term C2s(C=50.0). Expected result set size 50.0
+[12:32:02.395] Filter stats: average time 1.023ms average result set 50.056
+[12:32:02.396] Query test: Term range Sparse1(C=0.1), 10 terms. Expected result set size 1.0
+[12:32:02.959] Filter stats: average time 1.101ms average result set 0.986
+[12:32:02.960] Query test: Term range Sparse2s(C=0.1), 10 terms. Expected result set size 1.0
+[12:32:03.471] Filter stats: average time 1.010ms average result set 0.978
+[12:32:03.471] Query test: Term range A1(C=1.0), 10 terms. Expected result set size 10.0
+[12:32:04.067] Filter stats: average time 1.102ms average result set 10.054
+[12:32:04.067] Query test: Term range A2s(C=1.0), 10 terms. Expected result set size 10.0
+[12:32:04.578] Filter stats: average time 1.009ms average result set 10.110
+[12:32:04.578] Query test: Term range B1(C=10.0), 10 terms. Expected result set size 100.0
+[12:32:05.185] Filter stats: average time 1.204ms average result set 99.894
+[12:32:05.186] Query test: Term range B2s(C=10.0), 10 terms. Expected result set size 100.0
+[12:32:05.766] Filter stats: average time 1.151ms average result set 100.138
+[12:32:05.767] Query test: Term range C1(C=50.0), 10 terms. Expected result set size 500.0
+[12:32:06.837] Filter stats: average time 2.131ms average result set 499.786
+[12:32:06.838] Query test: Term range C2s(C=50.0), 10 terms. Expected result set size 500.0
+[12:32:07.827] Filter stats: average time 1.969ms average result set 499.890
+[12:32:07.827] Query test: Term range D1(C=1000.0), 10 terms. Expected result set size 10000.0
+[12:32:19.797] Filter stats: average time 23.929ms average result set 9999.446
+[12:32:19.797] Query test: Term range D2s(C=1000.0), 10 terms. Expected result set size 10000.0
+[GC [PSYoungGen: 1581243K->10051K(1835008K)] 1581243K->10051K(2883584K), 0.0040140 secs] [Times: user=0.02 sys=0.02, real=0.01 secs] 
+[12:32:31.662] Filter stats: average time 23.720ms average result set 9999.662
+[12:32:31.663] Query test: Single term D1(C=1000.0) & Single term D2s(C=1000.0). Expected result set size 10.0
+[12:32:32.203] Filter stats: average time 1.060ms average result set 10.070
+[12:32:32.203] Query test: Single term A1(C=1.0) & Single term D1(C=1000.0). Expected result set size 0.01
+[12:32:32.646] Filter stats: average time 0.872ms average result set 0.008
+[12:32:32.646] Query test: Single term D1(C=1000.0) & Single term A1(C=1.0). Expected result set size 0.01
+[12:32:33.066] Filter stats: average time 0.826ms average result set 0.010
+[12:32:33.066] Query test: Single term A1(C=1.0) & Single term E1(C=10000.0). Expected result set size 0.10000000000000002
+[12:32:33.474] Filter stats: average time 0.806ms average result set 0.102
+[12:32:33.475] Query test: Single term E1(C=10000.0) & Single term A1(C=1.0). Expected result set size 0.10000000000000002
+[12:32:33.861] Filter stats: average time 0.764ms average result set 0.090
+[12:32:33.862] Query test: Single term B1(C=10.0) & Single term D1(C=1000.0). Expected result set size 0.10000000000000002
+[12:32:34.236] Filter stats: average time 0.741ms average result set 0.090
+[12:32:34.236] Query test: Single term D1(C=1000.0) & Single term B1(C=10.0). Expected result set size 0.10000000000000002
+[12:32:34.601] Filter stats: average time 0.723ms average result set 0.090
+[12:32:34.601] Query test: Single term B1(C=10.0) & Single term E1(C=10000.0). Expected result set size 1.0
+[12:32:34.972] Filter stats: average time 0.735ms average result set 0.980
+[12:32:34.972] Query test: Single term E1(C=10000.0) & Single term B1(C=10.0). Expected result set size 1.0
+[12:32:35.335] Filter stats: average time 0.719ms average result set 0.966
+[12:32:35.335] Query test: Single term C1(C=50.0) & Single term D1(C=1000.0). Expected result set size 0.5
+[12:32:35.700] Filter stats: average time 0.724ms average result set 0.454
+[12:32:35.701] Query test: Single term D1(C=1000.0) & Single term C1(C=50.0). Expected result set size 0.5
+[12:32:36.073] Filter stats: average time 0.724ms average result set 0.536
+[12:32:36.073] Query test: Single term C1(C=50.0) & Single term E1(C=10000.0). Expected result set size 5.0
+[12:32:36.443] Filter stats: average time 0.733ms average result set 4.940
+[12:32:36.443] Query test: Single term E1(C=10000.0) & Single term C1(C=50.0). Expected result set size 5.0
+[12:32:36.812] Filter stats: average time 0.732ms average result set 5.124
+[12:32:36.812] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0). Expected result set size 100.0
+[12:32:37.349] Filter stats: average time 1.066ms average result set 100.102
+[12:32:37.349] Query test: Single term E1(C=10000.0) & Single term D1(C=1000.0). Expected result set size 100.0
+[12:32:37.891] Filter stats: average time 1.078ms average result set 99.898
+[12:32:37.891] Query test: Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1000.0000000000002
+[12:32:39.548] Filter stats: average time 3.308ms average result set 999.324
+[12:32:39.549] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 100.00000000000003
+[12:32:40.443] Filter stats: average time 1.781ms average result set 100.198
+[12:32:40.443] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1.0
+[12:32:41.029] Filter stats: average time 1.165ms average result set 0.956
+[12:32:41.029] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term D1(C=1000.0). Expected result set size 1.0000000000000002
+[12:32:41.609] Filter stats: average time 1.153ms average result set 1.014
+[12:32:41.610] Query test: Term range A2s(C=1.0), 10000 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[12:32:43.785] Filter stats: average time 4.343ms average result set 10.012
+[12:32:43.785] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Term range A2s(C=1.0), 10000 terms. Expected result set size 10.000000000000004
+[12:32:45.938] Filter stats: average time 4.298ms average result set 10.078
+[12:32:45.939] Query test: Multi term D1(C=1000.0), 10 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[12:32:46.915] Filter stats: average time 1.934ms average result set 9.536
+[12:32:46.915] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Multi term D1(C=1000.0), 10 terms. Expected result set size 10.000000000000004
+[12:32:47.876] Filter stats: average time 1.906ms average result set 9.436
+[12:32:47.877] Query test: Single term H1(C=50000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 50.000000000000014
+[12:32:49.048] Filter stats: average time 2.332ms average result set 49.568
+[12:32:49.049] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term H1(C=50000.0). Expected result set size 50.000000000000014
+[12:32:50.220] Filter stats: average time 2.331ms average result set 50.120
+[12:32:50.220] Rerun tests
+[12:32:50.221] Query test: Single term Sparse1(C=0.1). Expected result set size 0.09999999999999999
+[12:32:50.538] Filter stats: average time 0.629ms average result set 0.092
+[12:32:50.539] Query test: Single term Sparse2s(C=0.1). Expected result set size 0.09999999999999999
+[12:32:50.855] Filter stats: average time 0.626ms average result set 0.082
+[12:32:50.855] Query test: Single term A1(C=1.0). Expected result set size 1.0
+[12:32:51.184] Filter stats: average time 0.651ms average result set 0.962
+[12:32:51.184] Query test: Single term A2s(C=1.0). Expected result set size 1.0
+[12:32:51.503] Filter stats: average time 0.632ms average result set 1.054
+[12:32:51.503] Query test: Single term B1(C=10.0). Expected result set size 10.0
+[12:32:51.829] Filter stats: average time 0.647ms average result set 9.908
+[12:32:51.829] Query test: Single term B2s(C=10.0). Expected result set size 10.0
+[12:32:52.157] Filter stats: average time 0.649ms average result set 10.074
+[12:32:52.157] Query test: Single term C1(C=50.0). Expected result set size 50.0
+[12:32:52.530] Filter stats: average time 0.725ms average result set 49.898
+[12:32:52.530] Query test: Single term C2s(C=50.0). Expected result set size 50.0
+[12:32:52.894] Filter stats: average time 0.722ms average result set 49.892
+[12:32:52.894] Query test: Term range Sparse1(C=0.1), 10 terms. Expected result set size 1.0
+[12:32:53.244] Filter stats: average time 0.694ms average result set 1.012
+[12:32:53.245] Query test: Term range Sparse2s(C=0.1), 10 terms. Expected result set size 1.0
+[12:32:53.590] Filter stats: average time 0.684ms average result set 0.970
+[12:32:53.590] Query test: Term range A1(C=1.0), 10 terms. Expected result set size 10.0
+[12:32:53.964] Filter stats: average time 0.741ms average result set 10.110
+[12:32:53.964] Query test: Term range A2s(C=1.0), 10 terms. Expected result set size 10.0
+[12:32:54.332] Filter stats: average time 0.727ms average result set 9.838
+[12:32:54.332] Query test: Term range B1(C=10.0), 10 terms. Expected result set size 100.0
+[12:32:54.789] Filter stats: average time 0.908ms average result set 100.204
+[12:32:54.789] Query test: Term range B2s(C=10.0), 10 terms. Expected result set size 100.0
+[12:32:55.257] Filter stats: average time 0.928ms average result set 99.996
+[12:32:55.257] Query test: Term range C1(C=50.0), 10 terms. Expected result set size 500.0
+[12:32:56.120] Filter stats: average time 1.718ms average result set 500.034
+[12:32:56.121] Query test: Term range C2s(C=50.0), 10 terms. Expected result set size 500.0
+[12:32:56.972] Filter stats: average time 1.695ms average result set 500.056
+[12:32:56.972] Query test: Term range D1(C=1000.0), 10 terms. Expected result set size 10000.0
+[GC [PSYoungGen: 1582915K->10836K(1835008K)] 1582915K->10836K(2883584K), 0.0037560 secs] [Times: user=0.03 sys=0.01, real=0.00 secs] 
+[12:33:08.474] Filter stats: average time 22.996ms average result set 10001.070
+[12:33:08.474] Query test: Term range D2s(C=1000.0), 10 terms. Expected result set size 10000.0
+[GC [PSYoungGen: 1583700K->10211K(1835008K)] 1583700K->10211K(2883584K), 0.0039520 secs] [Times: user=0.02 sys=0.01, real=0.00 secs] 
+[12:33:19.933] Filter stats: average time 22.894ms average result set 9999.064
+[12:33:19.934] Query test: Single term D1(C=1000.0) & Single term D2s(C=1000.0). Expected result set size 10.0
+[12:33:20.343] Filter stats: average time 0.799ms average result set 9.932
+[12:33:20.343] Query test: Single term A1(C=1.0) & Single term D1(C=1000.0). Expected result set size 0.01
+[12:33:20.696] Filter stats: average time 0.699ms average result set 0.010
+[12:33:20.696] Query test: Single term D1(C=1000.0) & Single term A1(C=1.0). Expected result set size 0.01
+[12:33:21.042] Filter stats: average time 0.685ms average result set 0.008
+[12:33:21.042] Query test: Single term A1(C=1.0) & Single term E1(C=10000.0). Expected result set size 0.10000000000000002
+[12:33:21.386] Filter stats: average time 0.681ms average result set 0.084
+[12:33:21.386] Query test: Single term E1(C=10000.0) & Single term A1(C=1.0). Expected result set size 0.10000000000000002
+[12:33:21.749] Filter stats: average time 0.720ms average result set 0.090
+[12:33:21.750] Query test: Single term B1(C=10.0) & Single term D1(C=1000.0). Expected result set size 0.10000000000000002
+[12:33:22.102] Filter stats: average time 0.698ms average result set 0.118
+[12:33:22.102] Query test: Single term D1(C=1000.0) & Single term B1(C=10.0). Expected result set size 0.10000000000000002
+[12:33:22.487] Filter stats: average time 0.763ms average result set 0.126
+[12:33:22.487] Query test: Single term B1(C=10.0) & Single term E1(C=10000.0). Expected result set size 1.0
+[12:33:22.840] Filter stats: average time 0.699ms average result set 1.052
+[12:33:22.840] Query test: Single term E1(C=10000.0) & Single term B1(C=10.0). Expected result set size 1.0
+[12:33:23.184] Filter stats: average time 0.682ms average result set 0.998
+[12:33:23.184] Query test: Single term C1(C=50.0) & Single term D1(C=1000.0). Expected result set size 0.5
+[12:33:23.531] Filter stats: average time 0.687ms average result set 0.498
+[12:33:23.531] Query test: Single term D1(C=1000.0) & Single term C1(C=50.0). Expected result set size 0.5
+[12:33:23.875] Filter stats: average time 0.683ms average result set 0.528
+[12:33:23.876] Query test: Single term C1(C=50.0) & Single term E1(C=10000.0). Expected result set size 5.0
+[12:33:24.239] Filter stats: average time 0.721ms average result set 5.010
+[12:33:24.239] Query test: Single term E1(C=10000.0) & Single term C1(C=50.0). Expected result set size 5.0
+[12:33:24.595] Filter stats: average time 0.705ms average result set 5.160
+[12:33:24.595] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0). Expected result set size 100.0
+[12:33:25.116] Filter stats: average time 1.036ms average result set 99.904
+[12:33:25.117] Query test: Single term E1(C=10000.0) & Single term D1(C=1000.0). Expected result set size 100.0
+[12:33:25.646] Filter stats: average time 1.037ms average result set 100.114
+[12:33:25.646] Query test: Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1000.0000000000002
+[12:33:27.271] Filter stats: average time 3.242ms average result set 999.420
+[12:33:27.271] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 100.00000000000003
+[12:33:28.184] Filter stats: average time 1.818ms average result set 100.054
+[12:33:28.184] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1.0
+[12:33:28.750] Filter stats: average time 1.125ms average result set 1.028
+[12:33:28.751] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term D1(C=1000.0). Expected result set size 1.0000000000000002
+[12:33:29.316] Filter stats: average time 1.124ms average result set 1.030
+[12:33:29.317] Query test: Term range A2s(C=1.0), 10000 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[12:33:31.476] Filter stats: average time 4.311ms average result set 10.048
+[12:33:31.477] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Term range A2s(C=1.0), 10000 terms. Expected result set size 10.000000000000004
+[12:33:33.632] Filter stats: average time 4.302ms average result set 9.984
+[12:33:33.632] Query test: Multi term D1(C=1000.0), 10 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[12:33:34.569] Filter stats: average time 1.863ms average result set 9.562
+[12:33:34.569] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Multi term D1(C=1000.0), 10 terms. Expected result set size 10.000000000000004
+[12:33:35.541] Filter stats: average time 1.933ms average result set 9.668
+[12:33:35.541] Query test: Single term H1(C=50000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 50.000000000000014
+[12:33:36.701] Filter stats: average time 2.313ms average result set 49.792
+[12:33:36.701] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term H1(C=50000.0). Expected result set size 50.000000000000014
+[12:33:37.867] Filter stats: average time 2.311ms average result set 50.060
+[12:33:37.868] Query test: Single term Sparse1(C=0.1). Expected result set size 0.09999999999999999
+[12:33:38.186] Filter stats: average time 0.632ms average result set 0.108
+[12:33:38.187] Query test: Single term Sparse2s(C=0.1). Expected result set size 0.09999999999999999
+[12:33:38.505] Filter stats: average time 0.631ms average result set 0.106
+[12:33:38.505] Query test: Single term A1(C=1.0). Expected result set size 1.0
+[12:33:38.831] Filter stats: average time 0.644ms average result set 0.966
+[12:33:38.831] Query test: Single term A2s(C=1.0). Expected result set size 1.0
+[12:33:39.152] Filter stats: average time 0.635ms average result set 0.932
+[12:33:39.152] Query test: Single term B1(C=10.0). Expected result set size 10.0
+[12:33:39.484] Filter stats: average time 0.659ms average result set 10.034
+[12:33:39.484] Query test: Single term B2s(C=10.0). Expected result set size 10.0
+[12:33:39.815] Filter stats: average time 0.656ms average result set 10.044
+[12:33:39.815] Query test: Single term C1(C=50.0). Expected result set size 50.0
+[12:33:40.183] Filter stats: average time 0.730ms average result set 50.082
+[12:33:40.183] Query test: Single term C2s(C=50.0). Expected result set size 50.0
+[12:33:40.549] Filter stats: average time 0.725ms average result set 49.928
+[12:33:40.549] Query test: Term range Sparse1(C=0.1), 10 terms. Expected result set size 1.0
+[12:33:40.890] Filter stats: average time 0.675ms average result set 0.944
+[12:33:40.890] Query test: Term range Sparse2s(C=0.1), 10 terms. Expected result set size 1.0
+[12:33:41.235] Filter stats: average time 0.683ms average result set 1.052
+[12:33:41.235] Query test: Term range A1(C=1.0), 10 terms. Expected result set size 10.0
+[12:33:41.603] Filter stats: average time 0.730ms average result set 9.964
+[12:33:41.603] Query test: Term range A2s(C=1.0), 10 terms. Expected result set size 10.0
+[12:33:41.966] Filter stats: average time 0.719ms average result set 9.990
+[12:33:41.966] Query test: Term range B1(C=10.0), 10 terms. Expected result set size 100.0
+[12:33:42.418] Filter stats: average time 0.897ms average result set 100.522
+[12:33:42.418] Query test: Term range B2s(C=10.0), 10 terms. Expected result set size 100.0
+[12:33:42.870] Filter stats: average time 0.898ms average result set 100.250
+[12:33:42.870] Query test: Term range C1(C=50.0), 10 terms. Expected result set size 500.0
+[12:33:43.723] Filter stats: average time 1.699ms average result set 500.140
+[12:33:43.723] Query test: Term range C2s(C=50.0), 10 terms. Expected result set size 500.0
+[12:33:44.577] Filter stats: average time 1.701ms average result set 499.988
+[12:33:44.577] Query test: Term range D1(C=1000.0), 10 terms. Expected result set size 10000.0
+[GC [PSYoungGen: 1583075K->10463K(1835008K)] 1583075K->10463K(2883584K), 0.0093320 secs] [Times: user=0.05 sys=0.00, real=0.01 secs] 
+[12:33:56.132] Filter stats: average time 23.102ms average result set 10000.594
+[12:33:56.132] Query test: Term range D2s(C=1000.0), 10 terms. Expected result set size 10000.0
+[12:34:07.783] Filter stats: average time 23.296ms average result set 9999.974
+[12:34:07.784] Query test: Single term D1(C=1000.0) & Single term D2s(C=1000.0). Expected result set size 10.0
+[12:34:08.166] Filter stats: average time 0.759ms average result set 9.942
+[12:34:08.167] Query test: Single term A1(C=1.0) & Single term D1(C=1000.0). Expected result set size 0.01
+[12:34:08.503] Filter stats: average time 0.667ms average result set 0.008
+[12:34:08.503] Query test: Single term D1(C=1000.0) & Single term A1(C=1.0). Expected result set size 0.01
+[12:34:08.841] Filter stats: average time 0.669ms average result set 0.014
+[12:34:08.841] Query test: Single term A1(C=1.0) & Single term E1(C=10000.0). Expected result set size 0.10000000000000002
+[12:34:09.180] Filter stats: average time 0.672ms average result set 0.088
+[12:34:09.180] Query test: Single term E1(C=10000.0) & Single term A1(C=1.0). Expected result set size 0.10000000000000002
+[12:34:09.518] Filter stats: average time 0.670ms average result set 0.088
+[12:34:09.518] Query test: Single term B1(C=10.0) & Single term D1(C=1000.0). Expected result set size 0.10000000000000002
+[12:34:09.862] Filter stats: average time 0.681ms average result set 0.100
+[12:34:09.862] Query test: Single term D1(C=1000.0) & Single term B1(C=10.0). Expected result set size 0.10000000000000002
+[12:34:10.213] Filter stats: average time 0.684ms average result set 0.086
+[12:34:10.213] Query test: Single term B1(C=10.0) & Single term E1(C=10000.0). Expected result set size 1.0
+[12:34:10.561] Filter stats: average time 0.689ms average result set 0.992
+[12:34:10.561] Query test: Single term E1(C=10000.0) & Single term B1(C=10.0). Expected result set size 1.0
+[12:34:10.963] Filter stats: average time 0.798ms average result set 0.944
+[12:34:10.963] Query test: Single term C1(C=50.0) & Single term D1(C=1000.0). Expected result set size 0.5
+[12:34:11.316] Filter stats: average time 0.700ms average result set 0.426
+[12:34:11.316] Query test: Single term D1(C=1000.0) & Single term C1(C=50.0). Expected result set size 0.5
+[12:34:11.664] Filter stats: average time 0.689ms average result set 0.482
+[12:34:11.664] Query test: Single term C1(C=50.0) & Single term E1(C=10000.0). Expected result set size 5.0
+[12:34:12.023] Filter stats: average time 0.710ms average result set 4.954
+[12:34:12.023] Query test: Single term E1(C=10000.0) & Single term C1(C=50.0). Expected result set size 5.0
+[12:34:12.376] Filter stats: average time 0.701ms average result set 5.038
+[12:34:12.377] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0). Expected result set size 100.0
+[12:34:12.899] Filter stats: average time 1.038ms average result set 99.912
+[12:34:12.899] Query test: Single term E1(C=10000.0) & Single term D1(C=1000.0). Expected result set size 100.0
+[12:34:13.422] Filter stats: average time 1.040ms average result set 100.072
+[12:34:13.423] Query test: Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1000.0000000000002
+[12:34:15.060] Filter stats: average time 3.269ms average result set 999.894
+[12:34:15.061] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 100.00000000000003
+[12:34:15.998] Filter stats: average time 1.849ms average result set 100.508
+[12:34:15.998] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1.0
+[12:34:16.573] Filter stats: average time 1.142ms average result set 1.042
+[12:34:16.573] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term D1(C=1000.0). Expected result set size 1.0000000000000002
+[12:34:17.199] Filter stats: average time 1.246ms average result set 1.042
+[12:34:17.200] Query test: Term range A2s(C=1.0), 10000 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[12:34:19.381] Filter stats: average time 4.354ms average result set 10.056
+[12:34:19.381] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Term range A2s(C=1.0), 10000 terms. Expected result set size 10.000000000000004
+[12:34:21.605] Filter stats: average time 4.440ms average result set 10.064
+[12:34:21.605] Query test: Multi term D1(C=1000.0), 10 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[12:34:22.574] Filter stats: average time 1.927ms average result set 9.494
+[12:34:22.574] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Multi term D1(C=1000.0), 10 terms. Expected result set size 10.000000000000004
+[12:34:23.531] Filter stats: average time 1.904ms average result set 9.438
+[12:34:23.532] Query test: Single term H1(C=50000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 50.000000000000014
+[12:34:24.723] Filter stats: average time 2.376ms average result set 50.336
+[12:34:24.723] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term H1(C=50000.0). Expected result set size 50.000000000000014
+[GC [PSYoungGen: 1583327K->9235K(2085568K)] 1583327K->9235K(3134144K), 0.0038240 secs] [Times: user=0.02 sys=0.01, real=0.00 secs] 
+[12:34:25.908] Filter stats: average time 2.362ms average result set 50.106
+[12:34:25.908] Query test: Single term Sparse1(C=0.1). Expected result set size 0.09999999999999999
+[12:34:26.239] Filter stats: average time 0.656ms average result set 0.078
+[12:34:26.239] Query test: Single term Sparse2s(C=0.1). Expected result set size 0.09999999999999999
+[12:34:26.571] Filter stats: average time 0.657ms average result set 0.078
+[12:34:26.571] Query test: Single term A1(C=1.0). Expected result set size 1.0
+[12:34:26.899] Filter stats: average time 0.652ms average result set 1.004
+[12:34:26.900] Query test: Single term A2s(C=1.0). Expected result set size 1.0
+[12:34:27.233] Filter stats: average time 0.660ms average result set 0.950
+[12:34:27.233] Query test: Single term B1(C=10.0). Expected result set size 10.0
+[12:34:27.579] Filter stats: average time 0.688ms average result set 10.018
+[12:34:27.580] Query test: Single term B2s(C=10.0). Expected result set size 10.0
+[12:34:27.924] Filter stats: average time 0.683ms average result set 9.904
+[12:34:27.924] Query test: Single term C1(C=50.0). Expected result set size 50.0
+[12:34:28.306] Filter stats: average time 0.758ms average result set 50.314
+[12:34:28.307] Query test: Single term C2s(C=50.0). Expected result set size 50.0
+[12:34:28.690] Filter stats: average time 0.760ms average result set 50.116
+[12:34:28.690] Query test: Term range Sparse1(C=0.1), 10 terms. Expected result set size 1.0
+[12:34:29.052] Filter stats: average time 0.717ms average result set 0.972
+[12:34:29.052] Query test: Term range Sparse2s(C=0.1), 10 terms. Expected result set size 1.0
+[12:34:29.412] Filter stats: average time 0.715ms average result set 0.992
+[12:34:29.413] Query test: Term range A1(C=1.0), 10 terms. Expected result set size 10.0
+[12:34:29.794] Filter stats: average time 0.757ms average result set 10.044
+[12:34:29.795] Query test: Term range A2s(C=1.0), 10 terms. Expected result set size 10.0
+[12:34:30.164] Filter stats: average time 0.733ms average result set 9.798
+[12:34:30.164] Query test: Term range B1(C=10.0), 10 terms. Expected result set size 100.0
+[12:34:30.621] Filter stats: average time 0.908ms average result set 100.030
+[12:34:30.621] Query test: Term range B2s(C=10.0), 10 terms. Expected result set size 100.0
+[12:34:31.092] Filter stats: average time 0.921ms average result set 100.088
+[12:34:31.092] Query test: Term range C1(C=50.0), 10 terms. Expected result set size 500.0
+[12:34:32.008] Filter stats: average time 1.826ms average result set 499.936
+[12:34:32.009] Query test: Term range C2s(C=50.0), 10 terms. Expected result set size 500.0
+[12:34:32.873] Filter stats: average time 1.723ms average result set 500.078
+[12:34:32.874] Query test: Term range D1(C=1000.0), 10 terms. Expected result set size 10000.0
+[12:34:44.597] Filter stats: average time 23.441ms average result set 10000.416
+[12:34:44.597] Query test: Term range D2s(C=1000.0), 10 terms. Expected result set size 10000.0
+[GC [PSYoungGen: 2083155K->2108K(2076032K)] 2083155K->10592K(3124608K), 0.0041330 secs] [Times: user=0.03 sys=0.01, real=0.00 secs] 
+[12:34:56.374] Filter stats: average time 23.546ms average result set 9999.340
+[12:34:56.374] Query test: Single term D1(C=1000.0) & Single term D2s(C=1000.0). Expected result set size 10.0
+[12:34:56.768] Filter stats: average time 0.768ms average result set 9.856
+[12:34:56.768] Query test: Single term A1(C=1.0) & Single term D1(C=1000.0). Expected result set size 0.01
+[12:34:57.109] Filter stats: average time 0.677ms average result set 0.012
+[12:34:57.110] Query test: Single term D1(C=1000.0) & Single term A1(C=1.0). Expected result set size 0.01
+[12:34:57.452] Filter stats: average time 0.679ms average result set 0.008
+[12:34:57.452] Query test: Single term A1(C=1.0) & Single term E1(C=10000.0). Expected result set size 0.10000000000000002
+[12:34:57.795] Filter stats: average time 0.680ms average result set 0.090
+[12:34:57.795] Query test: Single term E1(C=10000.0) & Single term A1(C=1.0). Expected result set size 0.10000000000000002
+[12:34:58.141] Filter stats: average time 0.686ms average result set 0.122
+[12:34:58.141] Query test: Single term B1(C=10.0) & Single term D1(C=1000.0). Expected result set size 0.10000000000000002
+[12:34:58.482] Filter stats: average time 0.676ms average result set 0.076
+[12:34:58.482] Query test: Single term D1(C=1000.0) & Single term B1(C=10.0). Expected result set size 0.10000000000000002
+[12:34:58.822] Filter stats: average time 0.674ms average result set 0.074
+[12:34:58.822] Query test: Single term B1(C=10.0) & Single term E1(C=10000.0). Expected result set size 1.0
+[12:34:59.192] Filter stats: average time 0.734ms average result set 1.028
+[12:34:59.193] Query test: Single term E1(C=10000.0) & Single term B1(C=10.0). Expected result set size 1.0
+[12:34:59.538] Filter stats: average time 0.685ms average result set 1.026
+[12:34:59.538] Query test: Single term C1(C=50.0) & Single term D1(C=1000.0). Expected result set size 0.5
+[12:34:59.886] Filter stats: average time 0.690ms average result set 0.478
+[12:34:59.886] Query test: Single term D1(C=1000.0) & Single term C1(C=50.0). Expected result set size 0.5
+[12:35:00.250] Filter stats: average time 0.721ms average result set 0.472
+[12:35:00.250] Query test: Single term C1(C=50.0) & Single term E1(C=10000.0). Expected result set size 5.0
+[12:35:00.616] Filter stats: average time 0.727ms average result set 5.038
+[12:35:00.617] Query test: Single term E1(C=10000.0) & Single term C1(C=50.0). Expected result set size 5.0
+[12:35:01.058] Filter stats: average time 0.876ms average result set 5.060
+[12:35:01.058] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0). Expected result set size 100.0
+[12:35:01.584] Filter stats: average time 1.045ms average result set 100.050
+[12:35:01.584] Query test: Single term E1(C=10000.0) & Single term D1(C=1000.0). Expected result set size 100.0
+[12:35:02.159] Filter stats: average time 1.129ms average result set 100.174
+[12:35:02.160] Query test: Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1000.0000000000002
+[12:35:03.816] Filter stats: average time 3.307ms average result set 999.822
+[12:35:03.817] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 100.00000000000003
+[12:35:04.692] Filter stats: average time 1.745ms average result set 99.510
+[12:35:04.692] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1.0
+[12:35:05.270] Filter stats: average time 1.148ms average result set 1.030
+[12:35:05.270] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term D1(C=1000.0). Expected result set size 1.0000000000000002
+[12:35:05.839] Filter stats: average time 1.131ms average result set 1.022
+[12:35:05.839] Query test: Term range A2s(C=1.0), 10000 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[12:35:08.029] Filter stats: average time 4.373ms average result set 10.074
+[12:35:08.030] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Term range A2s(C=1.0), 10000 terms. Expected result set size 10.000000000000004
+[12:35:10.204] Filter stats: average time 4.341ms average result set 10.014
+[12:35:10.204] Query test: Multi term D1(C=1000.0), 10 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[12:35:11.184] Filter stats: average time 1.949ms average result set 9.520
+[12:35:11.184] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Multi term D1(C=1000.0), 10 terms. Expected result set size 10.000000000000004
+[12:35:12.160] Filter stats: average time 1.942ms average result set 9.838
+[12:35:12.160] Query test: Single term H1(C=50000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 50.000000000000014
+[12:35:13.358] Filter stats: average time 2.389ms average result set 50.250
+[12:35:13.359] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term H1(C=50000.0). Expected result set size 50.000000000000014
+[12:35:14.561] Filter stats: average time 2.398ms average result set 49.994
+[12:35:14.561] Query test: Single term Sparse1(C=0.1). Expected result set size 0.09999999999999999
+[12:35:14.906] Filter stats: average time 0.685ms average result set 0.100
+[12:35:14.906] Query test: Single term Sparse2s(C=0.1). Expected result set size 0.09999999999999999
+[12:35:15.252] Filter stats: average time 0.685ms average result set 0.094
+[12:35:15.252] Query test: Single term A1(C=1.0). Expected result set size 1.0
+[12:35:15.601] Filter stats: average time 0.693ms average result set 0.996
+[12:35:15.601] Query test: Single term A2s(C=1.0). Expected result set size 1.0
+[12:35:15.948] Filter stats: average time 0.689ms average result set 1.058
+[12:35:15.949] Query test: Single term B1(C=10.0). Expected result set size 10.0
+[12:35:16.308] Filter stats: average time 0.713ms average result set 10.042
+[12:35:16.308] Query test: Single term B2s(C=10.0). Expected result set size 10.0
+[12:35:16.668] Filter stats: average time 0.715ms average result set 10.000
+[12:35:16.669] Query test: Single term C1(C=50.0). Expected result set size 50.0
+[12:35:17.067] Filter stats: average time 0.791ms average result set 50.108
+[12:35:17.067] Query test: Single term C2s(C=50.0). Expected result set size 50.0
+[12:35:17.463] Filter stats: average time 0.787ms average result set 50.124
+[12:35:17.464] Query test: Term range Sparse1(C=0.1), 10 terms. Expected result set size 1.0
+[12:35:17.835] Filter stats: average time 0.737ms average result set 0.962
+[12:35:17.835] Query test: Term range Sparse2s(C=0.1), 10 terms. Expected result set size 1.0
+[12:35:18.207] Filter stats: average time 0.737ms average result set 1.046
+[12:35:18.207] Query test: Term range A1(C=1.0), 10 terms. Expected result set size 10.0
+[12:35:18.603] Filter stats: average time 0.787ms average result set 9.918
+[12:35:18.603] Query test: Term range A2s(C=1.0), 10 terms. Expected result set size 10.0
+[12:35:18.994] Filter stats: average time 0.776ms average result set 10.052
+[12:35:18.994] Query test: Term range B1(C=10.0), 10 terms. Expected result set size 100.0
+[12:35:19.475] Filter stats: average time 0.957ms average result set 99.910
+[12:35:19.476] Query test: Term range B2s(C=10.0), 10 terms. Expected result set size 100.0
+[12:35:19.958] Filter stats: average time 0.958ms average result set 100.108
+[12:35:19.958] Query test: Term range C1(C=50.0), 10 terms. Expected result set size 500.0
+[12:35:20.843] Filter stats: average time 1.764ms average result set 499.868
+[12:35:20.843] Query test: Term range C2s(C=50.0), 10 terms. Expected result set size 500.0
+[12:35:21.771] Filter stats: average time 1.850ms average result set 499.998
+[12:35:21.771] Query test: Term range D1(C=1000.0), 10 terms. Expected result set size 10000.0
+[12:35:33.393] Filter stats: average time 23.237ms average result set 10000.234
+[12:35:33.393] Query test: Term range D2s(C=1000.0), 10 terms. Expected result set size 10000.0
+[GC [PSYoungGen: 2076028K->1773K(2082304K)] 2084512K->10354K(3130880K), 0.0018330 secs] [Times: user=0.01 sys=0.00, real=0.01 secs] 
+[12:35:44.931] Filter stats: average time 23.070ms average result set 9999.662
+[12:35:44.932] Query test: Single term D1(C=1000.0) & Single term D2s(C=1000.0). Expected result set size 10.0
+[12:35:45.353] Filter stats: average time 0.837ms average result set 9.870
+[12:35:45.353] Query test: Single term A1(C=1.0) & Single term D1(C=1000.0). Expected result set size 0.01
+[12:35:45.725] Filter stats: average time 0.738ms average result set 0.014
+[12:35:45.725] Query test: Single term D1(C=1000.0) & Single term A1(C=1.0). Expected result set size 0.01
+[12:35:46.098] Filter stats: average time 0.741ms average result set 0.016
+[12:35:46.099] Query test: Single term A1(C=1.0) & Single term E1(C=10000.0). Expected result set size 0.10000000000000002
+[12:35:46.517] Filter stats: average time 0.831ms average result set 0.094
+[12:35:46.517] Query test: Single term E1(C=10000.0) & Single term A1(C=1.0). Expected result set size 0.10000000000000002
+[12:35:46.889] Filter stats: average time 0.737ms average result set 0.098
+[12:35:46.889] Query test: Single term B1(C=10.0) & Single term D1(C=1000.0). Expected result set size 0.10000000000000002
+[12:35:47.263] Filter stats: average time 0.743ms average result set 0.094
+[12:35:47.264] Query test: Single term D1(C=1000.0) & Single term B1(C=10.0). Expected result set size 0.10000000000000002
+[12:35:47.638] Filter stats: average time 0.743ms average result set 0.104
+[12:35:47.639] Query test: Single term B1(C=10.0) & Single term E1(C=10000.0). Expected result set size 1.0
+[12:35:48.017] Filter stats: average time 0.752ms average result set 1.014
+[12:35:48.018] Query test: Single term E1(C=10000.0) & Single term B1(C=10.0). Expected result set size 1.0
+[12:35:48.396] Filter stats: average time 0.751ms average result set 1.006
+[12:35:48.396] Query test: Single term C1(C=50.0) & Single term D1(C=1000.0). Expected result set size 0.5
+[12:35:48.807] Filter stats: average time 0.815ms average result set 0.462
+[12:35:48.807] Query test: Single term D1(C=1000.0) & Single term C1(C=50.0). Expected result set size 0.5
+[12:35:49.186] Filter stats: average time 0.753ms average result set 0.540
+[12:35:49.187] Query test: Single term C1(C=50.0) & Single term E1(C=10000.0). Expected result set size 5.0
+[12:35:49.583] Filter stats: average time 0.787ms average result set 5.070
+[12:35:49.584] Query test: Single term E1(C=10000.0) & Single term C1(C=50.0). Expected result set size 5.0
+[12:35:49.974] Filter stats: average time 0.774ms average result set 4.880
+[12:35:49.974] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0). Expected result set size 100.0
+[12:35:50.581] Filter stats: average time 1.207ms average result set 100.096
+[12:35:50.581] Query test: Single term E1(C=10000.0) & Single term D1(C=1000.0). Expected result set size 100.0
+[12:35:51.139] Filter stats: average time 1.110ms average result set 99.974
+[12:35:51.139] Query test: Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1000.0000000000002
+[12:35:52.805] Filter stats: average time 3.325ms average result set 999.430
+[12:35:52.806] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 100.00000000000003
+[12:35:53.708] Filter stats: average time 1.798ms average result set 99.796
+[12:35:53.708] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1.0
+[12:35:54.309] Filter stats: average time 1.182ms average result set 0.968
+[12:35:54.310] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term D1(C=1000.0). Expected result set size 1.0000000000000002
+[12:35:54.918] Filter stats: average time 1.210ms average result set 0.984
+[12:35:54.918] Query test: Term range A2s(C=1.0), 10000 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[12:35:57.161] Filter stats: average time 4.477ms average result set 9.864
+[12:35:57.161] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Term range A2s(C=1.0), 10000 terms. Expected result set size 10.000000000000004
+[12:35:59.397] Filter stats: average time 4.464ms average result set 9.668
+[12:35:59.398] Query test: Multi term D1(C=1000.0), 10 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[12:36:00.382] Filter stats: average time 1.956ms average result set 9.522
+[12:36:00.382] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Multi term D1(C=1000.0), 10 terms. Expected result set size 10.000000000000004
+[12:36:01.413] Filter stats: average time 2.050ms average result set 9.458
+[12:36:01.413] Query test: Single term H1(C=50000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 50.000000000000014
+[12:36:02.615] Filter stats: average time 2.393ms average result set 49.408
+[12:36:02.615] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term H1(C=50000.0). Expected result set size 50.000000000000014
+[12:36:03.820] Filter stats: average time 2.399ms average result set 50.136
+[12:36:03.820] Query test: Single term Sparse1(C=0.1). Expected result set size 0.09999999999999999
+[12:36:04.175] Filter stats: average time 0.700ms average result set 0.104
+[12:36:04.175] Query test: Single term Sparse2s(C=0.1). Expected result set size 0.09999999999999999
+[12:36:04.529] Filter stats: average time 0.700ms average result set 0.086
+[12:36:04.530] Query test: Single term A1(C=1.0). Expected result set size 1.0
+[12:36:04.909] Filter stats: average time 0.706ms average result set 1.016
+[12:36:04.910] Query test: Single term A2s(C=1.0). Expected result set size 1.0
+[12:36:05.270] Filter stats: average time 0.712ms average result set 0.880
+[12:36:05.270] Query test: Single term B1(C=10.0). Expected result set size 10.0
+[12:36:05.640] Filter stats: average time 0.731ms average result set 10.094
+[12:36:05.641] Query test: Single term B2s(C=10.0). Expected result set size 10.0
+[12:36:06.011] Filter stats: average time 0.732ms average result set 10.162
+[12:36:06.012] Query test: Single term C1(C=50.0). Expected result set size 50.0
+[12:36:06.416] Filter stats: average time 0.799ms average result set 50.368
+[12:36:06.416] Query test: Single term C2s(C=50.0). Expected result set size 50.0
+[12:36:06.818] Filter stats: average time 0.796ms average result set 49.996
+[12:36:06.819] Query test: Term range Sparse1(C=0.1), 10 terms. Expected result set size 1.0
+[12:36:07.198] Filter stats: average time 0.749ms average result set 0.980
+[12:36:07.198] Query test: Term range Sparse2s(C=0.1), 10 terms. Expected result set size 1.0
+[12:36:07.570] Filter stats: average time 0.735ms average result set 0.976
+[12:36:07.571] Query test: Term range A1(C=1.0), 10 terms. Expected result set size 10.0
+[12:36:07.981] Filter stats: average time 0.812ms average result set 9.972
+[12:36:07.981] Query test: Term range A2s(C=1.0), 10 terms. Expected result set size 10.0
+[12:36:08.374] Filter stats: average time 0.776ms average result set 9.810
+[12:36:08.374] Query test: Term range B1(C=10.0), 10 terms. Expected result set size 100.0
+[12:36:08.866] Filter stats: average time 0.973ms average result set 100.400
+[12:36:08.866] Query test: Term range B2s(C=10.0), 10 terms. Expected result set size 100.0
+[12:36:09.356] Filter stats: average time 0.970ms average result set 100.012
+[12:36:09.356] Query test: Term range C1(C=50.0), 10 terms. Expected result set size 500.0
+[12:36:10.254] Filter stats: average time 1.790ms average result set 499.916
+[12:36:10.255] Query test: Term range C2s(C=50.0), 10 terms. Expected result set size 500.0
+[12:36:11.173] Filter stats: average time 1.830ms average result set 499.984
+[12:36:11.173] Query test: Term range D1(C=1000.0), 10 terms. Expected result set size 10000.0
+[GC [PSYoungGen: 2071021K->1916K(2071168K)] 2079602K->10529K(3119744K), 0.0057740 secs] [Times: user=0.01 sys=0.00, real=0.01 secs] 
+[12:36:22.924] Filter stats: average time 23.492ms average result set 10000.166
+[12:36:22.924] Query test: Term range D2s(C=1000.0), 10 terms. Expected result set size 10000.0
+[12:36:34.506] Filter stats: average time 23.156ms average result set 9999.762
+[12:36:34.507] Query test: Single term D1(C=1000.0) & Single term D2s(C=1000.0). Expected result set size 10.0
+[12:36:34.937] Filter stats: average time 0.851ms average result set 9.984
+[12:36:34.937] Query test: Single term A1(C=1.0) & Single term D1(C=1000.0). Expected result set size 0.01
+[12:36:35.324] Filter stats: average time 0.764ms average result set 0.022
+[12:36:35.325] Query test: Single term D1(C=1000.0) & Single term A1(C=1.0). Expected result set size 0.01
+[12:36:35.708] Filter stats: average time 0.756ms average result set 0.012
+[12:36:35.708] Query test: Single term A1(C=1.0) & Single term E1(C=10000.0). Expected result set size 0.10000000000000002
+[12:36:36.091] Filter stats: average time 0.757ms average result set 0.102
+[12:36:36.091] Query test: Single term E1(C=10000.0) & Single term A1(C=1.0). Expected result set size 0.10000000000000002
+[12:36:36.476] Filter stats: average time 0.759ms average result set 0.092
+[12:36:36.476] Query test: Single term B1(C=10.0) & Single term D1(C=1000.0). Expected result set size 0.10000000000000002
+[12:36:36.862] Filter stats: average time 0.762ms average result set 0.094
+[12:36:36.862] Query test: Single term D1(C=1000.0) & Single term B1(C=10.0). Expected result set size 0.10000000000000002
+[12:36:37.248] Filter stats: average time 0.761ms average result set 0.092
+[12:36:37.248] Query test: Single term B1(C=10.0) & Single term E1(C=10000.0). Expected result set size 1.0
+[12:36:37.638] Filter stats: average time 0.770ms average result set 1.080
+[12:36:37.638] Query test: Single term E1(C=10000.0) & Single term B1(C=10.0). Expected result set size 1.0
+[12:36:38.019] Filter stats: average time 0.752ms average result set 1.058
+[12:36:38.020] Query test: Single term C1(C=50.0) & Single term D1(C=1000.0). Expected result set size 0.5
+[12:36:38.403] Filter stats: average time 0.757ms average result set 0.498
+[12:36:38.404] Query test: Single term D1(C=1000.0) & Single term C1(C=50.0). Expected result set size 0.5
+[12:36:38.786] Filter stats: average time 0.754ms average result set 0.482
+[12:36:38.786] Query test: Single term C1(C=50.0) & Single term E1(C=10000.0). Expected result set size 5.0
+[12:36:39.189] Filter stats: average time 0.796ms average result set 4.904
+[12:36:39.189] Query test: Single term E1(C=10000.0) & Single term C1(C=50.0). Expected result set size 5.0
+[12:36:39.589] Filter stats: average time 0.791ms average result set 4.928
+[12:36:39.589] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0). Expected result set size 100.0
+[12:36:40.176] Filter stats: average time 1.150ms average result set 99.942
+[12:36:40.176] Query test: Single term E1(C=10000.0) & Single term D1(C=1000.0). Expected result set size 100.0
+[12:36:40.740] Filter stats: average time 1.118ms average result set 99.844
+[12:36:40.740] Query test: Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1000.0000000000002
+[12:36:42.414] Filter stats: average time 3.340ms average result set 1000.110
+[12:36:42.414] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 100.00000000000003
+[12:36:43.318] Filter stats: average time 1.797ms average result set 99.806
+[12:36:43.318] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1.0
+[12:36:43.919] Filter stats: average time 1.193ms average result set 1.132
+[12:36:43.920] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term D1(C=1000.0). Expected result set size 1.0000000000000002
+[12:36:44.522] Filter stats: average time 1.194ms average result set 1.044
+[12:36:44.522] Query test: Term range A2s(C=1.0), 10000 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[12:36:46.716] Filter stats: average time 4.378ms average result set 10.110
+[12:36:46.716] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Term range A2s(C=1.0), 10000 terms. Expected result set size 10.000000000000004
+[12:36:48.919] Filter stats: average time 4.393ms average result set 10.036
+[12:36:48.919] Query test: Multi term D1(C=1000.0), 10 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[12:36:49.907] Filter stats: average time 1.963ms average result set 9.440
+[12:36:49.907] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Multi term D1(C=1000.0), 10 terms. Expected result set size 10.000000000000004
+[12:36:50.896] Filter stats: average time 1.964ms average result set 9.600
+[12:36:50.896] Query test: Single term H1(C=50000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 50.000000000000014
+[12:36:52.113] Filter stats: average time 2.422ms average result set 49.944
+[12:36:52.113] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term H1(C=50000.0). Expected result set size 50.000000000000014
+[12:36:53.322] Filter stats: average time 2.406ms average result set 50.416
+[12:36:53.322] Done
+Single term Sparse1(C=0.1). Expected result set size 0.09999999999999999	0.629	0.632	0.656	0.685	0.700
+Single term Sparse2s(C=0.1). Expected result set size 0.09999999999999999	0.626	0.631	0.657	0.685	0.700
+Single term A1(C=1.0). Expected result set size 1.0	0.651	0.644	0.652	0.693	0.706
+Single term A2s(C=1.0). Expected result set size 1.0	0.632	0.635	0.660	0.689	0.712
+Single term B1(C=10.0). Expected result set size 10.0	0.647	0.659	0.688	0.713	0.731
+Single term B2s(C=10.0). Expected result set size 10.0	0.649	0.656	0.683	0.715	0.732
+Single term C1(C=50.0). Expected result set size 50.0	0.725	0.730	0.758	0.791	0.799
+Single term C2s(C=50.0). Expected result set size 50.0	0.722	0.725	0.760	0.787	0.796
+Term range Sparse1(C=0.1), 10 ter. Expected result set size 1.0	0.694	0.675	0.717	0.737	0.749
+Term range Sparse2s(C=0.1), 10 ter. Expected result set size 1.0	0.684	0.683	0.715	0.737	0.735
+Term range A1(C=1.0), 10 ter. Expected result set size 10.0	0.741	0.730	0.757	0.787	0.812
+Term range A2s(C=1.0), 10 ter. Expected result set size 10.0	0.727	0.719	0.733	0.776	0.776
+Term range B1(C=10.0), 10 ter. Expected result set size 100.0	0.908	0.897	0.908	0.957	0.973
+Term range B2s(C=10.0), 10 ter. Expected result set size 100.0	0.928	0.898	0.921	0.958	0.970
+Term range C1(C=50.0), 10 ter. Expected result set size 500.0	1.718	1.699	1.826	1.764	1.790
+Term range C2s(C=50.0), 10 ter. Expected result set size 500.0	1.695	1.701	1.723	1.850	1.830
+Term range D1(C=1000.0), 10 ter. Expected result set size 10000.0	22.996	23.102	23.441	23.237	23.492
+Term range D2s(C=1000.0), 10 ter. Expected result set size 10000.0	22.894	23.296	23.546	23.070	23.156
+Single term D1(C=1000.0) & Single term D2s(C=1000.0). Expected result set size 10.0	0.799	0.759	0.768	0.837	0.851
+Single term A1(C=1.0) & Single term D1(C=1000.0). Expected result set size 0.01	0.699	0.667	0.677	0.738	0.764
+Single term D1(C=1000.0) & Single term A1(C=1.0). Expected result set size 0.01	0.685	0.669	0.679	0.741	0.756
+Single term A1(C=1.0) & Single term E1(C=10000.0). Expected result set size 0.10000000000000002	0.681	0.672	0.680	0.831	0.757
+Single term E1(C=10000.0) & Single term A1(C=1.0). Expected result set size 0.10000000000000002	0.720	0.670	0.686	0.737	0.759
+Single term B1(C=10.0) & Single term D1(C=1000.0). Expected result set size 0.10000000000000002	0.698	0.681	0.676	0.743	0.762
+Single term D1(C=1000.0) & Single term B1(C=10.0). Expected result set size 0.10000000000000002	0.763	0.684	0.674	0.743	0.761
+Single term B1(C=10.0) & Single term E1(C=10000.0). Expected result set size 1.0	0.699	0.689	0.734	0.752	0.770
+Single term E1(C=10000.0) & Single term B1(C=10.0). Expected result set size 1.0	0.682	0.798	0.685	0.751	0.752
+Single term C1(C=50.0) & Single term D1(C=1000.0). Expected result set size 0.5	0.687	0.700	0.690	0.815	0.757
+Single term D1(C=1000.0) & Single term C1(C=50.0). Expected result set size 0.5	0.683	0.689	0.721	0.753	0.754
+Single term C1(C=50.0) & Single term E1(C=10000.0). Expected result set size 5.0	0.721	0.710	0.727	0.787	0.796
+Single term E1(C=10000.0) & Single term C1(C=50.0). Expected result set size 5.0	0.705	0.701	0.876	0.774	0.791
+Single term D1(C=1000.0) & Single term E1(C=10000.0). Expected result set size 100.0	1.036	1.038	1.045	1.207	1.150
+Single term E1(C=10000.0) & Single term D1(C=1000.0). Expected result set size 100.0	1.037	1.040	1.129	1.110	1.118
+Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1000.0000000000002	3.242	3.269	3.307	3.325	3.340
+Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 100.00000000000003	1.818	1.849	1.745	1.798	1.797
+Single term D1(C=1000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1.0	1.125	1.142	1.148	1.182	1.193
+Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term D1(C=1000.0). Expected result set size 1.0000000000000002	1.124	1.246	1.131	1.210	1.194
+Term range A2s(C=1.0), 10000 ter & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004	4.311	4.354	4.373	4.477	4.378
+Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Term range A2s(C=1.0), 10000 ter. Expected result set size 10.000000000000004	4.302	4.440	4.341	4.464	4.393
+Multi term D1(C=1000.0), 10 ter & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004	1.863	1.927	1.949	1.956	1.963
+Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Multi term D1(C=1000.0), 10 ter. Expected result set size 10.000000000000004	1.933	1.904	1.942	2.050	1.964
+Single term H1(C=50000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 50.000000000000014	2.313	2.376	2.389	2.393	2.422
+Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term H1(C=50000.0). Expected result set size 50.000000000000014	2.311	2.362	2.398	2.399	2.406
+Heap
+ PSYoungGen      total 2071168K, used 1598319K [0x00007f5b03b70000, 0x00007f5b83b70000, 0x00007f5b83b70000)
+  eden space 2069248K, 77% used [0x00007f5b03b70000,0x00007f5b6526cb88,0x00007f5b82030000)
+  from space 1920K, 99% used [0x00007f5b82030000,0x00007f5b8220f250,0x00007f5b82210000)
+  to   space 14400K, 0% used [0x00007f5b82d60000,0x00007f5b82d60000,0x00007f5b83b70000)
+ PSOldGen        total 1048576K, used 8612K [0x00007f5ac3b70000, 0x00007f5b03b70000, 0x00007f5b03b70000)
+  object space 1048576K, 0% used [0x00007f5ac3b70000,0x00007f5ac43d92d8,0x00007f5b03b70000)
+ PSPermGen       total 24320K, used 24281K [0x00007f5abe970000, 0x00007f5ac0130000, 0x00007f5ac3b70000)
+  object space 24320K, 99% used [0x00007f5abe970000,0x00007f5ac0126608,0x00007f5ac0130000)

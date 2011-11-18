@@ -1,0 +1,578 @@
+sysProp: tangosol.pof.enabled: true
+sysProp: tangosol.pof.config: pof-config.xml
+sysProp: tangosol.coherence.cacheconfig: index-test-cache-config.xml
+sysProp: tangosol.coherence.distributed.localstorage: true
+[15:10:32.913] Generating 100000 documents
+[15:10:33.462] Loaded 10000
+[15:10:33.843] Loaded 20000
+[15:10:34.205] Loaded 30000
+[15:10:34.479] Loaded 40000
+[15:10:34.760] Loaded 50000
+[15:10:35.013] Loaded 60000
+[15:10:35.208] Loaded 70000
+[15:10:35.472] Loaded 80000
+[15:10:35.749] Loaded 90000
+[15:10:36.025] Loaded 100000
+[15:10:36.026] Creating indexes
+[15:10:45.376] Cache loaded
+[15:10:45.379] Query test: Single term Sparse1(C=0.1). Expected result set size 0.09999999999999999
+[15:10:45.498] Filter stats: average time 0.217ms average result set 0.120
+[15:10:45.498] Query test: Single term Sparse2s(C=0.1). Expected result set size 0.09999999999999999
+[15:10:45.608] Filter stats: average time 0.209ms average result set 0.080
+[15:10:45.608] Query test: Single term A1(C=1.0). Expected result set size 1.0
+[15:10:45.710] Filter stats: average time 0.195ms average result set 1.010
+[15:10:45.711] Query test: Single term A2s(C=1.0). Expected result set size 1.0
+[15:10:45.808] Filter stats: average time 0.186ms average result set 0.980
+[15:10:45.808] Query test: Single term B1(C=10.0). Expected result set size 10.0
+[15:10:45.903] Filter stats: average time 0.182ms average result set 9.862
+[15:10:45.903] Query test: Single term B2s(C=10.0). Expected result set size 10.0
+[15:10:45.997] Filter stats: average time 0.180ms average result set 10.028
+[15:10:45.998] Query test: Single term C1(C=50.0). Expected result set size 50.0
+[15:10:46.099] Filter stats: average time 0.194ms average result set 49.890
+[15:10:46.099] Query test: Single term C2s(C=50.0). Expected result set size 50.0
+[15:10:46.196] Filter stats: average time 0.186ms average result set 50.060
+[15:10:46.197] Query test: Term range Sparse1(C=0.1), 10 terms. Expected result set size 1.0
+[15:10:46.287] Filter stats: average time 0.171ms average result set 1.008
+[15:10:46.287] Query test: Term range Sparse2s(C=0.1), 10 terms. Expected result set size 1.0
+[15:10:46.375] Filter stats: average time 0.167ms average result set 0.908
+[15:10:46.375] Query test: Term range A1(C=1.0), 10 terms. Expected result set size 10.0
+[15:10:46.464] Filter stats: average time 0.163ms average result set 9.962
+[15:10:46.464] Query test: Term range A2s(C=1.0), 10 terms. Expected result set size 10.0
+[15:10:46.545] Filter stats: average time 0.152ms average result set 9.832
+[15:10:46.545] Query test: Term range B1(C=10.0), 10 terms. Expected result set size 100.0
+[15:10:46.660] Filter stats: average time 0.222ms average result set 100.190
+[15:10:46.660] Query test: Term range B2s(C=10.0), 10 terms. Expected result set size 100.0
+[15:10:46.776] Filter stats: average time 0.225ms average result set 100.040
+[15:10:46.776] Query test: Term range C1(C=50.0), 10 terms. Expected result set size 500.0
+[15:10:47.071] Filter stats: average time 0.583ms average result set 499.902
+[15:10:47.072] Query test: Term range C2s(C=50.0), 10 terms. Expected result set size 500.0
+[15:10:47.341] Filter stats: average time 0.532ms average result set 499.944
+[15:10:47.341] Query test: Term range D1(C=1000.0), 10 terms. Expected result set size 10000.0
+[15:10:51.312] Filter stats: average time 7.935ms average result set 10001.664
+[15:10:51.313] Query test: Term range D2s(C=1000.0), 10 terms. Expected result set size 10000.0
+[15:10:55.211] Filter stats: average time 7.790ms average result set 9999.296
+[15:10:55.211] Query test: Single term D1(C=1000.0) & Single term D2s(C=1000.0). Expected result set size 10.0
+[15:10:56.121] Filter stats: average time 1.806ms average result set 9.928
+[15:10:56.122] Query test: Single term A1(C=1.0) & Single term D1(C=1000.0). Expected result set size 0.01
+[15:10:56.317] Filter stats: average time 0.385ms average result set 0.006
+[15:10:56.317] Query test: Single term D1(C=1000.0) & Single term A1(C=1.0). Expected result set size 0.01
+[15:10:56.380] Filter stats: average time 0.122ms average result set 0.010
+[15:10:56.381] Query test: Single term A1(C=1.0) & Single term E1(C=10000.0). Expected result set size 0.10000000000000002
+[15:10:56.443] Filter stats: average time 0.120ms average result set 0.102
+[15:10:56.443] Query test: Single term E1(C=10000.0) & Single term A1(C=1.0). Expected result set size 0.10000000000000002
+[15:10:56.506] Filter stats: average time 0.120ms average result set 0.080
+[15:10:56.506] Query test: Single term B1(C=10.0) & Single term D1(C=1000.0). Expected result set size 0.10000000000000002
+[15:10:56.579] Filter stats: average time 0.142ms average result set 0.094
+[15:10:56.580] Query test: Single term D1(C=1000.0) & Single term B1(C=10.0). Expected result set size 0.10000000000000002
+[15:10:56.648] Filter stats: average time 0.133ms average result set 0.080
+[15:10:56.648] Query test: Single term B1(C=10.0) & Single term E1(C=10000.0). Expected result set size 1.0
+[15:10:56.719] Filter stats: average time 0.139ms average result set 1.046
+[15:10:56.720] Query test: Single term E1(C=10000.0) & Single term B1(C=10.0). Expected result set size 1.0
+[15:10:56.787] Filter stats: average time 0.130ms average result set 0.988
+[15:10:56.787] Query test: Single term C1(C=50.0) & Single term D1(C=1000.0). Expected result set size 0.5
+[15:10:56.907] Filter stats: average time 0.236ms average result set 0.544
+[15:10:56.907] Query test: Single term D1(C=1000.0) & Single term C1(C=50.0). Expected result set size 0.5
+[15:10:57.011] Filter stats: average time 0.203ms average result set 0.492
+[15:10:57.011] Query test: Single term C1(C=50.0) & Single term E1(C=10000.0). Expected result set size 5.0
+[15:10:57.126] Filter stats: average time 0.226ms average result set 4.990
+[15:10:57.126] Query test: Single term E1(C=10000.0) & Single term C1(C=50.0). Expected result set size 5.0
+[15:10:57.223] Filter stats: average time 0.190ms average result set 5.010
+[15:10:57.223] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0). Expected result set size 100.0
+[15:10:58.357] Filter stats: average time 2.263ms average result set 99.834
+[15:10:58.357] Query test: Single term E1(C=10000.0) & Single term D1(C=1000.0). Expected result set size 100.0
+[15:10:59.118] Filter stats: average time 1.519ms average result set 99.926
+[15:10:59.119] Query test: Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1000.0000000000002
+[15:11:09.166] Filter stats: average time 20.090ms average result set 1000.854
+[15:11:09.166] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 100.00000000000003
+[15:11:15.868] Filter stats: average time 13.400ms average result set 100.864
+[15:11:15.871] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1.0
+[15:11:17.018] Filter stats: average time 2.290ms average result set 0.962
+[15:11:17.019] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term D1(C=1000.0). Expected result set size 1.0000000000000002
+[15:11:17.758] Filter stats: average time 1.474ms average result set 1.048
+[15:11:17.759] Query test: Term range A2s(C=1.0), 10000 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[15:11:24.277] Filter stats: average time 13.031ms average result set 10.042
+[15:11:24.277] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Term range A2s(C=1.0), 10000 terms. Expected result set size 10.000000000000004
+[15:11:33.891] Filter stats: average time 19.221ms average result set 9.634
+[15:11:33.892] Query test: Multi term D1(C=1000.0), 10 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[15:11:45.995] Filter stats: average time 24.193ms average result set 9.536
+[15:11:45.996] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Multi term D1(C=1000.0), 10 terms. Expected result set size 10.000000000000004
+[15:11:53.389] Filter stats: average time 14.777ms average result set 9.738
+[15:11:53.390] Query test: Single term H1(C=50000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 50.000000000000014
+[15:12:02.468] Filter stats: average time 18.151ms average result set 50.130
+[15:12:02.469] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term H1(C=50000.0). Expected result set size 50.000000000000014
+[15:12:12.353] Filter stats: average time 19.762ms average result set 50.130
+[15:12:12.353] Rerun tests
+[15:12:12.353] Query test: Single term Sparse1(C=0.1). Expected result set size 0.09999999999999999
+[15:12:12.412] Filter stats: average time 0.113ms average result set 0.102
+[15:12:12.412] Query test: Single term Sparse2s(C=0.1). Expected result set size 0.09999999999999999
+[15:12:12.470] Filter stats: average time 0.113ms average result set 0.128
+[15:12:12.470] Query test: Single term A1(C=1.0). Expected result set size 1.0
+[15:12:12.528] Filter stats: average time 0.113ms average result set 0.986
+[15:12:12.528] Query test: Single term A2s(C=1.0). Expected result set size 1.0
+[15:12:12.586] Filter stats: average time 0.113ms average result set 1.068
+[15:12:12.587] Query test: Single term B1(C=10.0). Expected result set size 10.0
+[15:12:12.647] Filter stats: average time 0.117ms average result set 9.956
+[15:12:12.647] Query test: Single term B2s(C=10.0). Expected result set size 10.0
+[15:12:12.707] Filter stats: average time 0.118ms average result set 9.898
+[15:12:12.708] Query test: Single term C1(C=50.0). Expected result set size 50.0
+[15:12:12.776] Filter stats: average time 0.134ms average result set 50.082
+[15:12:12.776] Query test: Single term C2s(C=50.0). Expected result set size 50.0
+[15:12:12.845] Filter stats: average time 0.133ms average result set 49.986
+[15:12:12.845] Query test: Term range Sparse1(C=0.1), 10 terms. Expected result set size 1.0
+[15:12:12.908] Filter stats: average time 0.122ms average result set 1.070
+[15:12:12.908] Query test: Term range Sparse2s(C=0.1), 10 terms. Expected result set size 1.0
+[15:12:12.971] Filter stats: average time 0.122ms average result set 1.052
+[15:12:12.971] Query test: Term range A1(C=1.0), 10 terms. Expected result set size 10.0
+[15:12:13.039] Filter stats: average time 0.132ms average result set 9.978
+[15:12:13.039] Query test: Term range A2s(C=1.0), 10 terms. Expected result set size 10.0
+[15:12:13.107] Filter stats: average time 0.131ms average result set 10.014
+[15:12:13.107] Query test: Term range B1(C=10.0), 10 terms. Expected result set size 100.0
+[15:12:13.212] Filter stats: average time 0.204ms average result set 99.788
+[15:12:13.212] Query test: Term range B2s(C=10.0), 10 terms. Expected result set size 100.0
+[15:12:13.321] Filter stats: average time 0.213ms average result set 100.054
+[15:12:13.321] Query test: Term range C1(C=50.0), 10 terms. Expected result set size 500.0
+[15:12:13.601] Filter stats: average time 0.555ms average result set 499.990
+[15:12:13.601] Query test: Term range C2s(C=50.0), 10 terms. Expected result set size 500.0
+[15:12:13.864] Filter stats: average time 0.522ms average result set 500.016
+[15:12:13.864] Query test: Term range D1(C=1000.0), 10 terms. Expected result set size 10000.0
+[15:12:17.915] Filter stats: average time 8.097ms average result set 10001.026
+[15:12:17.915] Query test: Term range D2s(C=1000.0), 10 terms. Expected result set size 10000.0
+[15:12:21.935] Filter stats: average time 8.035ms average result set 9999.748
+[15:12:21.935] Query test: Single term D1(C=1000.0) & Single term D2s(C=1000.0). Expected result set size 10.0
+[15:12:22.759] Filter stats: average time 1.645ms average result set 10.022
+[15:12:22.760] Query test: Single term A1(C=1.0) & Single term D1(C=1000.0). Expected result set size 0.01
+[15:12:22.821] Filter stats: average time 0.119ms average result set 0.008
+[15:12:22.821] Query test: Single term D1(C=1000.0) & Single term A1(C=1.0). Expected result set size 0.01
+[15:12:22.882] Filter stats: average time 0.118ms average result set 0.014
+[15:12:22.883] Query test: Single term A1(C=1.0) & Single term E1(C=10000.0). Expected result set size 0.10000000000000002
+[15:12:22.944] Filter stats: average time 0.119ms average result set 0.108
+[15:12:22.948] Query test: Single term E1(C=10000.0) & Single term A1(C=1.0). Expected result set size 0.10000000000000002
+[15:12:23.011] Filter stats: average time 0.122ms average result set 0.110
+[15:12:23.012] Query test: Single term B1(C=10.0) & Single term D1(C=1000.0). Expected result set size 0.10000000000000002
+[15:12:23.086] Filter stats: average time 0.145ms average result set 0.090
+[15:12:23.086] Query test: Single term D1(C=1000.0) & Single term B1(C=10.0). Expected result set size 0.10000000000000002
+[15:12:23.155] Filter stats: average time 0.134ms average result set 0.092
+[15:12:23.155] Query test: Single term B1(C=10.0) & Single term E1(C=10000.0). Expected result set size 1.0
+[15:12:23.227] Filter stats: average time 0.141ms average result set 1.012
+[15:12:23.227] Query test: Single term E1(C=10000.0) & Single term B1(C=10.0). Expected result set size 1.0
+[15:12:23.295] Filter stats: average time 0.131ms average result set 0.994
+[15:12:23.295] Query test: Single term C1(C=50.0) & Single term D1(C=1000.0). Expected result set size 0.5
+[15:12:23.416] Filter stats: average time 0.239ms average result set 0.496
+[15:12:23.416] Query test: Single term D1(C=1000.0) & Single term C1(C=50.0). Expected result set size 0.5
+[15:12:23.518] Filter stats: average time 0.199ms average result set 0.494
+[15:12:23.518] Query test: Single term C1(C=50.0) & Single term E1(C=10000.0). Expected result set size 5.0
+[15:12:23.632] Filter stats: average time 0.224ms average result set 4.998
+[15:12:23.633] Query test: Single term E1(C=10000.0) & Single term C1(C=50.0). Expected result set size 5.0
+[15:12:23.728] Filter stats: average time 0.187ms average result set 4.952
+[15:12:23.728] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0). Expected result set size 100.0
+[15:12:24.836] Filter stats: average time 2.211ms average result set 100.098
+[15:12:24.836] Query test: Single term E1(C=10000.0) & Single term D1(C=1000.0). Expected result set size 100.0
+[15:12:25.563] Filter stats: average time 1.451ms average result set 99.870
+[15:12:25.564] Query test: Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1000.0000000000002
+[15:12:35.609] Filter stats: average time 20.087ms average result set 1000.004
+[15:12:35.610] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 100.00000000000003
+[15:12:42.754] Filter stats: average time 14.285ms average result set 100.254
+[15:12:42.754] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1.0
+[15:12:43.862] Filter stats: average time 2.210ms average result set 0.996
+[15:12:43.862] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term D1(C=1000.0). Expected result set size 1.0000000000000002
+[15:12:44.879] Filter stats: average time 2.028ms average result set 0.910
+[15:12:44.879] Query test: Term range A2s(C=1.0), 10000 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[15:12:51.318] Filter stats: average time 12.872ms average result set 10.104
+[15:12:51.318] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Term range A2s(C=1.0), 10000 terms. Expected result set size 10.000000000000004
+[15:13:00.846] Filter stats: average time 19.050ms average result set 9.864
+[15:13:00.846] Query test: Multi term D1(C=1000.0), 10 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[15:13:12.875] Filter stats: average time 24.050ms average result set 9.578
+[15:13:12.876] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Multi term D1(C=1000.0), 10 terms. Expected result set size 10.000000000000004
+[15:13:20.228] Filter stats: average time 14.695ms average result set 9.768
+[15:13:20.228] Query test: Single term H1(C=50000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 50.000000000000014
+[15:13:28.993] Filter stats: average time 17.525ms average result set 49.560
+[15:13:28.994] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term H1(C=50000.0). Expected result set size 50.000000000000014
+[15:13:38.280] Filter stats: average time 18.568ms average result set 49.708
+[15:13:38.280] Query test: Single term Sparse1(C=0.1). Expected result set size 0.09999999999999999
+[15:13:38.339] Filter stats: average time 0.114ms average result set 0.120
+[15:13:38.339] Query test: Single term Sparse2s(C=0.1). Expected result set size 0.09999999999999999
+[15:13:38.398] Filter stats: average time 0.114ms average result set 0.098
+[15:13:38.398] Query test: Single term A1(C=1.0). Expected result set size 1.0
+[15:13:38.457] Filter stats: average time 0.114ms average result set 1.036
+[15:13:38.457] Query test: Single term A2s(C=1.0). Expected result set size 1.0
+[15:13:38.515] Filter stats: average time 0.113ms average result set 1.012
+[15:13:38.515] Query test: Single term B1(C=10.0). Expected result set size 10.0
+[15:13:38.576] Filter stats: average time 0.118ms average result set 10.248
+[15:13:38.576] Query test: Single term B2s(C=10.0). Expected result set size 10.0
+[15:13:38.637] Filter stats: average time 0.120ms average result set 10.074
+[15:13:38.638] Query test: Single term C1(C=50.0). Expected result set size 50.0
+[15:13:38.706] Filter stats: average time 0.134ms average result set 49.862
+[15:13:38.706] Query test: Single term C2s(C=50.0). Expected result set size 50.0
+[15:13:38.775] Filter stats: average time 0.134ms average result set 49.884
+[15:13:38.775] Query test: Term range Sparse1(C=0.1), 10 terms. Expected result set size 1.0
+[15:13:38.839] Filter stats: average time 0.123ms average result set 0.932
+[15:13:38.839] Query test: Term range Sparse2s(C=0.1), 10 terms. Expected result set size 1.0
+[15:13:38.902] Filter stats: average time 0.123ms average result set 1.002
+[15:13:38.904] Query test: Term range A1(C=1.0), 10 terms. Expected result set size 10.0
+[15:13:38.972] Filter stats: average time 0.132ms average result set 9.844
+[15:13:38.972] Query test: Term range A2s(C=1.0), 10 terms. Expected result set size 10.0
+[15:13:39.040] Filter stats: average time 0.131ms average result set 9.988
+[15:13:39.040] Query test: Term range B1(C=10.0), 10 terms. Expected result set size 100.0
+[15:13:39.145] Filter stats: average time 0.206ms average result set 100.100
+[15:13:39.145] Query test: Term range B2s(C=10.0), 10 terms. Expected result set size 100.0
+[15:13:39.253] Filter stats: average time 0.212ms average result set 99.902
+[15:13:39.254] Query test: Term range C1(C=50.0), 10 terms. Expected result set size 500.0
+[15:13:39.536] Filter stats: average time 0.562ms average result set 499.746
+[15:13:39.537] Query test: Term range C2s(C=50.0), 10 terms. Expected result set size 500.0
+[15:13:39.800] Filter stats: average time 0.523ms average result set 500.386
+[15:13:39.800] Query test: Term range D1(C=1000.0), 10 terms. Expected result set size 10000.0
+[15:13:43.741] Filter stats: average time 7.878ms average result set 10001.288
+[15:13:43.741] Query test: Term range D2s(C=1000.0), 10 terms. Expected result set size 10000.0
+[15:13:47.651] Filter stats: average time 7.816ms average result set 9998.902
+[15:13:47.651] Query test: Single term D1(C=1000.0) & Single term D2s(C=1000.0). Expected result set size 10.0
+[15:13:48.478] Filter stats: average time 1.650ms average result set 9.858
+[15:13:48.478] Query test: Single term A1(C=1.0) & Single term D1(C=1000.0). Expected result set size 0.01
+[15:13:48.539] Filter stats: average time 0.119ms average result set 0.008
+[15:13:48.540] Query test: Single term D1(C=1000.0) & Single term A1(C=1.0). Expected result set size 0.01
+[15:13:48.601] Filter stats: average time 0.118ms average result set 0.006
+[15:13:48.601] Query test: Single term A1(C=1.0) & Single term E1(C=10000.0). Expected result set size 0.10000000000000002
+[15:13:48.661] Filter stats: average time 0.118ms average result set 0.110
+[15:13:48.662] Query test: Single term E1(C=10000.0) & Single term A1(C=1.0). Expected result set size 0.10000000000000002
+[15:13:48.722] Filter stats: average time 0.118ms average result set 0.110
+[15:13:48.722] Query test: Single term B1(C=10.0) & Single term D1(C=1000.0). Expected result set size 0.10000000000000002
+[15:13:48.795] Filter stats: average time 0.142ms average result set 0.116
+[15:13:48.795] Query test: Single term D1(C=1000.0) & Single term B1(C=10.0). Expected result set size 0.10000000000000002
+[15:13:48.864] Filter stats: average time 0.133ms average result set 0.104
+[15:13:48.864] Query test: Single term B1(C=10.0) & Single term E1(C=10000.0). Expected result set size 1.0
+[15:13:48.935] Filter stats: average time 0.139ms average result set 1.080
+[15:13:48.935] Query test: Single term E1(C=10000.0) & Single term B1(C=10.0). Expected result set size 1.0
+[15:13:49.003] Filter stats: average time 0.131ms average result set 1.016
+[15:13:49.003] Query test: Single term C1(C=50.0) & Single term D1(C=1000.0). Expected result set size 0.5
+[15:13:49.124] Filter stats: average time 0.238ms average result set 0.480
+[15:13:49.124] Query test: Single term D1(C=1000.0) & Single term C1(C=50.0). Expected result set size 0.5
+[15:13:49.225] Filter stats: average time 0.197ms average result set 0.528
+[15:13:49.225] Query test: Single term C1(C=50.0) & Single term E1(C=10000.0). Expected result set size 5.0
+[15:13:49.338] Filter stats: average time 0.223ms average result set 5.002
+[15:13:49.339] Query test: Single term E1(C=10000.0) & Single term C1(C=50.0). Expected result set size 5.0
+[15:13:49.434] Filter stats: average time 0.186ms average result set 5.014
+[15:13:49.434] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0). Expected result set size 100.0
+[15:13:50.537] Filter stats: average time 2.202ms average result set 100.006
+[15:13:50.537] Query test: Single term E1(C=10000.0) & Single term D1(C=1000.0). Expected result set size 100.0
+[15:13:51.272] Filter stats: average time 1.465ms average result set 99.952
+[15:13:51.272] Query test: Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1000.0000000000002
+[15:14:01.356] Filter stats: average time 20.164ms average result set 1000.300
+[15:14:01.356] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 100.00000000000003
+[15:14:08.002] Filter stats: average time 13.286ms average result set 99.562
+[15:14:08.002] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1.0
+[15:14:09.095] Filter stats: average time 2.182ms average result set 1.036
+[15:14:09.096] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term D1(C=1000.0). Expected result set size 1.0000000000000002
+[15:14:09.822] Filter stats: average time 1.449ms average result set 0.948
+[15:14:09.823] Query test: Term range A2s(C=1.0), 10000 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[15:14:16.283] Filter stats: average time 12.916ms average result set 9.876
+[15:14:16.283] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Term range A2s(C=1.0), 10000 terms. Expected result set size 10.000000000000004
+[15:14:25.907] Filter stats: average time 19.241ms average result set 10.002
+[15:14:25.907] Query test: Multi term D1(C=1000.0), 10 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[15:14:37.976] Filter stats: average time 24.129ms average result set 9.822
+[15:14:37.976] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Multi term D1(C=1000.0), 10 terms. Expected result set size 10.000000000000004
+[15:14:45.316] Filter stats: average time 14.671ms average result set 9.430
+[15:14:45.316] Query test: Single term H1(C=50000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 50.000000000000014
+[15:14:54.367] Filter stats: average time 18.097ms average result set 49.846
+[15:14:54.368] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term H1(C=50000.0). Expected result set size 50.000000000000014
+[15:15:03.842] Filter stats: average time 18.943ms average result set 49.930
+[15:15:03.842] Query test: Single term Sparse1(C=0.1). Expected result set size 0.09999999999999999
+[15:15:03.900] Filter stats: average time 0.113ms average result set 0.092
+[15:15:03.900] Query test: Single term Sparse2s(C=0.1). Expected result set size 0.09999999999999999
+[15:15:03.958] Filter stats: average time 0.113ms average result set 0.084
+[15:15:03.958] Query test: Single term A1(C=1.0). Expected result set size 1.0
+[15:15:04.017] Filter stats: average time 0.114ms average result set 1.018
+[15:15:04.017] Query test: Single term A2s(C=1.0). Expected result set size 1.0
+[15:15:04.075] Filter stats: average time 0.113ms average result set 1.102
+[15:15:04.075] Query test: Single term B1(C=10.0). Expected result set size 10.0
+[15:15:04.135] Filter stats: average time 0.118ms average result set 10.062
+[15:15:04.136] Query test: Single term B2s(C=10.0). Expected result set size 10.0
+[15:15:04.196] Filter stats: average time 0.118ms average result set 10.098
+[15:15:04.196] Query test: Single term C1(C=50.0). Expected result set size 50.0
+[15:15:04.265] Filter stats: average time 0.134ms average result set 49.828
+[15:15:04.265] Query test: Single term C2s(C=50.0). Expected result set size 50.0
+[15:15:04.333] Filter stats: average time 0.134ms average result set 50.082
+[15:15:04.334] Query test: Term range Sparse1(C=0.1), 10 terms. Expected result set size 1.0
+[15:15:04.396] Filter stats: average time 0.122ms average result set 1.028
+[15:15:04.397] Query test: Term range Sparse2s(C=0.1), 10 terms. Expected result set size 1.0
+[15:15:04.459] Filter stats: average time 0.122ms average result set 1.016
+[15:15:04.459] Query test: Term range A1(C=1.0), 10 terms. Expected result set size 10.0
+[15:15:04.526] Filter stats: average time 0.130ms average result set 9.972
+[15:15:04.526] Query test: Term range A2s(C=1.0), 10 terms. Expected result set size 10.0
+[15:15:04.593] Filter stats: average time 0.130ms average result set 10.048
+[15:15:04.593] Query test: Term range B1(C=10.0), 10 terms. Expected result set size 100.0
+[15:15:04.697] Filter stats: average time 0.205ms average result set 100.228
+[15:15:04.697] Query test: Term range B2s(C=10.0), 10 terms. Expected result set size 100.0
+[15:15:04.805] Filter stats: average time 0.211ms average result set 99.574
+[15:15:04.805] Query test: Term range C1(C=50.0), 10 terms. Expected result set size 500.0
+[15:15:05.088] Filter stats: average time 0.563ms average result set 499.742
+[15:15:05.088] Query test: Term range C2s(C=50.0), 10 terms. Expected result set size 500.0
+[15:15:05.353] Filter stats: average time 0.526ms average result set 499.672
+[15:15:05.353] Query test: Term range D1(C=1000.0), 10 terms. Expected result set size 10000.0
+[15:15:09.419] Filter stats: average time 8.127ms average result set 10001.394
+[15:15:09.419] Query test: Term range D2s(C=1000.0), 10 terms. Expected result set size 10000.0
+[15:15:13.463] Filter stats: average time 8.084ms average result set 9999.372
+[15:15:13.463] Query test: Single term D1(C=1000.0) & Single term D2s(C=1000.0). Expected result set size 10.0
+[15:15:14.350] Filter stats: average time 1.770ms average result set 9.960
+[15:15:14.350] Query test: Single term A1(C=1.0) & Single term D1(C=1000.0). Expected result set size 0.01
+[15:15:14.411] Filter stats: average time 0.118ms average result set 0.016
+[15:15:14.411] Query test: Single term D1(C=1000.0) & Single term A1(C=1.0). Expected result set size 0.01
+[15:15:14.474] Filter stats: average time 0.122ms average result set 0.012
+[15:15:14.474] Query test: Single term A1(C=1.0) & Single term E1(C=10000.0). Expected result set size 0.10000000000000002
+[15:15:14.537] Filter stats: average time 0.122ms average result set 0.090
+[15:15:14.537] Query test: Single term E1(C=10000.0) & Single term A1(C=1.0). Expected result set size 0.10000000000000002
+[15:15:14.597] Filter stats: average time 0.117ms average result set 0.088
+[15:15:14.598] Query test: Single term B1(C=10.0) & Single term D1(C=1000.0). Expected result set size 0.10000000000000002
+[15:15:14.673] Filter stats: average time 0.148ms average result set 0.098
+[15:15:14.674] Query test: Single term D1(C=1000.0) & Single term B1(C=10.0). Expected result set size 0.10000000000000002
+[15:15:14.742] Filter stats: average time 0.134ms average result set 0.120
+[15:15:14.742] Query test: Single term B1(C=10.0) & Single term E1(C=10000.0). Expected result set size 1.0
+[15:15:14.814] Filter stats: average time 0.140ms average result set 1.032
+[15:15:14.815] Query test: Single term E1(C=10000.0) & Single term B1(C=10.0). Expected result set size 1.0
+[15:15:14.882] Filter stats: average time 0.132ms average result set 0.990
+[15:15:14.882] Query test: Single term C1(C=50.0) & Single term D1(C=1000.0). Expected result set size 0.5
+[15:15:15.002] Filter stats: average time 0.235ms average result set 0.490
+[15:15:15.002] Query test: Single term D1(C=1000.0) & Single term C1(C=50.0). Expected result set size 0.5
+[15:15:15.105] Filter stats: average time 0.203ms average result set 0.486
+[15:15:15.105] Query test: Single term C1(C=50.0) & Single term E1(C=10000.0). Expected result set size 5.0
+[15:15:15.219] Filter stats: average time 0.224ms average result set 4.998
+[15:15:15.219] Query test: Single term E1(C=10000.0) & Single term C1(C=50.0). Expected result set size 5.0
+[15:15:15.316] Filter stats: average time 0.189ms average result set 4.990
+[15:15:15.316] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0). Expected result set size 100.0
+[15:15:16.440] Filter stats: average time 2.244ms average result set 99.956
+[15:15:16.440] Query test: Single term E1(C=10000.0) & Single term D1(C=1000.0). Expected result set size 100.0
+[15:15:17.192] Filter stats: average time 1.500ms average result set 100.100
+[15:15:17.192] Query test: Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1000.0000000000002
+[15:15:27.167] Filter stats: average time 19.945ms average result set 999.734
+[15:15:27.167] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 100.00000000000003
+[15:15:34.340] Filter stats: average time 14.343ms average result set 98.988
+[15:15:34.341] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1.0
+[15:15:35.429] Filter stats: average time 2.172ms average result set 1.034
+[15:15:35.429] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term D1(C=1000.0). Expected result set size 1.0000000000000002
+[15:15:36.146] Filter stats: average time 1.430ms average result set 0.924
+[15:15:36.147] Query test: Term range A2s(C=1.0), 10000 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[15:15:42.403] Filter stats: average time 12.507ms average result set 9.940
+[15:15:42.403] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Term range A2s(C=1.0), 10000 terms. Expected result set size 10.000000000000004
+[15:15:51.754] Filter stats: average time 18.697ms average result set 9.992
+[15:15:51.754] Query test: Multi term D1(C=1000.0), 10 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[15:16:03.838] Filter stats: average time 24.159ms average result set 9.500
+[15:16:03.838] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Multi term D1(C=1000.0), 10 terms. Expected result set size 10.000000000000004
+[15:16:11.190] Filter stats: average time 14.694ms average result set 9.350
+[15:16:11.190] Query test: Single term H1(C=50000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 50.000000000000014
+[15:16:19.907] Filter stats: average time 17.430ms average result set 50.254
+[15:16:19.907] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term H1(C=50000.0). Expected result set size 50.000000000000014
+[15:16:28.889] Filter stats: average time 17.959ms average result set 50.002
+[15:16:28.890] Query test: Single term Sparse1(C=0.1). Expected result set size 0.09999999999999999
+[15:16:28.948] Filter stats: average time 0.113ms average result set 0.110
+[15:16:28.948] Query test: Single term Sparse2s(C=0.1). Expected result set size 0.09999999999999999
+[15:16:29.006] Filter stats: average time 0.113ms average result set 0.118
+[15:16:29.006] Query test: Single term A1(C=1.0). Expected result set size 1.0
+[15:16:29.066] Filter stats: average time 0.117ms average result set 1.002
+[15:16:29.066] Query test: Single term A2s(C=1.0). Expected result set size 1.0
+[15:16:29.124] Filter stats: average time 0.114ms average result set 0.944
+[15:16:29.125] Query test: Single term B1(C=10.0). Expected result set size 10.0
+[15:16:29.185] Filter stats: average time 0.118ms average result set 10.274
+[15:16:29.185] Query test: Single term B2s(C=10.0). Expected result set size 10.0
+[15:16:29.247] Filter stats: average time 0.120ms average result set 10.016
+[15:16:29.247] Query test: Single term C1(C=50.0). Expected result set size 50.0
+[15:16:29.315] Filter stats: average time 0.134ms average result set 49.704
+[15:16:29.315] Query test: Single term C2s(C=50.0). Expected result set size 50.0
+[15:16:29.384] Filter stats: average time 0.134ms average result set 49.962
+[15:16:29.384] Query test: Term range Sparse1(C=0.1), 10 terms. Expected result set size 1.0
+[15:16:29.447] Filter stats: average time 0.123ms average result set 0.968
+[15:16:29.447] Query test: Term range Sparse2s(C=0.1), 10 terms. Expected result set size 1.0
+[15:16:29.510] Filter stats: average time 0.122ms average result set 0.966
+[15:16:29.510] Query test: Term range A1(C=1.0), 10 terms. Expected result set size 10.0
+[15:16:29.577] Filter stats: average time 0.131ms average result set 9.966
+[15:16:29.577] Query test: Term range A2s(C=1.0), 10 terms. Expected result set size 10.0
+[15:16:29.644] Filter stats: average time 0.130ms average result set 9.866
+[15:16:29.644] Query test: Term range B1(C=10.0), 10 terms. Expected result set size 100.0
+[15:16:29.747] Filter stats: average time 0.202ms average result set 99.822
+[15:16:29.747] Query test: Term range B2s(C=10.0), 10 terms. Expected result set size 100.0
+[15:16:29.850] Filter stats: average time 0.202ms average result set 100.078
+[15:16:29.850] Query test: Term range C1(C=50.0), 10 terms. Expected result set size 500.0
+[15:16:30.115] Filter stats: average time 0.525ms average result set 499.884
+[15:16:30.115] Query test: Term range C2s(C=50.0), 10 terms. Expected result set size 500.0
+[15:16:30.373] Filter stats: average time 0.513ms average result set 500.046
+[15:16:30.373] Query test: Term range D1(C=1000.0), 10 terms. Expected result set size 10000.0
+[15:16:34.346] Filter stats: average time 7.941ms average result set 10001.170
+[15:16:34.346] Query test: Term range D2s(C=1000.0), 10 terms. Expected result set size 10000.0
+[15:16:38.255] Filter stats: average time 7.814ms average result set 10000.074
+[15:16:38.255] Query test: Single term D1(C=1000.0) & Single term D2s(C=1000.0). Expected result set size 10.0
+[15:16:39.074] Filter stats: average time 1.635ms average result set 9.968
+[15:16:39.074] Query test: Single term A1(C=1.0) & Single term D1(C=1000.0). Expected result set size 0.01
+[15:16:39.135] Filter stats: average time 0.118ms average result set 0.010
+[15:16:39.135] Query test: Single term D1(C=1000.0) & Single term A1(C=1.0). Expected result set size 0.01
+[15:16:39.196] Filter stats: average time 0.119ms average result set 0.010
+[15:16:39.197] Query test: Single term A1(C=1.0) & Single term E1(C=10000.0). Expected result set size 0.10000000000000002
+[15:16:39.258] Filter stats: average time 0.119ms average result set 0.120
+[15:16:39.258] Query test: Single term E1(C=10000.0) & Single term A1(C=1.0). Expected result set size 0.10000000000000002
+[15:16:39.319] Filter stats: average time 0.119ms average result set 0.092
+[15:16:39.319] Query test: Single term B1(C=10.0) & Single term D1(C=1000.0). Expected result set size 0.10000000000000002
+[15:16:39.394] Filter stats: average time 0.145ms average result set 0.094
+[15:16:39.394] Query test: Single term D1(C=1000.0) & Single term B1(C=10.0). Expected result set size 0.10000000000000002
+[15:16:39.464] Filter stats: average time 0.137ms average result set 0.102
+[15:16:39.464] Query test: Single term B1(C=10.0) & Single term E1(C=10000.0). Expected result set size 1.0
+[15:16:39.536] Filter stats: average time 0.141ms average result set 0.960
+[15:16:39.537] Query test: Single term E1(C=10000.0) & Single term B1(C=10.0). Expected result set size 1.0
+[15:16:39.604] Filter stats: average time 0.131ms average result set 1.016
+[15:16:39.604] Query test: Single term C1(C=50.0) & Single term D1(C=1000.0). Expected result set size 0.5
+[15:16:39.719] Filter stats: average time 0.228ms average result set 0.528
+[15:16:39.720] Query test: Single term D1(C=1000.0) & Single term C1(C=50.0). Expected result set size 0.5
+[15:16:39.820] Filter stats: average time 0.197ms average result set 0.478
+[15:16:39.820] Query test: Single term C1(C=50.0) & Single term E1(C=10000.0). Expected result set size 5.0
+[15:16:39.930] Filter stats: average time 0.215ms average result set 5.030
+[15:16:39.930] Query test: Single term E1(C=10000.0) & Single term C1(C=50.0). Expected result set size 5.0
+[15:16:40.024] Filter stats: average time 0.184ms average result set 5.118
+[15:16:40.024] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0). Expected result set size 100.0
+[15:16:41.056] Filter stats: average time 2.060ms average result set 100.038
+[15:16:41.056] Query test: Single term E1(C=10000.0) & Single term D1(C=1000.0). Expected result set size 100.0
+[15:16:41.770] Filter stats: average time 1.423ms average result set 100.142
+[15:16:41.770] Query test: Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1000.0000000000002
+[15:16:50.942] Filter stats: average time 18.341ms average result set 999.594
+[15:16:50.942] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 100.00000000000003
+[15:16:58.107] Filter stats: average time 14.325ms average result set 99.988
+[15:16:58.108] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1.0
+[15:16:59.168] Filter stats: average time 2.116ms average result set 1.018
+[15:16:59.168] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term D1(C=1000.0). Expected result set size 1.0000000000000002
+[15:16:59.874] Filter stats: average time 1.408ms average result set 1.072
+[15:16:59.875] Query test: Term range A2s(C=1.0), 10000 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[15:17:06.186] Filter stats: average time 12.609ms average result set 10.026
+[15:17:06.186] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Term range A2s(C=1.0), 10000 terms. Expected result set size 10.000000000000004
+[15:17:15.833] Filter stats: average time 19.288ms average result set 9.934
+[15:17:15.833] Query test: Multi term D1(C=1000.0), 10 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[15:17:27.615] Filter stats: average time 23.555ms average result set 9.714
+[15:17:27.615] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Multi term D1(C=1000.0), 10 terms. Expected result set size 10.000000000000004
+[15:17:34.948] Filter stats: average time 14.657ms average result set 9.646
+[15:17:34.948] Query test: Single term H1(C=50000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 50.000000000000014
+[15:17:43.665] Filter stats: average time 17.430ms average result set 49.838
+[15:17:43.665] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term H1(C=50000.0). Expected result set size 50.000000000000014
+[15:17:53.082] Filter stats: average time 18.828ms average result set 50.002
+[15:17:53.082] Query test: Single term Sparse1(C=0.1). Expected result set size 0.09999999999999999
+[15:17:53.140] Filter stats: average time 0.114ms average result set 0.132
+[15:17:53.141] Query test: Single term Sparse2s(C=0.1). Expected result set size 0.09999999999999999
+[15:17:53.198] Filter stats: average time 0.113ms average result set 0.096
+[15:17:53.199] Query test: Single term A1(C=1.0). Expected result set size 1.0
+[15:17:53.257] Filter stats: average time 0.114ms average result set 1.036
+[15:17:53.257] Query test: Single term A2s(C=1.0). Expected result set size 1.0
+[15:17:53.315] Filter stats: average time 0.113ms average result set 0.942
+[15:17:53.315] Query test: Single term B1(C=10.0). Expected result set size 10.0
+[15:17:53.375] Filter stats: average time 0.118ms average result set 10.078
+[15:17:53.377] Query test: Single term B2s(C=10.0). Expected result set size 10.0
+[15:17:53.439] Filter stats: average time 0.119ms average result set 9.988
+[15:17:53.439] Query test: Single term C1(C=50.0). Expected result set size 50.0
+[15:17:53.507] Filter stats: average time 0.134ms average result set 50.158
+[15:17:53.507] Query test: Single term C2s(C=50.0). Expected result set size 50.0
+[15:17:53.576] Filter stats: average time 0.134ms average result set 50.050
+[15:17:53.576] Query test: Term range Sparse1(C=0.1), 10 terms. Expected result set size 1.0
+[15:17:53.639] Filter stats: average time 0.124ms average result set 0.998
+[15:17:53.640] Query test: Term range Sparse2s(C=0.1), 10 terms. Expected result set size 1.0
+[15:17:53.703] Filter stats: average time 0.123ms average result set 1.042
+[15:17:53.703] Query test: Term range A1(C=1.0), 10 terms. Expected result set size 10.0
+[15:17:54.339] Filter stats: average time 1.268ms average result set 9.942
+[15:17:54.339] Query test: Term range A2s(C=1.0), 10 terms. Expected result set size 10.0
+[15:17:54.406] Filter stats: average time 0.130ms average result set 10.110
+[15:17:54.406] Query test: Term range B1(C=10.0), 10 terms. Expected result set size 100.0
+[15:17:54.509] Filter stats: average time 0.203ms average result set 100.100
+[15:17:54.509] Query test: Term range B2s(C=10.0), 10 terms. Expected result set size 100.0
+[15:17:54.612] Filter stats: average time 0.202ms average result set 100.088
+[15:17:54.612] Query test: Term range C1(C=50.0), 10 terms. Expected result set size 500.0
+[15:17:54.870] Filter stats: average time 0.513ms average result set 499.974
+[15:17:54.870] Query test: Term range C2s(C=50.0), 10 terms. Expected result set size 500.0
+[15:17:55.127] Filter stats: average time 0.511ms average result set 499.990
+[15:17:55.128] Query test: Term range D1(C=1000.0), 10 terms. Expected result set size 10000.0
+[15:17:59.069] Filter stats: average time 7.879ms average result set 9999.886
+[15:17:59.069] Query test: Term range D2s(C=1000.0), 10 terms. Expected result set size 10000.0
+[15:18:03.008] Filter stats: average time 7.875ms average result set 9999.104
+[15:18:03.008] Query test: Single term D1(C=1000.0) & Single term D2s(C=1000.0). Expected result set size 10.0
+[15:18:03.830] Filter stats: average time 1.640ms average result set 10.004
+[15:18:03.831] Query test: Single term A1(C=1.0) & Single term D1(C=1000.0). Expected result set size 0.01
+[15:18:03.891] Filter stats: average time 0.119ms average result set 0.010
+[15:18:03.892] Query test: Single term D1(C=1000.0) & Single term A1(C=1.0). Expected result set size 0.01
+[15:18:03.953] Filter stats: average time 0.119ms average result set 0.006
+[15:18:03.953] Query test: Single term A1(C=1.0) & Single term E1(C=10000.0). Expected result set size 0.10000000000000002
+[15:18:04.014] Filter stats: average time 0.118ms average result set 0.094
+[15:18:04.014] Query test: Single term E1(C=10000.0) & Single term A1(C=1.0). Expected result set size 0.10000000000000002
+[15:18:04.075] Filter stats: average time 0.118ms average result set 0.068
+[15:18:04.075] Query test: Single term B1(C=10.0) & Single term D1(C=1000.0). Expected result set size 0.10000000000000002
+[15:18:04.150] Filter stats: average time 0.147ms average result set 0.084
+[15:18:04.151] Query test: Single term D1(C=1000.0) & Single term B1(C=10.0). Expected result set size 0.10000000000000002
+[15:18:04.222] Filter stats: average time 0.139ms average result set 0.114
+[15:18:04.222] Query test: Single term B1(C=10.0) & Single term E1(C=10000.0). Expected result set size 1.0
+[15:18:04.295] Filter stats: average time 0.144ms average result set 1.000
+[15:18:04.296] Query test: Single term E1(C=10000.0) & Single term B1(C=10.0). Expected result set size 1.0
+[15:18:04.365] Filter stats: average time 0.136ms average result set 1.024
+[15:18:04.365] Query test: Single term C1(C=50.0) & Single term D1(C=1000.0). Expected result set size 0.5
+[15:18:04.486] Filter stats: average time 0.239ms average result set 0.538
+[15:18:04.487] Query test: Single term D1(C=1000.0) & Single term C1(C=50.0). Expected result set size 0.5
+[15:18:04.587] Filter stats: average time 0.197ms average result set 0.520
+[15:18:04.587] Query test: Single term C1(C=50.0) & Single term E1(C=10000.0). Expected result set size 5.0
+[15:18:04.700] Filter stats: average time 0.223ms average result set 4.904
+[15:18:04.701] Query test: Single term E1(C=10000.0) & Single term C1(C=50.0). Expected result set size 5.0
+[15:18:04.796] Filter stats: average time 0.186ms average result set 5.040
+[15:18:04.796] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0). Expected result set size 100.0
+[15:18:05.901] Filter stats: average time 2.207ms average result set 99.920
+[15:18:05.902] Query test: Single term E1(C=10000.0) & Single term D1(C=1000.0). Expected result set size 100.0
+[15:18:06.625] Filter stats: average time 1.444ms average result set 99.868
+[15:18:06.625] Query test: Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1000.0000000000002
+[15:18:16.688] Filter stats: average time 20.121ms average result set 1000.314
+[15:18:16.688] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 100.00000000000003
+[15:18:23.663] Filter stats: average time 13.946ms average result set 99.380
+[15:18:23.663] Query test: Single term D1(C=1000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1.0
+[15:18:24.766] Filter stats: average time 2.202ms average result set 0.976
+[15:18:24.767] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term D1(C=1000.0). Expected result set size 1.0000000000000002
+[15:18:25.498] Filter stats: average time 1.457ms average result set 1.018
+[15:18:25.498] Query test: Term range A2s(C=1.0), 10000 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[15:18:31.774] Filter stats: average time 12.548ms average result set 10.090
+[15:18:31.775] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Term range A2s(C=1.0), 10000 terms. Expected result set size 10.000000000000004
+[15:18:40.992] Filter stats: average time 18.429ms average result set 10.060
+[15:18:40.992] Query test: Multi term D1(C=1000.0), 10 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004
+[15:18:53.052] Filter stats: average time 24.113ms average result set 9.402
+[15:18:53.053] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Multi term D1(C=1000.0), 10 terms. Expected result set size 10.000000000000004
+[15:19:00.427] Filter stats: average time 14.741ms average result set 9.478
+[15:19:00.428] Query test: Single term H1(C=50000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 50.000000000000014
+[15:19:09.370] Filter stats: average time 17.879ms average result set 50.066
+[15:19:09.370] Query test: Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term H1(C=50000.0). Expected result set size 50.000000000000014
+[15:19:18.818] Filter stats: average time 18.891ms average result set 49.962
+[15:19:18.818] Done
+Single term Sparse1(C=0.1). Expected result set size 0.09999999999999999	0.113	0.114	0.113	0.113	0.114
+Single term Sparse2s(C=0.1). Expected result set size 0.09999999999999999	0.113	0.114	0.113	0.113	0.113
+Single term A1(C=1.0). Expected result set size 1.0	0.113	0.114	0.114	0.117	0.114
+Single term A2s(C=1.0). Expected result set size 1.0	0.113	0.113	0.113	0.114	0.113
+Single term B1(C=10.0). Expected result set size 10.0	0.117	0.118	0.118	0.118	0.118
+Single term B2s(C=10.0). Expected result set size 10.0	0.118	0.120	0.118	0.120	0.119
+Single term C1(C=50.0). Expected result set size 50.0	0.134	0.134	0.134	0.134	0.134
+Single term C2s(C=50.0). Expected result set size 50.0	0.133	0.134	0.134	0.134	0.134
+Term range Sparse1(C=0.1), 10 terms. Expected result set size 1.0	0.122	0.123	0.122	0.123	0.124
+Term range Sparse2s(C=0.1), 10 terms. Expected result set size 1.0	0.122	0.123	0.122	0.122	0.123
+Term range A1(C=1.0), 10 terms. Expected result set size 10.0	0.132	0.132	0.130	0.131	1.268
+Term range A2s(C=1.0), 10 terms. Expected result set size 10.0	0.131	0.131	0.130	0.130	0.130
+Term range B1(C=10.0), 10 terms. Expected result set size 100.0	0.204	0.206	0.205	0.202	0.203
+Term range B2s(C=10.0), 10 terms. Expected result set size 100.0	0.213	0.212	0.211	0.202	0.202
+Term range C1(C=50.0), 10 terms. Expected result set size 500.0	0.555	0.562	0.563	0.525	0.513
+Term range C2s(C=50.0), 10 terms. Expected result set size 500.0	0.522	0.523	0.526	0.513	0.511
+Term range D1(C=1000.0), 10 terms. Expected result set size 10000.0	8.097	7.878	8.127	7.941	7.879
+Term range D2s(C=1000.0), 10 terms. Expected result set size 10000.0	8.035	7.816	8.084	7.814	7.875
+Single term D1(C=1000.0) & Single term D2s(C=1000.0). Expected result set size 10.0	1.645	1.650	1.770	1.635	1.640
+Single term A1(C=1.0) & Single term D1(C=1000.0). Expected result set size 0.01	0.119	0.119	0.118	0.118	0.119
+Single term D1(C=1000.0) & Single term A1(C=1.0). Expected result set size 0.01	0.118	0.118	0.122	0.119	0.119
+Single term A1(C=1.0) & Single term E1(C=10000.0). Expected result set size 0.10000000000000002	0.119	0.118	0.122	0.119	0.118
+Single term E1(C=10000.0) & Single term A1(C=1.0). Expected result set size 0.10000000000000002	0.122	0.118	0.117	0.119	0.118
+Single term B1(C=10.0) & Single term D1(C=1000.0). Expected result set size 0.10000000000000002	0.145	0.142	0.148	0.145	0.147
+Single term D1(C=1000.0) & Single term B1(C=10.0). Expected result set size 0.10000000000000002	0.134	0.133	0.134	0.137	0.139
+Single term B1(C=10.0) & Single term E1(C=10000.0). Expected result set size 1.0	0.141	0.139	0.140	0.141	0.144
+Single term E1(C=10000.0) & Single term B1(C=10.0). Expected result set size 1.0	0.131	0.131	0.132	0.131	0.136
+Single term C1(C=50.0) & Single term D1(C=1000.0). Expected result set size 0.5	0.239	0.238	0.235	0.228	0.239
+Single term D1(C=1000.0) & Single term C1(C=50.0). Expected result set size 0.5	0.199	0.197	0.203	0.197	0.197
+Single term C1(C=50.0) & Single term E1(C=10000.0). Expected result set size 5.0	0.224	0.223	0.224	0.215	0.223
+Single term E1(C=10000.0) & Single term C1(C=50.0). Expected result set size 5.0	0.187	0.186	0.189	0.184	0.186
+Single term D1(C=1000.0) & Single term E1(C=10000.0). Expected result set size 100.0	2.211	2.202	2.244	2.060	2.207
+Single term E1(C=10000.0) & Single term D1(C=1000.0). Expected result set size 100.0	1.451	1.465	1.500	1.423	1.444
+Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1000.0000000000002	20.087	20.164	19.945	18.341	20.121
+Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 100.00000000000003	14.285	13.286	14.343	14.325	13.946
+Single term D1(C=1000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 1.0	2.210	2.182	2.172	2.116	2.202
+Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term D1(C=1000.0). Expected result set size 1.0000000000000002	2.028	1.449	1.430	1.408	1.457
+Term range A2s(C=1.0), 10000 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004	12.872	12.916	12.507	12.609	12.548
+Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Term range A2s(C=1.0), 10000 terms. Expected result set size 10.000000000000004	19.050	19.241	18.697	19.288	18.429
+Multi term D1(C=1000.0), 10 terms & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 10.000000000000004	24.050	24.129	24.159	23.555	24.113
+Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Multi term D1(C=1000.0), 10 terms. Expected result set size 10.000000000000004	14.695	14.671	14.694	14.657	14.741
+Single term H1(C=50000.0) & Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0). Expected result set size 50.000000000000014	17.525	18.097	17.430	17.430	17.879
+Single term E1(C=10000.0) & Single term E3(C=10000.0) & Single term E4(C=10000.0) & Single term H1(C=50000.0). Expected result set size 50.000000000000014	18.568	18.943	17.959	18.828	18.891
