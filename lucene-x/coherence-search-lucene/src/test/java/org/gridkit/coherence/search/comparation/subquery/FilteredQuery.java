@@ -9,16 +9,12 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermDocs;
 import org.apache.lucene.index.TermEnum;
 import org.apache.lucene.index.TermPositions;
-import org.apache.lucene.search.DocIdSet;
 import org.apache.lucene.search.DocIdSetIterator;
 import org.apache.lucene.search.Explanation;
-import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.Searcher;
-import org.apache.lucene.search.Similarity;
 import org.apache.lucene.search.Weight;
-import org.apache.lucene.util.DocIdBitSet;
 import org.apache.lucene.util.OpenBitSet;
 
 @SuppressWarnings("deprecation")
@@ -29,17 +25,9 @@ public class FilteredQuery extends Query {
 	private Term[] maskTerms;
 	private Query query;
 	
-	private MaskedIndexReader maskedReader;
-	
 	public FilteredQuery(Query q, Term... terms) {
 		this.query = q;
 		this.maskTerms = terms;
-	}
-
-	public FilteredQuery(Query q, Term[] terms, MaskedIndexReader reader) {
-		this.query = q;
-		this.maskTerms = terms;
-		this.maskedReader = reader;
 	}
 
 	@Override
@@ -48,13 +36,9 @@ public class FilteredQuery extends Query {
 	}
 
 	@Override
+	@SuppressWarnings("serial")
 	public Weight createWeight(final Searcher searcher) throws IOException {
-		final Weight w = query.createWeight(new IndexSearcher(maskedReader) {
-			@Override
-			public Similarity getSimilarity() {
-				return searcher.getSimilarity();
-			}					
-		});
+		final Weight w = query.createWeight(searcher);
 		
 		return new Weight() {
 			
@@ -65,7 +49,7 @@ public class FilteredQuery extends Query {
 			
 			@Override
 			public Scorer scorer(IndexReader reader, boolean scoreDocsInOrder,	boolean topScorer) throws IOException {
-				return w.scorer(maskedReader, scoreDocsInOrder, topScorer);
+				return w.scorer(maskReader(reader), scoreDocsInOrder, topScorer);
 			}
 			
 			@Override
@@ -85,47 +69,52 @@ public class FilteredQuery extends Query {
 			
 			@Override
 			public Explanation explain(IndexReader reader, int doc) throws IOException {
-				return w.explain(maskedReader, doc);
+				return w.explain(maskReader(reader), doc);
 			}
 		};
 	}
 
 	@Override
 	public Query rewrite(IndexReader reader) throws IOException {
-		if (this.maskedReader != null) {
-			return this;
+		Query newQuery = query;
+		while(true) {
+			Query q = newQuery.rewrite(reader);
+			if (q == newQuery) {
+				break;
+			}
+			newQuery = q;
+		}
+
+		if (newQuery != query) {
+			return new FilteredQuery(newQuery, maskTerms);
 		}
 		else {
-			
-			OpenBitSet base = null;
-			for(Term term: maskTerms) {
-				OpenBitSet result = new OpenBitSet(reader.maxDoc());
-				TermDocs td = reader.termDocs(term);
-				while(td.next()) {
-//					System.out.println("mask: " + td.doc());
-					result.fastSet(td.doc());
-				}
-				if (base == null) {
-					base = result;
-				}
-				else {
-					base.and(result);
-				}
-			}
-			
-			MaskedIndexReader mr = new MaskedIndexReader(reader, base);
-			
-			Query newQuery = query;
-			while(true) {
-				Query q = newQuery.rewrite(mr);
-				if (q == newQuery) {
-					break;
-				}
-				newQuery = q;
-			}
-			
-			return new FilteredQuery(newQuery, maskTerms, mr);
+			return this;
 		}
+	}
+	
+	public IndexReader maskReader(IndexReader reader) throws IOException {
+		OpenBitSet base = null;
+		for(Term term: maskTerms) {
+			OpenBitSet result = new OpenBitSet(reader.maxDoc());
+			TermDocs td = reader.termDocs(term);
+			while(td.next()) {
+//					System.out.println("mask: " + td.doc());
+				result.fastSet(td.doc());
+			}
+			if (base == null) {
+				base = result;
+			}
+			else {
+				base.and(result);
+			}
+		}
+		
+//		System.out.println("Index mask for " + reader + " - " + base.cardinality());
+		
+		MaskedIndexReader mr = new MaskedIndexReader(reader, base);
+		
+		return mr;
 	}
 	
 	private static class MaskedIndexReader extends FilterIndexReader {
@@ -156,7 +145,6 @@ public class FilteredQuery extends Query {
 		class MaskedTermPositions extends FilterTermDocs implements TermPositions {
 
 			DocIdSetIterator docIt;
-			int termFreq;
 			
 			public MaskedTermPositions(TermDocs in) {
 				super(in);
@@ -166,28 +154,14 @@ public class FilteredQuery extends Query {
 			public void seek(Term term) throws IOException {
 				in.seek(term);
 				docIt = docMask.iterator();
-//				termFreq = countDocs();
-//				in.seek(term);
 			}
 
 			@Override
 			public void seek(TermEnum termEnum) throws IOException {
 				in.seek(termEnum);
 				docIt = docMask.iterator();
-//				termFreq = countDocs();
-//				in.seek(termEnum);
 			}
 
-			private int countDocs() throws IOException {
-				int n = 0;
-				while(in.next()) {
-					if (docMask.fastGet(in.doc())) {
-						++n;
-					}
-				}
-				return n;
-			}
-			
 			@Override
 			public int freq() {
 				return in.freq();
