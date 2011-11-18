@@ -488,7 +488,6 @@ public class SubQueryTest {
 
 		BooleanQuery ho =  new BooleanQuery();
 		initHints(ho, hints);
-		ho.setMinimumNumberShouldMatch(hints.length);
 
 		if (!testOnce) {
 			testQuery(new FilteredQuery(ho, hterms), String.format("Hints only %s", Arrays.toString(hints)));
@@ -520,14 +519,14 @@ public class SubQueryTest {
 		
 		public static void main(String[] args) throws IOException {
 			
-			System.out.println("100 doc, debug setup");
+			System.out.println("1000 doc, debug setup");
 			
 			SubQueryTest test = new SubQueryTest();
 			test.testOnce = true;
 			test.hintAll = true;
-//			test.generate(100);
+			test.generate(1000);
 //			test.generate(13,28,30);
-			test.generate(13, 13);
+//			test.generate(13, 13);
 			
 			test.testQuery(test.createPat1(0), "Pat1[0]", "H0");
 			test.testQuery(test.createPat1(0), "Pat1[0]");

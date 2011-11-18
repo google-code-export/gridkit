@@ -18,6 +18,7 @@ import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.Searcher;
 import org.apache.lucene.search.Similarity;
 import org.apache.lucene.search.Weight;
+import org.apache.lucene.util.DocIdBitSet;
 import org.apache.lucene.util.OpenBitSet;
 
 @SuppressWarnings("deprecation")
@@ -101,7 +102,7 @@ public class FilteredQuery extends Query {
 				OpenBitSet result = new OpenBitSet(reader.maxDoc());
 				TermDocs td = reader.termDocs(term);
 				while(td.next()) {
-					System.out.println("mask: " + td.doc());
+//					System.out.println("mask: " + td.doc());
 					result.fastSet(td.doc());
 				}
 				if (base == null) {
@@ -129,9 +130,9 @@ public class FilteredQuery extends Query {
 	
 	private static class MaskedIndexReader extends FilterIndexReader {
 		
-		private DocIdSet docMask;
+		private OpenBitSet docMask;
 		
-		public MaskedIndexReader(IndexReader reader, DocIdSet docMask) {
+		public MaskedIndexReader(IndexReader reader, OpenBitSet docMask) {
 			super(reader);
 			this.docMask = docMask;
 		}
@@ -155,6 +156,7 @@ public class FilteredQuery extends Query {
 		class MaskedTermPositions extends FilterTermDocs implements TermPositions {
 
 			DocIdSetIterator docIt;
+			int termFreq;
 			
 			public MaskedTermPositions(TermDocs in) {
 				super(in);
@@ -162,14 +164,33 @@ public class FilteredQuery extends Query {
 
 			@Override
 			public void seek(Term term) throws IOException {
-				super.seek(term);
+				in.seek(term);
 				docIt = docMask.iterator();
+//				termFreq = countDocs();
+//				in.seek(term);
 			}
 
 			@Override
 			public void seek(TermEnum termEnum) throws IOException {
-				super.seek(termEnum);
+				in.seek(termEnum);
 				docIt = docMask.iterator();
+//				termFreq = countDocs();
+//				in.seek(termEnum);
+			}
+
+			private int countDocs() throws IOException {
+				int n = 0;
+				while(in.next()) {
+					if (docMask.fastGet(in.doc())) {
+						++n;
+					}
+				}
+				return n;
+			}
+			
+			@Override
+			public int freq() {
+				return in.freq();
 			}
 
 			@Override
@@ -190,20 +211,25 @@ public class FilteredQuery extends Query {
 			}
 
 			private boolean findMatch() throws IOException {
+				if (!in.next()) {
+					return false;
+				}
 				while(true) {
 					int di = docIt.docID();
 					if (di == DocIdSetIterator.NO_MORE_DOCS) {
 						return false;
 					}
-					if (!in.skipTo(di)) {
-						return false;
-					}
-					if (di == doc()) {
-						System.out.println("#" + this.hashCode() + " find match: " + doc());
+					if (di == in.doc()) {
 						return true;
 					}
+					else if (di < in.doc()) {
+						docIt.advance(in.doc());
+						continue;
+					}
 					else {
-						docIt.advance(doc());
+						if (!in.skipTo(di)) {
+							return false;
+						}
 					}
 				}
 			}
@@ -221,7 +247,7 @@ public class FilteredQuery extends Query {
 
 			@Override
 			public int nextPosition() throws IOException {
-				return ((TermPositions)in).getPayloadLength();
+				return ((TermPositions)in).nextPosition();
 			}
 
 			@Override
@@ -239,6 +265,5 @@ public class FilteredQuery extends Query {
 				return ((TermPositions)in).isPayloadAvailable();
 			}
 		}
-	}
-	
+	}	
 }
