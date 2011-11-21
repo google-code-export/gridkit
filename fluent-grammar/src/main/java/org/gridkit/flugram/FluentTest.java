@@ -7,7 +7,7 @@ import java.util.List;
 
 import junit.framework.Assert;
 
-import org.gridkit.flugram.FluentDSL.SimpleTypeResolver;
+import org.gridkit.flugram.FluentDSL.TypeResolver;
 import org.junit.Test;
 
 
@@ -308,7 +308,7 @@ public class FluentTest {
 	@Test
 	public void testScopeResolver_SpanStart() {
 
-		SimpleTypeResolver resolver = new SimpleTypeResolver();
+		TypeResolver resolver = new TypeResolver();
 		
 		resolver.bind(SpanStart.class);
 		
