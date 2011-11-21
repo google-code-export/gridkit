@@ -19,10 +19,12 @@ public class FluentDSL {
 
 	public static <T, V> T newNode(Class<T> fi, AstNodeHandler<V> nodeHandler) {
 		AstNode node = new AstNode(nodeHandler);
-		return (T)newState(fi, node);
+		GenericContext genCtx = new GenericContext(fi);
+		return (T)newState(fi, node, genCtx);
 	}
 
-	private static Object newState(Class<?> fi, AstNode node) {
+	private static Object newState(Class<?> fi, AstNode node, GenericContext gc) {
+		node.genContext = gc;
 		return Proxy.newProxyInstance(fi.getClassLoader(), new Class[]{fi}, node);
 	}
 	
@@ -30,18 +32,18 @@ public class FluentDSL {
 		
 		private AstNode parent;
 		private Method callSite;
-		private Class returnFI;
 		private AstNodeHandler<?> handler;
+		
+		private GenericContext genContext;
 
 		public AstNode(AstNodeHandler<?> handler) {
 			this.handler = handler;
 		}
 		
-		public AstNode(AstNodeHandler<?> handler, AstNode parent, Method callSite, Class returnFI) {
+		public AstNode(AstNodeHandler<?> handler, AstNode parent, Method callSite) {
 			this.handler = handler;
 			this.parent = parent;
 			this.callSite = callSite;
-			this.returnFI = returnFI;
 		}
 
 		@SuppressWarnings("rawtypes")
@@ -58,11 +60,12 @@ public class FluentDSL {
 					
 					AstNodeHandler<?> h = (AstNodeHandler<?>) handlerProvider.invoke(handler, args);
 					
-					AstNode nested = new AstNode(h, this, term, returnType(proxy, method));
+					AstNode nested = new AstNode(h, this, term);
 					
 					System.out.println("PUSH: " + method.getName() + " - syntatic scope " + returnType(proxy, method) + ", handler " + h.getClass());
 
-					return newState(method.getReturnType(), nested);
+					GenericContext nextCtx = genContext.derive(method.getGenericReturnType());
+					return newState(method.getReturnType(), nested, nextCtx);
 					
 				} catch (Exception e) {
 					throw new RuntimeException(e);
@@ -80,11 +83,12 @@ public class FluentDSL {
 					
 					AstNodeHandler<?> h = (AstNodeHandler<?>) handlerProvider.invoke(handler, args);
 					
-					AstNode nested = new AstNode(h, null, term, returnType(proxy, method));
+					AstNode nested = new AstNode(h, null, term);
 					
 					System.out.println("REPLACE: " + method.getName() + " - syntatic scope " + returnType(proxy, method) + ", handler " + h.getClass());
 					
-					return newState(method.getReturnType(), nested);
+					GenericContext nextCtx = genContext.derive(method.getGenericReturnType());
+					return newState(method.getReturnType(), nested, nextCtx);
 					
 				} catch (Exception e) {
 					throw new RuntimeException(e);
@@ -104,7 +108,9 @@ public class FluentDSL {
 				}
 				else {
 					parent.pop(callSite, node);
-					return newState(returnFI, parent);
+					Class returnFI = genContext.resolveToClass(method.getGenericReturnType());
+					GenericContext nextCtx = genContext.derive(method.getGenericReturnType());
+					return newState(returnFI, parent, nextCtx);
 				}				
 			}
 			else {
@@ -114,13 +120,10 @@ public class FluentDSL {
 				m.invoke(handler, args);
 				
 				System.out.println("TERM: " + method.getName() + " on " + handler.getClass());
-				
-				if (method.getGenericReturnType() instanceof TypeVariable) {
-					return newState(returnType(proxy, method), this);
-				}
-				else {
-					return newState(method.getReturnType(), this);
-				}				
+
+				Class returnFI = genContext.resolveToClass(method.getGenericReturnType());
+				GenericContext nextCtx = genContext.derive(method.getGenericReturnType());
+				return newState(returnFI, this, nextCtx);
 			}
 		}
 
@@ -210,12 +213,12 @@ public class FluentDSL {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	static Class inferSyntaticScope(Type type) {
 		if (type instanceof Class) {
-			SimpleTypeResolver resolver = new SimpleTypeResolver();
+			TypeResolver resolver = new TypeResolver();
 			resolver.bind((Class)type);
 			return resolver.findSyntaticScope();
 		}
 		else if (type instanceof ParameterizedType) {
-			SimpleTypeResolver resolver = new SimpleTypeResolver();
+			TypeResolver resolver = new TypeResolver();
 			resolver.bind((ParameterizedType)type, Collections.EMPTY_MAP);
 			return resolver.findSyntaticScope();			
 		}
@@ -240,30 +243,30 @@ public class FluentDSL {
 		}
 	}
 	
-	static class SimpleTypeVar {		
+	static class TypeVar {		
 		
-		SimpleTypeBinding resolution;		
+		BindClause resolution;		
 		List<Type> bindings = new ArrayList<Type>();
-		List<SimpleTypeVar> synonims = new ArrayList<SimpleTypeVar>();
+		List<TypeVar> synonims = new ArrayList<TypeVar>();
 		
 	}
 	
-	static class SimpleTypeBinding {
+	static class BindClause {
 		Class<?> rawClass;
-		SimpleTypeVar[] parameters;
-		Map<TypeVariable<?>, SimpleTypeVar> varBinding = new HashMap<TypeVariable<?>, SimpleTypeVar>();
+		TypeVar[] parameters;
+		Map<String, TypeVar> varBinding = new HashMap<String, TypeVar>();
 	}
 	
-	static class SimpleTypeResolver {
+	static class TypeResolver {
 
-		Map<Class<?>, SimpleTypeBinding> bindings =  new HashMap<Class<?>, FluentDSL.SimpleTypeBinding>();
+		Map<Class<?>, BindClause> bindings =  new HashMap<Class<?>, FluentDSL.BindClause>();
 		
 		@SuppressWarnings("rawtypes")
-		void bind(ParameterizedType x, Map<TypeVariable<?>, SimpleTypeVar> scope) {
+		void bind(ParameterizedType x, Map<String, TypeVar> scope) {
 						
 			Class rawClass = (Class)x.getRawType();
 			
-			SimpleTypeBinding binding;
+			BindClause binding;
 			bind(rawClass);
 
 			binding = bindings.get(rawClass);				
@@ -272,7 +275,7 @@ public class FluentDSL {
 				Type arg = x.getActualTypeArguments()[n];
 				binding.parameters[n].bindings.add(arg);
 				if (arg instanceof TypeVariable) {
-					SimpleTypeVar tv = scope.get(arg);
+					TypeVar tv = scope.get(((TypeVariable) arg).getName());
 					tv.toString(); // NPE check
 					tv.synonims.add(binding.parameters[n]);
 					binding.parameters[n].synonims.add(tv);
@@ -285,18 +288,18 @@ public class FluentDSL {
 			
 			Class rawClass = type;
 			
-			SimpleTypeBinding binding;
+			BindClause binding;
 			if (!bindings.containsKey(rawClass)) {
-				binding = new SimpleTypeBinding();
+				binding = new BindClause();
 				binding.rawClass = rawClass;
-				binding.parameters = new SimpleTypeVar[rawClass.getTypeParameters().length];
+				binding.parameters = new TypeVar[rawClass.getTypeParameters().length];
 
 				for(int n = 0; n != binding.rawClass.getTypeParameters().length; ++n) {
-					binding.parameters[n] = new SimpleTypeVar();
+					binding.parameters[n] = new TypeVar();
 					binding.parameters[n].bindings.add(binding.rawClass.getTypeParameters()[n]);
 					
 					TypeVariable<?> tv = binding.rawClass.getTypeParameters()[n];
-					binding.varBinding.put(tv, binding.parameters[n]);
+					binding.varBinding.put(tv.getName(), binding.parameters[n]);
 				}
 				
 				bindings.put(binding.rawClass, binding);
@@ -315,14 +318,18 @@ public class FluentDSL {
 		}		
 		
 		Class<?> findSyntaticScope() {
-			SimpleTypeBinding tb = bindings.get(SyntScope.class);
-						
-			HashSet<SimpleTypeVar> checked = new HashSet<FluentDSL.SimpleTypeVar>();
-			HashSet<SimpleTypeVar> queue = new HashSet<FluentDSL.SimpleTypeVar>();
-			checked.add(tb.parameters[0]);
-			queue.add(tb.parameters[0]);
+			BindClause tb = bindings.get(SyntScope.class);
+			return resolve(tb.parameters[0]);
+		}
+		
+		static Class<?> resolve(TypeVar x) {
+
+			HashSet<TypeVar> checked = new HashSet<FluentDSL.TypeVar>();
+			HashSet<TypeVar> queue = new HashSet<FluentDSL.TypeVar>();
+			checked.add(x);
+			queue.add(x);
 			while(!queue.isEmpty()) {
-				SimpleTypeVar var = queue.iterator().next();
+				TypeVar var = queue.iterator().next();
 				queue.remove(var);
 				
 				for(Type t : var.bindings) {
@@ -334,13 +341,94 @@ public class FluentDSL {
 					}
 				}
 				
-				for(SimpleTypeVar a : var.synonims) {
+				for(TypeVar a : var.synonims) {
 					if (checked.add(a)) {
 						queue.add(a);
 					}
 				}
 			}
 			return null;			
+		}
+	}
+	
+	@SuppressWarnings({"unchecked","rawtypes"})
+	static class GenericContext {
+		
+		Class rootClass;
+		TypeResolver resolution;
+		
+		TypeVariable<?> rootVar;
+		TypeVar rootVarResolution;
+		
+		public GenericContext(Type type) {
+			this(type, Collections.EMPTY_MAP);
+		}
+
+		public GenericContext(TypeVariable<?> rv, TypeVar rvr) {
+			this.rootVar = rv;
+			this.rootVarResolution = rvr;
+		}
+		
+		public GenericContext(Type type, Map<String, TypeVar> vars) {
+			resolution = new TypeResolver();
+			if (type instanceof Class) {
+				rootClass = (Class) type;
+				resolution.bind((Class)type);
+			}
+			else if (type instanceof ParameterizedType) {
+				rootClass = (Class) ((ParameterizedType)type).getRawType();
+				resolution.bind((ParameterizedType)type, vars);
+			}
+			else {
+				throw new IllegalArgumentException("Unsuitable " + type);
+			}
+		}
+		
+		public Class resolveToClass(Type type) {
+			if (type instanceof Class) {
+				return (Class)type;
+			}
+			else if (type instanceof ParameterizedType) {
+				return (Class) ((ParameterizedType)type).getRawType();
+			}
+			else if (type instanceof TypeVariable) {
+				TypeVar tv = resolve((TypeVariable)type);
+				tv.getClass(); // NPE check
+				return TypeResolver.resolve(tv);
+			}
+			else {
+				throw new IllegalArgumentException("Unsuitable type " + type);
+			}
+		}
+		
+		public TypeVar resolve(TypeVariable<?> var) {
+			return getVarMap().get(var.getName());
+		}
+
+		private Map<String, TypeVar> getVarMap() {
+			if (rootClass != null) {
+				return resolution.bindings.get(rootClass).varBinding;
+			}
+			else {
+				return (Map)Collections.singletonMap(rootVar, rootVarResolution);
+			}
+		}
+
+		public GenericContext derive(Type type) {
+			if (type instanceof Class) {
+				return new GenericContext(type);
+			}
+			else if (type instanceof ParameterizedType) {
+				return new GenericContext(type, getVarMap());
+			}
+			else if (type instanceof TypeVariable<?>) {
+				TypeVariable<?> name = (TypeVariable<?>) type;
+				TypeVar res = resolve(name);
+				return new GenericContext(name, res);
+			}
+			else {
+				throw new IllegalArgumentException("Unsuitable type " + type);
+			}
 		}
 	}
 }
