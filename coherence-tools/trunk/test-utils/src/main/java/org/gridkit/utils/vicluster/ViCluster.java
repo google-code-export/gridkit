@@ -98,5 +98,9 @@ public class ViCluster implements ViProps {
 	}
 
 	public void setProp(Map<String, String> props) {
+		props.putAll(props);
+		for(ViNode node: nodes.values()) {
+			node.setProp(props);
+		}
 	}
 }
