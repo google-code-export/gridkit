@@ -1,5 +1,7 @@
 package org.gridkit.utils.vicluster;
 
+import java.lang.management.ManagementFactory;
+import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
@@ -18,9 +20,13 @@ public class CohHelper {
 	}
 
 	public static void enableFastLocalCluster(ViProps node) {
+		int port = new Random().nextInt(10000) + 50000;
 		node.setProp("tangosol.coherence.ttl", "0");
 		node.setProp("tangosol.coherence.wka", "127.0.0.1");
+		node.setProp("tangosol.coherence.wka.port", String.valueOf(port));
 		node.setProp("tangosol.coherence.localhost", "127.0.0.1");
+		node.setProp("tangosol.coherence.localport", String.valueOf(port));
+		node.setProp("tangosol.coherence.cluster", "jvm::" + ManagementFactory.getRuntimeMXBean().getName());
 	}
 
 	public static void disableTCMP(ViProps node) {
