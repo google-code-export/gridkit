@@ -1,7 +1,5 @@
 package org.gridkit.coherence.util.vicluster;
 
-import java.lang.management.ManagementFactory;
-
 import junit.framework.Assert;
 
 import org.gridkit.utils.vicluster.CohHelper;
@@ -16,48 +14,35 @@ public class ViClusterTest {
 	@Test
 	public void failoverTest() throws InterruptedException {
 		
-		for(int i = 0; i != 1000; ++i) {
-			ViCluster cluster = new ViCluster("failoverTest-" + i, "com.tangosol", "org.gridkit");
-			CohHelper.enableFastLocalCluster(cluster);
-			CohHelper.enableJmx(cluster);
-			
-			cluster.node("server1").start(DefaultCacheServer.class);
-			// ensure cache service
-			cluster.node("server1").getCache("distr-A");
-			
-			CohHelper.localstorage(cluster.node("client"), false);
-			
-			NamedCache cache = cluster.node("client").getCache("distr-A");
-			String cacheService = cluster.node("client").getServiceNameForCache("distr-A"); 
-			
-			cache.put("A", "A");
-	
-			System.out.println("Client node ID " + CohHelper.jmxMemberId(cluster.node("client")));
-			System.out.println("Server node ID " + CohHelper.jmxMemberId(cluster.node("server1")));
-			System.out.println("Server statusHA " + CohHelper.jmxServiceStatusHA(cluster.node("server1"), cacheService));
-	
-			Assert.assertEquals("Server's cache service is running", true, CohHelper.jmxServiceRunning(cluster.node("server1"), cacheService));
-			
-			
-			cluster.node("server2").start(DefaultCacheServer.class);
-			cluster.node("server2").getCluster();
-			CohHelper.jmxWaitForService(cluster.node("server2"), cacheService);
-			System.out.println("Shutting down server1");
-			cluster.node("server1").shutdown();
-			
-			Assert.assertEquals("Value at 'A'", "A", cache.get("A"));
-			
-			cluster.kill();	
-			System.out.println("Cluster is down");
-			cluster = null;
-			System.gc();
-			System.gc();
-			System.gc();
-			System.gc();
-			System.gc();
-		}		
+		ViCluster cluster = new ViCluster("failoverTest", "com.tangosol", "org.gridkit");
+		CohHelper.enableFastLocalCluster(cluster);
+		CohHelper.enableJmx(cluster);
 		
-		Thread.sleep(1000000);
+		cluster.node("server1").start(DefaultCacheServer.class);
+		// ensure cache service
+		cluster.node("server1").getCache("distr-A");
+		
+		CohHelper.localstorage(cluster.node("client"), false);
+		
+		NamedCache cache = cluster.node("client").getCache("distr-A");
+		String cacheService = cluster.node("client").getServiceNameForCache("distr-A"); 
+		
+		cache.put("A", "A");
+
+		System.out.println("Client node ID " + CohHelper.jmxMemberId(cluster.node("client")));
+		System.out.println("Server node ID " + CohHelper.jmxMemberId(cluster.node("server1")));
+		System.out.println("Server statusHA " + CohHelper.jmxServiceStatusHA(cluster.node("server1"), cacheService));
+
+		Assert.assertEquals("Server's cache service is running", true, CohHelper.jmxServiceRunning(cluster.node("server1"), cacheService));
+		
+		
+		cluster.node("server2").start(DefaultCacheServer.class);
+		CohHelper.jmxWaitForService(cluster.node("server2"), cacheService);
+		cluster.node("server1").shutdown();
+		
+		Assert.assertEquals("Value at 'A'", "A", cache.get("A"));
+		
+		cluster.shutdown();		
 	}
 	
 	@Test
@@ -87,6 +72,5 @@ public class ViClusterTest {
 		CohHelper.jmxWaitForStatusHA(cluster.node("client"), cacheService, "NODE-SAFE");
 
 		cluster.shutdown();
-	}
-	
+	}	
 }

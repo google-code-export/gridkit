@@ -60,6 +60,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.LogManager;
 
 import org.junit.Ignore;
@@ -78,7 +79,7 @@ public class Isolate {
 	
 	static {
 		
-		// need to initialize logging outside of Isolate
+		// initializing LogManager outside of isolate
 		LogManager.getLogManager();
 		
 		System.err.println("Installing java.lang.System multiplexor");
@@ -147,21 +148,13 @@ public class Isolate {
 	
 	private ThreadGroup threadGroup;
 	
-	private BlockingQueue<WorkUnit> queue = new SynchronousQueue<WorkUnit>();
+	private volatile BlockingQueue<WorkUnit> queue;
 	
 	public Isolate(String name, String... packages) {		
 		this.name = name;
 		this.cl = new IsolatedClassloader(getClass().getClassLoader(), packages);
 
-		threadGroup = new ThreadGroup(name) {
-			@Override
-			public void uncaughtException(Thread t, Throwable e) {
-				if (!(e instanceof ThreadDoomException)) {
-					stdErr.println("Uncaught exception at thread " + t.getName());
-					e.printStackTrace(stdErr);
-				}
-			}
-		};
+		threadGroup = new IsolateThreadGroup(name);
 		
 		sysProps = new Properties();
 		sysProps.putAll(System.getProperties());
@@ -179,6 +172,7 @@ public class Isolate {
 		isolatedThread = new Thread(threadGroup, new Runner());
 		isolatedThread.setName("Isolate-" + name);
 		isolatedThread.setDaemon(true);
+		queue = new SynchronousQueue<Isolate.WorkUnit>();
 		isolatedThread.start();		
 	}
 	
@@ -376,12 +370,16 @@ public class Isolate {
 		threadGroup.resume();
 	}
 	
-	@SuppressWarnings("deprecation")
 	public void stop() {
 		try {
-			queue.put(STOP);
+			queue.offer(STOP, 1000, TimeUnit.SECONDS);
+			while(queue != null) {
+				Thread.sleep(50);
+			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		} catch (NullPointerException e) {
+			// ignore;
 		}
 		stdErr.println("Stopping ...");
 		while(true) {
@@ -405,9 +403,15 @@ public class Isolate {
 		cl = null;
 		threadGroup = null;
 		isolatedThread = null;
+		sysProps = null;
+		
 		stdErr.println("Stopped");
+		
+		System.gc();
+		Runtime.getRuntime().runFinalization();
 	}
 	
+	@SuppressWarnings("deprecation")
 	private int kill(ThreadGroup tg) {
 		int threadCount = 0;
 		
@@ -459,7 +463,7 @@ public class Isolate {
 			}
 		}
 		
-		return n;
+		return threadCount;
 	}
 	
 	private void trySocketInterrupt(Thread t) {
@@ -562,49 +566,76 @@ public class Isolate {
 		return cl;
 	}
 
-	private static class ThreadDoomException extends ThreadDeath {
+	@SuppressWarnings("serial")
+	private class ThreadDoomException extends ThreadDeath {
 
 		@Override
 		public String getMessage() {
+			//System.out.println("OMEGA:getMessage");
 			throw this;
 		}
 
 		@Override
 		public String getLocalizedMessage() {
+			//System.out.println("OMEGA:getLocalizedMessage");
 			throw this;
 		}
 
 		@Override
 		public Throwable getCause() {
+			//System.out.println("OMEGA:getCause");			
 			throw this;
 		}
 
 		@Override
 		public String toString() {
+			//System.out.println("OMEGA:toString");
 			throw this;
 		}
 
 		@Override
 		public void printStackTrace() {
+			//System.out.println("OMEGA:printStackTrace");
 			throw this;
 		}
 
 		@Override
 		public void printStackTrace(PrintStream s) {
+			//System.out.println("OMEGA:printStackTrace");
 			throw this;
 		}
 
 		@Override
 		public void printStackTrace(PrintWriter s) {
+			//System.out.println("OMEGA:printStackTrace");
 			throw this;
 		}
 
 		@Override
 		public StackTraceElement[] getStackTrace() {
+			//System.out.println("OMEGA:getStackTrace");
 			throw this;
-		}
+		}		
 	}
 	
+	private class IsolateThreadGroup extends ThreadGroup {
+		
+		private IsolateThreadGroup(String name) {
+			super(name);
+		}
+
+		@Override
+		public void uncaughtException(Thread t, Throwable e) {
+			if (e instanceof ThreadDeath) {
+				// ignore
+			}
+			else {
+				stdErr.println("Uncaught exception at thread " + t.getName());
+				e.printStackTrace(stdErr);
+			}
+		}
+	}
+
 	private interface WorkUnit {		
 		public void exec() throws Exception;
 	}
@@ -794,22 +825,27 @@ public class Isolate {
 			Thread.currentThread().setContextClassLoader(cl);
 			ISOLATE.set(Isolate.this);
 			
-			while(true) {
-				try {
-					WorkUnit unit = queue.take();
-					if (unit instanceof StopMarker) {
-						break;
+			try{
+				while(true) {
+					try {
+						WorkUnit unit = queue.take();
+						if (unit instanceof StopMarker) {
+							break;
+						}
+						else {
+							unit.exec();
+						}
 					}
-					else {
-						unit.exec();
+					catch (ThreadDeath e) {
+						return;
 					}
+					catch (Exception e) {
+						e.printStackTrace();
+					};
 				}
-				catch (ThreadDeath e) {
-					return;
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-				};
+			}
+			finally{
+				queue = null;
 			}
 		};		
 	}
@@ -963,9 +999,7 @@ public class Isolate {
 					}
 				}
 				byte[] cd = bos.toByteArray();
-				Class<?> baseC = baseClassloader.loadClass(classname);
-				Class<?> c = defineClass(classname, cd, 0, cd.length, baseC.getProtectionDomain());
-				//System.out.println("IS-" + name + " > " + classname);
+				Class<?> c = defineClass(classname, cd, 0, cd.length, getClass().getProtectionDomain());
 				return c;
 			}
 			catch(Exception e) {

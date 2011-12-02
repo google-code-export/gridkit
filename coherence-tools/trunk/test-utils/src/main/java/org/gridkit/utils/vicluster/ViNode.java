@@ -80,33 +80,14 @@ public class ViNode implements ViProps {
 	public void start(final Class<?> main, final String... args) {
 		if (!started) {
 			start();
-		}		
+		}
+		final String name = getName();
 		isolate.exec(new Runnable() {
 			@Override
 			public void run() {
-				Thread t = new Thread() {
-					@Override
-					public void run() {
-						try {
-							Method mm = main.getDeclaredMethod("main", String[].class);
-							mm.setAccessible(true);
-							try {
-								mm.invoke(null, ((Object)args));
-							}
-							catch(InvocationTargetException e) {
-								if (e.getCause() instanceof ThreadDeath) {
-									//ignore;
-								}
-								else {
-									throw e;
-								}
-							}
-						} catch (Exception e) {
-							throw new RuntimeException("Failed to execute main() at " + main.getName(), e);
-						}
-					}
-				};
+				Thread t = new ViMain(args, main);
 				t.setDaemon(true);
+				t.setName(name + "-Main");
 				t.start();
 			}
 		});
@@ -218,11 +199,43 @@ public class ViNode implements ViProps {
 
 	public void kill() {
 		if (!started) {
-			throw new IllegalStateException("can't kill not started node");
+			throw new IllegalStateException("can't kill not started node " + getName());
 		}
 		if (!terminated) {
 			isolate.stop();
+			isolate = null;
 			terminated = true;
+		}
+	}
+
+	private static class ViMain extends Thread {
+		private final String[] args;
+		private final Class<?> main;
+	
+		private ViMain(String[] args, Class<?> main) {
+			this.args = args;
+			this.main = main;
+		}
+	
+		@Override
+		public void run() {
+			try {
+				Method mm = main.getDeclaredMethod("main", String[].class);
+				mm.setAccessible(true);
+				try {
+					mm.invoke(null, ((Object)args));
+				}
+				catch(InvocationTargetException e) {
+					if (e.getCause() instanceof ThreadDeath) {
+						//ignore;
+					}
+					else {
+						throw e;
+					}
+				}
+			} catch (Exception e) {
+				throw new RuntimeException("Failed to execute main() at " + main.getName(), e);
+			}
 		}
 	}
 }

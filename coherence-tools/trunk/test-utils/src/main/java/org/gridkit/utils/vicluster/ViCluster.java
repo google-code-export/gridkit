@@ -89,6 +89,15 @@ public class ViCluster implements ViProps {
 		for(ViNode node: nodes.values()) {
 			node.shutdown();
 		}
+		nodes.clear();
+		for(int i = 0; i != 3; ++i) {
+			System.gc();
+			Runtime.getRuntime().runFinalization();
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+			}
+		}
 	}
 
 	public void kill() {
