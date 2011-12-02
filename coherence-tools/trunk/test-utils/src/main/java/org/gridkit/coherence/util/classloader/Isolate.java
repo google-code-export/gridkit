@@ -29,6 +29,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.Writer;
+import java.lang.Thread.State;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -37,10 +38,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
+import java.net.DatagramSocket;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,6 +60,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.SynchronousQueue;
+import java.util.logging.LogManager;
 
 import org.junit.Ignore;
 
@@ -73,6 +77,9 @@ public class Isolate {
 	private static Properties rootProperties;
 	
 	static {
+		
+		// need to initialize logging outside of Isolate
+		LogManager.getLogManager();
 		
 		System.err.println("Installing java.lang.System multiplexor");
 		
@@ -136,6 +143,7 @@ public class Isolate {
 	private PrintStream stdOut;
 	private PrintStream stdErr;
 	private Properties sysProps;
+	private int shutdownRetry = 0;
 	
 	private ThreadGroup threadGroup;
 	
@@ -148,8 +156,10 @@ public class Isolate {
 		threadGroup = new ThreadGroup(name) {
 			@Override
 			public void uncaughtException(Thread t, Throwable e) {
-				stdErr.println("Uncaught exception at thread " + t.getName());
-				e.printStackTrace(stdErr);
+				if (!(e instanceof ThreadDoomException)) {
+					stdErr.println("Uncaught exception at thread " + t.getName());
+					e.printStackTrace(stdErr);
+				}
 			}
 		};
 		
@@ -373,8 +383,175 @@ public class Isolate {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		threadGroup.stop();
+		stdErr.println("Stopping ...");
+		while(true) {
+			while(kill(threadGroup) > 0 || removeShutdownHooks() > 0) {
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+				}
+				++shutdownRetry;
+			}
+			try {
+				if (!threadGroup.isDestroyed()) {
+					threadGroup.destroy();
+				}
+				break;
+			}
+			catch(IllegalThreadStateException e) {
+				stdErr.println(e);
+			}
+		}
 		cl = null;
+		threadGroup = null;
+		isolatedThread = null;
+		stdErr.println("Stopped");
+	}
+	
+	private int kill(ThreadGroup tg) {
+		int threadCount = 0;
+		
+		Thread[] threads = new Thread[2 * tg.activeCount()];
+		int n = tg.enumerate(threads);
+		for(int i = 0; i != n; ++i) {
+			++threadCount;
+			Thread t = threads[i];
+			if (Runtime.getRuntime().removeShutdownHook(t)) {
+				stdErr.println("Removing shutdown hook: " + t.getName());
+			}
+			if (t.getState() != State.TERMINATED) {
+				stdErr.println("Killing: " + t.getName());
+				try { t.resume(); }	catch(Exception e) {/* ignore */};
+				try { t.start(); }	catch(Exception e) {/* ignore */};
+				try { t.interrupt(); }	catch(Exception e) {/* ignore */};
+				try { t.stop(new ThreadDoomException()); }	catch(IllegalStateException e) {/* ignore */};				
+			}
+			else {
+				if (shutdownRetry % 10 == 9) {
+					stdErr.println("Already terminated: " + t.getName());
+				}
+			}
+			
+			if (t.isAlive() && shutdownRetry > 4) {
+				if (shutdownRetry > 10 && (shutdownRetry % 10 == 5)) {
+					StackTraceElement[] trace = t.getStackTrace();
+					for(StackTraceElement e: trace) {
+						stdErr.println("  at " + e);
+					}
+				}
+				try {
+					try { t.interrupt(); }	catch(Exception e) {/* ignore */};
+					trySocketInterrupt(t);
+					try { t.interrupt(); }	catch(Exception e) {/* ignore */};
+					try { t.stop(new ThreadDoomException()); }	catch(IllegalStateException e) {/* ignore */};				
+				}
+				catch(Exception e) {
+					stdErr.println("Socket interruption failed: " + e.toString());
+				}
+			}
+		}
+		
+		ThreadGroup[] groups = new ThreadGroup[2 * tg.activeGroupCount()];
+		n = tg.enumerate(groups);
+		for(ThreadGroup g: groups) {
+			if (g != null) {
+				threadCount += kill(g);
+			}
+		}
+		
+		return n;
+	}
+	
+	private void trySocketInterrupt(Thread t) {
+		Object target = getField(t, "target");
+		if (target == null) {
+			return;
+		}
+		String cn = target.getClass().getName();
+		if (cn.startsWith("com.tangosol.coherence.component")
+				&& cn.contains("PacketListener")) {
+			try {
+				Object udpSocket = getField(target, "__m_UdpSocket");
+				DatagramSocket ds = (DatagramSocket) getField(udpSocket, "__m_DatagramSocket");
+				ds.close();
+				stdErr.println("Closing socket for " + t.getName());
+			}
+			catch(Exception e) {
+				// ignore
+			}
+		}
+		else if (cn.startsWith("com.tangosol.coherence.component")
+					&& cn.contains("PacketPublisher")) {
+			try {
+				Object udpSocket = getField(target, "__m_UdpSocketUnicast");
+				DatagramSocket ds = (DatagramSocket) getField(udpSocket, "__m_DatagramSocket");
+				ds.close();
+				stdErr.println("Closing socket for " + t.getName());
+			}
+			catch(Exception e) {
+				// ignore;
+			}
+			try {
+				Object udpSocket = getField(target, "__m_UdpSocketMulticast");
+				DatagramSocket ds = (DatagramSocket) getField(udpSocket, "__m_DatagramSocket");
+				ds.close();
+				stdErr.println("Closing socket for " + t.getName());
+			}
+			catch(Exception e) {
+				// ignore;
+			}
+		}
+	}
+	
+	private static Object getField(Object x, String field) {
+		try {
+			Field f = null;
+			Class<?> c = x.getClass();
+			while(f == null && c != Object.class) {
+				try {
+					f = c.getDeclaredField(field);
+				} catch (NoSuchFieldException e) {
+				}
+				if (f == null) {
+					c = c.getSuperclass();
+				}
+			}
+			if (f != null) {
+				f.setAccessible(true);
+				return f.get(x);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		
+		throw new IllegalArgumentException("Cannot get '" + field + "' from " + x.getClass().getName());
+	}
+
+	private int removeShutdownHooks() {
+		int threadCount = 0;
+		for(Thread t : getSystemShutdownHooks()) {
+			if (t.getThreadGroup() == threadGroup || t.getContextClassLoader() ==cl) {
+				++threadCount;
+				if (Runtime.getRuntime().removeShutdownHook(t)) {
+					stdErr.println("Removing shutdown hook: " + t.getName());
+				}
+			}
+		}
+		return threadCount;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private Collection<Thread> getSystemShutdownHooks() {
+		try {
+			Class<?> cls = Class.forName("java.lang.ApplicationShutdownHooks");
+			Field f = cls.getDeclaredField("hooks");
+			f.setAccessible(true);
+			Map<Thread, Thread> hooks = (Map<Thread, Thread>) f.get(null);
+			return new ArrayList<Thread>(hooks.values());
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Collections.emptyList();
+		}
 	}
 	
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
@@ -385,6 +562,49 @@ public class Isolate {
 		return cl;
 	}
 
+	private static class ThreadDoomException extends ThreadDeath {
+
+		@Override
+		public String getMessage() {
+			throw this;
+		}
+
+		@Override
+		public String getLocalizedMessage() {
+			throw this;
+		}
+
+		@Override
+		public Throwable getCause() {
+			throw this;
+		}
+
+		@Override
+		public String toString() {
+			throw this;
+		}
+
+		@Override
+		public void printStackTrace() {
+			throw this;
+		}
+
+		@Override
+		public void printStackTrace(PrintStream s) {
+			throw this;
+		}
+
+		@Override
+		public void printStackTrace(PrintWriter s) {
+			throw this;
+		}
+
+		@Override
+		public StackTraceElement[] getStackTrace() {
+			throw this;
+		}
+	}
+	
 	private interface WorkUnit {		
 		public void exec() throws Exception;
 	}
