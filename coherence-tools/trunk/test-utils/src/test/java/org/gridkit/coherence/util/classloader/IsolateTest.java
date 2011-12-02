@@ -107,7 +107,10 @@ public class IsolateTest {
 			}
 		});		
 		
-		Assert.assertNull(System.getProperty("local-prop"));				
+		Assert.assertNull(System.getProperty("local-prop"));
+		
+		is1.stop();
+		is2.stop();
 	}
 	
 	@Test

@@ -999,12 +999,25 @@ public class Isolate {
 					}
 				}
 				byte[] cd = bos.toByteArray();
-				Class<?> c = defineClass(classname, cd, 0, cd.length, getClass().getProtectionDomain());
-				return c;
+				try {
+					return defineClass(classname, cd);
+				}
+				catch(OutOfMemoryError e) {
+					// try it again
+					System.gc();
+					System.runFinalization();
+					System.gc();
+					return defineClass(classname, cd);
+				}
 			}
 			catch(Exception e) {
 				throw new ClassNotFoundException(classname);
 			}
+		}
+
+		private Class<?> defineClass(String classname, byte[] cd) throws ClassFormatError {
+			Class<?> c = defineClass(classname, cd, 0, cd.length, getClass().getProtectionDomain());
+			return c;
 		}
 	}
 	
