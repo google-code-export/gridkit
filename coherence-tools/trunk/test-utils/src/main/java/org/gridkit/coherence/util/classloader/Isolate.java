@@ -446,6 +446,7 @@ public class Isolate {
 				try {
 					try { t.interrupt(); }	catch(Exception e) {/* ignore */};
 					trySocketInterrupt(t);
+					tryStop(t);
 					try { t.interrupt(); }	catch(Exception e) {/* ignore */};
 					try { t.stop(new ThreadDoomException()); }	catch(IllegalStateException e) {/* ignore */};				
 				}
@@ -503,6 +504,20 @@ public class Isolate {
 			}
 			catch(Exception e) {
 				// ignore;
+			}
+		}
+	}
+
+	private void tryStop(Thread thread) {
+		Object target = getField(thread, "target");
+		if (target != null) {
+			try {
+				Method m = target.getClass().getMethod("stop");
+				m.setAccessible(true);
+				m.invoke(target);
+				stdErr.println("Calling stop on " + thread.getName());
+			} catch (Exception e) {
+				//ignore
 			}
 		}
 	}
