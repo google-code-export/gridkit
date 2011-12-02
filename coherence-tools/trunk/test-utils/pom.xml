@@ -7,8 +7,7 @@
     express or implied. See the License for the specific language governing permissions 
     and limitations under the License. -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -18,7 +17,7 @@
     </parent>
 
     <artifactId>test-utils</artifactId>
-    <version>0.1.3-SNAPSHOT</version>
+    <version>0.1.3</version>
     <name>test-utils</name>
     <description>Utility classes for unit and integration testing</description>
 
@@ -40,7 +39,8 @@
     </repositories>
 
     <properties>
-        <coherence.version>3.6.1.0b19636</coherence.version>
+        <!--<coherence.version>3.6.1.0b19636</coherence.version>-->
+        <coherence.version>3.7.1.0b27797</coherence.version>
         <junit.version>4.8.2</junit.version>
     </properties>
 
@@ -67,10 +67,18 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.7.2</version>
+		<!--
                 <configuration>
                     <argLine>-XX:MaxPermSize=256m</argLine>
                 </configuration>
+                -->
             </plugin>
         </plugins>
     </build>
+
+  <scm>
+    <connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/tags/test-utils-0.1.3</connection>
+    <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/tags/test-utils-0.1.3</developerConnection>
+    <url>http://gridkit.googlecode.com/svn/coherence-tools/tags/test-utils-0.1.3</url>
+  </scm>
 </project>
