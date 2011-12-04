@@ -7,24 +7,21 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.lang.reflect.WildcardType;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
 public class FluentDSL {
 
+	@SuppressWarnings("unchecked")
 	public static <T, V> T newNode(Class<T> fi, AstNodeHandler<V> nodeHandler) {
 		AstNode node = new AstNode(nodeHandler);
-		GenericContext genCtx = new GenericContext(fi);
-		return (T)newState(fi, node, genCtx);
+		return (T)newState(new TrackedType(fi), node);
 	}
 
-	private static Object newState(Class<?> fi, AstNode node, GenericContext gc) {
-		node.genContext = gc;
+	private static Object newState(TrackedType type, AstNode node) {
+		Class<?> fi = type.getRawType();
+		node.runtimeType = type;
 		return Proxy.newProxyInstance(fi.getClassLoader(), new Class[]{fi}, node);
 	}
 	
@@ -34,7 +31,7 @@ public class FluentDSL {
 		private Method callSite;
 		private AstNodeHandler<?> handler;
 		
-		private GenericContext genContext;
+		private TrackedType runtimeType;
 
 		public AstNode(AstNodeHandler<?> handler) {
 			this.handler = handler;
@@ -46,7 +43,6 @@ public class FluentDSL {
 			this.callSite = callSite;
 		}
 
-		@SuppressWarnings("rawtypes")
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
 			if (isPushAction(method)) {
@@ -62,10 +58,10 @@ public class FluentDSL {
 					
 					AstNode nested = new AstNode(h, this, term);
 					
-					System.out.println("PUSH: " + method.getName() + " - syntatic scope " + returnType(proxy, method) + ", handler " + h.getClass());
+					System.out.println("PUSH: " + method.getName() + ", handler " + h.getClass());
 
-					GenericContext nextCtx = genContext.derive(method.getGenericReturnType());
-					return newState(method.getReturnType(), nested, nextCtx);
+					TrackedType type = runtimeType.resolve(method.getGenericReturnType());
+					return newState(type, nested);
 					
 				} catch (Exception e) {
 					throw new RuntimeException(e);
@@ -85,10 +81,10 @@ public class FluentDSL {
 					
 					AstNode nested = new AstNode(h, null, term);
 					
-					System.out.println("REPLACE: " + method.getName() + " - syntatic scope " + returnType(proxy, method) + ", handler " + h.getClass());
+					System.out.println("REPLACE: " + method.getName() + ", handler " + h.getClass());
 					
-					GenericContext nextCtx = genContext.derive(method.getGenericReturnType());
-					return newState(method.getReturnType(), nested, nextCtx);
+					TrackedType type = runtimeType.resolve(method.getGenericReturnType());
+					return newState(type, nested);
 					
 				} catch (Exception e) {
 					throw new RuntimeException(e);
@@ -108,9 +104,8 @@ public class FluentDSL {
 				}
 				else {
 					parent.pop(callSite, node);
-					Class returnFI = genContext.resolveToClass(method.getGenericReturnType());
-					GenericContext nextCtx = genContext.derive(method.getGenericReturnType());
-					return newState(returnFI, parent, nextCtx);
+					TrackedType type = runtimeType.resolve(method.getGenericReturnType());
+					return newState(type, parent);
 				}				
 			}
 			else {
@@ -121,9 +116,8 @@ public class FluentDSL {
 				
 				System.out.println("TERM: " + method.getName() + " on " + handler.getClass());
 
-				Class returnFI = genContext.resolveToClass(method.getGenericReturnType());
-				GenericContext nextCtx = genContext.derive(method.getGenericReturnType());
-				return newState(returnFI, this, nextCtx);
+				TrackedType type = runtimeType.resolve(method.getGenericReturnType());
+				return newState(type, this);
 			}
 		}
 
@@ -141,13 +135,6 @@ public class FluentDSL {
 			}
 			return m;
 		}
-
-		private Class returnType(Object proxy, Method method) {
-			Class[] interfaces = proxy.getClass().getInterfaces();
-			Class returnFI = inferReturnType(lookupTopInterface(interfaces, method));
-			return returnFI;
-		}
-
 
 		private boolean isPushAction(Method method) {
 			return method.isAnnotationPresent(AstPush.class);
@@ -188,45 +175,6 @@ public class FluentDSL {
 		}
 	}
 
-	@SuppressWarnings("rawtypes")
-	static Class lookupTopInterface(Class[] interfaces, Method m) {
-		for(Class i : interfaces) {
-			for(Method cm: i.getMethods()) {
-				if (cm.equals(m)) {
-					return i;
-				}
-			}
-		}
-		throw new RuntimeException("Cannot locate host class for " + m + " in " + Arrays.toString(interfaces));
-	}
-	
-	// package visibility for testing
-	@SuppressWarnings("rawtypes")
-	static Class inferReturnType(Class topClass) {
-		Class syntScope = inferSyntaticScope(topClass);
-		if (syntScope == null) {
-			throw new IllegalArgumentException("Cannot derive syntatic scope for " + topClass);
-		}		
-		return syntScope;
-	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	static Class inferSyntaticScope(Type type) {
-		if (type instanceof Class) {
-			TypeResolver resolver = new TypeResolver();
-			resolver.bind((Class)type);
-			return resolver.findSyntaticScope();
-		}
-		else if (type instanceof ParameterizedType) {
-			TypeResolver resolver = new TypeResolver();
-			resolver.bind((ParameterizedType)type, Collections.EMPTY_MAP);
-			return resolver.findSyntaticScope();			
-		}
-		else {
-			return null;
-		}
-	}
-	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	static boolean isAssignable(Class rtType, Type typeVar) {
 		if (typeVar instanceof Class) {
@@ -243,191 +191,110 @@ public class FluentDSL {
 		}
 	}
 	
-	static class TypeVar {		
+	@SuppressWarnings({"rawtypes"})
+	static class TrackedType {
 		
-		BindClause resolution;		
-		List<Type> bindings = new ArrayList<Type>();
-		List<TypeVar> synonims = new ArrayList<TypeVar>();
+		private boolean delayed = false;
 		
-	}
-	
-	static class BindClause {
-		Class<?> rawClass;
-		TypeVar[] parameters;
-		Map<String, TypeVar> varBinding = new HashMap<String, TypeVar>();
-	}
-	
-	static class TypeResolver {
+		private Type lazyType;
+		private TrackedType lazyScope;
+		
+		private Class rawType;
+		private Map<TypeVariable<?>, TrackedType> variables = new HashMap<TypeVariable<?>, FluentDSL.TrackedType>();
+		
+		public TrackedType(Class type) {
+			rawType = type;
+			bindVariables(type);
+		}
 
-		Map<Class<?>, BindClause> bindings =  new HashMap<Class<?>, FluentDSL.BindClause>();
-		
-		@SuppressWarnings("rawtypes")
-		void bind(ParameterizedType x, Map<String, TypeVar> scope) {
-						
-			Class rawClass = (Class)x.getRawType();
-			
-			BindClause binding;
-			bind(rawClass);
-
-			binding = bindings.get(rawClass);				
-		
-			for(int n = 0; n != x.getActualTypeArguments().length; ++n) {
-				Type arg = x.getActualTypeArguments()[n];
-				binding.parameters[n].bindings.add(arg);
-				if (arg instanceof TypeVariable) {
-					TypeVar tv = scope.get(((TypeVariable) arg).getName());
-					tv.toString(); // NPE check
-					tv.synonims.add(binding.parameters[n]);
-					binding.parameters[n].synonims.add(tv);
-				}
-			}			
+		TrackedType(ParameterizedType type, TrackedType scope) {
+			rawType = (Class) type.getRawType();
+			bindVariables(type, scope);
 		}
 		
-		@SuppressWarnings("rawtypes")
-		void bind(Class type) {
-			
-			Class rawClass = type;
-			
-			BindClause binding;
-			if (!bindings.containsKey(rawClass)) {
-				binding = new BindClause();
-				binding.rawClass = rawClass;
-				binding.parameters = new TypeVar[rawClass.getTypeParameters().length];
-
-				for(int n = 0; n != binding.rawClass.getTypeParameters().length; ++n) {
-					binding.parameters[n] = new TypeVar();
-					binding.parameters[n].bindings.add(binding.rawClass.getTypeParameters()[n]);
-					
-					TypeVariable<?> tv = binding.rawClass.getTypeParameters()[n];
-					binding.varBinding.put(tv.getName(), binding.parameters[n]);
-				}
-				
-				bindings.put(binding.rawClass, binding);
+		TrackedType(Type type, TrackedType scope, boolean delayed) {
+			this.delayed = delayed;
+			lazyType = type;
+			lazyScope = scope;
+			if (delayed) {
+				delayed = true;
 			}
-			
-			binding = bindings.get(rawClass);
-			
-			for(Type x: rawClass.getGenericInterfaces()) {
-				if (x instanceof ParameterizedType) {
-					bind((ParameterizedType) x, binding.varBinding);
+			else {
+				init();
+			}
+		}
+		
+		private void init() {
+			delayed = false;
+			if (lazyType instanceof Class) {
+				rawType = (Class) lazyType;
+				bindVariables((Class) lazyType);
+			}
+			else if (lazyType instanceof ParameterizedType) {
+				ParameterizedType pt = (ParameterizedType) lazyType;
+				rawType = (Class) pt.getRawType();
+				bindVariables(pt, lazyScope);
+			}
+			else {
+				throw new IllegalArgumentException("Unknown " + lazyType);
+			}			
+		}
+
+		private void bindVariables(Class type) {
+			for(Type tp : type.getGenericInterfaces()) {
+				if (tp instanceof Class) {
+					bindVariables((Class)tp);
+				}
+				else if (tp instanceof ParameterizedType) {
+					bindVariables((ParameterizedType) tp, this);
 				}
 				else {
-					bind((Class)x);
-				}
-			}			
-		}		
-		
-		Class<?> findSyntaticScope() {
-			BindClause tb = bindings.get(SyntScope.class);
-			return resolve(tb.parameters[0]);
-		}
-		
-		static Class<?> resolve(TypeVar x) {
-
-			HashSet<TypeVar> checked = new HashSet<FluentDSL.TypeVar>();
-			HashSet<TypeVar> queue = new HashSet<FluentDSL.TypeVar>();
-			checked.add(x);
-			queue.add(x);
-			while(!queue.isEmpty()) {
-				TypeVar var = queue.iterator().next();
-				queue.remove(var);
-				
-				for(Type t : var.bindings) {
-					if (t instanceof Class) {
-						return (Class<?>)t;
-					}
-					else if (t instanceof ParameterizedType) {
-						return (Class<?>)((ParameterizedType)t).getRawType();
-					}
-				}
-				
-				for(TypeVar a : var.synonims) {
-					if (checked.add(a)) {
-						queue.add(a);
-					}
+					throw new IllegalArgumentException("Unexpeted type " + tp);
 				}
 			}
-			return null;			
 		}
-	}
-	
-	@SuppressWarnings({"unchecked","rawtypes"})
-	static class GenericContext {
 		
-		Class rootClass;
-		TypeResolver resolution;
-		
-		TypeVariable<?> rootVar;
-		TypeVar rootVarResolution;
-		
-		public GenericContext(Type type) {
-			this(type, Collections.EMPTY_MAP);
+		private void bindVariables(ParameterizedType tp, TrackedType scope) {
+			TypeVariable<?>[] vars = ((Class)tp.getRawType()).getTypeParameters();
+			Type[] actual = tp.getActualTypeArguments();
+			for(int i = 0; i != vars.length; ++i) {
+				TypeVariable<?> v = vars[i];
+				Type t = actual[i];
+				if (t instanceof WildcardType) {
+					t = ((WildcardType)t).getUpperBounds()[0];
+				}
+				variables.put(v, scope.resolve(t));
+			}
+			
+			bindVariables((Class)tp.getRawType());
 		}
 
-		public GenericContext(TypeVariable<?> rv, TypeVar rvr) {
-			this.rootVar = rv;
-			this.rootVarResolution = rvr;
+		public Class getRawType() {
+			if (delayed) {
+				init();
+			}
+			return rawType;
 		}
 		
-		public GenericContext(Type type, Map<String, TypeVar> vars) {
-			resolution = new TypeResolver();
-			if (type instanceof Class) {
-				rootClass = (Class) type;
-				resolution.bind((Class)type);
+		public TrackedType resolve(Type var) {
+			if (delayed) {
+				init();
 			}
-			else if (type instanceof ParameterizedType) {
-				rootClass = (Class) ((ParameterizedType)type).getRawType();
-				resolution.bind((ParameterizedType)type, vars);
+			if (var instanceof Class) {
+				return new TrackedType((Class)var, null, true);
 			}
-			else {
-				throw new IllegalArgumentException("Unsuitable " + type);
+			else if (var instanceof TypeVariable<?>) {
+				TrackedType tracked = variables.get(var);
+				if (tracked == null) {
+					throw new IllegalArgumentException("Failed to resolve type " + var);
+				}
+				return tracked;
 			}
-		}
-		
-		public Class resolveToClass(Type type) {
-			if (type instanceof Class) {
-				return (Class)type;
-			}
-			else if (type instanceof ParameterizedType) {
-				return (Class) ((ParameterizedType)type).getRawType();
-			}
-			else if (type instanceof TypeVariable) {
-				TypeVar tv = resolve((TypeVariable)type);
-				tv.getClass(); // NPE check
-				return TypeResolver.resolve(tv);
+			else if (var instanceof ParameterizedType) {
+				return new TrackedType(((ParameterizedType) var), this, true);
 			}
 			else {
-				throw new IllegalArgumentException("Unsuitable type " + type);
-			}
-		}
-		
-		public TypeVar resolve(TypeVariable<?> var) {
-			return getVarMap().get(var.getName());
-		}
-
-		private Map<String, TypeVar> getVarMap() {
-			if (rootClass != null) {
-				return resolution.bindings.get(rootClass).varBinding;
-			}
-			else {
-				return (Map)Collections.singletonMap(rootVar, rootVarResolution);
-			}
-		}
-
-		public GenericContext derive(Type type) {
-			if (type instanceof Class) {
-				return new GenericContext(type);
-			}
-			else if (type instanceof ParameterizedType) {
-				return new GenericContext(type, getVarMap());
-			}
-			else if (type instanceof TypeVariable<?>) {
-				TypeVariable<?> name = (TypeVariable<?>) type;
-				TypeVar res = resolve(name);
-				return new GenericContext(name, res);
-			}
-			else {
-				throw new IllegalArgumentException("Unsuitable type " + type);
+				throw new IllegalArgumentException("Cannot resolve " + var);
 			}
 		}
 	}
