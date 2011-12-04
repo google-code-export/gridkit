@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FluentDSL {
+	
+	static boolean TRACE = Boolean.getBoolean("org.gridkit.flugram.trace");
 
 	@SuppressWarnings("unchecked")
 	public static <T, V> T newNode(Class<T> fi, AstNodeHandler<V> nodeHandler) {
@@ -46,42 +48,36 @@ public class FluentDSL {
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
 			if (isPushAction(method)) {
-				// non term token
-				
+				// non term token				
 				try {
 					// TODO lookup any one-arg method
 					Method term = lookupTermMethod(method.getName(), new Class[]{Object.class});
-					
 					Method handlerProvider = lookupHandlerProvider(method.getName(), method.getParameterTypes());
-					
 					AstNodeHandler<?> h = (AstNodeHandler<?>) handlerProvider.invoke(handler, args);
-					
 					AstNode nested = new AstNode(h, this, term);
 					
-					System.out.println("PUSH: " + method.getName() + ", handler " + h.getClass());
+					if (TRACE) {
+						System.out.println(ident() + "PUSH: " + method.getName() + ", handler " + h.getClass());
+					}
 
 					TrackedType type = runtimeType.resolve(method.getGenericReturnType());
 					return newState(type, nested);
 					
 				} catch (Exception e) {
 					throw new RuntimeException(e);
-				}
-				
+				}				
 			}
 			else if (isReplaceAction(method)) {
-				// non term token
-				
+				// non term token				
 				try {
 					// TODO lookup any one-arg method
-					Method term = lookupTermMethod(method.getName(), new Class[]{Object.class});
-					
 					Method handlerProvider = lookupHandlerProvider(method.getName(), method.getParameterTypes());
-					
 					AstNodeHandler<?> h = (AstNodeHandler<?>) handlerProvider.invoke(handler, args);
+					AstNode nested = new AstNode(h, parent, callSite);
 					
-					AstNode nested = new AstNode(h, null, term);
-					
-					System.out.println("REPLACE: " + method.getName() + ", handler " + h.getClass());
+					if (TRACE) {
+						System.out.println(ident() + "REPLACE: " + method.getName() + ", handler " + h.getClass());
+					}
 					
 					TrackedType type = runtimeType.resolve(method.getGenericReturnType());
 					return newState(type, nested);
@@ -97,7 +93,9 @@ public class FluentDSL {
 				Method m = evaluateMethod(handler, method);
 				Object node = m.invoke(handler, args);
 
-				System.out.println("POP: " + method.getName() );
+				if (TRACE) {
+					System.out.println(ident() + "POP: " + method.getName() );
+				}
 				
 				if (parent == null) {
 					return node;
@@ -114,7 +112,7 @@ public class FluentDSL {
 				Method m = lookupTermMethod(method.getName(), method.getParameterTypes());
 				m.invoke(handler, args);
 				
-				System.out.println("TERM: " + method.getName() + " on " + handler.getClass());
+				System.out.println(ident() + "TERM: " + method.getName() + " on " + handler.getClass());
 
 				TrackedType type = runtimeType.resolve(method.getGenericReturnType());
 				return newState(type, this);
@@ -136,6 +134,24 @@ public class FluentDSL {
 			return m;
 		}
 
+		private String ident() {
+			StringBuilder b = new StringBuilder();
+			for(int i = 0; i != depth(); ++i) {
+				b.append(' ');
+			}
+			return b.toString();
+		}
+		
+		private int depth() {
+			AstNode p = parent;
+			int n = 0;
+			while(p != null) {
+				++n;
+				p = p.parent;
+			}
+			return n;
+		}
+		
 		private boolean isPushAction(Method method) {
 			return method.isAnnotationPresent(AstPush.class);
 		}
@@ -167,7 +183,7 @@ public class FluentDSL {
 				return m;
 			}
 			catch (NoSuchMethodException e) {
-				throw new RuntimeException("Term methof '" + name + "' is not found in " + handler.getClass());
+				throw new RuntimeException("Term method '" + name + "' is not found in " + handler.getClass());
 			}
 			catch (Exception e) {
 				throw new RuntimeException(e);
