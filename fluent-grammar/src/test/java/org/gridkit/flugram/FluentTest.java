@@ -2,19 +2,19 @@ package org.gridkit.flugram;
 
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.Assert;
 
-import org.gridkit.flugram.FluentDSL.TypeResolver;
+import org.gridkit.flugram.FluentDSL.TrackedType;
 import org.junit.Test;
 
 
 public class FluentTest {
-
 	
-	public interface QueryStart<N> extends SyntScope<N> {
+	public interface QueryStart<N> {
 
 		@AstPush
 		public SpanStart<N> startSpan();
@@ -128,8 +128,8 @@ public class FluentTest {
 			this.inOrder = true;
 		}
 
-		public String evaluate() {
-			return "{ " + left + (inOrder ? " next/" : " near/") + distance + right + " }";
+		public String endSpan() {
+			return "{ " + left + (inOrder ? " next/" : " near/") + distance + " "+ right + " }";
 		}
 	}
 	
@@ -193,56 +193,98 @@ public class FluentTest {
 
 		public void must(Object term) {};
 		public void mustNot(Object term) {};
-		public void should(Object term) {};
-		
-		public AstNodeHandler<String> must() {
-			return new QueryNode<String>() {
-
-				public String evaluate() {
-					return null;
-				}
-
-				@Override
-				protected void subQuery(String query) {
-					result.append("+").append(query).append(" ");
-				}
-				
-			};
-		}
-
-		public AstNodeHandler<String> mustNot() {
-			return new QueryNode<String>() {
-				
-				public String evaluate() {
-					return null;
-				}
-				
-				@Override
-				protected void subQuery(String query) {
-					result.append("-").append(query).append(" ");
-				}
-				
-			};
-		}
-
-		public AstNodeHandler<String> should() {
-			return new QueryNode<String>() {
-				
-				public String evaluate() {
-					return null;
-				}
-				
-				@Override
-				protected void subQuery(String query) {
-					result.append("?").append(query).append(" ");
-				}
-				
-			};
-		}
+		public void should(Object term) {};		
 				
 		public String evaluate() {
 			return "{" + result.toString() + "}";
 		}
+	}
+	
+	@Test
+	public void test_type_tracking__term() {
+		
+		TrackedType tt = new TrackedType(SingleQueryStart.class);
+		Assert.assertEquals(SingleQueryStart.class, tt.getRawType());
+		tt = tt.resolve(getMethodType(tt.getRawType(), "term"));
+		Assert.assertEquals(String.class, tt.getRawType());
+		
+	}
+
+	@Test
+	public void test_type_tracking__term2() {
+		
+		TrackedType tt = new TrackedType(SingleQueryStart.class);
+		Assert.assertEquals(SingleQueryStart.class, tt.getRawType());
+		tt = tt.resolve(getMethodType(QueryStart.class, "term"));
+		Assert.assertEquals(String.class, tt.getRawType());
+		
+	}
+
+	@Test
+	public void test_type_tracking__phrase() {
+		
+		TrackedType tt = new TrackedType(SingleQueryStart.class);
+		Assert.assertEquals(SingleQueryStart.class, tt.getRawType());
+		tt = tt.resolve(getMethodType(SingleQueryStart.class, "startPhrase"));
+		Assert.assertEquals(PhraseNext.class, tt.getRawType());
+		tt = tt.resolve(getMethodType(PhraseNext.class, "term"));
+		Assert.assertEquals(PhraseNext.class, tt.getRawType());
+		tt = tt.resolve(getMethodType(PhraseNext.class, "term"));
+		Assert.assertEquals(PhraseNext.class, tt.getRawType());
+		tt = tt.resolve(getMethodType(PhraseNext.class, "endPhrase"));
+		Assert.assertEquals(String.class, tt.getRawType());
+		
+	}
+
+	@Test
+	public void test_type_tracking__span() {
+		
+		TrackedType tt = new TrackedType(SingleQueryStart.class);
+		Assert.assertEquals(SingleQueryStart.class, tt.getRawType());
+		tt = tt.resolve(getMethodType(SingleQueryStart.class, "startSpan"));
+		Assert.assertEquals(SpanStart.class, tt.getRawType());
+		tt = tt.resolve(getMethodType(QueryStart.class, "term"));
+		Assert.assertEquals(SpanNext.class, tt.getRawType());
+		tt = tt.resolve(getMethodType(SpanNext.class, "next"));
+		Assert.assertEquals(QueryStart.class, tt.getRawType());
+		tt = tt.resolve(getMethodType(QueryStart.class, "term"));
+		Assert.assertEquals(SpanEnd.class, tt.getRawType());
+		tt = tt.resolve(getMethodType(SpanEnd.class, "endSpan"));
+		Assert.assertEquals(String.class, tt.getRawType());
+		
+	}
+
+	@Test
+	public void test_type_tracking__spanAndPharse() {
+		
+		TrackedType tt = new TrackedType(SingleQueryStart.class);
+		Assert.assertEquals(SingleQueryStart.class, tt.getRawType());
+		tt = tt.resolve(getMethodType(SingleQueryStart.class, "startSpan"));
+		Assert.assertEquals(SpanStart.class, tt.getRawType());
+		tt = tt.resolve(getMethodType(QueryStart.class, "term"));
+		Assert.assertEquals(SpanNext.class, tt.getRawType());
+		tt = tt.resolve(getMethodType(SpanNext.class, "next"));
+		Assert.assertEquals(QueryStart.class, tt.getRawType());
+		tt = tt.resolve(getMethodType(QueryStart.class, "startPhrase"));
+		Assert.assertEquals(PhraseNext.class, tt.getRawType());
+		tt = tt.resolve(getMethodType(PhraseNext.class, "term"));
+		Assert.assertEquals(PhraseNext.class, tt.getRawType());
+		tt = tt.resolve(getMethodType(PhraseNext.class, "term"));
+		Assert.assertEquals(PhraseNext.class, tt.getRawType());
+		tt = tt.resolve(getMethodType(PhraseNext.class, "endPhrase"));
+		Assert.assertEquals(SpanEnd.class, tt.getRawType());
+		tt = tt.resolve(getMethodType(SpanEnd.class, "endSpan"));
+		Assert.assertEquals(String.class, tt.getRawType());
+		
+	}
+	
+	private Type getMethodType(Class type, String name) {
+		for(Method m: type.getMethods()) {
+			if (m.getName().equals(name)) {
+				return m.getGenericReturnType();
+			}
+		}
+		throw new IllegalArgumentException("method not found '" + name + "' at " + type.getName());
 	}
 	
 	@Test
@@ -294,48 +336,24 @@ public class FluentTest {
 					.term("y")
 				.endSpan();
 		
-		Assert.assertEquals("{ x, { yx, xz /10 }, z /1 }", result);		
+		Assert.assertEquals("{ x next/2 y }", result);		
 	}
 
 	@Test
-	public void lookupTopInterface_SpanStart() throws SecurityException, NoSuchMethodException {
-		Method m = QueryStart.class.getMethod("startPhrase", null);
-		Class[] interfaces = {SpanStart.class};
-		SpanStart.class.getGenericInterfaces();
-		Assert.assertEquals(SpanStart.class, FluentDSL.lookupTopInterface(interfaces, m));
+	public void fluent_snap_nest() {
+		
+		String result = ((QueryStart<String>)FluentDSL.newNode(SingleQueryStart.class, new SingleQueryNode()))
+		.startSpan()
+			.term("x")
+			.near(2)
+			.startPhrase()
+				.term("a")
+				.term("b")
+				.term("c")
+				.slop(1)
+			.endPhrase()
+		.endSpan();
+		
+		Assert.assertEquals("{ x near/2 { a, b, c /1 } }", result);		
 	}
-
-	@Test
-	public void testScopeResolver_SpanStart() {
-
-		TypeResolver resolver = new TypeResolver();
-		
-		resolver.bind(SpanStart.class);
-		
-		resolver.toString();
-		
-		Class c = resolver.findSyntaticScope();
-	
-	}
-	
-//	@Test @Ignore
-//	@SuppressWarnings("unused")
-//	public void inferReturnType_SpanStart() throws SecurityException, NoSuchMethodException {
-//		Method m = SpanStart.class.getMethod("startPhrase", null);
-//		
-//		Type rt = m.getGenericReturnType();
-//		ParameterizedType pt = (ParameterizedType) rt;
-//		Class rpt = (Class) pt.getRawType();
-//		for(Type i : rpt.getGenericInterfaces()) {			
-//			if (i instanceof ParameterizedType && FluentDSL.isAssignable(SyntScope.class, i)) {
-//				ParameterizedType ps = (ParameterizedType) i;
-//				Type argT = ps.getActualTypeArguments()[0];
-//				argT.toString();
-//			}
-//		}
-		
-//		Class<?> c = FluentDSL.inferReturnType(m);
-//		Assert.assertEquals(SpanNext.class, c);
-//	}
-	
 }
