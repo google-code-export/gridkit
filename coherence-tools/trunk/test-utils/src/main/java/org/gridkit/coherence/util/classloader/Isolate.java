@@ -223,7 +223,12 @@ public class Isolate {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} catch (ExecutionException e) {
-			AnyThrow.throwUncheked(e.getCause());
+			if (e instanceof ExecutionException) {
+				AnyThrow.throwUncheked((Throwable)convertOut(e.getCause()));
+			}
+			else {
+				AnyThrow.throwUncheked((Throwable)convertOut(e));				
+			}
 		}
 	}
 
@@ -242,7 +247,12 @@ public class Isolate {
 			return (V) convertOut(res);
 		}
 		catch(Throwable e) {
-			AnyThrow.throwUncheked((Throwable)convertOut(e));
+			if (e instanceof ExecutionException) {
+				AnyThrow.throwUncheked((Throwable)convertOut(e.getCause()));
+			}
+			else {
+				AnyThrow.throwUncheked((Throwable)convertOut(e));				
+			}
 			return null;
 		}
 	}
