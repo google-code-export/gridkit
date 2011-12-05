@@ -137,6 +137,19 @@ public class Isolate {
 		return ISOLATE.get();
 	}
 	
+	private static final Map<Class<?>, Object> PRIMITIVE_DEFAULTS = new HashMap<Class<?>, Object>();
+	static {
+		PRIMITIVE_DEFAULTS.put(boolean.class, Boolean.FALSE);
+		PRIMITIVE_DEFAULTS.put(byte.class, Byte.valueOf((byte)0));
+		PRIMITIVE_DEFAULTS.put(short.class, Short.valueOf((byte)0));
+		PRIMITIVE_DEFAULTS.put(char.class, Character.valueOf((char)0));
+		PRIMITIVE_DEFAULTS.put(int.class, Integer.valueOf((char)0));
+		PRIMITIVE_DEFAULTS.put(long.class, Long.valueOf((char)0));
+		PRIMITIVE_DEFAULTS.put(float.class, Float.valueOf(0f));
+		PRIMITIVE_DEFAULTS.put(double.class, Double.valueOf(0f));
+	}
+
+	
 	private String name;
 	private Thread isolatedThread;
 	private IsolatedClassloader cl;
@@ -332,7 +345,13 @@ public class Isolate {
 			Constructor<?> c = c_in.getDeclaredConstructors()[0];
 			
 			c.setAccessible(true);
-			Object oo = c.newInstance(new Object[c.getParameterTypes().length]);
+			// we have to init primitive params, cause null cannot be converted to primitive value
+			Object[] params = new Object[c.getParameterTypes().length];
+			for(int i = 0; i != params.length; ++i) {
+				Class<?> p = c.getParameterTypes()[i];
+				params[i] = PRIMITIVE_DEFAULTS.get(p);
+			}
+			Object oo = c.newInstance(params);
 			
 			for(Field fo : f_out) {
 				if (fo.getName().startsWith("this$")) {
