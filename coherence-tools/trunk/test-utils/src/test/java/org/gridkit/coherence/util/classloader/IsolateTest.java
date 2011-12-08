@@ -20,6 +20,7 @@ import java.util.concurrent.Callable;
 
 import junit.framework.Assert;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.tangosol.net.CacheFactory;
@@ -158,7 +159,7 @@ public class IsolateTest {
 		}		
 	}	
 	
-	@Test
+	@Test @Ignore
 	public void test_stack_trace() {
 
 		Isolate is1 = new Isolate("node-1", "com.tangosol", "org.gridkit");
@@ -179,7 +180,7 @@ public class IsolateTest {
 		}
 	}
 	
-	@Test
+	@Test @Ignore
 	public void test_stack_trace2() {
 
 		Isolate is1 = new Isolate("node-1", "com.tangosol", "org.gridkit");
