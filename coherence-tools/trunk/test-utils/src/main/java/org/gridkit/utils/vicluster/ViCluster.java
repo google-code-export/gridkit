@@ -42,6 +42,10 @@ public class ViCluster implements ViProps {
 		this.packages = packages;
 	}
 
+	public String getClusterProp(String prop) {
+		return props.get(prop);
+	}
+	
 	@Override
 	public void setProp(String prop, String value) {
 		props.put(prop, value);

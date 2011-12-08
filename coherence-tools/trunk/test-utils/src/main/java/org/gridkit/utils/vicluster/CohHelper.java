@@ -29,6 +29,15 @@ public class CohHelper {
 		node.setProp("tangosol.coherence.cluster", "jvm::" + ManagementFactory.getRuntimeMXBean().getName());
 	}
 
+	public static void shareCluster(ViProps node, ViCluster cluster) {
+		node.setProp("tangosol.coherence.ttl", 			cluster.getClusterProp("tangosol.coherence.ttl"));
+		node.setProp("tangosol.coherence.wka", 			cluster.getClusterProp("tangosol.coherence.wka"));
+		node.setProp("tangosol.coherence.wka.port", 	cluster.getClusterProp("tangosol.coherence.wka.port"));
+		node.setProp("tangosol.coherence.localhost", 	cluster.getClusterProp("tangosol.coherence.localhost"));
+		node.setProp("tangosol.coherence.localport", 	cluster.getClusterProp("tangosol.coherence.localport"));
+		node.setProp("tangosol.coherence.cluster", 		cluster.getClusterProp("tangosol.coherence.cluster"));
+	}
+	
 	public static void disableTCMP(ViProps node) {
 		node.setProp("tangosol.coherence.tcmp.enabled", "false");
 	}

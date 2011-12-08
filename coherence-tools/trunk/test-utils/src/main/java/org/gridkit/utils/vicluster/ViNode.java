@@ -107,11 +107,11 @@ public class ViNode implements ViProps {
 		return isolate.exec(task);
 	}
 
-	public <V> V export(Callable<V> task, Class<?>... interfaces) {
+	public <V> V export(Callable<V> task) {
 		if (!started) {
 			start();
 		}		
-		return isolate.export(task, interfaces);
+		return isolate.export(task);
 	}
 
 	public void suspend() {
@@ -133,7 +133,7 @@ public class ViNode implements ViProps {
 				return CacheFactory.getCluster();
 			}
 			
-		}, Cluster.class);
+		});
 	}
 
 	public NamedCache getCache(final String name) {
@@ -147,7 +147,7 @@ public class ViNode implements ViProps {
 				return CacheFactory.getCache(name);
 			}
 			
-		}, NamedCache.class);
+		});
 	}
 
 	public String getServiceNameForCache(final String name) {
@@ -175,7 +175,7 @@ public class ViNode implements ViProps {
 				return CacheFactory.getService(name);
 			}
 			
-		}, Service.class);
+		});
 	}
 	
 	public void shutdown() {

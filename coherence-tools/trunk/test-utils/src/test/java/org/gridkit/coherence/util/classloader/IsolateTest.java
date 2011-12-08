@@ -127,14 +127,14 @@ public class IsolateTest {
 			public NamedCache call() throws Exception {
 				return CacheFactory.getCache("distr-A");
 			}
-		}, NamedCache.class);
+		});
 
 		NamedCache cache2 = is2.export(new Callable<NamedCache>() {
 			@Override
 			public NamedCache call() throws Exception {
 				return CacheFactory.getCache("distr-A");
 			}
-		}, NamedCache.class);
+		});
 		
 		cache1.put("A", "A");
 		
@@ -157,4 +157,54 @@ public class IsolateTest {
 			return this.getClass().getClassLoader().getClass().getName();
 		}		
 	}	
+	
+	@Test
+	public void test_stack_trace() {
+
+		Isolate is1 = new Isolate("node-1", "com.tangosol", "org.gridkit");
+		is1.start();
+		
+		try {
+			is1.exec(new Runnable() {
+				@Override
+				public void run() {
+					throw new IllegalArgumentException("test");
+				}
+			});
+			Assert.assertFalse(true);
+		}
+		catch(IllegalArgumentException e) {
+			e.printStackTrace();
+			Assert.assertEquals("Stack trace lenght ", 26, e.getStackTrace().length);
+		}
+	}
+	
+	@Test
+	public void test_stack_trace2() {
+
+		Isolate is1 = new Isolate("node-1", "com.tangosol", "org.gridkit");
+		is1.start();
+		
+		try {
+			Runnable r = is1.export(new Callable<Runnable>() {
+				public Runnable call() {
+					return 	new Runnable() {
+						@Override
+						public void run() {
+							throw new IllegalArgumentException("test2");
+						}
+					};
+				}
+			});
+
+			r.run();
+			
+			Assert.assertFalse(true);
+		}
+		catch(IllegalArgumentException e) {
+			e.printStackTrace();
+			Assert.assertEquals("Stack trace lenght ", 26, e.getStackTrace().length);
+		}
+	}
+	
 }

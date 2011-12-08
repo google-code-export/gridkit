@@ -48,6 +48,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.InvalidPropertiesFormatException;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -213,81 +214,85 @@ public class Isolate {
 		sysProps.putAll(props);
 	}
 
+	private Object process(WorkUnit wu) {
+		try {
+			queue.put(wu);
+		} catch (NullPointerException e) {
+			throw new IllegalStateException("Isolate[" + name + "] is not started");
+		} catch (InterruptedException e) {
+			AnyThrow.throwUncheked(e);
+		}
+		try {
+			queue.put(NOP);
+		} catch (NullPointerException e) {
+			throw new IllegalStateException("Isolate[" + name + "] has been stopped");
+		} catch (InterruptedException e) {
+			AnyThrow.throwUncheked(e);
+		}
+	
+		if (wu instanceof CallableWorkUnit) {
+			try {
+				return ((CallableWorkUnit<?>)wu).future.get();				
+			}
+			catch(ExecutionException e) {
+				weaveAndRethrow(e.getCause());
+				return null;
+			}
+			catch(Throwable e) {
+				AnyThrow.throwUncheked(e);
+				return null;
+			}
+		}
+		else {
+			return null;
+		}
+	}
+	
+	private void weaveAndRethrow(Throwable e) {
+		Exception d = new Exception();
+		
+		StackTraceElement marker = new StackTraceElement(Isolate.class.getName(), "", null, -1);
+		StackTraceElement boundary = new StackTraceElement("<isolate-boundary>", "<exec>", name, -1);
+		
+		ExceptionWeaver.replaceStackTop(e, marker, d, marker, boundary);		
+		AnyThrow.throwUncheked(e);		
+	}
+
+	private void proxyWeaveAndRethrow(Object proxy, Throwable e) {
+		Exception d = new Exception();
+		
+		StackTraceElement marker1 = new StackTraceElement("", "", null, -2); // match native method
+		StackTraceElement marker2 = new StackTraceElement(proxy.getClass().getName(), "", null, -1);
+		StackTraceElement boundary = new StackTraceElement("<isolate-boundary>", "<proxy>", name, -1);
+		
+		ExceptionWeaver.replaceStackTop(e, marker1, d, marker2, boundary);		
+		AnyThrow.throwUncheked(e);		
+	}
+
 	/**
 	 * @deprecated Use {@link #exec(Runnable)} and normal object passing
 	 */
 	@Deprecated
 	public void submit(Class<?> clazz, Object... constructorArgs) {
-		try {
-			queue.put(new ClassWorkUnit(clazz.getName(), constructorArgs));
-			queue.put(NOP);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		process(new ClassWorkUnit(clazz.getName(), constructorArgs));
 	}
 	
 	@SuppressWarnings("rawtypes")
 	public void exec(Runnable task) {
-		try {
-			CallableWorkUnit wu = new CallableWorkUnit((Runnable) convertIn(task));
-			queue.put(wu);
-			queue.put(NOP);
-			wu.future.get();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			if (e instanceof ExecutionException) {
-				AnyThrow.throwUncheked((Throwable)convertOut(e.getCause()));
-			}
-			else {
-				AnyThrow.throwUncheked((Throwable)convertOut(e));				
-			}
-		}
+		CallableWorkUnit wu = new CallableWorkUnit((Runnable) convertIn(task));
+		process(wu);
 	}
 
 	@SuppressWarnings("unchecked")
 	public <V> V exec(Callable<V> task) {
 		CallableWorkUnit<V> wu = new CallableWorkUnit<V>((Callable<V>) convertIn(task));
-		try {			
-			queue.put(wu);
-			queue.put(NOP);
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}		
-		Object res; 
-		try {
-			res = wu.future.get();
-			return (V) convertOut(res);
-		}
-		catch(Throwable e) {
-			if (e instanceof ExecutionException) {
-				AnyThrow.throwUncheked((Throwable)convertOut(e.getCause()));
-			}
-			else {
-				AnyThrow.throwUncheked((Throwable)convertOut(e));				
-			}
-			return null;
-		}
+		return (V) process(wu);
 	}
 
 	@SuppressWarnings("unchecked")
-	public <V> V export(Callable<V> task, Class<?>... interfaces) {
+	public <V> V export(Callable<V> task) {
 		CallableWorkUnit<V> wu = new CallableWorkUnit<V>((Callable<V>) convertIn(task));
-		try {			
-			queue.put(wu);
-			queue.put(NOP);
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}		
-		Object res; 
-		try {
-			res = wu.future.get();
-			return (V) exportOut(res, interfaces);
-		}
-		catch(Throwable e) {
-			AnyThrow.throwUncheked((Throwable)convertOut(e));
-			return null;
-		}
+		return (V) exportOut(process(wu));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -322,13 +327,42 @@ public class Isolate {
 		return fromBytes(toBytes(obj), cl);
 	}
 
-	protected Object convertOut(Object obj) {
-		return fromBytes(toBytes(obj), cl.getParent());
+	@SuppressWarnings("unchecked")
+	protected <V> V convertOut(Object obj) {
+		return (V) fromBytes(toBytes(obj), cl.getParent());
 	}
 	
-	protected Object exportOut(Object obj, Class<?>[] interfaces) {
+	protected Object exportOut(Object obj) {
+		Class<?>[] interfaces = convertOut(collectInterfaces(obj.getClass()));
 		ProxyOut po = new ProxyOut(obj, interfaces);
 		return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), interfaces, po);		
+	}
+	
+	@SuppressWarnings("rawtypes")
+	protected Class[] collectInterfaces(Class<?> type) {
+		Set<Class<?>> interfaces = new LinkedHashSet<Class<?>>();
+		collectInterfaces(type, interfaces);
+		return interfaces.toArray(new Class[interfaces.size()]);
+	}
+	
+	private void collectInterfaces(Class<?> type, Set<Class<?>> collector) {
+		if (type.isInterface()) {
+			collector.add(type);
+		}
+		for(Class<?> i : type.getInterfaces()) {
+			collectInterfaces(i,collector);
+		}
+	}
+
+	protected boolean isIsolatedClass(Class<?> x) {
+		ClassLoader cl = x.getClassLoader();
+		while(cl != null) {
+			if (cl == this.cl) {
+				return true;
+			}
+			cl = cl.getParent();
+		}
+		return false;
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -836,10 +870,8 @@ public class Isolate {
 				}
 			}
 			catch(InvocationTargetException e) {
-				throw (Throwable)convertOut(e.getCause());
-			}
-			catch(Exception e) {
-				throw (Throwable)convertOut(e);
+				proxyWeaveAndRethrow(proxy, (Throwable)convertOut(e.getCause()));
+				return null;
 			}
 		}
 	}
@@ -848,12 +880,25 @@ public class Isolate {
 
 		final FutureTask<V> future;
 		
-		public CallableWorkUnit(Callable<V> x) {			
-			future = new FutureTask<V>(x);
+		public CallableWorkUnit(final Callable<V> x) {			
+			future = new FutureTask<V>(new Callable<V>() {
+				// Callable wrapper to simplify stack trace weaving
+				@Override
+				public V call() throws Exception {
+					return x.call();
+				}
+			});
 		}
 
-		public CallableWorkUnit(Runnable x) {			
-			future = new FutureTask<V>(x,(V) null);
+		public CallableWorkUnit(final Runnable x) {			
+			future = new FutureTask<V>(new Runnable(){
+				// Runnable wrapper to simplify stack trace weaving
+				@Override
+				public void run() {
+					x.run();					
+				}
+				
+			},(V) null);
 		}
 
 		@Override
@@ -884,6 +929,7 @@ public class Isolate {
 						return;
 					}
 					catch (Exception e) {
+						System.err.println("Exception in isolate [" + name + "]");
 						e.printStackTrace();
 					};
 				}

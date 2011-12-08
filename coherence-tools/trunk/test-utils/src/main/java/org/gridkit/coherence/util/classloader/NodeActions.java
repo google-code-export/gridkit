@@ -24,6 +24,7 @@ import com.tangosol.net.DefaultConfigurableCacheFactory;
  * @author malekseev
  * 15.04.2011
  */
+@Deprecated
 public abstract class NodeActions {
 	
 	/**
@@ -103,7 +104,6 @@ public abstract class NodeActions {
 
 		public Crash(int node) {}
 
-		@Override @SuppressWarnings("deprecation")
 		public void run() {
 			ThreadGroup parent = Thread.currentThread().getThreadGroup();
 			ThreadGroup[] childs = new ThreadGroup[parent.activeGroupCount()];
