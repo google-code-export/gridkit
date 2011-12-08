@@ -26,6 +26,7 @@ public class CohHelper {
 		node.setProp("tangosol.coherence.wka.port", String.valueOf(port));
 		node.setProp("tangosol.coherence.localhost", "127.0.0.1");
 		node.setProp("tangosol.coherence.localport", String.valueOf(port));
+		node.setProp("tangosol.coherence.socketprovider", "tcp");
 		node.setProp("tangosol.coherence.cluster", "jvm::" + ManagementFactory.getRuntimeMXBean().getName());
 	}
 
