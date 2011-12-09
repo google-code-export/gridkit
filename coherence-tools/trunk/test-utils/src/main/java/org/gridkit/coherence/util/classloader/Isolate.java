@@ -230,9 +230,10 @@ public class Isolate {
 			AnyThrow.throwUncheked(e);
 		}
 	
+		Object result;
 		if (wu instanceof CallableWorkUnit) {
 			try {
-				return ((CallableWorkUnit<?>)wu).future.get();				
+				result = ((CallableWorkUnit<?>)wu).future.get();				
 			}
 			catch(ExecutionException e) {
 				weaveAndRethrow(e.getCause());
@@ -242,6 +243,7 @@ public class Isolate {
 				AnyThrow.throwUncheked(e);
 				return null;
 			}
+			return convertOut(result);
 		}
 		else {
 			return null;
