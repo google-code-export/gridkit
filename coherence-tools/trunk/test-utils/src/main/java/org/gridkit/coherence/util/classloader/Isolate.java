@@ -243,7 +243,7 @@ public class Isolate {
 				AnyThrow.throwUncheked(e);
 				return null;
 			}
-			return convertOut(result);
+			return result;
 		}
 		else {
 			return null;
@@ -288,7 +288,7 @@ public class Isolate {
 	@SuppressWarnings("unchecked")
 	public <V> V exec(Callable<V> task) {
 		CallableWorkUnit<V> wu = new CallableWorkUnit<V>((Callable<V>) convertIn(task));
-		return (V) process(wu);
+		return (V) convertOut(process(wu));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -300,21 +300,7 @@ public class Isolate {
 	@SuppressWarnings("unchecked")
 	public <V> V exportNoProxy(Callable<V> task) {
 		CallableWorkUnit<V> wu = new CallableWorkUnit<V>((Callable<V>) convertIn(task));
-		try {			
-			queue.put(wu);
-			queue.put(NOP);
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}		
-		Object res; 
-		try {
-			res = wu.future.get();
-			return (V)res;
-		}
-		catch(Throwable e) {
-			AnyThrow.throwUncheked((Throwable)convertOut(e));
-			return null;
-		}
+		return (V) process(wu);
 	}
 	
 	@SuppressWarnings("unchecked")
