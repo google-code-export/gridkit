@@ -25,6 +25,7 @@ import org.gridkit.coherence.util.classloader.Isolate;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Cluster;
+import com.tangosol.net.DefaultCacheServer;
 import com.tangosol.net.NamedCache;
 import com.tangosol.net.Service;
 
@@ -184,9 +185,18 @@ public class ViNode implements ViProps {
 				isolate.exec(new Runnable() {
 					@Override
 					public void run() {
-						if (CacheFactory.getCluster().isRunning()) {
-							CacheFactory.getCluster().shutdown();
-						}
+						DefaultCacheServer.shutdown();
+					}
+				});
+			}
+			catch(Exception e) {
+				//ignore
+			}
+			try {
+				isolate.exec(new Runnable() {
+					@Override
+					public void run() {
+						CacheFactory.shutdown();
 					}
 				});
 			}

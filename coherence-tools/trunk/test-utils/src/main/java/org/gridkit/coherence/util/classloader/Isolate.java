@@ -39,8 +39,15 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.net.DatagramSocket;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.security.AllPermission;
+import java.security.CodeSource;
+import java.security.PermissionCollection;
+import java.security.Permissions;
+import java.security.ProtectionDomain;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,6 +55,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.InvalidPropertiesFormatException;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -434,7 +442,9 @@ public class Isolate {
 		}
 		stdErr.println("Stopping ...");
 		while(true) {
-			while(kill(threadGroup) > 0 || removeShutdownHooks() > 0) {
+			while( 0 < kill(threadGroup)  
+					+ removeShutdownHooks()
+					+ removeAppContexts() ) {
 				try {
 					Thread.sleep(10);
 				} catch (InterruptedException e) {
@@ -487,7 +497,7 @@ public class Isolate {
 				}
 			}
 			
-			if (t.isAlive() && shutdownRetry > 4) {
+			if (t.isAlive() && shutdownRetry > 24) {
 				if (shutdownRetry > 10 && (shutdownRetry % 10 == 5)) {
 					StackTraceElement[] trace = t.getStackTrace();
 					for(StackTraceElement e: trace) {
@@ -497,7 +507,7 @@ public class Isolate {
 				try {
 					try { t.interrupt(); }	catch(Exception e) {/* ignore */};
 					trySocketInterrupt(t);
-					tryStop(t);
+//					tryStop(t);
 					try { t.interrupt(); }	catch(Exception e) {/* ignore */};
 					try { t.stop(new ThreadDoomException()); }	catch(IllegalStateException e) {/* ignore */};				
 				}
@@ -597,10 +607,24 @@ public class Isolate {
 		throw new IllegalArgumentException("Cannot get '" + field + "' from " + x.getClass().getName());
 	}
 
+	boolean isOwnedThreadGroup(ThreadGroup tg) {
+		while(true) {
+			if (tg == threadGroup) {
+				return true;
+			}
+			else if (tg.getParent() == null || tg.getParent() == tg) {
+				return false;
+			}
+			else {
+				tg = tg.getParent();
+			}
+		}
+	}
+	
 	private int removeShutdownHooks() {
 		int threadCount = 0;
 		for(Thread t : getSystemShutdownHooks()) {
-			if (t.getThreadGroup() == threadGroup || t.getContextClassLoader() ==cl) {
+			if (isOwnedThreadGroup(t.getThreadGroup()) || t.getContextClassLoader() == cl) {
 				++threadCount;
 				if (Runtime.getRuntime().removeShutdownHook(t)) {
 					stdErr.println("Removing shutdown hook: " + t.getName());
@@ -624,6 +648,22 @@ public class Isolate {
 		}
 	}
 	
+	@SuppressWarnings("restriction")
+	private int removeAppContexts() {
+		int n = 0;
+		Set<sun.awt.AppContext> contexts = sun.awt.AppContext.getAppContexts();
+		Iterator<sun.awt.AppContext> it = contexts.iterator();
+		while(it.hasNext()) {
+			sun.awt.AppContext ctx = it.next();
+			if (isOwnedThreadGroup(ctx.getThreadGroup())) {
+				++n;
+				it.remove();				
+				stdErr.println("Removing AppContext: " + ctx.toString());
+			}
+		}
+		return n;
+	}
+	
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		return cl.loadClass(name);
 	}
@@ -635,53 +675,53 @@ public class Isolate {
 	@SuppressWarnings("serial")
 	private class ThreadDoomException extends ThreadDeath {
 
-		@Override
-		public String getMessage() {
-			//System.out.println("OMEGA:getMessage");
-			throw this;
-		}
+//		@Override
+//		public String getMessage() {
+//			//System.out.println("OMEGA:getMessage");
+//			throw this;
+//		}
 
-		@Override
-		public String getLocalizedMessage() {
-			//System.out.println("OMEGA:getLocalizedMessage");
-			throw this;
-		}
+//		@Override
+//		public String getLocalizedMessage() {
+//			//System.out.println("OMEGA:getLocalizedMessage");
+//			throw this;
+//		}
 
 		@Override
 		public Throwable getCause() {
 			//System.out.println("OMEGA:getCause");			
-			throw this;
+			return this;
 		}
 
 		@Override
 		public String toString() {
-			//System.out.println("OMEGA:toString");
-			throw this;
+			return "Isolate [" + name + "] has been terminated";
 		}
 
 		@Override
 		public void printStackTrace() {
 			//System.out.println("OMEGA:printStackTrace");
-			throw this;
+//			throw this;
 		}
 
 		@Override
 		public void printStackTrace(PrintStream s) {
 			//System.out.println("OMEGA:printStackTrace");
-			throw this;
+//			throw this;
 		}
 
 		@Override
 		public void printStackTrace(PrintWriter s) {
 			//System.out.println("OMEGA:printStackTrace");
-			throw this;
+//			throw this;
 		}
 
 		@Override
 		public StackTraceElement[] getStackTrace() {
 			//System.out.println("OMEGA:getStackTrace");
-			throw this;
-		}		
+//			throw this;
+			return null;
+		}
 	}
 	
 	private class IsolateThreadGroup extends ThreadGroup {
@@ -938,11 +978,24 @@ public class Isolate {
 		private Collection<URL> externalPaths = new ArrayList<URL>();
 		private URLClassLoader cpExtention;
 		
+		private ProtectionDomain isolateDomain;
+		private Map<URL, ProtectionDomain> domainCache = new HashMap<URL, ProtectionDomain>();
+		
 		IsolatedClassloader(ClassLoader base, String[] packages) {
 			super(null);			
 			this.baseClassloader = base;
 			this.packages = packages;
 			this.excludes = new HashSet<String>();
+
+			PermissionCollection pc = new Permissions();
+			pc.add(new AllPermission());
+			
+			ProtectionDomain domain = new ProtectionDomain(
+					/* codesource - */ getClass().getProtectionDomain().getCodeSource(),
+					/* permissions - */ pc,
+					/* classloader - */ null,
+					/* principals - */ getClass().getProtectionDomain().getPrincipals());
+			this.isolateDomain = domain;
 		}
 		
 		public void exclude(Class<?>... excludedClasses) {
@@ -1037,6 +1090,9 @@ public class Isolate {
 					}
 				}
 			}
+			if (name.equals("sun.awt.AppContext")) {
+				new Exception("loading AppContext").printStackTrace();
+			}
 			Class<?> cc = baseClassloader.loadClass(name);
 			return cc;
 		}
@@ -1064,6 +1120,7 @@ public class Isolate {
 		protected Class<?> findClass(String classname) throws ClassNotFoundException {
 			try {
 				String path = classname.replace('.', '/').concat(".class");
+				URL url = baseClassloader.getResource(path);
 				InputStream res = baseClassloader.getResourceAsStream(path);
 				ByteArrayOutputStream bos = new ByteArrayOutputStream();
 				byte[] buf = new byte[4096];
@@ -1078,14 +1135,14 @@ public class Isolate {
 				}
 				byte[] cd = bos.toByteArray();
 				try {
-					return defineClass(classname, cd);
+					return defineClass(url, classname, cd);
 				}
 				catch(OutOfMemoryError e) {
 					// try it again
 					System.gc();
 					System.runFinalization();
 					System.gc();
-					return defineClass(classname, cd);
+					return defineClass(url, classname, cd);
 				}
 			}
 			catch(Exception e) {
@@ -1093,9 +1150,32 @@ public class Isolate {
 			}
 		}
 
-		private Class<?> defineClass(String classname, byte[] cd) throws ClassFormatError {
-			Class<?> c = defineClass(classname, cd, 0, cd.length, getClass().getProtectionDomain());
+		private Class<?> defineClass(URL url, String classname, byte[] cd) throws ClassFormatError {
+			Class<?> c = defineClass(classname, cd, 0, cd.length, getProtectionDomain(url));
 			return c;
+		}
+
+		private synchronized ProtectionDomain getProtectionDomain(URL url) {
+			try {
+				if ("jar".equals(url.getProtocol())) {
+					String jarPath = url.getPath();
+					jarPath = jarPath.substring(0, jarPath.lastIndexOf('!'));
+					URL jarUrl = new URL(jarPath + "?isolate=" + name);
+					ProtectionDomain domain = domainCache.get(jarUrl);
+					if (domain == null) {
+						domain = new ProtectionDomain(
+								new CodeSource(jarUrl, new Certificate[0]), 
+								isolateDomain.getPermissions());
+						domainCache.put(jarUrl, domain);
+					}
+					return domain;
+				}
+				else {
+					return isolateDomain;
+				}
+			} catch (MalformedURLException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 	
