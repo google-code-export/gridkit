@@ -15,6 +15,14 @@ import com.tangosol.net.management.MBeanServerFinder;
 
 public class CohHelper {
 
+	public static void pofConfig(ViProps node, String path) {
+		node.setProp("tangosol.pof.config", path);
+	}
+
+	public static void cacheConfig(ViProps node, String path) {
+		node.setProp("tangosol.coherence.cacheconfig", path);
+	}
+
 	public static void localstorage(ViProps node, boolean enabled) {
 		node.setProp("tangosol.coherence.distributed.localstorage", String.valueOf(enabled));
 	}
