@@ -235,6 +235,7 @@ public class Isolate {
 		} catch (NullPointerException e) {
 			throw new IllegalStateException("Isolate[" + name + "] has been stopped");
 		} catch (InterruptedException e) {
+			e = convertOut(e);
 			AnyThrow.throwUncheked(e);
 		}
 	
@@ -244,10 +245,12 @@ public class Isolate {
 				result = ((CallableWorkUnit<?>)wu).future.get();				
 			}
 			catch(ExecutionException e) {
+				e = convertOut(e);
 				weaveAndRethrow(e.getCause());
 				return null;
 			}
 			catch(Throwable e) {
+				e = convertOut(e);
 				AnyThrow.throwUncheked(e);
 				return null;
 			}
