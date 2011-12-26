@@ -63,6 +63,7 @@ public class CacheLoaderCheck {
 			storage.start(DefaultCacheServer.class);
 			
 			client.exec(new Callable<Void>(){
+				@SuppressWarnings({ "rawtypes", "unchecked" })
 				@Override
 				public Void call() throws Exception {
 					
