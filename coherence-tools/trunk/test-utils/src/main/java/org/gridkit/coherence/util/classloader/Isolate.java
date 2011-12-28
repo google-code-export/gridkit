@@ -743,7 +743,7 @@ public class Isolate {
 				e.printStackTrace(stdErr);
 			}
 		}
-	}
+	}	
 
 	private interface WorkUnit {		
 		public void exec() throws Exception;
@@ -1029,7 +1029,7 @@ public class Isolate {
 				return r;
 			}
 			r = baseClassloader.getResource(name);
-			if (isForbiden(r)) {
+			if (r == null || isForbiden(r)) {
 				return null;
 			}
 			else {
@@ -1061,7 +1061,7 @@ public class Isolate {
 		}
 
 		private boolean isForbiden(URL r) {
-			if (!forbidenPaths.isEmpty()) {
+			if (r != null && !forbidenPaths.isEmpty()) {
 				String s = r.toString();
 				for(String path: forbidenPaths) {
 					if (s.startsWith(path)) {
@@ -1123,13 +1123,14 @@ public class Isolate {
 		protected Class<?> findClass(String classname) throws ClassNotFoundException {
 			try {
 				String path = classname.replace('.', '/').concat(".class");
-				URL url = baseClassloader.getResource(path);
-				InputStream res = baseClassloader.getResourceAsStream(path);
+				URL url = getResource(path);
+				InputStream res = url.openStream();
 				ByteArrayOutputStream bos = new ByteArrayOutputStream();
 				byte[] buf = new byte[4096];
 				while(true) {
 					int x = res.read(buf);
 					if (x <= 0) {
+						res.close();
 						break;
 					}
 					else {
