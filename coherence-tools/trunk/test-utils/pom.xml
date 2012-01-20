@@ -40,7 +40,10 @@
 
     <properties>
         <!--<coherence.version>3.6.1.0b19636</coherence.version>-->
+        <!-- 
         <coherence.version>3.7.1.0b27797</coherence.version>
+         -->
+        <coherence.version>3.7.1.1</coherence.version>
         <junit.version>4.8.2</junit.version>
     </properties>
 

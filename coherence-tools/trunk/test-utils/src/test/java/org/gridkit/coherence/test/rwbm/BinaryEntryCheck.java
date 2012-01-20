@@ -1,10 +1,9 @@
-package org.gridkit.coherence.util.vicluster;
+package org.gridkit.coherence.test.rwbm;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-import java.util.TreeMap;
 import java.util.concurrent.Callable;
+
+import junit.framework.Assert;
 
 import org.gridkit.utils.vicluster.CohHelper;
 import org.gridkit.utils.vicluster.ViCluster;
@@ -23,39 +22,24 @@ import com.tangosol.util.MapListener;
 import com.tangosol.util.MapTrigger;
 import com.tangosol.util.MapTriggerListener;
 
-public class CacheLoaderCheck {
+public class BinaryEntryCheck {
 
 	static {
 		DefaultConfigurableCacheFactory.class.toString();
 	}
 	
 	@Test
-	public void test_cache_loader__no_miss_cache() {
-		test_cache_loader("vanila-A");
-	}
-
-	@Test
-	public void test_cache_loader__miss_cache() {
-		test_cache_loader("miss-A");
-	}
-
-	@Test
-	public void test_cache_loader__null_removal_trigger() {
-		test_cache_loader("nt-A");
-	}
-
-	@Test
-	public void test_cache_loader__null_filter_map() {
-		test_cache_loader("nf-A");
+	public void test_binary_store__vanila() {
+		test_binary_store("vanila-A");
 	}
 	
-	public void test_cache_loader(final String cacheName) {
+	public void test_binary_store(final String cacheName) {
 		
 		ViCluster cluster = new ViCluster("test_cache_loader", "org.gridkit", "com.tangosol");
 		try {
 			
 			CohHelper.enableFastLocalCluster(cluster);
-			CohHelper.cacheConfig(cluster, "/cache-loader-cache-config.xml");
+			CohHelper.cacheConfig(cluster, "/binary-expiry-cache-store-cache-config.xml");
 			
 			ViNode storage = cluster.node("storage");
 			CohHelper.localstorage(storage, true);
@@ -68,24 +52,27 @@ public class CacheLoaderCheck {
 			storage.start(DefaultCacheServer.class);
 			
 			client.exec(new Callable<Void>(){
-				@SuppressWarnings({ "rawtypes", "unchecked" })
 				@Override
 				public Void call() throws Exception {
 					
 					NamedCache cache = CacheFactory.getCache(cacheName);
-					
-					List<Integer> keys = Arrays.asList(1,2,3,4,5,6,7);
 
-					cache.put(0, 0);
+					String val = (String) cache.get(1);
 					
-					TreeMap result = new TreeMap(cache.getAll(keys));
+					Assert.assertEquals("1-0", val);
 					
-					System.out.println("getAll -> " + result);
+					Thread.sleep(100);
 
-					result = new TreeMap(cache.getAll(keys));
+					val = (String) cache.get(1);
+					Assert.assertEquals("1-1", val);
 					
-					System.out.println("getAll -> " + result);
+					val = (String) cache.get(1000);
+					Assert.assertEquals("1000-2", val);
 					
+					Thread.sleep(5);
+
+					val = (String) cache.get(1000);
+					Assert.assertEquals("1000-2", val);
 					
 					return null;
 				}

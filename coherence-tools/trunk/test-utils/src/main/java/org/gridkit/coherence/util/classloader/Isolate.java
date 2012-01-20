@@ -165,6 +165,8 @@ public class Isolate {
 	
 	private PrintStream stdOut;
 	private PrintStream stdErr;
+	private WrapperPrintStream wrpOut;
+	private WrapperPrintStream wrpErr;
 	private Properties sysProps;
 	private int shutdownRetry = 0;
 	
@@ -182,12 +184,25 @@ public class Isolate {
 		sysProps.putAll(System.getProperties());
 		sysProps.put("isolate.name", name);
 		
-		stdOut = new PrintStream(new WrapperPrintStream("[" + name + "] ", rootOut));
-		stdErr = new PrintStream(new WrapperPrintStream("[" + name + "] ", rootErr));
+		wrpOut = new WrapperPrintStream("[" + name + "] ", rootOut);
+		stdOut = new PrintStream(wrpOut);
+		wrpErr = new WrapperPrintStream("[" + name + "] ", rootErr);
+		stdErr = new PrintStream(wrpErr);
 	}
 	
 	public String getName() {
 		return name;
+	}
+	
+	public synchronized void setName(String name) {
+		this.name = name;
+		// reinit name stuff
+		// WARN threadGroup name will not be changed
+		this.wrpOut.setPrefix("[" + name + "] ");
+		this.wrpErr.setPrefix("[" + name + "] ");
+		if (isolatedThread != null) {
+			isolatedThread.setName("Isolate-" + name);
+		}
 	}
 	
 	public synchronized void start() {
@@ -572,6 +587,8 @@ public class Isolate {
 		}
 	}
 
+	// TODO plugable thread killers
+	@SuppressWarnings("unused")
 	private void tryStop(Thread thread) {
 		Object target = getField(thread, "target");
 		if (target != null) {
@@ -759,7 +776,7 @@ public class Isolate {
 	}
 	
 	private static Nop NOP = new Nop();
-	
+
 	private static class Nop implements WorkUnit {
 		@Override
 		public void exec() {
@@ -1206,6 +1223,10 @@ public class Isolate {
 			this.prefix = prefix;
 			this.startOfLine = true;
 			this.printStream = printStream;
+		}
+		
+		public void setPrefix(String prefix) {
+			this.prefix = prefix;
 		}
 		
 		@Override

@@ -34,7 +34,6 @@ import com.tangosol.net.Service;
  */
 public class ViNode implements ViProps {
 
-	@SuppressWarnings("unused")
 	private ViCluster cluster;
 	
 	private Isolate isolate;
@@ -215,6 +214,7 @@ public class ViNode implements ViProps {
 			isolate.stop();
 			isolate = null;
 			terminated = true;
+			cluster.remove(this);
 		}
 	}
 

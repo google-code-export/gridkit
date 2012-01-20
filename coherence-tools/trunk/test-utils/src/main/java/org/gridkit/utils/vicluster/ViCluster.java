@@ -89,8 +89,12 @@ public class ViCluster implements ViProps {
 		nodes.put(name, vnode);
 	}
 	
+	void remove(ViNode node) {
+		nodes.values().remove(node);
+	}
+	
 	public void shutdown() {
-		for(ViNode node: nodes.values()) {
+		for(ViNode node: new ArrayList<ViNode>(nodes.values())) {
 			node.shutdown();
 		}
 		nodes.clear();
@@ -105,13 +109,13 @@ public class ViCluster implements ViProps {
 	}
 
 	public void kill() {
-		for(ViNode node: nodes.values()) {
+		for(ViNode node: new ArrayList<ViNode>(nodes.values())) {
 			node.kill();
 		}
 	}
 
 	public void setProp(Map<String, String> props) {
-		props.putAll(props);
+		this.props.putAll(props);
 		for(ViNode node: nodes.values()) {
 			node.setProp(props);
 		}
