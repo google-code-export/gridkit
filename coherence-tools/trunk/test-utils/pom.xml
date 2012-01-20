@@ -17,7 +17,7 @@
     </parent>
 
     <artifactId>test-utils</artifactId>
-    <version>0.1.8-SNAPSHOT</version>
+    <version>0.1.8</version>
     <name>test-utils</name>
     <description>Utility classes for unit and integration testing</description>
 
@@ -40,10 +40,10 @@
 
     <properties>
         <!--<coherence.version>3.6.1.0b19636</coherence.version>-->
-        <!-- 
         <coherence.version>3.7.1.0b27797</coherence.version>
-         -->
+        <!-- 
         <coherence.version>3.7.1.1</coherence.version>
+         -->
         <junit.version>4.8.2</junit.version>
     </properties>
 
@@ -78,4 +78,10 @@
             </plugin>
         </plugins>
     </build>
+
+  <scm>
+    <connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/tags/test-utils-0.1.8</connection>
+    <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/tags/test-utils-0.1.8</developerConnection>
+    <url>http://gridkit.googlecode.com/svn/coherence-tools/tags/test-utils-0.1.8</url>
+  </scm>
 </project>
