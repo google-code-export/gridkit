@@ -14,9 +14,7 @@ import org.gridkit.monitoring.cpureport.CpuUsageReporter;
  */
 public class GCMeasure {
 
-	private static Map<Integer, Object> maps[]; //= new HashMap<Integer, Integer>();
-//	private static SortedMap<Integer, Integer> map = new TreeMap<Integer, Integer>();
-//	private static SortedMap<Integer, Integer> map = new ConcurrentSkipListMap<Integer, Integer>();
+	private static Map<Integer, Object> maps[];
 	private static Random random = new Random();
 	
 //	private static int ENTRY_SIZE = Integer.getInteger("gc-measure.entry-size", 104); // 64bit
@@ -27,11 +25,14 @@ public class GCMeasure {
 	
 	private static boolean DRY_MODE = Boolean.getBoolean("gc-measure.dry-mode");
 	private static boolean CMS_MODE = Boolean.getBoolean("gc-measure.cms-mode");
+	private static boolean REPORT_CPU = Boolean.getBoolean("gc-measure.report-cpu");
 	
 	private static char[] STRING_TEMPLATE = new char[STRING_LEN];
 	
 	public static void main(String[] args) {
-		CpuUsageReporter.startReporter(System.out, 15000);
+		if (REPORT_CPU) {
+			CpuUsageReporter.startReporter(System.out, 15000);
+		}
 		
 		long tenuredSize = Runtime.getRuntime().maxMemory();
 		// getting more accurate data
@@ -59,6 +60,9 @@ public class GCMeasure {
 			System.out.println("CMS mode is enabled");
 		}
 		System.out.println("Total old space: " + (tenuredSize >> 20) + "M (-" + HEADROOM + "M)");
+		if (count < 0) {
+			System.out.println("Heap size is too small, increase heap size or reduce headroom");
+		}
 		System.out.println("Populating - " + count);
 		maps = new Map[(count + 200000 -1) / 200000];
 		for(int i = 0; i != maps.length; ++i) {
@@ -78,6 +82,9 @@ public class GCMeasure {
  		else {
  			System.out.println("Processing ... (DRY MODE ENABLED)");
  		}
+ 		
+ 		GCSelfMonitor gcmonitor = new GCSelfMonitor();
+ 		
  		// start count down here
  		long startTime = System.currentTimeMillis();
 		while(true) {
@@ -103,9 +110,11 @@ public class GCMeasure {
 			}
 			if (limit != 0 && (System.currentTimeMillis() > (startTime + limit))) {
 				System.out.println("Finished");
-				System.exit(0);
+				break;
 			}
 		}
+		
+		gcmonitor.displayStats();
 	}
 
 	private static int size() {
