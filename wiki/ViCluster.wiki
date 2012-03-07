@@ -11,7 +11,7 @@
  * Classpath of each isolate could be tweaked independently.
  * Output of isolates could be optionally prefixed by isolate name.
  * Isolate could be forcibly terminated.
- * Isolate can be suspended/resumes (server crash and long GC pauses could be simulated this way).
+ * Isolate can be suspended/resumed (server crash and long GC pauses could be simulated this way).
  * Test code can be executed in context of any JVM. 
 
 = Getting started =
