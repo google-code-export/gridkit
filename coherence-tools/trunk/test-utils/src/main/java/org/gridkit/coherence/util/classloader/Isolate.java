@@ -237,16 +237,35 @@ public class Isolate {
 		sysProps.putAll(props);
 	}
 
+	private void abortablePut(WorkUnit wu) throws InterruptedException {
+		while(true) {
+			try {
+				if (queue.offer(wu, 100, TimeUnit.MILLISECONDS)) {
+					break;
+				}
+			} catch (InterruptedException e) {
+				throw e;
+			} catch (RuntimeException e) {
+				throw e;
+			} catch (Exception e) {
+				// most likely JUnit is trying to kill us
+				stdErr.println("Stoping isolate due to stop signal: " + e.toString());
+				stop();
+				AnyThrow.throwUncheked(e);
+			}			
+		}
+	}
+	
 	private Object process(WorkUnit wu) {
 		try {
-			queue.put(wu);
+			abortablePut(wu);
 		} catch (NullPointerException e) {
 			throw new IllegalStateException("Isolate[" + name + "] is not started");
 		} catch (InterruptedException e) {
 			AnyThrow.throwUncheked(e);
 		}
 		try {
-			queue.put(NOP);
+			abortablePut(NOP);
 		} catch (NullPointerException e) {
 			throw new IllegalStateException("Isolate[" + name + "] has been stopped");
 		} catch (InterruptedException e) {
@@ -477,6 +496,9 @@ public class Isolate {
 			}
 			catch(IllegalThreadStateException e) {
 				stdErr.println(e);
+			}
+			if (shutdownRetry >  1000) {
+				stdErr.println("Isolate clean up failed");
 			}
 		}
 		cl = null;
@@ -1237,6 +1259,10 @@ public class Isolate {
 					startOfLine = true;
 				}
 				super.write(c);
+				if (startOfLine) {
+					// flush after end of line
+					super.flush();
+				}
 			}
 		}
 
