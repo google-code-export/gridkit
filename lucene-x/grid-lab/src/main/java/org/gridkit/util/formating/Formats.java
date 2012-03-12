@@ -28,6 +28,7 @@ public class Formats {
 	}
 	
 	public static void main(String[] args) {
+		System.out.println("TIME_STAMP: " + String.format(TIME_STAMP, System.currentTimeMillis()));
 		System.out.println("DATE_STAMP: " + String.format(DATE_STAMP, System.currentTimeMillis()));
 		System.out.println("FILE_DATE_STAMP: " + String.format(FILE_DATE_STAMP, System.currentTimeMillis()));
 		System.out.println("ZERO_LEAD_DECIMAL_6: " + String.format(ZERO_LEAD_DECIMAL_6, 1234));
