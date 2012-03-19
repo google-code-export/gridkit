@@ -1,6 +1,9 @@
 package org.gridkit.gatling.remoting;
 
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
@@ -18,5 +21,29 @@ public class Test {
 		
 		host.init();
 		
+		ExecutorService es1 = host.createRemoteExecutor();
+		es1.submit(new Echo("Y-a-a-ho!"));
+
+		ExecutorService es2 = host.createRemoteExecutor();
+		es2.submit(new Echo("Y-a-a-ho!"));
+		
+		Thread.sleep(5000);
+		
+		System.exit(1);
+	}
+	
+	public static class Echo implements Callable<Void>, Serializable {
+
+		private String sound;
+		
+		public Echo(String sound) {
+			this.sound = sound;
+		}
+
+		@Override
+		public Void call() throws Exception {
+			System.out.println(sound);
+			return null;
+		}
 	}
 }

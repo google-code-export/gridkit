@@ -230,7 +230,9 @@ public class RmiGateway {
 				DuplexStream socket = RmiGateway.this.socket;
 				InputStream in = RmiGateway.this.in;
 				readerThread = null;
+				LOGGER.debug("disconnecting");
 				disconnect();
+				LOGGER.debug("streamError(...)");
 				streamErrorHandler.streamError(socket, in, e);
 			}
 		}

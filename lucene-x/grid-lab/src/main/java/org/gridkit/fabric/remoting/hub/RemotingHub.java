@@ -22,7 +22,7 @@ public class RemotingHub {
 	
 	private SecureRandom srnd ;
 	
-	private ConcurrentMap<String, ConnectionContext> connections = new ConcurrentHashMap<String, ConnectionContext>();
+	private ConcurrentMap<String, SessionContext> connections = new ConcurrentHashMap<String, SessionContext>();
 	
 	public RemotingHub() {
 		try {
@@ -32,10 +32,10 @@ public class RemotingHub {
 		}
 	}
 	
-	public String newConnection(ConnectionEventListener listener) {
+	public String newSession(SessionEventListener listener) {
 		while(true) {
 			String uid = generateUID();
-			ConnectionContext ctx = new ConnectionContext();
+			SessionContext ctx = new SessionContext();
 			ctx.uid = uid;
 			ctx.listener = listener;			
 			synchronized(ctx) {
@@ -49,8 +49,8 @@ public class RemotingHub {
 		}		
 	}
 	
-	public ExecutorService getExecutionService(String uid) {
-		ConnectionContext ctx = connections.get(uid);
+	public ExecutorService getExecutionService(String sessionId) {
+		SessionContext ctx = connections.get(sessionId);
 		if (ctx != null) {
 			return ctx.gateway.getRemoteExecutorService();
 		}
@@ -71,7 +71,7 @@ public class RemotingHub {
 	}
 
 	public void closeConnection(String id) {
-		ConnectionContext ctx = connections.get(id);
+		SessionContext ctx = connections.get(id);
 		if (ctx != null) {
 			synchronized(ctx) {
 				ctx = connections.get(id);
@@ -92,7 +92,7 @@ public class RemotingHub {
 	public void dispatch(DuplexStream stream) {
 		String id = readId(stream);
 		if (id != null) {
-			ConnectionContext ctx = connections.get(id);
+			SessionContext ctx = connections.get(id);
 			if (ctx != null) {
 				synchronized(ctx) {
 					ctx = connections.get(id);
@@ -134,7 +134,7 @@ public class RemotingHub {
 		}
 	}
 
-	public interface ConnectionEventListener {
+	public interface SessionEventListener {
 		
 		public void connected(DuplexStream stream);
 		
@@ -145,10 +145,10 @@ public class RemotingHub {
 		public void closed();		
 	}
 	
-	private class ConnectionContext implements StreamErrorHandler {
+	private class SessionContext implements StreamErrorHandler {
 		
 		private String uid;
-		private ConnectionEventListener listener;
+		private SessionEventListener listener;
 		private RmiGateway gateway;
 		private DuplexStream stream;
 

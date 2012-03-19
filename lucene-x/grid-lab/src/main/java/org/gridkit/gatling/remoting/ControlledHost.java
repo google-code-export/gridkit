@@ -7,15 +7,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import org.gridkit.fabric.exec.ExecCommand;
-import org.gridkit.fabric.remoting.RmiGateway;
+import org.gridkit.fabric.remoting.DuplexStream;
+import org.gridkit.fabric.remoting.hub.RemotingHub;
+import org.gridkit.fabric.remoting.hub.RemotingHub.SessionEventListener;
 import org.gridkit.gatling.remoting.bootstraper.Bootstraper;
+import org.gridkit.gatling.remoting.bootstraper.HalloWorld;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,10 +42,10 @@ public class ControlledHost {
 	private Random random = new Random();
 	
 	private String bootJarPath;
+	
+	private RemotingHub hub = new RemotingHub();
 	private int controlPort;
 
-	private Map<String, RemoteControlHandler> agents = new HashMap<String, RemoteControlHandler>(); 	
-	
 	public ControlledHost(String host, SSHFactory sshFactory) {
 		this.host = host;
 		this.factory = sshFactory;
@@ -70,7 +73,7 @@ public class ControlledHost {
 		ExecCommand halloWorldCmd = new ExecCommand(javaExecPath);
 //		ExecCommand halloWorldCmd = new ExecCommand("echo");
 		halloWorldCmd.setWorkDir(agentHome);
-		halloWorldCmd.addArg("-jar").addArg(bootJarPath);
+		halloWorldCmd.addArg("-cp").addArg(bootJarPath).addArg(HalloWorld.class.getName());
 		RemoteProcess rp = new RemoteProcess(ssh, halloWorldCmd);
 		rp.getOutputStream().close();
 		BackgroundStreamDumper.link(rp.getInputStream(), System.out);
@@ -79,19 +82,40 @@ public class ControlledHost {
 		rp.waitFor();
 		Thread.sleep(2000);
 	}
+	
+	public ExecutorService createRemoteExecutor() throws JSchException, IOException {
+		ExecCommand jvmCmd = new ExecCommand(javaExecPath);
+		jvmCmd.setWorkDir(agentHome);
+		jvmCmd.addArg("-jar").addArg(bootJarPath);
+		
+		RemoteControlSession session = new RemoteControlSession();
+		String sessionId = hub.newSession(session);
+		jvmCmd.addArg(sessionId).addArg("localhost").addArg(String.valueOf(controlPort));
+		jvmCmd.addArg(agentHome);
+		session.setSessionId(sessionId);
+		
+		RemoteProcess rp = new RemoteProcess(ssh, jvmCmd);
+		rp.getOutputStream().close();
+		BackgroundStreamDumper.link(rp.getInputStream(), System.out);
+		BackgroundStreamDumper.link(rp.getErrorStream(), System.err);
+		session.setProcess(rp);
+		
+		return session.getRemoteExecutor();
+	}
 
 	private synchronized void initPortForwarding() {
 		for(int i = 0; i != 10; ++i) {
 			int port;
 			try {
 				port = 50000 + random.nextInt(1000);
-				ssh.setPortForwardingR(port, ControlledHost.class.getName() + "$PortForwardAcceptor", new Object[]{agents});
+				ssh.setPortForwardingR(port, ControlledHost.class.getName() + "$" + RemotingTunnelAcceptor.class.getSimpleName(), new Object[]{ControlledHost.this});
 			}
 			catch(JSchException e) {
 				LOGGER.warn("Failed to forward port " + e.toString());
 				continue;
 			}
 			controlPort = port;
+			return;
 		}
 		throw new RuntimeException("Failed to bind remote port");
 	}
@@ -146,111 +170,127 @@ public class ControlledHost {
 		return bos.toByteArray();
 	}
 	
-	private class RemoteControlHandler {
+	private class RemoteControlSession implements SessionEventListener {
+		
+		String sessionId;
+		ExecutorService remoteExecutorService;
+		RemoteProcess process;
+		CountDownLatch connected = new CountDownLatch(1);
+		
+		public void setSessionId(String sessionId) {
+			this.sessionId = sessionId;
+		}
 
-		private RemoteProcess remoteProcess;		
-		private PortForwardAcceptor acceptor;
-		private RmiGateway gateway;
-		
-		public void connected(InputStream in, OutputStream out, PortForwardAcceptor acceptor) throws IOException {
-			this.gateway = new RmiGateway();
-			this.acceptor = acceptor;
-			gateway.connect(in, out);
+		public void setProcess(RemoteProcess process) {
+			this.process = process;
 		}
-		
-		void disconnected() {
-			acceptor = null;
-			close();
-		}
-		
-		public void close() {
-			gateway.shutdown();
-			remoteProcess.destroy();
-			if (acceptor != null) {
-				acceptor.close();
+
+		public ExecutorService getRemoteExecutor() {
+			try {
+				connected.await();
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
 			}
-		} 
+			return remoteExecutorService;
+		}
+		
+		@Override
+		public void connected(DuplexStream stream) {
+			remoteExecutorService = hub.getExecutionService(sessionId);
+			connected.countDown();
+			LOGGER.info("Conntected: " + stream);
+		}
+
+		@Override
+		public void interrupted(DuplexStream stream) {
+			LOGGER.info("Interrupted: " + stream);
+		}
+
+		@Override
+		public void reconnected(DuplexStream stream) {
+			LOGGER.info("Reconnected: " + stream);
+		}
+
+		@Override
+		public void closed() {
+			LOGGER.info("Closed");
+			process.destroy();
+		}
 	}
 	
-	private static class PortForwardAcceptor implements ForwardedTCPIPDaemon {
-
-		private Map<String, RemoteControlHandler> agents;
+	private static class TunneledSocket implements DuplexStream {
 		
 		private ChannelForwardedTCPIP channel;
-		private RemoteControlHandler handler;
 		private InputStream in;
 		private OutputStream out;
+
+		public TunneledSocket(ChannelForwardedTCPIP channel, InputStream in, OutputStream out) {
+			this.channel = channel;
+			this.in = in;
+			this.out = out;
+		}
+
+		@Override
+		public InputStream getInput() throws IOException {
+			return in;
+		}
+
+		@Override
+		public OutputStream getOutput() throws IOException {
+			return out;
+		}
+
+		@Override
+		public boolean isClosed() {
+			return channel.isConnected();
+		}
+
+		@Override
+		public void close() throws IOException {
+			channel.disconnect();
+		}
+
+		@Override
+		public String toString() {
+			try {
+				return "[SSH Tunnel: " + channel.getSession().getHost() + ":" + channel.getRemotePort() + "]";
+			} catch (JSchException e) {
+				return "[SSH Tunnel: ?:" + channel.getRemotePort() + "]";
+			}
+		}
+	}
+	
+	public static class RemotingTunnelAcceptor implements ForwardedTCPIPDaemon {
+
+		private ChannelForwardedTCPIP channel;
+		private InputStream in;
+		private OutputStream out;
+		private ControlledHost host;
 		
-		private boolean verified;
+		public RemotingTunnelAcceptor() {
+		}
 		
 		@Override
 		public void setArg(Object[] arg) {
-			agents = (Map<String, RemoteControlHandler>) arg[0];
+			host = (ControlledHost) arg[0];
 		}
 
 		@Override
 		public void setChannel(ChannelForwardedTCPIP channel, InputStream in, OutputStream out) {
 			this.channel = channel;
-			verifyMagic(in);
 			this.in = in;
 			this.out = out;
 		}
 
 		@Override
 		public void run() {
-			if (!verified) {
-				LOGGER.warn("Connection verfication failed");
-				close();
-			}
-			
 			try {
-				synchronized(this) {					
-					handler.connected(in, out, this);
-				}
+				LOGGER.debug("SSH Tunnel: incomming " + channel.getSession().getHost() + ":" + channel.getId());
+				TunneledSocket ts = new TunneledSocket(channel, in, out);
+				host.hub.dispatch(ts);
+			} catch (JSchException e) {
+				throw new RuntimeException(e);
 			}
-			catch(Exception e) {
-				LOGGER.error("Channel failure", e);
-				close();
-			}
-		}
-
-		private void close() {
-			try {
-				in.close();
-			} catch (IOException e) {
-				// ignore
-			}				
-			try {
-				out.close();
-			} catch (IOException e) {
-				// ignore
-			}
-			channel.disconnect();
-			if (handler != null) {
-				handler.disconnected();
-			}
-		}
-
-		private void verifyMagic(InputStream is) {
-			try {
-				byte[] magic = new byte[32];
-				for(int i = 0; i != magic.length; ++i) {
-					magic[i] = (byte) is.read();
-				}
-				String key = new String(magic);
-				RemoteControlHandler rch = agents.get(key);
-				if (rch != null) {
-					handler = rch;
-					verified = true;
-				}
-				else {
-					LOGGER.error("Invalid connection ID " + key);
-					close();
-				}
-			}
-			catch(IOException e) {
-				return;
-			}			
 		}
 	}
 }

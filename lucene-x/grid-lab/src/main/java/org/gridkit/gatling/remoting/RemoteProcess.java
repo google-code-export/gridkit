@@ -39,7 +39,7 @@ public class RemoteProcess extends Process {
 		channel = (ChannelExec) session.openChannel("exec");
 		String cmd = command.getCommand();
 		if (command.getWorkDir() != null) {
-			cmd = "cd " + command.getWorkDir() + ";" + cmd;
+			cmd = "cd " + command.getWorkDir() + ";" + cmd + " >> rout";
 		}
 		channel.setCommand(cmd);
 		stdin = channel.getOutputStream();
