@@ -10,7 +10,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
@@ -23,6 +22,15 @@ public class ClasspathUtils {
 		URLClassLoader classLoader = (URLClassLoader) Thread.currentThread().getContextClassLoader();
 		return Arrays.asList(classLoader.getURLs());
 	}
+
+//	public static Collection<URL> listCurrentEffectiveClasspath() throws IOException {
+//		List<URL> result = new ArrayList<URL>();
+//		Enumeration<URL> en = Thread.currentThread().getContextClassLoader().getResources("/");
+//		while(en.hasMoreElements()) {
+//			result.add(en.nextElement());
+//		}
+//		return result;
+//	}
 	
 	public static byte[] createManifestJar(Manifest manifest) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
@@ -92,6 +100,11 @@ public class ClasspathUtils {
 		for(URL url: listCurrentClasspath()) {
 			System.out.println(url);
 		}
+		System.out.println();
+//		for(URL url: listCurrentEffectiveClasspath()) {
+//			System.out.println(url);
+//		}
+		
 //		ClassLoader cl = Thread.currentThread().getContextClassLoader();
 //		String path = Bootstraper.class.getName().replace('.', '/') + ".class";
 //		URL url = cl.getResource(path);

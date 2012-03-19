@@ -20,7 +20,7 @@ import org.gridkit.fabric.remoting.RmiChannelPipeTest.SelfIdentity;
 import org.gridkit.fabric.remoting.hub.Ping;
 import org.gridkit.fabric.remoting.hub.RemotingEndPoint;
 import org.gridkit.fabric.remoting.hub.RemotingHub;
-import org.gridkit.fabric.remoting.hub.RemotingHub.ConnectionEventListener;
+import org.gridkit.fabric.remoting.hub.RemotingHub.SessionEventListener;
 import org.gridkit.fabric.remoting.hub.SimpleSocketAcceptor;
 import org.junit.After;
 import org.junit.Assert;
@@ -42,7 +42,7 @@ public class RemotingHubTest {
 		
 		final CountDownLatch latch = new CountDownLatch(2);
 		
-		ConnectionEventListener sessionListener = new ConnectionEventListener() {
+		SessionEventListener sessionListener = new SessionEventListener() {
 			@Override
 			public void reconnected(DuplexStream stream) {
 				System.out.println("HUB: reconnected: " + stream);
@@ -65,8 +65,8 @@ public class RemotingHubTest {
 			}
 		};
 		
-		String uid1 = hub.newConnection(sessionListener);
-		String uid2 = hub.newConnection(sessionListener);
+		String uid1 = hub.newSession(sessionListener);
+		String uid2 = hub.newSession(sessionListener);
 		
 		
 		acceptor = new SimpleSocketAcceptor();

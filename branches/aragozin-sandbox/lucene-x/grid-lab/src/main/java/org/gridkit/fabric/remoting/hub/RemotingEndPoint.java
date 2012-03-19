@@ -33,6 +33,12 @@ public class RemotingEndPoint implements Runnable, RmiGateway.StreamErrorHandler
 		while(true) {
 			
 			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e1) {
+				// ignore
+			}
+			
+			try {
 				if (!gateway.isConnected()) {
 				
 					Socket sock = new Socket();
@@ -56,6 +62,7 @@ public class RemotingEndPoint implements Runnable, RmiGateway.StreamErrorHandler
 					pingSingnal.wait(pingInterval);
 				}
 				
+				LOGGER.debug("Ping");
 				gateway.getRemoteExecutorService().submit(new Ping()).get();
 			} catch (Exception e) {
 				LOGGER.error("Communication error", e);
@@ -66,7 +73,7 @@ public class RemotingEndPoint implements Runnable, RmiGateway.StreamErrorHandler
 	@Override
 	public void streamError(DuplexStream socket, Object stream, Exception error) {
 		synchronized(pingSingnal) {
-			pingSingnal.notify();
+			pingSingnal.notifyAll();
 		}
 		try {
 			socket.close();
