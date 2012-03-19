@@ -5,21 +5,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.URL;
-import java.rmi.Remote;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import org.gridkit.fabric.exec.ExecCommand;
-import org.gridkit.fabric.remoting.RemoteMessage;
-import org.gridkit.fabric.remoting.RmiChannel;
+import org.gridkit.fabric.remoting.RmiGateway;
 import org.gridkit.gatling.remoting.bootstraper.Bootstraper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,31 +149,30 @@ public class ControlledHost {
 	private class RemoteControlHandler {
 
 		private RemoteProcess remoteProcess;		
-		private ExecutorService callbackExecutor;
 		private PortForwardAcceptor acceptor;
-		private RmiChannel channel;
+		private RmiGateway gateway;
 		
-		public void connected(RmiChannel channel, PortForwardAcceptor acceptor) {
-			this.channel = channel;
+		public void connected(InputStream in, OutputStream out, PortForwardAcceptor acceptor) throws IOException {
+			this.gateway = new RmiGateway();
 			this.acceptor = acceptor;
+			gateway.connect(in, out);
 		}
 		
 		void disconnected() {
 			acceptor = null;
-			channel = null;
 			close();
 		}
 		
 		public void close() {
+			gateway.shutdown();
 			remoteProcess.destroy();
-			callbackExecutor.shutdown();
 			if (acceptor != null) {
 				acceptor.close();
 			}
 		} 
 	}
 	
-	private static class PortForwardAcceptor implements ForwardedTCPIPDaemon, RmiChannel.OutputChannel {
+	private static class PortForwardAcceptor implements ForwardedTCPIPDaemon {
 
 		private Map<String, RemoteControlHandler> agents;
 		
@@ -186,7 +180,6 @@ public class ControlledHost {
 		private RemoteControlHandler handler;
 		private InputStream in;
 		private OutputStream out;
-		private ObjectOutputStream objectOut;
 		
 		private boolean verified;
 		
@@ -211,20 +204,9 @@ public class ControlledHost {
 			}
 			
 			try {
-				ObjectInputStream ois;
-				RmiChannel rmi;
 				synchronized(this) {					
-					objectOut = new ObjectOutputStream(out);
-					ois = new ObjectInputStream(in);
-					rmi = new RmiChannel(this, handler.callbackExecutor, Remote.class);
-					handler.connected(rmi, this);
+					handler.connected(in, out, this);
 				}
-				while(true) {
-					RemoteMessage cmd = (RemoteMessage) ois.readObject();
-					if (cmd != null) {
-						rmi.handleRemoteMessage(cmd);
-					}
-				}					
 			}
 			catch(Exception e) {
 				LOGGER.error("Channel failure", e);
@@ -269,12 +251,6 @@ public class ControlledHost {
 			catch(IOException e) {
 				return;
 			}			
-		}
-
-		@Override
-		public synchronized void send(RemoteMessage message) throws IOException {
-			objectOut.writeObject(message);
-			objectOut.flush();			
 		}
 	}
 }

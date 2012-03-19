@@ -14,7 +14,6 @@ import com.jcraft.jsch.Session;
 public class RemoteExecutor {
 
 	private Logger logger;
-	private String host;
 	private Session session; 
 	
 	public RemoteExecutor(String host, Session session) {

@@ -6,8 +6,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.net.Socket;
-import java.net.SocketException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
@@ -18,123 +16,154 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.gridkit.gatling.remoting.RemoteControledJvm;
-import org.gridkit.gatling.remoting.RemoteControledJvmAgent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class AbstractRmiGateway {
+public class RmiGateway {
 
-	private final ExecutorService executor = Executors.newCachedThreadPool();
+	private static final Logger LOGGER = LoggerFactory.getLogger(RmiGateway.class);
+	
 	private final RmiChannel channel;
+	private final ExecutorService executor = Executors.newCachedThreadPool();
 	
 	private boolean connected = false;
 	private boolean terminated = false; 
 	
-	private Socket connection;
+	private DuplexStream socket;
 	private RmiObjectInputStream in;
 	private RmiObjectOutputStream out;
-	
-	private ExecutorService service;
-	
-	private Object remote;
-	
 
-	public AbstractRmiGateway() {
+	private ExecutorService service;
+	private CounterAgent remote;
+	private Thread readerThread;
+	
+	private StreamErrorHandler streamErrorHandler = new StreamErrorHandler() {
+		@Override
+		public void streamError(DuplexStream socket, Object stream, Exception error) {
+			shutdown();
+		}
+	};
+	
+	public RmiGateway() {
 		this(new Class[]{Remote.class});
 	}
 
-	RemoteControledJvm(String id) {
-		this.channel = new RmiChannel(new MessageOut(), executor, new Class[]{Remote.class});
-		this.service = new RemoteExecutionService();
-	}
-
-	@SuppressWarnings("unchecked")
-	public RemoteControledJvm(Class[] remoteMarkers) {
+	@SuppressWarnings("rawtypes")
+	public RmiGateway(Class[] remoteMarkers) {
+		// TODO should include counter agent
 		this.channel = new RmiChannel(new MessageOut(), executor, remoteMarkers);
 		this.service = new RemoteExecutionService();
 	}
 	
-	public String getJvmStartForClient(String host, int port) {
-		return RemoteControledJvmAgent.class.getName() + " tcp-client " + host + " " + port ;
-	}
-
-	public String getJvmStartForServer(int port) {
-		return RemoteControledJvmAgent.class.getName() + " tcp-server " + " " + port ;
-	}
-
-	public ExecutorService getExecutionService() {
+	public ExecutorService getRemoteExecutorService() {
 		return service;
 	}
 	
-	public synchronized boolean connect(Socket socket) throws InterruptedException {
-		if (this.connection != null) {
-			throw new IllegalStateException();
+	public void setStreamErrorHandler(StreamErrorHandler errorHandler) {
+		this.streamErrorHandler = errorHandler;
+	}
+	
+	public synchronized void connect(DuplexStream socket) throws IOException {
+		if (this.socket != null) {
+			throw new IllegalStateException("Already connected");
 		}
-		connection = socket;
-		if (socket != null) {
-			try {
-				InputStream is = socket.getInputStream();
-				OutputStream os = socket.getOutputStream();
-				out = new RmiObjectOutputStream(os);
-				
-				MasterInterface master = new MasterInterface() {
-					public void ping() throws RemoteException {
-						// do nothing
-					}
-				};
-				channel.exportObject(MasterInterface.class, master);
-				synchronized(out) {					
-					out.writeUnshared(master);
-					out.reset();
-				}
+		try {
+			this.socket = socket;
+			
+			out = new RmiObjectOutputStream(socket.getOutput());
+			
+			CounterAgent localAgent = new LocalAgent();			
+			channel.exportObject(CounterAgent.class, localAgent);
+			synchronized(out) {					
+				out.writeUnshared(localAgent);
+				out.reset();
+				out.flush();
+			}
 
-				// important create out stream first!
-				in = new RmiObjectInputStream(is);
-				remote = (SlaveInterface) in.readObject();
-				connected = true;
-				
-				Thread thread = new Thread() {
-					@Override
-					public void run() {
-						
-						try {
-							while(true) {
-								Object message = in.readObject();
-								if (message != null) {
-									if ("close".equals(message)) {
-										shutdown();
-									}
-									else {
-										channel.handleRemoteMessage((RemoteMessage) message);
-									}
-								}
-							}
-						}
-						catch(Exception e) {
-							if (e instanceof SocketException && connection.isClosed()) {
-								System.err.println("RMI socket closed, remote [" + connection.getRemoteSocketAddress().toString() + "]");
-							}
-							else {
-								System.err.println("RMI stream read exception [" + connection.getRemoteSocketAddress().toString() + "]");
-								e.printStackTrace();
-							}
-							shutdown();
-						}
-					}
-				};
-				
-				thread.setName("RMI-receiver-" + socket.getRemoteSocketAddress());
-				thread.start();
-				
-			} catch (Exception e) {
-				try {
-					connection.close();
-				} catch (IOException e1) {
-					// ignore
+			// important create out stream first!
+			in = new RmiObjectInputStream(socket.getInput());
+			remote = (CounterAgent) in.readObject();
+			
+			readerThread = new SocketReader();
+			readerThread.setName("RMI-Receiver: " + socket);
+			readerThread.start();
+			connected = true;			
+			
+		} catch (Exception e) {
+			try {
+				if (in != null) {
+					in.close();
 				}
-				e.printStackTrace();
+			} catch (IOException e1) {
+				// ignore
+			}
+			try {
+				if (out != null) {
+					out.close();
+				}
+			} catch (IOException e1) {
+				// ignore
+			}
+			try {
+				if (this.socket != null) {
+					this.socket.close();
+				}
+			}
+			catch (Exception e1) {
+				//ignore
+			}
+			in = null;
+			out = null;
+			this.socket = null;
+			if (e instanceof IOException) {
+				throw (IOException) e;
+			}
+			else {
+				throw new RuntimeException(e);
 			}
 		}
-		return socket != null;
+	}
+	
+	public void disconnect() {
+		Thread readerThread = null;
+		synchronized(this) {
+			if (connected) {
+				
+				readerThread = this.readerThread;
+				
+				try {
+					in.close();
+				}
+				catch(Exception e) {
+					// ignore
+				}
+				try {
+					out.close();
+				}
+				catch(Exception e) {
+					// ignore
+				}
+				try {
+					socket.close();
+				}
+				catch(Exception e) {
+					// ignore
+				}
+				
+				in = null;
+				out = null;
+				socket = null;
+				connected = false;
+			}
+		}
+		if (readerThread != null) {
+			readerThread.interrupt();
+			try {
+				readerThread.join();
+			} catch (InterruptedException e) {
+				// ignore;
+			}
+		}
 	}
 	
 	public synchronized boolean isConnected() {
@@ -147,14 +176,15 @@ public class AbstractRmiGateway {
 		}
 		terminated = true;
 		try {
-			out.writeUnshared("close");
+			out.close();
 		}
 		catch(Exception e) {
 			// ignore
 		}
 		try {
-			connection.close();
-		} catch (IOException e) {
+			in.close();
+		}
+		catch(Exception e) {
 			// ignore
 		}
 		try {
@@ -177,6 +207,35 @@ public class AbstractRmiGateway {
 		}
 	}
 	
+	private final class SocketReader extends Thread {
+		@Override
+		public void run() {
+			
+			RmiObjectInputStream chin = in;
+			try {
+				while(true) {
+					Object message = chin.readObject();
+					if (message != null) {
+						if ("close".equals(message)) {
+							shutdown();
+						}
+						else {
+							channel.handleRemoteMessage((RemoteMessage) message);
+						}
+					}
+				}
+			}
+			catch(Exception e) {
+				LOGGER.error("RMI stream read exception [" + socket + "]", e);
+				DuplexStream socket = RmiGateway.this.socket;
+				InputStream in = RmiGateway.this.in;
+				readerThread = null;
+				disconnect();
+				streamErrorHandler.streamError(socket, in, e);
+			}
+		}
+	}
+
 	private class RmiObjectInputStream extends ObjectInputStream {
 		
 		public RmiObjectInputStream(InputStream in) throws IOException {
@@ -211,9 +270,19 @@ public class AbstractRmiGateway {
 					out.reset();
 				}
 			} catch (IOException e) {
-				shutdown();
+				DuplexStream socket = RmiGateway.this.socket;
+				OutputStream out = RmiGateway.this.out;			
+				disconnect();
+				streamErrorHandler.streamError(socket, out, e);
+				throw e;
 			}
 		}
+	}
+	
+	public interface StreamErrorHandler {
+		
+		public void streamError(DuplexStream socket, Object stream, Exception error);
+		
 	}
 
 	private class RemoteExecutionService extends AbstractExecutorService {
@@ -242,7 +311,6 @@ public class AbstractRmiGateway {
 
 		private <T> Callable<T> wrap(final Callable<T> task) {
 			return new Callable<T>() {
-
 				public T call() throws Exception {
 					return remote.remoteCall(task);
 				}
@@ -262,7 +330,7 @@ public class AbstractRmiGateway {
 		}
 
 		public void shutdown() {
-			RemoteControledJvm.this.shutdown();
+			RmiGateway.this.shutdown();
 		}
 
 		public List<Runnable> shutdownNow() {
@@ -290,12 +358,14 @@ public class AbstractRmiGateway {
 		}
 	}
 	
-	public static interface MasterInterface extends Remote {
-		public void ping() throws RemoteException;
+	public static interface CounterAgent extends Remote {
+		public <T> T remoteCall(Callable<T> callable) throws RemoteException, Exception;
 	}
-
-	public static interface SlaveInterface extends Remote {
-		public <T> T remoteCall(Callable<T> callable) throws RemoteException;
-		public void shutdown();
+	
+	private class LocalAgent implements CounterAgent {
+		@Override
+		public <T> T remoteCall(Callable<T> callable) throws Exception {
+			return callable.call();
+		}
 	}
 }
