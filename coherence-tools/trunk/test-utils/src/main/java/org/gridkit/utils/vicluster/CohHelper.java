@@ -11,7 +11,11 @@ import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
 
+import com.tangosol.net.CacheFactory;
+import com.tangosol.net.Cluster;
 import com.tangosol.net.management.MBeanServerFinder;
+import com.tangosol.run.xml.XmlElement;
+import com.tangosol.run.xml.XmlHelper;
 
 public class CohHelper {
 
@@ -56,6 +60,47 @@ public class CohHelper {
 		node.setProp("tangosol.coherence.management.jvm.all", "false");
 		node.setProp("tangosol.coherence.management.remote", "false");
 		node.setProp("tangosol.coherence.management.serverfactory", IsolateMBeanFinder.class.getName());
+	}
+	
+	/**
+	 * Coherence does not have standard property for cluster join timeout.
+	 * This method will patch op. configuration directly.
+	 */
+	public static void setJoinTimeout(ViNode node, final long timeout) {
+		node.exec(new Runnable() {
+			@Override
+			public void run() {
+				Cluster cluster = CacheFactory.getCluster();
+				if (cluster.isRunning()) {
+					throw new IllegalStateException("Cluster is already started");
+				}
+				XmlElement config = CacheFactory.getClusterConfig();
+				XmlHelper.ensureElement(config, "cluster-config/multicast-listener/join-timeout-milliseconds")
+					.setLong(timeout);
+				CacheFactory.setServiceConfig("Cluster", config);
+			}
+		});
+	}
+
+	/**
+	 * Coherence does not have standard property to disable TCP ring.
+	 * TCP ring tends to hung in isolate environment, so disabling it makes testing more stable.
+	 * This method will patch op. configuration directly.
+	 */
+	public static void disableTcpRing(ViNode node) {
+		node.exec(new Runnable() {
+			@Override
+			public void run() {
+				Cluster cluster = CacheFactory.getCluster();
+				if (cluster.isRunning()) {
+					throw new IllegalStateException("Cluster is already started");
+				}
+				XmlElement config = CacheFactory.getClusterConfig();
+				XmlHelper.ensureElement(config, "cluster-config/tcp-ring-listener/enabled")
+				.setBoolean(false);
+				CacheFactory.setServiceConfig("Cluster", config);
+			}
+		});
 	}
 
 	private static Object jmxAttribute(ViNode node, ObjectName name, String attribute) {

@@ -17,6 +17,12 @@ public class ViClusterTest {
 		ViCluster cluster = new ViCluster("failoverTest", "com.tangosol", "org.gridkit");
 		CohHelper.enableFastLocalCluster(cluster);
 		CohHelper.enableJmx(cluster);
+		CohHelper.disableTcpRing(cluster.node("server1"));
+		CohHelper.setJoinTimeout(cluster.node("server1"), 50);
+		CohHelper.disableTcpRing(cluster.node("server2"));
+		CohHelper.setJoinTimeout(cluster.node("server2"), 50);
+		CohHelper.disableTcpRing(cluster.node("client"));
+		CohHelper.setJoinTimeout(cluster.node("client"), 50);
 		
 		cluster.node("server1").start(DefaultCacheServer.class);
 		// ensure cache service
