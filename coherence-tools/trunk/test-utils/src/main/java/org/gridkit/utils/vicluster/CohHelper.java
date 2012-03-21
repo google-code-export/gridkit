@@ -1,7 +1,11 @@
 package org.gridkit.utils.vicluster;
 
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Method;
+import java.net.Socket;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
@@ -11,8 +15,12 @@ import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectName;
 
+import com.tangosol.coherence.component.net.extend.RemoteService;
+import com.tangosol.coherence.component.net.extend.connection.TcpConnection;
+import com.tangosol.coherence.component.util.SafeCluster;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Cluster;
+import com.tangosol.net.Service;
 import com.tangosol.net.management.MBeanServerFinder;
 import com.tangosol.run.xml.XmlElement;
 import com.tangosol.run.xml.XmlHelper;
@@ -103,6 +111,46 @@ public class CohHelper {
 		});
 	}
 
+	public static void killTcpInitiator(String serviceName) {
+		for(Service s: getLocalServices()) {
+			if (serviceName.equals(s.getInfo().getServiceName())) {
+				killTcpInitiator(s);
+			}
+		}
+	}
+	
+	public static void killTcpAllInitiators() {
+		for(Service s: getLocalServices()) {
+			if (s instanceof RemoteService) {
+				killTcpInitiator(s);
+			}
+		}
+	}
+	
+	private static void killTcpInitiator(Service s) {
+		RemoteService rs = (RemoteService) s;
+		try {
+			TcpConnection tcp = (TcpConnection) rs.getInitiator().ensureConnection();
+			Socket sock = tcp.getSocket();
+			System.err.println("Dropping Extend socket " + rs.getInfo().getServiceName() + " | " + sock);
+			sock.close();
+		} catch (IOException e) {
+			// ignore
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Set<Service> getLocalServices() {
+		try {
+			Cluster cluster = CacheFactory.getCluster();
+			Method m = SafeCluster.class.getDeclaredMethod("getLocalServices");
+			m.setAccessible(true);
+			return (Set<Service>) m.invoke(cluster);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	private static Object jmxAttribute(ViNode node, ObjectName name, String attribute) {
 		try {
 			MBeanServer mserver = getMBeanServer(node);
@@ -172,6 +220,47 @@ public class CohHelper {
 		Object x = jmxAttribute(node, mbeanCluster(), "LocalMemberId");
 		return x == null ? 0 : ((Integer)x).intValue();
 	}
+	
+	public static void jmxCloseProxyConnections(ViNode node) {
+		jmxCloseProxyConnections(node, "*");
+	}
+
+	public static void jmxCloseProxyConnections(ViNode node, String proxyServiceName) {		
+		final MBeanServer server = getMBeanServer(node);
+		int id = jmxMemberId(node);
+		for(final ObjectName name : server.queryNames(null, null)) {
+			if (isConnectionBean(name) && String.valueOf(id).equals(name.getKeyProperty("nodeId"))) {
+				if (!"*".equals(proxyServiceName)) {
+					if (!proxyServiceName.equals(name.getKeyProperty("name"))) {
+						continue;
+					}
+				}
+				// Separate thread is required if we are executing on that connection
+				Thread thread = new Thread() {
+					@Override
+					public void run() {
+						try {
+							server.invoke(name, "closeConnection", new Object[0], new String[0]);
+							System.err.println("Extend conntection closed: " + name);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				};
+				thread.start();
+				try {
+					thread.join();
+				} catch (InterruptedException e) {
+					// ignore
+				}
+			}
+		}
+	}
+
+	private static boolean isConnectionBean(ObjectName name) {
+		return "Coherence".equals(name.getDomain())
+				&& "Connection".equals(name.getKeyProperty("type"));
+	}
 
 	public static String jmxServiceStatusHA(ViNode node, String serviceName) {
 		String s = (String) jmxAttribute(node, mbeanServiceName(serviceName, jmxMemberId(node)), "StatusHA");
@@ -225,27 +314,36 @@ public class CohHelper {
 	}
 	
 	private static MBeanServer getMBeanServer(ViNode node) {
-		// cluster connection my take sometime
-		long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(3500);
-		MBeanServer server = null;
-		while(deadline > System.nanoTime()) {			
-			server = node.getIsolate().exportNoProxy(new Callable<MBeanServer>() {
-				@Override
-				public MBeanServer call() throws Exception {
-					return IsolateMBeanFinder.MSERVER;
+		if (node != null) {
+			// cluster connection my take sometime
+			long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(3500);
+			MBeanServer server = null;
+			while(deadline > System.nanoTime()) {			
+				server = node.getIsolate().exportNoProxy(new Callable<MBeanServer>() {
+					@Override
+					public MBeanServer call() throws Exception {
+						return IsolateMBeanFinder.MSERVER;
+					}
+				});
+				if (server == null) {
+					LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(10));
 				}
-			});
-			if (server == null) {
-				LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(10));
+				else {
+					break;
+				}			
 			}
-			else {
-				break;
-			}			
+			if (server == null) {
+				throw new IllegalStateException("Local JMX is not enabled for node " + node.getName());
+			}
+			return server;
 		}
-		if (server == null) {
-			throw new IllegalStateException("Local JMX is not enabled for node " + node.getName());
+		else {
+			MBeanServer server = IsolateMBeanFinder.MSERVER;
+			if (server == null) {
+				throw new IllegalStateException("Local JMX is not enabled for this node");
+			}
+			return server;
 		}
-		return server;
 	}
 	
 	public static class IsolateMBeanFinder implements MBeanServerFinder {
