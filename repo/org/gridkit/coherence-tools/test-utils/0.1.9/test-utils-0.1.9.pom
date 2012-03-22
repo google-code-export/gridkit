@@ -1,0 +1,87 @@
+<!-- Copyright 2011 Grid Dynamics Consulting Services, Inc. Licensed under 
+    the Apache License, Version 2.0 (the "License"); you may not use this file 
+    except in compliance with the License. You may obtain a copy of the License 
+    at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable 
+    law or agreed to in writing, software distributed under the License is distributed 
+    on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
+    express or implied. See the License for the specific language governing permissions 
+    and limitations under the License. -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.gridkit.coherence-tools</groupId>
+        <artifactId>coherence-tools-parent</artifactId>
+        <version>1.2</version>
+    </parent>
+
+    <artifactId>test-utils</artifactId>
+    <version>0.1.9</version>
+    <name>test-utils</name>
+    <description>Utility classes for unit and integration testing</description>
+
+    <!-- this repository is required to get parent POM -->
+    <repositories>
+        <!-- GridKit maven2 repository -->
+        <repository>
+            <id>gridkit-releases</id>
+            <name>gridkit-repo.googlecode.com</name>
+            <url>http://gridkit.googlecode.com/svn/repo/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <properties>
+        <!--<coherence.version>3.6.1.0b19636</coherence.version>-->
+        <coherence.version>3.7.1.0b27797</coherence.version>
+        <!-- 
+        <coherence.version>3.7.1.1</coherence.version>
+         -->
+        <junit.version>4.8.2</junit.version>
+    </properties>
+
+    <dependencies>
+        <!-- Coherence -->
+        <dependency>
+            <groupId>com.oracle.coherence</groupId>
+            <artifactId>coherence</artifactId>
+            <version>${coherence.version}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Note that JUnit is added with compile scope -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.7.2</version>
+		<!--
+                <configuration>
+                    <argLine>-XX:MaxPermSize=256m</argLine>
+                </configuration>
+                -->
+            </plugin>
+        </plugins>
+    </build>
+
+  <scm>
+    <connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/tags/test-utils-0.1.9</connection>
+    <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/tags/test-utils-0.1.9</developerConnection>
+    <url>http://gridkit.googlecode.com/svn/coherence-tools/tags/test-utils-0.1.9</url>
+  </scm>
+</project>
