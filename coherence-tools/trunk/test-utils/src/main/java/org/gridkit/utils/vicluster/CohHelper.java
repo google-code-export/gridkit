@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -220,7 +223,7 @@ public class CohHelper {
 		Object x = jmxAttribute(node, mbeanCluster(), "LocalMemberId");
 		return x == null ? 0 : ((Integer)x).intValue();
 	}
-	
+
 	public static void jmxCloseProxyConnections(ViNode node) {
 		jmxCloseProxyConnections(node, "*");
 	}
@@ -257,6 +260,27 @@ public class CohHelper {
 		}
 	}
 
+	public static Collection<ObjectName> jmxListProxyConnections(ViNode node) {
+		return jmxListProxyConnections(node, "*");
+	}
+
+	public static Collection<ObjectName> jmxListProxyConnections(ViNode node, String proxyServiceName) {		
+		final MBeanServer server = getMBeanServer(node);
+		int id = jmxMemberId(node);
+		List<ObjectName> result = new ArrayList<ObjectName>();
+		for(final ObjectName name : server.queryNames(null, null)) {
+			if (isConnectionBean(name) && String.valueOf(id).equals(name.getKeyProperty("nodeId"))) {
+				if (!"*".equals(proxyServiceName)) {
+					if (!proxyServiceName.equals(name.getKeyProperty("name"))) {
+						continue;
+					}
+				}
+				result.add(name);
+			}
+		}
+		return result;
+	}
+	
 	private static boolean isConnectionBean(ObjectName name) {
 		return "Coherence".equals(name.getDomain())
 				&& "Connection".equals(name.getKeyProperty("type"));
