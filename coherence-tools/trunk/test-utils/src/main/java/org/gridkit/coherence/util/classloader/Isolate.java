@@ -230,11 +230,18 @@ public class Isolate {
 	}
 
 	public void setProp(String prop, String value) {
-		sysProps.setProperty(prop, value);
+		if (value == null) {
+			sysProps.remove(prop);
+		}
+		else {
+			sysProps.setProperty(prop, value);
+		}
 	}
 	
 	public void setProp(Map<String, String> props) {
-		sysProps.putAll(props);
+		for(Map.Entry<String, String> e : props.entrySet()) {
+			setProp(e.getKey(), e.getValue());
+		}
 	}
 
 	private void abortablePut(WorkUnit wu) throws InterruptedException {
