@@ -554,7 +554,8 @@ public class Isolate {
 				try {
 					try { t.interrupt(); }	catch(Exception e) {/* ignore */};
 					trySocketInterrupt(t);
-//					tryStop(t);
+					tryNotify(t);
+					tryStop(t);
 					try { t.interrupt(); }	catch(Exception e) {/* ignore */};
 					try { t.stop(new ThreadDoomException()); }	catch(IllegalStateException e) {/* ignore */};				
 				}
@@ -616,7 +617,53 @@ public class Isolate {
 		}
 	}
 
-	// TODO plugable thread killers
+	private void tryNotify(Thread t) {
+		Object target = getField(t, "target");
+		if (target == null) {
+			return;
+		}
+		StackTraceElement[] trace = t.getStackTrace();
+		if (!"onWait".equals(trace[1].getMethodName())) {
+			return;
+		}
+		String cn = target.getClass().getName();
+		if (cn.startsWith("com.tangosol.coherence.component")) {
+			try {
+				Object lock = getField(target, "__m_Lock");
+				if (lock != null) {
+					stdErr.println("Notify: " + t.getName());
+					synchronized(lock) {
+						lock.notifyAll();
+					}
+				}
+			}
+			catch(Exception e) {
+				// ignore
+			}
+		}
+		else if (cn.startsWith("com.tangosol.coherence.component")
+					&& cn.contains("PacketPublisher")) {
+			try {
+				Object udpSocket = getField(target, "__m_UdpSocketUnicast");
+				DatagramSocket ds = (DatagramSocket) getField(udpSocket, "__m_DatagramSocket");
+				ds.close();
+				stdErr.println("Closing socket for " + t.getName());
+			}
+			catch(Exception e) {
+				// ignore;
+			}
+			try {
+				Object udpSocket = getField(target, "__m_UdpSocketMulticast");
+				DatagramSocket ds = (DatagramSocket) getField(udpSocket, "__m_DatagramSocket");
+				ds.close();
+				stdErr.println("Closing socket for " + t.getName());
+			}
+			catch(Exception e) {
+				// ignore;
+			}
+		}
+	}
+	
 	@SuppressWarnings("unused")
 	private void tryStop(Thread thread) {
 		Object target = getField(thread, "target");
@@ -625,7 +672,7 @@ public class Isolate {
 				Method m = target.getClass().getMethod("stop");
 				m.setAccessible(true);
 				m.invoke(target);
-				stdErr.println("Calling stop on " + thread.getName());
+				stdErr.println("Calling stop() on " + thread.getName());
 			} catch (Exception e) {
 				//ignore
 			}
