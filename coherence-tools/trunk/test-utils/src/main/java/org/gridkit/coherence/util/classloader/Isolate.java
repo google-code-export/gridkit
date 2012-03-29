@@ -664,7 +664,6 @@ public class Isolate {
 		}
 	}
 	
-	@SuppressWarnings("unused")
 	private void tryStop(Thread thread) {
 		Object target = getField(thread, "target");
 		if (target != null) {
