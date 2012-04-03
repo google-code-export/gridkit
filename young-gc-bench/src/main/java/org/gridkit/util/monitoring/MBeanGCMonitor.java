@@ -133,8 +133,9 @@ public class MBeanGCMonitor {
 					
 					builder.append("[GC: ").append(name).append("#").append(id).append(" time: ");
 					builder.append(dur).append("ms");
+					long inter = -1;
 					if (prevTimestamp != 0) {
-						long inter = startTs - prevTimestamp;
+						inter = startTs - prevTimestamp;
 						builder.append(" interval: ").append(inter).append("ms");
 					}
 					builder.append(" mem:");
@@ -153,7 +154,7 @@ public class MBeanGCMonitor {
 						long before = (Long) mbefore.get("used");
 						long after = (Long) mafter.get("used");
 						long max = (Long) mbefore.get("max");
-						String mb,ma,mm,md;
+						String mb,ma,mm,md,mt;
 						if (max > 1024 << 20) {
 							ma = (after >> 20) + "m";
 							mb = (before >> 20) + "m";
@@ -169,8 +170,30 @@ public class MBeanGCMonitor {
 						if (!md.startsWith("-")) {
 							md = "+" + md;
 						}
+						if (inter > 0) {
+							double mspeed = 1000d * (after - before) / inter;
+							if (mspeed > 16 << 20) {
+								mt = String.format("%.2fMb/s", mspeed / (1 << 20));
+							}
+							else {
+								mt = String.format("%.2fkb/s", mspeed / (1 << 10));
+							}
+						}
+						else {
+							mt = "";
+						}
 						
-						builder.append(" ").append(poolName).append(": ").append(mb).append(md).append("->").append(ma).append("(max:").append(mm).append(")");
+						String ext = (max > 0) ? "max:" + mm : "";
+						if (mt.length() > 0) {
+							if (ext.length() > 0) {
+								ext += ",";
+							}
+							ext += "rate:" + mt;
+						}
+						if (ext.length() > 0) {
+							ext = "[" + ext + "]";
+						}
+						builder.append(" ").append(poolName).append(": ").append(mb).append(md).append("->").append(ma).append(ext);
 					}
 					builder.append("]");
 					return builder.toString();
