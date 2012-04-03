@@ -1,12 +1,10 @@
 package org.gridkit.util.monitoring;
 
 import java.io.PrintStream;
-import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.math.BigInteger;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -31,14 +29,12 @@ public class CpuUsageReporter {
 	private static class CpuUsageReporterDaemon implements Runnable {
 		
 		private ThreadMXBean threadBean;
-		private List<GarbageCollectorMXBean> gcBeans;
 		private PrintStream printStream;
 		private long reportInterval;
 		private String jvmName = ManagementFactory.getRuntimeMXBean().getName();
 
 		private long lastTimestamp;
 		private long lastProcessCpuTime;
-		private long lastGcTime;
 		private BigInteger lastCummulativeCpuTime;
 		private BigInteger lastCummulativeUserTime;
 		
@@ -47,7 +43,6 @@ public class CpuUsageReporter {
 		public CpuUsageReporterDaemon(PrintStream ps, long reportInterval) {
 			this.printStream = ps;
 			this.threadBean =ManagementFactory.getThreadMXBean();
-			this.gcBeans = ManagementFactory.getGarbageCollectorMXBeans();
 			this.reportInterval = reportInterval;
 		}
 		
@@ -56,14 +51,12 @@ public class CpuUsageReporter {
 			
 			lastTimestamp = System.nanoTime();
 			lastProcessCpuTime = getProcessCpuTime();
-			lastGcTime = getGcTime();
 			
 			while(true) {
 				
 				long currentTime = System.nanoTime();
 				long timeSplit = currentTime - lastTimestamp;
 				long currentCpuTime = getProcessCpuTime();
-				long gcTime = getGcTime();
 				
 				Map<Long,ThreadNote> newNotes = new HashMap<Long, CpuUsageReporter.ThreadNote>();
 				Set<String> report = new TreeSet<String>();
@@ -75,7 +68,6 @@ public class CpuUsageReporter {
 				for(long tid: threadBean.getAllThreadIds()) {
 					ThreadNote lastNote = notes.get(tid);
 					ThreadNote newNote = new ThreadNote();
-					newNote.threadId = tid;
 					newNote.lastCpuTime = threadBean.getThreadCpuTime(tid);
 					newNote.lastUserTime = threadBean.getThreadUserTime(tid);
 					
@@ -100,7 +92,6 @@ public class CpuUsageReporter {
 					double processT = ((double)(currentCpuTime - lastProcessCpuTime)) / timeSplit;
 					double cpuT = ((double)(totalCpu.subtract(lastCummulativeCpuTime).longValue())) / timeSplit;
 					double userT = ((double)(totalUser.subtract(lastCummulativeUserTime).longValue())) / timeSplit;
-					double gcT = ((double)(gcTime - lastGcTime)) / timeSplit;
 
 					StringBuffer buf = new StringBuffer();
 					buf.append(Formats.toDatestamp(System.currentTimeMillis()));
@@ -131,20 +122,11 @@ public class CpuUsageReporter {
 		@SuppressWarnings("restriction")
 		private long getProcessCpuTime() {
 			return ((com.sun.management.OperatingSystemMXBean)ManagementFactory.getOperatingSystemMXBean()).getProcessCpuTime();
-		}
-		
-		private long getGcTime() {
-			long cpuTime = 0;
-			for(GarbageCollectorMXBean gcBean : gcBeans) {
-				cpuTime += TimeUnit.MILLISECONDS.toNanos(gcBean.getCollectionTime());
-			}
-			return cpuTime;
-		}
+		}		
 	}	
 	
 	private static class ThreadNote {
 		
-		private long threadId;
 		private long lastCpuTime;
 		private long lastUserTime;
 		

@@ -1,27 +1,23 @@
 package org.gridkit.util.monitoring;
 
 import java.lang.management.GarbageCollectorMXBean;
-import java.lang.management.ManagementFactory;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GCSelfMonitor {
-	
+public abstract class AbstractGCMonitor {
+
 	private Map<String, CollectorTracker> trackers = new LinkedHashMap<String, CollectorTracker>();
-	
-	public GCSelfMonitor() {
+
+	protected abstract List<GarbageCollectorMXBean> getGarbageCollectorMXBeans();
+
+	protected void initSnapshot() {
 		for(GarbageCollectorMXBean gcbean: getGarbageCollectorMXBeans()) {
 			CollectorTracker tracker = new CollectorTracker(gcbean);
 			trackers.put(gcbean.getName(), tracker);
 		}
 	}
 
-	private List<GarbageCollectorMXBean> getGarbageCollectorMXBeans() {
-		return ManagementFactory.getGarbageCollectorMXBeans();
-	}
-	
 	public void displayStats() {
 		for(GarbageCollectorMXBean gcbean: getGarbageCollectorMXBeans()) {
 			CollectorTracker tracker = trackers.get(gcbean.getName());
@@ -30,9 +26,9 @@ public class GCSelfMonitor {
 			}
 		}
 	}
-	
-	private static class CollectorTracker {
-		
+
+	protected static class CollectorTracker {
+			
 		private String name;
 		private long initialCount;
 		private long initialTime;
@@ -58,16 +54,6 @@ public class GCSelfMonitor {
 			builder.append(String.format("%s[ collections: %d | avg: %.4f secs | total: %.1f secs ]", name, count - initialCount, avg / 1000d, (time - initialTime) / 1000d));
 			
 			return builder.toString();
-		}
-	}
-	
-	public static void main(String[] args) {
-		System.gc();
-		for(GarbageCollectorMXBean gcbean: ManagementFactory.getGarbageCollectorMXBeans()) {
-			System.out.println(gcbean.getName());
-			System.out.println(" count: " + gcbean.getCollectionCount());
-			System.out.println(" time: " + gcbean.getCollectionTime());
-			System.out.println(" pools: " + Arrays.asList(gcbean.getMemoryPoolNames()));
 		}
 	}
 }
