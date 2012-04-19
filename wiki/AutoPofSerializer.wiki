@@ -21,7 +21,7 @@ With {{{AutoPofSerializer}}} you have just to configure it for cache ...
 }}}
 ... and it should work.
 
-{{{AutoPofSerializer}}} will automatically serialize all objects implementing {{{PortableObject}}} and all others using {{{ReflectionPofSerializer}}} ({{{java.lang.Throwable}} is a special case, Java built-in serialization is used for expections).
+{{{AutoPofSerializer}}} will automatically serialize all objects implementing {{{PortableObject}}} and all others using {{{ReflectionPofSerializer}}} ({{{java.lang.Throwable}}} is a special case, Java built-in serialization is used for expections).
 
 
 = Limitations =
