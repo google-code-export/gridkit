@@ -4,7 +4,7 @@
 .1[0].id, CHAR_STRING, 12
 .1[0].price, INT32, 90000
 .1[0].quantity, INT32, 690
-.1[0].attributes, MAP, 
+.1[0].attributes, UNIFORM_KEYS_MAP, 
 .1[0].attributes[0], ENTRY, 
 .1[0].attributes[0].key, CHAR_STRING, b
 .1[0].attributes[0].value, MyPofAttr, 
@@ -23,7 +23,7 @@
 .1[1].id, CHAR_STRING, 24
 .1[1].price, INT32, 20000
 .1[1].quantity, INT_20, 20
-.1[1].attributes, MAP, 
+.1[1].attributes, UNIFORM_KEYS_MAP, 
 .1[1].attributes[0], ENTRY, 
 .1[1].attributes[0].key, CHAR_STRING, b
 .1[1].attributes[0].value, MyPofAttr, 
