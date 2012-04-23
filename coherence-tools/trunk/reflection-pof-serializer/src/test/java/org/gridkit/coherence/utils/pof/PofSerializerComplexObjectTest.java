@@ -57,8 +57,8 @@ public class PofSerializerComplexObjectTest {
     	
     	CacheFactory.getCluster().shutdown();
 
-    	System.setProperty("tangosol.coherence.wka", "localhost");
-    	System.setProperty("tangosol.coherence.localhost", "localhost");
+    	System.setProperty("tangosol.coherence.wka", "127.0.0.1");
+    	System.setProperty("tangosol.coherence.localhost", "127.0.0.1");
         System.setProperty("tangosol.coherence.distributed.localstorage", "true");
 
         CacheFactory.setConfigurableCacheFactory(new DefaultConfigurableCacheFactory("test-pof-cache-config.xml"));

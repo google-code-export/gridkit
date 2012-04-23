@@ -184,7 +184,7 @@ public class AutoPofSerializer implements Serializer, PofContext {
 					NamedCache typeMap = getTypeMap();
 					typeMapGetter.put(typeMap);
 				} catch (Exception e) {
-					Base.err("Failed to connect to AutoPofSerializer type map cache");
+					Base.err("Failed to connect to AutoPofSerializer type map cache. " + e.toString());
 				}
 			}
 		};

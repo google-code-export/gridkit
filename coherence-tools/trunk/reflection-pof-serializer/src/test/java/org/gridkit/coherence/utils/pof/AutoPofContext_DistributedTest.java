@@ -38,8 +38,8 @@ public class AutoPofContext_DistributedTest extends AutoPofContext_FunctionalTes
 
 	@BeforeClass
 	public static void init_storage_node() throws SecurityException, IllegalArgumentException, NoSuchFieldException, IllegalAccessException {
-    	System.setProperty("tangosol.coherence.wka", "localhost");
-    	System.setProperty("tangosol.coherence.localhost", "localhost");
+    	System.setProperty("tangosol.coherence.wka", "127.0.0.1");
+    	System.setProperty("tangosol.coherence.localhost", "127.0.0.1");
 		
 		isolate = new Isolate("Remote", "org.gridkit", "com.tangosol");
 		isolate.start();
@@ -60,8 +60,8 @@ public class AutoPofContext_DistributedTest extends AutoPofContext_FunctionalTes
     	
     	CacheFactory.getCluster().shutdown();
 
-    	System.setProperty("tangosol.coherence.wka", "localhost");
-    	System.setProperty("tangosol.coherence.localhost", "localhost");
+    	System.setProperty("tangosol.coherence.wka", "127.0.0.1");
+    	System.setProperty("tangosol.coherence.localhost", "127.0.0.1");
 
         CacheFactory.setConfigurableCacheFactory(new DefaultConfigurableCacheFactory("auto-pof-cache-config-client.xml"));
         cache = CacheFactory.getCache("objects");        

@@ -41,8 +41,8 @@ public class PofExtractorCacheTest {
     	
     	CacheFactory.getCluster().shutdown();
 
-    	System.setProperty("tangosol.coherence.wka", "localhost");
-    	System.setProperty("tangosol.coherence.localhost", "localhost");
+    	System.setProperty("tangosol.coherence.wka", "127.0.0.1");
+    	System.setProperty("tangosol.coherence.localhost", "127.0.0.1");
 //        System.setProperty("tangosol.pof.enabled", "true");
 //        System.setProperty("tangosol.pof.config", "test-pof-config.xml");
 //        System.setProperty("tangosol.coherence.cacheconfig", "test-pof-cache-config.xml");

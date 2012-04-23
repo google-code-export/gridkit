@@ -25,9 +25,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import junit.framework.Assert;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public abstract class AutoPofContext_FunctionalTest {
@@ -183,6 +185,15 @@ public abstract class AutoPofContext_FunctionalTest {
 		l1.add(State.STATE1);
 		l1.add(State.STATE2);
 		l1.add(State.STATE3);
+		
+		Object l2 = serDeser(l1);
+		Assert.assertSame(l1.getClass(), l2.getClass());
+		Assert.assertEquals(l1.toString(), l2.toString());
+	}		
+
+	@Test @Ignore
+	public void testRegex() {
+		Pattern l1 = Pattern.compile("[0-9]+");
 		
 		Object l2 = serDeser(l1);
 		Assert.assertSame(l1.getClass(), l2.getClass());

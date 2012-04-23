@@ -67,14 +67,15 @@
         </dependency>        
         <dependency>
             <groupId>org.gridkit.coherence-tools</groupId>
-             <artifactId>test-utils</artifactId>
+            <artifactId>test-utils</artifactId>
             <version>0.1.1</version>
-                <scope>test</scope>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.thrift</groupId>
             <artifactId>libthrift</artifactId>
             <version>0.8.0</version>
+            <scope>test</scope>
             <optional>true</optional>
         </dependency>        
     </dependencies>
