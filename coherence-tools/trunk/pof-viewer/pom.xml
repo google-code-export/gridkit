@@ -26,7 +26,7 @@
     <name>Coherence POF viewer</name>
     <description>Tool for fine printing of POF binary without deserialization</description>
     <packaging>jar</packaging>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.1</version>
 
     <properties>
         <javaVersion>1.6</javaVersion>
@@ -113,4 +113,10 @@
             </plugin>                
         </plugins>
     </build>
+
+  <scm>
+    <connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/tags/pof-viewer-0.1</connection>
+    <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/tags/pof-viewer-0.1</developerConnection>
+    <url>http://gridkit.googlecode.com/svn/coherence-tools/tags/pof-viewer-0.1</url>
+  </scm>
 </project>
