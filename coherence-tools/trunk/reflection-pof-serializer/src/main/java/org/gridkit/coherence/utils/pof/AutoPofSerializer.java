@@ -111,7 +111,9 @@ public class AutoPofSerializer implements Serializer, PofContext {
 		this.typeMap = typeMap;
 		initContextMap();
 		initCustomPredefines();
-		scheduleTypeMapConnection();
+		if (typeMap == null) {
+			scheduleTypeMapConnection();
+		}
 	}
 	
 		
