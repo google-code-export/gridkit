@@ -11,6 +11,7 @@
 */
 package com.griddynamics.research.coherence.osgi.corebundle;
 
+import com.tangosol.net.ConfigurableCacheFactory;
 import com.tangosol.net.DefaultCacheFactoryBuilder;
 
 /**
@@ -26,6 +27,11 @@ public class MyCacheFactoryBuilder extends DefaultCacheFactoryBuilder {
     }
 
     @Override
+	public ConfigurableCacheFactory getSingletonFactory() {
+		return super.getSingletonFactory();
+	}
+
+	@Override
     protected String getScopeName(ClassLoader classLoader) {
         return "Scope(" + classLoader.toString() + ")";
     }
