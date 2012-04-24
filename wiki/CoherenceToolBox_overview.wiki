@@ -1,6 +1,14 @@
 #summary Coherence ToolBox projects overview.
 #labels Featured
 
+<<<<<<< .mine
+= Distributed metrics (cluster stats) =
+
+= Data loss listener =
+
+= Distributed resource coordinator =
+
+=======
 Coherence !ToolBox contains several utility projects for Oracle Coherence IMDG.
 
 = Data Loss Listener =
@@ -17,4 +25,4 @@ Coherence !ToolBox contains several utility projects for Oracle Coherence IMDG.
 
 = Test Utils =
 
-[TestUtils Test Utils] may be efficiently used for unit- and integration-testing of tools and projects. Run Coherence cluster, or even two, in a single JVM to perform JUnit tests without any external infrastructure.
+[TestUtils Test Utils] may be efficiently used for unit- and integration-testing of tools and projects. Run Coherence cluster, or even two, in a single JVM to perform JUnit tests without any external infrastructure.>>>>>>> .r928

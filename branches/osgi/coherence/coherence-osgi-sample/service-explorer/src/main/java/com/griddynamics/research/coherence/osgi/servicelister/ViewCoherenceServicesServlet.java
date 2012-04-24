@@ -11,6 +11,7 @@
 */
 package com.griddynamics.research.coherence.osgi.servicelister;
 
+import com.griddynamics.research.coherence.osgi.corebundle.MyCacheFactoryBuilder;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Cluster;
 
@@ -44,6 +45,7 @@ public class ViewCoherenceServicesServlet extends HttpServlet {
 
     private void showServices(HttpServletResponse httpServletResponse) throws IOException {
         final ServletOutputStream out = httpServletResponse.getOutputStream();
+//        CacheFactory cf = ((MyCacheFactoryBuilder)CacheFactory.getCacheFactoryBuilder()).getSingletonFactory();
         final Cluster cluster = CacheFactory.getCluster();
         final Enumeration serviceNames = cluster.getServiceNames();
         out.println("<html><body><pre>");
