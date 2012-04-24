@@ -74,7 +74,7 @@
         <dependency>
             <groupId>org.gridkit.coherence.utils</groupId>
             <artifactId>reflection-pof-serializer</artifactId>
-            <version>1.4-SNAPSHOT</version>
+            <version>1.3.2</version>
         </dependency>
     </dependencies>
 
