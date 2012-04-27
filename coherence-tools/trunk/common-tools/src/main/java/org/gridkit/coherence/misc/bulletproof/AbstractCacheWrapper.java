@@ -11,21 +11,12 @@ import com.tangosol.util.Filter;
 import com.tangosol.util.MapListener;
 import com.tangosol.util.ValueExtractor;
 
-public class BulletproofCacheWrapper implements NamedCache {
+public class AbstractCacheWrapper implements NamedCache {
 	
 	private NamedCache cache;
-	private int recoveryAttempts = 1;
-	
-	public BulletproofCacheWrapper(NamedCache cache) {
+
+	public AbstractCacheWrapper(NamedCache cache) {
 		this.cache = cache;		
-	}
-
-	public int getRecoveryAttempts() {
-		return recoveryAttempts;
-	}
-
-	public void setRecoveryAttempts(int recoveryAttempts) {
-		this.recoveryAttempts = recoveryAttempts;
 	}
 
 	public void addMapListener(MapListener listener) {
@@ -108,36 +99,36 @@ public class BulletproofCacheWrapper implements NamedCache {
 		cache.release();
 	}
 
-	public void removeIndex(ValueExtractor paramValueExtractor) {
-		cache.removeIndex(paramValueExtractor);
+	public void removeIndex(ValueExtractor attributeExtractor) {
+		cache.removeIndex(attributeExtractor);
 	}
 
 	public void destroy() {
 		cache.destroy();
 	}
 
-	public Object put(Object paramObject1, Object paramObject2, long paramLong) {
-		return cache.put(paramObject1, paramObject2, paramLong);
+	public Object put(Object key, Object value, long expiry) {
+		return cache.put(key, value, expiry);
 	}
 
-	public void removeMapListener(MapListener paramMapListener,	 Filter paramFilter) {
-		cache.removeMapListener(paramMapListener, paramFilter);
+	public void removeMapListener(MapListener listener,	 Filter filter) {
+		cache.removeMapListener(listener, filter);
 	}
 
-	public Object aggregate(Filter paramFilter, EntryAggregator paramEntryAggregator) {
-		return cache.aggregate(paramFilter, paramEntryAggregator);
+	public Object aggregate(Filter filter, EntryAggregator aggregator) {
+		return cache.aggregate(filter, aggregator);
 	}
 
-	public boolean lock(Object paramObject, long paramLong) {
-		return cache.lock(paramObject, paramLong);
+	public boolean lock(Object key, long timeout) {
+		return cache.lock(key, timeout);
 	}
 
-	public boolean lock(Object paramObject) {
-		return cache.lock(paramObject);
+	public boolean lock(Object key) {
+		return cache.lock(key);
 	}
 
-	public boolean unlock(Object paramObject) {
-		return cache.unlock(paramObject);
+	public boolean unlock(Object key) {
+		return cache.unlock(key);
 	}
 
 	public int size() {
@@ -193,7 +184,7 @@ public class BulletproofCacheWrapper implements NamedCache {
 	}
 
 	public boolean equals(Object o) {
-		return cache.equals(o);
+		return this == o;
 	}
 
 	public int hashCode() {
