@@ -11,12 +11,12 @@ import com.tangosol.util.Filter;
 import com.tangosol.util.MapListener;
 import com.tangosol.util.ValueExtractor;
 
-public class HardenedCacheWrapper implements NamedCache {
+public class BulletproofCacheWrapper implements NamedCache {
 	
 	private NamedCache cache;
 	private int recoveryAttempts = 1;
 	
-	public HardenedCacheWrapper(NamedCache cache) {
+	public BulletproofCacheWrapper(NamedCache cache) {
 		this.cache = cache;		
 	}
 
@@ -120,13 +120,11 @@ public class HardenedCacheWrapper implements NamedCache {
 		return cache.put(paramObject1, paramObject2, paramLong);
 	}
 
-	public void removeMapListener(MapListener paramMapListener,
-			Filter paramFilter) {
+	public void removeMapListener(MapListener paramMapListener,	 Filter paramFilter) {
 		cache.removeMapListener(paramMapListener, paramFilter);
 	}
 
-	public Object aggregate(Filter paramFilter,
-			EntryAggregator paramEntryAggregator) {
+	public Object aggregate(Filter paramFilter, EntryAggregator paramEntryAggregator) {
 		return cache.aggregate(paramFilter, paramEntryAggregator);
 	}
 
@@ -170,6 +168,7 @@ public class HardenedCacheWrapper implements NamedCache {
 		return cache.remove(key);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public void putAll(Map m) {
 		cache.putAll(m);
 	}
@@ -178,14 +177,17 @@ public class HardenedCacheWrapper implements NamedCache {
 		cache.clear();
 	}
 
+	@SuppressWarnings("rawtypes")
 	public Set keySet() {
 		return cache.keySet();
 	}
 
+	@SuppressWarnings("rawtypes")
 	public Collection values() {
 		return cache.values();
 	}
 
+	@SuppressWarnings("rawtypes")
 	public Set entrySet() {
 		return cache.entrySet();
 	}
@@ -197,7 +199,4 @@ public class HardenedCacheWrapper implements NamedCache {
 	public int hashCode() {
 		return cache.hashCode();
 	}
-
-	
-	
 }

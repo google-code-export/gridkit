@@ -12,7 +12,7 @@ import com.tangosol.util.InvocableMap.ParallelAwareAggregator;
 
 public class HardenedAggregator implements ParallelAwareAggregator, PortableObject {
 
-	private EntryAggregator 
+	private EntryAggregator nestedAggregator;
 	
 	@Override
 	public Object aggregate(Set paramSet) {

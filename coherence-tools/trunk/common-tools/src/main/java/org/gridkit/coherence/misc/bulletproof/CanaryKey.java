@@ -1,20 +1,15 @@
 package org.gridkit.coherence.misc.bulletproof;
 
-import java.io.IOException;
+import java.io.Serializable;
 
-import com.tangosol.io.pof.PofReader;
-import com.tangosol.io.pof.PofWriter;
-import com.tangosol.io.pof.PortableObject;
 import com.tangosol.net.partition.KeyPartitioningStrategy.PartitionAwareKey;
 
-public class CanaryKey implements PortableObject, PartitionAwareKey {
+public class CanaryKey implements PartitionAwareKey, Serializable {
+
+	private static final long serialVersionUID = 20120424L;
 
 	private int partitionId;
 
-	public CanaryKey() {
-		// for POF serialization
-	} 
-	
 	public CanaryKey(int partitionId) {
 		this.partitionId = partitionId;
 	}
@@ -43,16 +38,6 @@ public class CanaryKey implements PortableObject, PartitionAwareKey {
 		return true;
 	}
 
-	@Override
-	public void readExternal(PofReader reader) throws IOException {
-		partitionId = reader.readInt(1);
-	}
-	
-	@Override
-	public void writeExternal(PofWriter writer) throws IOException {
-		writer.writeInt(1, partitionId);
-	}
-	
 	@Override
 	public String toString() {
 		return "partId:" + partitionId;
