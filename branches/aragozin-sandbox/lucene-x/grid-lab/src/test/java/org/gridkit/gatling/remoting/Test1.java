@@ -8,16 +8,13 @@ import java.util.concurrent.ExecutorService;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 
-public class Test {
+public class Test1 {
 
 	
 	public static void main(String[] args) throws JSchException, SftpException, IOException, InterruptedException {
+
 		
-		SSHFactory sshFactory = new GrimsSSHFactory();
-		
-		ControlledHost host = new ControlledHost("longmltsreu9.uk.db.com", sshFactory);
-		host.setAgentHome("/local/applogs/datatgramtest-20111023-0803");
-		host.setJavaExecPath("/apps/grimis/java/linux/jdk1.6.0_22/jre/bin/java");
+		ControlledHost host = initHost_u1();
 		
 		host.init();
 		
@@ -32,6 +29,27 @@ public class Test {
 		System.exit(1);
 	}
 	
+	private static ControlledHost initHost() {
+		SSHFactory sshFactory = new GrimsSSHFactory();
+		
+		ControlledHost host = new ControlledHost("longmltsreu9.uk.db.com", sshFactory);
+		host.setAgentHome("/local/applogs/datatgramtest-20111023-0803");
+		host.setJavaExecPath("/apps/grimis/java/linux/jdk1.6.0_22/jre/bin/java");
+		return host;
+	}
+
+	private static ControlledHost initHost_u1() {
+		DefaultSSHFactory sshFactory = new DefaultSSHFactory();
+		
+		sshFactory.setUser("coreserv");
+		sshFactory.setPassword("l0nd0n99");
+		
+		ControlledHost host = new ControlledHost("longmrdfappu1.uk.db.com", sshFactory);
+		host.setAgentHome("/mnt/ramfs/qmt");
+		host.setJavaExecPath("/usr/lib64/jvm/java-1.6.0-sun/bin/java");
+		return host;
+	}
+
 	public static class Echo implements Callable<Void>, Serializable {
 
 		private String sound;
