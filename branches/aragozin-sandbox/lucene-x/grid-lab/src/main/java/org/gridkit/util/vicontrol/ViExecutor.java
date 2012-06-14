@@ -20,6 +20,11 @@ public interface ViExecutor {
 
 	// Mass operations
 
+	/**
+	 * Version of exec for group
+	 * 
+	 * @return
+	 */
 	public <T> List<? super T> massExec(Callable<T> task);
 	
 	public List<Future<Void>> massSubmit(Runnable task);

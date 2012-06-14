@@ -11,6 +11,10 @@ import java.util.concurrent.Future;
  */
 public class MassExec {
 
+	/**
+	 * Collect result from all futures. If any of futures have thrown exception, other futures will be collected but exception disacred.
+	 * @return list of results from futures
+	 */
 	public static <T> List<? super T> waitAll(List<Future<T>> futures) {
 		try {
 			Object[] results = new Object[futures.size()];
