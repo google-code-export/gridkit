@@ -1,3 +1,18 @@
+/**
+ * Copyright 2012 Alexey Ragozin
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gridkit.util.vicontrol;
 
 import java.util.ArrayList;
@@ -11,6 +26,14 @@ import java.util.concurrent.TimeoutException;
 
 public class ViGroup implements ViHost {
 
+	public static ViGroup group(ViHost... hosts) {
+		ViGroup group = new ViGroup();
+		for(ViHost host: hosts) {
+			group.addHost(host);
+		}
+		return group;
+	}
+	
 	private ViHostConfig config = new ViHostConfig();
 	private List<ViHost> hosts = new ArrayList<ViHost>();
 	private boolean shutdown = false;
@@ -93,16 +116,6 @@ public class ViGroup implements ViHost {
 	}
 
 	@Override
-	public synchronized void kill() {
-		if (!shutdown) {
-			for(ViHost host: hosts) {
-				host.kill();
-			}			
-			shutdown = true;
-		}		
-	}
-
-	@Override
 	public synchronized void exec(Runnable task) {
 		MassExec.waitAll(massSubmit(task));		
 	}
@@ -130,13 +143,13 @@ public class ViGroup implements ViHost {
 	
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public synchronized <T> Future<? super T> submit(Callable<T> task) {
+	public synchronized <T> Future<T> submit(Callable<T> task) {
 		return new GroupFuture(massSubmit(task));
 	}
 	
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public synchronized <T> List<? super T> massExec(Callable<T> task) {
+	public synchronized <T> List<T> massExec(Callable<? extends T> task) {
 		return MassExec.waitAll((List)massSubmit(task));
 	}
 	
@@ -161,9 +174,9 @@ public class ViGroup implements ViHost {
 	}
 	
 	@Override
-	public synchronized <T> List<Future<? super T>> massSubmit(Callable<T> task) {
+	public synchronized <T> List<Future<T>> massSubmit(Callable<? extends T> task) {
 		checkExecutable();
-		List<Future<? super T>> results = new ArrayList<Future<? super T>>();
+		List<Future<T>> results = new ArrayList<Future<T>>();
 		for(ViHost host: hosts) {
 			results.addAll(host.massSubmit(task));
 		}
