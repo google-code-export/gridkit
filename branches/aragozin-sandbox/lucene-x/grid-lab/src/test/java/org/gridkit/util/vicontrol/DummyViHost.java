@@ -43,10 +43,6 @@ public class DummyViHost implements ViHost {
 	}
 
 	@Override
-	public void kill() {
-	}
-
-	@Override
 	public void exec(Runnable task) {
 		task.run();		
 	}
@@ -91,13 +87,13 @@ public class DummyViHost implements ViHost {
 	}
 
 	@Override
-	public <T> Future<? super T> submit(Callable<T> task) {
+	public <T> Future<T> submit(Callable<T> task) {
 		return EXECUTOR.submit(task);
 	}
 
 	@Override
-	public <T> List<? super T> massExec(Callable<T> task) {
-		return Collections.singletonList(exec(task));
+	public <T> List<T> massExec(Callable<? extends T> task) {
+		return Collections.singletonList((T)exec(task));
 	}
 
 	@Override
@@ -112,7 +108,7 @@ public class DummyViHost implements ViHost {
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <T> List<Future<? super T>> massSubmit(Callable<T> task) {
+	public <T> List<Future<T>> massSubmit(Callable<? extends T> task) {
 		return (List)Collections.singletonList(submit(task));
 	}
 	

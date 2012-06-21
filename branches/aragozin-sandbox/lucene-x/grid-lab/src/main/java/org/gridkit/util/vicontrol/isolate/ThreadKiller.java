@@ -13,20 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gridkit.util.vicontrol;
-
+package org.gridkit.util.vicontrol.isolate;
 
 /**
- * 
+ * JVM does not provide means to kill a thread. This makes uncooperative termination of isolate problematic.
+ * Thread killer is pluging using application specific means to kill thread remaining from isolate. 
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
- *
  */
-public interface ViHost extends ViExecutor, ViConfigurable {
+public interface ThreadKiller {
 
-	public void suspend();
-	
-	public void resume();
-	
-	public void shutdown();
+	/**
+	 * @return <code>true</code> if killer have done any actions to thread 
+	 */
+	public boolean tryToKill(Isolate isolate, Thread thread);
 	
 }

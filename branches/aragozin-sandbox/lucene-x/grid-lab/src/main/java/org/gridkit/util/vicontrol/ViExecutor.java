@@ -1,3 +1,18 @@
+/**
+ * Copyright 2012 Alexey Ragozin
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gridkit.util.vicontrol;
 
 import java.util.List;
@@ -16,7 +31,7 @@ public interface ViExecutor {
 	
 	public Future<Void> submit(VoidCallable task);
 	
-	public <T> Future<? super T> submit(Callable<T> task);	
+	public <T> Future<T> submit(Callable<T> task);	
 
 	// Mass operations
 
@@ -25,15 +40,11 @@ public interface ViExecutor {
 	 * 
 	 * @return
 	 */
-	public <T> List<? super T> massExec(Callable<T> task);
+	public <T> List<T> massExec(Callable<? extends T> task);
 	
 	public List<Future<Void>> massSubmit(Runnable task);
 	
 	public List<Future<Void>> massSubmit(VoidCallable task);
 	
-	public <T> List<Future<? super T>> massSubmit(Callable<T> task);
-	
-	public static interface VoidCallable {		
-		public void call() throws Exception;		
-	}	
+	public <T> List<Future<T>> massSubmit(Callable<? extends T> task);
 }
