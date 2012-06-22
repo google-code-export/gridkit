@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.gridkit.util.vicontrol.ViGroup;
-import org.gridkit.util.vicontrol.ViHost;
+import org.gridkit.util.vicontrol.ViNode;
 import org.gridkit.util.vicontrol.VoidCallable;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
@@ -28,8 +28,8 @@ public class IsolateFeatureTest {
 	
 	ViGroup hosts = new ViGroup();
 	
-	private IsolateViHost createIsolateViHost(String name) {
-		IsolateViHost viHost = new IsolateViHost(name);
+	private IsolateViNode createIsolateViHost(String name) {
+		IsolateViNode viHost = new IsolateViNode(name);
 		hosts.addHost(viHost);
 		return viHost;
 	}
@@ -43,8 +43,8 @@ public class IsolateFeatureTest {
 	@Test
 	public void verify_isolated_static_with_void_callable() {
 		
-		IsolateViHost viHost1 = createIsolateViHost("node-1");
-		IsolateViHost viHost2 = createIsolateViHost("node-2");
+		IsolateViNode viHost1 = createIsolateViHost("node-1");
+		IsolateViNode viHost2 = createIsolateViHost("node-2");
 		
 		ViGroup group = ViGroup.group(viHost1, viHost2);
 		group.setProps(ISOLATE_PROPS);
@@ -76,8 +76,8 @@ public class IsolateFeatureTest {
 	@Test
 	public void verify_isolated_static_with_callable() {
 		
-		IsolateViHost viHost1 = createIsolateViHost("node-1");
-		IsolateViHost viHost2 = createIsolateViHost("node-2");
+		IsolateViNode viHost1 = createIsolateViHost("node-1");
+		IsolateViNode viHost2 = createIsolateViHost("node-2");
 		
 		ViGroup group = ViGroup.group(viHost1, viHost2);
 		group.setProps(ISOLATE_PROPS);
@@ -111,8 +111,8 @@ public class IsolateFeatureTest {
 	@Test
 	public void verify_isolated_static_with_runnable() {
 		
-		IsolateViHost viHost1 = createIsolateViHost("node-1");
-		IsolateViHost viHost2 = createIsolateViHost("node-2");
+		IsolateViNode viHost1 = createIsolateViHost("node-1");
+		IsolateViNode viHost2 = createIsolateViHost("node-2");
 		
 		ViGroup group = ViGroup.group(viHost1, viHost2);
 		group.setProps(ISOLATE_PROPS);
@@ -144,13 +144,13 @@ public class IsolateFeatureTest {
 	@Test
 	public void verify_class_exclusion() {
 		
-		IsolateViHost viHost1 = createIsolateViHost("node-1");
-		IsolateViHost viHost2 = createIsolateViHost("node-2");
+		IsolateViNode viHost1 = createIsolateViHost("node-1");
+		IsolateViNode viHost2 = createIsolateViHost("node-2");
 		
 		ViGroup group = ViGroup.group(viHost1, viHost2);
 		group.setProps(ISOLATE_PROPS);
 		
-		IsolateViHost.excludeClass(group, StaticVarHost.class);
+		IsolateViNode.excludeClass(group, StaticVarHost.class);
 		
 		viHost1.exec(new Runnable() {
 			@Override
@@ -179,8 +179,8 @@ public class IsolateFeatureTest {
 	@Test
 	public void verify_property_isolation() throws Exception {
 		
-		ViHost node1 = createIsolateViHost("node-1");
-		ViHost node2 = createIsolateViHost("node-2");
+		ViNode node1 = createIsolateViHost("node-1");
+		ViNode node2 = createIsolateViHost("node-2");
 
 		ViGroup.group(node1, node2).setProps(ISOLATE_PROPS);
 
@@ -226,7 +226,7 @@ public class IsolateFeatureTest {
 	@Test
 	public void verify_exec_stack_trace_locality() {
 
-		ViHost node = createIsolateViHost("node-1");
+		ViNode node = createIsolateViHost("node-1");
 		node.setProps(ISOLATE_PROPS);
 		
 		try {
@@ -295,12 +295,12 @@ public class IsolateFeatureTest {
 	@Test
 	public void test_classpath_extention() throws MalformedURLException {
 		
-		ViHost node = createIsolateViHost("test-node");
+		ViNode node = createIsolateViHost("test-node");
 		node.setProps(ISOLATE_PROPS);
 		
 		URL jar = getClass().getResource("/marker-override.jar");
 		URL path = new URL("jar:" + jar.toString() + "!/");
-		IsolateViHost.addToClasspath(node, path);
+		IsolateViNode.addToClasspath(node, path);
 		
 		node.exec(new CheckMarker("Marker from jar"));
 		
@@ -309,16 +309,16 @@ public class IsolateFeatureTest {
 
 	@Test(expectedExceptions = NoClassDefFoundError.class)
 	public void test_classpath_limiting() throws MalformedURLException {
-		ViHost node = createIsolateViHost("test-node");
+		ViNode node = createIsolateViHost("test-node");
 		node.setProps(ISOLATE_PROPS);
-		IsolateViHost.includePackage(node, "org.testng");
+		IsolateViNode.includePackage(node, "org.testng");
 		
 		URL url = getClass().getResource("/testng-1.0.dtd");
 		Assert.assertNotNull(url);
 		
 		String jarUrl = url.toString();
 		jarUrl = jarUrl.substring(0, jarUrl.lastIndexOf('/') + 1);
-		IsolateViHost.removeFromClasspath(node, new URL(jarUrl));
+		IsolateViNode.removeFromClasspath(node, new URL(jarUrl));
 		
 		node.exec(new Runnable() {
 			@Override
@@ -357,7 +357,7 @@ public class IsolateFeatureTest {
 	@Test
 	public void test_annonimous_primitive_in_args() {
 		
-		ViHost node = createIsolateViHost("test_annonimous_primitive_in_args");
+		ViNode node = createIsolateViHost("test_annonimous_primitive_in_args");
 		node.setProps(ISOLATE_PROPS);
 		
 		final boolean fb = trueConst();

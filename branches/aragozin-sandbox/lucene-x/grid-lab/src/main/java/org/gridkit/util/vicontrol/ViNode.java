@@ -21,7 +21,7 @@ package org.gridkit.util.vicontrol;
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  *
  */
-public interface ViHost extends ViExecutor, ViConfigurable {
+public interface ViNode extends ViExecutor, ViConfigurable {
 
 	public void suspend();
 	

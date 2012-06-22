@@ -8,11 +8,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class DummyViHost implements ViHost {
+public class DummyViNode implements ViNode {
 	
 	private static ExecutorService EXECUTOR = Executors.newCachedThreadPool();
 
-	private ViHostConfig config = new ViHostConfig();
+	private ViNodeConfig config = new ViNodeConfig();
 
 	public void setProp(String propName, String value) {
 		config.setProp(propName, value);

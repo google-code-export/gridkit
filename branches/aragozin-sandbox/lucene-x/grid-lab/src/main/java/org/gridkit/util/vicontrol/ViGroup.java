@@ -24,18 +24,18 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class ViGroup implements ViHost {
+public class ViGroup implements ViNode {
 
-	public static ViGroup group(ViHost... hosts) {
+	public static ViGroup group(ViNode... hosts) {
 		ViGroup group = new ViGroup();
-		for(ViHost host: hosts) {
+		for(ViNode host: hosts) {
 			group.addHost(host);
 		}
 		return group;
 	}
 	
-	private ViHostConfig config = new ViHostConfig();
-	private List<ViHost> hosts = new ArrayList<ViHost>();
+	private ViNodeConfig config = new ViNodeConfig();
+	private List<ViNode> hosts = new ArrayList<ViNode>();
 	private boolean shutdown = false;
 	
 	private void checkActive() {
@@ -51,7 +51,7 @@ public class ViGroup implements ViHost {
 		}
 	}
 	
-	public synchronized void addHost(ViHost host) {
+	public synchronized void addHost(ViNode host) {
 		checkActive();
 		hosts.add(host);
 		config.apply(host);
@@ -61,7 +61,7 @@ public class ViGroup implements ViHost {
 	public synchronized void setProp(String propName, String value) {
 		checkActive();
 		config.setProp(propName, value);
-		for(ViHost vh: hosts) {
+		for(ViNode vh: hosts) {
 			vh.setProp(propName, value);
 		}
 	}
@@ -70,7 +70,7 @@ public class ViGroup implements ViHost {
 	public synchronized void setProps(Map<String, String> props) {
 		checkActive();
 		config.setProps(props);
-		for(ViHost vh: hosts) {
+		for(ViNode vh: hosts) {
 			vh.setProps(props);
 		}
 	}
@@ -79,7 +79,7 @@ public class ViGroup implements ViHost {
 	public synchronized void addStartupHook(String name, Runnable hook, boolean override) {
 		checkActive();
 		config.addStartupHook(name, hook, override);
-		for(ViHost vh: hosts) {
+		for(ViNode vh: hosts) {
 			vh.addStartupHook(name, hook, override);
 		}
 	}
@@ -88,7 +88,7 @@ public class ViGroup implements ViHost {
 	public synchronized void addShutdownHook(String name, Runnable hook, boolean override) {
 		checkActive();
 		config.addShutdownHook(name, hook, override);
-		for(ViHost vh: hosts) {
+		for(ViNode vh: hosts) {
 			vh.addShutdownHook(name, hook, override);
 		}
 	}
@@ -108,7 +108,7 @@ public class ViGroup implements ViHost {
 	@Override
 	public synchronized void shutdown() {
 		if (!shutdown) {
-			for(ViHost host: hosts) {
+			for(ViNode host: hosts) {
 				host.shutdown();
 			}			
 			shutdown = true;
@@ -157,7 +157,7 @@ public class ViGroup implements ViHost {
 	public synchronized List<Future<Void>> massSubmit(Runnable task) {
 		checkExecutable();
 		List<Future<Void>> results = new ArrayList<Future<Void>>();
-		for(ViHost host: hosts) {
+		for(ViNode host: hosts) {
 			results.addAll(host.massSubmit(task));
 		}
 		return results;
@@ -167,7 +167,7 @@ public class ViGroup implements ViHost {
 	public synchronized List<Future<Void>> massSubmit(VoidCallable task) {
 		checkExecutable();
 		List<Future<Void>> results = new ArrayList<Future<Void>>();
-		for(ViHost host: hosts) {
+		for(ViNode host: hosts) {
 			results.addAll(host.massSubmit(task));
 		}
 		return results;
@@ -177,7 +177,7 @@ public class ViGroup implements ViHost {
 	public synchronized <T> List<Future<T>> massSubmit(Callable<? extends T> task) {
 		checkExecutable();
 		List<Future<T>> results = new ArrayList<Future<T>>();
-		for(ViHost host: hosts) {
+		for(ViNode host: hosts) {
 			results.addAll(host.massSubmit(task));
 		}
 		return results;

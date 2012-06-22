@@ -11,12 +11,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.gridkit.util.vicontrol.MassExec;
 import org.gridkit.util.vicontrol.ViConfigurable;
-import org.gridkit.util.vicontrol.ViHost;
-import org.gridkit.util.vicontrol.ViHostConfig;
+import org.gridkit.util.vicontrol.ViNode;
+import org.gridkit.util.vicontrol.ViNodeConfig;
 import org.gridkit.util.vicontrol.VoidCallable;
 import org.gridkit.util.vicontrol.VoidCallable.VoidCallableWrapper;
 
-public class IsolateViHost implements ViHost {
+public class IsolateViNode implements ViNode {
 
 	public static String SYS_PROP_NAME = "isolate:name";
 	
@@ -32,7 +32,7 @@ public class IsolateViHost implements ViHost {
 	/** Use for prohibiting URLs in classpath */
 	public static String SYS_PROP_CP_REMOVE = "isolate:cp-remove:";
 	
-	private ViHostConfig config = new ViHostConfig();
+	private ViNodeConfig config = new ViNodeConfig();
 
 	private Isolate isolate;
 	private ViConfigurable configProxy;
@@ -41,10 +41,10 @@ public class IsolateViHost implements ViHost {
 	
 	private static AtomicInteger COUNTER = new AtomicInteger();
 	
-	public IsolateViHost() {
+	public IsolateViNode() {
 	}
 	
-	public IsolateViHost(String name) {
+	public IsolateViNode(String name) {
 		setName(this, name);
 	}
 	
@@ -186,7 +186,7 @@ public class IsolateViHost implements ViHost {
 			Throwable cause = (Throwable) e.getCause();
 			
 			StackTraceElement receiverMarker = new StackTraceElement(Isolate.class.getName(), "", null, -1);
-			StackTraceElement donorMarker = new StackTraceElement(IsolateViHost.class.getName(), "resolve", null, -1);
+			StackTraceElement donorMarker = new StackTraceElement(IsolateViNode.class.getName(), "resolve", null, -1);
 			StackTraceElement boundary = new StackTraceElement("<isolate-boundary>", "<exec>", isolate.getName(), -1);
 			
 			ExceptionWeaver.replaceStackTop(cause, receiverMarker, new Exception(), donorMarker, boundary);
@@ -319,6 +319,12 @@ public class IsolateViHost implements ViHost {
 	
 	public static void includePackage(ViConfigurable node, String pkg) {
 		node.setProp(SYS_PROP_PACKAGE + pkg, "");
+	}
+
+	public static void includePackages(ViConfigurable node, String... packages) {
+		for(String pkg: packages) {
+			includePackage(node, pkg);
+		}
 	}
 	
 	public static void excludeClass(ViConfigurable node, Class<StaticVarHost> type) {
