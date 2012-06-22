@@ -18,7 +18,7 @@ package org.gridkit.util.vicontrol;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ViHostConfig implements ViConfigurable {
+public class ViNodeConfig implements ViConfigurable {
 
 	private Map<String, String> props = new LinkedHashMap<String, String>();
 	private Map<String, HookInfo> startupHooks = new LinkedHashMap<String, HookInfo>();
