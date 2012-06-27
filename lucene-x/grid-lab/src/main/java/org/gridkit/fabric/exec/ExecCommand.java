@@ -1,5 +1,6 @@
 package org.gridkit.fabric.exec;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +16,7 @@ public class ExecCommand implements Cloneable, Serializable {
 	private static final long serialVersionUID = 20090416L;
 	
 	private String executable;
-	private String workDir = null;
+	private String workDir = ".";
 	private Map<String, String> enviroment = new HashMap<String, String>();
 	private List<String> arguments = new ArrayList<String>();
 	
@@ -41,6 +42,16 @@ public class ExecCommand implements Cloneable, Serializable {
 		}
 		
 		return buffer.toString();
+	}
+	
+	public ProcessBuilder getProcessBuilder() {
+		List<String> line = new ArrayList<String>(arguments.size() + 1);
+		line.add(executable);
+		line.addAll(arguments);
+		ProcessBuilder pb = new ProcessBuilder(line);
+		pb.directory(new File(workDir));
+		pb.environment().putAll(enviroment);
+		return pb;
 	}
 	
 	public String getWorkDir() {

@@ -23,6 +23,8 @@ package org.gridkit.util.vicontrol;
  */
 public interface ViNode extends ViExecutor, ViConfigurable {
 
+	public String getProp(String propName);
+	
 	public void suspend();
 	
 	public void resume();

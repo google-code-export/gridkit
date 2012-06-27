@@ -603,6 +603,12 @@ public class Isolate {
 		stdErr.println("Stopping ...");
 		if (threadPool != null) {
 			threadPool.shutdown();
+			try {
+				// give thread pool a chance to gracefull shutdown itself
+				threadPool.awaitTermination(100, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {
+				// ignore
+			}
 		}
 		while(true) {
 			while( 0 < kill(threadGroup)  

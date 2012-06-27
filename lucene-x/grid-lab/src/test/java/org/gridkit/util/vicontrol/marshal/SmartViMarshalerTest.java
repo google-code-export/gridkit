@@ -29,17 +29,17 @@ public class SmartViMarshalerTest {
 			}
 		};
 		
-		Marshaled obj = new SmartViMarshaler().marshal(task);
+		Object ms = SmartViMarshaler.marshal(task);
 		
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = new ObjectOutputStream(bos);
-		oos.writeObject(obj);
+		oos.writeObject(ms);
 		oos.close();
 		
 		ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
 		ObjectInputStream ois = new ObjectInputStream(bis);
-		Marshaled env = (Marshaled) ois.readObject();
+		Object md = ois.readObject();
 		
-		Assert.assertEquals("task.10.100", env.unmarshal().toString());		
+		Assert.assertEquals("task.10.100", SmartViMarshaler.unmarshal(md).toString());		
 	}		
 }
