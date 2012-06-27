@@ -36,7 +36,6 @@ public class RemotingHub {
 		while(true) {
 			String uid = generateUID();
 			SessionContext ctx = new SessionContext();
-			ctx.uid = uid;
 			ctx.listener = listener;			
 			synchronized(ctx) {
 				if (connections.putIfAbsent(uid, ctx) != null) {
@@ -147,7 +146,6 @@ public class RemotingHub {
 	
 	private class SessionContext implements StreamErrorHandler {
 		
-		private String uid;
 		private SessionEventListener listener;
 		private RmiGateway gateway;
 		private DuplexStream stream;

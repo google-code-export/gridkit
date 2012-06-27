@@ -30,7 +30,6 @@ public class Bootstraper {
 		String id = args[0];
 		String host = args[1];
 		int port = Integer.valueOf(args[2]);
-		String home = args[3];
 		
 		Socket socket = new Socket();
 		socket.connect(new InetSocketAddress("127.0.0.1", port));

@@ -18,20 +18,6 @@ import org.gridkit.util.vicontrol.VoidCallable.VoidCallableWrapper;
 
 public class IsolateViNode implements ViNode {
 
-	public static String SYS_PROP_NAME = "isolate:name";
-	
-	/** Use for packages to be isolate */
-	public static String SYS_PROP_PACKAGE = "isolate:package:";
-
-	/** Use for classes to be delegated to parent classloader */
-	public static String SYS_PROP_SHARED = "isolate:shared:";
-
-	/** Use for adding additional URLs to classpath */
-	public static String SYS_PROP_CP_ADD = "isolate:cp-add:";
-
-	/** Use for prohibiting URLs in classpath */
-	public static String SYS_PROP_CP_REMOVE = "isolate:cp-remove:";
-	
 	private ViNodeConfig config = new ViNodeConfig();
 
 	private Isolate isolate;
@@ -48,6 +34,16 @@ public class IsolateViNode implements ViNode {
 		setName(this, name);
 	}
 	
+	@Override
+	public String getProp(String propName) {
+		if (isolate == null) {
+			return config.getProp(propName);
+		}
+		else {
+			return isolate.getProp(propName);
+		}
+	}
+
 	@Override
 	public synchronized void setProp(String propName, String value) {
 		ensureNotDestroyed();
@@ -198,7 +194,7 @@ public class IsolateViNode implements ViNode {
 	private synchronized void ensureStarted() {
 		ensureNotDestroyed();
 		if (isolate == null) {
-			String name = config.getProp(SYS_PROP_NAME, "ISOLATE@" + COUNTER.getAndIncrement());
+			String name = config.getProp(IsolateProps.NAME, "ISOLATE@" + COUNTER.getAndIncrement());
 			isolate = new Isolate(name);
 			configProxy = new ConfigProxy();
 			isolate.start();
@@ -242,31 +238,31 @@ public class IsolateViNode implements ViNode {
 			}
 			else {
 				if (propName.startsWith("isolate:")) {
-					if (propName.equals(SYS_PROP_NAME)) {
+					if (propName.equals(IsolateProps.NAME)) {
 						isolate.setName(value);
 					}
-					else if (propName.startsWith(SYS_PROP_PACKAGE)) {
-						String pn = propName.substring(SYS_PROP_PACKAGE.length());
+					else if (propName.startsWith(IsolateProps.PACKAGE)) {
+						String pn = propName.substring(IsolateProps.PACKAGE.length());
 						isolate.addPackage(pn);
 					}
-					else if (propName.startsWith(SYS_PROP_SHARED)) {
-						String cn = propName.substring(SYS_PROP_SHARED.length());
+					else if (propName.startsWith(IsolateProps.SHARED)) {
+						String cn = propName.substring(IsolateProps.SHARED.length());
 						isolate.exclude(cn);
 					}
-					else if (propName.startsWith(SYS_PROP_CP_ADD)) {
+					else if (propName.startsWith(IsolateProps.CP_ADD)) {
 						try {
 							if (value.length() == 0) {
-								value = propName.substring(SYS_PROP_CP_ADD.length());
+								value = propName.substring(IsolateProps.CP_ADD.length());
 							}
 							isolate.addToClasspath(new URL(value));
 						} catch (MalformedURLException e) {
 							throw new RuntimeException(e);
 						}
 					}
-					else if (propName.startsWith(SYS_PROP_CP_REMOVE)) {
+					else if (propName.startsWith(IsolateProps.CP_REMOVE)) {
 						try {
 							if (value.length() == 0) {
-								value = propName.substring(SYS_PROP_CP_REMOVE.length());
+								value = propName.substring(IsolateProps.CP_REMOVE.length());
 							}
 							isolate.removeFromClasspath(new URL(value));
 						} catch (MalformedURLException e) {
@@ -314,11 +310,11 @@ public class IsolateViNode implements ViNode {
 	}
 
 	public static void setName(ViConfigurable node, String name) {
-		node.setProp(SYS_PROP_NAME, name);
+		node.setProp(IsolateProps.NAME, name);
 	}
 	
 	public static void includePackage(ViConfigurable node, String pkg) {
-		node.setProp(SYS_PROP_PACKAGE + pkg, "");
+		node.setProp(IsolateProps.PACKAGE + pkg, "");
 	}
 
 	public static void includePackages(ViConfigurable node, String... packages) {
@@ -331,14 +327,14 @@ public class IsolateViNode implements ViNode {
 		if (type.isPrimitive() || type.isArray() || type.getDeclaringClass() != null) {
 			throw new IllegalArgumentException("Non inner, non primity, non array class is expected");
 		}
-		node.setProp(SYS_PROP_SHARED + type.getName(), "");
+		node.setProp(IsolateProps.SHARED + type.getName(), "");
 	}	
 	
 	public static void addToClasspath(ViConfigurable node, URL url) {
-		node.setProp(SYS_PROP_CP_ADD + url.toString(), url.toString());
+		node.setProp(IsolateProps.CP_ADD + url.toString(), url.toString());
 	}
 
 	public static void removeFromClasspath(ViConfigurable node, URL url) {
-		node.setProp(SYS_PROP_CP_REMOVE + url.toString(), url.toString());
+		node.setProp(IsolateProps.CP_REMOVE + url.toString(), url.toString());
 	}
 }

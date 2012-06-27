@@ -20,7 +20,7 @@ public class RmiIsolationTest {
 	
 	private IsolateViNode createIsolateViHost(String name) {
 		IsolateViNode viHost = new IsolateViNode(name);
-		hosts.addHost(viHost);
+		hosts.addNode(viHost);
 		return viHost;
 	}
 

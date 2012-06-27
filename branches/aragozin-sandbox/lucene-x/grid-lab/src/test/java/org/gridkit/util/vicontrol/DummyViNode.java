@@ -14,6 +14,11 @@ public class DummyViNode implements ViNode {
 
 	private ViNodeConfig config = new ViNodeConfig();
 
+	@Override
+	public String getProp(String propName) {
+		return config.getProp(propName);
+	}
+
 	public void setProp(String propName, String value) {
 		config.setProp(propName, value);
 	}

@@ -28,6 +28,7 @@ import com.tangosol.coherence.component.net.extend.connection.TcpConnection;
 import com.tangosol.coherence.component.util.SafeCluster;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Cluster;
+import com.tangosol.net.DefaultCacheServer;
 import com.tangosol.net.Service;
 import com.tangosol.net.management.MBeanServerFinder;
 import com.tangosol.run.xml.XmlElement;
@@ -57,8 +58,38 @@ public class CohHelper {
 		node.setProp("tangosol.coherence.socketprovider", "tcp");
 		node.setProp("tangosol.coherence.cluster", "jvm::" + ManagementFactory.getRuntimeMXBean().getName());
 		setJoinTimeout(node, 100);
+		disableTcpRing(node);
+		enableShutdownOnExit(node);
 	}
 
+	public static void enableShutdownOnExit(ViConfigurable node) {
+		node.addShutdownHook("com.oracle.coherence.shutdown-on-stop", new Runnable() {
+			@Override
+			public void run() {
+				Cluster cluster = CacheFactory.getCluster();
+				if (cluster.isRunning()) {
+					cluster.stop();
+				}
+				CacheFactory.shutdown();
+			}
+		}, true);
+	}
+
+	/**
+	 * Starts Coherence same way as {@link DefaultCacheServer#main(String[])} will do.
+	 * @param node
+	 */
+	public static void startDefaultCacheServer(ViNode node) {
+		node.exec(new Runnable() {
+			@Override
+			public void run() {
+				// this will invoke DefaultCacheServer startup logic
+				DefaultCacheServer.start();
+				// cluster should be started at this point
+			}
+		});
+	}
+	
 	public static void disableTCMP(ViConfigurable node) {
 		node.setProp("tangosol.coherence.tcmp.enabled", "false");
 	}

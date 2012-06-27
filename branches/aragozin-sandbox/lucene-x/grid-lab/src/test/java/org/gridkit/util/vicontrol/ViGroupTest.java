@@ -14,8 +14,8 @@ public class ViGroupTest {
 	public void test_group_task_exec() throws InterruptedException, ExecutionException {
 		
 		ViGroup group = new ViGroup();
-		group.addHost(new DummyViNode());
-		group.addHost(new DummyViNode());
+		group.addNode(new DummyViNode());
+		group.addNode(new DummyViNode());
 		
 		final AtomicInteger counter = new AtomicInteger();
 		
@@ -39,8 +39,8 @@ public class ViGroupTest {
 	public void test_group_task_mass_exec() throws InterruptedException, ExecutionException {
 		
 		ViGroup group = new ViGroup();
-		group.addHost(new DummyViNode());
-		group.addHost(new DummyViNode());
+		group.addNode(new DummyViNode());
+		group.addNode(new DummyViNode());
 		
 		final AtomicInteger counter = new AtomicInteger();
 		

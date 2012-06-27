@@ -45,13 +45,12 @@ public class RmiGateway {
 	};
 	
 	public RmiGateway() {
-		this(new Class[]{Remote.class});
+		this(new SmartRmiMarshaler());
 	}
 
-	@SuppressWarnings("rawtypes")
-	public RmiGateway(Class[] remoteMarkers) {
+	public RmiGateway(RmiMarshaler marshaler) {
 		// TODO should include counter agent
-		this.channel = new RmiChannel(new MessageOut(), executor, remoteMarkers);
+		this.channel = new RmiChannel(new MessageOut(), executor, marshaler);
 		this.service = new RemoteExecutionService();
 	}
 	
@@ -247,7 +246,11 @@ public class RmiGateway {
 
 		@Override
 		protected Object resolveObject(Object obj) throws IOException {
-			return channel.streamResolveObject(obj);
+			Object r = channel.streamResolveObject(obj);
+//			if (r != obj) {
+//				System.out.println("Read resolve: " + obj.getClass().getName() + "->" + r.getClass().getName());
+//			}
+			return r;
 		}
 	}
 
@@ -260,7 +263,11 @@ public class RmiGateway {
 
 		@Override
 		protected Object replaceObject(Object obj) throws IOException {
-			return channel.streamReplaceObject(obj);
+			Object r = channel.streamReplaceObject(obj);
+//			if (r != obj ) {
+//				System.err.println("Write replace: " + obj.getClass().getName() + "->" + r.getClass().getName());
+//			}
+			return r;
 		}
 	}
 	

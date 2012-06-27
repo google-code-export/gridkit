@@ -16,37 +16,31 @@ import java.util.Map;
  */
 public class SmartViMarshaler {	
 	
-	public Marshaled marshal(Object obj) {
+	public static Object marshal(Object obj) {
 		if (isAnnonObject(obj)) {
 			return new AnnonEnvelop(obj);
 		}
 		else {
-			return new Envelop(obj);
+			return obj;
 		}
 		
 	}
 	
-	private boolean isAnnonObject(Object obj) {
+	public static Object unmarshal(Object obj) throws IOException {
+		if (obj instanceof AnnonEnvelop) {
+			return ((AnnonEnvelop)obj).unmarshal();
+		}
+		else {
+			return obj;
+		}
+	}
+	
+	private static boolean isAnnonObject(Object obj) {
 		return obj != null && (!(obj instanceof Serializable)) && obj.getClass().isAnonymousClass();
 	}
 
 	@SuppressWarnings("serial")
-	public static class Envelop implements Marshaled, Serializable {
-		
-		private Object payload;
-
-		public Envelop(Object payload) {
-			this.payload = payload;
-		}
-
-		@Override
-		public Object unmarshal() throws IOException {
-			return payload;
-		}
-	}
-	
-	@SuppressWarnings("serial")
-	public static class AnnonEnvelop implements Marshaled, Serializable {
+	public static class AnnonEnvelop implements Serializable {
 
 		private static final Map<Class<?>, Object> PRIMITIVE_DEFAULTS = new HashMap<Class<?>, Object>();
 		static {
@@ -83,7 +77,6 @@ public class SmartViMarshaler {
 			}
 		}
 
-		@Override
 		public Object unmarshal() throws IOException {
 
 			Constructor<?> c = type.getDeclaredConstructors()[0];
@@ -140,6 +133,5 @@ public class SmartViMarshaler {
 				}
 			}
 		}		
-	}
-	
+	}	
 }

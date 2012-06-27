@@ -14,6 +14,12 @@
  */
 package org.gridkit.fabric.remoting;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 public class RemoteRef implements Serializable {
@@ -32,5 +38,13 @@ public class RemoteRef implements Serializable {
 
 	public String toString() {
 		return identity.toString();
+	}
+
+	private void writeObject(ObjectOutputStream  out) throws IOException {
+		((ObjectOutputStream)out).defaultWriteObject();
+	}
+	
+	private void readObject(ObjectInputStream   in) throws IOException, ClassNotFoundException {
+		((ObjectInputStream)in).defaultReadObject();
 	}
 }

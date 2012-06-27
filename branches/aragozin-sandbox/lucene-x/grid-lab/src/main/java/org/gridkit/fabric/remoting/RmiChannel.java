@@ -15,20 +15,12 @@
 package org.gridkit.fabric.remoting;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -54,20 +46,18 @@ public class RmiChannel {
     private final Map<RemoteInstance, Object> remoteInstanceProxys = new ConcurrentHashMap<RemoteInstance, Object>();
     private final Map<Long, RemoteCallContext> remoteReturnWaiters = new ConcurrentHashMap<Long, RemoteCallContext>();
 
-    @SuppressWarnings({ "rawtypes" })
-    private final Map<Class<?>, Class[]> remoteAutodetectCache = new ConcurrentHashMap<Class<?>, Class[]>();
     private final Map<RemoteMethodSignature, Method> methodCache = new ConcurrentHashMap<RemoteMethodSignature, Method>();
-    private final Set<Class<?>> remoteInterfaceMarkers;
+    private final RmiMarshaler marshaler;
 
     private final Map<String, Object> name2bean = new ConcurrentHashMap<String, Object>();
     private final Map<Object, String> bean2name = new ConcurrentHashMap<Object, String>();
 
     private volatile boolean terminated = false;
 
-    public RmiChannel(OutputChannel output, Executor callDispatcher, Class<?>... remoteInterfaceMarkes) {
+    public RmiChannel(OutputChannel output, Executor callDispatcher, RmiMarshaler marshaler) {
         this.messageOut = output;
         this.callDispatcher = callDispatcher;
-        this.remoteInterfaceMarkers = new HashSet<Class<?>>(Arrays.asList(remoteInterfaceMarkes));
+        this.marshaler = marshaler;
     }
 
     public void registerNamedBean(String name, Object obj) {
@@ -295,8 +285,13 @@ public class RmiChannel {
         }
     }
 
-    public Object streamResolveObject(Object obj) {
-        if (obj instanceof BeanRef) {
+    public Object streamResolveObject(Object obj) throws IOException {
+    	
+    	if (obj == null) {
+    		return null;
+    	}
+    	
+    	if (obj instanceof BeanRef) {
             BeanRef ref = (BeanRef) obj;
             Object bean = name2bean.get(ref.getBeanName());
             if (bean == null) {
@@ -307,69 +302,35 @@ public class RmiChannel {
         if (obj instanceof RemoteRef) {
             return getProxyFromRemoteInstance(((RemoteRef) obj).getIdentity());
         } else {
-            return obj;
+            return marshaler.readResolve(obj);
         }
     }
 
-    public Object streamReplaceObject(Object obj) {
+    public Object streamReplaceObject(Object obj) throws IOException {
+    	
+    	if (obj == null) {
+    		return null;
+    	}
+    	
         if (bean2name.containsKey(obj)) {
             return new BeanRef(bean2name.get(obj));
         }
-        if (!(obj instanceof Serializable) || (obj instanceof Proxy)) {
-            // allow explicit export
-            synchronized (object2remote) {
-                RemoteInstance id = object2remote.get(obj);
-                if (id != null) {
-                    return new RemoteRef(id);
-                }
-            }
-            Class<?>[] remoteIf = detectRemoteInterfaces(obj);
-            if (remoteIf.length > 0) {
-                return new RemoteRef(exportObject(remoteIf, obj));
+
+        // allow explicit export
+        synchronized (object2remote) {
+            RemoteInstance id = object2remote.get(obj);
+            if (id != null) {
+                return new RemoteRef(id);
             }
         }
 
-        return obj;
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    protected Class<?>[] detectRemoteInterfaces(Object obj) {
-        Class<?> objClass = obj.getClass();
-        Class<?>[] result = remoteAutodetectCache.get(objClass);
-        if (result != null) {
-            return result;
-        } else {
-            List<Class> iflist = new ArrayList<Class>();
-            iflist.addAll(Arrays.asList(objClass.getInterfaces()));
-
-            Iterator<Class> it = iflist.iterator();
-            while (it.hasNext()) {
-                Class intf = it.next();
-                boolean remote = false;
-                for (Class<?> marker : remoteInterfaceMarkers) {
-                    if (marker.isAssignableFrom(intf)) {
-                        remote = true;
-                        break;
-                    }
-                }
-
-                if (!remote) {
-                    it.remove();
-                    continue;
-                }
-
-                for (Class other : iflist) {
-                    if (intf != other && intf.isAssignableFrom(other)) {
-                        it.remove();
-                    }
-                }
-            }
-
-            result = iflist.toArray(new Class[iflist.size()]);
-            remoteAutodetectCache.put(objClass, result);
-
-            return result;
+        Object mr = marshaler.writeReplace(obj);
+        if (mr instanceof Exported) {
+        	Exported exp = (Exported) mr;
+        	return new RemoteRef(exportObject(exp.getInterfaces(), exp.getObject()));
         }
+        
+        return mr;
     }
 
     @SuppressWarnings("rawtypes")

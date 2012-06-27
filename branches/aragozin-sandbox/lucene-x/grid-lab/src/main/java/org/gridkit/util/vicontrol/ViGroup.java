@@ -29,7 +29,7 @@ public class ViGroup implements ViNode {
 	public static ViGroup group(ViNode... hosts) {
 		ViGroup group = new ViGroup();
 		for(ViNode host: hosts) {
-			group.addHost(host);
+			group.addNode(host);
 		}
 		return group;
 	}
@@ -51,7 +51,7 @@ public class ViGroup implements ViNode {
 		}
 	}
 	
-	public synchronized void addHost(ViNode host) {
+	public synchronized void addNode(ViNode host) {
 		checkActive();
 		hosts.add(host);
 		config.apply(host);
@@ -75,6 +75,11 @@ public class ViGroup implements ViNode {
 		}
 	}
 	
+	@Override
+	public String getProp(String propName) {
+		throw new UnsupportedOperationException("Unsupported for group");
+	}
+
 	@Override
 	public synchronized void addStartupHook(String name, Runnable hook, boolean override) {
 		checkActive();

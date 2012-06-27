@@ -15,6 +15,7 @@
 package org.gridkit.fabric.remoting;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
@@ -37,7 +38,17 @@ public class RemoteStub implements InvocationHandler  {
 	}
 	
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		return channel.remoteInvocation(this, proxy, method, args);
+		if (method.getDeclaringClass() == Object.class) {
+			try {
+				return method.invoke(this, args);
+			}
+			catch(InvocationTargetException e) {
+				throw e.getCause();
+			}
+		}
+		else {
+			return channel.remoteInvocation(this, proxy, method, args);
+		}
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -49,5 +60,9 @@ public class RemoteStub implements InvocationHandler  {
 		}
 		
 		return Proxy.newProxyInstance(channel.getClassLoader(), classes, new RemoteStub(remoteInstance, channel));
+	}
+	
+	public String toString() {
+		return identity.toString();
 	}
 }
