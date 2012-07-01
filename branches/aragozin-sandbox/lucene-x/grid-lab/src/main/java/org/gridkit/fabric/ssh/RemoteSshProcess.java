@@ -1,5 +1,5 @@
 /**
- * Copyright 2008-2009 Grid Dynamics Consulting Services, Inc.
+ * Copyright 2012 Alexey Ragozin
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gridkit.gatling.remoting;
+package org.gridkit.fabric.ssh;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +26,12 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
-public class RemoteProcess extends Process {
+/**
+ * An implementation of {@link Process} representing process executed via SSH facility.
+ * 
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ */
+public class RemoteSshProcess extends Process {
 
 	private OutputStream stdin;
 	private InputStream stdout;
@@ -34,7 +39,7 @@ public class RemoteProcess extends Process {
 	
 	private ChannelExec channel;
 	
-	public RemoteProcess(Session session, ExecCommand command) throws JSchException, IOException {
+	public RemoteSshProcess(Session session, ExecCommand command) throws JSchException, IOException {
 		
 		channel = (ChannelExec) session.openChannel("exec");
 		String cmd = command.getCommand();

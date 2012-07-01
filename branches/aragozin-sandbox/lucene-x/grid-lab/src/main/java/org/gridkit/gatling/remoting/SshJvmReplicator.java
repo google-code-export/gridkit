@@ -17,6 +17,8 @@ import org.gridkit.fabric.exec.ExecCommand;
 import org.gridkit.fabric.remoting.DuplexStream;
 import org.gridkit.fabric.remoting.hub.RemotingHub;
 import org.gridkit.fabric.remoting.hub.RemotingHub.SessionEventListener;
+import org.gridkit.fabric.ssh.RemoteSshProcess;
+import org.gridkit.fabric.ssh.SshSessionProvider;
 import org.gridkit.gatling.remoting.bootstraper.Bootstraper;
 import org.gridkit.gatling.remoting.bootstraper.HalloWorld;
 import org.slf4j.Logger;
@@ -28,11 +30,11 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 
-public class ControlledHost {
+public class SshJvmReplicator implements JvmProcessFactory {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ControlledHost.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SshJvmReplicator.class);
 	
-	private SSHFactory factory;
+	private SshSessionProvider factory;
 	private String host;
 	private String agentHome; 
 	private String javaExecPath = "java";
@@ -46,7 +48,7 @@ public class ControlledHost {
 	private RemotingHub hub = new RemotingHub();
 	private int controlPort;
 
-	public ControlledHost(String host, SSHFactory sshFactory) {
+	public SshJvmReplicator(String host, SshSessionProvider sshFactory) {
 		this.host = host;
 		this.factory = sshFactory;
 	}
@@ -71,10 +73,9 @@ public class ControlledHost {
 		initPortForwarding();
 		
 		ExecCommand halloWorldCmd = new ExecCommand(javaExecPath);
-//		ExecCommand halloWorldCmd = new ExecCommand("echo");
 		halloWorldCmd.setWorkDir(agentHome);
 		halloWorldCmd.addArg("-cp").addArg(bootJarPath).addArg(HalloWorld.class.getName());
-		RemoteProcess rp = new RemoteProcess(ssh, halloWorldCmd);
+		RemoteSshProcess rp = new RemoteSshProcess(ssh, halloWorldCmd);
 		rp.getOutputStream().close();
 		BackgroundStreamDumper.link(rp.getInputStream(), System.out);
 		BackgroundStreamDumper.link(rp.getErrorStream(), System.err);
@@ -83,6 +84,29 @@ public class ControlledHost {
 		Thread.sleep(2000);
 	}
 	
+	@Override
+	public ControlledProcess createProcess(JvmConfig jvmArgs) throws IOException {
+		ExecCommand jvmCmd = new ExecCommand(javaExecPath);
+		jvmCmd.setWorkDir(agentHome);
+		jvmCmd.addArg("-jar").addArg(bootJarPath);
+		
+		RemoteControlSession session = new RemoteControlSession();
+		String sessionId = hub.newSession(session);
+		jvmCmd.addArg(sessionId).addArg("localhost").addArg(String.valueOf(controlPort));
+		jvmCmd.addArg(agentHome);
+		session.setSessionId(sessionId);
+		
+		RemoteSshProcess rp;
+		try {
+			rp = new RemoteSshProcess(ssh, jvmCmd);
+		} catch (JSchException e) {
+			throw new IOException(e);
+		}
+		session.setProcess(rp);
+		
+		return session;
+	}
+
 	public ExecutorService createRemoteExecutor() throws JSchException, IOException {
 		ExecCommand jvmCmd = new ExecCommand(javaExecPath);
 		jvmCmd.setWorkDir(agentHome);
@@ -94,7 +118,7 @@ public class ControlledHost {
 		jvmCmd.addArg(agentHome);
 		session.setSessionId(sessionId);
 		
-		RemoteProcess rp = new RemoteProcess(ssh, jvmCmd);
+		RemoteSshProcess rp = new RemoteSshProcess(ssh, jvmCmd);
 		rp.getOutputStream().close();
 		BackgroundStreamDumper.link(rp.getInputStream(), System.out);
 		BackgroundStreamDumper.link(rp.getErrorStream(), System.err);
@@ -108,7 +132,7 @@ public class ControlledHost {
 			int port;
 			try {
 				port = 50000 + random.nextInt(1000);
-				ssh.setPortForwardingR(port, ControlledHost.class.getName() + "$" + RemotingTunnelAcceptor.class.getSimpleName(), new Object[]{ControlledHost.this});
+				ssh.setPortForwardingR(port, SshJvmReplicator.class.getName() + "$" + RemotingTunnelAcceptor.class.getSimpleName(), new Object[]{SshJvmReplicator.this});
 			}
 			catch(JSchException e) {
 				LOGGER.warn("Failed to forward port " + e.toString());
@@ -170,18 +194,28 @@ public class ControlledHost {
 		return bos.toByteArray();
 	}
 	
-	private class RemoteControlSession implements SessionEventListener {
+	private class RemoteControlSession implements SessionEventListener, ControlledProcess {
 		
 		String sessionId;
 		ExecutorService remoteExecutorService;
-		RemoteProcess process;
+		RemoteSshProcess process;
 		CountDownLatch connected = new CountDownLatch(1);
 		
+		@Override
+		public Process getProcess() {
+			return process;
+		}
+
+		@Override
+		public ExecutorService getExecutionService() {
+			return getRemoteExecutor();
+		}
+
 		public void setSessionId(String sessionId) {
 			this.sessionId = sessionId;
 		}
 
-		public void setProcess(RemoteProcess process) {
+		public void setProcess(RemoteSshProcess process) {
 			this.process = process;
 		}
 
@@ -265,14 +299,14 @@ public class ControlledHost {
 		private ChannelForwardedTCPIP channel;
 		private InputStream in;
 		private OutputStream out;
-		private ControlledHost host;
+		private SshJvmReplicator host;
 		
 		public RemotingTunnelAcceptor() {
 		}
 		
 		@Override
 		public void setArg(Object[] arg) {
-			host = (ControlledHost) arg[0];
+			host = (SshJvmReplicator) arg[0];
 		}
 
 		@Override

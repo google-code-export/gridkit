@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class StreamHelper {
+class StreamHelper {
 	
 	public static String digest(byte[] data, String algorithm) {
 		try {

@@ -8,16 +8,12 @@ import java.rmi.Remote;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.gridkit.fabric.remoting.RmiChannelPipeTest.ProxyCallable;
-import org.gridkit.fabric.remoting.RmiChannelPipeTest.SelfIdentity;
-import org.gridkit.fabric.remoting.hub.Ping;
 import org.gridkit.fabric.remoting.hub.RemotingEndPoint;
 import org.gridkit.fabric.remoting.hub.RemotingHub;
 import org.gridkit.fabric.remoting.hub.RemotingHub.SessionEventListener;
@@ -99,11 +95,13 @@ public class RemotingHubTest {
 	}
 	
 	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void verify_executor1() throws InterruptedException, ExecutionException {
 		Assert.assertEquals("abc", remoteExecutor1.submit(new Echo("abc")).get());
 	}
 
 	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void verify_executor2() throws InterruptedException, ExecutionException {
 		Assert.assertEquals("abc", remoteExecutor2.submit(new Echo("abc")).get());
 	}
@@ -115,6 +113,7 @@ public class RemotingHubTest {
 		Assert.assertEquals("123", result);		
 	}
 	
+	@SuppressWarnings("serial")
 	public static class Echo<V> implements Callable<V>, Serializable {
 
 		private V sound;
@@ -129,6 +128,7 @@ public class RemotingHubTest {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	public static class SelfIdentity implements Callable<SelfIdentity>, Serializable {
 		
 		public SelfIdentity() {
@@ -147,6 +147,7 @@ public class RemotingHubTest {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	public static class SerializableAdapter<V> implements Callable<V>, Serializable {
 		
 		private Callable<V> callable;
@@ -179,6 +180,7 @@ public class RemotingHubTest {
 		}
 	}	
 	
+	@SuppressWarnings("serial")
 	public static class RemoteProxyMaker<V> implements Callable<Callable<V>>, Serializable {
 		
 		private Callable<V> nested;

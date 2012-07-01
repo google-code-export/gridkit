@@ -10,6 +10,10 @@ import org.gridkit.fabric.remoting.SocketStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This is an agent class initiating socket connection to RMI hub.
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ */
 public class RemotingEndPoint implements Runnable, RmiGateway.StreamErrorHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RemotingEndPoint.class);

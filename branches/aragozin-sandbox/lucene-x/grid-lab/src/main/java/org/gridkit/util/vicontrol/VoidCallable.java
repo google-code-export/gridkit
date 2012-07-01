@@ -1,9 +1,14 @@
 package org.gridkit.util.vicontrol;
 
+import java.io.Serializable;
 import java.util.concurrent.Callable;
 
 public interface VoidCallable {		
-	public static class VoidCallableWrapper implements Callable<Void> {
+
+	public void call() throws Exception;
+	
+	@SuppressWarnings("serial")
+	public static class VoidCallableWrapper implements Callable<Void>, Serializable {
 		
 		public final VoidCallable callable;
 		
@@ -17,6 +22,4 @@ public interface VoidCallable {
 			return null;
 		}
 	}
-
-	public void call() throws Exception;		
 }

@@ -7,6 +7,12 @@ import java.net.Socket;
 import org.gridkit.fabric.remoting.DuplexStream;
 import org.gridkit.fabric.remoting.SocketStream;
 
+/**
+ * This is a simple socket server passing incoming connections to {@link RemotingHub} 
+ * which authenticates them and processing RMI handshake. 
+ * 
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ */
 public class SimpleSocketAcceptor implements Runnable {
 
 	private RemotingHub hub;

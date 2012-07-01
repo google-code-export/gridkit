@@ -14,6 +14,12 @@ import org.gridkit.fabric.remoting.RmiGateway.StreamErrorHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This is a hub managing multiple RMI channel connection.
+ * It accepts duplex stream, verifies and matches ID token.
+ * 
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ */
 public class RemotingHub {
 	
 	private final static Logger LOGGER = LoggerFactory.getLogger(RemotingHub.class);
