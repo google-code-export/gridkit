@@ -2,7 +2,6 @@ package org.gridkit.gatling.remoting.bootstraper;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.Arrays;
 
 import org.gridkit.fabric.remoting.hub.RemotingEndPoint;
@@ -31,12 +30,12 @@ public class Bootstraper {
 		String host = args[1];
 		int port = Integer.valueOf(args[2]);
 		
-		Socket socket = new Socket();
-		socket.connect(new InetSocketAddress("127.0.0.1", port));
-		socket.getOutputStream().write("Ping".getBytes());
-		socket.close();
-		
-		System.out.println("Socket ping - OK");
+//		Socket socket = new Socket();
+//		socket.connect(new InetSocketAddress("127.0.0.1", port));
+//		socket.getOutputStream().write("Ping".getBytes());
+//		socket.close();
+//		
+//		System.out.println("Socket ping - OK");
 		
 		new Bootstraper(id, host, port).start();
 		System.exit(0);

@@ -20,6 +20,31 @@ public class JvmProps {
 	/**
 	 * Addition command line options for JVM.
 	 */	
-	public static String JVM_XX = "jvm:xx:"; 
+	public static String JVM_XX = "jvm:xx:";
+
+	/**
+	 * JDK version
+	 */	
+	public static String JDK_VERSION = "jdk:version";
+
+	/**
+	 * CPU Architecture 32 or 64
+	 */	
+	public static String JDK_ARCH = "jdk:arch";
+
+	/**
+	 * Use JRE instead of JDK
+	 */	
+	public static String JDK_JRE_ONLY = "jdk:jre-only";
+
+	/**
+	 * Use particular vendor
+	 */	
+	public static String JDK_VENDOR = "jdk:vendor";
+
+	/**
+	 * Custom clarifer to select JDK
+	 */	
+	public static String JDK_CLARIFIER = "jdk:clarifier";
 	
 }

@@ -6,9 +6,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import junit.framework.Assert;
+import org.testng.AssertJUnit;
+import org.testng.annotations.Test;
 
-import org.junit.Test;
 
 public class SpeedLimitTest {
 
@@ -130,7 +130,7 @@ public class SpeedLimitTest {
 	}
 	
 	private void assertError(double value, double target, double tolerance) {
-		Assert.assertTrue(String.format("%f within %.3f bounds from %f", value, tolerance, target), value < (target + target * tolerance) && value > (target - target * tolerance));
+		AssertJUnit.assertTrue(String.format("%f within %.3f bounds from %f", value, tolerance, target), value < (target + target * tolerance) && value > (target - target * tolerance));
 	}
 	
 	@SuppressWarnings("unused")
@@ -169,7 +169,6 @@ public class SpeedLimitTest {
 		
 		long start = System.nanoTime();
 		final AtomicInteger counter = new AtomicInteger(events + 1);
-//		final CountDownLatch startBarrier = new CountDownLatch(1);
 		final CountDownLatch finishBarrier = new CountDownLatch(threadCount);
 
 		ExecutorService executor = Executors.newFixedThreadPool(threadCount);
@@ -177,11 +176,6 @@ public class SpeedLimitTest {
 			executor.submit(new Runnable() {
 				@Override
 				public void run() {
-//					try {
-//						startBarrier.await();
-//					} catch (InterruptedException e) {
-//						// ignore
-//					}
 					while(true) {
 						if (counter.decrementAndGet() < 0) {
 							break;

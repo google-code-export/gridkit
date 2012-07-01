@@ -12,8 +12,7 @@ public class Test1 {
 
 	
 	public static void main(String[] args) throws JSchException, SftpException, IOException, InterruptedException {
-
-		
+	
 		ControlledHost host = initHost_u1();
 		
 		host.init();
