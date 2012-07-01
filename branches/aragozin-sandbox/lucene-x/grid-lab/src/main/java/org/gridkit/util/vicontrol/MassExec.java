@@ -112,6 +112,37 @@ public class MassExec {
 	public static <T> List<Future<T>> singleNodeMassSubmit(ViExecutor exec, Callable<? extends T> task) {
 		return (List)Collections.singletonList(exec.submit(task));
 	}	
+
+	public static void submitAndWait(ViExecutor exec, Runnable task) {
+		try {
+			exec.submit(task).get();
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		} catch (ExecutionException e) {
+			AnyThrow.throwUncheked(e.getCause());
+		}
+	}
+	
+	public static void submitAndWait(ViExecutor exec, VoidCallable task) {
+		try {
+			exec.submit(task).get();
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		} catch (ExecutionException e) {
+			AnyThrow.throwUncheked(e.getCause());
+		}
+	}
+	
+	public static <T> T submitAndWait(ViExecutor exec, Callable<? extends T> task) {
+		try {
+			return exec.submit(task).get();
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		} catch (ExecutionException e) {
+			AnyThrow.throwUncheked(e.getCause());
+			throw new Error("Unreachable");
+		}
+	}	
 	
 	private static class AnyThrow {
 

@@ -146,9 +146,9 @@ public class LocalJvmProcessFactory implements JvmProcessFactory {
 		p = pb.start();
 		processes.add(p);
 
-		p.getOutputStream().close();
-		BackgroundStreamDumper.link(p.getInputStream(), System.out);
-		BackgroundStreamDumper.link(p.getErrorStream(), System.err);
+//		p.getOutputStream().close();
+//		BackgroundStreamDumper.link(p.getInputStream(), System.out);
+//		BackgroundStreamDumper.link(p.getErrorStream(), System.err);
 		session.setProcess(p);
 		
 		session.ensureRemoteExecutor(-1);

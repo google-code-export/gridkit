@@ -16,6 +16,7 @@
 package org.gridkit.util.vicontrol;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -27,6 +28,14 @@ import java.util.concurrent.TimeoutException;
 public class ViGroup implements ViNode {
 
 	public static ViGroup group(ViNode... hosts) {
+		ViGroup group = new ViGroup();
+		for(ViNode host: hosts) {
+			group.addNode(host);
+		}
+		return group;
+	}
+
+	public static ViGroup group(Collection<? extends ViNode> hosts) {
 		ViGroup group = new ViGroup();
 		for(ViNode host: hosts) {
 			group.addNode(host);

@@ -48,12 +48,10 @@ public class SmartRmiMarshaler implements RmiMarshaler {
     protected boolean isEligbleForExport(Object obj) {
 		for(Class marker: remoteInterfaceMarkers) {
 			if (marker.isInstance(obj)) {
-				System.err.println("Exportable " + obj.getClass());
 				return true;
 			}
 		}
 
-		System.err.println("Not exportable " + obj.getClass());
 		return false;
 	}
 

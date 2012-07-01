@@ -15,10 +15,12 @@
  */
 package org.gridkit.util.vicontrol;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ViNodeConfig implements ViConfigurable {
+@SuppressWarnings("serial")
+public class ViNodeConfig implements ViConfigurable, Serializable {
 
 	private Map<String, String> props = new LinkedHashMap<String, String>();
 	private Map<String, HookInfo> startupHooks = new LinkedHashMap<String, HookInfo>();
@@ -90,5 +92,94 @@ public class ViNodeConfig implements ViConfigurable {
 			this.hook = hook;
 			this.override = override;
 		}
+	}
+
+	public static void applyProps(ViConfigurable vc, Map<String, String> props) {
+		for(Map.Entry<String, String> e : props.entrySet()) {
+			vc.setProp(e.getKey(), e.getValue());
+		}
+	}
+	
+	public static boolean matches(String prefix, String propName) {
+		if (prefix.endsWith(":")) {
+			return propName.startsWith("prefix");
+		}
+		else {
+			return propName.equals(prefix);
+		}
+	}
+	
+	public static abstract class ReplyStartupHooks implements ViConfigurable {
+
+		@Override
+		public void setProp(String propName, String value) {
+			// ignore
+		}
+
+		@Override
+		public void setProps(Map<String, String> props) {
+			// ignore
+		}
+
+		@Override
+		public void addShutdownHook(String name, Runnable hook, boolean override) {
+			// ignore
+		}
+	}
+
+	public static abstract class ReplyProps implements ViConfigurable {
+		
+		private String[] filter;
+
+		public ReplyProps(String... filter) {
+			this.filter = filter;
+		}
+		
+		protected abstract void setPropInternal(String propName, String value);
+		
+		@Override
+		public void setProp(String propName, String value) {
+			if (filter.length == 0) {
+				setPropInternal(propName, value);
+			}
+			else {
+				for(String f: filter) {
+					if (matches(f, propName)) {
+						setPropInternal(propName, value);
+						break;
+					}
+				}
+			}
+		}
+		
+		@Override
+		public void setProps(Map<String, String> props) {
+			for(String key: props.keySet()) {
+				setProp(key, props.get(key));
+			}
+		}
+		
+		@Override
+		public void addShutdownHook(String name, Runnable hook, boolean override) {
+			// ignore
+		}
+	}
+
+	public static abstract class ReplyShutdownHooks implements ViConfigurable {
+		
+		@Override
+		public void setProp(String propName, String value) {
+			// ignore
+		}
+		
+		@Override
+		public void setProps(Map<String, String> props) {
+			// ignore
+		}
+
+		@Override
+		public void addStartupHook(String name, Runnable hook, boolean override) {
+			// ignore			
+		}		
 	}
 }
