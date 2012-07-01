@@ -1,14 +1,11 @@
 package org.gridkit.gatling.remoting.bootstraper;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.Enumeration;
+import java.net.InetAddress;
 
 public class HalloWorld {
 	public static void main(String[] args) throws IOException {
-		System.out.println("Hallo world");
+		System.out.println("\"Hallo world\" from " + InetAddress.getLocalHost().getHostName());
 		
 //		for(URL url: ((URLClassLoader)Thread.currentThread().getContextClassLoader()).getURLs()) {
 //			System.out.println(url);

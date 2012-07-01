@@ -16,6 +16,7 @@ public class RemoteFileCache {
 	private static final String CACHE_PATH = ".cache";
 	private Session session;
 	private String agentHome;
+	private String agentHomePath;
 	private ChannelSftp sftp;
 
 	private Map<String, String> fileMapping = new HashMap<String, String>();
@@ -43,6 +44,7 @@ public class RemoteFileCache {
 		}
 		
 		sftp.cd(agentHome);
+		agentHomePath = sftp.pwd();
 		if (!exists(sftp, CACHE_PATH)) {
 			sftp.mkdir(CACHE_PATH);
 		}
@@ -70,14 +72,14 @@ public class RemoteFileCache {
 				System.out.println("Exists: " + rname + " " + data.length + " bytes");
 			}
 			
-			fileMapping.put(id, agentHome + "/" + rname);
+			fileMapping.put(id, agentHomePath + "/" + rname);
 		}
 		return fileMapping.get(id);
 	}
 
 	private boolean exists(ChannelSftp sftp, String path) {
 		try {
-			return sftp.stat(agentHome + "/" + path) != null;
+			return sftp.stat(path) != null;
 		} catch (SftpException e) {
 			return false;
 		}

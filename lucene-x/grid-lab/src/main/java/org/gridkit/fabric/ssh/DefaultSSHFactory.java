@@ -1,15 +1,19 @@
-package org.gridkit.gatling.remoting;
+package org.gridkit.fabric.ssh;
 
+import java.util.Arrays;
+
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Logger;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 
-public class DefaultSSHFactory implements SSHFactory {
+public class DefaultSSHFactory implements SshSessionProvider {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSSHFactory.class); 
 
 	private JSch jsch = new JSch();
 	
@@ -18,7 +22,6 @@ public class DefaultSSHFactory implements SSHFactory {
 	private String passphrase;
 	
 	public DefaultSSHFactory() {
-		JSch.setConfig("PreferredAuthentications", "publickey,keyboard-interactive");
 	}
 	
 	public void setUser(String user) {
@@ -34,14 +37,19 @@ public class DefaultSSHFactory implements SSHFactory {
 	}
 	
 	@Override
-	public Session getSession(final String host) throws JSchException {
+	public Session getSession(String host) throws JSchException {
 		UserInfo ui = new UserAuthnticator(host);
 		
-		JSch jsc = new JSch();
-		Session session = jsc.getSession(user, host);
+		int port = 22;
+		if (host.indexOf(':') > 0) {
+			String p = host.substring(host.lastIndexOf(':') + 1);
+			host = host.substring(0, host.lastIndexOf(':'));
+			port = Integer.parseInt(p);
+		}
+			
+		Session session = jsch.getSession(user, host, port);
 		session.setDaemonThread(true);
-		session.setUserInfo(ui);
-//		session.setPassword(password);
+		session.setUserInfo(ui);		
 		session.connect();
 		
 		return session;
@@ -60,46 +68,47 @@ public class DefaultSSHFactory implements SSHFactory {
 
 		@Override
 		public String[] promptKeyboardInteractive(String destination, String name, String instruction, String[] prompt, boolean[] echo) {
+			LOGGER.debug("[" + host + "] SSH: keyboard-interactive Prompt=" + Arrays.toString(prompt));
 			return new String[]{password};
 		}
 
 		@Override
 		public void showMessage(String message) {
-			System.out.println("[" + host + "] SSH: " + message);
+			LOGGER.debug("[" + host + "] SSH: " + message);
 		}
 
 		@Override
 		public boolean promptYesNo(String message) {
-			System.out.println("[" + host + "] SSH: " + message + " <- yes");
+			LOGGER.debug("[" + host + "] SSH: " + message + " <- yes");
 			return true;
 		}
 
 		@Override
 		public boolean promptPassword(String message) {
-			System.out.println("[" + host + "] SSH: " + message + " <- yes");
+			LOGGER.debug("[" + host + "] SSH: " + message + " <- yes");
 			return true;
 		}
 
 		@Override
 		public boolean promptPassphrase(String message) {
-			System.out.println("[" + host + "] SSH: " + message + " <- yes");
+			LOGGER.debug("[" + host + "] SSH: " + message + " <- yes");
 			return true;
 		}
 
 		@Override
 		public String getPassword() {
-			System.out.println("[" + host + "] SSH: password = " + password);
+			LOGGER.debug("[" + host + "] SSH: password = " + password);
 			return password;
 		}
 
 		@Override
 		public String getPassphrase() {
-			System.out.println("[" + host + "] SSH: passphrase = " + password);
+			LOGGER.debug("[" + host + "] SSH: passphrase = " + password);
 			return passphrase;
 		}
 	}
 
-	private final static class JSchLogger implements Logger {
+	private final static class JSchLogger implements com.jcraft.jsch.Logger {
 		
 		private org.slf4j.Logger logger;
 		

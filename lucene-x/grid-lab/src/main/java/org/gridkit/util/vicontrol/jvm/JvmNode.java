@@ -47,6 +47,7 @@ public class JvmNode implements ViNode {
 		BackgroundStreamDumper.link(process.getErrorStream(), stdErr);
 		
 		initStartupHooks();
+		active = true;
 	}
 
 	private void initStartupHooks() throws IOException {
@@ -110,40 +111,39 @@ public class JvmNode implements ViNode {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Future<Void> submit(Runnable task) {
+		ensureStarted();
 		return (Future<Void>) executor.submit(task);
 	}
 
 	@Override
 	public Future<Void> submit(VoidCallable task) {
+		ensureStarted();
 		return executor.submit(new VoidCallable.VoidCallableWrapper(task));
 	}
 
 	@Override
 	public <T> Future<T> submit(Callable<T> task) {
+		ensureStarted();
 		return executor.submit(task);
 	}
 
 	@Override
 	public <T> List<T> massExec(Callable<? extends T> task) {
-		ensureStarted();
 		return MassExec.singleNodeMassExec(this, task);
 	}
 
 	@Override
 	public List<Future<Void>> massSubmit(Runnable task) {
-		ensureStarted();
 		return MassExec.singleNodeMassSubmit(this, task);
 	}
 
 	@Override
 	public List<Future<Void>> massSubmit(VoidCallable task) {
-		ensureStarted();
 		return MassExec.singleNodeMassSubmit(this, task);
 	}
 
 	@Override
 	public <T> List<Future<T>> massSubmit(Callable<? extends T> task) {
-		ensureStarted();
 		return MassExec.singleNodeMassSubmit(this, task);
 	}
 

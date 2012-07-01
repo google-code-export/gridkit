@@ -2,8 +2,6 @@ package org.gridkit.gatling.remoting;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -155,22 +153,6 @@ public class LocalJvmProcessFactory implements JvmProcessFactory {
 		
 		return session;
 	}
-
-	private static class JvmProcess implements ControlledProcess {
-
-		private Process process;
-		private ExecutorService executor;
-
-		@Override
-		public Process getProcess() {
-			return process;
-		}
-		
-		@Override
-		public ExecutorService getExecutionService() {
-			return executor;
-		}
-	}
 	
 	private class RemoteControlSession implements SessionEventListener, ControlledProcess {
 		
@@ -197,6 +179,7 @@ public class LocalJvmProcessFactory implements JvmProcessFactory {
 			this.process = process;
 		}
 
+		@SuppressWarnings("unused")
 		private boolean isConnected() {
 			return connected.getCount() == 0;
 		}
