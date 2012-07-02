@@ -32,8 +32,12 @@ public class DefaultSSHFactory implements SshSessionProvider {
 		this.password = password;
 	}
 	
-	public void setKeyFile(String fileName) throws JSchException {
-		jsch.addIdentity(fileName);
+	public void setKeyFile(String fileName) {
+		try {
+			jsch.addIdentity(fileName);
+		} catch (JSchException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 	
 	@Override

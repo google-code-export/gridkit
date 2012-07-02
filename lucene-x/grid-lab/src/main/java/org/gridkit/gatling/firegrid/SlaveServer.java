@@ -12,14 +12,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
 import org.gridkit.gatling.utils.SpeedLimit;
-import org.gridkit.monitoring.cpureport.CpuUsageReporter;
 import org.gridkit.util.formating.Formats;
 
 public class SlaveServer implements Slave {
 	
 	public static void main(String[] args) throws RemoteException, NotBoundException, InterruptedException {
 		
-		CpuUsageReporter.startReporter();
+//		CpuUsageReporter.startReporter();
 		
 		String address = args.length == 0 ? "localhost" : args[0];
 		System.out.println("Connecting to master [" + address + "]");

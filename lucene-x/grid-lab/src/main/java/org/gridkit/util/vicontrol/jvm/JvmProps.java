@@ -1,5 +1,7 @@
 package org.gridkit.util.vicontrol.jvm;
 
+import org.gridkit.util.vicontrol.ViNodeConfig;
+
 public class JvmProps {
 
 	/**
@@ -46,5 +48,13 @@ public class JvmProps {
 	 * Custom clarifer to select JDK
 	 */	
 	public static String JDK_CLARIFIER = "jdk:clarifier";
+
+	public static void setJvmArg(ViNodeConfig config, String string) {
+		config.setProp(JVM_XX + "arg" + string, string);
+	}
+
+	public static void setJvmArg(String name, ViNodeConfig config, String string) {
+		config.setProp(JVM_XX + name, string);
+	}
 	
 }

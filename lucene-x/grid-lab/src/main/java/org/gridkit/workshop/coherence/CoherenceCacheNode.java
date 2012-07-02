@@ -21,8 +21,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
-import org.gridkit.monitoring.cpureport.CpuUsageReporter;
-
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.BinaryEntry;
@@ -55,8 +53,6 @@ public class CoherenceCacheNode {
 	    setProp("tangosol.pof.enabled", "true");
 	    setProp("tangosol.coherence.cacheconfig", "coherence-lab-cache-config.xml");
 	    setProp("tangosol.coherence.distributed.localstorage", "true");
-	    
-	    CpuUsageReporter.startReporter();
 	    
 		try {			
 			if (args.length == 0) {

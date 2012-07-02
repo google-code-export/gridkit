@@ -130,6 +130,7 @@ public class LocalJvmProcessFactory implements JvmProcessFactory {
 		String filesep = System.getProperty("file.separator");
 		ExecCommand jvmCmd = new ExecCommand(javaHome + filesep + "bin" + filesep + "java");
 		jvmCmd.addArg("-cp").addArg(defaultClasspath);
+		jvmArgs.apply(jvmCmd);
 		jvmCmd.addArg(Bootstraper.class.getName());
 		
 		RemoteControlSession session = new RemoteControlSession();
@@ -149,7 +150,22 @@ public class LocalJvmProcessFactory implements JvmProcessFactory {
 //		BackgroundStreamDumper.link(p.getErrorStream(), System.err);
 		session.setProcess(p);
 		
-		session.ensureRemoteExecutor(-1);
+		while(true) {
+			ExecutorService exec = session.ensureRemoteExecutor(100);
+			if (exec != null) {
+				break;
+			}
+			try {
+				int code = p.exitValue();
+				StreamHelper.copy(p.getInputStream(), System.out);
+				StreamHelper.copy(p.getErrorStream(), System.err);
+				p.destroy();
+				throw new IOException("Child JVM process has terminated, exit code " + code);
+			}
+			catch(IllegalThreadStateException e) {
+				// process is still alive
+			}
+		}
 		
 		return session;
 	}
