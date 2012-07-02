@@ -10,8 +10,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.gridkit.monitoring.cpureport.CpuUsageReporter;
-
 import com.tangosol.net.CacheFactory;
 
 /**
@@ -55,8 +53,6 @@ public class SimpleObjectLoader {
 	
 	public static void main(String[] args) throws InterruptedException, ExecutionException {
 		
-		CpuUsageReporter.startReporter();
-	
 		String cacheName = args[0];
 		
 		setProp("tangosol.pof.enabled", "true");
