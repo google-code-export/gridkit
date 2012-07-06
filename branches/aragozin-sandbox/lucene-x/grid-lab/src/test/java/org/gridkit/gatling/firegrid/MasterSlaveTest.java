@@ -9,7 +9,6 @@ import org.gridkit.gatling.firegrid.AbstractMasterServer.WorkStreamSession;
 import org.gridkit.gatling.firegrid.test.DummyWorkExecutor;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.experimental.theories.suppliers.TestedOn;
 
 @Ignore
 public class MasterSlaveTest {

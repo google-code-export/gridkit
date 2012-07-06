@@ -102,7 +102,7 @@ public class ViNodeConfig implements ViConfigurable, Serializable {
 	
 	public static boolean matches(String prefix, String propName) {
 		if (prefix.endsWith(":")) {
-			return propName.startsWith("prefix");
+			return propName.startsWith(prefix);
 		}
 		else {
 			return propName.equals(prefix);
@@ -159,6 +159,11 @@ public class ViNodeConfig implements ViConfigurable, Serializable {
 			}
 		}
 		
+		@Override
+		public void addStartupHook(String name, Runnable hook, boolean override) {
+			// ignore			
+		}		
+
 		@Override
 		public void addShutdownHook(String name, Runnable hook, boolean override) {
 			// ignore
