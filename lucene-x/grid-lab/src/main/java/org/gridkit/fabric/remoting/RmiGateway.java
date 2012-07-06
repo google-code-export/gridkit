@@ -62,67 +62,6 @@ public class RmiGateway {
 		this.streamErrorHandler = errorHandler;
 	}
 	
-	public synchronized void connect(DuplexStream socket) throws IOException {
-		if (this.socket != null) {
-			throw new IllegalStateException("Already connected");
-		}
-		try {
-			this.socket = socket;
-			
-			out = new RmiObjectOutputStream(socket.getOutput());
-			
-			CounterAgent localAgent = new LocalAgent();			
-			channel.exportObject(CounterAgent.class, localAgent);
-			synchronized(out) {					
-				out.writeUnshared(localAgent);
-				out.reset();
-				out.flush();
-			}
-
-			// important create out stream first!
-			in = new RmiObjectInputStream(socket.getInput());
-			remote = (CounterAgent) in.readObject();
-			
-			readerThread = new SocketReader();
-			readerThread.setName("RMI-Receiver: " + socket);
-			readerThread.start();
-			connected = true;			
-			
-		} catch (Exception e) {
-			try {
-				if (in != null) {
-					in.close();
-				}
-			} catch (IOException e1) {
-				// ignore
-			}
-			try {
-				if (out != null) {
-					out.close();
-				}
-			} catch (IOException e1) {
-				// ignore
-			}
-			try {
-				if (this.socket != null) {
-					this.socket.close();
-				}
-			}
-			catch (Exception e1) {
-				//ignore
-			}
-			in = null;
-			out = null;
-			this.socket = null;
-			if (e instanceof IOException) {
-				throw (IOException) e;
-			}
-			else {
-				throw new RuntimeException(e);
-			}
-		}
-	}
-	
 	public void disconnect() {
 		Thread readerThread = null;
 		synchronized(this) {
@@ -166,7 +105,7 @@ public class RmiGateway {
 	}
 	
 	public synchronized boolean isConnected() {
-		return connected && !terminated;
+		return connected && !terminated && !socket.isClosed();
 	}
 	
 	public synchronized void shutdown() {
@@ -237,6 +176,67 @@ public class RmiGateway {
 		}
 	}
 
+	public synchronized void connect(DuplexStream socket) throws IOException {
+		if (this.socket != null) {
+			throw new IllegalStateException("Already connected");
+		}
+		try {
+			this.socket = socket;
+			
+			out = new RmiObjectOutputStream(socket.getOutput());
+			
+			CounterAgent localAgent = new LocalAgent();			
+			channel.exportObject(CounterAgent.class, localAgent);
+			synchronized(out) {					
+				out.writeUnshared(localAgent);
+				out.reset();
+				out.flush();
+			}
+	
+			// important create out stream first!
+			in = new RmiObjectInputStream(socket.getInput());
+			remote = (CounterAgent) in.readObject();
+			
+			readerThread = new SocketReader();
+			readerThread.setName("RMI-Receiver: " + socket);
+			readerThread.start();
+			connected = true;			
+			
+		} catch (Exception e) {
+			try {
+				if (in != null) {
+					in.close();
+				}
+			} catch (IOException e1) {
+				// ignore
+			}
+			try {
+				if (out != null) {
+					out.close();
+				}
+			} catch (IOException e1) {
+				// ignore
+			}
+			try {
+				if (this.socket != null) {
+					this.socket.close();
+				}
+			}
+			catch (Exception e1) {
+				//ignore
+			}
+			in = null;
+			out = null;
+			this.socket = null;
+			if (e instanceof IOException) {
+				throw (IOException) e;
+			}
+			else {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+
 	private class RmiObjectInputStream extends ObjectInputStream {
 		
 		public RmiObjectInputStream(InputStream in) throws IOException {
@@ -247,9 +247,6 @@ public class RmiGateway {
 		@Override
 		protected Object resolveObject(Object obj) throws IOException {
 			Object r = channel.streamResolveObject(obj);
-//			if (r != obj) {
-//				System.out.println("Read resolve: " + obj.getClass().getName() + "->" + r.getClass().getName());
-//			}
 			return r;
 		}
 	}
@@ -264,9 +261,6 @@ public class RmiGateway {
 		@Override
 		protected Object replaceObject(Object obj) throws IOException {
 			Object r = channel.streamReplaceObject(obj);
-//			if (r != obj ) {
-//				System.err.println("Write replace: " + obj.getClass().getName() + "->" + r.getClass().getName());
-//			}
 			return r;
 		}
 	}

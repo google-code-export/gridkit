@@ -45,7 +45,7 @@ public class RemotingEndPoint implements Runnable, RmiGateway.StreamErrorHandler
 			try {
 				if (!gateway.isConnected()) {
 				
-					Socket sock = new Socket();
+					final Socket sock = new Socket();
 					
 					try {
 						sock.connect(addr);
