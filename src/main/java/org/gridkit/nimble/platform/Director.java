@@ -37,6 +37,12 @@ public class Director<T> {
         for (RemoteAgent agent : agents) {
             agent.shutdown(hard);
         }
+        
+        if (hard) {
+            executor.shutdownNow();
+        } else {
+            executor.shutdown();
+        }
     }
     
     private class DirectorContext implements Scenario.Context<T> {

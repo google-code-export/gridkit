@@ -5,9 +5,9 @@ import org.gridkit.nimble.platform.Play;
 public abstract class AbstractPlay<T> implements Play<T> {
     protected final Scenario scenario;
 
-    protected Play.Status status;
+    private Play.Status status;
     
-    protected T stats;
+    private T stats;
 
     public AbstractPlay(Scenario scenario, T initialStats) {
         this.scenario = scenario;
@@ -34,8 +34,12 @@ public abstract class AbstractPlay<T> implements Play<T> {
         runnable.run();
     }
 
-    protected void setStatus(Play.Status status) {
-        this.status = status;
+    protected boolean setStatus(Play.Status status) {
+        if (this.status == Play.Status.InProgress) {
+            this.status = status;
+            return true;
+        }
+        return false;
     }
 
     protected void setStats(T stats) {

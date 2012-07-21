@@ -1,7 +1,6 @@
 package org.gridkit.nimble;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -16,7 +15,6 @@ import org.gridkit.nimble.scenario.ExecScenario.Result;
 import org.gridkit.nimble.scenario.ParScenario;
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.SeqScenario;
-import org.gridkit.nimble.statistics.simple.SimpleStatsFactory;
 
 public class FirstTest {
     public static void main(String[] args) throws Exception {
@@ -25,11 +23,13 @@ public class FirstTest {
 
         RemoteAgent agent = new ThreadPoolAgent(agentExecutor);
         
-        Director<Void> director = new Director<Void>(
-            Collections.singletonList(agent),
-            new SimpleStatsFactory(),
-            directorExecutor
-        );
+        Director<Void> director = null;
+        
+        //new Director<Void>(
+        //    Collections.singletonList(agent),
+        //    new SimpleStatsFactory(),
+        //    directorExecutor
+        //);
         
         Scenario s1 = new ExecScenario("A", new SimpleExecutable("A"), agent);
         Scenario s2 = new ExecScenario("B", new SimpleExecutable("B"), agent);
@@ -44,6 +44,7 @@ public class FirstTest {
 
         Scenario par = new ParScenario("PAR", Arrays.asList(seq1, seq2));
         
+        @SuppressWarnings("null")
         Play<Void> play = director.play(par);
         
         Thread.sleep(1250);

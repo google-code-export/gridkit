@@ -7,7 +7,9 @@ import org.gridkit.nimble.platform.TimeService;
 import org.gridkit.nimble.statistics.StatsReporter;
 
 public interface Task {
-    public void excute(Context context) throws Exception;
+    String getName();
+    
+    void excute(Context context) throws Exception;
     
     public interface Context extends TimeService, AttributeContext {
         StatsReporter getStatReporter();

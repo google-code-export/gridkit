@@ -2,6 +2,7 @@ package org.gridkit.nimble.task;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -218,7 +219,7 @@ public class TaskSLA implements Cloneable {
         result.finishDelay = this.finishDelay;
         result.rate = this.rate;
         result.iterationsCount = this.iterationsCount; 
-        result.labels = this.labels;
+        result.labels = new HashSet<String>(labels);
         
         return result;
     }

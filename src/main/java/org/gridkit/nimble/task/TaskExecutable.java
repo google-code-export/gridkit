@@ -50,14 +50,14 @@ public class TaskExecutable implements ExecScenario.Executable {
         }
 
         try {
-            executor.invokeAll(taskCallables);
-        } catch (InterruptedException e) {
+            executor.invokeAll(taskCallables); 
+        } catch (InterruptedException ignored) {
             return getResult(status, stats);
         } finally {
             executor.shutdownNow();
         }
         
-        return null;
+        return getResult(status, stats);
     }
     
     private <T> Result<T> getResult(AtomicReference<Play.Status> status, AtomicReference<T> stats) {
@@ -92,7 +92,7 @@ public class TaskExecutable implements ExecScenario.Executable {
                 long iteration = 0;
                 long duration = context.getLocalAgent().currentTimeMillis() - startTime;
                 
-                while (sla.isFinished(duration, iteration)) {
+                while (!sla.isFinished(duration, iteration)) {
                     iteration += 1;
                     task.excute(taskContext);
                 }
@@ -132,6 +132,11 @@ public class TaskExecutable implements ExecScenario.Executable {
         }
 
         @Override
+        public long currentTimeNanos() {
+            return context.getLocalAgent().currentTimeNanos();
+        }
+        
+        @Override
         public Logger getLogger() {
             return context.getLocalAgent().getLogger(name);
         }
@@ -145,5 +150,7 @@ public class TaskExecutable implements ExecScenario.Executable {
         public ConcurrentMap<String, Object> getAttributesMap() {
             return context.getAttributesMap();
         }
+
+
     }
 }
