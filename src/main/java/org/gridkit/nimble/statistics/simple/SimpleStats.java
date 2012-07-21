@@ -59,7 +59,7 @@ public class SimpleStats {
     
     private void isTimeStats(String statistica) {
         StatisticalSummary vs = getValueStats(statistica);
-        StatisticalSummary ts  = getValueStats(statistica);
+        StatisticalSummary ts  = getTimeStats(statistica);
 
         if (vs.getN() != ts.getN()) {
             throw new IllegalStateException(statistica + " is not time based statistics");

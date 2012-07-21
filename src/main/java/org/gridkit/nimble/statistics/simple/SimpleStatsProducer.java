@@ -11,8 +11,8 @@ public class SimpleStatsProducer implements StatsProducer<SimpleStats> {
     private Map<String, SummaryStatistics> timeStats;
 
     public SimpleStatsProducer() {
-        this.timeStats = new HashMap<String, SummaryStatistics>();
         this.valueStats = new HashMap<String, SummaryStatistics>();
+        this.timeStats = new HashMap<String, SummaryStatistics>();
     }
     
     @Override
@@ -36,6 +36,7 @@ public class SimpleStatsProducer implements StatsProducer<SimpleStats> {
             timeStats.put(statistica, timeStat);
         }
         
+        timeStat.addValue(timestamp);
         report(statistica, value);
     }
 

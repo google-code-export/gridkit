@@ -7,7 +7,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 import org.gridkit.nimble.platform.Director;
 import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.RemoteAgent;
@@ -15,6 +17,7 @@ import org.gridkit.nimble.platform.local.ThreadPoolAgent;
 import org.gridkit.nimble.scenario.ParScenario;
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.SeqScenario;
+import org.gridkit.nimble.statistics.ThroughputSummary;
 import org.gridkit.nimble.statistics.simple.SimpleStats;
 import org.gridkit.nimble.statistics.simple.SimpleStatsFactory;
 import org.gridkit.nimble.statistics.simple.SimpleStatsReporter;
@@ -30,8 +33,8 @@ public class Trigonometry {
     private static final String TAN = "tan";
     
     private static final long NUMBERS = 5;
-    private static final long ITERATIONS = 5;
-    private static final long DURATION = 5000;
+    private static final long ITERATIONS = 10000;
+    private static final long DURATION = 1; // seconds
     
     public static void main(String[] args) throws Exception {
         ExecutorService agentExecutor = Executors.newCachedThreadPool();
@@ -49,15 +52,30 @@ public class Trigonometry {
         try {
             play.getCompletionFuture().get();
         } finally {
-            System.err.println("--------------------");
             director.shutdown(false);
+        }
+
+        for (String func : Arrays.asList(SIN, COS, TAN)) {
+            System.err.println("Latency for " + func + " in microseconds");
+            
+            StatisticalSummary latencyStats = play.getStats().getLatency(calcStats(func), TimeUnit.MICROSECONDS);
+            System.err.println(latencyStats);
+            
+            System.err.println("-----");
+            
+            ThroughputSummary throughput = play.getStats().getThroughput(calcStats(func));
+            
+            System.err.println("Duration of " + func + " = " + throughput.getDuration(TimeUnit.MILLISECONDS) + " ms");
+            System.err.println("Throughput of " + func + " = " + throughput.getThroughput(TimeUnit.MILLISECONDS) + " ops/ms");
+            
+            System.err.println("-----");
         }
     }
     
     private static Scenario getScenario() {
         Task sinInitTask = new InitTask("SinInitTask", SIN, new Sin());
         Task cosInitTask = new InitTask("CosInitTask", COS, new Cos());
-        Task tanInitTask = new InitTask("TanInitTask", TAN, new Cos());
+        Task tanInitTask = new InitTask("TanInitTask", TAN, new Tan());
         
         TaskSLA sinSLA = new TaskSLA();
         sinSLA.setLabels(Collections.singleton(SIN));
@@ -87,7 +105,8 @@ public class Trigonometry {
         cosSLA.setIterationsCount(ITERATIONS);
         
         tanSLA = tanSLA.clone();
-        tanSLA.setFinishDelay(DURATION);
+        tanSLA.setFinishDelay(DURATION, TimeUnit.SECONDS);
+        tanSLA.setIterationsCount(null);
         
         List<Task> sinTasks = new ArrayList<Task>();
         List<Task> cosTasks = new ArrayList<Task>();
@@ -138,7 +157,7 @@ public class Trigonometry {
 
         @Override
         public String getName() {
-            return "init of " + name;
+            return name;
         }
     }
     
@@ -157,13 +176,13 @@ public class Trigonometry {
         public void excute(Context context) throws Exception {
             SimpleStatsReporter reporter = new SimpleStatsReporter(context.getStatReporter(), context);
             
-            String getStats = getStats(funcName);
+            String initStats = initStats(funcName);
             String calsStats = calcStats(funcName);
             
-            reporter.start(getStats);
+            reporter.start(initStats);
             @SuppressWarnings("unchecked")
             Function<Double, Double> func = (Function<Double, Double>)context.getAttributesMap().get(funcName);
-            reporter.finish(getStats);
+            reporter.finish(initStats);
             
             reporter.start(calsStats);
             func.apply(value);
@@ -172,11 +191,11 @@ public class Trigonometry {
 
         @Override
         public String getName() {
-            return "calculation of " + name;
+            return name;
         }
     }
     
-    public static String getStats(String name) {
+    public static String initStats(String name) {
         return "get_" + name;
     }
     

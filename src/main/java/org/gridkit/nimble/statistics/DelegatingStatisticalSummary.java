@@ -47,4 +47,18 @@ public class DelegatingStatisticalSummary implements StatisticalSummary {
     protected StatisticalSummary getDelegate() {
         return delegate;
     }
+    
+    @Override
+    public String toString() {
+        StringBuilder outBuffer = new StringBuilder();
+        String endl = "\n";
+        outBuffer.append("StatisticalSummary:").append(endl);
+        outBuffer.append("n: ").append(getN()).append(endl);
+        outBuffer.append("min: ").append(getMin()).append(endl);
+        outBuffer.append("max: ").append(getMax()).append(endl);
+        outBuffer.append("mean: ").append(getMean()).append(endl);
+        outBuffer.append("variance: ").append(getVariance()).append(endl);
+        outBuffer.append("standard deviation: ").append(getStandardDeviation());
+        return outBuffer.toString();
+    }
 }

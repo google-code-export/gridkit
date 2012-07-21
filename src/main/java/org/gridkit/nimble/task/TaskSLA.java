@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.RemoteAgent;
@@ -107,7 +108,7 @@ public class TaskSLA implements Cloneable {
         }
     }
     
-    public boolean isFinished(long duration, long iteration) {
+    public boolean isFinished(long duration, long iteration) {        
         if (finishDelay != null && duration > finishDelay) {
             return true;
         }
@@ -145,24 +146,24 @@ public class TaskSLA implements Cloneable {
         return startDelay;
     }
 
-    public void setStartDelay(Long startDelay) {
+    public void setStartDelay(Long startDelay, TimeUnit timeUnit) {
         if (startDelay != null) {
             ValidOps.positive(startDelay, "startDelay");
         }
         
-        this.startDelay = startDelay;
+        this.startDelay = TimeUnit.MILLISECONDS.convert(startDelay, timeUnit);
     }
 
     public Long getFinishDelay() {
         return finishDelay;
     }
 
-    public void setFinishDelay(Long finishDelay) {
+    public void setFinishDelay(Long finishDelay, TimeUnit timeUnit) {
         if (finishDelay != null) {
             ValidOps.positive(finishDelay, "finishDelay");
         }
         
-        this.finishDelay = finishDelay;
+        this.finishDelay = TimeUnit.MILLISECONDS.convert(finishDelay, timeUnit);
     }
 
     public Integer getRate() {
