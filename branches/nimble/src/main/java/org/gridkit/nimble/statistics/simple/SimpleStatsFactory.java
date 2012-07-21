@@ -3,19 +3,19 @@ package org.gridkit.nimble.statistics.simple;
 import org.gridkit.nimble.statistics.StatsFactory;
 import org.gridkit.nimble.statistics.StatsProducer;
 
-public class SimpleStatsFactory implements StatsFactory<SimpleStats> {
+public class SimpleStatsFactory implements StatsFactory<SimpleStats> {    
     @Override
     public StatsProducer<SimpleStats> newStatsProducer() {
-        return null;
+        return new SimpleStatsProducer();
     }
 
     @Override
     public SimpleStats emptyStats() {
-        return null;
+        return new SimpleStats();
     }
 
     @Override
-    public SimpleStats combine(SimpleStats stats1, SimpleStats stats2) {
-        return null;
+    public SimpleStats combine(SimpleStats s1, SimpleStats s2) {
+        return SimpleStats.combine(s1, s2);
     }
 }

@@ -30,7 +30,7 @@ public class TaskScenario implements Scenario {
     @Override
     public <T> Play<T> play(Context<T> context) {
         List<RemoteAgent> agents = sla.getAgents(context.getAgents());
-        
+                
         if (agents.isEmpty()) {
             log.info("No agents was found for scenario '{}'", name);
             return new EmptyPlay<T>(

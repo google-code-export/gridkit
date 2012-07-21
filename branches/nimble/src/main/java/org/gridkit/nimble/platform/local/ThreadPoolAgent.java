@@ -92,6 +92,11 @@ public class ThreadPoolAgent implements LocalAgent {
     }
 
     @Override
+    public long currentTimeNanos() {
+        return System.nanoTime();
+    }
+    
+    @Override
     public ConcurrentMap<String, Object> getAttributesMap() {
         return attributes;
     }

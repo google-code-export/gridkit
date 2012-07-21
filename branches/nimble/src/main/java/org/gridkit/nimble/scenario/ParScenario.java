@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.gridkit.nimble.platform.Play;
+import org.gridkit.nimble.util.FutureListener;
+import org.gridkit.nimble.util.FutureOps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.gridkit.nimble.platform.Play;
 import com.google.common.base.Functions;
 import com.google.common.util.concurrent.AbstractFuture;
-import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -30,6 +31,10 @@ public class ParScenario implements Scenario {
     public ParScenario(String name, List<Scenario> scenarios) {
         this(name, scenarios, true);
     }
+    
+    public ParScenario(List<Scenario> scenarios) {
+        this("PAR", scenarios);
+    }
 
     @Override
     public <T> Play<T> play(Context<T> context) {
@@ -45,7 +50,7 @@ public class ParScenario implements Scenario {
         return name;
     }
     
-    private class ParPlay<T> extends AbstractPlay<T> implements FutureCallback<Play<T>> {
+    private class ParPlay<T> extends AbstractPlay<T> implements FutureListener<Play<T>> {
         private final Context<T> context;
         
         private final AtomicInteger playsRemain;
@@ -80,20 +85,14 @@ public class ParScenario implements Scenario {
         
         public void registerCallbacks() {
             for (ListenableFuture<Play<T>> playFuture : playFutures) {
-                Futures.addCallback(playFuture, this, context.getExecutor());
+                FutureOps.addListener(playFuture, this, context.getExecutor());
             }
         }
         
-        public synchronized boolean cancel() {            
-            boolean result = false;
-                        
+        public void cancel() {            
             for (ListenableFuture<Play<T>> playFuture : playFutures) {
-                boolean playCanceled = playFuture.cancel(interruptOnFailure); // do not insert into result expression
-                
-                result = result || playCanceled;
+                playFuture.cancel(interruptOnFailure);
             }
-
-            return result;
         }
         
         @Override
@@ -102,25 +101,29 @@ public class ParScenario implements Scenario {
         }
 
         @Override
-        public void onSuccess(final Play<T> paly) {
+        public void onSuccess(final Play<T> play) {
             final int playsRemain = this.playsRemain.decrementAndGet();
 
             this.update(new Runnable() {
                 @Override
                 public void run() {
-                    if (paly.getStatus() != Play.Status.Success) {
-                        status = Play.Status.Failure;
-
-                        if (paly.getStatus() == Play.Status.Failure) {
-                            ScenarioLogging.logFailure(log, ParScenario.this, paly.getScenario());
-                        } else {
-                            ScenarioLogging.logFailure(log, ParScenario.this, paly.getScenario(), paly.getStatus());
+                    ParPlay.this.setStats(context.getStatsFactory().combine(ParPlay.this.getStats(), play.getStats()));
+                    
+                    if (play.getStatus() != Play.Status.Success) {
+                        try {
+                            cancel();
+                        } finally {
+                            ParPlay.this.setStatus(Play.Status.Failure);
+                            future.set(null);
                         }
                         
-                        future.set(null);
-                        cancel();
+                        if (play.getStatus() == Play.Status.Failure) {
+                            ScenarioLogging.logFailure(log, ParScenario.this, play.getScenario());
+                        } else {
+                            ScenarioLogging.logFailure(log, ParScenario.this, play.getScenario(), play.getStatus());
+                        }
                     } else if (playsRemain == 0) {
-                        status = Play.Status.Success;
+                        ParPlay.this.setStatus(Play.Status.Success);
                         ScenarioLogging.logSuccess(log, ParScenario.this);
                         future.set(null);
                     }
@@ -128,15 +131,22 @@ public class ParScenario implements Scenario {
             });
         }
 
+        // TODO combine statistics on failure
         @Override
-        public void onFailure(Throwable t) {
-            boolean justCancelled = cancel();
-            
-            if (justCancelled) {
-                setStatus(Play.Status.Failure);
-                ScenarioLogging.logFailure(log, ParScenario.this, t);
-                future.setException(t);
+        public void onFailure(Throwable t, boolean afterSuccess, boolean afterCancel) {
+            try {
+                cancel();
+            } finally {
+                if (setStatus(Play.Status.Failure)) {
+                    ScenarioLogging.logFailure(log, ParScenario.this, t);
+                    future.setException(t);
+                }
             }
+        }
+
+        @Override
+        public void onCancel() {
+            
         }
     }
     
@@ -160,15 +170,15 @@ public class ParScenario implements Scenario {
                 return false;
             }
             
-            boolean justCancelled = play.cancel();
-            
-            if (justCancelled) {
-                play.setStatus(Play.Status.Canceled);
-                ScenarioLogging.logCancel(log, ParScenario.this);
-                super.cancel(false);
+            try {
+                play.cancel();
+            } finally {
+                if (play.setStatus(Play.Status.Canceled)) {
+                    ScenarioLogging.logCancel(log, ParScenario.this);
+                }
             }
             
-            return justCancelled;
+            return super.cancel(false);
         };
     }
     

@@ -5,9 +5,6 @@ import static org.gridkit.nimble.util.StringOps.F;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.gridkit.nimble.platform.AttributeContext;
 import org.gridkit.nimble.platform.LocalAgent;
 import org.gridkit.nimble.platform.Play;
@@ -15,9 +12,12 @@ import org.gridkit.nimble.platform.Play.Status;
 import org.gridkit.nimble.platform.RemoteAgent;
 import org.gridkit.nimble.statistics.StatsFactory;
 import org.gridkit.nimble.statistics.StatsProducer;
+import org.gridkit.nimble.util.FutureListener;
+import org.gridkit.nimble.util.FutureOps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.util.concurrent.AbstractFuture;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
 public class ExecScenario implements Scenario {
@@ -101,7 +101,7 @@ public class ExecScenario implements Scenario {
         }
     }
     
-    private class ExecPipeline<T> extends AbstractFuture<Void> implements FutureCallback<Result<T>> {
+    private class ExecPipeline<T> extends AbstractFuture<Void> implements FutureListener<Result<T>> {
         private final Scenario.Context<T> context;
         
         private volatile AbstractPlay<T> play;
@@ -123,7 +123,7 @@ public class ExecScenario implements Scenario {
             
             future = agent.invoke(executor);
             
-            Futures.addCallback(future, this, context.getExecutor());
+            FutureOps.addListener(future, this, context.getExecutor());
         }
 
         @Override
@@ -131,27 +131,27 @@ public class ExecScenario implements Scenario {
             play.update(new Runnable() {
                 @Override
                 public void run() {
-                    play.status = result.getStatus();
-                    play.stats = result.getStats();
+                    play.setStats(result.getStats());
                     
-                    if (play.status == Play.Status.Failure) {
+                    if (result.getStatus() == Play.Status.Failure) {
+                        play.setStatus(Play.Status.Failure);
                         ScenarioLogging.logFailure(log, ExecScenario.this, F("executable '%'", executable));
-                    } else if (play.status == Play.Status.Success) {
+                    } else if (result.getStatus() == Play.Status.Success) {
+                        play.setStatus(Play.Status.Success);
                         ScenarioLogging.logSuccess(log, ExecScenario.this);
                     } else {
-                        play.status = Play.Status.Failure;
+                        play.setStatus(Play.Status.Failure);
                         ScenarioLogging.logFailure(log, ExecScenario.this, F("executable '%'", executable), result.getStatus());
                     }
+                    
+                    set(null);
                 }
             });
-
-            set(null);
         }
 
         @Override
-        public void onFailure(Throwable t) {
-            if (!future.isCancelled()) {
-                play.setStatus(Play.Status.Failure);
+        public void onFailure(Throwable t, boolean afterSuccess, boolean afterCancel) {
+            if (play.setStatus(Play.Status.Failure)) {
                 ScenarioLogging.logFailure(log, ExecScenario.this, t);
                 setException(t);
             }
@@ -159,15 +159,24 @@ public class ExecScenario implements Scenario {
         
         @Override
         public boolean cancel(boolean mayInterruptIfRunning) {
-            boolean result = future.cancel(mayInterruptIfRunning);
-            
-            if (result) {
-                play.setStatus(Play.Status.Canceled);
-                ScenarioLogging.logCancel(log, ExecScenario.this);
-                super.cancel(false);
+            if (isDone()) {
+                return false;
             }
             
-            return result;
+            try {
+                future.cancel(mayInterruptIfRunning);
+            } finally {
+                if (play.setStatus(Play.Status.Canceled)) {
+                    ScenarioLogging.logCancel(log, ExecScenario.this);
+                }
+            }
+
+            return super.cancel(false);
+        }
+
+        @Override
+        public void onCancel() {
+            
         }
     }
 
