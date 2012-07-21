@@ -44,7 +44,7 @@ public class TaskExecutable implements ExecScenario.Executable {
         ExecutorService executor = sla.newExecutor();
         
         List<Callable<Void>> taskCallables = new ArrayList<Callable<Void>>();
-        
+                
         for (Task task : tasks) {
             taskCallables.add(new TaskCallable<T>(task, status, stats, context));
         }
@@ -87,14 +87,16 @@ public class TaskExecutable implements ExecScenario.Executable {
             StatsProducer<T> statsProducer = statsFactory.newStatsProducer();
             
             Task.Context taskContext = new TaskContext<T>(context, status, statsProducer);
-            
+                        
             try {
                 long iteration = 0;
-                long duration = context.getLocalAgent().currentTimeMillis() - startTime;
+                long duration = 0; 
                 
                 while (!sla.isFinished(duration, iteration)) {
-                    iteration += 1;
                     task.excute(taskContext);
+                    
+                    iteration += 1;
+                    duration = context.getLocalAgent().currentTimeMillis() - startTime;
                 }
             } catch (Throwable t) {
                 statsProducer.report(t.toString(), context.getLocalAgent().currentTimeMillis());

@@ -11,26 +11,31 @@ public class SimpleStatsReporter extends DelegatingStatsReporter {
     private final TimeService timeService;
     
     private final Map<String, Long> startNanos;
+    private final Map<String, Long> startMillis; 
+    
     
     public SimpleStatsReporter(StatsReporter delegate, TimeService timeService) {
         super(delegate);
         this.timeService = timeService;
         this.startNanos = new HashMap<String, Long>();
+        this.startMillis = new HashMap<String, Long>();
     }
 
     public void start(String statistica) {
-        report(statistica, timeService.currentTimeMillis());
         startNanos.put(statistica, timeService.currentTimeNanos());
+        startMillis.put(statistica, timeService.currentTimeMillis());
     }
     
     public void finish(String statistica) {
-        long finishTime = timeService.currentTimeNanos();
+        long finishTimeNanos = timeService.currentTimeNanos();
         
-        Long startTime = startNanos.get(statistica);
+        Long startTimeNanos = startNanos.get(statistica);
+        Long startTimeMillis = startMillis.get(statistica);
         
-        if (statistica != null) {
-            report(statistica, startTime, finishTime - startTime);
+        if (startTimeNanos != null && startTimeMillis != null) {
+            report(statistica, startTimeMillis, finishTimeNanos - startTimeNanos);
             startNanos.remove(statistica);
+            startMillis.remove(statistica);
         }
     }
 }
