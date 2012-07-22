@@ -17,6 +17,10 @@ public class EmptyPlay<T> implements Play<T> {
         this.future = Futures.immediateFuture(null);
     }
 
+    public EmptyPlay(Scenario scenario, T stats) {
+        this(scenario, Play.Status.Success, stats);
+    }
+    
     @Override
     public Scenario getScenario() {
         return scenario;

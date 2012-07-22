@@ -4,6 +4,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
+import org.gridkit.nimble.util.FutureListener.FailureEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ public class FutureOps {
             } catch (CancellationException e) {
                 onCancel();
             } catch (ExecutionException e) {
-                onFailure(e.getCause(), false, false);
+                onFailure(e.getCause(), FailureEvent.OnFailure);
             }
             
             if (isSuccess) {
@@ -54,7 +55,7 @@ public class FutureOps {
                 listener.onSuccess(result);
             } catch (Throwable t) {
                 log.error("Throwable while executing onSuccess", t);
-                onFailure(t, true, false);
+                onFailure(t, FailureEvent.OnSuccess);
             }
         }
 
@@ -63,13 +64,13 @@ public class FutureOps {
                 listener.onCancel();
             } catch (Throwable t) {
                 log.error("Throwable while executing onCancel", t);
-                onFailure(t, false, true);
+                onFailure(t, FailureEvent.OnCancel);
             }
         }
         
-        private void onFailure(Throwable t, boolean afterSuccess, boolean afterCancel) {
+        private void onFailure(Throwable t, FailureEvent event) {
             try {
-                listener.onFailure(t, afterSuccess, afterCancel);
+                listener.onFailure(t, event);
             } catch (Throwable tt) {
                 log.error("Throwable while executing onFailure", tt);
                 throw new RuntimeException(tt);

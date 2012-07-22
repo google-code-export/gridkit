@@ -123,7 +123,7 @@ public class SeqScenario implements Scenario {
         }
 
         @Override
-        public void onFailure(Throwable t, boolean afterSuccess, boolean afterCancel) {
+        public void onFailure(Throwable t, FailureEvent event) {
             if (play.setStatus(Play.Status.Failure)) {
                 ScenarioOps.logFailure(log, SeqScenario.this, t);
                 setException(t);

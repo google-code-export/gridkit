@@ -18,8 +18,10 @@ import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.SeqScenario;
 import org.gridkit.nimble.statistics.simple.SimpleStats;
 import org.gridkit.nimble.statistics.simple.SimpleStatsFactory;
+import org.junit.Ignore;
 import org.slf4j.Logger;
 
+@Ignore
 public class Sleep {
     public static void main(String[] args) throws Exception {
         ExecutorService agentExecutor = Executors.newCachedThreadPool();
