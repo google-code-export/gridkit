@@ -19,7 +19,7 @@ public class SimpleThroughputSummary extends    DelegatingStatisticalSummary
 
     @Override
     public long getDuration(TimeUnit timeUnit) {
-        if (timeUnit == TimeUnit.NANOSECONDS) {
+        if (timeUnit == TimeUnit.NANOSECONDS || timeUnit == TimeUnit.MICROSECONDS) {
             throw new IllegalArgumentException("timeUnit");
         }
         

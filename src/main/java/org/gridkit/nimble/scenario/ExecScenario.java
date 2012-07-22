@@ -2,6 +2,7 @@ package org.gridkit.nimble.scenario;
 
 import static org.gridkit.nimble.util.StringOps.F;
 
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -70,7 +71,14 @@ public class ExecScenario implements Scenario {
         this.executable = executable;
         this.agent = agent;
     }
-
+    
+    public ExecScenario(Executable executable, RemoteAgent agent) {
+        this(
+            ScenarioOps.getName("Exec", Arrays.asList(executable.toString(), agent.toString())),
+            executable, agent
+        );
+    }
+    
     @Override
     public <T> Play<T> play(Scenario.Context<T> context) {
         ExecPlay<T> play = new ExecPlay<T>(this, context, agent);
@@ -113,7 +121,7 @@ public class ExecScenario implements Scenario {
         }
         
         public void start(AbstractPlay<T> play) {
-            ScenarioLogging.logStart(log, ExecScenario.this);
+            ScenarioOps.logStart(log, ExecScenario.this);
             
             this.play = play;
             
@@ -135,13 +143,13 @@ public class ExecScenario implements Scenario {
                     
                     if (result.getStatus() == Play.Status.Failure) {
                         play.setStatus(Play.Status.Failure);
-                        ScenarioLogging.logFailure(log, ExecScenario.this, F("executable '%'", executable));
+                        ScenarioOps.logFailure(log, ExecScenario.this, executable.toString());
                     } else if (result.getStatus() == Play.Status.Success) {
                         play.setStatus(Play.Status.Success);
-                        ScenarioLogging.logSuccess(log, ExecScenario.this);
+                        ScenarioOps.logSuccess(log, ExecScenario.this);
                     } else {
                         play.setStatus(Play.Status.Failure);
-                        ScenarioLogging.logFailure(log, ExecScenario.this, F("executable '%'", executable), result.getStatus());
+                        ScenarioOps.logFailure(log, ExecScenario.this, executable.toString(), result.getStatus());
                     }
                     
                     set(null);
@@ -152,7 +160,7 @@ public class ExecScenario implements Scenario {
         @Override
         public void onFailure(Throwable t, boolean afterSuccess, boolean afterCancel) {
             if (play.setStatus(Play.Status.Failure)) {
-                ScenarioLogging.logFailure(log, ExecScenario.this, t);
+                ScenarioOps.logFailure(log, ExecScenario.this, t);
                 setException(t);
             }
         }
@@ -167,7 +175,7 @@ public class ExecScenario implements Scenario {
                 future.cancel(mayInterruptIfRunning);
             } finally {
                 if (play.setStatus(Play.Status.Canceled)) {
-                    ScenarioLogging.logCancel(log, ExecScenario.this);
+                    ScenarioOps.logCancel(log, ExecScenario.this);
                 }
             }
 
@@ -199,9 +207,14 @@ public class ExecScenario implements Scenario {
             
             try {
                 return executable.excute(this);
-            } catch (Exception e) {
+            } catch (Throwable t) {
                 StatsProducer<T> producer = statsFactory.newStatsProducer();
-                producer.report("Exception during ", agent.currentTimeMillis());
+                
+                producer.report(
+                    F("Exception during executable '%s' execution on agent '%s'", executable.toString()), 
+                    agent.currentTimeMillis(), t
+                );
+                
                 return new Result<T>(Play.Status.Failure, producer.produce());
             }
         }

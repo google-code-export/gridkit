@@ -13,7 +13,6 @@ public class SimpleStatsReporter extends DelegatingStatsReporter {
     private final Map<String, Long> startNanos;
     private final Map<String, Long> startMillis; 
     
-    
     public SimpleStatsReporter(StatsReporter delegate, TimeService timeService) {
         super(delegate);
         this.timeService = timeService;

@@ -1,6 +1,5 @@
 package org.gridkit.nimble.statistics.simple;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,17 +9,18 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 import org.gridkit.nimble.statistics.ScaledStatisticalSummary;
+import org.gridkit.nimble.statistics.StatsOps;
 import org.gridkit.nimble.statistics.ThroughputSummary;
 
 public class SimpleStats {
-    private final Map<String, SimpleStatisticalSummary> valueStatsMap;
-    private final Map<String, SimpleStatisticalSummary> timeStatsMap;
+    private final Map<String, StatisticalSummary> valueStatsMap;
+    private final Map<String, StatisticalSummary> timeStatsMap;
 
     public SimpleStats() {
-        this(new HashMap<String, SimpleStatisticalSummary>(), new HashMap<String, SimpleStatisticalSummary>());
+        this(new HashMap<String, StatisticalSummary>(), new HashMap<String, StatisticalSummary>());
     }
     
-    public SimpleStats(Map<String, SimpleStatisticalSummary> valueStatsMap, Map<String, SimpleStatisticalSummary> timeStatsMap) {
+    public SimpleStats(Map<String, StatisticalSummary> valueStatsMap, Map<String, StatisticalSummary> timeStatsMap) {
         this.valueStatsMap = valueStatsMap;
         this.timeStatsMap = timeStatsMap;
     }
@@ -73,11 +73,11 @@ public class SimpleStats {
         );
     }
     
-    private static Map<String, SimpleStatisticalSummary> combine(Map<String, SimpleStatisticalSummary> m1, Map<String, SimpleStatisticalSummary> m2) {
+    private static Map<String, StatisticalSummary> combine(Map<String, StatisticalSummary> m1, Map<String, StatisticalSummary> m2) {
         Set<String> statsNames = new HashSet<String>(m1.keySet());
         statsNames.addAll(m2.keySet());
         
-        Map<String, SimpleStatisticalSummary> result = new HashMap<String, SimpleStatisticalSummary>();
+        Map<String, StatisticalSummary> result = new HashMap<String, StatisticalSummary>();
         
         for (String statsName : statsNames) {
             result.put(statsName, combine(m1.get(statsName), m2.get(statsName)));
@@ -86,13 +86,13 @@ public class SimpleStats {
         return result;
     }
     
-    private static SimpleStatisticalSummary combine(SimpleStatisticalSummary s1, SimpleStatisticalSummary s2) {
+    private static StatisticalSummary combine(StatisticalSummary s1, StatisticalSummary s2) {
         if (s1 == null) {
             return s2;
         } else if (s2 == null) {
             return s1;
         } else {
-            return SimpleStatisticalSummary.combine(Arrays.asList(s1, s2));
+            return StatsOps.combine(s1, s2);
         }
     }
 }

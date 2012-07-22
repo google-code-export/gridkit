@@ -33,7 +33,7 @@ public class ParScenario implements Scenario {
     }
     
     public ParScenario(List<Scenario> scenarios) {
-        this("PAR", scenarios);
+        this(ScenarioOps.getCompositeName("Par", scenarios), scenarios);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class ParScenario implements Scenario {
         public ParPlay(Context<T> context) {
             super(ParScenario.this, context.getStatsFactory().emptyStats());
 
-            ScenarioLogging.logStart(log, ParScenario.this);
+            ScenarioOps.logStart(log, ParScenario.this);
             
             this.context = context;
             
@@ -118,13 +118,13 @@ public class ParScenario implements Scenario {
                         }
                         
                         if (play.getStatus() == Play.Status.Failure) {
-                            ScenarioLogging.logFailure(log, ParScenario.this, play.getScenario());
+                            ScenarioOps.logFailure(log, ParScenario.this, play.getScenario());
                         } else {
-                            ScenarioLogging.logFailure(log, ParScenario.this, play.getScenario(), play.getStatus());
+                            ScenarioOps.logFailure(log, ParScenario.this, play.getScenario(), play.getStatus());
                         }
                     } else if (playsRemain == 0) {
                         ParPlay.this.setStatus(Play.Status.Success);
-                        ScenarioLogging.logSuccess(log, ParScenario.this);
+                        ScenarioOps.logSuccess(log, ParScenario.this);
                         future.set(null);
                     }
                 }
@@ -138,7 +138,7 @@ public class ParScenario implements Scenario {
                 cancel();
             } finally {
                 if (setStatus(Play.Status.Failure)) {
-                    ScenarioLogging.logFailure(log, ParScenario.this, t);
+                    ScenarioOps.logFailure(log, ParScenario.this, t);
                     future.setException(t);
                 }
             }
@@ -174,7 +174,7 @@ public class ParScenario implements Scenario {
                 play.cancel();
             } finally {
                 if (play.setStatus(Play.Status.Canceled)) {
-                    ScenarioLogging.logCancel(log, ParScenario.this);
+                    ScenarioOps.logCancel(log, ParScenario.this);
                 }
             }
             
