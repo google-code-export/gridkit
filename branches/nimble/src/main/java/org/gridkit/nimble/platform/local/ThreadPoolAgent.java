@@ -1,5 +1,7 @@
 package org.gridkit.nimble.platform.local;
 
+import static org.gridkit.nimble.util.StringOps.F;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
@@ -83,7 +85,7 @@ public class ThreadPoolAgent implements LocalAgent {
 
     @Override
     public Logger getLogger(String name) {
-        return LoggerFactory.getLogger(name);
+        return LoggerFactory.getLogger(ThreadPoolAgent.class.getSimpleName() + "." + name);
     }
 
     @Override
@@ -108,5 +110,10 @@ public class ThreadPoolAgent implements LocalAgent {
         } else {
             executor.shutdown();
         }
+    }
+    
+    @Override
+    public String toString() {
+        return F("%d#%s#%s", pid, inetAddress.getHostName(), labels);
     }
 }

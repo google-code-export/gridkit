@@ -34,7 +34,7 @@ public abstract class AbstractPlay<T> implements Play<T> {
         runnable.run();
     }
 
-    protected boolean setStatus(Play.Status status) {
+    protected synchronized boolean setStatus(Play.Status status) {
         if (this.status == Play.Status.InProgress) {
             this.status = status;
             return true;
@@ -42,7 +42,7 @@ public abstract class AbstractPlay<T> implements Play<T> {
         return false;
     }
 
-    protected void setStats(T stats) {
+    protected synchronized void setStats(T stats) {
         this.stats = stats;
     }
 }

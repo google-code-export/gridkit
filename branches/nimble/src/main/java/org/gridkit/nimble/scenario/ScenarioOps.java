@@ -1,12 +1,30 @@
 package org.gridkit.nimble.scenario;
 
-import org.slf4j.Logger;
-
-import org.gridkit.nimble.platform.Play;
-
 import static org.gridkit.nimble.util.StringOps.F;
 
-public class ScenarioLogging {
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import org.gridkit.nimble.platform.Play;
+import org.slf4j.Logger;
+
+public class ScenarioOps {
+    public static String getCompositeName(String type, Collection<Scenario> scenarios) {
+        Set<String> names = new LinkedHashSet<String>();
+        
+        for (Scenario scenario : scenarios) {
+            names.add(scenario.getName());
+        }
+        
+        return getName(type, names);
+    }
+    
+    public static String getName(String type, Collection<String> elements) {
+        return type + (new ArrayList<String>(elements)).toString();
+    }
+    
     public static void logStart(Logger log, Scenario scenario) {
         log.info("Starting execution of Scenario '{}'", scenario.getName());
     }

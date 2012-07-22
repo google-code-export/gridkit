@@ -24,7 +24,7 @@ public class SeqScenario implements Scenario {
     }
 
     public SeqScenario(List<Scenario> scenarios) {
-        this("SEQ", scenarios);
+        this(ScenarioOps.getCompositeName("Seq", scenarios), scenarios);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class SeqScenario implements Scenario {
         }
         
         public void action() {
-            ScenarioLogging.logStart(log, SeqScenario.this);
+            ScenarioOps.logStart(log, SeqScenario.this);
             pipeline.start(this);
         }
         
@@ -89,15 +89,15 @@ public class SeqScenario implements Scenario {
                         
                         if (curPlay.getStatus() == Play.Status.Failure) {
                             if (play.setStatus(Play.Status.Failure)) {
-                                ScenarioLogging.logFailure(log, SeqScenario.this, curPlay.getScenario());
+                                ScenarioOps.logFailure(log, SeqScenario.this, curPlay.getScenario());
                             }
                         } else if (curPlay.getStatus() != Play.Status.Success) {
                             if (play.setStatus(Play.Status.Failure)) {
-                                ScenarioLogging.logFailure(log, SeqScenario.this, curPlay.getScenario(), curPlay.getStatus());
+                                ScenarioOps.logFailure(log, SeqScenario.this, curPlay.getScenario(), curPlay.getStatus());
                             }
                         } else if (nextScenarios.isEmpty()) {
                             if (play.setStatus(Play.Status.Success)) {
-                                ScenarioLogging.logSuccess(log, SeqScenario.this);
+                                ScenarioOps.logSuccess(log, SeqScenario.this);
                             }
                         }
                     }
@@ -125,7 +125,7 @@ public class SeqScenario implements Scenario {
         @Override
         public void onFailure(Throwable t, boolean afterSuccess, boolean afterCancel) {
             if (play.setStatus(Play.Status.Failure)) {
-                ScenarioLogging.logFailure(log, SeqScenario.this, t);
+                ScenarioOps.logFailure(log, SeqScenario.this, t);
                 setException(t);
             }
         }
@@ -141,7 +141,7 @@ public class SeqScenario implements Scenario {
                     future.cancel(mayInterruptIfRunning);
                 } finally {
                     if (play.setStatus(Play.Status.Canceled)) {
-                        ScenarioLogging.logCancel(log, SeqScenario.this);
+                        ScenarioOps.logCancel(log, SeqScenario.this);
                     }
                 }
                 return super.cancel(false);

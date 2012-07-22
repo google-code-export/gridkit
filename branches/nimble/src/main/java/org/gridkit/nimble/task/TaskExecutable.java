@@ -1,6 +1,9 @@
 package org.gridkit.nimble.task;
 
+import static org.gridkit.nimble.util.StringOps.F;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
@@ -14,6 +17,7 @@ import org.gridkit.nimble.platform.Play.Status;
 import org.gridkit.nimble.scenario.ExecScenario;
 import org.gridkit.nimble.scenario.ExecScenario.Context;
 import org.gridkit.nimble.scenario.ExecScenario.Result;
+import org.gridkit.nimble.scenario.ScenarioOps;
 import org.gridkit.nimble.statistics.StatsFactory;
 import org.gridkit.nimble.statistics.StatsProducer;
 import org.gridkit.nimble.statistics.StatsReporter;
@@ -86,7 +90,7 @@ public class TaskExecutable implements ExecScenario.Executable {
             StatsFactory<T> statsFactory = context.getStatsFactory();
             StatsProducer<T> statsProducer = statsFactory.newStatsProducer();
             
-            Task.Context taskContext = new TaskContext<T>(context, status, statsProducer);
+            Task.Context taskContext = new TaskContext<T>(task, context, status, statsProducer);
                         
             try {
                 long iteration = 0;
@@ -99,7 +103,10 @@ public class TaskExecutable implements ExecScenario.Executable {
                     duration = context.getLocalAgent().currentTimeMillis() - startTime;
                 }
             } catch (Throwable t) {
-                statsProducer.report(t.toString(), context.getLocalAgent().currentTimeMillis());
+                statsProducer.report(
+                    F("Exception during task '%s' execution on agent '%s'", task.toString(), context.getLocalAgent().toString()),
+                    context.getLocalAgent().currentTimeMillis()
+                );
                 status.set(Play.Status.Failure);
             } finally {
                 synchronized (stats) {
@@ -112,12 +119,14 @@ public class TaskExecutable implements ExecScenario.Executable {
     }
     
     private class TaskContext<T> implements Task.Context {
+        private final Task task;
         private final ExecScenario.Context<T> context;
         
         private final AtomicReference<Play.Status> status;
         private final StatsReporter reporter;
         
-        public TaskContext(Context<T> context, AtomicReference<Status> status, StatsReporter reporter) {
+        public TaskContext(Task task, Context<T> context, AtomicReference<Status> status, StatsReporter reporter) {
+            this.task = task;
             this.context = context;
             this.status = status;
             this.reporter = reporter;
@@ -140,7 +149,7 @@ public class TaskExecutable implements ExecScenario.Executable {
         
         @Override
         public Logger getLogger() {
-            return context.getLocalAgent().getLogger(name);
+            return context.getLocalAgent().getLogger(task.getName());
         }
 
         @Override
@@ -152,7 +161,10 @@ public class TaskExecutable implements ExecScenario.Executable {
         public ConcurrentMap<String, Object> getAttributesMap() {
             return context.getAttributesMap();
         }
-
-
+    }
+    
+    @Override
+    public String toString() {
+        return ScenarioOps.getName("TaskExec", Collections.singleton(name));
     }
 }

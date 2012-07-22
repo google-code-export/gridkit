@@ -3,6 +3,7 @@ package org.gridkit.nimble.statistics.simple;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.gridkit.nimble.statistics.StatsProducer;
 
@@ -50,11 +51,11 @@ public class SimpleStatsProducer implements StatsProducer<SimpleStats> {
         return new SimpleStats(produce(valueStats), produce(timeStats));
     }
     
-    private static Map<String, SimpleStatisticalSummary> produce(Map<String, SummaryStatistics> stats) {
-        Map<String, SimpleStatisticalSummary> result = new HashMap<String, SimpleStatisticalSummary>();
+    private static Map<String, StatisticalSummary> produce(Map<String, SummaryStatistics> stats) {
+        Map<String, StatisticalSummary> result = new HashMap<String, StatisticalSummary>();
         
         for (Map.Entry<String, SummaryStatistics> entry : stats.entrySet()) {
-            result.put(entry.getKey(), new SimpleStatisticalSummary(entry.getValue()));
+            result.put(entry.getKey(), entry.getValue().getSummary());
         }
         
         return result;

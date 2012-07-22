@@ -2,6 +2,7 @@ package org.gridkit.nimble.task;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +28,8 @@ public class TaskSLA implements Cloneable {
     private Long iterationsCount = 1l; 
 
     private boolean ignoreFailures = false;
+    
+    private boolean shuffle = true;
     
     private Set<String> labels = null; // by default execute on every agent
 
@@ -96,6 +99,14 @@ public class TaskSLA implements Cloneable {
             }
             return false;
         }
+    }
+    
+    public List<Task> shuffle(List<Task> tasks) {
+        if (shuffle) {
+            Collections.shuffle(tasks);
+        };
+        
+        return tasks;
     }
     
     public Play.Status getStatus(Play.Status status) {
@@ -208,6 +219,14 @@ public class TaskSLA implements Cloneable {
         }
 
         this.labels = labels;
+    }
+
+    public boolean isShuffle() {
+        return shuffle;
+    }
+
+    public void setShuffle(boolean shuffle) {
+        this.shuffle = shuffle;
     }
 
     @Override

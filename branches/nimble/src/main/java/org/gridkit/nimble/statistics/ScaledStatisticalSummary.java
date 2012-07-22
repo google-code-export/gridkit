@@ -24,7 +24,7 @@ public class ScaledStatisticalSummary extends DelegatingStatisticalSummary {
 
     @Override
     public double getStandardDeviation() {
-        return getDelegate().getStandardDeviation() * square;
+        return getDelegate().getStandardDeviation() * scale;
     }
 
     @Override

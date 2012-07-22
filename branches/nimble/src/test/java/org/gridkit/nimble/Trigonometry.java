@@ -17,6 +17,7 @@ import org.gridkit.nimble.platform.local.ThreadPoolAgent;
 import org.gridkit.nimble.scenario.ParScenario;
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.SeqScenario;
+import org.gridkit.nimble.statistics.StatsOps;
 import org.gridkit.nimble.statistics.ThroughputSummary;
 import org.gridkit.nimble.statistics.simple.SimpleStats;
 import org.gridkit.nimble.statistics.simple.SimpleStatsFactory;
@@ -27,14 +28,18 @@ import org.gridkit.nimble.task.TaskScenario;
 
 import com.google.common.base.Function;
 
-public class Trigonometry {
+public class Trigonometry {    
     private static final String SIN = "sin";
     private static final String COS = "cos";
     private static final String TAN = "tan";
     
-    private static final long NUMBERS = 5;
-    private static final long ITERATIONS = 10000;
-    private static final long DURATION = 1; // seconds
+    private static final long WARMUP_NUMBERS = 5;
+    private static final long WARMUP_ITERATIONS = 25000;
+    private static final long WARMUP_DURATION = 3; // seconds
+    
+    private static final long NUMBERS = 10;
+    private static final long ITERATIONS = 100000;
+    private static final long DURATION = 3; // seconds
     
     public static void main(String[] args) throws Exception {
         ExecutorService agentExecutor = Executors.newCachedThreadPool();
@@ -47,32 +52,30 @@ public class Trigonometry {
             Arrays.asList(sinAgent, cosAgent), new SimpleStatsFactory(), directorExecutor
         );
 
-        Play<SimpleStats> play = director.play(getScenario());
+        Play<SimpleStats> play;
         
         try {
+            play = director.play(getScenario(WARMUP_NUMBERS, WARMUP_ITERATIONS, WARMUP_DURATION));
+            play.getCompletionFuture().get();
+            
+            play = director.play(getScenario(NUMBERS, ITERATIONS, DURATION));
             play.getCompletionFuture().get();
         } finally {
             director.shutdown(false);
         }
 
         for (String func : Arrays.asList(SIN, COS, TAN)) {
-            System.err.println("Latency for " + func + " in microseconds");
-            
             StatisticalSummary latencyStats = play.getStats().getLatency(calcStats(func), TimeUnit.MICROSECONDS);
-            System.err.println(latencyStats);
-            
-            System.err.println("-----");
-            
             ThroughputSummary throughput = play.getStats().getThroughput(calcStats(func));
-            
-            System.err.println("Duration of " + func + " = " + throughput.getDuration(TimeUnit.MILLISECONDS) + " ms");
-            System.err.println("Throughput of " + func + " = " + throughput.getThroughput(TimeUnit.MILLISECONDS) + " ops/ms");
-            
-            System.err.println("-----");
+
+            System.err.println("----- Latency for " + func);
+            System.err.println(StatsOps.latencyToString(latencyStats, TimeUnit.MICROSECONDS));
+            System.err.println("----- Throughput of " + func);
+            System.err.println(StatsOps.throughputToString(throughput, TimeUnit.MILLISECONDS));
         }
     }
     
-    private static Scenario getScenario() {
+    private static Scenario getScenario(long numbers, long iterations, long duration) {
         Task sinInitTask = new InitTask("SinInitTask", SIN, new Sin());
         Task cosInitTask = new InitTask("CosInitTask", COS, new Cos());
         Task tanInitTask = new InitTask("TanInitTask", TAN, new Tan());
@@ -99,20 +102,20 @@ public class Trigonometry {
         );
         
         sinSLA = sinSLA.clone();
-        sinSLA.setIterationsCount(ITERATIONS);
+        sinSLA.setIterationsCount(iterations);
         
         cosSLA = cosSLA.clone();
-        cosSLA.setIterationsCount(ITERATIONS);
+        cosSLA.setIterationsCount(iterations);
         
         tanSLA = tanSLA.clone();
-        tanSLA.setFinishDelay(DURATION, TimeUnit.SECONDS);
+        tanSLA.setFinishDelay(duration, TimeUnit.SECONDS);
         tanSLA.setIterationsCount(null);
         
         List<Task> sinTasks = new ArrayList<Task>();
         List<Task> cosTasks = new ArrayList<Task>();
         List<Task> tanTasks = new ArrayList<Task>();
         
-        for (long i = 1; i <= NUMBERS; ++i) {
+        for (long i = 1; i <= numbers; ++i) {
             sinTasks.add(new CalcTask("SinCalcTask#"+i, SIN, i));
             cosTasks.add(new CalcTask("CosCalcTask#"+i, COS, i));
             tanTasks.add(new CalcTask("TanCalcTask#"+i, TAN, i));
