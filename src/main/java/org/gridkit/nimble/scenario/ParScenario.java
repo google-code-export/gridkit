@@ -133,7 +133,7 @@ public class ParScenario implements Scenario {
 
         // TODO combine statistics on failure
         @Override
-        public void onFailure(Throwable t, boolean afterSuccess, boolean afterCancel) {
+        public void onFailure(Throwable t, FailureEvent event) {
             try {
                 cancel();
             } finally {

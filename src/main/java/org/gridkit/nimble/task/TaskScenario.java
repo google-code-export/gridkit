@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.gridkit.nimble.platform.EmptyPlay;
 import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.RemoteAgent;
@@ -17,6 +14,8 @@ import org.gridkit.nimble.scenario.ScenarioOps;
 import org.gridkit.nimble.util.FutureListener;
 import org.gridkit.nimble.util.FutureOps;
 import org.gridkit.nimble.util.ValidOps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TaskScenario implements Scenario, FutureListener<Void> {
     private static final Logger log = LoggerFactory.getLogger(TaskScenario.class);
@@ -48,12 +47,12 @@ public class TaskScenario implements Scenario, FutureListener<Void> {
         if (agents.isEmpty()) {
             TaskOps.logNoAgentsFound(log, this);
             result = new EmptyPlay<T>(
-                this, Play.Status.Success, context.getStatsFactory().emptyStats()
+                this, context.getStatsFactory().emptyStats()
             );
         } else if (tasks.isEmpty()) {
             TaskOps.logNoTasksFound(log, this);
             result = new EmptyPlay<T>(
-                this, Play.Status.Success, context.getStatsFactory().emptyStats()
+                this, context.getStatsFactory().emptyStats()
             );
         } else if (agents.size() == 1) {
             RemoteAgent execAgent = agents.get(0);
@@ -99,9 +98,8 @@ public class TaskScenario implements Scenario, FutureListener<Void> {
     }
 
     @Override
-    public void onFailure(Throwable t, boolean afterSuccess, boolean afterCancel) {
+    public void onFailure(Throwable t, FailureEvent event) {
         ScenarioOps.logFailure(log, this, t);
-        
     }
 
     @Override

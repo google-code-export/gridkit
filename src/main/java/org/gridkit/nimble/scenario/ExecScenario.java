@@ -158,7 +158,7 @@ public class ExecScenario implements Scenario {
         }
 
         @Override
-        public void onFailure(Throwable t, boolean afterSuccess, boolean afterCancel) {
+        public void onFailure(Throwable t, FailureEvent event) {
             if (play.setStatus(Play.Status.Failure)) {
                 ScenarioOps.logFailure(log, ExecScenario.this, t);
                 setException(t);
@@ -189,14 +189,14 @@ public class ExecScenario implements Scenario {
     }
 
     private static class Executor<T> implements RemoteAgent.Invocable<Result<T>>, Context<T> {
-        private String id;
+        private String contextId;
         private Executable executable;
         private StatsFactory<T> statsFactory;
         
         private transient LocalAgent agent;
         
-        public Executor(String id, Executable executable, StatsFactory<T> statsFactory) {
-            this.id = id;
+        public Executor(String contextId, Executable executable, StatsFactory<T> statsFactory) {
+            this.contextId = contextId;
             this.executable = executable;
             this.statsFactory = statsFactory;
         }
@@ -231,12 +231,12 @@ public class ExecScenario implements Scenario {
         
         @Override //TODO implement attributes cleaning
         public ConcurrentMap<String, Object> getAttributesMap() {
-            if (!agent.getAttributesMap().containsKey(id)) {
-                agent.getAttributesMap().putIfAbsent(id, new ConcurrentHashMap<String, Object>());
+            if (!agent.getAttributesMap().containsKey(contextId)) {
+                agent.getAttributesMap().putIfAbsent(contextId, new ConcurrentHashMap<String, Object>());
             }
 
             @SuppressWarnings("unchecked")
-            ConcurrentMap<String, Object> result = (ConcurrentMap<String, Object>)agent.getAttributesMap().get(id);
+            ConcurrentMap<String, Object> result = (ConcurrentMap<String, Object>)agent.getAttributesMap().get(contextId);
             
             return result;
         }

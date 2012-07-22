@@ -25,9 +25,11 @@ import org.gridkit.nimble.statistics.simple.SimpleStatsReporter;
 import org.gridkit.nimble.task.Task;
 import org.gridkit.nimble.task.TaskSLA;
 import org.gridkit.nimble.task.TaskScenario;
+import org.junit.Ignore;
 
 import com.google.common.base.Function;
 
+@Ignore
 public class Trigonometry {    
     private static final String SIN = "sin";
     private static final String COS = "cos";
