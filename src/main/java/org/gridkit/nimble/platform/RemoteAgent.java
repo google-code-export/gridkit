@@ -1,11 +1,12 @@
 package org.gridkit.nimble.platform;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.Set;
+import java.util.concurrent.Future;
 
-import com.google.common.util.concurrent.ListenableFuture;
 
-public interface RemoteAgent extends TimeService {
+public interface RemoteAgent {
     String getId();
     
     Set<String> getLabels();
@@ -19,9 +20,9 @@ public interface RemoteAgent extends TimeService {
     /**
      * @throws UnsupportedOperationException in a case of {@link LocalAgent}
      */
-    <T> ListenableFuture<T> invoke(Invocable<T> invocable);
+    <T> Future<T> invoke(Invocable<T> invocable);
     
-    public interface Invocable<T> {
+    public interface Invocable<T> extends Serializable {
         T invoke(LocalAgent localAgent) throws Exception;
     }
 }

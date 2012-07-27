@@ -1,12 +1,14 @@
 package org.gridkit.nimble.task;
 
+import java.io.Serializable;
+
 import org.slf4j.Logger;
 
 import org.gridkit.nimble.platform.AttributeContext;
 import org.gridkit.nimble.platform.TimeService;
 import org.gridkit.nimble.statistics.StatsReporter;
 
-public interface Task {
+public interface Task extends Serializable {
     String getName();
     
     void excute(Context context) throws Exception;

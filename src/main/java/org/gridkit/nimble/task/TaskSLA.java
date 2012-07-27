@@ -1,5 +1,6 @@
 package org.gridkit.nimble.task;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -14,7 +15,7 @@ import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.RemoteAgent;
 import org.gridkit.nimble.util.ValidOps;
 
-public class TaskSLA implements Cloneable {
+public class TaskSLA implements Cloneable, Serializable {
     private Distribution distribution = Distribution.All;
     
     private Integer threadsCount = null; // by default thread per task
