@@ -1,11 +1,18 @@
-package org.gridkit.gatling.utils;
+package org.gridkit.util.concurrent;
 
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class SimpleSpeedLimit implements SpeedLimit {
+/** 
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com) 
+ */
+public class SimpleSpeedLimit implements BlockingBarrier {
 
 	private static final long OPTIMISTIC_WAIT_TIMEOUT = 50;
 	
@@ -30,7 +37,68 @@ public class SimpleSpeedLimit implements SpeedLimit {
 	}
 	
 	@Override
-	public void accure() {
+	public void pass() throws InterruptedException, BrokenBarrierException {
+		pass(true);
+	}
+
+	@Override
+	public void stepIn() {
+		stepIn(false);
+	}
+
+	@Override
+	public void pass(boolean breakOnInterrupt) throws InterruptedException {
+		accure();
+	}
+
+	@Override
+	public void breakthrough() {
+		return;		
+	}
+
+	@Override
+	public Future<Void> stepIn(boolean needFuture) {
+		if (needFuture) {
+			return new FutureLatch() {
+
+				@Override
+				public synchronized Void get() throws InterruptedException, ExecutionException {
+					if (!isDone()) {
+						accure();
+						open();
+						return null;
+					}
+					else {
+						return null;
+					}
+				}
+
+				@Override
+				public synchronized Void get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException,		TimeoutException {
+					if (!isDone()) {
+						accure();
+						open();
+						return null;
+					}
+					else {
+						return null;
+					}
+				}
+			};
+		}
+		else {
+			try {
+				replenishLock.lock(); 
+				++anchorDrained;
+			}
+			finally {
+				replenishLock.unlock();
+			}
+			return null;
+		}
+	}
+
+	public void accure() throws InterruptedException {
 		if (semaphore.tryAcquire()) {
 			if (semaphore.availablePermits() < replenishMark) {
 				tryReplenish();
@@ -40,21 +108,33 @@ public class SimpleSpeedLimit implements SpeedLimit {
 		else {
 			while(true) {
 				tryReplenish();
-				try {
-					if (semaphore.tryAcquire(OPTIMISTIC_WAIT_TIMEOUT, TimeUnit.MILLISECONDS)) {
-						return;
-					}
-				} catch (InterruptedException e) {
-					// ignore
+				if (semaphore.tryAcquire(OPTIMISTIC_WAIT_TIMEOUT, TimeUnit.MILLISECONDS)) {
+					return;
 				}
 			}
 		}
-		
 	}
 
-	@Override
-	public void dispose() {
-		// do nothing
+	public boolean tryAccure(long timeout, TimeUnit tu) throws InterruptedException {
+		if (semaphore.tryAcquire()) {
+			if (semaphore.availablePermits() < replenishMark) {
+				tryReplenish();
+			}
+			return true;
+		}
+		else {
+			long deadline = System.nanoTime() + tu.toNanos(timeout);
+			while(true) {
+				tryReplenish();
+				long delay = Math.min(TimeUnit.MILLISECONDS.toNanos(OPTIMISTIC_WAIT_TIMEOUT), deadline - System.nanoTime());
+				if (delay <= 0) {
+					return false;
+				}
+				if (semaphore.tryAcquire(delay, TimeUnit.NANOSECONDS)) {
+					return true;
+				}
+			}
+		}
 	}
 
 	private void tryReplenish() {
@@ -69,6 +149,7 @@ public class SimpleSpeedLimit implements SpeedLimit {
 						if (replenishAmount > replenishLimit) {
 							replenishAmount = replenishLimit;
 						}
+
 						
 //						if (anchorDrained >= 2 * replenishLimit) {
 //							// reset anchor point;

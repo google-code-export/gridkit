@@ -1,11 +1,15 @@
 package org.gridkit.gatling.utils;
 
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.gridkit.util.concurrent.Barriers;
+import org.gridkit.util.concurrent.BlockingBarrier;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
@@ -14,140 +18,115 @@ public class SpeedLimitTest {
 
 	@Test
 	public void test_UltraHighRate_1_thread() {
-		double targetRate = 10000;
-		SpeedLimit limit = SpeedLimit.Helper.newSpeedLimit(targetRate);
-		double rate = testSpeedLimit_unbalanced(limit, 1, (int)(targetRate * 10));
-		System.out.println(String.format("Thread 1, target rate %f -> %f (error %.3f%%)", targetRate, rate, Math.abs(100 * (targetRate - rate) / targetRate)));
-		assertError(rate, targetRate, 0.05);
+		runTest(10000, 1, false);
 	}
 
 	@Test
 	public void test_HighRate_1_thread() {
-		double targetRate = 1000;
-		SpeedLimit limit = SpeedLimit.Helper.newSpeedLimit(targetRate);
-		double rate = testSpeedLimit_unbalanced(limit, 1, (int)(targetRate * 10));
-		System.out.println(String.format("Thread 1, target rate %f -> %f (error %.3f%%)", targetRate, rate, Math.abs(100 * (targetRate - rate) / targetRate)));
-		assertError(rate, targetRate, 0.05);
+		runTest(1000, 1, false);
 	}
 
 	@Test
 	public void test_MidRate_1_thread() {
-		double targetRate = 100;
-		SpeedLimit limit = SpeedLimit.Helper.newSpeedLimit(targetRate);
-		double rate = testSpeedLimit_unbalanced(limit, 1, (int)(targetRate * 10));
-		System.out.println(String.format("Thread 1, target rate %f -> %f (error %.3f%%)", targetRate, rate, Math.abs(100 * (targetRate - rate) / targetRate)));
-		assertError(rate, targetRate, 0.05);
+		runTest(100, 1, false);
 	}	
 
 	@Test
 	public void test_LowRate_1_thread() {
-		double targetRate = 5;
-		SpeedLimit limit = SpeedLimit.Helper.newSpeedLimit(targetRate);
-		double rate = testSpeedLimit_unbalanced(limit, 1, (int)(targetRate * 10));
-		System.out.println(String.format("Thread 1, target rate %f -> %f (error %.3f%%)", targetRate, rate, Math.abs(100 * (targetRate - rate) / targetRate)));
-		assertError(rate, targetRate, 0.05);
+		runTest(5, 1, false);
 	}	
 	
 	@Test
 	public void test_SlowestRate_1_thread() {
-		double targetRate = 0.5;
-		SpeedLimit limit = SpeedLimit.Helper.newSpeedLimit(targetRate);
-		double rate = testSpeedLimit_unbalanced(limit, 1, (int)(targetRate * 10));
-		System.out.println(String.format("Thread 1, target rate %f -> %f (error %.3f%%)", targetRate, rate, Math.abs(100 * (targetRate - rate) / targetRate)));
-		assertError(rate, targetRate, 0.05);
+		runTest(0.5, 1, false);
 	}	
 	
 	@Test
 	public void test_UltraHighRate_16_thread() {
-		double targetRate = 10000;
-		SpeedLimit limit = SpeedLimit.Helper.newSpeedLimit(targetRate);
-		double rate = testSpeedLimit_unbalanced(limit, 16, (int)(targetRate * 10));
-		System.out.println(String.format("Thread 16, target rate %f -> %f (error %.3f%%)", targetRate, rate, Math.abs(100 * (targetRate - rate) / targetRate)));
-		assertError(rate, targetRate, 0.05);
+		runTest(10000, 16, false);
+		runTest(10000, 16, true);
 	}
 
 	@Test
 	public void test_HighRate_16_thread() {
-		double targetRate = 1000;
-		SpeedLimit limit = SpeedLimit.Helper.newSpeedLimit(targetRate);
-		double rate = testSpeedLimit_unbalanced(limit, 16, (int)(targetRate * 10));
-		System.out.println(String.format("Thread 16, target rate %f -> %f (error %.3f%%)", targetRate, rate, Math.abs(100 * (targetRate - rate) / targetRate)));
-		assertError(rate, targetRate, 0.05);
+		runTest(1000, 16, false);
+		runTest(1000, 16, true);
 	}
 
 	@Test
 	public void test_MidRate_16_thread() {
-		double targetRate = 100;
-		SpeedLimit limit = SpeedLimit.Helper.newSpeedLimit(targetRate);
-		double rate = testSpeedLimit_unbalanced(limit, 16, (int)(targetRate * 10));
-		System.out.println(String.format("Thread 16, target rate %f -> %f (error %.3f%%)", targetRate, rate, Math.abs(100 * (targetRate - rate) / targetRate)));
-		assertError(rate, targetRate, 0.05);
+		runTest(100, 16, false);
+		runTest(100, 16, true);
 	}
 
 	@Test
 	public void test_LowRate_16_thread() {
-		double targetRate = 5;
-		SpeedLimit limit = SpeedLimit.Helper.newSpeedLimit(targetRate);
-		double rate = testSpeedLimit_unbalanced(limit, 16, (int)(targetRate * 10));
-		System.out.println(String.format("Thread 16, target rate %f -> %f (error %.3f%%)", targetRate, rate, Math.abs(100 * (targetRate - rate) / targetRate)));
-		assertError(rate, targetRate, 0.05);
+		runTest(5, 16, false);
+		runTest(5, 16, true);
 	}
 
 	@Test
 	public void test_SlowestRate_16_thread() {
-		double targetRate = 0.5;
-		SpeedLimit limit = SpeedLimit.Helper.newSpeedLimit(targetRate);
-		double rate = testSpeedLimit_unbalanced(limit, 16, (int)(targetRate * 10));
-		System.out.println(String.format("Thread 16, target rate %f -> %f (error %.3f%%)", targetRate, rate, Math.abs(100 * (targetRate - rate) / targetRate)));
-		assertError(rate, targetRate, 0.05);
+		runTest(0.5, 16, false);
 	}
 
 	@Test
 	public void test_UltraHighRate_4_thread() {
-		double targetRate = 10000;
-		SpeedLimit limit = SpeedLimit.Helper.newSpeedLimit(targetRate);
-		double rate = testSpeedLimit_unbalanced(limit, 4, (int)(targetRate * 10));
-		System.out.println(String.format("Thread 4, target rate %f -> %f (error %.3f%%)", targetRate, rate, Math.abs(100 * (targetRate - rate) / targetRate)));
-		assertError(rate, targetRate, 0.05);
+		runTest(10000, 4, false);
+		runTest(10000, 4, true);
 	}
 	
 	@Test
 	public void test_HighRate_4_thread() {
-		double targetRate = 1000;
-		SpeedLimit limit = SpeedLimit.Helper.newSpeedLimit(targetRate);
-		double rate = testSpeedLimit_unbalanced(limit, 4, (int)(targetRate * 10));
-		System.out.println(String.format("Thread 4, target rate %f -> %f (error %.3f%%)", targetRate, rate, Math.abs(100 * (targetRate - rate) / targetRate)));
-		assertError(rate, targetRate, 0.05);
+		runTest(1000, 4, false);
+		runTest(1000, 4, true);
 	}
 
 	@Test
 	public void test_MidRate_4_thread() {
-		double targetRate = 100;
-		SpeedLimit limit = SpeedLimit.Helper.newSpeedLimit(targetRate);
-		double rate = testSpeedLimit_unbalanced(limit, 4, (int)(targetRate * 10));
-		System.out.println(String.format("Thread 4, target rate %f -> %f (error %.3f%%)", targetRate, rate, Math.abs(100 * (targetRate - rate) / targetRate)));
-		assertError(rate, targetRate, 0.05);
+		runTest(100, 4, false);
+		runTest(100, 4, true);
+	}
+
+	@Test
+	public void test_LowRate_4_thread() {
+		runTest(5, 4, false);
+		runTest(5, 4, true);
+	}
+
+	@Test
+	public void test_SlowestRate_4_thread() {
+		runTest(0.5, 4, false);
 	}
 	
 	private void assertError(double value, double target, double tolerance) {
 		AssertJUnit.assertTrue(String.format("%f within %.3f bounds from %f", value, tolerance, target), value < (target + target * tolerance) && value > (target - target * tolerance));
 	}
 	
-	@SuppressWarnings("unused")
-	private double testSpeedLimit_balanced(final SpeedLimit limit, int threadCount, int events) {
+	private void runTest(double targetRate, int threads, boolean balanced) {
+		BlockingBarrier limit = Barriers.speedLimit(targetRate);
+		double rate = balanced ?
+					testSpeedLimit_balanced(limit, threads, (int)(targetRate * 10)):
+					testSpeedLimit_unbalanced(limit, threads, (int)(targetRate * 10));
+		System.out.println(String.format("Thread %2d, %s, target rate %f -> %f (error %.3f%%)", threads, balanced ? "  balanced" : "unbalanced" , targetRate, rate, Math.abs(100 * (targetRate - rate) / targetRate)));
+		assertError(rate, targetRate, 0.05);
+	}
+
+	private double testSpeedLimit_balanced(final BlockingBarrier limit, int threadCount, int events) {
 		long start = System.nanoTime();
 		final CountDownLatch barrier = new CountDownLatch(threadCount);
 		final int eventsPerThread = events / threadCount;
 		
 		ExecutorService executor = Executors.newFixedThreadPool(threadCount);
 		for(int i = 0; i != threadCount; ++i) {
-			executor.submit(new Runnable() {
+			executor.submit(new Callable<Void>() {
 				@Override
-				public void run() {
+				public Void call() throws InterruptedException, BrokenBarrierException {
 					for(int i = 0; i != eventsPerThread; ++i) {
-						limit.accure();
+						limit.pass();
 					}
 					barrier.countDown();
+					return null;
 				}
 			});
 		}
@@ -165,7 +144,7 @@ public class SpeedLimitTest {
 		return rate;		
 	}
 
-	private double testSpeedLimit_unbalanced(final SpeedLimit limit, int threadCount, int events) {
+	private double testSpeedLimit_unbalanced(final BlockingBarrier limit, int threadCount, int events) {
 		
 		long start = System.nanoTime();
 		final AtomicInteger counter = new AtomicInteger(events + 1);
@@ -173,18 +152,19 @@ public class SpeedLimitTest {
 
 		ExecutorService executor = Executors.newFixedThreadPool(threadCount);
 		for(int i = 0; i != threadCount; ++i) {
-			executor.submit(new Runnable() {
+			executor.submit(new Callable<Void>() {
 				@Override
-				public void run() {
+				public Void call() throws InterruptedException, BrokenBarrierException {
 					while(true) {
 						if (counter.decrementAndGet() < 0) {
 							break;
 						}
 						else {
-							limit.accure();
+							limit.pass();
 						}
 					}
 					finishBarrier.countDown();
+					return null;
 				}
 			});
 		}
@@ -220,5 +200,7 @@ public class SpeedLimitTest {
 		test.test_UltraHighRate_4_thread();
 		test.test_HighRate_4_thread();
 		test.test_MidRate_4_thread();
+		test.test_LowRate_4_thread();
+		test.test_SlowestRate_4_thread();
 	}
 }

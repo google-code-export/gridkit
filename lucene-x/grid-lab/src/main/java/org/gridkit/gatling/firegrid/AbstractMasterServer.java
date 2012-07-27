@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -27,7 +28,8 @@ import org.apache.commons.math.stat.descriptive.moment.Mean;
 import org.apache.commons.math.stat.descriptive.moment.StandardDeviation;
 import org.gridkit.gatling.stats.PerfSample;
 import org.gridkit.gatling.stats.PerfSampleBlock;
-import org.gridkit.gatling.utils.SpeedLimit;
+import org.gridkit.util.concurrent.Barriers;
+import org.gridkit.util.concurrent.BlockingBarrier;
 import org.gridkit.util.formating.Formats;
 
 public abstract class AbstractMasterServer implements MasterCoordinator {
@@ -52,11 +54,11 @@ public abstract class AbstractMasterServer implements MasterCoordinator {
 
 	protected void runPinger() {
 		try {
-			SpeedLimit limit = SpeedLimit.Helper.newSpeedLimit(2);
+			BlockingBarrier limit = Barriers.speedLimit(2);
 			while(true) {
 				Thread.sleep(5000);
 				for(Slave slave: slaves.values()) {
-					limit.accure();
+					limit.pass();
 					try {
 						slave.ping();
 					} catch (RemoteException e) {
@@ -66,6 +68,8 @@ public abstract class AbstractMasterServer implements MasterCoordinator {
 				}
 			}		
 		} catch (InterruptedException e) {
+			// ignore
+		} catch (BrokenBarrierException e) {
 			// ignore
 		}
 	}
