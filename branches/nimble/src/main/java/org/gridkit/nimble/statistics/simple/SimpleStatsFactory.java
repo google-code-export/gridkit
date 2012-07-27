@@ -1,9 +1,11 @@
 package org.gridkit.nimble.statistics.simple;
 
+import java.io.Serializable;
+
 import org.gridkit.nimble.statistics.StatsFactory;
 import org.gridkit.nimble.statistics.StatsProducer;
 
-public class SimpleStatsFactory implements StatsFactory<SimpleStats> {    
+public class SimpleStatsFactory implements StatsFactory<SimpleStats>, Serializable {    
     @Override
     public StatsProducer<SimpleStats> newStatsProducer() {
         return new SimpleStatsProducer();

@@ -2,9 +2,11 @@ package org.gridkit.nimble.scenario;
 
 import static org.gridkit.nimble.util.StringOps.F;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Future;
 
 import org.gridkit.nimble.platform.AttributeContext;
 import org.gridkit.nimble.platform.LocalAgent;
@@ -30,11 +32,11 @@ public class ExecScenario implements Scenario {
         LocalAgent getLocalAgent();
     }
     
-    public static interface Executable {
+    public static interface Executable extends Serializable {
         public <T> Result<T> excute(Context<T> context) throws Exception;
     }
     
-    public static final class Result<T> {
+    public static final class Result<T> implements Serializable {
         private Play.Status status;
         private T stats;
 
@@ -110,11 +112,12 @@ public class ExecScenario implements Scenario {
     }
     
     private class ExecPipeline<T> extends AbstractFuture<Void> implements FutureListener<Result<T>> {
+    	
         private final Scenario.Context<T> context;
         
         private volatile AbstractPlay<T> play;
 
-        private volatile ListenableFuture<Result<T>> future;
+        private volatile Future<Result<T>> future;
         
         public ExecPipeline(Scenario.Context<T> context) {
             this.context = context;
@@ -131,7 +134,7 @@ public class ExecScenario implements Scenario {
             
             future = agent.invoke(executor);
             
-            FutureOps.addListener(future, this, context.getExecutor());
+            FutureOps.addListener(DumbListenableFuture.wrap("Poller", future), this, context.getExecutor());
         }
 
         @Override

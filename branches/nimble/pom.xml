@@ -57,6 +57,11 @@
 			<version>4.10</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+		    <groupId>org.gridkit.coherence.workshop</groupId>
+		    <artifactId>grid-lab</artifactId>
+		    <version>0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 
 	<build>

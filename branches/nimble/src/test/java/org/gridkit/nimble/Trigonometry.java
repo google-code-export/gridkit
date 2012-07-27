@@ -1,5 +1,6 @@
 package org.gridkit.nimble;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,6 +15,7 @@ import org.gridkit.nimble.platform.Director;
 import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.RemoteAgent;
 import org.gridkit.nimble.platform.local.ThreadPoolAgent;
+import org.gridkit.nimble.platform.remote.LocalAgentFactory;
 import org.gridkit.nimble.scenario.ParScenario;
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.SeqScenario;
@@ -25,11 +27,12 @@ import org.gridkit.nimble.statistics.simple.SimpleStatsReporter;
 import org.gridkit.nimble.task.Task;
 import org.gridkit.nimble.task.TaskSLA;
 import org.gridkit.nimble.task.TaskScenario;
-import org.junit.Ignore;
+import org.junit.AfterClass;
+import org.junit.Test;
+import org.testng.annotations.AfterTest;
 
 import com.google.common.base.Function;
 
-@Ignore
 public class Trigonometry {    
     private static final String SIN = "sin";
     private static final String COS = "cos";
@@ -42,13 +45,36 @@ public class Trigonometry {
     private static final long NUMBERS = 10;
     private static final long ITERATIONS = 100000;
     private static final long DURATION = 3; // seconds
+
+    private static LocalAgentFactory localFactory = new LocalAgentFactory();
     
-    public static void main(String[] args) throws Exception {
-        ExecutorService agentExecutor = Executors.newCachedThreadPool();
+    public RemoteAgent createAgent(String mode, String... labels) {
+    	if ("in-proc".equals(mode)) {
+    		return new ThreadPoolAgent(Executors.newSingleThreadExecutor(), new HashSet<String>(Arrays.asList(labels)));
+    	}
+    	if ("local".equals(mode)) {
+    		return localFactory.createAgent("agent" + Arrays.toString(labels), labels);
+    	}
+    	else {
+    		throw new IllegalArgumentException("Unknown mode: " + mode);
+    	}
+    }
+    
+    @Test
+    public void inproc_test() throws Exception {
+    	runTest("in-proc");
+    }
+
+    @Test
+    public void local_test() throws Exception {
+    	runTest("local");
+    }
+    
+    public void runTest(String mode) throws Exception {
         ExecutorService directorExecutor = Executors.newCachedThreadPool();
         
-        RemoteAgent sinAgent = new ThreadPoolAgent(agentExecutor, Collections.singleton(SIN));
-        RemoteAgent cosAgent = new ThreadPoolAgent(agentExecutor, Collections.singleton(COS));
+        RemoteAgent sinAgent = createAgent(mode, SIN);
+        RemoteAgent cosAgent = createAgent(mode, COS);
         
         Director<SimpleStats> director = new Director<SimpleStats>(
             Arrays.asList(sinAgent, cosAgent), new SimpleStatsFactory(), directorExecutor
@@ -208,21 +234,21 @@ public class Trigonometry {
         return "calc_" + name;
     }
     
-    public static class Sin implements Function<Double, Double> {
+    public static class Sin implements Function<Double, Double>, Serializable {
         @Override
         public Double apply(Double arg) {
             return Math.sin(arg);
         }
     }
     
-    public static class Cos implements Function<Double, Double> {
+    public static class Cos implements Function<Double, Double>, Serializable {
         @Override
         public Double apply(Double arg) {
             return Math.cos(arg);
         }
     }
     
-    public static class Tan implements Function<Double, Double> {
+    public static class Tan implements Function<Double, Double>, Serializable {
         @Override
         public Double apply(Double arg) {
             return Math.tan(arg);
