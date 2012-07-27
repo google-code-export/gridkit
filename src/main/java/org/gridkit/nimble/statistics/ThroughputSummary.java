@@ -7,5 +7,5 @@ import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 public interface ThroughputSummary extends StatisticalSummary {
     double getThroughput(TimeUnit timeUnit);
     
-    long getDuration(TimeUnit timeUnit);
+    double getDuration(TimeUnit timeUnit);
 }

@@ -42,27 +42,24 @@ public class SimpleStats {
     }
 
     public StatisticalSummary getLatency(String statistica, TimeUnit timeUnit) {
-        isTimeStats(statistica);
-        
-        double scale = 1.0 / TimeUnit.NANOSECONDS.convert(1, timeUnit);
-        
         StatisticalSummary vs = getValueStats(statistica);
         
-        return new ScaledStatisticalSummary(vs, scale);
+        if (vs == null) {
+            return vs;
+        } else {
+            double scale = 1.0 / TimeUnit.NANOSECONDS.convert(1, timeUnit);
+            return new ScaledStatisticalSummary(vs, scale);
+        }
     }
     
     public ThroughputSummary getThroughput(String statistica) {
-        isTimeStats(statistica);
-        
-        return new SimpleThroughputSummary(getTimeStats(statistica));
-    }
-    
-    private void isTimeStats(String statistica) {
-        StatisticalSummary vs = getValueStats(statistica);
-        StatisticalSummary ts  = getTimeStats(statistica);
+        StatisticalSummary ts = getTimeStats(statistica);
+        StatisticalSummary vs = getValueStats((SimpleThroughputSummary.getFinishStats(statistica)));
 
-        if (vs.getN() != ts.getN()) {
-            throw new IllegalStateException(statistica + " is not time based statistics");
+        if (ts == null || vs == null) {
+            return null;
+        } else {
+            return new SimpleThroughputSummary(ts, vs);
         }
     }
     

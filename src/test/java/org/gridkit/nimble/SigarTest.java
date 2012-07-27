@@ -7,10 +7,10 @@ import org.junit.Ignore;
 @Ignore
 public class SigarTest {
     public static void main(String[] args) throws Exception {
-        Runtime.getRuntime().load("/home/art/distr/hyperic-sigar-1.6.4/sigar-bin/lib/libsigar-x86-linux.so");
+        Runtime.getRuntime().load("C:/Tools/hyperic-sigar-1.6.4/sigar-bin/lib/sigar-x86-winnt.dll");
         
         SigarProxy sigar = new Sigar();
         
-        System.out.println(sigar.getCpuPerc().getIdle());
+        System.out.println(sigar.getNetStat().getTcpEstablished());
     }
 }

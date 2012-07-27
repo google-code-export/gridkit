@@ -105,7 +105,7 @@ public class TaskExecutable implements ExecScenario.Executable {
             } catch (Throwable t) {
                 statsProducer.report(
                     F("Exception during task '%s' execution on agent '%s'", task.toString(), context.getLocalAgent().toString()),
-                    context.getLocalAgent().currentTimeMillis()
+                    context.getLocalAgent().currentTimeMillis(), t
                 );
                 status.set(Play.Status.Failure);
             } finally {
