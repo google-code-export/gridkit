@@ -4,6 +4,8 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -11,7 +13,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
-import org.gridkit.gatling.utils.SpeedLimit;
+import org.gridkit.util.concurrent.Barriers;
+import org.gridkit.util.concurrent.BlockingBarrier;
 import org.gridkit.util.formating.Formats;
 
 public class SlaveServer implements Slave {
@@ -115,23 +118,23 @@ public class SlaveServer implements Slave {
 		}
 
 		private void processWorkPacket(WorkPacket packet) throws InterruptedException {
-			final SpeedLimit limit = SpeedLimit.Helper.newSpeedLimit(packet.getExecutionRate());
+			final BlockingBarrier limit = Barriers.speedLimit(packet.getExecutionRate());
 			final AtomicInteger execCounter = new AtomicInteger(packet.getPacketSize());
 			final CountDownLatch finishLatch = new CountDownLatch(workstream.getThreaCount());
 			
 			workstream.getExecutor().initWorkPacket(packet);
 			for (int i = 0; i != workstream.getThreaCount(); ++i) {
-				service.submit(new Runnable() {
+				service.submit(new Callable<Void>() {
 					
 					@Override
-					public void run() {
+					public Void call() throws InterruptedException, BrokenBarrierException {
 						while(true) {
 							if (execCounter.decrementAndGet() < 0) {
 								finishLatch.countDown();
-								return;
+								return null;
 							}
 							else {
-								limit.accure();
+								limit.pass();
 								workstream.getExecutor().execute();
 							}
 						}
