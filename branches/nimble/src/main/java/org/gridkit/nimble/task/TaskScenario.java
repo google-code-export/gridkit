@@ -94,6 +94,7 @@ public class TaskScenario implements Scenario, FutureListener<Void> {
 
     @Override
     public void onSuccess(Void result) {
+        //TODO fix, failures also go here
         ScenarioOps.logSuccess(log, this);
     }
 

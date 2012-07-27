@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.util.FutureListener;
 import org.gridkit.nimble.util.FutureOps;
+import org.gridkit.nimble.util.ValidOps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +23,10 @@ public class ParScenario implements Scenario {
     private final List<Scenario> scenarios;
     private final boolean interruptOnFailure;
     
+    
     public ParScenario(String name, List<Scenario> scenarios, boolean interruptOnFailure) {
+        ValidOps.notEmpty(scenarios, "scenarios"); //TODO handle empty scenarios list
+        
         this.name = name;
         this.scenarios = scenarios;
         this.interruptOnFailure = interruptOnFailure;

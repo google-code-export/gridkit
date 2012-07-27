@@ -5,9 +5,13 @@ import java.util.Map;
 
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.gridkit.nimble.statistics.StatsProducer;
 
 public class SimpleStatsProducer implements StatsProducer<SimpleStats> {
+    private static final Logger log = LoggerFactory.getLogger(SimpleStatsProducer.class);
+    
     private Map<String, SummaryStatistics> valueStats;
     private Map<String, SummaryStatistics> timeStats;
 
@@ -44,6 +48,7 @@ public class SimpleStatsProducer implements StatsProducer<SimpleStats> {
     @Override
     public void report(String message, long timestamp, Throwable throwable) {
         // TODO implement
+        log.error(message, throwable);
     }
     
     @Override

@@ -21,18 +21,21 @@ public class SimpleStatsReporter extends DelegatingStatsReporter {
     }
 
     public void start(String statistica) {
-        startNanos.put(statistica, timeService.currentTimeNanos());
         startMillis.put(statistica, timeService.currentTimeMillis());
+        startNanos.put(statistica, timeService.currentTimeNanos());
     }
     
     public void finish(String statistica) {
         long finishTimeNanos = timeService.currentTimeNanos();
-        
+        long finishTimeMillis = timeService.currentTimeMillis();
+
         Long startTimeNanos = startNanos.get(statistica);
         Long startTimeMillis = startMillis.get(statistica);
         
         if (startTimeNanos != null && startTimeMillis != null) {
             report(statistica, startTimeMillis, finishTimeNanos - startTimeNanos);
+            report(SimpleThroughputSummary.getFinishStats(statistica), finishTimeMillis);
+            
             startNanos.remove(statistica);
             startMillis.remove(statistica);
         }
