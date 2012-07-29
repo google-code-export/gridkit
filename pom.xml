@@ -6,6 +6,22 @@
 	<artifactId>nimble-core</artifactId>
 	<version>0.1-SNAPSHOT</version>
 
+    <repositories>
+        <!-- GridKit maven2 repository -->
+        <repository>
+            <id>gridkit-releases</id>
+            <name>gridkit-repo.googlecode.com</name>
+            <url>http://gridkit.googlecode.com/svn/repo/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -57,11 +73,13 @@
 			<version>4.10</version>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
-		    <groupId>org.gridkit.coherence.workshop</groupId>
-		    <artifactId>grid-lab</artifactId>
-		    <version>0.1-SNAPSHOT</version>
+		    <groupId>org.gridkit.lab</groupId>
+		    <artifactId>telecontrol-ssh</artifactId>
+		    <version>0.5</version>
 		</dependency>
+		
 	</dependencies>
 
 	<build>

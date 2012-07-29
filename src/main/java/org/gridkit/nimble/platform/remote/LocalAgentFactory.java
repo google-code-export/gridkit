@@ -4,12 +4,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.gridkit.gatling.remoting.LocalJvmProcessFactory;
 import org.gridkit.nimble.platform.RemoteAgent;
-import org.gridkit.util.vicontrol.ViNode;
-import org.gridkit.util.vicontrol.ViNodeConfig;
-import org.gridkit.util.vicontrol.jvm.JvmNodeProvider;
-import org.gridkit.util.vicontrol.jvm.JvmProps;
+import org.gridkit.vicluster.ViNode;
+import org.gridkit.vicluster.ViNodeConfig;
+import org.gridkit.vicluster.telecontrol.LocalJvmProcessFactory;
+import org.gridkit.vicluster.telecontrol.jvm.JvmNodeProvider;
+import org.gridkit.vicluster.telecontrol.jvm.JvmProps;
 
 public class LocalAgentFactory {
 
