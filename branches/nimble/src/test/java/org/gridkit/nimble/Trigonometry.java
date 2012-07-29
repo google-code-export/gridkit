@@ -27,9 +27,7 @@ import org.gridkit.nimble.statistics.simple.SimpleStatsReporter;
 import org.gridkit.nimble.task.Task;
 import org.gridkit.nimble.task.TaskSLA;
 import org.gridkit.nimble.task.TaskScenario;
-import org.junit.AfterClass;
 import org.junit.Test;
-import org.testng.annotations.AfterTest;
 
 import com.google.common.base.Function;
 

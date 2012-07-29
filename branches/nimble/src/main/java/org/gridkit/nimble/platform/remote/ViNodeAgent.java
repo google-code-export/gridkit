@@ -12,7 +12,7 @@ import java.util.concurrent.Future;
 
 import org.gridkit.nimble.platform.LocalAgent;
 import org.gridkit.nimble.platform.RemoteAgent;
-import org.gridkit.util.vicontrol.ViNode;
+import org.gridkit.vicluster.ViNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
