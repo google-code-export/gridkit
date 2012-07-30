@@ -67,6 +67,10 @@ public class ViNodeAgent implements RemoteAgent {
 		node.shutdown();
 	}
 
+	public String toString() {
+		return "ViNodeAgent#" + uid;
+	}
+	
 	@Override
 	public <T> Future<T> invoke(final Invocable<T> invocable) {
 		final RemoteHandle handle = this.handle;

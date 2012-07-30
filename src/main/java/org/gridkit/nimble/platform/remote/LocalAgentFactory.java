@@ -2,7 +2,6 @@ package org.gridkit.nimble.platform.remote;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.gridkit.nimble.platform.RemoteAgent;
 import org.gridkit.vicluster.ViNode;
@@ -12,8 +11,6 @@ import org.gridkit.vicluster.telecontrol.jvm.JvmNodeProvider;
 import org.gridkit.vicluster.telecontrol.jvm.JvmProps;
 
 public class LocalAgentFactory {
-
-	private static AtomicInteger COUNT = new AtomicInteger();
 
 	private JvmNodeProvider nodeProvider;
 	private ViNodeConfig config;
