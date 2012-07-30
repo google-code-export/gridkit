@@ -77,7 +77,7 @@
 		<dependency>
 		    <groupId>org.gridkit.lab</groupId>
 		    <artifactId>telecontrol-ssh</artifactId>
-		    <version>0.5</version>
+		    <version>0.7-SNAPSHOT</version>
 		</dependency>
 		
 	</dependencies>
