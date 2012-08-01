@@ -10,7 +10,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 import org.gridkit.nimble.platform.Director;
 import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.RemoteAgent;
@@ -19,8 +18,8 @@ import org.gridkit.nimble.platform.remote.LocalAgentFactory;
 import org.gridkit.nimble.scenario.ParScenario;
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.SeqScenario;
-import org.gridkit.nimble.statistics.StatsOps;
-import org.gridkit.nimble.statistics.ThroughputSummary;
+import org.gridkit.nimble.statistics.simple.SimplePrettyPrinter;
+import org.gridkit.nimble.statistics.simple.SimplePrinter;
 import org.gridkit.nimble.statistics.simple.SimpleStats;
 import org.gridkit.nimble.statistics.simple.SimpleStatsFactory;
 import org.gridkit.nimble.statistics.simple.SimpleStatsReporter;
@@ -90,15 +89,9 @@ public class Trigonometry {
             director.shutdown(false);
         }
 
-        for (String func : Arrays.asList(SIN, COS, TAN)) {
-            StatisticalSummary latencyStats = play.getStats().getLatency(calcStats(func), TimeUnit.MICROSECONDS);
-            ThroughputSummary throughput = play.getStats().getThroughput(calcStats(func));
-
-            System.err.println("----- Latency for " + func);
-            System.err.println(StatsOps.latencyToString(latencyStats, TimeUnit.MICROSECONDS));
-            System.err.println("----- Throughput of " + func);
-            System.err.println(StatsOps.throughputToString(throughput, TimeUnit.MILLISECONDS));
-        }
+        SimplePrinter printer = new SimplePrettyPrinter();
+        
+        printer.print(System.err, play.getStats());
     }
     
     private static Scenario getScenario(long numbers, long iterations, long duration) {
@@ -166,6 +159,7 @@ public class Trigonometry {
         return new SeqScenario(Arrays.asList(init, first, tanCalsScen));
     }    
     
+    @SuppressWarnings("serial")
     public static class InitTask implements Task {
         private final String name;
         private final String funcName;
@@ -190,6 +184,7 @@ public class Trigonometry {
         }
     }
     
+    @SuppressWarnings("serial")
     public static class CalcTask implements Task {
         private final String name;
         private final String funcName;
@@ -232,6 +227,7 @@ public class Trigonometry {
         return "calc_" + name;
     }
     
+    @SuppressWarnings("serial")
     public static class Sin implements Function<Double, Double>, Serializable {
         @Override
         public Double apply(Double arg) {
@@ -239,6 +235,7 @@ public class Trigonometry {
         }
     }
     
+    @SuppressWarnings("serial")
     public static class Cos implements Function<Double, Double>, Serializable {
         @Override
         public Double apply(Double arg) {
@@ -246,6 +243,7 @@ public class Trigonometry {
         }
     }
     
+    @SuppressWarnings("serial")
     public static class Tan implements Function<Double, Double>, Serializable {
         @Override
         public Double apply(Double arg) {

@@ -15,6 +15,7 @@ import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.RemoteAgent;
 import org.gridkit.nimble.util.ValidOps;
 
+@SuppressWarnings("serial")
 public class TaskSLA implements Cloneable, Serializable {
     private Distribution distribution = Distribution.All;
     

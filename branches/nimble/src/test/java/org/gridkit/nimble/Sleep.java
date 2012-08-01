@@ -67,6 +67,7 @@ public class Sleep {
         }
     }
     
+    @SuppressWarnings("serial")
     public static class SimpleExecutable implements Executable {
         private final String str;
 

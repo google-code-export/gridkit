@@ -23,6 +23,7 @@ import org.gridkit.nimble.statistics.StatsProducer;
 import org.gridkit.nimble.statistics.StatsReporter;
 
 //TODO think about start time sync using RemoteAgent.currentTimeMillis()
+@SuppressWarnings("serial")
 public class TaskExecutable implements ExecScenario.Executable {
     private String name;
     private List<Task> tasks;
