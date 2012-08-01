@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.gridkit.nimble.statistics.StatsFactory;
 import org.gridkit.nimble.statistics.StatsProducer;
 
+@SuppressWarnings("serial")
 public class SimpleStatsFactory implements StatsFactory<SimpleStats>, Serializable {    
     @Override
     public StatsProducer<SimpleStats> newStatsProducer() {

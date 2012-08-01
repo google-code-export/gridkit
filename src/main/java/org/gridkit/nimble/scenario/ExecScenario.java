@@ -36,6 +36,7 @@ public class ExecScenario implements Scenario {
         public <T> Result<T> excute(Context<T> context) throws Exception;
     }
     
+    @SuppressWarnings("serial")
     public static final class Result<T> implements Serializable {
         private Play.Status status;
         private T stats;
@@ -191,6 +192,7 @@ public class ExecScenario implements Scenario {
         }
     }
 
+    @SuppressWarnings("serial")
     private static class Executor<T> implements RemoteAgent.Invocable<Result<T>>, Context<T> {
         private String contextId;
         private Executable executable;

@@ -13,12 +13,11 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import org.gridkit.nimble.platform.LocalAgent;
+import org.gridkit.nimble.util.SystemOps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.gridkit.nimble.platform.LocalAgent;
-import org.gridkit.nimble.platform.TimeService;
-import org.gridkit.nimble.util.SystemOps;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 

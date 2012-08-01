@@ -13,6 +13,7 @@ import org.gridkit.nimble.statistics.ScaledStatisticalSummary;
 import org.gridkit.nimble.statistics.StatsOps;
 import org.gridkit.nimble.statistics.ThroughputSummary;
 
+@SuppressWarnings("serial")
 public class SimpleStats implements Serializable {
     private final Map<String, StatisticalSummary> valueStatsMap;
     private final Map<String, StatisticalSummary> timeStatsMap;
