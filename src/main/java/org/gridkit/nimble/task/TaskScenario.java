@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.gridkit.nimble.platform.EmptyPlay;
+import org.gridkit.nimble.platform.FuturePoller;
 import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.RemoteAgent;
 import org.gridkit.nimble.scenario.ExecScenario;
@@ -13,6 +14,7 @@ import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.ScenarioOps;
 import org.gridkit.nimble.util.FutureListener;
 import org.gridkit.nimble.util.FutureOps;
+import org.gridkit.nimble.util.QueuedFuturePoller;
 import org.gridkit.nimble.util.ValidOps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,8 @@ public class TaskScenario implements Scenario, FutureListener<Void> {
     private List<Task> tasks;
     private TaskSLA sla;
 
+    private FuturePoller poller;
+    
     public TaskScenario(String name, Collection<Task> tasks, TaskSLA sla) {
         ValidOps.notEmpty(name, "name");
         ValidOps.notNull(tasks, "tasks");
@@ -41,6 +45,8 @@ public class TaskScenario implements Scenario, FutureListener<Void> {
         ScenarioOps.logStart(log, this);
         
         List<RemoteAgent> agents = sla.getAgents(context.getAgents());
+        
+        poller = new QueuedFuturePoller(Math.max(1, agents.size() / sla.getAgentsPerPoll()));
         
         Play<T> result;
         
@@ -83,7 +89,7 @@ public class TaskScenario implements Scenario, FutureListener<Void> {
     
     private Scenario newAgentScenario(RemoteAgent agent, List<Task> tasks, String name) {
         TaskExecutable executable = new TaskExecutable(name, tasks, sla);
-        Scenario scenario = new ExecScenario(name, executable, agent);
+        Scenario scenario = new ExecScenario(name, executable, agent, poller);
         return scenario;        
     }
 
@@ -95,6 +101,7 @@ public class TaskScenario implements Scenario, FutureListener<Void> {
     @Override
     public void onSuccess(Void result) {
         //TODO fix, failures also go here
+        poller.shutdown();
         ScenarioOps.logSuccess(log, this);
     }
 
