@@ -41,7 +41,7 @@ public class Trigonometry {
     
     private static final long NUMBERS = 10;
     private static final long ITERATIONS = 100000;
-    private static final long DURATION = 3; // seconds
+    private static final long DURATION = 60; // seconds
 
     private static LocalAgentFactory localFactory = new LocalAgentFactory();
     

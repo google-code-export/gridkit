@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.gridkit.nimble.platform.Director;
+import org.gridkit.nimble.platform.FuturePoller;
 import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.RemoteAgent;
 import org.gridkit.nimble.platform.local.ThreadPoolAgent;
@@ -18,6 +19,7 @@ import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.SeqScenario;
 import org.gridkit.nimble.statistics.simple.SimpleStats;
 import org.gridkit.nimble.statistics.simple.SimpleStatsFactory;
+import org.gridkit.nimble.util.QueuedFuturePoller;
 import org.junit.Ignore;
 import org.slf4j.Logger;
 
@@ -35,13 +37,15 @@ public class Sleep {
             directorExecutor
         );
         
-        Scenario s1 = new ExecScenario(new SimpleExecutable("A"), agent);
-        Scenario s2 = new ExecScenario(new SimpleExecutable("B"), agent);
-        Scenario s3 = new ExecScenario(new SimpleExecutable("C"), agent);
+        FuturePoller poller = new QueuedFuturePoller(2);
         
-        Scenario s4 = new ExecScenario(new SimpleExecutable("D"), agent);
-        Scenario s5 = new ExecScenario(new SimpleExecutable("E"), agent);
-        Scenario s6 = new ExecScenario(new SimpleExecutable("F"), agent);
+        Scenario s1 = new ExecScenario(new SimpleExecutable("A"), agent, poller);
+        Scenario s2 = new ExecScenario(new SimpleExecutable("B"), agent, poller);
+        Scenario s3 = new ExecScenario(new SimpleExecutable("C"), agent, poller);
+        
+        Scenario s4 = new ExecScenario(new SimpleExecutable("D"), agent, poller);
+        Scenario s5 = new ExecScenario(new SimpleExecutable("E"), agent, poller);
+        Scenario s6 = new ExecScenario(new SimpleExecutable("F"), agent, poller);
         
         Scenario seq1 = new SeqScenario("SEQ1", Arrays.asList(s1, s2, s3));
         Scenario seq2 = new SeqScenario("SEQ2", Arrays.asList(s4, s5, s6));
@@ -64,6 +68,7 @@ public class Sleep {
             
             agentExecutor.shutdown();
             directorExecutor.shutdown();
+            poller.shutdown();
         }
     }
     
