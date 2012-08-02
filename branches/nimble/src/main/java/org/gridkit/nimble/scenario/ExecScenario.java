@@ -6,9 +6,9 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Future;
 
 import org.gridkit.nimble.platform.AttributeContext;
+import org.gridkit.nimble.platform.FuturePoller;
 import org.gridkit.nimble.platform.LocalAgent;
 import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.Play.Status;
@@ -69,16 +69,19 @@ public class ExecScenario implements Scenario {
 
     private final RemoteAgent agent;
     
-    public ExecScenario(String name, Executable executable, RemoteAgent agent) {
+    private final FuturePoller poller;
+    
+    public ExecScenario(String name, Executable executable, RemoteAgent agent, FuturePoller poller) {
         this.name = name;
         this.executable = executable;
         this.agent = agent;
+        this.poller = poller;
     }
     
-    public ExecScenario(Executable executable, RemoteAgent agent) {
+    public ExecScenario(Executable executable, RemoteAgent agent, FuturePoller poller) {
         this(
             ScenarioOps.getName("Exec", Arrays.asList(executable.toString(), agent.toString())),
-            executable, agent
+            executable, agent, poller
         );
     }
     
@@ -118,7 +121,7 @@ public class ExecScenario implements Scenario {
         
         private volatile AbstractPlay<T> play;
 
-        private volatile Future<Result<T>> future;
+        private volatile ListenableFuture<Result<T>> future;
         
         public ExecPipeline(Scenario.Context<T> context) {
             this.context = context;
@@ -133,9 +136,9 @@ public class ExecScenario implements Scenario {
                 context.getContextId(), executable, context.getStatsFactory()
             );
             
-            future = agent.invoke(executor);
-            
-            FutureOps.addListener(DumbListenableFuture.wrap("Poller", future), this, context.getExecutor());
+            future = poller.poll(agent.invoke(executor));
+
+            FutureOps.addListener(future, this, context.getExecutor());
         }
 
         @Override
