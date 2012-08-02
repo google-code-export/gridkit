@@ -1,4 +1,4 @@
-package org.gridkit.nimble.scenario;
+package org.gridkit.nimble.util;
 
 import java.util.ArrayList;
 import java.util.List;
