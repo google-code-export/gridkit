@@ -9,17 +9,17 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.gridkit.nimble.platform.FuturePoller;
 
+import com.google.common.util.concurrent.AbstractFuture;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class QueuedFuturePoller implements FuturePoller {
-    private final BlockingQueue<Pair<Future, SettableFuture>> futures;
+    private final BlockingQueue<PollFuture> futures;
     
     private final ExecutorService executor;
 
     public QueuedFuturePoller(int nThreads) {
-        this.futures = new LinkedBlockingQueue<Pair<Future,SettableFuture>>();
+        this.futures = new LinkedBlockingQueue<PollFuture>();
         this.executor = Executors.newFixedThreadPool(nThreads);
         
         while (nThreads-- > 0) {
@@ -29,10 +29,8 @@ public class QueuedFuturePoller implements FuturePoller {
 
     @Override
     public <T> ListenableFuture<T> poll(Future<T> future) {
-        SettableFuture result = SettableFuture.create();
-        
-        futures.add(Pair.newPair((Future)future, result));
-        
+        PollFuture result = new PollFuture(future);
+        futures.add(result);
         return result;
     }
     
@@ -41,23 +39,21 @@ public class QueuedFuturePoller implements FuturePoller {
         public void run() {
             try {
                 while (true) {
-                    Pair<Future,SettableFuture> pair = futures.take();
-                    
-                    Future future = pair.getA();
-                    SettableFuture result = pair.getB();
+                    PollFuture pollFuture = futures.take();
+                    Future future = pollFuture.getFuture();
                     
                     if (future.isDone()) {
                         if (future.isCancelled()) {
-                            result.cancel(true);
+                            pollFuture.cancel(true);
                         } else {
                             try {
-                                result.set(future.get());
+                                pollFuture.set(future.get());
                             } catch (ExecutionException e) {
-                                result.setException(e.getCause());
+                                pollFuture.setException(e.getCause());
                             }
                         }
                     } else {
-                        futures.put(pair);
+                        futures.put(pollFuture);
                     }
                 }
             }
@@ -65,7 +61,38 @@ public class QueuedFuturePoller implements FuturePoller {
         }
     }
 
+    private static class PollFuture<T> extends AbstractFuture<T> {
+        private final Future<T> future;
 
+        public PollFuture(Future<T> future) {
+            this.future = future;
+        }
+
+        @Override
+        public boolean set(T value) {
+            return super.set(value);
+        };
+        
+        @Override
+        public boolean setException(Throwable throwable) {
+            return super.setException(throwable);
+        }
+        
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            if (isDone()) {
+                return false;
+            }
+            
+            future.cancel(mayInterruptIfRunning);
+            
+            return super.cancel(false);
+        }
+        
+        public Future<T> getFuture() {
+            return future;
+        }
+    }
 
     @Override
     public void shutdown() {
