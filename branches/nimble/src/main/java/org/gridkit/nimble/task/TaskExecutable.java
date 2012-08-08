@@ -46,7 +46,7 @@ public class TaskExecutable implements ExecScenario.Executable {
             return getResult(status, stats);
         }
         
-        ExecutorService executor = sla.newExecutor();
+        ExecutorService executor = sla.newExecutor(name);
         
         List<Callable<Void>> taskCallables = new ArrayList<Callable<Void>>();
                 

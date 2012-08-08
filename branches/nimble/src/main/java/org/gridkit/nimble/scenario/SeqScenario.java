@@ -90,10 +90,12 @@ public class SeqScenario implements Scenario {
                         if (curPlay.getStatus() == Play.Status.Failure) {
                             if (play.setStatus(Play.Status.Failure)) {
                                 ScenarioOps.logFailure(log, SeqScenario.this, curPlay.getScenario());
+                                set(null);
                             }
                         } else if (curPlay.getStatus() != Play.Status.Success) {
                             if (play.setStatus(Play.Status.Failure)) {
                                 ScenarioOps.logFailure(log, SeqScenario.this, curPlay.getScenario(), curPlay.getStatus());
+                                set(null);
                             }
                         } else if (nextScenarios.isEmpty()) {
                             if (play.setStatus(Play.Status.Success)) {
@@ -106,7 +108,7 @@ public class SeqScenario implements Scenario {
             
             if (!nextScenarios.isEmpty()) {
                 synchronized (futureMonitor) {
-                    if (isCancelled()) {
+                    if (isDone()) {
                         return;
                     }
                     

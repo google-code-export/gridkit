@@ -107,11 +107,13 @@ public class TaskScenario implements Scenario, FutureListener<Void> {
 
     @Override
     public void onFailure(Throwable t, FailureEvent event) {
+        poller.shutdown();
         ScenarioOps.logFailure(log, this, t);
     }
 
     @Override
     public void onCancel() {
+        poller.shutdown();
         ScenarioOps.logCancel(log, this);
     }
 }
