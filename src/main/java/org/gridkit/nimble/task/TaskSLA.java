@@ -9,10 +9,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.RemoteAgent;
+import org.gridkit.nimble.util.NamedThreadFactory;
 import org.gridkit.nimble.util.ValidOps;
 
 @SuppressWarnings("serial")
@@ -72,11 +74,13 @@ public class TaskSLA implements Cloneable, Serializable {
         public abstract List<List<Task>> distribute(List<Task> tasks, int agentsCount);
     }
     
-    public ExecutorService newExecutor() {
+    public ExecutorService newExecutor(String taskName) {
+        ThreadFactory threadFactory = new NamedThreadFactory(taskName);
+        
         if (threadsCount == null) {
-            return Executors.newCachedThreadPool();
+            return Executors.newCachedThreadPool(threadFactory);
         } else {
-            return Executors.newFixedThreadPool(threadsCount);
+            return Executors.newFixedThreadPool(threadsCount, threadFactory);
         }
     }
     

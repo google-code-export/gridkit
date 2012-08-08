@@ -1,6 +1,7 @@
 package org.gridkit.nimble.platform;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
@@ -43,6 +44,10 @@ public class Director<T> {
         } else {
             executor.shutdown();
         }
+    }
+    
+    public Collection<RemoteAgent> getAgents() {
+        return Collections.unmodifiableCollection(agents);
     }
     
     private class DirectorContext implements Scenario.Context<T> {

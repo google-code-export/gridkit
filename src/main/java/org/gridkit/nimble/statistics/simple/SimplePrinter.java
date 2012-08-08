@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
@@ -105,7 +106,7 @@ public abstract class SimplePrinter {
         leftValues = adjustLength(leftValues, leftHeader.size());
         rightValues = adjustLength(rightValues, rightHeader.size());
         
-        for (String statsName : statsNames) {
+        for (String statsName : new TreeSet<String>(statsNames)) {
             List<String> row = new ArrayList<String>();
             table.add(row);
             
