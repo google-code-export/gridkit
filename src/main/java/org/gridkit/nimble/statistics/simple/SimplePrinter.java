@@ -52,6 +52,8 @@ public abstract class SimplePrinter {
         this.rightHeader = rightHeader;;
     }
 
+    // ------------------------------------------------------------------------------------- //
+    
     public void print(PrintStream stream, SimpleStats stats) {
         print(stream, stats, Collections.<String>emptyList(), Collections.<String>emptyList());
     }
@@ -96,6 +98,20 @@ public abstract class SimplePrinter {
             printStream.close();
         }
     }
+    
+    // ------------------------------------------------------------------------------------- //
+    
+    public void printValues(PrintStream stream, SimpleStats stats, Collection<String> statsNames,
+                            List<String> leftValues, List<String> rightValues) { 
+        List<String> header = newValueHeader();
+        List<List<String>> table = newValueTable(stats, statsNames, leftValues, rightValues);
+        
+        table.add(0, header);
+
+        printTable(stream, table);
+    }
+    
+    // ------------------------------------------------------------------------------------- //
     
     protected abstract void printTable(PrintStream stream, List<List<String>> table);
     
