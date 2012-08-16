@@ -7,8 +7,8 @@
 
 = Key features =
  * Starting all kind of nodes inside one JVM (member and extend client, storage enabled and disabled), supporting any type of Coherence topology.
- * Have independent system properties for each isolate.
- * Classpath of each isolate could be tweaked independently.
+ * Have independent *system properties* for each isolate.
+ * *Classpath* of each isolate could be tweaked independently.
  * Output of isolates could be optionally prefixed by isolate name.
  * Isolate could be forcibly terminated.
  * Isolate can be suspended/resumed (server crash and long GC pauses could be simulated this way).
