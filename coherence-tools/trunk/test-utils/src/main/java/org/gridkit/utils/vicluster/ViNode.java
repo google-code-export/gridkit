@@ -208,7 +208,7 @@ public class ViNode implements ViProps {
 
 	public void kill() {
 		if (!started) {
-			throw new IllegalStateException("can't kill not started node " + getName());
+			terminated = true;
 		}
 		if (!terminated) {
 			isolate.stop();
