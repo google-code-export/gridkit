@@ -770,22 +770,9 @@ public class Isolate {
 	@SuppressWarnings("serial")
 	private class ThreadDoomException extends ThreadDeath {
 
-//		@Override
-//		public String getMessage() {
-//			//System.out.println("OMEGA:getMessage");
-//			throw this;
-//		}
-
-//		@Override
-//		public String getLocalizedMessage() {
-//			//System.out.println("OMEGA:getLocalizedMessage");
-//			throw this;
-//		}
-
 		@Override
 		public Throwable getCause() {
-			//System.out.println("OMEGA:getCause");			
-			return this;
+			return null;
 		}
 
 		@Override
@@ -795,26 +782,18 @@ public class Isolate {
 
 		@Override
 		public void printStackTrace() {
-			//System.out.println("OMEGA:printStackTrace");
-//			throw this;
 		}
 
 		@Override
 		public void printStackTrace(PrintStream s) {
-			//System.out.println("OMEGA:printStackTrace");
-//			throw this;
 		}
 
 		@Override
 		public void printStackTrace(PrintWriter s) {
-			//System.out.println("OMEGA:printStackTrace");
-//			throw this;
 		}
 
 		@Override
 		public StackTraceElement[] getStackTrace() {
-			//System.out.println("OMEGA:getStackTrace");
-//			throw this;
 			return null;
 		}
 	}

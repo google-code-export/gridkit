@@ -1,23 +1,8 @@
 package org.gridkit.coherence.util.classloader;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 
 public class ExceptionWeaver {
-
-	private static final Field TRACE_FIELD;
-	private static final Field CAUSE_FIELD;
-	
-	static {
-		try {
-			TRACE_FIELD = Throwable.class.getDeclaredField("stackTrace");
-			TRACE_FIELD.setAccessible(true);
-			CAUSE_FIELD = Throwable.class.getDeclaredField("cause");
-			CAUSE_FIELD.setAccessible(true);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
 	
 	public static void replaceStackTop(Throwable receiver, StackTraceElement receiverTop, Throwable donnor, StackTraceElement donnorBottom, StackTraceElement boundary) {
 		StackTraceElement[] rtrace = receiver.getStackTrace();
@@ -47,7 +32,7 @@ public class ExceptionWeaver {
 		result = Arrays.copyOf(result, n);
 		
 		try {
-			TRACE_FIELD.set(receiver, result);
+			receiver.setStackTrace(result);
 		} catch (Exception e) {
 			// ignore
 		}
