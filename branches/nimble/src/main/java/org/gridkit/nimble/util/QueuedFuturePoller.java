@@ -41,7 +41,7 @@ public class QueuedFuturePoller implements FuturePoller {
                 while (true) {
                     PollFuture pollFuture = futures.take();
                     Future future = pollFuture.getFuture();
-                    
+                                        
                     if (future.isDone()) {
                         if (future.isCancelled()) {
                             pollFuture.cancel(true);
@@ -54,6 +54,7 @@ public class QueuedFuturePoller implements FuturePoller {
                         }
                     } else {
                         futures.put(pollFuture);
+                        Thread.sleep(50);
                     }
                 }
             }
