@@ -37,7 +37,7 @@ public class Sleep {
             directorExecutor
         );
         
-        FuturePoller poller = new QueuedFuturePoller(2);
+        FuturePoller poller = new QueuedFuturePoller(1);
         
         Scenario s1 = new ExecScenario(new SimpleExecutable("A"), agent, poller);
         Scenario s2 = new ExecScenario(new SimpleExecutable("B"), agent, poller);

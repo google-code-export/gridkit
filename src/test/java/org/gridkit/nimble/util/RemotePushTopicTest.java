@@ -112,6 +112,7 @@ public class RemotePushTopicTest {
         public void excute(Context context) throws Exception {
             for (int i = from; i < to; ++i) {
                 topic.publish(Collections.singleton(String.valueOf(i)));
+                topic.sync();
             }
         }
     }
