@@ -1,9 +1,11 @@
 package org.gridkit.nimble.util;
 
 import java.rmi.Remote;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -57,6 +59,7 @@ public class RemotePushTopicTest {
         try {
             Play<SimpleStats> play = director.play(scenario);
             play.getCompletionFuture().get();
+            topic.sync();
         } finally {
             director.shutdown(false);
         }
@@ -84,9 +87,9 @@ public class RemotePushTopicTest {
     public static class PrintSubscriber implements PushTopic.Subscriber<String>, Remote {
         @Override
         public void push(Collection<String> msgs) {
-            for (String msg : msgs) {
-                System.out.println(msg);
-            }
+        	System.out.println(msgs);
+//            for (String msg : msgs) {
+//            }
         }
     }
     
@@ -110,10 +113,21 @@ public class RemotePushTopicTest {
 
         @Override
         public void excute(Context context) throws Exception {
-            for (int i = from; i < to; ++i) {
-                topic.publish(Collections.singleton(String.valueOf(i)));
-                topic.sync();
-            }
+        	try {
+	            for (int i = from; i < to; ++i) {
+	                topic.publish(Collections.singleton(String.valueOf(i)));
+	            }
+	            topic.sync();
+	            List<String> pack = new ArrayList<String>();
+	            for (int i = 0; i != 16 << 10; ++i) {
+	            	pack.add(String.valueOf(i));
+	            }
+	            topic.publish(pack);
+	            topic.sync();
+        	}
+        	catch(Exception e) {
+        		e.printStackTrace();
+        	}
         }
     }
 }
