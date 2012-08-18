@@ -43,6 +43,7 @@ public class RemotePushTopic<M> implements PushTopic<M>, Serializable {
     		t.setName("PushTopic.Publisher-" + t.getName());
     		t.start();
     	}
+    	publishQueue.addAll(msgs);
     }
     
     @Override
