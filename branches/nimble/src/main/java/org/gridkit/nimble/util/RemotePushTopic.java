@@ -5,6 +5,7 @@ import java.rmi.Remote;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -43,14 +44,22 @@ public class RemotePushTopic<M> implements PushTopic<M>, Serializable {
     		t.setName("PushTopic.Publisher-" + t.getName());
     		t.start();
     	}
-    	publishQueue.addAll(msgs);
+    	List<M> outgoing = new ArrayList<M>(msgs);
+    	while(!outgoing.isEmpty()) {
+    		move(outgoing, publishQueue);
+    	}
     }
     
     @Override
 	public void sync() throws InterruptedException {
-		while(publishQueue.size() > 0) {
-			Thread.sleep(1000);
-		}
+    	if (hub instanceof Hub) {
+    		hub.sync();
+    	}
+    	else if (publishQueue != null) {
+	 		while(publishQueue.size() > 0) {
+				Thread.sleep(100);
+			}
+    	}
 	}
 
 	private void pushToHub() {
@@ -71,7 +80,19 @@ public class RemotePushTopic<M> implements PushTopic<M>, Serializable {
 		}
     }
     
-    private static class Hub<M> implements RemoteTopic<M> {
+    private static <M> void move(List<M> incoming, BlockingQueue<M> queue) {
+		Iterator<M> it = incoming.iterator();
+		while(it.hasNext()) {
+			if (queue.offer(it.next())) {
+				it.remove();
+			}
+			else {
+				break;
+			}
+		}			
+	}
+
+	private static class Hub<M> implements RemoteTopic<M> {
     	
     	private List<Subscriber<M>> subscribers = new CopyOnWriteArrayList<Subscriber<M>>();
     	private BlockingQueue<M> buffer = new ArrayBlockingQueue<M>(8 << 10); 
@@ -83,24 +104,31 @@ public class RemotePushTopic<M> implements PushTopic<M>, Serializable {
 
         @Override
         public void publish(Collection<M> msgs) {
-        	buffer.addAll(msgs);
-        	synchronized (this) {
-        		List<M> data = new ArrayList<M>();
-        		buffer.drainTo(data);
-        		
-        		List<Subscriber<M>> shuffledSubscribers = new ArrayList<Subscriber<M>>(subscribers);
-        		
-        		Collections.shuffle(shuffledSubscribers);
-        		
-        		for (Subscriber<M> subscriber : shuffledSubscribers) {
-        			subscriber.push(msgs);
-        		}
-			}
+        	List<M> incoming = new ArrayList<M>(msgs);
+        	while(!incoming.isEmpty()) {
+        		move(incoming, buffer);
+	        	synchronized (this) {
+	        		List<M> data = new ArrayList<M>();	        		
+	        		buffer.drainTo(data);
+	        		if (data.isEmpty()) {	        		
+		        		List<Subscriber<M>> shuffledSubscribers = new ArrayList<Subscriber<M>>(subscribers);
+		        		
+		        		Collections.shuffle(shuffledSubscribers);
+		        		
+		        		for (Subscriber<M> subscriber : shuffledSubscribers) {
+	        				subscriber.push(msgs);
+		        		}
+		        		System.err.println("Published " + data.size() + " messages to " + shuffledSubscribers.size() + " subscribers");
+	        		}
+				}
+        	}
         }
 
 		@Override
-		public void sync() {
-			// do nothing
+		public void sync() throws InterruptedException {
+			while(!buffer.isEmpty()) {
+				Thread.sleep(100);
+			}
 		}    	
     }
     
