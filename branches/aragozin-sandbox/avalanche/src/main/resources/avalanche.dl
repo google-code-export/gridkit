@@ -1,0 +1,144 @@
+f_component('hcluster').
+
+
+f_state('hcluster', 'void').
+f_state('hcluster', 'init').
+f_state('hcluster', 'provision').
+f_state('hcluster', 'run').
+f_state('hcluster', 'shutdown').
+
+f_transition('hcluster.init',      'hcluster', 'void', 'init').
+f_transition('hcluster.provision', 'hcluster', 'init', 'provision').
+f_transition('hcluster.run',       'hcluster', 'provision', 'run').
+f_transition('hcluster.shutdown',  'hcluster', 'run', 'shutdown').
+f_transition('hcluster.dispose',   'hcluster', 'shutdown', 'void').
+
+f_current_state('hcluster', 'void').
+
+f_component('benchmark').
+
+f_state('benchmark', 'void').
+f_state('benchmark', 'init').
+f_state('benchmark', 'provision').
+f_state('benchmark', 'run').
+f_state('benchmark', 'report').
+
+f_transition('benchmark.init',      'benchmark', 'void', 'init').
+f_transition('benchmark.provision', 'benchmark', 'init', 'provision').
+f_transition('benchmark.run',       'benchmark', 'provision', 'run').
+f_transition('benchmark.report',    'benchmark', 'run', 'report').
+f_transition('benchmark.dispose',   'benchmark', 'report', 'void').
+
+f_current_state('benchmark', 'void').
+
+f_dependency('benchmark.provision', 'hcluster', 'run').
+
+
+f_goal('hcluster', 'run').
+
+error(?M) :-
+    f_goal(?C, ?S),
+    ! f_state(?C, ?S),
+    ?M = ERROR("Unknown goal state specified", ?C, ?S).
+
+error(?M) :-
+    f_current_state(?C, ?S),
+    ! f_state(?C, ?S),
+    ?M = ERROR("Unknown current state specified", ?C, ?S).
+    
+error(?M) :-
+    f_state(?C, ?S),
+    ! f_component(?C),
+    ?M = ERROR("Unknown component for a state", ?C, ?S).
+    
+
+state(?state) :-
+    f_state(?component, ?stateName),
+    ?state = STATE(?component, ?stateName).
+
+state(?state, ?component, ?stateName) :-
+    f_state(?component, ?stateName),
+    ?state = STATE(?component, ?stateName).
+
+transition(?transition, ?initialState, ?targetState) :-
+    f_transition(?transition, ?component, ?initialStateName, ?targetStateName),
+    state(?initialState, ?component, ?initialStateName),
+    state(?targetState, ?component, ?targetStateName).
+
+goal(?state) :-
+    f_goal(?component, ?stateName),
+    state(?state, ?component, ?stateName).
+
+solve(?targetState, ?transition) :-
+    ready_to_run(?transition),
+    ! satisfied(?targetState),
+    contributing(?transition, ?targetState).    
+
+activate(?transition) :-
+    ready_to_run(?transition),
+    goal(?targetState),
+    ! satisfied(?targetState),
+    contributing(?transition, ?targetState).
+
+contributing(?transition, ?targetState) :-
+    transition(?transition, ?initialState, ?targetState).
+    
+contributing(?transition, ?targetState) :-
+    contributing(?transition, ?midState), 
+    transition(?transitionTarget, ?t0, ?targetState),
+    initial_state_dependency(?midDep, ?midState),
+    has_dependency(?transitionTarget, ?midDep).     
+    
+ready_to_run(?transition) :-
+    transition(?transition, ?initialState, ?targetState),
+    ! has_pending_dependency(?transition).
+
+has_pending_dependency(?transition) :-
+    has_dependency(?transition, ?dependency),
+    ! satisfied(?dependency).
+    
+has_dependency(?transition, ?dependency) :-
+    transition(?transition, ?initialState, ?targetState),
+    initial_state_dependency(?dependency, ?initialState).
+
+has_dependency(?transition, ?dependency) :-
+    f_dependency(?transition, ?component, ?stateName),
+    state(?state, ?component, ?stateName),
+    initial_state_dependency(?dependency, ?state).
+
+satisfied(?dependency) :-
+    initial_state_dependency(?dependency, ?state),
+    satisfied(?state).
+
+satisfied(?state) :-
+    state(?state, ?component, ?stateName),
+    f_current_state(?component, ?stateName).
+
+initial_state_dependency(?dependency, ?component, ?state) :-
+    f_component(?component),
+    f_state(?component, ?state),
+    ?dependency = DEP(?component, ?state).
+
+initial_state_dependency(?dependency, ?state) :-
+    state(?state, ?component, ?stateName),
+    ?dependency = DEP(?component, ?stateName).
+
+?-error(?M).
+//?-activate(?X).
+//?-ready_to_run(?transition).
+//?-goal(?targetState).
+//?-satisfied(?targetState).
+?-contributing('hcluster.init', ?targetState).
+?-contributing('benchmark.init', ?targetState).
+
+?-ready_to_run(?X).
+//?-contributing('hcluster.init', ?Y).
+//?-transition(?X, ?Y, ?Z).
+//?-state(?X, ?Y, ?Z).
+//?-f_dependency(?X, ?Y, ?Z).
+?-has_dependency('benchmark.init', ?Y).
+//?-initial_state_dependenct(?X, 'hcluster', 'void').
+?-satisfied(?X).
+//?-has_pending_dependency(?transition).
+
+?-solve(STATE('benchmark', 'report'), ?A).

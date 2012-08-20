@@ -1,0 +1,111 @@
+
+// World
+
+world(?world) :-
+    ?world=WORLD().
+
+world(?world, ?fact, ?rest) :-
+    ?world=WORLD(?fact, ?rest).
+
+w_state(?world, ?state) :-
+    state(?state, ?component, ?stateName),
+    w_state(?world, ?component, ?stateName).
+    
+w_state(?world, ?component, ?stateName) :-
+    world(?world, ?fact, ?rest),
+    w_state_fact(?fact, ?component, ?stateName).
+
+w_state(?world, ?component, ?stateName) :-
+    world(?world, ?fact, WORLD()),
+    w_state_fact(?fact, ?component, ?stateName).
+    
+w_state(?world, ?component, ?stateName) :-
+    world(?world, ?fact, ?rest),
+    !w_state_fact(?fact, ?component, ?anyState),
+    w_state(?rest, ?component, ?stateName).
+
+w_active(?world, ?transition) :-
+    w_state(?world, ?transition, TRUE()).
+    
+w_active(?world, ?transition, ?status) :-
+    world(?world, ?fact, ?rest),
+    w_active_fact(?fact, ?transition, ?status).
+
+w_active(?world, ?transition, ?status) :-
+    world(?world, ?fact, ?rest),
+    ! w_active_fact(?fact, ?transition, ?anyStatus),
+    w_active(?rest, ?transition, ?status).
+    
+w_state_fact(?fact, ?component, ?stateName) :-
+    ?fact = STATE(?component, ?stateName).
+
+w_set_state(?oldWorld, ?component, ?stateName, ?newWorld) :-
+//    f_state(?component, ?stateName),
+    world(?newWorld, ?fact, ?oldWorld),
+    w_state_fact(?fact, ?component, ?stateName).
+
+w_active_fact(?fact, ?transition, ?active) :-
+    ?fact = ACTIVE(?transition, ?active).
+
+w_set_active(?oldWorld, ?transition, ?status, ?newWorld) :-
+    world(?newWorld, ?fact, ?oldWorld),
+    w_active_fact(?fact, ?transition, ?status).
+
+
+// State
+
+state(?state, ?component, ?stateName) :-
+    ?state = STATE(?component, ?stateName).
+
+
+
+// World tests
+
+f_state('t_A', 'void').
+f_state('t_A', 'run').
+f_state('t_B', 'init').
+
+world_test_1(?M) :-
+    world(?w1),
+    w_set_state(?w1, 't_A', 'void', ?w2),
+    w_state(?w2, 't_A', ?s),
+    ?s='void',
+    ?M = M(?s, ?w2).
+
+world_test_2(?M) :-
+    world(?w1),
+    w_set_state(?w1, 't_A', 'void', ?w2),
+    w_set_state(?w2, 't_A', 'run', ?w3),
+    w_state(?w3, 't_A', ?s),
+    ?s='run',
+    ?M = M(?s, ?w3).
+
+world_test_3(?M) :-
+    world(?w1),
+    w_set_state(?w1, 't_A', 'void', ?w2),
+    w_set_state(?w2, 't_B', 'init', ?w3),
+    w_set_state(?w3, 't_A', 'run', ?w4),
+    w_state(?w4, 't_A', ?sA),
+    w_state(?w4, 't_B', ?sB),
+//    ?sA='run',
+//    ?sB='init',
+    ?M = M(?sA, ?sB, ?w4).
+    
+world_test_4(?M) :-
+    world(?w1),
+    w_set_state(?w1, 't_A', 'void', ?w2),
+    w_set_state(?w2, 't_B', 'init', ?w3),
+    w_set_active(?w3, 'tx1', TRUE(), ?w4),
+    w_set_state(?w5, 't_A', 'run', ?w6),
+    w_state(?w5, 't_A', ?sA),
+    w_state(?w5, 't_B', ?sB),
+    ?sA='run',
+    ?sB='init',
+    ?M = M(?sA, ?sB, ?w5).
+        
+?-world_test_3(?X).
+//?-w_state(WORLD(STATE('t_A','run'),WORLD(STATE('t_B','init'),WORLD(STATE('t_A','void'),WORLD()))), ?x, ?Y).
+//?-w_active(WORLD(STATE('tx1',TRUE()),WORLD(ACTIVE('t_A','void'),WOLRD())), ?X, ?Y).
+//?-w_set_active(WORLD(STATE('t_A','void'),WOLRD()), 'tx1', TRUE(), ?X).
+//?-world(?X).
+    
