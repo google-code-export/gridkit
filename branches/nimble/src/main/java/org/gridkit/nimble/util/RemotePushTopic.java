@@ -1,6 +1,7 @@
 package org.gridkit.nimble.util;
 
 import java.io.Serializable;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.rmi.Remote;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.gridkit.nimble.platform.PushTopic;
 
@@ -33,7 +35,7 @@ public class RemotePushTopic<M> implements PushTopic<M>, Serializable {
     @Override
     public synchronized void publish(Collection<M> msgs) {
     	if (pushThread == null) {
-    		publishQueue = new ArrayBlockingQueue<M>(4 << 10);
+    		publishQueue = new LinkedBlockingQueue<M>();
     		Thread t = new Thread(new Runnable() {				
 				@Override
 				public void run() {
@@ -43,6 +45,7 @@ public class RemotePushTopic<M> implements PushTopic<M>, Serializable {
     		t.setDaemon(true);
     		t.setName("PushTopic.Publisher-" + t.getName());
     		t.start();
+    		pushThread = t;
     	}
     	List<M> outgoing = new ArrayList<M>(msgs);
     	while(!outgoing.isEmpty()) {
@@ -69,7 +72,12 @@ public class RemotePushTopic<M> implements PushTopic<M>, Serializable {
 				M first = publishQueue.take();
 				buffer.add(first);
 				publishQueue.drainTo(buffer, (2 << 10) - 1);
-				hub.publish(buffer);
+				try {
+					hub.publish(buffer);
+				}
+				catch(Exception e) {
+					// ignore
+				}
 				buffer.clear();
 			}
 		} catch (InterruptedException e) {			
@@ -95,7 +103,7 @@ public class RemotePushTopic<M> implements PushTopic<M>, Serializable {
 	private static class Hub<M> implements RemoteTopic<M> {
     	
     	private List<Subscriber<M>> subscribers = new CopyOnWriteArrayList<Subscriber<M>>();
-    	private BlockingQueue<M> buffer = new ArrayBlockingQueue<M>(8 << 10); 
+    	private BlockingQueue<M> buffer = new ArrayBlockingQueue<M>(256); 
     	
         @Override
         public void subscribe(Subscriber<M> subscriber) {
@@ -104,23 +112,35 @@ public class RemotePushTopic<M> implements PushTopic<M>, Serializable {
 
         @Override
         public void publish(Collection<M> msgs) {
-        	List<M> incoming = new ArrayList<M>(msgs);
-        	while(!incoming.isEmpty()) {
-        		move(incoming, buffer);
-	        	synchronized (this) {
-	        		List<M> data = new ArrayList<M>();	        		
-	        		buffer.drainTo(data);
-	        		if (data.isEmpty()) {	        		
-		        		List<Subscriber<M>> shuffledSubscribers = new ArrayList<Subscriber<M>>(subscribers);
-		        		
-		        		Collections.shuffle(shuffledSubscribers);
-		        		
-		        		for (Subscriber<M> subscriber : shuffledSubscribers) {
-	        				subscriber.push(msgs);
+        	try {
+	        	List<M> incoming = new ArrayList<M>(msgs);
+	        	while(!incoming.isEmpty()) {
+	        		move(incoming, buffer);
+		        	synchronized (this) {
+		        		List<M> data = new ArrayList<M>();	        		
+		        		buffer.drainTo(data);
+		        		if (!data.isEmpty()) {	        		
+			        		List<Subscriber<M>> shuffledSubscribers = new ArrayList<Subscriber<M>>(subscribers);
+			        		
+			        		Collections.shuffle(shuffledSubscribers);
+			        		
+			        		for (Subscriber<M> subscriber : shuffledSubscribers) {
+			        			try {
+			        				subscriber.push(msgs);
+			        			}
+			        			catch(UndeclaredThrowableException e) {
+			        				// ignore
+			        				subscribers.remove(subscriber);
+			        			}
+			        		}
+			        		System.err.println("Published " + data.size() + " messages to " + shuffledSubscribers.size() + " subscribers");
 		        		}
-		        		System.err.println("Published " + data.size() + " messages to " + shuffledSubscribers.size() + " subscribers");
-	        		}
-				}
+					}
+	        	}
+        	}
+        	catch(Exception e) {
+        		// TODO
+        		// ignore
         	}
         }
 
