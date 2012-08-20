@@ -4,11 +4,39 @@
 @prefix s:  <avc:/state/>.
 @prefix t:  <avc:/transition/>.
 
-(?transition :ready "") <- 
+(?transition :ready true) <- 
     (?transition :a cl:transition) 
-    noValue(?transition :pending_dependency).
+    noValue(?transition :pending_dependency true).
 
 (:solution :perform ?transition) <- 
     (?transition :a cl:transition)
     (?transition :ready ?t1)
     (?transition :live_dependency ?t2).
+    
+(?transition :gen_dep dep(?condition, cl:precondition, ?state)) <- 
+    (?transition :a cl:transition)
+    (?transition :from ?state)
+    makeInstance(?transition, ?state, ?condition). 
+    
+(?condition :a cl:precodition) <-
+    (?transition :gen_dep dep(?condition, cl:precondition, ?state)).
+    
+(?condition :state ?state) <-
+	(?transition :gen_dep dep(?condition, cl:precondition, ?state)).
+
+(?transition :depends ?condition) <-
+	(?transition :gen_dep dep(?condition, cl:precondition, ?state)).
+
+(?condition :satisfied true) <-
+    (?condition :a cl:precodition)
+    (?condition :state ?state)
+    (?component :at_state ?state).
+        
+(?transition :pending_dependency true) <-
+    (?transition :depends ?condition)
+    noValue(?condition :satisfied true).  
+    
+(?transition :solved_dependency true) <-
+    (?transition :depends ?condition)
+    (?condition :satisfied true).  
+    

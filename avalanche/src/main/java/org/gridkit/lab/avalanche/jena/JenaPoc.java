@@ -25,15 +25,19 @@ public class JenaPoc {
 		Model baseModel = ModelFactory.createNonreifyingModel();
 		baseModel.read(cl.getResourceAsStream("test-model.n3"), "", "N3");
 
-		Reasoner reasoner = new GenericRuleReasoner(Rule.rulesFromURL(cl.getResource("avalanche.rules").toString()));
-		reasoner.setDerivationLogging(true);
+		GenericRuleReasoner reasoner = new GenericRuleReasoner(Rule.rulesFromURL(cl.getResource("avalanche.rules").toString()));
+//		reasoner.setDerivationLogging(true);
 		
 		InfModel inf = ModelFactory.createInfModel(reasoner, baseModel);
 		
 		Resource solution = baseModel.createResource("avc:/solution");
 		printFacts("avc:/solution", null, null, inf);
 		printFacts(null, "avc:/ready", null, inf);
-		printFacts(null, null, "avc:/class/transition", inf);
+//		printFacts(null, null, "avc:/class/transition", inf);
+		printFacts(null, "avc:/depends", null, inf);
+		printFacts(null, "avc:/pending_dependency", null, inf);
+		printFacts(null, "avc:/solved_dependency", null, inf);
+		printFacts(null, "avc:/satisfied", null, inf);
 	}
 	
 	private static void printFacts(String subj, String pred, String obj, Model model) {
