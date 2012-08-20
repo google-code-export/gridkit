@@ -1,0 +1,40 @@
+@prefix : <avc:/>.
+@prefix c:  <avc:/component/>.
+@prefix cl:  <avc:/class/>.
+@prefix s:  <avc:/state/>.
+@prefix t:  <avc:/transition/>.
+
+c:hcluster :a cl:component.
+
+
+s:hcluster.void      :a cl:state.
+s:hcluster.init      :a cl:state.
+s:hcluster.provision :a cl:state.
+s:hcluster.run       :a cl:state.
+s:hcluster.shutdown  :a cl:state.
+
+t:hcluster.init      :a cl:transition;
+    :from s:cluster.void;
+    :to s:cluster.init.
+
+t:hcluster.provision      :a cl:transition;
+    :from s:cluster.init;
+    :to s:cluster.provision.
+
+t:hcluster.run      :a cl:transition;
+    :from s:cluster.provision;
+    :to s:cluster.run.
+
+t:hcluster.shutdown      :a cl:transition;
+    :from s:cluster.run;
+    :to s:cluster.shutdown.
+
+t:hcluster.destroy      :a cl:transition;
+    :from s:cluster.shutdown;
+    :to s:cluster.void.
+
+c:hcluster :at_state s:hcluster.void.
+
+
+:goal :a s:hcluster.run.
+:solution :test "test".    

@@ -1,0 +1,14 @@
+@prefix : <avc:/>.
+@prefix c:  <avc:/component/>.
+@prefix cl:  <avc:/class/>.
+@prefix s:  <avc:/state/>.
+@prefix t:  <avc:/transition/>.
+
+(?transition :ready "") <- 
+    (?transition :a cl:transition) 
+    noValue(?transition :pending_dependency).
+
+(:solution :perform ?transition) <- 
+    (?transition :a cl:transition)
+    (?transition :ready ?t1)
+    (?transition :live_dependency ?t2).
