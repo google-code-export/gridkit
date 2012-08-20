@@ -14,24 +14,24 @@ s:hcluster.run       :a cl:state.
 s:hcluster.shutdown  :a cl:state.
 
 t:hcluster.init      :a cl:transition;
-    :from s:cluster.void;
-    :to s:cluster.init.
+    :from s:hcluster.void;
+    :to s:hcluster.init.
 
 t:hcluster.provision      :a cl:transition;
-    :from s:cluster.init;
-    :to s:cluster.provision.
+    :from s:hcluster.init;
+    :to s:hcluster.provision.
 
 t:hcluster.run      :a cl:transition;
-    :from s:cluster.provision;
-    :to s:cluster.run.
+    :from s:hcluster.provision;
+    :to s:hcluster.run.
 
 t:hcluster.shutdown      :a cl:transition;
-    :from s:cluster.run;
-    :to s:cluster.shutdown.
+    :from s:hcluster.run;
+    :to s:hcluster.shutdown.
 
 t:hcluster.destroy      :a cl:transition;
-    :from s:cluster.shutdown;
-    :to s:cluster.void.
+    :from s:hcluster.shutdown;
+    :to s:hcluster.void.
 
 c:hcluster :at_state s:hcluster.void.
 
