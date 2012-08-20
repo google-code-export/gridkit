@@ -11,14 +11,11 @@ public interface Component extends AttrMap {
 	
 	public Component getOwner();
 	
-	public Knot getCurrentState();
-	
-	public Collection<Transition> currentTransitions();
+	public ComponentState getCurrentState();
 	
 	public Map<String, Component> getNamedSubComponents();
 	
 	public Collection<Component> getAllSubComponents();
 	
 	public <V> V get(AttrKey<V> key);
-	
 }

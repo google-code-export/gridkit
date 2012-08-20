@@ -7,9 +7,10 @@ import java.util.List;
 public class Strategian {
 
 	Graph graph;
-	Knot target;
 	List<Proposal> proposals = new ArrayList<Strategian.Proposal>();
 	List<Conflict> conflicts = new ArrayList<Conflict>();
+	
+	List<Node> waveFront = new ArrayList<Strategian.Node>();
 	
 	public Strategian(Graph graph) {
 		this.graph = graph;
@@ -17,7 +18,7 @@ public class Strategian {
 	
 	public Collection<ActionItem> analyze(Graph graph, Knot target) {
 		reset();		
-		this.target = target;
+		waveFront.add(new Node(target));
 		buildLiveDependencyGraph();
 		List<ActionItem> result = new ArrayList<ActionItem>();
 		for(Conflict c: conflicts) {
@@ -30,8 +31,10 @@ public class Strategian {
 	}	
 	
 	private void buildLiveDependencyGraph() {
-		// TODO Auto-generated method stub
-		
+		while(!waveFront.isEmpty()) {
+			Node goal = waveFront.remove(0);
+			sanityCheck("No dependencies in ")
+		}		
 	}
 
 	private ActionItem reportProposal(Proposal p) {
@@ -46,7 +49,7 @@ public class Strategian {
 		target = null;
 		proposals.clear();
 		conflicts.clear();
-		
+		waveFront.clear();		
 	}
 	
 	private static class Proposal {
@@ -57,9 +60,6 @@ public class Strategian {
 	
 	private static class Conflict {
 		
-		Knot goal1;
-		Edge
-		Knot goal2;
 		
 	}
 	

@@ -8,5 +8,7 @@ public interface Manifest {
 	
 	public Collection<Knot> getKnots();
 	
+	public Transition getTransition(Knot from, Knot to);
+	
 	public Collection<Dependency> getDependencies(Knot knot);
 }
