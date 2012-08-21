@@ -1269,53 +1269,47 @@ public class Isolate {
 	private static class WrapperPrintStream extends FilterOutputStream {
 
 		private String prefix;
-		private boolean startOfLine;
 		private PrintStream printStream;
+		private ByteArrayOutputStream buffer;
 		
 		public WrapperPrintStream(String prefix, PrintStream printStream) {
 			super(printStream);
 			this.prefix = prefix;
-			this.startOfLine = true;
 			this.printStream = printStream;
+			this.buffer = new ByteArrayOutputStream();
 		}
 		
 		public void setPrefix(String prefix) {
 			this.prefix = prefix;
 		}
+				
+		private void dumpBuffer() throws IOException {
+			printStream.append(prefix);
+			printStream.write(buffer.toByteArray());
+			printStream.flush();
+			buffer.reset();
+		}
 		
 		@Override
 		public synchronized void write(int c) throws IOException {
 			synchronized(printStream) {
-				checkNewLine();
+				buffer.write(c);
 				if (c == '\n') {
-					startOfLine = true;
-				}
-				super.write(c);
-				if (startOfLine) {
-					// flush after end of line
-					super.flush();
+					dumpBuffer();
 				}
 			}
 		}
 
-		private void checkNewLine() {
-			if (startOfLine) {
-				printStream.append(prefix);
-				startOfLine = false;
-			}
-		}
-	
 		@Override
-		public void write(byte[] b, int off, int len) throws IOException {
+		public synchronized void write(byte[] b, int off, int len) throws IOException {
 			synchronized(printStream) {
-				checkNewLine();
 				for (int i = 0; i != len; ++i) {
 					if (b[off + i] == '\n') {
 						writeByChars(b, off, len);
 						return;
 					}
 				}
-				super.write(b, off, len);
+				buffer.write(b, off, len);
 			}
 		}
 
@@ -1328,8 +1322,9 @@ public class Isolate {
 		@Override
 		public void close() throws IOException {
 			super.flush();
+			dumpBuffer();			
 		}
-	}
+	}	
 	
 	private static abstract class PrintStreamMultiplexor extends PrintStream {
 		
