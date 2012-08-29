@@ -3,12 +3,13 @@
   <groupId>org.gridkit.coherence-tools</groupId>
   <artifactId>coherence-tools-parent</artifactId>
   <versioning>
-    <release>1.2</release>
+    <release>1.3</release>
     <versions>
       <version>1.0</version>
       <version>1.1</version>
       <version>1.2</version>
+      <version>1.3</version>
     </versions>
-    <lastUpdated>20111102114855</lastUpdated>
+    <lastUpdated>20120829214250</lastUpdated>
   </versioning>
 </metadata>
