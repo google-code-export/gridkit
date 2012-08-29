@@ -35,7 +35,7 @@
         <!-- GridKit maven2 repository location -->
         <repository>
             <id>gridkit-repo.googlecode.com</id>
-            <url>dav:https://gridkit.googlecode.com/svn/repo/</url>
+            <url>svn:https://gridkit.googlecode.com/svn/repo/</url>
         </repository>
     </distributionManagement>
     
@@ -54,6 +54,14 @@
             </snapshots>
         </repository>
         <repository>
+            <!-- 
+        This is member only repository used by developers of this project
+                to store proprietary artifact.
+                Normally you would use your own repository to store such artefact
+                and configure it in your maven setting.
+                This repository is defined at POM for convience of team collaborating
+                on gridkit project. 
+            -->
             <id>gridkit-maven</id>
             <url>https://subversion.assembla.com/svn/gridkit-maven/</url>
             <releases>
@@ -110,11 +118,17 @@
             </plugin>                
         </plugins>
         <extensions>
-            <!-- Enables webdav repository access -->
             <extension>
+                <!-- Enables webdav repository access -->
                 <groupId>org.apache.maven.wagon</groupId>
                 <artifactId>wagon-webdav-jackrabbit</artifactId>
                 <version>1.0-beta-7</version>
+            </extension>
+            <extension>
+			    <!-- Enables SVN repository access -->
+                <groupId>com.google.code.maven-svn-wagon</groupId>
+                <artifactId>maven-svn-wagon</artifactId>
+                <version>1.4</version>
             </extension>
         </extensions>
     </build>
