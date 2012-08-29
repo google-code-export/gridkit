@@ -36,7 +36,7 @@
         <!-- GridKit maven2 repository location -->
         <repository>
             <id>gridkit-repo.googlecode.com</id>
-            <url>dav:https://gridkit.googlecode.com/svn/repo/</url>
+            <url>svn:https://gridkit.googlecode.com/svn/repo/</url>
         </repository>
     </distributionManagement>
     
@@ -111,11 +111,17 @@
             </plugin>                
         </plugins>
         <extensions>
-            <!-- Enables webdav repository access -->
             <extension>
+                <!-- Enables webdav repository access -->
                 <groupId>org.apache.maven.wagon</groupId>
                 <artifactId>wagon-webdav-jackrabbit</artifactId>
                 <version>1.0-beta-7</version>
+            </extension>
+            <extension>
+                <!-- Enables SVN repository access -->
+                <groupId>com.google.code.maven-svn-wagon</groupId>
+                <artifactId>maven-svn-wagon</artifactId>
+                <version>1.4</version>
             </extension>
         </extensions>
     </build>
