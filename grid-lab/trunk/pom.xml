@@ -21,15 +21,15 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.gridkit.lab</groupId>
     <artifactId>grid-lab-parent</artifactId>
-    <version>0.10</version>
+    <version>0.11-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>grid-lab parent POM</name>
     <description>Tools collection for Oracle Coherence IMDG (parent project).</description>
     
     <scm>
-        <connection>scm:svn:http://gridkit.googlecode.com/svn/grid-lab/tags/grid-lab-parent-0.10</connection>
-        <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/grid-lab/tags/grid-lab-parent-0.10</developerConnection>
-        <url>http://gridkit.googlecode.com/svn/grid-lab/tags/grid-lab-parent-0.10</url>
+        <connection>scm:svn:http://gridkit.googlecode.com/svn/grid-lab/trunk</connection>
+        <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/grid-lab/trunk</developerConnection>
+        <url>http://gridkit.googlecode.com/svn/grid-lab/trunk</url>
     </scm>
     
     <distributionManagement>
