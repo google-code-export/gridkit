@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<cache-config>
+	<caching-scheme-mapping>
+		<cache-mapping>
+			<cache-name>store-cache</cache-name>
+			<scheme-name>distributed-store</scheme-name>
+		</cache-mapping>
+	</caching-scheme-mapping>
+	
+	<caching-schemes>
+		<distributed-scheme>
+			<scheme-name>distributed-store</scheme-name>
+			<service-name>DistributedStore</service-name>
+			<partition-count system-property="org.gridkit.batch-store-uploader.partition-count">257</partition-count>
+			<backing-map-scheme>
+				<read-write-backing-map-scheme>
+					<internal-cache-scheme>
+						<local-scheme />
+					</internal-cache-scheme>
+					<cachestore-scheme>
+						<class-scheme>
+							<class-name>org.gridkit.coherence.store.HashMapCacheStore</class-name>
+						</class-scheme>
+					</cachestore-scheme>
+				</read-write-backing-map-scheme>
+			</backing-map-scheme>
+		</distributed-scheme>
+	</caching-schemes>
+	
+</cache-config>
