@@ -25,7 +25,7 @@ public class SimpleStatsReporter extends DelegatingStatsReporter {
         startNanos.put(statistica, timeService.currentTimeNanos());
     }
     
-    public void finish(String statistica) {
+	public void finish(String statistica) {
         long finishTimeNanos = timeService.currentTimeNanos();
         long finishTimeMillis = timeService.currentTimeMillis();
 
@@ -34,6 +34,21 @@ public class SimpleStatsReporter extends DelegatingStatsReporter {
         
         if (startTimeNanos != null && startTimeMillis != null) {
             report(statistica, startTimeMillis, finishTimeNanos - startTimeNanos);
+            report(SimpleThroughputSummary.getFinishStats(statistica), finishTimeMillis);
+            
+            startNanos.remove(statistica);
+            startMillis.remove(statistica);
+        }
+    }
+	
+	public void finish(String statistica, double value) {
+        long finishTimeMillis = timeService.currentTimeMillis();
+
+        Long startTimeNanos = startNanos.get(statistica);
+        Long startTimeMillis = startMillis.get(statistica);
+        
+        if (startTimeNanos != null && startTimeMillis != null) {
+            report(statistica, startTimeMillis, value);
             report(SimpleThroughputSummary.getFinishStats(statistica), finishTimeMillis);
             
             startNanos.remove(statistica);

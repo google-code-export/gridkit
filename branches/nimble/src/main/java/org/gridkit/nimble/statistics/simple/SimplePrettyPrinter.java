@@ -23,7 +23,20 @@ public class SimplePrettyPrinter extends SimplePrinter {
             
             for (int c = 0; c < lens.size(); ++c) {
                 String cell = c < row.size() ? row.get(c) : "";
-                stream.printf("%" + lens.get(c) + "s | ", cell);
+                boolean number = false;
+                try {
+                	Double.parseDouble(cell);
+                	number = true;
+                }
+                catch(NumberFormatException e) {
+                	// ignore
+                }
+                if (number) {
+                	stream.printf("%" + lens.get(c) + "s | ", cell);
+                }
+                else {
+                	stream.printf("%-" + lens.get(c) + "s | ", cell);
+                }
             }
             
             stream.println();
@@ -36,7 +49,7 @@ public class SimplePrettyPrinter extends SimplePrinter {
         List<Integer> lens = new ArrayList<Integer>(maxSize);
         
         for (int c = 0; c < maxSize; ++c) {
-            int len = Integer.MIN_VALUE;
+            int len = 1;
             
             for (int r = 0; r < rows.size(); ++r) {
                 List<String> row = rows.get(r);

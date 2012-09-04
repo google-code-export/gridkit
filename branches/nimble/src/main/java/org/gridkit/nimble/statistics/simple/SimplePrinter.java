@@ -39,7 +39,7 @@ public abstract class SimplePrinter {
     private final List<String> leftHeader;
     private final List<String> rightHeader;
     
-    private DecimalFormat decFormat = new DecimalFormat("#.##");
+    private DecimalFormat decFormat = new DecimalFormat("0.00");
     
     private TimeUnit ltUnit = TimeUnit.MILLISECONDS;
     private TimeUnit thUnit = TimeUnit.SECONDS;
@@ -103,7 +103,7 @@ public abstract class SimplePrinter {
     
     public void printValues(PrintStream stream, SimpleStats stats, Collection<String> statsNames,
                             List<String> leftValues, List<String> rightValues) { 
-        List<String> header = newValueHeader();
+        List<String> header = newValueHeader(TimeUnit.SECONDS);
         List<List<String>> table = newValueTable(stats, statsNames, leftValues, rightValues);
         
         table.add(0, header);
@@ -143,7 +143,7 @@ public abstract class SimplePrinter {
                     if (ltStats != null) {
                         row.add(decFormat.format(ltStats.getMean()));
                         row.add(decFormat.format(ltStats.getStandardDeviation()));
-                        row.add(decFormat.format(ltStats.getVariance()));
+//                        row.add(decFormat.format(ltStats.getVariance()));
                         row.add(decFormat.format(ltStats.getMin()));
                         row.add(decFormat.format(ltStats.getMax()));
                     } else {
@@ -187,7 +187,7 @@ public abstract class SimplePrinter {
                 row.add(String.valueOf(valStats.getN()));
                 row.add(decFormat.format(valStats.getMean()));
                 row.add(decFormat.format(valStats.getStandardDeviation()));
-                row.add(decFormat.format(valStats.getVariance()));
+//                row.add(decFormat.format(valStats.getVariance()));
                 row.add(decFormat.format(valStats.getMin()));
                 row.add(decFormat.format(valStats.getMax()));
             } else {
@@ -215,11 +215,11 @@ public abstract class SimplePrinter {
 
         if (latencyUnit != null) {
             String ltAlias = " (" + getTimeAlias(latencyUnit) + ")";
-            String varAlias = " (" + getTimeAlias(latencyUnit) + "^2)";
+//            String varAlias = " (" + getTimeAlias(latencyUnit) + "^2)";
 
             result.add("Mean" + ltAlias);
             result.add("Sd"   + ltAlias);
-            result.add("Var"  + varAlias);
+//            result.add("Var"  + varAlias);
             result.add("Min"  + ltAlias);
             result.add("Max"  + ltAlias);
         }
@@ -237,13 +237,13 @@ public abstract class SimplePrinter {
         return result;
     }
     
-    protected List<String> newValueHeader() {
+    protected List<String> newValueHeader(TimeUnit throughputUnit) {
         List<String> result = new ArrayList<String>();
         
         result.addAll(leftHeader);
-        result.addAll(Arrays.asList("Name", "N", "Mean", "Var", "Sd", "Min", "Max"));
+        result.addAll(Arrays.asList("Name", "N", "Mean", "Sd", "Min", "Max"));
         result.addAll(rightHeader);
-        
+
         return result;
     }
     
