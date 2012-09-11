@@ -50,6 +50,8 @@ import com.tangosol.util.Base;
 import com.tangosol.util.UUID;
 import com.tangosol.util.extractor.IdentityExtractor;
 import com.tangosol.util.filter.EqualsFilter;
+import com.tangosol.util.filter.NotFilter;
+import com.tangosol.util.filter.PresentFilter;
 import com.tangosol.util.processor.ConditionalPut;
 
 /**
@@ -66,7 +68,7 @@ public class AutoPofSerializer implements Serializer, PofContext {
 	
 	private static final int MAX_CONFIG_ID = Integer.getInteger("gridkit.auto-pof.max-config-id", 1000);
 	private static final int MIN_AUTO_ID = Integer.getInteger("gridkit.auto-pof.min-auto-id", 10000);
-	private static final Boolean USE_PUBLIC_CACHE_CONFIG = Boolean.getBoolean("gridkit.auto-pof.use-public-cache-config");
+	private static final boolean USE_PUBLIC_CACHE_CONFIG = Boolean.getBoolean("gridkit.auto-pof.use-public-cache-config");
 	
 	private static final String XML_FRAGMENT =
 	"<cache-config>"
@@ -466,35 +468,25 @@ public class AutoPofSerializer implements Serializer, PofContext {
 			initTypeMap();
 		}
 		while(true) {
-			if (typeMap.lock(name, 100)) {
-				try {
-					Integer n = (Integer) typeMap.get(name);
-					if (n != null) {
-						return n.intValue();
-					}
-					int nn;
-					while(true) {
-						n = (Integer) typeMap.get("");
-						if (n == null) {
-							nn = minAutoId;
-						}
-						else {
-							nn = n + 1;
-						}
-						Object x = typeMap.invoke("", new ConditionalPut(new EqualsFilter(IdentityExtractor.INSTANCE, n), nn, true));
-						if (x == null) {
-							break;
-						}
-					}
-					
-					typeMap.put(nn, name);
-					typeMap.put(name, nn);
-					return nn;
-				}
-				finally {
-					typeMap.unlock(name);
-				}
+			Integer id = (Integer) typeMap.get(name);
+			if (id != null) {
+				return id;
 			}
+			Integer n = (Integer) typeMap.get("");
+			int nn;
+			if (n == null) {
+				nn = minAutoId;
+			}
+			else {
+				nn = n + 1;
+			}
+			Object x = typeMap.invoke("", new ConditionalPut(new EqualsFilter(IdentityExtractor.INSTANCE, n), nn, true));
+			if (x != null) {
+				continue;
+			}
+			// this may create fake id -> name mappings, but it is ok because they will never be used in POF stream
+			typeMap.put(nn, name);
+			typeMap.invoke(name, new ConditionalPut(new NotFilter(PresentFilter.INSTANCE), nn, true));
 		}
 	}
 	

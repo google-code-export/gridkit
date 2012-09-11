@@ -24,40 +24,33 @@
             <scheme-name>remote-scheme</scheme-name>
         </cache-mapping>
 
+        <!-- THIS ENTRY IS REQUIRED FOR AUTO POF SERIALIZER -->
 		<cache-mapping><cache-name>AUTO_POF_MAPPING</cache-name><scheme-name>AUTO_POF_EXTEND_SCHEME</scheme-name></cache-mapping>
 
     </caching-scheme-mapping>
 
     <caching-schemes>
 
+        <!-- THIS ENTRY IS REQUIRED FOR AUTO POF SERIALIZER -->
 	    <remote-cache-scheme>
 			<scheme-name>AUTO_POF_EXTEND_SCHEME</scheme-name>
 			<service-name>AUTO_POF_SERVICE</service-name>
-			<!-- Service name should be set programatically <service-name>TcpExtendConnector</service-name> -->
 			<initiator-config>
 				<tcp-initiator>
 					<remote-addresses>
 						<socket-address>
 							<address>localhost</address>
-<!-- 
-							<port>9097</port>
- -->
 							<port>9099</port>
 						</socket-address>
 					</remote-addresses>
 				</tcp-initiator>
-<!-- 
- 				<serializer>
-				  <class-name>com.tangosol.io.pof.ConfigurablePofContext</class-name>
-				</serializer>
- -->
 				<serializer>
 				  <class-name>org.gridkit.coherence.utils.pof.AutoPofSerializer</class-name>
 				</serializer>
-
 			</initiator-config>
 		</remote-cache-scheme>
 
+        <!-- THIS A TEMPLATE FOR APPLICATION REMOTE SCHEME -->   
 	    <remote-cache-scheme>
 			<scheme-name>remote-scheme</scheme-name>
 			<service-name>ExtendConnector</service-name>
