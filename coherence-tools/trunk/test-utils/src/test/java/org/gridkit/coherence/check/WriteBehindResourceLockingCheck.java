@@ -18,15 +18,21 @@ import org.gridkit.coherence.test.CacheTemplate;
 import org.gridkit.utils.vicluster.CohHelper;
 import org.gridkit.utils.vicluster.ViCluster;
 import org.gridkit.utils.vicluster.ViNode;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.number.IsGreaterThan;
+import org.hamcrest.number.OrderingComparisons;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.tangosol.net.CacheFactory;
+import com.tangosol.net.RequestPolicyException;
 import com.tangosol.net.cache.CacheStore;
 
 public class WriteBehindResourceLockingCheck {
 
+	private static final long CACHE_LOADER_DELAY = 2000;
+	
 	private ViCluster cluster;
 	private ExecutorService executor = Executors.newCachedThreadPool();
 	private ViNode client1;
@@ -55,6 +61,49 @@ public class WriteBehindResourceLockingCheck {
 		ViNode storage = cluster.node("storage");
 		CohHelper.localstorage(storage, true);
 
+		storage.getCache("a-test");
+		initClientsAndCache();
+
+		delay(1000);
+		
+		verifyParallelReadThrough();
+		verifyReadThroughContention();
+	}
+
+	@Test
+	public void reproduce_guardian_timeout() throws InterruptedException, ExecutionException {
+		
+		cluster = new ViCluster("test", "org.gridkit", "com.tangosol");
+		
+		CohHelper.enableFastLocalCluster(cluster);
+		
+		CacheTemplate.useTemplateCacheConfig(cluster);
+		CacheTemplate.usePartitionedReadWriteCache(cluster, DelayCacheStore.class);
+		CacheTemplate.usePartitionedServiceThreadCount(cluster, 10);
+		CacheTemplate.useWriteDelay(cluster, "100s");
+		CacheTemplate.usePartitionedServiceGuardianTimeout(cluster, 2 * CACHE_LOADER_DELAY);
+
+		ViNode storage = cluster.node("storage");
+		CohHelper.localstorage(storage, true);
+
+		storage.getCache("a-test");
+		initClientsAndCache();
+
+		delay(1000);
+		
+		verifyParallelReadThrough();
+		
+		try {
+			verifyReadThroughContention();
+			Assert.assertFalse("Should throw an exception", true);
+		}
+		catch(Exception e) {
+			// We have only one storage node
+			Assert.assertSame(RequestPolicyException.class, e.getCause().getCause().getClass());
+		}
+	}
+
+	private void initClientsAndCache() {
 		client1 = cluster.node("client1");
 		client2 = cluster.node("client2");
 		client3 = cluster.node("client3");
@@ -64,7 +113,6 @@ public class WriteBehindResourceLockingCheck {
 		CohHelper.localstorage(client3, false);
 		CohHelper.localstorage(client4, false);
 		
-		storage.getCache("a-test");
 		client1.getCache("a-test");
 		client2.getCache("a-test");
 		client3.getCache("a-test");
@@ -74,11 +122,6 @@ public class WriteBehindResourceLockingCheck {
 			String key = String.valueOf((char)('A' + i));
 			client1.getCache("a-test").put(key, key);
 		}
-
-		delay(1000);
-		
-		verifyParallelReadThrough();
-		verifyReadThroughContenttion();
 	}
 	
 	private void verifyParallelReadThrough() {
@@ -109,24 +152,24 @@ public class WriteBehindResourceLockingCheck {
 
 		try {
 			
-			Assert.assertTrue(f1.get() >= 2000);
-			Assert.assertTrue(f1.get() <  3000);
+			Assert.assertTrue(f1.get() + 2 >= CACHE_LOADER_DELAY);
+			Assert.assertTrue(f1.get() + 2 <  3 * CACHE_LOADER_DELAY / 2);
 
-			Assert.assertTrue(f2.get() >= 2000);
-			Assert.assertTrue(f2.get() <  3000);
+			Assert.assertTrue(f2.get() + 2 >= CACHE_LOADER_DELAY);
+			Assert.assertTrue(f2.get() + 2 <  3 * CACHE_LOADER_DELAY / 2);
 
-			Assert.assertTrue(f3.get() >= 2000);
-			Assert.assertTrue(f3.get() <  3000);
+			Assert.assertTrue(f3.get() + 2 >= CACHE_LOADER_DELAY);
+			Assert.assertTrue(f3.get() + 2 <  3 * CACHE_LOADER_DELAY / 2);
 			
-			Assert.assertTrue(f4.get() >= 2000);
-			Assert.assertTrue(f4.get() <  3000);
+			Assert.assertTrue(f4.get() + 2 >= CACHE_LOADER_DELAY);
+			Assert.assertTrue(f4.get() + 2 <  3 * CACHE_LOADER_DELAY / 2);
 			
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private void verifyReadThroughContenttion() {
+	private void verifyReadThroughContention() {
 		Future<Long> f1 = executor.submit(new Callable<Long>() {
 			@Override
 			public Long call() throws Exception {
@@ -162,10 +205,11 @@ public class WriteBehindResourceLockingCheck {
 			
 			Collections.sort(timings);
 			
-			Assert.assertTrue(timings.get(0) >= 2000);
-			Assert.assertTrue(timings.get(1) >= 4000);
-			Assert.assertTrue(timings.get(2) >= 6000);
-			Assert.assertTrue(timings.get(3) >= 8000);
+			Assert.assertThat(timings.get(0) + 2, OrderingComparisons.greaterThan(CACHE_LOADER_DELAY));
+			Assert.assertThat(timings.get(1) + 2, OrderingComparisons.greaterThan(2 * CACHE_LOADER_DELAY));
+			Assert.assertThat(timings.get(2) + 2, OrderingComparisons.greaterThan(3 * CACHE_LOADER_DELAY));
+			Assert.assertThat(timings.get(3) + 2, OrderingComparisons.greaterThan(4 * CACHE_LOADER_DELAY));
+			
 			
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -262,7 +306,7 @@ public class WriteBehindResourceLockingCheck {
 		@Override
 		public Object load(Object key) {
 			println("DelayCacheStore::load <- " + key);
-			delay(2000);
+			delay(CACHE_LOADER_DELAY);
 			println("DelayCacheStore::load -> ");
 			return null;
 		}
@@ -270,7 +314,7 @@ public class WriteBehindResourceLockingCheck {
 		@Override
 		public Map loadAll(Collection keys) {
 			println("DelayCacheStore::loadAll <- " + keys);
-			delay(2000);
+			delay(CACHE_LOADER_DELAY);
 			println("DelayCacheStore::loadAll -> ");
 			return Collections.EMPTY_MAP;
 		}
@@ -278,28 +322,28 @@ public class WriteBehindResourceLockingCheck {
 		@Override
 		public void erase(Object key) {
 			println("DelayCacheStore::erase <- " + key);
-			delay(2000);
+			delay(CACHE_LOADER_DELAY);
 			println("DelayCacheStore::erase -> ");
 		}
 
 		@Override
 		public void eraseAll(Collection keys) {
 			println("DelayCacheStore::eraseAll <- " + keys);
-			delay(2000);
+			delay(CACHE_LOADER_DELAY);
 			println("DelayCacheStore::eraseAll -> ");
 		}
 
 		@Override
 		public void store(Object key, Object value) {
 			println("DelayCacheStore::store <- " + key + ", " + value);
-			delay(2000);
+			delay(CACHE_LOADER_DELAY);
 			println("DelayCacheStore::store -> ");
 		}
 
 		@Override
 		public void storeAll(Map entries) {
 			println("DelayCacheStore::stoareAll <- " + entries.size() + " pairs, " +entries);
-			delay(2000);
+			delay(CACHE_LOADER_DELAY);
 			println("DelayCacheStore::storeAll -> ");
 		}
 	}

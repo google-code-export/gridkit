@@ -1,6 +1,7 @@
 package org.gridkit.coherence.test;
 
 import org.gridkit.utils.vicluster.CohHelper;
+import org.gridkit.utils.vicluster.ViCluster;
 import org.gridkit.utils.vicluster.ViProps;
 
 public class CacheTemplate {
@@ -20,6 +21,14 @@ public class CacheTemplate {
 
 	public static void usePartitionedServiceThreadCount(ViProps props, int threadCount) {
 		props.setProp("cache-template.distributed-scheme.thread-count", String.valueOf(threadCount));
+	}
+
+	public static void usePartitionedServiceGuardianTimeout(ViCluster props, long timeout) {
+		usePartitionedServiceGuardianTimeout(props, timeout + "ms");
+	}
+
+	public static void usePartitionedServiceGuardianTimeout(ViCluster props, String timeout) {
+		props.setProp("cache-template.distributed-scheme.guardian-timeout", timeout);
 	}
 
 	public static void useWriteDelay(ViProps props, String delay) {
