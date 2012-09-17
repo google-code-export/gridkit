@@ -278,9 +278,7 @@ public class ReflectionPofSerializer implements PofSerializer {
 					break;
 				}
 				if (c.getParameterTypes().length == 1 
-						&& (   c.getParameterTypes()[0].isAssignableFrom(Collection.class) 
-							|| c.getParameterTypes()[0].isAssignableFrom(Set.class)
-							|| c.getParameterTypes()[0].isAssignableFrom(List.class) ) ) {
+						&& (Collection.class.isAssignableFrom(c.getParameterTypes()[0]))) { 
 					cc = c;
 				}
 				if (c.getParameterTypes().length == 1 
@@ -316,8 +314,9 @@ public class ReflectionPofSerializer implements PofSerializer {
 				else if (format != null) {
 					PofReader header = reader.createNestedPofReader(0);
 					Collection<?> col = (Collection<?>) format.deserialize(header);
-					//this is workaround for incorrect transient markers usage in ArrayList
-					col.clear();
+					// This is workaround for incorrect transient markers usage in ArrayList
+					// ArrayList may be used as base for over classes so this hack may make them work out of box
+					resetArrayListSize(col);					
 					reader.readCollection(1, col);
 					reader.readRemainder();
 					return col;
@@ -330,6 +329,15 @@ public class ReflectionPofSerializer implements PofSerializer {
 				}
 			} catch (Exception e) {
 				throw new IOException("Failed to deserialize " + type.getName() + " instance", e);
+			}
+		}
+
+		private void resetArrayListSize(Collection<?> col) throws IllegalArgumentException, IllegalAccessException {
+			for(ObjectFieldCodec field: format.propCodec) {
+				if (field.field.getDeclaringClass() == (Class<?>)ArrayList.class
+						&& "size".equals(field.field.getName())) {
+					field.field.set(col, 0);
+				}
 			}
 		}
 
