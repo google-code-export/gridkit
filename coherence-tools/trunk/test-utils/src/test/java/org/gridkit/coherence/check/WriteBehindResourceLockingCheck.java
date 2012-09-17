@@ -18,8 +18,6 @@ import org.gridkit.coherence.test.CacheTemplate;
 import org.gridkit.utils.vicluster.CohHelper;
 import org.gridkit.utils.vicluster.ViCluster;
 import org.gridkit.utils.vicluster.ViNode;
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.number.IsGreaterThan;
 import org.hamcrest.number.OrderingComparisons;
 import org.junit.After;
 import org.junit.Assert;
@@ -152,17 +150,17 @@ public class WriteBehindResourceLockingCheck {
 
 		try {
 			
-			Assert.assertTrue(f1.get() + 2 >= CACHE_LOADER_DELAY);
-			Assert.assertTrue(f1.get() + 2 <  3 * CACHE_LOADER_DELAY / 2);
+			Assert.assertTrue(f1.get() >= CACHE_LOADER_DELAY);
+			Assert.assertTrue(f1.get() <  3 * CACHE_LOADER_DELAY / 2);
 
-			Assert.assertTrue(f2.get() + 2 >= CACHE_LOADER_DELAY);
-			Assert.assertTrue(f2.get() + 2 <  3 * CACHE_LOADER_DELAY / 2);
+			Assert.assertTrue(f2.get() >= CACHE_LOADER_DELAY);
+			Assert.assertTrue(f2.get() <  3 * CACHE_LOADER_DELAY / 2);
 
-			Assert.assertTrue(f3.get() + 2 >= CACHE_LOADER_DELAY);
-			Assert.assertTrue(f3.get() + 2 <  3 * CACHE_LOADER_DELAY / 2);
+			Assert.assertTrue(f3.get() >= CACHE_LOADER_DELAY);
+			Assert.assertTrue(f3.get() <  3 * CACHE_LOADER_DELAY / 2);
 			
-			Assert.assertTrue(f4.get() + 2 >= CACHE_LOADER_DELAY);
-			Assert.assertTrue(f4.get() + 2 <  3 * CACHE_LOADER_DELAY / 2);
+			Assert.assertTrue(f4.get() >= CACHE_LOADER_DELAY);
+			Assert.assertTrue(f4.get() <  3 * CACHE_LOADER_DELAY / 2);
 			
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -205,10 +203,10 @@ public class WriteBehindResourceLockingCheck {
 			
 			Collections.sort(timings);
 			
-			Assert.assertThat(timings.get(0) + 2, OrderingComparisons.greaterThan(CACHE_LOADER_DELAY));
-			Assert.assertThat(timings.get(1) + 2, OrderingComparisons.greaterThan(2 * CACHE_LOADER_DELAY));
-			Assert.assertThat(timings.get(2) + 2, OrderingComparisons.greaterThan(3 * CACHE_LOADER_DELAY));
-			Assert.assertThat(timings.get(3) + 2, OrderingComparisons.greaterThan(4 * CACHE_LOADER_DELAY));
+			Assert.assertThat(timings.get(0), OrderingComparisons.greaterThan(CACHE_LOADER_DELAY));
+			Assert.assertThat(timings.get(1), OrderingComparisons.greaterThan(2 * CACHE_LOADER_DELAY));
+			Assert.assertThat(timings.get(2), OrderingComparisons.greaterThan(3 * CACHE_LOADER_DELAY));
+			Assert.assertThat(timings.get(3), OrderingComparisons.greaterThan(4 * CACHE_LOADER_DELAY));
 			
 			
 		} catch (Exception e) {
@@ -281,7 +279,7 @@ public class WriteBehindResourceLockingCheck {
 
 	public static void delay(long millis) {
 		try {
-			long deadLine = System.currentTimeMillis() + millis;
+			long deadLine = System.currentTimeMillis() + millis + 2;
 			while(true) {
 				long sleepTime = deadLine - System.currentTimeMillis();
 				if (sleepTime > 0) {
