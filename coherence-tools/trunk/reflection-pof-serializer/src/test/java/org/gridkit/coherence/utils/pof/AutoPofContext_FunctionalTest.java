@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
@@ -60,6 +61,18 @@ public abstract class AutoPofContext_FunctionalTest {
 	}
 
 	@Test
+	public void testLargeArrayList() {
+		ArrayList<String> list = new ArrayList<String>();
+		for(int i = 0; i != 100; ++i) {
+			list.add(String.valueOf(i));
+		}
+		List<String> l1 = list;
+		Object l2 = serDeser(l1);
+		Assert.assertSame(l1.getClass(), l2.getClass());
+		Assert.assertEquals(l1.toString(), l2.toString());
+	}	
+	
+	@Test
 	public void testObjectArray() {
 		Chars[] ss = {new Chars("Quick brown fox"), null, new Chars("over lazy dog")};
 		Object ss2 = serDeser(ss);
@@ -87,6 +100,40 @@ public abstract class AutoPofContext_FunctionalTest {
 	}
 
 	@Test
+	public void testEmptyList() {
+		List<String> l1 = Collections.emptyList();
+		Object l2 = serDeser(l1);
+		Assert.assertSame(l1.getClass(), l2.getClass());
+		Assert.assertEquals(l1.toString(), l2.toString());
+	}
+
+	@Test
+	public void testEmptySet() {
+		Set<String> l1 = Collections.emptySet();
+		Object l2 = serDeser(l1);
+		Assert.assertSame(l1.getClass(), l2.getClass());
+		Assert.assertEquals(l1.toString(), l2.toString());
+	}
+	
+	@Test
+	public void testSingletonList() {
+		Chars ss = new Chars("Quick brown fox");
+		List<Chars> l1 = Collections.singletonList(ss);
+		Object l2 = serDeser(l1);
+		Assert.assertSame(l1.getClass(), l2.getClass());
+		Assert.assertEquals(l1.toString(), l2.toString());
+	}
+
+	@Test
+	public void testSingletonSet() {
+		Chars ss = new Chars("Quick brown fox");
+		Set<Chars> l1 = Collections.singleton(ss);
+		Object l2 = serDeser(l1);
+		Assert.assertSame(l1.getClass(), l2.getClass());
+		Assert.assertEquals(l1.toString(), l2.toString());
+	}
+
+	@Test
 	public void testObjectSet() {
 		Chars[] ss = {new Chars("Quick brown fox"), null, new Chars("over lazy dog")};
 		HashSet<Chars> l1 = new HashSet<Chars>(Arrays.asList(ss));
@@ -103,6 +150,22 @@ public abstract class AutoPofContext_FunctionalTest {
 		map1.put("C", 3);
 		map1.put("D", 5);
 		map1.put("E", 10);
+		Object map2 = serDeser(map1);
+		Assert.assertSame(map1.getClass(), map2.getClass());
+		Assert.assertEquals(map1, map2);
+	}
+
+	@Test
+	public void testSingletonMap() {
+		Map<String, Integer> map1 = Collections.singletonMap("A", 1);
+		Object map2 = serDeser(map1);
+		Assert.assertSame(map1.getClass(), map2.getClass());
+		Assert.assertEquals(map1, map2);
+	}
+
+	@Test
+	public void testEmptyMap() {
+		Map<String, Integer> map1 = Collections.emptyMap();
 		Object map2 = serDeser(map1);
 		Assert.assertSame(map1.getClass(), map2.getClass());
 		Assert.assertEquals(map1, map2);

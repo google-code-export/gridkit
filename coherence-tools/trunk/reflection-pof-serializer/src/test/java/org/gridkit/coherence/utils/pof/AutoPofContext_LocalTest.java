@@ -15,8 +15,6 @@
 package org.gridkit.coherence.utils.pof;
 
 
-
-
 import com.tangosol.net.NamedCache;
 import com.tangosol.net.cache.LocalCache;
 import com.tangosol.net.cache.WrapperNamedCache;
