@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Array;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.SynchronousQueue;
@@ -176,6 +178,9 @@ public class AutoPofSerializer implements Serializer, PofContext {
 	private synchronized void initCustomPredefines() {
 //		registerSerializationContext(minAutoId++, Throwable.class, new JavaSerializationSerializer());
 		registerArraySerializer(minAutoId++ , UUID[].class);
+		registerSerializationContext(minAutoId++, Collections.singleton(null).getClass(), new SingletonSetSerializer());
+		registerSerializationContext(minAutoId++, Collections.singletonList(null).getClass(), new SingletonListSerializer());
+		registerSerializationContext(minAutoId++, Collections.singletonMap(null, null).getClass(), new SingletonMapSerializer());
 	}
 
 	private void scheduleTypeMapConnection() {
@@ -677,6 +682,62 @@ public class AutoPofSerializer implements Serializer, PofContext {
 		}		
 	}
 	
+	private static class SingletonSetSerializer implements PofSerializer {
+
+		@Override
+		public Object deserialize(PofReader in) throws IOException {
+			Object obj = in.readObject(1);
+			in.readRemainder();
+			return Collections.singleton(obj);
+		}
+
+		@Override
+		@SuppressWarnings("rawtypes")
+		public void serialize(PofWriter out, Object obj) throws IOException {
+			Object[] el = ((Collection)obj).toArray();
+			out.writeObject(1, el[0]);
+			out.writeRemainder(null);
+		}		
+	}
+
+	private static class SingletonListSerializer implements PofSerializer {
+		
+		@Override
+		public Object deserialize(PofReader in) throws IOException {
+			Object obj = in.readObject(1);
+			in.readRemainder();
+			return Collections.singletonList(obj);
+		}
+		
+		@Override
+		@SuppressWarnings("rawtypes")
+		public void serialize(PofWriter out, Object obj) throws IOException {
+			Object[] el = ((Collection)obj).toArray();
+			out.writeObject(1, el[0]);
+			out.writeRemainder(null);
+		}		
+	}
+
+	private static class SingletonMapSerializer implements PofSerializer {
+		
+		@Override
+		public Object deserialize(PofReader in) throws IOException {
+			Object key = in.readObject(1);
+			Object value = in.readObject(2);
+			in.readRemainder();
+			return Collections.singletonMap(key, value);
+		}
+		
+		@Override
+		@SuppressWarnings("rawtypes")
+		public void serialize(PofWriter out, Object obj) throws IOException {
+			Object[] key = ((Map)obj).keySet().toArray();
+			out.writeObject(1, key[0]);
+			out.writeObject(2, ((Map)obj).get(key[0]));
+			out.writeRemainder(null);
+		}		
+	}
+
 	public static class JavaSerializationSerializer implements Serializer, PofSerializer {
 
 		public static Object fromBytes(byte[] buf) throws IOException {
