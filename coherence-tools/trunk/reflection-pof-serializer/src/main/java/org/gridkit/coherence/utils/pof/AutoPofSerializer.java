@@ -63,6 +63,8 @@ import com.tangosol.util.processor.ConditionalPut;
  */
 public class AutoPofSerializer implements Serializer, PofContext {
 
+	static boolean TRACE = false;
+	
 	private static final String AUTO_POF_SERVICE = "AUTO-POF-SERVICE";
 	private static final String AUTO_POF_MAPPING = "AUTO_POF_MAPPING";
 
@@ -176,7 +178,7 @@ public class AutoPofSerializer implements Serializer, PofContext {
 	}
 	
 	private synchronized void initCustomPredefines() {
-//		registerSerializationContext(minAutoId++, Throwable.class, new JavaSerializationSerializer());
+		registerArraySerializer(minAutoId++ , Object[].class);
 		registerArraySerializer(minAutoId++ , UUID[].class);
 		registerSerializationContext(minAutoId++, Collections.singleton(null).getClass(), new SingletonSetSerializer());
 		registerSerializationContext(minAutoId++, Collections.singletonList(null).getClass(), new SingletonListSerializer());
@@ -427,11 +429,13 @@ public class AutoPofSerializer implements Serializer, PofContext {
 			return ctx;
 		}
 		else {
-			
 			if (id < MIN_AUTO_ID) {
 				return importPofSerializer(id);
 			}
 			else {
+				if (TRACE) {
+					System.out.println("AUTO: requested " + id);
+				}
 				
 				if (typeMap == null) {
 					initTypeMap();
@@ -475,6 +479,9 @@ public class AutoPofSerializer implements Serializer, PofContext {
 		while(true) {
 			Integer id = (Integer) typeMap.get(name);
 			if (id != null) {
+				if (TRACE) {
+					System.out.println("AUTOPOF: mapped " + name + " -> " + id);
+				}
 				return id;
 			}
 			Integer n = (Integer) typeMap.get("");
