@@ -3,6 +3,7 @@ package org.gridkit.nimble.util;
 import static org.gridkit.nimble.util.StringOps.F;
 
 import java.util.Collection;
+import java.util.Map;
 
 public class ValidOps {
     public static void notNull(Object obj, String name) {
@@ -23,6 +24,14 @@ public class ValidOps {
         notNull(str, name);
         
         if (str.trim().isEmpty()) {
+            throw new IllegalArgumentException(shouldNotBe(name, "empty"));
+        }
+    }
+    
+    public static void notEmpty(Map<?, ?> map, String name) {
+        notNull(map, name);
+        
+        if (map.isEmpty()) {
             throw new IllegalArgumentException(shouldNotBe(name, "empty"));
         }
     }

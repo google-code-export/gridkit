@@ -1,6 +1,6 @@
 package org.gridkit.nimble.statistics;
 
-public interface StatsFactory<T> {
+public interface StatsMonoid<T> {
     StatsProducer<T> newStatsProducer();
     
     T emptyStats();

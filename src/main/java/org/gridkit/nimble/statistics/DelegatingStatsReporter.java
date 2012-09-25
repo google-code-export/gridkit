@@ -1,5 +1,7 @@
 package org.gridkit.nimble.statistics;
 
+import java.util.Map;
+
 public class DelegatingStatsReporter implements StatsReporter {
     private final StatsReporter delegate;
 
@@ -8,20 +10,8 @@ public class DelegatingStatsReporter implements StatsReporter {
     }
 
     @Override
-    public void report(String statistica, double value) {
-        delegate.report(statistica, value);
-        
-    }
-
-    @Override
-    public void report(String statistica, long timestamp, double value) {
-        delegate.report(statistica, timestamp, value);
-        
-    }
-
-    @Override
-    public void report(String message, long timestamp, Throwable throwable) {
-        delegate.report(message, timestamp, throwable);
+    public void report(Map<String, Object> stats) {
+        delegate.report(stats);
     }
     
     protected StatsReporter getDelegate() {

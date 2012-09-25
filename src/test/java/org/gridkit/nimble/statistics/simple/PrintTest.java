@@ -35,18 +35,16 @@ public class PrintTest {
         for (int i = 0; i < 5; ++i) {
             reporter.start("sleep");
             Thread.sleep(10);
+            reporter.describe("sleep", "i", i);
             reporter.finish("sleep");
-            
-            reporter.report("i", i);
         }
         
         for (int s = 0; s < 5; ++s) {
             reporter.start("sin");
             double sin = Math.sin(s);
             Thread.sleep(2);
+            reporter.describe("sin", "s", sin);
             reporter.finish("sin");
-            
-            reporter.report("s", sin);
         }
         
         return producer.produce();

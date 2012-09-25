@@ -4,38 +4,36 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 import org.gridkit.nimble.statistics.DelegatingStatisticalSummary;
+import org.gridkit.nimble.statistics.StatsOps;
 import org.gridkit.nimble.statistics.ThroughputSummary;
 
-public class SimpleThroughputSummary extends    DelegatingStatisticalSummary
-                                     implements ThroughputSummary {
-    private StatisticalSummary finishStats;
+public class SimpleThroughputSummary extends DelegatingStatisticalSummary implements ThroughputSummary {    
+    private double startMs;
+    private double finishMs;
     
-    public SimpleThroughputSummary(StatisticalSummary delegate, StatisticalSummary finishStats) {
-        super(delegate);
-        this.finishStats = finishStats;
+    public SimpleThroughputSummary(StatisticalSummary valStats, double scale, double startMs, double finishMs) {
+        super(StatsOps.scale(valStats, scale));
+        this.startMs = startMs;
+        this.finishMs = finishMs;
     }
 
     @Override
     public double getThroughput(TimeUnit timeUnit) {
-        double n = getN();
-        return n / getDuration(timeUnit);
+        return getSum() / getDuration(timeUnit);
     }
 
     @Override
     public double getDuration(TimeUnit timeUnit) {
-        if (timeUnit == TimeUnit.NANOSECONDS || timeUnit == TimeUnit.MICROSECONDS) {
-            throw new IllegalArgumentException("timeUnit");
-        }
-        
-        long scale = TimeUnit.MILLISECONDS.convert(1, timeUnit);
-        
-        double startTime = getMin();
-        double finishTime = finishStats.getMax();
-        
-        return (finishTime - startTime) / scale;
+        return Math.max((finishMs - startMs), 1) * StatsOps.getScale(TimeUnit.MILLISECONDS, timeUnit);
     }
 
-    public static String getFinishStats(String stats) {
-        return stats + "." + "finish";
+    @Override
+    public double getStartTime(TimeUnit timeUnit) {
+        return StatsOps.convert(startMs, TimeUnit.MILLISECONDS, timeUnit);
+    }
+
+    @Override
+    public double getFinishTime(TimeUnit timeUnit) {
+        return StatsOps.convert(finishMs, TimeUnit.MILLISECONDS, timeUnit);
     }
 }
