@@ -1,4 +1,4 @@
-package org.gridkit.nimble.statistics.simple;
+package org.gridkit.nimble.statistics;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -6,18 +6,23 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.gridkit.nimble.platform.TimeService;
-import org.gridkit.nimble.statistics.DelegatingStatsReporter;
-import org.gridkit.nimble.statistics.StatsOps;
-import org.gridkit.nimble.statistics.StatsReporter;
+import org.gridkit.nimble.util.Pair;
+import org.gridkit.nimble.util.ValidOps;
 
-public class SimpleStatsReporter extends DelegatingStatsReporter {
+public class SmartReporter extends DelegatingStatsReporter {
+    public static final String MARK_SEP = "^";
+    
+    public static final String START_MS_MARK  = "start_ms";
+    public static final String START_NS_MARK  = "start_ns";
+    public static final String FINISH_MS_MARK = "finish_ms";
+    public static final String TIME_NS_MARK   = "time_ns";
+    public static final String OPS_MARK       = "ops";
+
     private final TimeService timeService;
-    
-    private static final String START_NS_MARK = "start_ns";
-    
+
     private final Map<String, Map<String, Object>> attrsMap;
     
-    public SimpleStatsReporter(StatsReporter delegate, TimeService timeService) {
+    public SmartReporter(StatsReporter delegate, TimeService timeService) {
         super(delegate);
         this.timeService = timeService;
         this.attrsMap = new HashMap<String, Map<String, Object>>();
@@ -26,7 +31,7 @@ public class SimpleStatsReporter extends DelegatingStatsReporter {
     public void start(String statistica) {
         Map<String, Object> attrs = getAttrs(statistica);
         
-        attrs.put(SimpleStats.START_MS_MARK, timeService.currentTimeMillis());
+        attrs.put(START_MS_MARK, timeService.currentTimeMillis());
         attrs.put(START_NS_MARK, timeService.currentTimeNanos());
     }
     
@@ -39,7 +44,7 @@ public class SimpleStatsReporter extends DelegatingStatsReporter {
     }
     
     public void operations(String statistica, int count) {
-        getAttrs(statistica).put(SimpleStats.OPS_MARK, count);
+        getAttrs(statistica).put(OPS_MARK, count);
     }
     
 	public void finish(String statistica) {
@@ -49,21 +54,19 @@ public class SimpleStatsReporter extends DelegatingStatsReporter {
 
             Map<String, Object> attrs = getAttrs(statistica);
             
-            Long startMs = (Long)attrs.get(SimpleStats.START_MS_MARK);
+            Long startMs = (Long)attrs.get(START_MS_MARK);
             Long startNs = (Long)attrs.get(START_NS_MARK);
 
             if (startNs != null && startMs != null) {
-                if (!attrs.containsKey(SimpleStats.OPS_MARK)) {
-                    attrs.put(SimpleStats.OPS_MARK, 1);
+                if (!attrs.containsKey(OPS_MARK)) {
+                    attrs.put(OPS_MARK, 1);
                 }
                 
-                attrs.put(SimpleStatsProducer.STATS_NAME_ATTR, statistica);
-                attrs.put(SimpleStats.FINISH_MS_MARK, finishMs);
-                attrs.put(SimpleStats.TIME_NS_MARK, finishNs - startNs);
-
+                attrs.put(FINISH_MS_MARK, finishMs);
+                attrs.put(TIME_NS_MARK, finishNs - startNs);
                 attrs.remove(START_NS_MARK);
                 
-                getDelegate().report(attrs);
+                report(statistica, attrs);
             } else if (startNs != null || startMs != null) {
                 throw new IllegalStateException("startTimeNanos and startTimeMillis are unsync");
             }
@@ -72,11 +75,20 @@ public class SimpleStatsReporter extends DelegatingStatsReporter {
         }
     }
 	
+	private void report(String statistica, Map<String, Object> attrs) {
+	    Map<String, Object> report = new HashMap<String, Object>();
+	    
+	    for (Map.Entry<String, Object> entry : attrs.entrySet()) {
+	        report.put(mark(statistica, entry.getKey()), entry.getValue());
+	    }
+	    
+	    getDelegate().report(report);
+	}
+	
 	public void latency(String statistica, double latency, TimeUnit unit, Map<String, Object> attrs) {
 	    Map<String, Object> report = new HashMap<String, Object>(attrs);
 	    
-	    report.put(SimpleStatsProducer.STATS_NAME_ATTR, statistica);
-	    report.put(SimpleStats.TIME_NS_MARK, StatsOps.convert(latency, unit, TimeUnit.NANOSECONDS));
+	    report.put(mark(statistica, TIME_NS_MARK), StatsOps.convert(latency, unit, TimeUnit.NANOSECONDS));
 	    
 	    getDelegate().report(report);
 	}
@@ -103,4 +115,26 @@ public class SimpleStatsReporter extends DelegatingStatsReporter {
 	private void removeAttrs(String statistica) {
 	    attrsMap.remove(statistica);
 	}
+	
+    public static String mark(String statistica, String mark) {
+        ValidOps.notEmpty(statistica, "statistica");
+        ValidOps.notEmpty(statistica, "mark");
+        
+        if (statistica.contains(MARK_SEP)) {
+            throw new IllegalArgumentException("statistica");
+        }
+        
+        return statistica + MARK_SEP + mark;
+    }
+    
+    public static Pair<String, String> unmark(String str) {
+        int index = str.indexOf(MARK_SEP);
+        int lastIndex = str.lastIndexOf(MARK_SEP);
+        
+        if (index == -1 || index != lastIndex || index == str.length() - 1 || index == 0) {
+            throw new IllegalArgumentException("str");
+        }
+        
+        return Pair.newPair(str.substring(0, index), str.substring(index + 1));
+    }
 }
