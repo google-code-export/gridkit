@@ -16,6 +16,8 @@ import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.RemoteAgent;
 import org.gridkit.nimble.util.NamedThreadFactory;
 import org.gridkit.nimble.util.ValidOps;
+import org.gridkit.util.concurrent.Barriers;
+import org.gridkit.util.concurrent.BlockingBarrier;
 
 @SuppressWarnings("serial")
 public class TaskSLA implements Cloneable, Serializable {
@@ -197,6 +199,10 @@ public class TaskSLA implements Cloneable, Serializable {
         this.rate = rate;
     }
 
+    public BlockingBarrier getTaskBarrier() {
+        return Barriers.speedLimit(rate == null ? Double.POSITIVE_INFINITY : rate);
+    }
+    
     public Long getIterationsCount() {
         return iterationsCount;
     }

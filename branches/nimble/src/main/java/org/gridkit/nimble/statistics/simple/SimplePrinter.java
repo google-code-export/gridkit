@@ -63,11 +63,11 @@ public abstract class SimplePrinter {
     }
     
     public void print(PrintStream stream, SimpleStats stats, List<String> leftValues, List<String> rightValues) {
-        print(stream, stats, stats.getTimeStatsNames(), leftValues, rightValues);
+        print(stream, stats, stats.getValStatsNames(SimpleStats.TIME_NS_MARK), leftValues, rightValues);
     }
     
     public void print(File file, SimpleStats stats, List<String> leftValues, List<String> rightValues) throws IOException {
-        print(file, stats, stats.getTimeStatsNames(), leftValues, rightValues);
+        print(file, stats, stats.getValStatsNames(SimpleStats.TIME_NS_MARK), leftValues, rightValues);
     }
     
     public void print(PrintStream stream, SimpleStats stats, Collection<String> statsNames,
@@ -181,7 +181,7 @@ public abstract class SimplePrinter {
             row.addAll(leftValues);
             row.add(statsName);
 
-            StatisticalSummary valStats = stats.getValueStats(statsName);
+            StatisticalSummary valStats = stats.getValStats(statsName);
             
             if (valStats != null) {
                 row.add(String.valueOf(valStats.getN()));

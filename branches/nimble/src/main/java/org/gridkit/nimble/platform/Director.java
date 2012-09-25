@@ -6,15 +6,15 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 import org.gridkit.nimble.scenario.Scenario;
-import org.gridkit.nimble.statistics.StatsFactory;
+import org.gridkit.nimble.statistics.StatsMonoid;
 import org.gridkit.nimble.util.ValidOps;
 
 public class Director<T> {
     private final Collection<RemoteAgent> agents;
-    private final StatsFactory<T> statsFactory;
+    private final StatsMonoid<T> statsFactory;
     private final ExecutorService executor;
 
-    public Director(Collection<RemoteAgent> agents, StatsFactory<T> statsFactory, ExecutorService executor) {
+    public Director(Collection<RemoteAgent> agents, StatsMonoid<T> statsFactory, ExecutorService executor) {
         ValidOps.notEmpty(agents, "agents");
         ValidOps.notNull(statsFactory, "statsFactory");
         ValidOps.notNull(executor, "executor");
@@ -58,7 +58,7 @@ public class Director<T> {
         }
 
         @Override
-        public StatsFactory<T> getStatsFactory() {
+        public StatsMonoid<T> getStatsFactory() {
             return statsFactory;
         }
         

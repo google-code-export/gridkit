@@ -2,11 +2,11 @@ package org.gridkit.nimble.statistics.simple;
 
 import java.io.Serializable;
 
-import org.gridkit.nimble.statistics.StatsFactory;
+import org.gridkit.nimble.statistics.StatsMonoid;
 import org.gridkit.nimble.statistics.StatsProducer;
 
 @SuppressWarnings("serial")
-public class SimpleStatsFactory implements StatsFactory<SimpleStats>, Serializable {    
+public class SimpleStatsFactory implements StatsMonoid<SimpleStats>, Serializable {    
     @Override
     public StatsProducer<SimpleStats> newStatsProducer() {
         return new SimpleStatsProducer();

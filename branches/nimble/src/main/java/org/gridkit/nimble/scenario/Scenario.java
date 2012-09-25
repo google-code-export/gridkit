@@ -5,7 +5,7 @@ import java.util.concurrent.ExecutorService;
 
 import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.RemoteAgent;
-import org.gridkit.nimble.statistics.StatsFactory;
+import org.gridkit.nimble.statistics.StatsMonoid;
 
 public interface Scenario {
     String getName();
@@ -15,7 +15,7 @@ public interface Scenario {
     public interface Context<T> {
         String getContextId();
         
-        StatsFactory<T> getStatsFactory();
+        StatsMonoid<T> getStatsFactory();
         
         ExecutorService getExecutor();
         

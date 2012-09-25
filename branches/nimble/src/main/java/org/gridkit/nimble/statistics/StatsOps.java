@@ -1,5 +1,7 @@
 package org.gridkit.nimble.statistics;
 
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummaryValues;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
@@ -31,5 +33,24 @@ public class StatsOps {
         double min = Math.min(s1.getMin(), s2.getMin());
         
         return new StatisticalSummaryValues(mean, var, n, max, min, sum);
+    }
+    
+    public static StatisticalSummary scale(StatisticalSummary s, double scale) {
+        double square = scale * scale;
+        
+        return new StatisticalSummaryValues(
+            s.getMean() * scale, s.getVariance() * square, s.getN(), s.getMax() * scale, s.getMin() * scale, s.getSum() * scale
+        );
+    }
+    
+    public static double getScale(TimeUnit from, TimeUnit to) {
+        double fromInNs = from.toNanos(1);
+        double toInNs = to.toNanos(1);
+        
+        return fromInNs / toInNs;
+    }
+    
+    public static double convert(double time, TimeUnit from, TimeUnit to) {
+        return time * getScale(from, to);
     }
 }

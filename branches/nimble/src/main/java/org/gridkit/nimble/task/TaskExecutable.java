@@ -18,9 +18,10 @@ import org.gridkit.nimble.scenario.ExecScenario;
 import org.gridkit.nimble.scenario.ExecScenario.Context;
 import org.gridkit.nimble.scenario.ExecScenario.Result;
 import org.gridkit.nimble.scenario.ScenarioOps;
-import org.gridkit.nimble.statistics.StatsFactory;
+import org.gridkit.nimble.statistics.StatsMonoid;
 import org.gridkit.nimble.statistics.StatsProducer;
 import org.gridkit.nimble.statistics.StatsReporter;
+import org.gridkit.util.concurrent.BlockingBarrier;
 
 //TODO think about start time sync using RemoteAgent.currentTimeMillis()
 @SuppressWarnings("serial")
@@ -47,11 +48,12 @@ public class TaskExecutable implements ExecScenario.Executable {
         }
         
         ExecutorService executor = sla.newExecutor(name);
+        BlockingBarrier taskBarrier = sla.getTaskBarrier(); 
         
         List<Callable<Void>> taskCallables = new ArrayList<Callable<Void>>();
                 
         for (Task task : tasks) {
-            taskCallables.add(new TaskCallable<T>(task, status, stats, context));
+            taskCallables.add(new TaskCallable<T>(task, status, stats, context, taskBarrier));
         }
 
         try {
@@ -77,18 +79,21 @@ public class TaskExecutable implements ExecScenario.Executable {
         
         private final ExecScenario.Context<T> context;
         
-        public TaskCallable(Task task, AtomicReference<Play.Status> status, AtomicReference<T> stats, Context<T> context) {
+        private final BlockingBarrier taskBarrier;
+
+        public TaskCallable(Task task, AtomicReference<Play.Status> status, AtomicReference<T> stats, Context<T> context, BlockingBarrier taskBarrier) {
             this.task = task;
             this.status = status;
             this.stats = stats;
             this.context = context;
+            this.taskBarrier = taskBarrier;
         }
 
         @Override
         public Void call() throws Exception {
             long startTime = context.getLocalAgent().currentTimeMillis();
             
-            StatsFactory<T> statsFactory = context.getStatsFactory();
+            StatsMonoid<T> statsFactory = context.getStatsFactory();
             StatsProducer<T> statsProducer = statsFactory.newStatsProducer();
             
             Task.Context taskContext = new TaskContext<T>(task, context, status, statsProducer);
@@ -98,15 +103,15 @@ public class TaskExecutable implements ExecScenario.Executable {
                 long duration = 0; 
                 
                 while (!sla.isFinished(duration, iteration)) {
+                    taskBarrier.pass();
                     task.excute(taskContext);
                     
                     iteration += 1;
                     duration = context.getLocalAgent().currentTimeMillis() - startTime;
                 }
             } catch (Throwable t) {
-                statsProducer.report(
-                    F("Exception during task '%s' execution on agent '%s'", task.toString(), context.getLocalAgent().toString()),
-                    context.getLocalAgent().currentTimeMillis(), t
+                context.getLocalAgent().getLogger(TaskCallable.class.getName()).error(
+                    F("Exception during task '%s' execution on agent '%s'", task.toString(), context.getLocalAgent().toString()), t
                 );
                 status.set(Play.Status.Failure);
             } finally {

@@ -13,7 +13,7 @@ import org.gridkit.nimble.platform.LocalAgent;
 import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.Play.Status;
 import org.gridkit.nimble.platform.RemoteAgent;
-import org.gridkit.nimble.statistics.StatsFactory;
+import org.gridkit.nimble.statistics.StatsMonoid;
 import org.gridkit.nimble.statistics.StatsProducer;
 import org.gridkit.nimble.util.FutureListener;
 import org.gridkit.nimble.util.FutureOps;
@@ -27,7 +27,7 @@ public class ExecScenario implements Scenario {
     private static final Logger log = LoggerFactory.getLogger(ExecScenario.class);
     
     public static interface Context<T> extends AttributeContext {
-        StatsFactory<T> getStatsFactory();
+        StatsMonoid<T> getStatsFactory();
         
         LocalAgent getLocalAgent();
     }
@@ -199,11 +199,11 @@ public class ExecScenario implements Scenario {
     private static class Executor<T> implements RemoteAgent.Invocable<Result<T>>, Context<T> {
         private String contextId;
         private Executable executable;
-        private StatsFactory<T> statsFactory;
+        private StatsMonoid<T> statsFactory;
         
         private transient LocalAgent agent;
         
-        public Executor(String contextId, Executable executable, StatsFactory<T> statsFactory) {
+        public Executor(String contextId, Executable executable, StatsMonoid<T> statsFactory) {
             this.contextId = contextId;
             this.executable = executable;
             this.statsFactory = statsFactory;
@@ -218,9 +218,8 @@ public class ExecScenario implements Scenario {
             } catch (Throwable t) {
                 StatsProducer<T> producer = statsFactory.newStatsProducer();
                 
-                producer.report(
-                    F("Exception during executable '%s' execution on agent '%s'", executable.toString()), 
-                    agent.currentTimeMillis(), t
+                agent.getLogger(Executor.class.getName()).error(
+                    F("Exception during executable '%s' execution on agent '%s'", executable.toString()), t
                 );
                 
                 return new Result<T>(Play.Status.Failure, producer.produce());
@@ -233,7 +232,7 @@ public class ExecScenario implements Scenario {
         }
         
         @Override
-        public StatsFactory<T> getStatsFactory() {
+        public StatsMonoid<T> getStatsFactory() {
             return statsFactory;
         }
         
