@@ -18,11 +18,11 @@ import org.gridkit.nimble.platform.remote.LocalAgentFactory;
 import org.gridkit.nimble.scenario.ParScenario;
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.SeqScenario;
+import org.gridkit.nimble.statistics.SmartReporter;
 import org.gridkit.nimble.statistics.simple.SimplePrettyPrinter;
 import org.gridkit.nimble.statistics.simple.SimplePrinter;
 import org.gridkit.nimble.statistics.simple.SimpleStats;
 import org.gridkit.nimble.statistics.simple.SimpleStatsFactory;
-import org.gridkit.nimble.statistics.simple.SimpleStatsReporter;
 import org.gridkit.nimble.task.Task;
 import org.gridkit.nimble.task.TaskSLA;
 import org.gridkit.nimble.task.TaskScenario;
@@ -198,7 +198,7 @@ public class Trigonometry {
 
         @Override
         public void excute(Context context) throws Exception {
-            SimpleStatsReporter reporter = new SimpleStatsReporter(context.getStatReporter(), context);
+            SmartReporter reporter = new SmartReporter(context.getStatReporter(), context);
             
             String initStats = initStats(funcName);
             String calsStats = calcStats(funcName);

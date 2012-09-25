@@ -16,6 +16,7 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
+import org.gridkit.nimble.statistics.SmartReporter;
 import org.gridkit.nimble.statistics.ThroughputSummary;
 import org.gridkit.nimble.util.ValidOps;
 
@@ -63,11 +64,11 @@ public abstract class SimplePrinter {
     }
     
     public void print(PrintStream stream, SimpleStats stats, List<String> leftValues, List<String> rightValues) {
-        print(stream, stats, stats.getValStatsNames(SimpleStats.TIME_NS_MARK), leftValues, rightValues);
+        print(stream, stats, stats.getValStatsNames(SmartReporter.TIME_NS_MARK), leftValues, rightValues);
     }
     
     public void print(File file, SimpleStats stats, List<String> leftValues, List<String> rightValues) throws IOException {
-        print(file, stats, stats.getValStatsNames(SimpleStats.TIME_NS_MARK), leftValues, rightValues);
+        print(file, stats, stats.getValStatsNames(SmartReporter.TIME_NS_MARK), leftValues, rightValues);
     }
     
     public void print(PrintStream stream, SimpleStats stats, Collection<String> statsNames,
