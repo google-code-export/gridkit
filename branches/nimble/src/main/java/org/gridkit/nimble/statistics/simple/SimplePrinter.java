@@ -23,9 +23,9 @@ public abstract class SimplePrinter {
     private static final Map<TimeUnit, String> timeAliasMap = new HashMap<TimeUnit, String>();
 
     private static final int MISSED_GEN  = 1; // n
-    private static final int MISSED_LT   = 5; // mean, sd, var, min, max
+    private static final int MISSED_LT   = 4; // mean, sd, min, max
     private static final int MISSED_TH   = 2; // th, dur
-    private static final int MISSED_VAL  = 6; // n, mean, sd, var, min, max
+    private static final int MISSED_VAL  = 5; // n, mean, sd, min, max
     
     static {
         timeAliasMap.put(TimeUnit.NANOSECONDS,  "ns");
@@ -143,7 +143,7 @@ public abstract class SimplePrinter {
                     if (ltStats != null) {
                         row.add(decFormat.format(ltStats.getMean()));
                         row.add(decFormat.format(ltStats.getStandardDeviation()));
-//                        row.add(decFormat.format(ltStats.getVariance()));
+                        //row.add(decFormat.format(ltStats.getVariance()));
                         row.add(decFormat.format(ltStats.getMin()));
                         row.add(decFormat.format(ltStats.getMax()));
                     } else {
@@ -187,7 +187,7 @@ public abstract class SimplePrinter {
                 row.add(String.valueOf(valStats.getN()));
                 row.add(decFormat.format(valStats.getMean()));
                 row.add(decFormat.format(valStats.getStandardDeviation()));
-//                row.add(decFormat.format(valStats.getVariance()));
+                //row.add(decFormat.format(valStats.getVariance()));
                 row.add(decFormat.format(valStats.getMin()));
                 row.add(decFormat.format(valStats.getMax()));
             } else {
@@ -215,11 +215,11 @@ public abstract class SimplePrinter {
 
         if (latencyUnit != null) {
             String ltAlias = " (" + getTimeAlias(latencyUnit) + ")";
-//            String varAlias = " (" + getTimeAlias(latencyUnit) + "^2)";
+            //String varAlias = " (" + getTimeAlias(latencyUnit) + "^2)";
 
             result.add("Mean" + ltAlias);
             result.add("Sd"   + ltAlias);
-//            result.add("Var"  + varAlias);
+            //result.add("Var"  + varAlias);
             result.add("Min"  + ltAlias);
             result.add("Max"  + ltAlias);
         }
