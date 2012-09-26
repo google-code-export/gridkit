@@ -5,9 +5,9 @@ import java.util.Map;
 
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-import org.gridkit.nimble.statistics.StatsProducer;
+import org.gridkit.nimble.statistics.FlushableStatsReporter;
 
-public class SimpleStatsProducer implements StatsProducer<SimpleStats> {
+public class SimpleStatsProducer implements FlushableStatsReporter {
     private Map<String, SummaryStatistics> valStats;
 
     public SimpleStatsProducer() {
@@ -35,7 +35,6 @@ public class SimpleStatsProducer implements StatsProducer<SimpleStats> {
         return stats;
     }
 
-    @Override
     public SimpleStats produce() {
         Map<String, StatisticalSummary> result = new HashMap<String, StatisticalSummary>();
         
@@ -44,5 +43,10 @@ public class SimpleStatsProducer implements StatsProducer<SimpleStats> {
         }
         
         return new SimpleStats(result);
+    }
+
+    @Override
+    public void flush() {
+        // do nothing
     }
 }

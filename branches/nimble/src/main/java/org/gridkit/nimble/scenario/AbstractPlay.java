@@ -2,27 +2,19 @@ package org.gridkit.nimble.scenario;
 
 import org.gridkit.nimble.platform.Play;
 
-public abstract class AbstractPlay<T> implements Play<T> {
+public abstract class AbstractPlay implements Play {
     protected final Scenario scenario;
 
     private Play.Status status;
     
-    private T stats;
-
-    public AbstractPlay(Scenario scenario, T initialStats) {
+    public AbstractPlay(Scenario scenario) {
         this.scenario = scenario;
-        this.stats = initialStats;
         this.status = Play.Status.InProgress;
     }
 
     @Override
     public Scenario getScenario() {
         return scenario;
-    }
-
-    @Override
-    public synchronized T getStats() {
-        return stats;
     }
 
     @Override
@@ -40,9 +32,5 @@ public abstract class AbstractPlay<T> implements Play<T> {
             return true;
         }
         return false;
-    }
-
-    protected synchronized void setStats(T stats) {
-        this.stats = stats;
     }
 }

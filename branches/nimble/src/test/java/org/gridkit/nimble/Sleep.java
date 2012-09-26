@@ -13,12 +13,10 @@ import org.gridkit.nimble.platform.local.ThreadPoolAgent;
 import org.gridkit.nimble.scenario.ExecScenario;
 import org.gridkit.nimble.scenario.ExecScenario.Context;
 import org.gridkit.nimble.scenario.ExecScenario.Executable;
-import org.gridkit.nimble.scenario.ExecScenario.Result;
 import org.gridkit.nimble.scenario.ParScenario;
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.SeqScenario;
 import org.gridkit.nimble.statistics.simple.SimpleStats;
-import org.gridkit.nimble.statistics.simple.SimpleStatsFactory;
 import org.gridkit.nimble.util.QueuedFuturePoller;
 import org.junit.Ignore;
 import org.slf4j.Logger;
@@ -33,7 +31,6 @@ public class Sleep {
         
         Director<SimpleStats> director = new Director<SimpleStats>(
             Collections.singletonList(agent),
-            new SimpleStatsFactory(),
             directorExecutor
         );
         
@@ -52,7 +49,7 @@ public class Sleep {
 
         Scenario par = new ParScenario("PAR", Arrays.asList(seq1, seq2));
         
-        Play<SimpleStats> play = director.play(par);
+        Play play = director.play(par);
         
         Thread.sleep(1250);
         
@@ -81,7 +78,7 @@ public class Sleep {
         }
 
         @Override
-        public <T> Result<T> excute(Context<T> context) throws Exception {
+        public Play.Status excute(Context context) throws Exception {
             Logger log = context.getLocalAgent().getLogger(str);
             
             log.info(str + " - before sleep");
@@ -94,7 +91,7 @@ public class Sleep {
             
             log.info(str + " - after sleep");
             
-            return new Result<T>(Play.Status.Success, context.getStatsFactory().emptyStats());
+            return Play.Status.Success;
         }
         
         @Override

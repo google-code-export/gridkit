@@ -3,11 +3,9 @@ package org.gridkit.nimble.platform;
 import org.gridkit.nimble.scenario.Scenario;
 import com.google.common.util.concurrent.ListenableFuture;
 
-public interface Play<T> {
+public interface Play {
     Scenario getScenario();
-    
-    T getStats();
-    
+        
     Status getStatus();
     
     ListenableFuture<Void> getCompletionFuture();

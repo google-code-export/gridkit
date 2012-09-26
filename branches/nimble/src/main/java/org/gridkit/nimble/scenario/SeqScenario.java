@@ -28,8 +28,8 @@ public class SeqScenario implements Scenario {
     }
 
     @Override
-    public <T> Play<T> play(Context<T> context) {
-        SeqPlay<T> play = new SeqPlay<T>(context);
+    public Play play(Context context) {
+        SeqPlay play = new SeqPlay(context);
         play.action();
         return play;
     }
@@ -39,12 +39,12 @@ public class SeqScenario implements Scenario {
         return name;
     }
     
-    private class SeqPlay<T> extends AbstractPlay<T> {
-        private final SeqPipeline<T> pipeline;
+    private class SeqPlay extends AbstractPlay {
+        private final SeqPipeline pipeline;
         
-        public SeqPlay(Context<T> context) {
-            super(SeqScenario.this, context.getStatsFactory().emptyStats());
-            this.pipeline = new SeqPipeline<T>(context);
+        public SeqPlay(Context context) {
+            super(SeqScenario.this);
+            this.pipeline = new SeqPipeline(context);
         }
         
         public void action() {
@@ -58,23 +58,23 @@ public class SeqScenario implements Scenario {
         }
     }
 
-    private class SeqPipeline<T> extends AbstractFuture<Void> implements FutureListener<Void> {
+    private class SeqPipeline extends AbstractFuture<Void> implements FutureListener<Void> {
         private final List<Scenario> nextScenarios;
 
-        private final Context<T> context;
+        private final Context context;
 
-        private AbstractPlay<T> play;
-        private Play<T> curPlay;
+        private AbstractPlay play;
+        private Play curPlay;
         
         private ListenableFuture<Void> future;
         private final Object futureMonitor = new Object();
 
-        public SeqPipeline(Context<T> context) {
+        public SeqPipeline(Context context) {
             this.nextScenarios = scenarios;
             this.context = context;
         }
         
-        public void start(AbstractPlay<T> play) {
+        public void start(AbstractPlay play) {
             this.play = play;
             onSuccess(null);
         }
@@ -84,9 +84,7 @@ public class SeqScenario implements Scenario {
             if (curPlay != null) {
                 play.update(new Runnable() {
                     @Override
-                    public void run() {
-                        play.setStats(context.getStatsFactory().combine(play.getStats(), curPlay.getStats()));
-                        
+                    public void run() {                        
                         if (curPlay.getStatus() == Play.Status.Failure) {
                             if (play.setStatus(Play.Status.Failure)) {
                                 ScenarioOps.logFailure(log, SeqScenario.this, curPlay.getScenario());

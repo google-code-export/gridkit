@@ -22,8 +22,7 @@ public class ParScenario implements Scenario {
     private final String name;
     private final List<Scenario> scenarios;
     private final boolean interruptOnFailure;
-    
-    
+
     public ParScenario(String name, List<Scenario> scenarios, boolean interruptOnFailure) {
         ValidOps.notEmpty(scenarios, "scenarios"); //TODO handle empty scenarios list
         
@@ -41,8 +40,8 @@ public class ParScenario implements Scenario {
     }
 
     @Override
-    public <T> Play<T> play(Context<T> context) {
-        ParPlay<T> play = new ParPlay<T>(context);
+    public Play play(Context context) {
+        ParPlay play = new ParPlay(context);
         
         play.registerCallbacks();
         
@@ -54,17 +53,17 @@ public class ParScenario implements Scenario {
         return name;
     }
     
-    private class ParPlay<T> extends AbstractPlay<T> implements FutureListener<Play<T>> {
-        private final Context<T> context;
+    private class ParPlay extends AbstractPlay implements FutureListener<Play> {
+        private final Context context;
         
         private final AtomicInteger playsRemain;
         
-        private final List<ListenableFuture<Play<T>>> playFutures;
+        private final List<ListenableFuture<Play>> playFutures;
         
-        private final ParFuture<T> future;
+        private final ParFuture future;
 
-        public ParPlay(Context<T> context) {
-            super(ParScenario.this, context.getStatsFactory().emptyStats());
+        public ParPlay(Context context) {
+            super(ParScenario.this);
 
             ScenarioOps.logStart(log, ParScenario.this);
             
@@ -72,29 +71,29 @@ public class ParScenario implements Scenario {
             
             this.playsRemain = new AtomicInteger(scenarios.size());
             
-            this.playFutures = new ArrayList<ListenableFuture<Play<T>>>(scenarios.size());
+            this.playFutures = new ArrayList<ListenableFuture<Play>>(scenarios.size());
             
             for (Scenario scenario : scenarios) {
-                Play<T> play = scenario.play(context);
+                Play play = scenario.play(context);
                 
-                ListenableFuture<Play<T>> playFuture = Futures.transform(
+                ListenableFuture<Play> playFuture = Futures.transform(
                     play.getCompletionFuture(), Functions.constant(play)
                 );
                 
                 playFutures.add(playFuture);
             }
             
-            this.future = new ParFuture<T>(this);
+            this.future = new ParFuture(this);
         }
         
         public void registerCallbacks() {
-            for (ListenableFuture<Play<T>> playFuture : playFutures) {
+            for (ListenableFuture<Play> playFuture : playFutures) {
                 FutureOps.addListener(playFuture, this, context.getExecutor());
             }
         }
         
         public void cancel() {            
-            for (ListenableFuture<Play<T>> playFuture : playFutures) {
+            for (ListenableFuture<Play> playFuture : playFutures) {
                 playFuture.cancel(interruptOnFailure);
             }
         }
@@ -105,14 +104,12 @@ public class ParScenario implements Scenario {
         }
 
         @Override
-        public void onSuccess(final Play<T> play) {
+        public void onSuccess(final Play play) {
             final int playsRemain = this.playsRemain.decrementAndGet();
 
             this.update(new Runnable() {
                 @Override
-                public void run() {
-                    ParPlay.this.setStats(context.getStatsFactory().combine(ParPlay.this.getStats(), play.getStats()));
-                    
+                public void run() {                    
                     if (play.getStatus() != Play.Status.Success) {
                         try {
                             cancel();
@@ -154,10 +151,10 @@ public class ParScenario implements Scenario {
         }
     }
     
-    private class ParFuture<T> extends AbstractFuture<Void> {
-        private final ParPlay<T> play;
+    private class ParFuture extends AbstractFuture<Void> {
+        private final ParPlay play;
 
-        public ParFuture(ParPlay<T> play) {
+        public ParFuture(ParPlay play) {
             this.play = play;
         }
 

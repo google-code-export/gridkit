@@ -131,10 +131,12 @@ public class TaskSLA implements Cloneable, Serializable {
     
     public boolean isFinished(long duration, long iteration) {        
         if (finishDelay != null && duration > finishDelay) {
+            //System.err.println("finish by time");
             return true;
         }
         
         if (iterationsCount != null && iteration >= iterationsCount) {
+            //System.err.println("finish by iters");
             return true;
         }
 

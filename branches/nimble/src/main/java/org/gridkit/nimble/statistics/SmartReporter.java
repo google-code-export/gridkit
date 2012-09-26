@@ -13,11 +13,12 @@ public class SmartReporter extends DelegatingStatsReporter {
     public static final String MARK_SEP = "^";
     
     public static final String START_MS_MARK  = "start_ms";
-    public static final String START_NS_MARK  = "start_ns";
     public static final String FINISH_MS_MARK = "finish_ms";
     public static final String TIME_NS_MARK   = "time_ns";
     public static final String OPS_MARK       = "ops";
 
+    private static final String START_NS_MARK  = "start_ns";
+    
     private final TimeService timeService;
 
     private final Map<String, Map<String, Object>> attrsMap;
@@ -75,7 +76,7 @@ public class SmartReporter extends DelegatingStatsReporter {
         }
     }
 	
-	private void report(String statistica, Map<String, Object> attrs) {
+	public void report(String statistica, Map<String, Object> attrs) {
 	    Map<String, Object> report = new HashMap<String, Object>();
 	    
 	    for (Map.Entry<String, Object> entry : attrs.entrySet()) {

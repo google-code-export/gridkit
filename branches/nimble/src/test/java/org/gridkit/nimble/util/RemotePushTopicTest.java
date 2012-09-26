@@ -16,8 +16,10 @@ import org.gridkit.nimble.platform.RemoteAgent;
 import org.gridkit.nimble.platform.remote.LocalAgentFactory;
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.SeqScenario;
+import org.gridkit.nimble.statistics.simple.QueuedSimpleStatsAggregator;
 import org.gridkit.nimble.statistics.simple.SimpleStats;
-import org.gridkit.nimble.statistics.simple.SimpleStatsFactory;
+import org.gridkit.nimble.statistics.simple.SimpleStatsAggregator;
+import org.gridkit.nimble.task.SimpleStatsReporterFactory;
 import org.gridkit.nimble.task.Task;
 import org.gridkit.nimble.task.TaskSLA;
 import org.gridkit.nimble.task.TaskScenario;
@@ -39,9 +41,11 @@ public class RemotePushTopicTest {
         publishSla.setLabels(Collections.singleton(PUBLISHER));
         Task publishTask = new PublishTask(topic, 1, 10);
         
+        SimpleStatsAggregator aggr = new QueuedSimpleStatsAggregator();    
+        
         Scenario scenario = new SeqScenario(Arrays.<Scenario>asList(
-            new TaskScenario("INIT", Collections.singleton(initTask), initSla),
-            new TaskScenario("PUBLISH", Collections.singleton(publishTask), publishSla)
+            new TaskScenario("INIT", Collections.singleton(initTask), initSla, new SimpleStatsReporterFactory(aggr)),
+            new TaskScenario("PUBLISH", Collections.singleton(publishTask), publishSla, new SimpleStatsReporterFactory(aggr))
         ));
         
         LocalAgentFactory localFactory = new LocalAgentFactory();
@@ -53,11 +57,11 @@ public class RemotePushTopicTest {
         ExecutorService directorExecutor = Executors.newCachedThreadPool();
         
         Director<SimpleStats> director = new Director<SimpleStats>(
-            Arrays.asList(publisher, subscriber1, subscriber2), new SimpleStatsFactory(), directorExecutor
+            Arrays.asList(publisher, subscriber1, subscriber2), directorExecutor
         );
 
         try {
-            Play<SimpleStats> play = director.play(scenario);
+            Play play = director.play(scenario);
             play.getCompletionFuture().get();
             topic.sync();
         } finally {
