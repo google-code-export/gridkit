@@ -6,7 +6,6 @@ import java.util.Collections;
 
 import org.gridkit.nimble.platform.TimeService;
 import org.gridkit.nimble.statistics.SmartReporter;
-import org.gridkit.nimble.statistics.StatsProducer;
 import org.junit.Ignore;
 
 @Ignore
@@ -29,8 +28,7 @@ public class PrintTest {
     }
 
     public static SimpleStats gerateStats() throws InterruptedException {
-        SimpleStatsFactory factory = new SimpleStatsFactory();
-        StatsProducer<SimpleStats> producer = factory.newStatsProducer();
+        SimpleStatsProducer producer = new SimpleStatsProducer();
         SmartReporter reporter = new SmartReporter(producer, timeService);
         
         for (int i = 0; i < 5; ++i) {

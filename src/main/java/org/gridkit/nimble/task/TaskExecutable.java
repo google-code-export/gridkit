@@ -10,18 +10,16 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.slf4j.Logger;
-
 import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.Play.Status;
 import org.gridkit.nimble.scenario.ExecScenario;
 import org.gridkit.nimble.scenario.ExecScenario.Context;
-import org.gridkit.nimble.scenario.ExecScenario.Result;
 import org.gridkit.nimble.scenario.ScenarioOps;
-import org.gridkit.nimble.statistics.StatsMonoid;
-import org.gridkit.nimble.statistics.StatsProducer;
+import org.gridkit.nimble.statistics.FlushableStatsReporter;
 import org.gridkit.nimble.statistics.StatsReporter;
+import org.gridkit.nimble.task.TaskScenario.StatsReporterFactory;
 import org.gridkit.util.concurrent.BlockingBarrier;
+import org.slf4j.Logger;
 
 //TODO think about start time sync using RemoteAgent.currentTimeMillis()
 @SuppressWarnings("serial")
@@ -29,22 +27,23 @@ public class TaskExecutable implements ExecScenario.Executable {
     private String name;
     private List<Task> tasks;
     private TaskSLA sla;
+    private StatsReporterFactory reporterFactory;
     
-    public TaskExecutable(String name, List<Task> tasks, TaskSLA sla) {
+    public TaskExecutable(String name, List<Task> tasks, TaskSLA sla, StatsReporterFactory reporterFactory) {
         this.name = name;
         this.tasks = tasks;
         this.sla = sla;
+        this.reporterFactory = reporterFactory;
     }
 
     @Override
-    public <T> Result<T> excute(ExecScenario.Context<T> context) {
+    public Play.Status excute(ExecScenario.Context context) {
         AtomicReference<Play.Status> status = new AtomicReference<Play.Status>(Play.Status.Success);
-        AtomicReference<T> stats = new AtomicReference<T>(context.getStatsFactory().emptyStats());
         
         try {
             sla.waitForStart();
         } catch (InterruptedException e) {
-            return getResult(status, stats);
+            return status.get();
         }
         
         ExecutorService executor = sla.newExecutor(name);
@@ -53,38 +52,33 @@ public class TaskExecutable implements ExecScenario.Executable {
         List<Callable<Void>> taskCallables = new ArrayList<Callable<Void>>();
                 
         for (Task task : tasks) {
-            taskCallables.add(new TaskCallable<T>(task, status, stats, context, taskBarrier));
+            taskCallables.add(new TaskCallable(task, status, context, taskBarrier));
         }
 
         try {
             executor.invokeAll(taskCallables); 
         } catch (InterruptedException ignored) {
-            return getResult(status, stats);
+            return status.get();
         } finally {
             executor.shutdownNow();
+            reporterFactory.flush();
         }
         
-        return getResult(status, stats);
+        return status.get();
     }
-    
-    private <T> Result<T> getResult(AtomicReference<Play.Status> status, AtomicReference<T> stats) {
-        return new Result<T>(sla.getStatus(status.get()), stats.get());
-    }
-    
-    private class TaskCallable<T> implements Callable<Void> {
+        
+    private class TaskCallable implements Callable<Void> {
         private final Task task;
         
         private final AtomicReference<Play.Status> status;
-        private final AtomicReference<T> stats;
         
-        private final ExecScenario.Context<T> context;
+        private final ExecScenario.Context context;
         
         private final BlockingBarrier taskBarrier;
 
-        public TaskCallable(Task task, AtomicReference<Play.Status> status, AtomicReference<T> stats, Context<T> context, BlockingBarrier taskBarrier) {
+        public TaskCallable(Task task, AtomicReference<Play.Status> status, Context context, BlockingBarrier taskBarrier) {
             this.task = task;
             this.status = status;
-            this.stats = stats;
             this.context = context;
             this.taskBarrier = taskBarrier;
         }
@@ -93,10 +87,9 @@ public class TaskExecutable implements ExecScenario.Executable {
         public Void call() throws Exception {
             long startTime = context.getLocalAgent().currentTimeMillis();
             
-            StatsMonoid<T> statsFactory = context.getStatsFactory();
-            StatsProducer<T> statsProducer = statsFactory.newStatsProducer();
+            FlushableStatsReporter statsReporter = reporterFactory.newTaskReporter();
             
-            Task.Context taskContext = new TaskContext<T>(task, context, status, statsProducer);
+            Task.Context taskContext = new TaskContext(task, context, status, statsReporter);
                         
             try {
                 long iteration = 0;
@@ -115,23 +108,21 @@ public class TaskExecutable implements ExecScenario.Executable {
                 );
                 status.set(Play.Status.Failure);
             } finally {
-                synchronized (stats) {
-                    stats.set(statsFactory.combine(stats.get(), statsProducer.produce()));
-                }
+                statsReporter.flush();
             }
             
             return null;
         }
     }
     
-    private class TaskContext<T> implements Task.Context {
+    private class TaskContext implements Task.Context {
         private final Task task;
-        private final ExecScenario.Context<T> context;
+        private final ExecScenario.Context context;
         
         private final AtomicReference<Play.Status> status;
         private final StatsReporter reporter;
         
-        public TaskContext(Task task, Context<T> context, AtomicReference<Status> status, StatsReporter reporter) {
+        public TaskContext(Task task, Context context, AtomicReference<Status> status, StatsReporter reporter) {
             this.task = task;
             this.context = context;
             this.status = status;

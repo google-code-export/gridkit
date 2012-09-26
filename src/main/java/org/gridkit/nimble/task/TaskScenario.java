@@ -12,6 +12,7 @@ import org.gridkit.nimble.scenario.ExecScenario;
 import org.gridkit.nimble.scenario.ParScenario;
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.ScenarioOps;
+import org.gridkit.nimble.statistics.FlushableStatsReporter;
 import org.gridkit.nimble.util.FutureListener;
 import org.gridkit.nimble.util.FutureOps;
 import org.gridkit.nimble.util.QueuedFuturePoller;
@@ -25,41 +26,45 @@ public class TaskScenario implements Scenario, FutureListener<Void> {
     private String name;
     private List<Task> tasks;
     private TaskSLA sla;
-
+    private StatsReporterFactory reporterFactory;
+    
     private FuturePoller poller;
     
-    public TaskScenario(String name, Collection<Task> tasks, TaskSLA sla) {
+    public static interface StatsReporterFactory {
+        FlushableStatsReporter newTaskReporter();
+        void flush();
+    }
+    
+    public TaskScenario(String name, Collection<Task> tasks, TaskSLA sla, StatsReporterFactory reporterFactory) {
         ValidOps.notEmpty(name, "name");
         ValidOps.notNull(tasks, "tasks");
         ValidOps.notNull(sla, "sla");
+        ValidOps.notNull(reporterFactory, "reporterFactory");
         
         this.name = name;
         this.tasks = new ArrayList<Task>(tasks);
         this.sla = sla;
+        this.reporterFactory = reporterFactory;
         
         this.sla.shuffle(this.tasks);
     }
 
     @Override
-    public <T> Play<T> play(Context<T> context) {
+    public Play play(Context context) {
         ScenarioOps.logStart(log, this);
         
         List<RemoteAgent> agents = sla.getAgents(context.getAgents());
         
         poller = new QueuedFuturePoller(Math.max(1, agents.size() / sla.getAgentsPerPoll()));
         
-        Play<T> result;
+        Play result;
         
         if (agents.isEmpty()) {
             TaskOps.logNoAgentsFound(log, this);
-            result = new EmptyPlay<T>(
-                this, context.getStatsFactory().emptyStats()
-            );
+            result = new EmptyPlay(this);
         } else if (tasks.isEmpty()) {
             TaskOps.logNoTasksFound(log, this);
-            result = new EmptyPlay<T>(
-                this, context.getStatsFactory().emptyStats()
-            );
+            result = new EmptyPlay(this);
         } else if (agents.size() == 1) {
             RemoteAgent execAgent = agents.get(0);
             result = newAgentScenario(execAgent, tasks, TaskOps.getExecName(this, execAgent)).play(context);
@@ -88,7 +93,7 @@ public class TaskScenario implements Scenario, FutureListener<Void> {
     }
     
     private Scenario newAgentScenario(RemoteAgent agent, List<Task> tasks, String name) {
-        TaskExecutable executable = new TaskExecutable(name, tasks, sla);
+        TaskExecutable executable = new TaskExecutable(name, tasks, sla, reporterFactory);
         Scenario scenario = new ExecScenario(name, executable, agent, poller);
         return scenario;        
     }

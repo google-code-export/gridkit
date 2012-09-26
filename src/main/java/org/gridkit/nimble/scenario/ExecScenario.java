@@ -11,10 +11,7 @@ import org.gridkit.nimble.platform.AttributeContext;
 import org.gridkit.nimble.platform.FuturePoller;
 import org.gridkit.nimble.platform.LocalAgent;
 import org.gridkit.nimble.platform.Play;
-import org.gridkit.nimble.platform.Play.Status;
 import org.gridkit.nimble.platform.RemoteAgent;
-import org.gridkit.nimble.statistics.StatsMonoid;
-import org.gridkit.nimble.statistics.StatsProducer;
 import org.gridkit.nimble.util.FutureListener;
 import org.gridkit.nimble.util.FutureOps;
 import org.slf4j.Logger;
@@ -26,43 +23,14 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class ExecScenario implements Scenario {
     private static final Logger log = LoggerFactory.getLogger(ExecScenario.class);
     
-    public static interface Context<T> extends AttributeContext {
-        StatsMonoid<T> getStatsFactory();
-        
+    public static interface Context extends AttributeContext {        
         LocalAgent getLocalAgent();
     }
     
     public static interface Executable extends Serializable {
-        public <T> Result<T> excute(Context<T> context) throws Exception;
+        public Play.Status excute(Context context) throws Exception;
     }
-    
-    @SuppressWarnings("serial")
-    public static final class Result<T> implements Serializable {
-        private Play.Status status;
-        private T stats;
 
-        public Result(Status status, T stats) {
-            this.status = status;
-            this.stats = stats;
-        }
-
-        public Play.Status getStatus() {
-            return status;
-        }
-
-        public void setStatus(Play.Status status) {
-            this.status = status;
-        }
-
-        public T getStats() {
-            return stats;
-        }
-
-        public void setStats(T stats) {
-            this.stats = stats;
-        }
-    }
-    
     private final Executable executable;
     
     private final String name;
@@ -86,8 +54,8 @@ public class ExecScenario implements Scenario {
     }
     
     @Override
-    public <T> Play<T> play(Scenario.Context<T> context) {
-        ExecPlay<T> play = new ExecPlay<T>(this, context, agent);
+    public Play play(Scenario.Context context) {
+        ExecPlay play = new ExecPlay(this, context, agent);
         play.action();
         return play;
     }
@@ -97,12 +65,12 @@ public class ExecScenario implements Scenario {
         return name;
     }
     
-    private class ExecPlay<T> extends AbstractPlay<T> {
-        private final ExecPipeline<T> pipeline;
+    private class ExecPlay extends AbstractPlay {
+        private final ExecPipeline pipeline;
         
-        public ExecPlay(Scenario scenario, Scenario.Context<T> context, RemoteAgent agent) {
-            super(scenario, context.getStatsFactory().emptyStats());
-            pipeline = new ExecPipeline<T>(context);
+        public ExecPlay(Scenario scenario, Scenario.Context context, RemoteAgent agent) {
+            super(scenario);
+            pipeline = new ExecPipeline(context);
         }
         
         public void action() {
@@ -115,26 +83,23 @@ public class ExecScenario implements Scenario {
         }
     }
     
-    private class ExecPipeline<T> extends AbstractFuture<Void> implements FutureListener<Result<T>> {
-    	
-        private final Scenario.Context<T> context;
+    private class ExecPipeline extends AbstractFuture<Void> implements FutureListener<Play.Status> {
+        private final Scenario.Context context;
         
-        private volatile AbstractPlay<T> play;
+        private volatile AbstractPlay play;
 
-        private volatile ListenableFuture<Result<T>> future;
+        private volatile ListenableFuture<Play.Status> future;
         
-        public ExecPipeline(Scenario.Context<T> context) {
+        public ExecPipeline(Scenario.Context context) {
             this.context = context;
         }
         
-        public void start(AbstractPlay<T> play) {
+        public void start(AbstractPlay play) {
             ScenarioOps.logStart(log, ExecScenario.this);
             
             this.play = play;
             
-            Executor<T> executor = new Executor<T>(
-                context.getContextId(), executable, context.getStatsFactory()
-            );
+            Executor executor = new Executor(context.getContextId(), executable);
             
             future = poller.poll(agent.invoke(executor));
 
@@ -142,21 +107,19 @@ public class ExecScenario implements Scenario {
         }
 
         @Override
-        public void onSuccess(final Result<T> result) {
+        public void onSuccess(final Play.Status result) {
             play.update(new Runnable() {
                 @Override
                 public void run() {
-                    play.setStats(result.getStats());
-                    
-                    if (result.getStatus() == Play.Status.Failure) {
+                    if (result == Play.Status.Failure) {
                         play.setStatus(Play.Status.Failure);
                         ScenarioOps.logFailure(log, ExecScenario.this, executable.toString());
-                    } else if (result.getStatus() == Play.Status.Success) {
+                    } else if (result == Play.Status.Success) {
                         play.setStatus(Play.Status.Success);
                         ScenarioOps.logSuccess(log, ExecScenario.this);
                     } else {
                         play.setStatus(Play.Status.Failure);
-                        ScenarioOps.logFailure(log, ExecScenario.this, executable.toString(), result.getStatus());
+                        ScenarioOps.logFailure(log, ExecScenario.this, executable.toString());
                     }
                     
                     set(null);
@@ -196,44 +159,35 @@ public class ExecScenario implements Scenario {
     }
 
     @SuppressWarnings("serial")
-    private static class Executor<T> implements RemoteAgent.Invocable<Result<T>>, Context<T> {
+    private static class Executor implements RemoteAgent.Invocable<Play.Status>, Context {
         private String contextId;
         private Executable executable;
-        private StatsMonoid<T> statsFactory;
         
         private transient LocalAgent agent;
         
-        public Executor(String contextId, Executable executable, StatsMonoid<T> statsFactory) {
+        public Executor(String contextId, Executable executable) {
             this.contextId = contextId;
             this.executable = executable;
-            this.statsFactory = statsFactory;
         }
 
         @Override
-        public Result<T> invoke(LocalAgent agent) {
+        public Play.Status invoke(LocalAgent agent) {
             this.agent = agent;
             
             try {
                 return executable.excute(this);
-            } catch (Throwable t) {
-                StatsProducer<T> producer = statsFactory.newStatsProducer();
-                
+            } catch (Throwable t) {                
                 agent.getLogger(Executor.class.getName()).error(
                     F("Exception during executable '%s' execution on agent '%s'", executable.toString()), t
                 );
                 
-                return new Result<T>(Play.Status.Failure, producer.produce());
+                return Play.Status.Failure;
             }
         }
         
         @Override
         public LocalAgent getLocalAgent() {
             return agent;
-        }
-        
-        @Override
-        public StatsMonoid<T> getStatsFactory() {
-            return statsFactory;
         }
         
         @Override //TODO implement attributes cleaning

@@ -19,10 +19,12 @@ import org.gridkit.nimble.scenario.ParScenario;
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.SeqScenario;
 import org.gridkit.nimble.statistics.SmartReporter;
+import org.gridkit.nimble.statistics.simple.QueuedSimpleStatsAggregator;
 import org.gridkit.nimble.statistics.simple.SimplePrettyPrinter;
 import org.gridkit.nimble.statistics.simple.SimplePrinter;
 import org.gridkit.nimble.statistics.simple.SimpleStats;
-import org.gridkit.nimble.statistics.simple.SimpleStatsFactory;
+import org.gridkit.nimble.statistics.simple.SimpleStatsAggregator;
+import org.gridkit.nimble.task.SimpleStatsReporterFactory;
 import org.gridkit.nimble.task.Task;
 import org.gridkit.nimble.task.TaskSLA;
 import org.gridkit.nimble.task.TaskScenario;
@@ -74,27 +76,30 @@ public class Trigonometry {
         RemoteAgent cosAgent = createAgent(mode, COS);
         
         Director<SimpleStats> director = new Director<SimpleStats>(
-            Arrays.asList(sinAgent, cosAgent), new SimpleStatsFactory(), directorExecutor
+            Arrays.asList(sinAgent, cosAgent), directorExecutor
         );
 
-        Play<SimpleStats> play;
+        SimpleStatsAggregator wAggr = new QueuedSimpleStatsAggregator();        
+        SimpleStatsAggregator rAggr = new QueuedSimpleStatsAggregator();
+        
+        Play play;
         
         try {
-            play = director.play(getScenario(WARMUP_NUMBERS, WARMUP_ITERATIONS, WARMUP_DURATION));
+            play = director.play(getScenario(WARMUP_NUMBERS, WARMUP_ITERATIONS, WARMUP_DURATION, wAggr));
             play.getCompletionFuture().get();
             
-            play = director.play(getScenario(NUMBERS, ITERATIONS, DURATION));
+            play = director.play(getScenario(NUMBERS, ITERATIONS, DURATION, rAggr));
             play.getCompletionFuture().get();
         } finally {
             director.shutdown(false);
         }
-
-        SimplePrinter printer = new SimplePrettyPrinter();
         
-        printer.print(System.err, play.getStats());
+        SimplePrinter printer = new SimplePrettyPrinter();
+                
+        printer.print(System.err, rAggr.calculate());
     }
     
-    private static Scenario getScenario(long numbers, long iterations, long duration) {
+    private static Scenario getScenario(long numbers, long iterations, long duration, SimpleStatsAggregator aggr) {
         Task sinInitTask = new InitTask("SinInitTask", SIN, new Sin());
         Task cosInitTask = new InitTask("CosInitTask", COS, new Cos());
         Task tanInitTask = new InitTask("TanInitTask", TAN, new Tan());
@@ -109,15 +114,15 @@ public class Trigonometry {
         tanSLA.setLabels(new HashSet<String>(Arrays.asList(SIN, COS)));
         
         Scenario sinInitScen = new TaskScenario(
-            sinInitTask.getName(), Collections.singleton(sinInitTask), sinSLA
+            sinInitTask.getName(), Collections.singleton(sinInitTask), sinSLA, new SimpleStatsReporterFactory(aggr)
         );
         
         Scenario cosInitScen = new TaskScenario(
-            cosInitTask.getName(), Collections.singleton(cosInitTask), cosSLA
+            cosInitTask.getName(), Collections.singleton(cosInitTask), cosSLA, new SimpleStatsReporterFactory(aggr)
         );
         
         Scenario tanInitScen = new TaskScenario(
-            tanInitTask.getName(), Collections.singleton(tanInitTask), tanSLA
+            tanInitTask.getName(), Collections.singleton(tanInitTask), tanSLA, new SimpleStatsReporterFactory(aggr)
         );
         
         sinSLA = sinSLA.clone();
@@ -141,15 +146,15 @@ public class Trigonometry {
         }
         
         Scenario sinCalcScen = new TaskScenario(
-            "sin cals scen", sinTasks, sinSLA
+            "sin cals scen", sinTasks, sinSLA, new SimpleStatsReporterFactory(aggr)
         );
             
         Scenario cosCalcScen = new TaskScenario(
-            "cos cals scen", cosTasks, cosSLA
+            "cos cals scen", cosTasks, cosSLA, new SimpleStatsReporterFactory(aggr)
         );
             
         Scenario tanCalsScen = new TaskScenario(
-            "tan cals scen", tanTasks, tanSLA
+            "tan cals scen", tanTasks, tanSLA, new SimpleStatsReporterFactory(aggr)
         );
 
         Scenario init = new ParScenario(Arrays.asList(sinInitScen, cosInitScen, tanInitScen));
