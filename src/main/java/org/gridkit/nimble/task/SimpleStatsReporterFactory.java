@@ -21,12 +21,7 @@ public class SimpleStatsReporterFactory implements TaskScenario.StatsReporterFac
     
     @Override
     public FlushableStatsReporter newTaskReporter() {
-        return new SimpleStatsProducer() {
-            @Override
-            public void flush() {
-                taskAggregator.add(produce());
-            }
-        };
+        return SimpleStatsProducer.newInstance(taskAggregator);
     }
 
     @Override

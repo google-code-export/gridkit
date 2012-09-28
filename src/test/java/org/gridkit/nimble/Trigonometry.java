@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -15,15 +16,18 @@ import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.RemoteAgent;
 import org.gridkit.nimble.platform.local.ThreadPoolAgent;
 import org.gridkit.nimble.platform.remote.LocalAgentFactory;
+import org.gridkit.nimble.scenario.DemonScenario;
 import org.gridkit.nimble.scenario.ParScenario;
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.SeqScenario;
+import org.gridkit.nimble.sigar.CpuDemon;
 import org.gridkit.nimble.statistics.SmartReporter;
 import org.gridkit.nimble.statistics.simple.QueuedSimpleStatsAggregator;
 import org.gridkit.nimble.statistics.simple.SimplePrettyPrinter;
 import org.gridkit.nimble.statistics.simple.SimplePrinter;
 import org.gridkit.nimble.statistics.simple.SimpleStats;
 import org.gridkit.nimble.statistics.simple.SimpleStatsAggregator;
+import org.gridkit.nimble.statistics.simple.SimpleStatsProducer;
 import org.gridkit.nimble.task.SimpleStatsReporterFactory;
 import org.gridkit.nimble.task.Task;
 import org.gridkit.nimble.task.TaskSLA;
@@ -49,7 +53,7 @@ public class Trigonometry {
     
     public RemoteAgent createAgent(String mode, String... labels) {
     	if ("in-proc".equals(mode)) {
-    		return new ThreadPoolAgent(Executors.newSingleThreadExecutor(), new HashSet<String>(Arrays.asList(labels)));
+    		return new ThreadPoolAgent(Executors.newCachedThreadPool(), new HashSet<String>(Arrays.asList(labels)));
     	}
     	if ("local".equals(mode)) {
     		return localFactory.createAgent("agent" + Arrays.toString(labels), labels);
@@ -96,7 +100,15 @@ public class Trigonometry {
         
         SimplePrinter printer = new SimplePrettyPrinter();
                 
-        printer.print(System.err, rAggr.calculate());
+        SimpleStats stats = rAggr.calculate();
+        
+        printer.print(System.err, stats);
+        
+        List<String> metrics = Arrays.asList("SINCOS.SYS", "SINCOS.TOT", "SINCOS.USR", "TAN.SYS", "TAN.TOT", "TAN.USR");
+        
+        System.err.println();
+        
+        printer.printValues(System.err, stats, metrics);
     }
     
     private static Scenario getScenario(long numbers, long iterations, long duration, SimpleStatsAggregator aggr) {
@@ -144,7 +156,7 @@ public class Trigonometry {
             cosTasks.add(new CalcTask("CosCalcTask#"+i, COS, i));
             tanTasks.add(new CalcTask("TanCalcTask#"+i, TAN, i));
         }
-        
+
         Scenario sinCalcScen = new TaskScenario(
             "sin cals scen", sinTasks, sinSLA, new SimpleStatsReporterFactory(aggr)
         );
@@ -159,9 +171,16 @@ public class Trigonometry {
 
         Scenario init = new ParScenario(Arrays.asList(sinInitScen, cosInitScen, tanInitScen));
         
-        Scenario first = new ParScenario(Arrays.asList(sinCalcScen, cosCalcScen));
+        CpuDemon firstCpuRep = new CpuDemon("SINCOS", new CpuDemon.CurPidCpuReporter(), SimpleStatsProducer.newInstance(aggr), 100, 500);
+        CpuDemon secondCpuRep = new CpuDemon("TAN", new CpuDemon.CurPidCpuReporter(), SimpleStatsProducer.newInstance(aggr), 100, 500);
         
-        return new SeqScenario(Arrays.asList(init, first, tanCalsScen));
+        Scenario first = new ParScenario(Arrays.asList(sinCalcScen, cosCalcScen));
+        Scenario firstCpu = DemonScenario.newInstance(first, Collections.singleton(SIN), Collections.<Callable<Void>>singleton(firstCpuRep));
+        
+        Scenario secondCpu = DemonScenario.newInstance(tanCalsScen, null, Collections.<Callable<Void>>singleton(secondCpuRep));
+        
+        //return new SeqScenario(Arrays.asList(init, first, tanCalsScen)); 
+        return new SeqScenario(Arrays.asList(init, firstCpu, secondCpu));
     }    
     
     @SuppressWarnings("serial")
@@ -202,7 +221,7 @@ public class Trigonometry {
         }
 
         @Override
-        public void excute(Context context) throws Exception {
+        public void excute(Context context) throws Exception {            
             SmartReporter reporter = new SmartReporter(context.getStatReporter(), context);
             
             String initStats = initStats(funcName);
