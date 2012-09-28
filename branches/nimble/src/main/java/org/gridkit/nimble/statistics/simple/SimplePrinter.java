@@ -101,9 +101,17 @@ public abstract class SimplePrinter {
     }
     
     // ------------------------------------------------------------------------------------- //
+
+    public void printValues(PrintStream stream, SimpleStats stats) {
+        printValues(stream, stats, new TreeSet<String>(stats.getValStatsNames()), Collections.<String>emptyList(), Collections.<String>emptyList());
+    }
+    
+    public void printValues(PrintStream stream, SimpleStats stats, Collection<String> statsNames) {
+        printValues(stream, stats, statsNames, Collections.<String>emptyList(), Collections.<String>emptyList());
+    }
     
     public void printValues(PrintStream stream, SimpleStats stats, Collection<String> statsNames,
-                            List<String> leftValues, List<String> rightValues) { 
+                            List<String> leftValues, List<String> rightValues) {
         List<String> header = newValueHeader(TimeUnit.SECONDS);
         List<List<String>> table = newValueTable(stats, statsNames, leftValues, rightValues);
         

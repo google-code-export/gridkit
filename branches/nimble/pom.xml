@@ -36,15 +36,9 @@
 		</dependency>
 
 		<dependency>
-		    <groupId>org.fusesource</groupId>
-		    <artifactId>sigar</artifactId>
-		    <version>1.6.4</version>
-		    <exclusions>
-		      <exclusion>
-		          <groupId>log4j</groupId>
-		          <artifactId>log4j</artifactId>
-		      </exclusion>
-		    </exclusions>
+		    <groupId>org.gridkit.lab</groupId>
+		    <artifactId>sigar-lib</artifactId>
+		    <version>0.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -79,7 +73,6 @@
 		    <artifactId>telecontrol-ssh</artifactId>
 		    <version>0.7.6-SNAPSHOT</version>
 		</dependency>
-		
 	</dependencies>
 
 	<build>
