@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
 
-@SuppressWarnings("restriction")
 public interface PidProvider {
     Collection<Long> getPids();
     

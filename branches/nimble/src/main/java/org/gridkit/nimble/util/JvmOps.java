@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
 
-@SuppressWarnings("restriction")
 public class JvmOps {
     private static final Logger log = LoggerFactory.getLogger(JvmOps.class);
     
