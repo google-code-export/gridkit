@@ -7,8 +7,6 @@ import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.gridkit.nimble.platform.AttributeContext;
-import org.gridkit.nimble.platform.FuturePoller;
 import org.gridkit.nimble.platform.LocalAgent;
 import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.RemoteAgent;
@@ -23,8 +21,10 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class ExecScenario implements Scenario {
     private static final Logger log = LoggerFactory.getLogger(ExecScenario.class);
     
-    public static interface Context extends AttributeContext {        
+    public static interface Context {       
         LocalAgent getLocalAgent();
+        
+        ConcurrentMap<String, Object> getAttrsMap();
     }
     
     public static interface Executable extends Serializable {
@@ -36,20 +36,16 @@ public class ExecScenario implements Scenario {
     private final String name;
 
     private final RemoteAgent agent;
-    
-    private final FuturePoller poller;
-    
-    public ExecScenario(String name, Executable executable, RemoteAgent agent, FuturePoller poller) {
+        
+    public ExecScenario(String name, Executable executable, RemoteAgent agent) {
         this.name = name;
         this.executable = executable;
         this.agent = agent;
-        this.poller = poller;
     }
     
-    public ExecScenario(Executable executable, RemoteAgent agent, FuturePoller poller) {
+    public ExecScenario(Executable executable, RemoteAgent agent) {
         this(
-            ScenarioOps.getName("Exec", Arrays.asList(executable.toString(), agent.toString())),
-            executable, agent, poller
+            ScenarioOps.getName("Exec", Arrays.asList(executable.toString(), agent.toString())), executable, agent
         );
     }
     
@@ -101,7 +97,7 @@ public class ExecScenario implements Scenario {
             
             Executor executor = new Executor(context.getContextId(), executable);
             
-            future = poller.poll(agent.invoke(executor));
+            future = agent.invoke(executor);
 
             FutureOps.addListener(future, this, context.getExecutor());
         }
@@ -191,13 +187,13 @@ public class ExecScenario implements Scenario {
         }
         
         @Override //TODO implement attributes cleaning
-        public ConcurrentMap<String, Object> getAttributesMap() {
-            if (!agent.getAttributesMap().containsKey(contextId)) {
-                agent.getAttributesMap().putIfAbsent(contextId, new ConcurrentHashMap<String, Object>());
+        public ConcurrentMap<String, Object> getAttrsMap() {
+            if (!agent.getAttrsMap().containsKey(contextId)) {
+                agent.getAttrsMap().putIfAbsent(contextId, new ConcurrentHashMap<String, Object>());
             }
 
             @SuppressWarnings("unchecked")
-            ConcurrentMap<String, Object> result = (ConcurrentMap<String, Object>)agent.getAttributesMap().get(contextId);
+            ConcurrentMap<String, Object> result = (ConcurrentMap<String, Object>)agent.getAttrsMap().get(contextId);
             
             return result;
         }

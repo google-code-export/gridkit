@@ -5,7 +5,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.gridkit.nimble.sigar.CpuDemon;
+import org.gridkit.nimble.sensor.CpuDemon;
 import org.gridkit.nimble.statistics.simple.SimplePrettyPrinter;
 import org.gridkit.nimble.statistics.simple.SimplePrinter;
 import org.gridkit.nimble.statistics.simple.SimpleStats;
@@ -22,9 +22,9 @@ public class SigarTest {
         
         ExecutorService executor = Executors.newCachedThreadPool();
         
-        CpuDemon cpuRep = new CpuDemon("LOCAL", new CpuDemon.CurPidCpuReporter(), r1, 2000, 2000);
+        CpuDemon cpuRep = new CpuDemon("LOCAL", new CpuDemon.CurPidCpuReporter(), r1, 100, 200);
         
-        CpuDemon pcpuRep = new CpuDemon("CHROME", new CpuDemon.PtqlCpuReporter("chrome"),  r2, 2000, 2000);
+        CpuDemon pcpuRep = new CpuDemon("CHROME", new CpuDemon.PtqlCpuReporter("Exe.Name.ct=java"),  r2, 100, 200);
         
         executor.submit(new SinCalc());
         executor.submit(new SinCalc());
@@ -38,6 +38,10 @@ public class SigarTest {
         SimplePrinter printer = new SimplePrettyPrinter();
         
         printer.printValues(System.err, SimpleStats.combine(r1.produce(), r2.produce()));
+        
+        printer.printValues(System.err, r1.produce());
+        
+        printer.printValues(System.err, r2.produce());
         
     }
     

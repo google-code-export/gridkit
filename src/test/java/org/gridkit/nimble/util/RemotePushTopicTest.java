@@ -6,8 +6,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.gridkit.nimble.platform.Director;
 import org.gridkit.nimble.platform.Play;
@@ -53,11 +51,9 @@ public class RemotePushTopicTest {
         RemoteAgent publisher   = localFactory.createAgent("publisher", PUBLISHER);
         RemoteAgent subscriber1 = localFactory.createAgent("subscriber1", SUBSCRIBER);
         RemoteAgent subscriber2 = localFactory.createAgent("subscriber2", SUBSCRIBER);
-        
-        ExecutorService directorExecutor = Executors.newCachedThreadPool();
-        
+                
         Director<SimpleStats> director = new Director<SimpleStats>(
-            Arrays.asList(publisher, subscriber1, subscriber2), directorExecutor
+            Arrays.asList(publisher, subscriber1, subscriber2)
         );
 
         try {

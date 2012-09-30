@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.gridkit.nimble.platform.Play;
+import org.gridkit.nimble.platform.TimeService;
 import org.gridkit.nimble.platform.Play.Status;
 import org.gridkit.nimble.scenario.ExecScenario;
 import org.gridkit.nimble.scenario.ExecScenario.Context;
@@ -85,7 +86,7 @@ public class TaskExecutable implements ExecScenario.Executable {
 
         @Override
         public Void call() throws Exception {
-            long startTime = context.getLocalAgent().currentTimeMillis();
+            long startTime = context.getLocalAgent().getTimeService().currentTimeMillis();
             
             FlushableStatsReporter statsReporter = reporterFactory.newTaskReporter();
             
@@ -100,7 +101,7 @@ public class TaskExecutable implements ExecScenario.Executable {
                     task.excute(taskContext);
                     
                     iteration += 1;
-                    duration = context.getLocalAgent().currentTimeMillis() - startTime;
+                    duration = context.getLocalAgent().getTimeService().currentTimeMillis() - startTime;
                 }
             } catch (Throwable t) {
                 context.getLocalAgent().getLogger(TaskCallable.class.getName()).error(
@@ -135,13 +136,8 @@ public class TaskExecutable implements ExecScenario.Executable {
         }
 
         @Override
-        public long currentTimeMillis() {
-            return context.getLocalAgent().currentTimeMillis();
-        }
-
-        @Override
-        public long currentTimeNanos() {
-            return context.getLocalAgent().currentTimeNanos();
+        public TimeService getTimeService() {
+            return context.getLocalAgent().getTimeService();
         }
         
         @Override
@@ -155,8 +151,8 @@ public class TaskExecutable implements ExecScenario.Executable {
         }
 
         @Override
-        public ConcurrentMap<String, Object> getAttributesMap() {
-            return context.getAttributesMap();
+        public ConcurrentMap<String, Object> getAttrsMap() {
+            return context.getAttrsMap();
         }
     }
     

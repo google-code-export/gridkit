@@ -59,6 +59,6 @@ public class SimpleStatsProducer implements FlushableStatsReporter, Serializable
     
     @Override
     public void flush() {
-        valStats.clear();
+        
     }
 }
