@@ -1,8 +1,10 @@
 package org.gridkit.nimble.statistics;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public class DelegatingStatsReporter implements StatsReporter {
+@SuppressWarnings("serial")
+public class DelegatingStatsReporter implements StatsReporter, Serializable {
     private final StatsReporter delegate;
 
     public DelegatingStatsReporter(StatsReporter delegate) {

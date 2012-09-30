@@ -36,7 +36,7 @@ public class SimpleStats implements Serializable {
     }
     
     public StatisticalSummary getValStats(String statistica, String mark) {
-        return valStats.get(SmartReporter.mark(statistica, mark));
+        return valStats.get(StatsOps.mark(statistica, mark));
     }
     
     public Set<String> getValStatsNames() {
@@ -50,7 +50,7 @@ public class SimpleStats implements Serializable {
         
         while (iter.hasNext()) {
             try {
-                Pair<String, String> entry = SmartReporter.unmark(iter.next());
+                Pair<String, String> entry = StatsOps.unmark(iter.next());
                 
                 if (mark.equals(entry.getB())) {
                     result.add(entry.getA());
