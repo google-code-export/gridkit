@@ -15,16 +15,10 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class SeqScenario implements Scenario {
     private static final Logger log = LoggerFactory.getLogger(SeqScenario.class);
     
-    private final String name;
     private final List<Scenario> scenarios;
     
-    public SeqScenario(String name, List<Scenario> scenarios) {
-        this.name = name;
-        this.scenarios = new ArrayList<Scenario>(scenarios);
-    }
-
     public SeqScenario(List<Scenario> scenarios) {
-        this(ScenarioOps.getCompositeName("Seq", scenarios), scenarios);
+        this.scenarios = new ArrayList<Scenario>(scenarios);
     }
 
     @Override
@@ -32,11 +26,6 @@ public class SeqScenario implements Scenario {
         SeqPlay play = new SeqPlay(context);
         play.action();
         return play;
-    }
-    
-    @Override
-    public String getName() {
-        return name;
     }
     
     private class SeqPlay extends AbstractPlay {
@@ -156,6 +145,6 @@ public class SeqScenario implements Scenario {
     
     @Override
     public String toString() {
-        return "SeqScenario[" + name + "]";
+        return ScenarioOps.getCompositeName("Seq", scenarios);
     }
 }

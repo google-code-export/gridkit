@@ -74,11 +74,6 @@ public class RemotePushTopicTest {
         }
 
         @Override
-        public String getName() {
-            return InitSubscriber.class.getSimpleName();
-        }
-
-        @Override
         public void excute(Context context) throws Exception {
             topic.subscribe(new PrintSubscriber());
         }
@@ -104,11 +99,6 @@ public class RemotePushTopicTest {
             this.topic = topic;
             this.from = from;
             this.to = to;
-        }
-
-        @Override
-        public String getName() {
-            return PublishTask.class.getSimpleName();
         }
 
         @Override

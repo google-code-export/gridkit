@@ -16,7 +16,6 @@ import org.gridkit.nimble.platform.Play.Status;
 import org.gridkit.nimble.scenario.ExecScenario;
 import org.gridkit.nimble.scenario.ExecScenario.Context;
 import org.gridkit.nimble.scenario.ScenarioOps;
-import org.gridkit.nimble.statistics.FlushableStatsReporter;
 import org.gridkit.nimble.statistics.StatsReporter;
 import org.gridkit.nimble.task.TaskScenario.StatsReporterFactory;
 import org.gridkit.util.concurrent.BlockingBarrier;
@@ -28,13 +27,13 @@ public class TaskExecutable implements ExecScenario.Executable {
     private String name;
     private List<Task> tasks;
     private TaskSLA sla;
-    private StatsReporterFactory reporterFactory;
+    private StatsReporterFactory<? extends StatsReporter> repFactory;
     
-    public TaskExecutable(String name, List<Task> tasks, TaskSLA sla, StatsReporterFactory reporterFactory) {
+    public TaskExecutable(String name, List<Task> tasks, TaskSLA sla, StatsReporterFactory<? extends StatsReporter> repFactory) {
         this.name = name;
         this.tasks = tasks;
         this.sla = sla;
-        this.reporterFactory = reporterFactory;
+        this.repFactory = repFactory;
     }
 
     @Override
@@ -53,7 +52,10 @@ public class TaskExecutable implements ExecScenario.Executable {
         List<Callable<Void>> taskCallables = new ArrayList<Callable<Void>>();
                 
         for (Task task : tasks) {
-            taskCallables.add(new TaskCallable(task, status, context, taskBarrier));
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            Callable<Void> tastCallable = new TaskCallable(task, status, context, taskBarrier, repFactory);
+            
+            taskCallables.add(tastCallable);
         }
 
         try {
@@ -62,13 +64,13 @@ public class TaskExecutable implements ExecScenario.Executable {
             return status.get();
         } finally {
             executor.shutdownNow();
-            reporterFactory.flush();
+            repFactory.finish();
         }
         
         return status.get();
     }
         
-    private class TaskCallable implements Callable<Void> {
+    private class TaskCallable<R extends StatsReporter> implements Callable<Void> {
         private final Task task;
         
         private final AtomicReference<Play.Status> status;
@@ -76,19 +78,23 @@ public class TaskExecutable implements ExecScenario.Executable {
         private final ExecScenario.Context context;
         
         private final BlockingBarrier taskBarrier;
+        
+        private final StatsReporterFactory<R> repFactory;
 
-        public TaskCallable(Task task, AtomicReference<Play.Status> status, Context context, BlockingBarrier taskBarrier) {
+        public TaskCallable(Task task, AtomicReference<Play.Status> status, Context context,
+                            BlockingBarrier taskBarrier, StatsReporterFactory<R> repFactory) {
             this.task = task;
             this.status = status;
             this.context = context;
             this.taskBarrier = taskBarrier;
+            this.repFactory = repFactory;
         }
 
         @Override
         public Void call() throws Exception {
             long startTime = context.getLocalAgent().getTimeService().currentTimeMillis();
             
-            FlushableStatsReporter statsReporter = reporterFactory.newTaskReporter();
+            R statsReporter = repFactory.newTaskReporter();
             
             Task.Context taskContext = new TaskContext(task, context, status, statsReporter);
                         
@@ -109,7 +115,7 @@ public class TaskExecutable implements ExecScenario.Executable {
                 );
                 status.set(Play.Status.Failure);
             } finally {
-                statsReporter.flush();
+                repFactory.finish(statsReporter);
             }
             
             return null;
@@ -142,7 +148,7 @@ public class TaskExecutable implements ExecScenario.Executable {
         
         @Override
         public Logger getLogger() {
-            return context.getLocalAgent().getLogger(task.getName());
+            return context.getLocalAgent().getLogger(task.toString());
         }
 
         @Override

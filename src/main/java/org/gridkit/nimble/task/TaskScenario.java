@@ -11,7 +11,8 @@ import org.gridkit.nimble.scenario.ExecScenario;
 import org.gridkit.nimble.scenario.ParScenario;
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.ScenarioOps;
-import org.gridkit.nimble.statistics.FlushableStatsReporter;
+import org.gridkit.nimble.statistics.StatsReporter;
+import org.gridkit.nimble.statistics.simple.SimpleStatsAggregator;
 import org.gridkit.nimble.util.FutureListener;
 import org.gridkit.nimble.util.FutureOps;
 import org.gridkit.nimble.util.ValidOps;
@@ -24,25 +25,36 @@ public class TaskScenario implements Scenario, FutureListener<Void> {
     private String name;
     private List<Task> tasks;
     private TaskSLA sla;
-    private StatsReporterFactory reporterFactory;
+    private StatsReporterFactory<?> repFactory;
         
-    public static interface StatsReporterFactory {
-        FlushableStatsReporter newTaskReporter();
-        void flush();
+    public static interface StatsReporterFactory<R extends StatsReporter> {
+        R newTaskReporter();
+        
+        void finish(R taskRep);
+        
+        void finish();
     }
     
-    public TaskScenario(String name, Collection<Task> tasks, TaskSLA sla, StatsReporterFactory reporterFactory) {
+    public TaskScenario(String name, Collection<Task> tasks, TaskSLA sla, StatsReporterFactory<?> repFactory) {
         ValidOps.notEmpty(name, "name");
         ValidOps.notNull(tasks, "tasks");
         ValidOps.notNull(sla, "sla");
-        ValidOps.notNull(reporterFactory, "reporterFactory");
+        ValidOps.notNull(repFactory, "repFactory");
         
         this.name = name;
         this.tasks = new ArrayList<Task>(tasks);
         this.sla = sla;
-        this.reporterFactory = reporterFactory;
+        this.repFactory = repFactory;
         
         this.sla.shuffle(this.tasks);
+    }
+    
+    public TaskScenario(String name, Collection<Task> tasks, TaskSLA sla, SimpleStatsAggregator aggr) {
+        this(name, tasks, sla, new SimpleStatsReporterFactory(aggr));
+    }
+    
+    public <R extends StatsReporter> TaskScenario(String name, Collection<Task> tasks, TaskSLA sla, R reporter) {
+        this(name, tasks, sla, new SingletonStatsReporterFactory<R>(reporter));
     }
 
     @Override
@@ -87,14 +99,14 @@ public class TaskScenario implements Scenario, FutureListener<Void> {
     }
     
     private Scenario newAgentScenario(RemoteAgent agent, List<Task> tasks, String name) {
-        TaskExecutable executable = new TaskExecutable(name, tasks, sla, reporterFactory);
-        Scenario scenario = new ExecScenario(name, executable, agent);
+        TaskExecutable executable = new TaskExecutable(name, tasks, sla, repFactory);
+        Scenario scenario = new ExecScenario(executable, agent);
         return scenario;        
     }
 
     @Override
-    public String getName() {
-        return name;
+    public String toString() {
+        return ScenarioOps.getName("Task", name);
     }
 
     @Override

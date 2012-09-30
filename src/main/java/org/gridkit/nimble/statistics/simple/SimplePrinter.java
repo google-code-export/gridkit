@@ -20,6 +20,8 @@ import org.gridkit.nimble.statistics.SmartReporter;
 import org.gridkit.nimble.statistics.ThroughputSummary;
 import org.gridkit.nimble.util.ValidOps;
 
+//TODO make configuration more flexible
+//TODO introduce strategy interface
 public abstract class SimplePrinter {
     private static final Map<TimeUnit, String> timeAliasMap = new HashMap<TimeUnit, String>();
 
@@ -152,7 +154,6 @@ public abstract class SimplePrinter {
                     if (ltStats != null) {
                         row.add(decFormat.format(ltStats.getMean()));
                         row.add(decFormat.format(ltStats.getStandardDeviation()));
-                        //row.add(decFormat.format(ltStats.getVariance()));
                         row.add(decFormat.format(ltStats.getMin()));
                         row.add(decFormat.format(ltStats.getMax()));
                     } else {
@@ -196,7 +197,6 @@ public abstract class SimplePrinter {
                 row.add(String.valueOf(valStats.getN()));
                 row.add(decFormat.format(valStats.getMean()));
                 row.add(decFormat.format(valStats.getStandardDeviation()));
-                //row.add(decFormat.format(valStats.getVariance()));
                 row.add(decFormat.format(valStats.getMin()));
                 row.add(decFormat.format(valStats.getMax()));
             } else {
@@ -224,11 +224,9 @@ public abstract class SimplePrinter {
 
         if (latencyUnit != null) {
             String ltAlias = " (" + getTimeAlias(latencyUnit) + ")";
-            //String varAlias = " (" + getTimeAlias(latencyUnit) + "^2)";
 
             result.add("Mean" + ltAlias);
             result.add("Sd"   + ltAlias);
-            //result.add("Var"  + varAlias);
             result.add("Min"  + ltAlias);
             result.add("Max"  + ltAlias);
         }

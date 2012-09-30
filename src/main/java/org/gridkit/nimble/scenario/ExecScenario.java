@@ -33,20 +33,11 @@ public class ExecScenario implements Scenario {
 
     private final Executable executable;
     
-    private final String name;
-
     private final RemoteAgent agent;
         
-    public ExecScenario(String name, Executable executable, RemoteAgent agent) {
-        this.name = name;
+    public ExecScenario(Executable executable, RemoteAgent agent) {
         this.executable = executable;
         this.agent = agent;
-    }
-    
-    public ExecScenario(Executable executable, RemoteAgent agent) {
-        this(
-            ScenarioOps.getName("Exec", Arrays.asList(executable.toString(), agent.toString())), executable, agent
-        );
     }
     
     @Override
@@ -56,11 +47,6 @@ public class ExecScenario implements Scenario {
         return play;
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
-    
     private class ExecPlay extends AbstractPlay {
         private final ExecPipeline pipeline;
         
@@ -201,6 +187,6 @@ public class ExecScenario implements Scenario {
     
     @Override
     public String toString() {
-        return "ExecScenario[" + name + "]";
+        return ScenarioOps.getName("Exec", Arrays.asList(executable.toString(), agent.toString()));
     }
 }

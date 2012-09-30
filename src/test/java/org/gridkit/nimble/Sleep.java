@@ -46,10 +46,10 @@ public class Sleep {
         Scenario s5 = new ExecScenario(new SimpleExecutable("E"), agent);
         Scenario s6 = new ExecScenario(new SimpleExecutable("F"), agent);
         
-        Scenario seq1 = new SeqScenario("SEQ1", Arrays.asList(s1, s2, s3));
-        Scenario seq2 = new SeqScenario("SEQ2", Arrays.asList(s4, s5, s6));
+        Scenario seq1 = new SeqScenario(Arrays.asList(s1, s2, s3));
+        Scenario seq2 = new SeqScenario(Arrays.asList(s4, s5, s6));
 
-        Scenario par = new ParScenario("PAR", Arrays.asList(seq1, seq2));
+        Scenario par = new ParScenario(Arrays.asList(seq1, seq2));
         
         Play play = director.play(par);
         

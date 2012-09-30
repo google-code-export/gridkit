@@ -11,9 +11,6 @@ public interface RemoteAgent {
         
     void shutdown(boolean hard);
     
-    /**
-     * @throws UnsupportedOperationException in a case of {@link LocalAgent}
-     */
     <T> ListenableFuture<T> invoke(Invocable<T> invocable);
     
     public interface Invocable<T> extends Serializable {

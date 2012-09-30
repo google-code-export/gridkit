@@ -6,24 +6,14 @@ import java.util.Map;
 
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-import org.gridkit.nimble.statistics.FlushableStatsReporter;
+import org.gridkit.nimble.statistics.StatsReporter;
 
 @SuppressWarnings("serial")
-public class SimpleStatsProducer implements FlushableStatsReporter, Serializable {
+public class SimpleStatsProducer implements StatsReporter, Serializable {
     private Map<String, SummaryStatistics> valStats;
 
     public SimpleStatsProducer() {
         this.valStats = new HashMap<String, SummaryStatistics>();
-    }
-
-    public static SimpleStatsProducer newInstance(final SimpleStatsAggregator aggr) {
-        return new SimpleStatsProducer() {
-            @Override
-            public void flush() {
-                aggr.add(produce());
-                super.flush();
-            }
-        };
     }
     
     @Override
@@ -55,10 +45,5 @@ public class SimpleStatsProducer implements FlushableStatsReporter, Serializable
         }
         
         return new SimpleStats(result);
-    }
-    
-    @Override
-    public void flush() {
-        
     }
 }

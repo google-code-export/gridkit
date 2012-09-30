@@ -18,14 +18,19 @@ import org.gridkit.nimble.scenario.DemonScenario;
 import org.gridkit.nimble.scenario.ParScenario;
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.SeqScenario;
-import org.gridkit.nimble.sensor.CpuDemon;
+import org.gridkit.nimble.sensor.PidProvider;
+import org.gridkit.nimble.sensor.ProcCpu;
+import org.gridkit.nimble.sensor.ProcCpuReporter;
+import org.gridkit.nimble.sensor.ProcCpuSensor;
+import org.gridkit.nimble.sensor.SensorDemon;
 import org.gridkit.nimble.statistics.SmartReporter;
+import org.gridkit.nimble.statistics.StatsReporter;
+import org.gridkit.nimble.statistics.simple.AggregatingSimpleStatsReporter;
 import org.gridkit.nimble.statistics.simple.QueuedSimpleStatsAggregator;
 import org.gridkit.nimble.statistics.simple.SimplePrettyPrinter;
 import org.gridkit.nimble.statistics.simple.SimplePrinter;
 import org.gridkit.nimble.statistics.simple.SimpleStats;
 import org.gridkit.nimble.statistics.simple.SimpleStatsAggregator;
-import org.gridkit.nimble.statistics.simple.SimpleStatsProducer;
 import org.gridkit.nimble.task.SimpleStatsReporterFactory;
 import org.gridkit.nimble.task.Task;
 import org.gridkit.nimble.task.TaskSLA;
@@ -120,15 +125,15 @@ public class Trigonometry {
         tanSLA.setLabels(new HashSet<String>(Arrays.asList(SIN, COS)));
         
         Scenario sinInitScen = new TaskScenario(
-            sinInitTask.getName(), Collections.singleton(sinInitTask), sinSLA, new SimpleStatsReporterFactory(aggr)
+            sinInitTask.toString(), Collections.singleton(sinInitTask), sinSLA, aggr
         );
         
         Scenario cosInitScen = new TaskScenario(
-            cosInitTask.getName(), Collections.singleton(cosInitTask), cosSLA, new SimpleStatsReporterFactory(aggr)
+            cosInitTask.toString(), Collections.singleton(cosInitTask), cosSLA, aggr
         );
         
         Scenario tanInitScen = new TaskScenario(
-            tanInitTask.getName(), Collections.singleton(tanInitTask), tanSLA, new SimpleStatsReporterFactory(aggr)
+            tanInitTask.toString(), Collections.singleton(tanInitTask), tanSLA, aggr
         );
         
         sinSLA = sinSLA.clone();
@@ -165,13 +170,21 @@ public class Trigonometry {
 
         Scenario init = new ParScenario(Arrays.asList(sinInitScen, cosInitScen, tanInitScen));
         
-        CpuDemon firstCpuRep = new CpuDemon("SINCOS", new CpuDemon.CurPidCpuReporter(), SimpleStatsProducer.newInstance(aggr), 100, 500);
-        CpuDemon secondCpuRep = new CpuDemon("TAN", new CpuDemon.CurPidCpuReporter(), SimpleStatsProducer.newInstance(aggr), 100, 500);
+        StatsReporter firstCpuRep = new AggregatingSimpleStatsReporter(aggr, 1);
+        StatsReporter secondCpuRep = new AggregatingSimpleStatsReporter(aggr, 1);
+        
+        SensorDemon<ProcCpu> firstCpuDemon = new SensorDemon<ProcCpu>(
+            new ProcCpuSensor(new PidProvider.CurPidProvider()), new ProcCpuReporter("SINCOS", firstCpuRep)
+        );
+        
+        SensorDemon<ProcCpu> secondCpuDemon = new SensorDemon<ProcCpu>(
+            new ProcCpuSensor(new PidProvider.CurPidProvider()), new ProcCpuReporter("TAN", secondCpuRep)
+        );
         
         Scenario first = new ParScenario(Arrays.asList(sinCalcScen, cosCalcScen));
-        Scenario firstCpu = DemonScenario.newInstance(first, Collections.singleton(SIN), Collections.<Callable<Void>>singleton(firstCpuRep));
+        Scenario firstCpu = DemonScenario.newInstance("FirstCpu", first, Collections.singleton(SIN), Collections.<Callable<Void>>singleton(firstCpuDemon));
         
-        Scenario secondCpu = DemonScenario.newInstance(tanCalsScen, null, Collections.<Callable<Void>>singleton(secondCpuRep));
+        Scenario secondCpu = DemonScenario.newInstance("SecondCpu", tanCalsScen, null, Collections.<Callable<Void>>singleton(secondCpuDemon));
         
         //return new SeqScenario(Arrays.asList(init, first, tanCalsScen)); 
         return new SeqScenario(Arrays.asList(init, firstCpu, secondCpu));
@@ -197,7 +210,7 @@ public class Trigonometry {
         }
 
         @Override
-        public String getName() {
+        public String toString() {
             return name;
         }
     }
@@ -232,7 +245,7 @@ public class Trigonometry {
         }
 
         @Override
-        public String getName() {
+        public String toString() {
             return name;
         }
     }
