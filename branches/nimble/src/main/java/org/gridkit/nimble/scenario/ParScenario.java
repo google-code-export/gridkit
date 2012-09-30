@@ -19,24 +19,18 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class ParScenario implements Scenario {
     private static final Logger log = LoggerFactory.getLogger(ParScenario.class);
     
-    private final String name;
     private final List<Scenario> scenarios;
     private final boolean interruptOnFailure;
 
-    public ParScenario(String name, List<Scenario> scenarios, boolean interruptOnFailure) {
+    public ParScenario(List<Scenario> scenarios, boolean interruptOnFailure) {
         ValidOps.notEmpty(scenarios, "scenarios"); //TODO handle empty scenarios list
         
-        this.name = name;
         this.scenarios = scenarios;
         this.interruptOnFailure = interruptOnFailure;
     }
-    
-    public ParScenario(String name, List<Scenario> scenarios) {
-        this(name, scenarios, true);
-    }
-    
+        
     public ParScenario(List<Scenario> scenarios) {
-        this(ScenarioOps.getCompositeName("Par", scenarios), scenarios);
+        this(scenarios, true);
     }
 
     @Override
@@ -47,12 +41,7 @@ public class ParScenario implements Scenario {
         
         return play;
     }
-    
-    @Override
-    public String getName() {
-        return name;
-    }
-    
+
     private class ParPlay extends AbstractPlay implements FutureListener<Play> {
         private final Context context;
         
@@ -185,6 +174,6 @@ public class ParScenario implements Scenario {
     
     @Override
     public String toString() {
-        return "ParScenario[" + name + "]";
+        return ScenarioOps.getCompositeName("Par", scenarios);
     }
 }

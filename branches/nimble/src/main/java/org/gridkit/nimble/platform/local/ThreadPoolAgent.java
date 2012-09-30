@@ -14,6 +14,7 @@ import org.gridkit.nimble.platform.LocalAgent;
 import org.gridkit.nimble.platform.RemoteAgent;
 import org.gridkit.nimble.platform.SystemTimeService;
 import org.gridkit.nimble.platform.TimeService;
+import org.gridkit.nimble.util.NamedThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,10 @@ public class ThreadPoolAgent implements LocalAgent, RemoteAgent {
     
     public ThreadPoolAgent(Set<String> labels) {
         this.labels = new HashSet<String>(labels);
-        this.executor = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+        
+        String threadGroup = F("%s[%d,%s]", ThreadPoolAgent.class.getSimpleName(), System.identityHashCode(this), labels);
+        this.executor = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool(new NamedThreadFactory(threadGroup)));
+        
         this.attrs = new ConcurrentHashMap<String, Object>();
     }
     

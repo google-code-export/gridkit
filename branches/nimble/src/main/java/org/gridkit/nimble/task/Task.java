@@ -8,9 +8,7 @@ import org.slf4j.Logger;
 import org.gridkit.nimble.platform.TimeService;
 import org.gridkit.nimble.statistics.StatsReporter;
 
-public interface Task extends Serializable {
-    String getName();
-    
+public interface Task extends Serializable {    
     void excute(Context context) throws Exception;
     
     public interface Context {

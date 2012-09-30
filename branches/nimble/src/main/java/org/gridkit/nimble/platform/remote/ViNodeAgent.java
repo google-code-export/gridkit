@@ -17,6 +17,7 @@ import org.gridkit.nimble.platform.LocalAgent;
 import org.gridkit.nimble.platform.RemoteAgent;
 import org.gridkit.nimble.platform.SystemTimeService;
 import org.gridkit.nimble.platform.TimeService;
+import org.gridkit.nimble.util.NamedThreadFactory;
 import org.gridkit.vicluster.ViNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,7 +149,9 @@ public class ViNodeAgent implements RemoteAgent {
 
         @Override
         public <T> RemoteExecutionHandle invoke(final Invocable<T> invocable, final RemoteResult<T> resut) {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
+            String threadGroup = F("%s[%s]", ViLocalAgent.class.getSimpleName(), invocable);
+            
+            ExecutorService executor = Executors.newSingleThreadExecutor(new NamedThreadFactory(threadGroup));
             
             final Future<?> resultFuture = executor.submit(new Runnable() {
                 @Override

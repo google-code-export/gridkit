@@ -1,5 +1,7 @@
 package org.gridkit.nimble.platform;
 
+import static org.gridkit.nimble.util.StringOps.F;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
@@ -7,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.gridkit.nimble.scenario.Scenario;
+import org.gridkit.nimble.util.NamedThreadFactory;
 import org.gridkit.nimble.util.ValidOps;
 
 public class Director<T> {
@@ -17,13 +20,15 @@ public class Director<T> {
         ValidOps.notEmpty(agents, "agents");
         
         this.agents = agents;
-        this.executor = Executors.newCachedThreadPool();
+        
+        String threadGroup = F("%s[%d]", Director.class.getSimpleName(), System.identityHashCode(this));
+        this.executor = Executors.newCachedThreadPool(new NamedThreadFactory(threadGroup));
     }
 
     public Play play(Scenario scenario) {
         ValidOps.notNull(scenario, "scenario");
         
-        String id = scenario.getName() + "[" + UUID.randomUUID().toString() + "]";
+        String id = scenario.toString() + "[" + UUID.randomUUID().toString() + "]";
         
         Scenario.Context context = new DirectorContext(id);
         

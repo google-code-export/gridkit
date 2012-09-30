@@ -10,20 +10,25 @@ import java.util.concurrent.Future;
 
 import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.RemoteAgent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DemonScenario implements Scenario {
+    private static final Logger log = LoggerFactory.getLogger(DemonScenario.class);
+    
+    private String name;
     private Scenario scenario;
     private Set<String> labels;
     private Collection<RemoteAgent.Invocable<Void>> demons;
     
-    public DemonScenario(Scenario scenario, Set<String> labels, Collection<RemoteAgent.Invocable<Void>> demons) {
+    public DemonScenario(String name, Scenario scenario, Set<String> labels, Collection<RemoteAgent.Invocable<Void>> demons) {
         this.scenario = scenario;
         this.labels = labels;
         this.demons = demons;
     }
 
-    public static DemonScenario newInstance(Scenario scenario, Set<String> labels, Collection<Callable<Void>> demons) {
-        return new DemonScenario(scenario, labels, convert(demons));
+    public static DemonScenario newInstance(String name, Scenario scenario, Set<String> labels, Collection<Callable<Void>> demons) {
+        return new DemonScenario(name, scenario, labels, convert(demons));
     }
     
     private static Collection<RemoteAgent.Invocable<Void>> convert(Collection<Callable<Void>> demons) {
@@ -38,6 +43,8 @@ public class DemonScenario implements Scenario {
     
     @Override
     public Play play(Context context) {
+        ScenarioOps.logStart(log, this);
+        
         List<Future<Void>> demonFutures = startDemons(context.getAgents());
         
         Play scenPlay = scenario.play(context);
@@ -78,7 +85,7 @@ public class DemonScenario implements Scenario {
         return result;
     }
 
-    private static class DemonHalt implements Runnable {
+    private class DemonHalt implements Runnable {
         private final List<Future<Void>> demonFutures;
 
         public DemonHalt(List<Future<Void>> demonFutures) {
@@ -90,11 +97,12 @@ public class DemonScenario implements Scenario {
             for (Future<Void> demonFuture : demonFutures) {
                 demonFuture.cancel(true);
             }
+            ScenarioOps.logSuccess(log, DemonScenario.this);
         }
     }
     
     @Override
-    public String getName() {
-        return DemonScenario.class.getName();
+    public String toString() {
+        return ScenarioOps.getName("Demon", name, scenario.toString());
     }
 }

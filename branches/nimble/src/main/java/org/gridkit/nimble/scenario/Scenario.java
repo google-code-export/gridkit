@@ -7,8 +7,6 @@ import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.RemoteAgent;
 
 public interface Scenario {
-    String getName();
-    
     Play play(Context context);
     
     public interface Context {
