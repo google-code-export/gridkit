@@ -11,8 +11,4 @@ public interface ThroughputSummary extends StatisticalSummary {
      * @return duration within millisecond precision (never zero)
      */
     double getDuration(TimeUnit timeUnit); 
-    
-    double getStartTime(TimeUnit timeUnit);
-    
-    double getFinishTime(TimeUnit timeUnit);
 }

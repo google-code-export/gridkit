@@ -6,12 +6,9 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.gridkit.nimble.platform.TimeService;
-import org.gridkit.nimble.util.Pair;
-import org.gridkit.nimble.util.ValidOps;
 
-public class SmartReporter extends DelegatingStatsReporter {
-    public static final String MARK_SEP = "^";
-    
+@SuppressWarnings("serial")
+public class SmartReporter extends DelegatingStatsReporter {    
     public static final String START_MS_MARK  = "start_ms";
     public static final String FINISH_MS_MARK = "finish_ms";
     public static final String TIME_NS_MARK   = "time_ns";
@@ -80,7 +77,7 @@ public class SmartReporter extends DelegatingStatsReporter {
 	    Map<String, Object> report = new HashMap<String, Object>();
 	    
 	    for (Map.Entry<String, Object> entry : attrs.entrySet()) {
-	        report.put(mark(statistica, entry.getKey()), entry.getValue());
+	        report.put(StatsOps.mark(statistica, entry.getKey()), entry.getValue());
 	    }
 	    
 	    getDelegate().report(report);
@@ -89,7 +86,7 @@ public class SmartReporter extends DelegatingStatsReporter {
 	public void latency(String statistica, double latency, TimeUnit unit, Map<String, Object> attrs) {
 	    Map<String, Object> report = new HashMap<String, Object>(attrs);
 	    
-	    report.put(mark(statistica, TIME_NS_MARK), StatsOps.convert(latency, unit, TimeUnit.NANOSECONDS));
+	    report.put(StatsOps.mark(statistica, TIME_NS_MARK), StatsOps.convert(latency, unit, TimeUnit.NANOSECONDS));
 	    
 	    getDelegate().report(report);
 	}
@@ -116,26 +113,4 @@ public class SmartReporter extends DelegatingStatsReporter {
 	private void removeAttrs(String statistica) {
 	    attrsMap.remove(statistica);
 	}
-	
-    public static String mark(String statistica, String mark) {
-        ValidOps.notEmpty(statistica, "statistica");
-        ValidOps.notEmpty(statistica, "mark");
-        
-        if (statistica.contains(MARK_SEP)) {
-            throw new IllegalArgumentException("statistica");
-        }
-        
-        return statistica + MARK_SEP + mark;
-    }
-    
-    public static Pair<String, String> unmark(String str) {
-        int index = str.indexOf(MARK_SEP);
-        int lastIndex = str.lastIndexOf(MARK_SEP);
-        
-        if (index == -1 || index != lastIndex || index == str.length() - 1 || index == 0) {
-            throw new IllegalArgumentException("str");
-        }
-        
-        return Pair.newPair(str.substring(0, index), str.substring(index + 1));
-    }
 }

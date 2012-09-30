@@ -2,7 +2,6 @@ package org.gridkit.nimble.scenario;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -10,6 +9,7 @@ import java.util.concurrent.Future;
 
 import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.RemoteAgent;
+import org.gridkit.nimble.util.SetOps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +22,7 @@ public class DemonScenario implements Scenario {
     private Collection<RemoteAgent.Invocable<Void>> demons;
     
     public DemonScenario(String name, Scenario scenario, Set<String> labels, Collection<RemoteAgent.Invocable<Void>> demons) {
+        this.name = name;
         this.scenario = scenario;
         this.labels = labels;
         this.demons = demons;
@@ -74,8 +75,7 @@ public class DemonScenario implements Scenario {
         List<RemoteAgent> result = new ArrayList<RemoteAgent>();
         
         for (RemoteAgent agent : agents) {
-            Set<String> inter = new HashSet<String>(agent.getLabels());
-            inter.retainAll(labels);
+            Set<String> inter = SetOps.intersection(agent.getLabels(), labels);
             
             if (inter.size() > 0) {
                 result.add(agent);

@@ -8,13 +8,15 @@ import org.gridkit.nimble.statistics.StatsOps;
 import org.gridkit.nimble.statistics.ThroughputSummary;
 
 public class SimpleThroughputSummary extends DelegatingStatisticalSummary implements ThroughputSummary {    
-    private double startMs;
-    private double finishMs;
+    private double durationMs;
     
     public SimpleThroughputSummary(StatisticalSummary valStats, double scale, double startMs, double finishMs) {
+        this(valStats, scale, Math.max((finishMs - startMs), 1));
+    }
+    
+    public SimpleThroughputSummary(StatisticalSummary valStats, double scale, double durationMs) {
         super(StatsOps.scale(valStats, scale));
-        this.startMs = startMs;
-        this.finishMs = finishMs;
+        this.durationMs = durationMs;
     }
 
     @Override
@@ -24,16 +26,6 @@ public class SimpleThroughputSummary extends DelegatingStatisticalSummary implem
 
     @Override
     public double getDuration(TimeUnit timeUnit) {
-        return Math.max((finishMs - startMs), 1) * StatsOps.getScale(TimeUnit.MILLISECONDS, timeUnit);
-    }
-
-    @Override
-    public double getStartTime(TimeUnit timeUnit) {
-        return StatsOps.convert(startMs, TimeUnit.MILLISECONDS, timeUnit);
-    }
-
-    @Override
-    public double getFinishTime(TimeUnit timeUnit) {
-        return StatsOps.convert(finishMs, TimeUnit.MILLISECONDS, timeUnit);
+        return durationMs * StatsOps.getScale(TimeUnit.MILLISECONDS, timeUnit);
     }
 }

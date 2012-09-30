@@ -5,8 +5,12 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummaryValues;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+import org.gridkit.nimble.util.Pair;
+import org.gridkit.nimble.util.ValidOps;
 
 public class StatsOps {
+    public static final String MARK_SEP = "^";
+    
     private static final StatisticalSummary emptySummary = (new SummaryStatistics()).getSummary();
     
     public static StatisticalSummary combine(StatisticalSummary s1, StatisticalSummary s2) {
@@ -53,4 +57,27 @@ public class StatsOps {
     public static double convert(double time, TimeUnit from, TimeUnit to) {
         return time * getScale(from, to);
     }
+    
+    public static String mark(String statistica, String mark) {
+        ValidOps.notEmpty(statistica, "statistica");
+        ValidOps.notEmpty(statistica, "mark");
+        
+        if (statistica.contains(MARK_SEP)) {
+            throw new IllegalArgumentException("statistica");
+        }
+        
+        return statistica + MARK_SEP + mark;
+    }
+    
+    public static Pair<String, String> unmark(String str) {
+        int index = str.indexOf(MARK_SEP);
+        int lastIndex = str.lastIndexOf(MARK_SEP);
+        
+        if (index == -1 || index != lastIndex || index == str.length() - 1 || index == 0) {
+            throw new IllegalArgumentException("str");
+        }
+        
+        return Pair.newPair(str.substring(0, index), str.substring(index + 1));
+    }
+
 }

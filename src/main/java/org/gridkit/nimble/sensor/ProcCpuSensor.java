@@ -37,14 +37,10 @@ public class ProcCpuSensor extends SigarHolder implements Sensor<ProcCpu> {
     @Override
     public ProcCpu measure() {
         ProcCpu procCpu = new ProcCpu();
-
-        if (pids == null || refreshPids) {
-            pids = pidProvider.getPids();
-        }
-                    
+        
         boolean found = false;
         
-        for (long pid : pids) {
+        for (long pid : getPids()) {
             try {
                 procCpu.add(getSigar().getProcCpu(pid));
                 found = true;
@@ -57,6 +53,14 @@ public class ProcCpuSensor extends SigarHolder implements Sensor<ProcCpu> {
         return found ? procCpu : null;
     }
 
+    public Collection<Long> getPids() {
+        if (pids == null || refreshPids) {
+            pids = pidProvider.getPids();
+        }
+        
+        return pids;
+    }
+    
     @Override
     public long getSleepTimeMs() {
         return sleepTimeMs;

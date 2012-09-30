@@ -6,9 +6,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import org.gridkit.lab.sigar.SigarFactory;
 import org.gridkit.nimble.platform.Director;
 import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.RemoteAgent;
@@ -18,13 +22,17 @@ import org.gridkit.nimble.scenario.DemonScenario;
 import org.gridkit.nimble.scenario.ParScenario;
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.SeqScenario;
+import org.gridkit.nimble.sensor.NetInterfaceReporter;
+import org.gridkit.nimble.sensor.NetInterfaceSensor;
 import org.gridkit.nimble.sensor.PidProvider;
 import org.gridkit.nimble.sensor.ProcCpu;
 import org.gridkit.nimble.sensor.ProcCpuReporter;
 import org.gridkit.nimble.sensor.ProcCpuSensor;
 import org.gridkit.nimble.sensor.SensorDemon;
+import org.gridkit.nimble.sensor.SensorReporter;
 import org.gridkit.nimble.statistics.SmartReporter;
 import org.gridkit.nimble.statistics.StatsReporter;
+import org.gridkit.nimble.statistics.ThroughputSummary;
 import org.gridkit.nimble.statistics.simple.AggregatingSimpleStatsReporter;
 import org.gridkit.nimble.statistics.simple.QueuedSimpleStatsAggregator;
 import org.gridkit.nimble.statistics.simple.SimplePrettyPrinter;
@@ -35,6 +43,7 @@ import org.gridkit.nimble.task.SimpleStatsReporterFactory;
 import org.gridkit.nimble.task.Task;
 import org.gridkit.nimble.task.TaskSLA;
 import org.gridkit.nimble.task.TaskScenario;
+import org.hyperic.sigar.NetInterfaceStat;
 import org.junit.Test;
 
 import com.google.common.base.Function;
@@ -108,6 +117,27 @@ public class Trigonometry {
         System.err.println();
         
         printer.printValues(System.err, stats, metrics);
+        
+        System.err.println();
+        
+        Set<String> inters = new TreeSet<String>(Arrays.asList(SigarFactory.newSigar().getNetInterfaceList()));
+        inters.add(NetInterfaceReporter.TOTAL_INTERFACE);
+        
+        for (String inter : inters) {
+            ThroughputSummary sentTh = SensorReporter.getThroughput(
+                NetInterfaceReporter.getSentBytesStatsName(inter), stats, 1.0 / 1024.0 / 1024.0
+            );
+            
+            ThroughputSummary receivedTh = SensorReporter.getThroughput(
+                NetInterfaceReporter.getReceivedBytesStatsName(inter), stats, 1.0 / 1024.0 / 1024.0
+            );
+            
+            System.err.println("Send Th for " + inter + " = " + sentTh.getThroughput(TimeUnit.SECONDS));
+            System.err.println("Receive Th for " + inter + " = " + receivedTh.getThroughput(TimeUnit.SECONDS));
+            System.err.println("Total Send for " + inter + " = " + sentTh.getSum());
+            System.err.println("Total Received for " + inter + " = " + receivedTh.getSum());
+            System.err.println();
+        }
     }
     
     private static Scenario getScenario(long numbers, long iterations, long duration, SimpleStatsAggregator aggr) {
@@ -170,6 +200,7 @@ public class Trigonometry {
 
         Scenario init = new ParScenario(Arrays.asList(sinInitScen, cosInitScen, tanInitScen));
         
+        StatsReporter netStatsRep = new AggregatingSimpleStatsReporter(aggr, 1);
         StatsReporter firstCpuRep = new AggregatingSimpleStatsReporter(aggr, 1);
         StatsReporter secondCpuRep = new AggregatingSimpleStatsReporter(aggr, 1);
         
@@ -181,13 +212,19 @@ public class Trigonometry {
             new ProcCpuSensor(new PidProvider.CurPidProvider()), new ProcCpuReporter("TAN", secondCpuRep)
         );
         
+        SensorDemon<Map<String, NetInterfaceStat>> netStatsDemon = new SensorDemon<Map<String, NetInterfaceStat>>(
+            new NetInterfaceSensor(), new NetInterfaceReporter(netStatsRep)
+        );
+        
         Scenario first = new ParScenario(Arrays.asList(sinCalcScen, cosCalcScen));
         Scenario firstCpu = DemonScenario.newInstance("FirstCpu", first, Collections.singleton(SIN), Collections.<Callable<Void>>singleton(firstCpuDemon));
         
-        Scenario secondCpu = DemonScenario.newInstance("SecondCpu", tanCalsScen, null, Collections.<Callable<Void>>singleton(secondCpuDemon));
+        Scenario secondCpu = DemonScenario.newInstance("SecondCpu", tanCalsScen, Collections.singleton(COS), Collections.<Callable<Void>>singleton(secondCpuDemon));
+
+        //Scenario whole = SeqScenario(Arrays.asList(init, first, tanCalsScen)); 
+        Scenario whole = new SeqScenario(Arrays.asList(init, firstCpu, secondCpu));
         
-        //return new SeqScenario(Arrays.asList(init, first, tanCalsScen)); 
-        return new SeqScenario(Arrays.asList(init, firstCpu, secondCpu));
+        return DemonScenario.newInstance("Whole", whole, Collections.singleton(SIN), Collections.<Callable<Void>>singleton(netStatsDemon));
     }    
     
     @SuppressWarnings("serial")
