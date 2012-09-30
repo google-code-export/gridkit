@@ -38,8 +38,6 @@ public class TaskSLA implements Cloneable, Serializable {
     private boolean shuffle = true;
     
     private Set<String> labels = null; // by default execute on every agent
-
-    private int agentsPerPoll = 5;
     
     public static enum Distribution {
         // all tasks on all agents
@@ -131,12 +129,10 @@ public class TaskSLA implements Cloneable, Serializable {
     
     public boolean isFinished(long duration, long iteration) {        
         if (finishDelay != null && duration > finishDelay) {
-            //System.err.println("finish by time");
             return true;
         }
         
         if (iterationsCount != null && iteration >= iterationsCount) {
-            //System.err.println("finish by iters");
             return true;
         }
 
@@ -245,14 +241,6 @@ public class TaskSLA implements Cloneable, Serializable {
         this.shuffle = shuffle;
     }
 
-    public int getAgentsPerPoll() {
-        return agentsPerPoll;
-    }
-
-    public void setAgentsPerPoll(int agentsPerPoll) {
-        this.agentsPerPoll = agentsPerPoll;
-    }
-
     @Override
     public TaskSLA clone() {
         TaskSLA result = new TaskSLA();
@@ -264,7 +252,6 @@ public class TaskSLA implements Cloneable, Serializable {
         result.rate = this.rate;
         result.iterationsCount = this.iterationsCount; 
         result.labels = new HashSet<String>(labels);
-        result.agentsPerPoll = this.agentsPerPoll;
         
         return result;
     }

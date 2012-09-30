@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.gridkit.nimble.platform.EmptyPlay;
-import org.gridkit.nimble.platform.FuturePoller;
 import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.RemoteAgent;
 import org.gridkit.nimble.scenario.ExecScenario;
@@ -15,7 +14,6 @@ import org.gridkit.nimble.scenario.ScenarioOps;
 import org.gridkit.nimble.statistics.FlushableStatsReporter;
 import org.gridkit.nimble.util.FutureListener;
 import org.gridkit.nimble.util.FutureOps;
-import org.gridkit.nimble.util.QueuedFuturePoller;
 import org.gridkit.nimble.util.ValidOps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +25,7 @@ public class TaskScenario implements Scenario, FutureListener<Void> {
     private List<Task> tasks;
     private TaskSLA sla;
     private StatsReporterFactory reporterFactory;
-    
-    private FuturePoller poller;
-    
+        
     public static interface StatsReporterFactory {
         FlushableStatsReporter newTaskReporter();
         void flush();
@@ -54,9 +50,7 @@ public class TaskScenario implements Scenario, FutureListener<Void> {
         ScenarioOps.logStart(log, this);
         
         List<RemoteAgent> agents = sla.getAgents(context.getAgents());
-        
-        poller = new QueuedFuturePoller(Math.max(1, agents.size() / sla.getAgentsPerPoll()));
-        
+                
         Play result;
         
         if (agents.isEmpty()) {
@@ -94,7 +88,7 @@ public class TaskScenario implements Scenario, FutureListener<Void> {
     
     private Scenario newAgentScenario(RemoteAgent agent, List<Task> tasks, String name) {
         TaskExecutable executable = new TaskExecutable(name, tasks, sla, reporterFactory);
-        Scenario scenario = new ExecScenario(name, executable, agent, poller);
+        Scenario scenario = new ExecScenario(name, executable, agent);
         return scenario;        
     }
 
@@ -106,19 +100,16 @@ public class TaskScenario implements Scenario, FutureListener<Void> {
     @Override
     public void onSuccess(Void result) {
         //TODO fix, failures also go here
-        poller.shutdown();
         ScenarioOps.logSuccess(log, this);
     }
 
     @Override
     public void onFailure(Throwable t, FailureEvent event) {
-        poller.shutdown();
         ScenarioOps.logFailure(log, this, t);
     }
 
     @Override
     public void onCancel() {
-        poller.shutdown();
         ScenarioOps.logCancel(log, this);
     }
 }

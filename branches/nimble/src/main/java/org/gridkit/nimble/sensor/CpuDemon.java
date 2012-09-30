@@ -1,11 +1,9 @@
-package org.gridkit.nimble.sigar;
+package org.gridkit.nimble.sensor;
 
 import static org.gridkit.nimble.util.StringOps.F;
 
+import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.gridkit.lab.sigar.SigarFactory;
 import org.gridkit.nimble.statistics.FlushableStatsReporter;
+import org.gridkit.nimble.util.JvmOps;
 import org.hyperic.sigar.ProcCpu;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
@@ -28,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
 
-@SuppressWarnings("serial")
+@SuppressWarnings({ "serial", "restriction" })
 public class CpuDemon implements Callable<Void>, Serializable {
     private static final Logger log = LoggerFactory.getLogger(CpuDemon.class);
     
@@ -174,25 +173,38 @@ public class CpuDemon implements Callable<Void>, Serializable {
     }
     
     public static abstract class PidsCpuReporter extends SigarCpuReporter {
-        protected abstract Collection<Long> getPids();
-        
+        private Collection<Long> pids;
+        private boolean refreshPids;
+
+        public PidsCpuReporter(boolean refreshPids) {
+            this.pids = null;
+            this.refreshPids = refreshPids;
+        }
+
         @Override
         public CpuReport getCpuReport() {
             CpuReport report = new CpuReport();
-            
+
+            if (pids == null || refreshPids) {
+                pids = getPids();
+            }
+                        
             boolean found = false;
             
-            for (long pid : getPids()) {
+            for (long pid : pids) {
                 try {
                     report.add(getSigar().getProcCpu(pid));
                     found = true;
                 } catch (SigarException e) {
                     log.error(F("Error while getting processes CPU usage for pid '%d'", pid), e);
+                    pids.remove(pid);
                 }
             }
             
             return found ? report : null;
         }
+        
+        protected abstract Collection<Long> getPids();
     }
     
     /**
@@ -202,6 +214,7 @@ public class CpuDemon implements Callable<Void>, Serializable {
         private String query;
 
         public PtqlCpuReporter(String query) {
+            super(true);
             this.query = query;
         }
 
@@ -227,45 +240,24 @@ public class CpuDemon implements Callable<Void>, Serializable {
         private String value;
 
         public JavaSysProperyCpuReporter(String key, String value) {
+            super(false);
             this.key = key;
             this.value = value;
         }
 
-        static {
-            try {
-                String javaHome = System.getProperty("java.home");
-                String toolsJarURL = "file:" + javaHome + "/../lib/tools.jar";
-
-                // Make addURL public
-                Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-                method.setAccessible(true);
-                
-                URLClassLoader sysloader = (URLClassLoader)ClassLoader.getSystemClassLoader();
-                method.invoke(sysloader, (Object) new URL(toolsJarURL));
-            } catch (Exception e) {
-                log.error("Failed to add tools.jar to classpath", e);
-            }
-        }
-        
-        
         @Override
         protected Collection<Long> getPids() {
             Collection<Long> pids = new HashSet<Long>();
-            
-            List<VirtualMachineDescriptor> descs = VirtualMachine.list();
-            
-            for (VirtualMachineDescriptor desc : descs) {
-                VirtualMachine vm = null;
+                        
+            for (Map.Entry<VirtualMachineDescriptor, VirtualMachine> vm : JvmOps.listVms().entrySet()) {
                 try {
-                    vm = VirtualMachine.attach(desc);
-                    
-                    Properties props = vm.getSystemProperties();
+                    Properties props = vm.getValue().getSystemProperties();
                     
                     if (value.equals(props.getProperty(key))) {
-                        pids.add(Long.valueOf(vm.id()));
+                        pids.add(Long.valueOf(vm.getKey().id()));
                     }
-                } catch (Exception e) {
-                    log.error("Failed to attach to vm " + desc, e);
+                } catch (IOException e) {
+                    log.error("Failed to retrieve JVM properties " + vm.getKey(), e);
                     continue;
                 }
             }

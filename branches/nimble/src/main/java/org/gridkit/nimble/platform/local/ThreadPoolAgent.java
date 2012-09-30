@@ -2,79 +2,49 @@ package org.gridkit.nimble.platform.local;
 
 import static org.gridkit.nimble.util.StringOps.F;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.concurrent.Executors;
 
 import org.gridkit.nimble.platform.LocalAgent;
-import org.gridkit.nimble.util.SystemOps;
+import org.gridkit.nimble.platform.RemoteAgent;
+import org.gridkit.nimble.platform.SystemTimeService;
+import org.gridkit.nimble.platform.TimeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
-public class ThreadPoolAgent implements LocalAgent {
-    private final String id;
+public class ThreadPoolAgent implements LocalAgent, RemoteAgent {
     private final Set<String> labels;
-    
-    private final int pid;
-    private final InetAddress inetAddress;
-    
+        
     private final ListeningExecutorService executor;
     
-    private final ConcurrentMap<String, Object> attributes;
+    private final ConcurrentMap<String, Object> attrs;
     
-    public ThreadPoolAgent(ExecutorService executor, Set<String> labels) {
-        this.id = UUID.randomUUID().toString();
-        this.labels = labels;
-        
-        this.pid = SystemOps.getPid();
-        
-        try {
-            this.inetAddress = InetAddress.getLocalHost();
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        }
-        
-        this.executor = MoreExecutors.listeningDecorator(executor);
-        
-        this.attributes = new ConcurrentHashMap<String, Object>();
+    public ThreadPoolAgent(Set<String> labels) {
+        this.labels = new HashSet<String>(labels);
+        this.executor = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+        this.attrs = new ConcurrentHashMap<String, Object>();
     }
     
-    public ThreadPoolAgent(ExecutorService executor) {
-        this(executor, Collections.<String>emptySet());
+    public ThreadPoolAgent() {
+        this(Collections.<String>emptySet());
     }
     
-    @Override
-    public String getId() {
-        return id;
-    }
-
     @Override
     public Set<String> getLabels() {
-        return labels;
+        return Collections.unmodifiableSet(labels);
     }
 
     @Override
-    public InetAddress getInetAddress() {
-        return inetAddress;
-    }
-
-    @Override
-    public int getPid() {
-        return pid;
-    }
-
-    @Override
-    public <T> Future<T> invoke(final Invocable<T> invocable) {
+    public <T> ListenableFuture<T> invoke(final Invocable<T> invocable) {
         return executor.submit(new Callable<T>() {
             @Override
             public T call() throws Exception {
@@ -89,18 +59,13 @@ public class ThreadPoolAgent implements LocalAgent {
     }
 
     @Override
-    public long currentTimeMillis() {
-        return System.currentTimeMillis();
-    }
-
-    @Override
-    public long currentTimeNanos() {
-        return System.nanoTime();
+    public ConcurrentMap<String, Object> getAttrsMap() {
+        return attrs;
     }
     
     @Override
-    public ConcurrentMap<String, Object> getAttributesMap() {
-        return attributes;
+    public TimeService getTimeService() {
+        return SystemTimeService.getInstance();
     }
     
     @Override
@@ -114,6 +79,6 @@ public class ThreadPoolAgent implements LocalAgent {
     
     @Override
     public String toString() {
-        return F("%d#%s#%s", pid, inetAddress.getHostName(), labels);
+        return F("ThreadPoolAgent[%s,%d]", labels, System.identityHashCode(this));
     }
 }

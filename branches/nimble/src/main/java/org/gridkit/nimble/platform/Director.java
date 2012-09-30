@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.util.ValidOps;
@@ -12,12 +13,11 @@ public class Director<T> {
     private final Collection<RemoteAgent> agents;
     private final ExecutorService executor;
 
-    public Director(Collection<RemoteAgent> agents, ExecutorService executor) {
+    public Director(Collection<RemoteAgent> agents) {
         ValidOps.notEmpty(agents, "agents");
-        ValidOps.notNull(executor, "executor");
         
         this.agents = agents;
-        this.executor = executor;
+        this.executor = Executors.newCachedThreadPool();
     }
 
     public Play play(Scenario scenario) {

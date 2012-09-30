@@ -1,65 +1,50 @@
 package org.gridkit.nimble.platform.remote;
 
-import java.net.InetAddress;
+import static org.gridkit.nimble.util.StringOps.F;
+
 import java.rmi.Remote;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.gridkit.nimble.platform.LocalAgent;
 import org.gridkit.nimble.platform.RemoteAgent;
+import org.gridkit.nimble.platform.SystemTimeService;
+import org.gridkit.nimble.platform.TimeService;
 import org.gridkit.vicluster.ViNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.util.concurrent.AbstractFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 
+//TODO handle remote agents shutdown situations
 public class ViNodeAgent implements RemoteAgent {
-
-	private String uid;
 	private ViNode node;
-	private Set<String> tags;
-	private RemoteHandle handle;
+	private Set<String> labels;
+	private LocalAgentHandle localAgent;
 	
-	public ViNodeAgent(ViNode node, Set<String> tags) {
-		this.uid = UUID.randomUUID().toString();
+	public ViNodeAgent(ViNode node, final Set<String> labels) {
 		this.node = node;
-		this.tags = tags;
+		this.labels = new HashSet<String>(labels);
 		
-		final String nodeId = uid;
-		final Set<String> nodeTags = tags;
-		
-		handle = node.exec(new Callable<RemoteHandle>() {
-
+		this.localAgent = node.exec(new Callable<LocalAgentHandle>() {
 			@Override
-			public RemoteHandle call() throws Exception {
-				return new RemoteAgent(nodeId, nodeTags);
+			public LocalAgentHandle call() throws Exception {
+				return new ViLocalAgent(labels);
 			}
-			
 		});
 	}
 
 	@Override
-	public String getId() {
-		return uid;
-	}
-
-	@Override
 	public Set<String> getLabels() {
-		return new HashSet<String>(tags);
-	}
-
-	@Override
-	public InetAddress getInetAddress() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public int getPid() {
-		return 0;
+		return Collections.unmodifiableSet(labels);
 	}
 
 	@Override
@@ -67,89 +52,141 @@ public class ViNodeAgent implements RemoteAgent {
 		node.shutdown();
 	}
 
-	public String toString() {
-		return "ViNodeAgent#" + uid;
-	}
-	
 	@Override
-	public <T> Future<T> invoke(final Invocable<T> invocable) {
-		final RemoteHandle handle = this.handle;
-		return node.submit(new Callable<T>() {
-			@Override
-			public T call() throws Exception {				
-				return handle.exec(invocable);
-			}
-		});
-	}
-	
-	private static interface RemoteHandle extends Remote {		
-		public <T> T exec(Invocable<T> task) throws Exception;		
-	}
-	
-	private static class RemoteAgent implements LocalAgent, RemoteHandle {
+	public <T> ListenableFuture<T> invoke(Invocable<T> invocable) {	    
+	    RemoteResultPromise<T> remoteResult = new RemoteResultPromise<T>();
 
-		private String uid; 
-		private Set<String> labels;
-		private ConcurrentMap<String, Object> attributes = new ConcurrentHashMap<String, Object>();
+	    RemoteExecutionHandle execHandle = localAgent.invoke(invocable, remoteResult);
+	    
+	    remoteResult.getResultFuture().setExecHandle(execHandle);
+	    
+	    return remoteResult.getResultFuture();
+	}
+
+	private static interface RemoteResult<T> extends Remote {
+	    void set(T result);
+	    void setException(Throwable throwable);
+	}
+	
+    private static interface RemoteExecutionHandle extends Remote {     
+        void cancel(Boolean hard);
+    }
+    
+    private static interface LocalAgentHandle extends Remote, LocalAgent {
+        <T> RemoteExecutionHandle invoke(Invocable<T> invocable, RemoteResult<T> resut);
+    }
+	    
+    private static class StaticRemoteExecutionHandle implements RemoteExecutionHandle {
+        private Future<?> resultFuture;
+        
+        public StaticRemoteExecutionHandle(Future<?> resultFuture) {
+            this.resultFuture = resultFuture;
+        }
+
+        @Override
+        public void cancel(Boolean hard) {
+            resultFuture.cancel(hard);
+        }
+    }
+    
+	private static class RemoteResultPromise<T> implements RemoteResult<T> {
+	    private RemoteResultFuture<T> resultFuture = new RemoteResultFuture<T>();
+	    
+        @Override
+        public void set(T result) {
+            resultFuture.set(result);
+        }
+        
+        @Override
+        public void setException(Throwable throwable) {
+            resultFuture.setException(throwable);
+        }
+        
+        public RemoteResultFuture<T> getResultFuture() {
+            return resultFuture;
+        }
+	}
+	
+	private static class RemoteResultFuture<T> extends AbstractFuture<T> {
+	    private RemoteExecutionHandle execHandle;
+	    
+        public boolean cancel(boolean hard) {
+            if (isDone()) {
+                return false;
+            }
+            
+            if (execHandle != null) {
+               execHandle.cancel(hard);
+            } else {
+                throw new IllegalStateException();
+            }
+            
+            return super.cancel(hard);
+        };
+        
+        public boolean set(T value) {
+            return super.set(value);
+        };
+        
+        public boolean setException(Throwable throwable) {
+            return super.setException(throwable);
+        };
+
+	    public void setExecHandle(RemoteExecutionHandle execHandle) {
+            this.execHandle = execHandle;
+        }
+	}
+
+	private static class ViLocalAgent implements LocalAgentHandle {
+	    private Set<String> labels;
+		private ConcurrentMap<String, Object> attrs;
 		
-		public RemoteAgent(String uid, Set<String> labels) {
-			this.uid = uid;
-			this.labels = labels;
+		public ViLocalAgent(Set<String> labels) {		    
+			this.labels = new HashSet<String>(labels);
+			this.attrs = new ConcurrentHashMap<String, Object>();
 		}
 
-		@Override
-		public ConcurrentMap<String, Object> getAttributesMap() {
-			return attributes;
-		}
+        @Override
+        public <T> RemoteExecutionHandle invoke(final Invocable<T> invocable, final RemoteResult<T> resut) {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            
+            final Future<?> resultFuture = executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        resut.set(invocable.invoke(ViLocalAgent.this));
+                    } catch (Throwable t) {
+                        resut.setException(t);
+                    }
+                }
+            });
 
-		@Override
-		public String getId() {
-			return uid;
-		}
-
+            return new StaticRemoteExecutionHandle(resultFuture);
+        }
+		
 		@Override
 		public Set<String> getLabels() {
-			return labels;
+		    return labels;
 		}
-
-		@Override
-		public InetAddress getInetAddress() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public int getPid() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void shutdown(boolean hard) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public <T> Future<T> invoke(Invocable<T> invocable) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public <T> T exec(Invocable<T> task) throws Exception {
-			return task.invoke(this);
-		}
-
-		@Override
-		public long currentTimeMillis() {
-			return System.currentTimeMillis();
-		}
-
-		@Override
-		public long currentTimeNanos() {
-			return System.nanoTime();
-		}
-
+		
+		
 		@Override
 		public Logger getLogger(String name) {
 			return LoggerFactory.getLogger(name);
 		}
+
+        @Override
+        public ConcurrentMap<String, Object> getAttrsMap() {
+            return attrs;
+        }
+
+        @Override
+        public TimeService getTimeService() {
+            return SystemTimeService.getInstance();
+        }
 	}
+	
+    public String toString() {
+        return F("ViNodeAgent[%s]", node.toString());
+    }
 }

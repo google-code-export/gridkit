@@ -7,8 +7,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.gridkit.nimble.platform.Director;
@@ -20,7 +18,7 @@ import org.gridkit.nimble.scenario.DemonScenario;
 import org.gridkit.nimble.scenario.ParScenario;
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.SeqScenario;
-import org.gridkit.nimble.sigar.CpuDemon;
+import org.gridkit.nimble.sensor.CpuDemon;
 import org.gridkit.nimble.statistics.SmartReporter;
 import org.gridkit.nimble.statistics.simple.QueuedSimpleStatsAggregator;
 import org.gridkit.nimble.statistics.simple.SimplePrettyPrinter;
@@ -53,7 +51,7 @@ public class Trigonometry {
     
     public RemoteAgent createAgent(String mode, String... labels) {
     	if ("in-proc".equals(mode)) {
-    		return new ThreadPoolAgent(Executors.newCachedThreadPool(), new HashSet<String>(Arrays.asList(labels)));
+    		return new ThreadPoolAgent(new HashSet<String>(Arrays.asList(labels)));
     	}
     	if ("local".equals(mode)) {
     		return localFactory.createAgent("agent" + Arrays.toString(labels), labels);
@@ -73,15 +71,11 @@ public class Trigonometry {
     	runTest("local");
     }
     
-    public void runTest(String mode) throws Exception {
-        ExecutorService directorExecutor = Executors.newCachedThreadPool();
-        
+    public void runTest(String mode) throws Exception {        
         RemoteAgent sinAgent = createAgent(mode, SIN);
         RemoteAgent cosAgent = createAgent(mode, COS);
         
-        Director<SimpleStats> director = new Director<SimpleStats>(
-            Arrays.asList(sinAgent, cosAgent), directorExecutor
-        );
+        Director<SimpleStats> director = new Director<SimpleStats>(Arrays.asList(sinAgent, cosAgent));
 
         SimpleStatsAggregator wAggr = new QueuedSimpleStatsAggregator();        
         SimpleStatsAggregator rAggr = new QueuedSimpleStatsAggregator();
@@ -199,7 +193,7 @@ public class Trigonometry {
         public void excute(Context context) throws Exception {
             Thread.sleep(250);
             context.getLogger().info("log " + name);
-            context.getAttributesMap().put(funcName, func);
+            context.getAttrsMap().put(funcName, func);
         }
 
         @Override
@@ -222,14 +216,14 @@ public class Trigonometry {
 
         @Override
         public void excute(Context context) throws Exception {            
-            SmartReporter reporter = new SmartReporter(context.getStatReporter(), context);
+            SmartReporter reporter = new SmartReporter(context.getStatReporter(), context.getTimeService());
             
             String initStats = initStats(funcName);
             String calsStats = calcStats(funcName);
             
             reporter.start(initStats);
             @SuppressWarnings("unchecked")
-            Function<Double, Double> func = (Function<Double, Double>)context.getAttributesMap().get(funcName);
+            Function<Double, Double> func = (Function<Double, Double>)context.getAttrsMap().get(funcName);
             reporter.finish(initStats);
             
             reporter.start(calsStats);
