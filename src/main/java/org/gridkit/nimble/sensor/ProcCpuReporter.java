@@ -12,6 +12,7 @@ public class ProcCpuReporter implements Sensor.Reporter<ProcCpu>, Serializable {
     public static String TOTAL_SUFFIX  = ".TOT";
     public static String USER_SUFFIX   = ".USR";
     public static String SYSTEM_SUFFIX = ".SYS";
+    public static String COUNT_SUFFIX  = ".CNT";
 
     private String statistica;
     private StatsReporter statsReporter;
@@ -22,7 +23,7 @@ public class ProcCpuReporter implements Sensor.Reporter<ProcCpu>, Serializable {
     }
 
     @Override
-    public void report(ProcCpu cpu1, ProcCpu cpu2, long timeNs) {
+    public void report(ProcCpu cpu1, ProcCpu cpu2, long timeNs) {        
         if (cpu1 != null && cpu2 != null) {            
             double usrTime = TimeUnit.MILLISECONDS.toNanos(cpu2.getUsr() - cpu1.getUsr());
             double sysTime = TimeUnit.MILLISECONDS.toNanos(cpu2.getSys() - cpu1.getSys());
@@ -33,6 +34,7 @@ public class ProcCpuReporter implements Sensor.Reporter<ProcCpu>, Serializable {
             report.put(getTotStatsName(statistica), totTime / timeNs);
             report.put(getUsrStatsName(statistica), usrTime / timeNs);
             report.put(getSysStatsName(statistica), sysTime / timeNs);
+            report.put(getCntStatsName(statistica), cpu1.getCnt());
             
             statsReporter.report(report);
         }
@@ -48,5 +50,9 @@ public class ProcCpuReporter implements Sensor.Reporter<ProcCpu>, Serializable {
     
     public static String getUsrStatsName(String statistica) {
         return statistica + USER_SUFFIX;
+    }
+    
+    public static String getCntStatsName(String statistica) {
+        return statistica + COUNT_SUFFIX;
     }
 }
