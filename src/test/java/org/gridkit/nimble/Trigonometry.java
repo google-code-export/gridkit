@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
@@ -22,10 +21,10 @@ import org.gridkit.nimble.scenario.DemonScenario;
 import org.gridkit.nimble.scenario.ParScenario;
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.SeqScenario;
+import org.gridkit.nimble.sensor.IntervalMeasure;
 import org.gridkit.nimble.sensor.NetInterfaceReporter;
 import org.gridkit.nimble.sensor.NetInterfaceSensor;
 import org.gridkit.nimble.sensor.PidProvider;
-import org.gridkit.nimble.sensor.ProcCpu;
 import org.gridkit.nimble.sensor.ProcCpuReporter;
 import org.gridkit.nimble.sensor.ProcCpuSensor;
 import org.gridkit.nimble.sensor.SensorDemon;
@@ -43,7 +42,7 @@ import org.gridkit.nimble.task.SimpleStatsReporterFactory;
 import org.gridkit.nimble.task.Task;
 import org.gridkit.nimble.task.TaskSLA;
 import org.gridkit.nimble.task.TaskScenario;
-import org.hyperic.sigar.NetInterfaceStat;
+import org.hyperic.sigar.ProcCpu;
 import org.junit.Test;
 
 import com.google.common.base.Function;
@@ -204,15 +203,15 @@ public class Trigonometry {
         StatsReporter firstCpuRep = new AggregatingSimpleStatsReporter(aggr, 1);
         StatsReporter secondCpuRep = new AggregatingSimpleStatsReporter(aggr, 1);
         
-        SensorDemon<ProcCpu> firstCpuDemon = new SensorDemon<ProcCpu>(
+        SensorDemon<?> firstCpuDemon = new SensorDemon<List<IntervalMeasure<ProcCpu>>>(
             new ProcCpuSensor(new PidProvider.CurPidProvider()), new ProcCpuReporter("SINCOS", firstCpuRep)
         );
         
-        SensorDemon<ProcCpu> secondCpuDemon = new SensorDemon<ProcCpu>(
+        SensorDemon<?> secondCpuDemon = new SensorDemon<List<IntervalMeasure<ProcCpu>>>(
             new ProcCpuSensor(new PidProvider.CurPidProvider()), new ProcCpuReporter("TAN", secondCpuRep)
         );
         
-        SensorDemon<Map<String, NetInterfaceStat>> netStatsDemon = new SensorDemon<Map<String, NetInterfaceStat>>(
+        SensorDemon<?> netStatsDemon = new SensorDemon<List<NetInterfaceSensor.InterfaceMeasure>>(
             new NetInterfaceSensor(), new NetInterfaceReporter(netStatsRep)
         );
         

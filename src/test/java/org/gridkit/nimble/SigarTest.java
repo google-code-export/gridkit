@@ -1,12 +1,13 @@
 package org.gridkit.nimble;
 
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.gridkit.nimble.sensor.IntervalMeasure;
 import org.gridkit.nimble.sensor.PidProvider;
-import org.gridkit.nimble.sensor.ProcCpu;
 import org.gridkit.nimble.sensor.ProcCpuReporter;
 import org.gridkit.nimble.sensor.ProcCpuSensor;
 import org.gridkit.nimble.sensor.SensorDemon;
@@ -16,6 +17,7 @@ import org.gridkit.nimble.statistics.simple.QueuedSimpleStatsAggregator;
 import org.gridkit.nimble.statistics.simple.SimplePrettyPrinter;
 import org.gridkit.nimble.statistics.simple.SimplePrinter;
 import org.gridkit.nimble.statistics.simple.SimpleStatsAggregator;
+import org.hyperic.sigar.ProcCpu;
 import org.junit.Ignore;
 
 @Ignore
@@ -29,13 +31,13 @@ public class SigarTest {
         
         StatsReporter cpuRep = new AggregatingSimpleStatsReporter(aggr, 2);
         
-        SensorDemon<ProcCpu> cpuDemon = new SensorDemon<ProcCpu>(
+        SensorDemon<?> cpuDemon = new SensorDemon<List<IntervalMeasure<ProcCpu>>>(
            new ProcCpuSensor(new PidProvider.CurPidProvider()), new ProcCpuReporter("LOCAL", cpuRep)
         );
         
         StatsReporter pcpuRep = new AggregatingSimpleStatsReporter(aggr, 2);
 
-        SensorDemon<ProcCpu> pcpuDemon = new SensorDemon<ProcCpu>(
+        SensorDemon<?> pcpuDemon = new SensorDemon<List<IntervalMeasure<ProcCpu>>>(
             new ProcCpuSensor(new PidProvider.PtqlPidProvider("Exe.Name.ct=java")), new ProcCpuReporter("JAVA", pcpuRep)
         );
         

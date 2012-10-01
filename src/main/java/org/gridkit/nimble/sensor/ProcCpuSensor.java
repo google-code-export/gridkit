@@ -2,70 +2,96 @@ package org.gridkit.nimble.sensor;
 
 import static org.gridkit.nimble.util.StringOps.F;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.gridkit.nimble.util.Pair;
+import org.gridkit.nimble.util.SetOps;
+import org.hyperic.sigar.ProcCpu;
 import org.hyperic.sigar.SigarException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
-public class ProcCpuSensor extends SigarHolder implements Sensor<ProcCpu> {
+public class ProcCpuSensor extends IntervalMeasureSensor<List<IntervalMeasure<ProcCpu>>, Map<Long, Pair<Long, ProcCpu>>> {
     private static final Logger log = LoggerFactory.getLogger(ProcCpuSensor.class);
     
-    private static long MIN_SLEEP_TIME_S = 3;
+    private static long MIN_MEASURE_INTERVAL_MS = 3;
     
     private PidProvider pidProvider;
-    private long sleepTimeMs;
     private boolean refreshPids;
     
-    private transient Collection<Long> pids;
+    private transient Set<Long> pids;
 
-    public ProcCpuSensor(PidProvider pidProvider, long sleepTime, TimeUnit unit, boolean refreshPids) {
+    public ProcCpuSensor(PidProvider pidProvider, long measureInterval, TimeUnit unit, boolean refreshPids) {
+        super(Math.max(unit.toMillis(measureInterval), TimeUnit.SECONDS.toMillis(MIN_MEASURE_INTERVAL_MS)));
         this.pidProvider = pidProvider;
-        this.sleepTimeMs = Math.max(unit.toMillis(sleepTime), TimeUnit.SECONDS.toMillis(MIN_SLEEP_TIME_S));
     }
     
-    public ProcCpuSensor(PidProvider pidProvider, long sleepTimeS, boolean refreshPids) {
-        this(pidProvider, sleepTimeS, TimeUnit.SECONDS, refreshPids);
+    public ProcCpuSensor(PidProvider pidProvider, long measureIntervalS, boolean refreshPids) {
+        this(pidProvider, measureIntervalS, TimeUnit.SECONDS, refreshPids);
     }
     
     public ProcCpuSensor(PidProvider pidProvider) {
-        this(pidProvider, MIN_SLEEP_TIME_S, false);
+        this(pidProvider, MIN_MEASURE_INTERVAL_MS, false);
     }
 
     @Override
-    public ProcCpu measure() {
-        ProcCpu procCpu = new ProcCpu();
+    protected Map<Long, Pair<Long, ProcCpu>> getState() {
+        Map<Long, Pair<Long, ProcCpu>> result = new HashMap<Long, Pair<Long, ProcCpu>>();
         
-        boolean found = false;
-        
-        for (long pid : getPids()) {
+        for (Long pid : getPids()) {
             try {
-                procCpu.add(getSigar().getProcCpu(pid));
-                found = true;
+                result.put(pid, Pair.newPair(System.nanoTime(), getSigar().getProcCpu(pid)));
             } catch (SigarException e) {
                 log.error(F("Error while getting processes CPU usage for pid '%d'", pid), e);
-                pids.remove(pid);
+                invalidate(pid);
             }
         }
         
-        return found ? procCpu : null;
+        return result;
     }
 
-    public Collection<Long> getPids() {
+    @Override
+    protected List<IntervalMeasure<ProcCpu>> getMeasure(Map<Long, Pair<Long, ProcCpu>> leftState, Map<Long, Pair<Long, ProcCpu>> rightState) {
+        List<IntervalMeasure<ProcCpu>> result = new ArrayList<IntervalMeasure<ProcCpu>>();
+        
+        for (Long pid : SetOps.<Long>intersection(leftState.keySet(), rightState.keySet())) {
+            IntervalMeasure<ProcCpu> measure = new IntervalMeasure<ProcCpu>();
+            
+            Pair<Long, ProcCpu> left = leftState.get(pid);
+            Pair<Long, ProcCpu> right = rightState.get(pid);
+            
+            measure.setLeftTsNs(left.getA());
+            measure.setLeftState(left.getB());
+            
+            measure.setRightTsNs(right.getA());
+            measure.setRightState(right.getB());
+
+            result.add(measure);
+        }
+        
+        return result;
+    }
+    
+    private Collection<Long> getPids() {
         if (pids == null || refreshPids) {
-            pids = pidProvider.getPids();
+            pids = new HashSet<Long>(pidProvider.getPids());
         }
         
         return pids;
     }
     
-    @Override
-    public long getSleepTimeMs() {
-        return sleepTimeMs;
+    private void invalidate(Long pid) {
+        pids.remove(pid);
     }
-    
+
     @Override
     public String toString() {
         return F("%s[%s]", ProcCpuSensor.class.getSimpleName(), pidProvider.toString());
