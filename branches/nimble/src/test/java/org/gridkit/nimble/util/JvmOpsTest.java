@@ -7,7 +7,6 @@ import org.junit.Test;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
 
-@SuppressWarnings("restriction")
 public class JvmOpsTest {
     @Test
     public void test() {
