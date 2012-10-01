@@ -3,8 +3,7 @@ package org.gridkit.nimble.util;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,17 +30,7 @@ public class JvmOps {
         }
     }
     
-    public static Map<VirtualMachineDescriptor, VirtualMachine> listVms() {
-        Map<VirtualMachineDescriptor, VirtualMachine> result = new HashMap<VirtualMachineDescriptor, VirtualMachine>();
-        
-        for (VirtualMachineDescriptor desc : VirtualMachine.list()) {
-            try {
-                result.put(desc, VirtualMachine.attach(desc));
-            } catch (Exception e) {
-                log.warn("Failed to attach to vm " + desc, e);
-            }
-        }
-        
-        return result;
+    public static List<VirtualMachineDescriptor> listVms() {
+        return VirtualMachine.list();
     }
 }

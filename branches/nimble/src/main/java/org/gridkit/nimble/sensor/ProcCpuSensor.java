@@ -65,4 +65,9 @@ public class ProcCpuSensor extends SigarHolder implements Sensor<ProcCpu> {
     public long getSleepTimeMs() {
         return sleepTimeMs;
     }
+    
+    @Override
+    public String toString() {
+        return F("%s[%s]", ProcCpuSensor.class.getSimpleName(), pidProvider.toString());
+    }
 }
