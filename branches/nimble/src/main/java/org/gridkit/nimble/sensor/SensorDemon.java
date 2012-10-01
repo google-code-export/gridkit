@@ -20,46 +20,24 @@ public class SensorDemon<M> implements Callable<Void>, Serializable {
         this.ignoreFailures = true;
     }
 
-    public Void callInternal() throws Exception {                
-        long ts11 = System.nanoTime();
-        M m1 = sensor.measure();
-        long ts12 = System.nanoTime();
-        
-        while (!Thread.interrupted()) {
-            Thread.sleep(sensor.getSleepTimeMs());
-            
-            long ts21 = System.nanoTime();
-            M m2 = sensor.measure();
-            long ts22 = System.nanoTime();
-
-            long timeNs = (ts22 + ts21)/2 - (ts11 + ts12)/2;
-            
-            reporter.report(m1, m2, timeNs);
-
-            m1 = m2;
-            ts11 = ts21;
-            ts12 = ts22;
-        }
-        
-        return null;
-    }
-    
     @Override
     public Void call() throws Exception {
-        while (true) {
+        while (!Thread.interrupted()) {
             try {
-                callInternal();
+                M m = sensor.measure();
+                reporter.report(m);
+            } catch (InterruptedException e) {
+                return null;
             } catch (Throwable t) {
-                if (!(t instanceof InterruptedException)) {
-                    log.error("Throwable while executing SensorDemon", t);
-                    if (!ignoreFailures) {
-                        log.error("SensorDemon will be terminated");
-                        return null;
-                    }
-                } else {
+                log.error("Throwable while executing SensorDemon", t);
+                
+                if (!ignoreFailures) {
+                    log.error("SensorDemon will be terminated");
                     return null;
                 }
             }
         }
+        
+        return null;
     }
 }

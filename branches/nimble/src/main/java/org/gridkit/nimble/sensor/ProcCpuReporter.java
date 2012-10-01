@@ -2,13 +2,15 @@ package org.gridkit.nimble.sensor;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.gridkit.nimble.statistics.StatsReporter;
+import org.hyperic.sigar.ProcCpu;
 
 @SuppressWarnings("serial")
-public class ProcCpuReporter implements Sensor.Reporter<ProcCpu>, Serializable {
+public class ProcCpuReporter implements Sensor.Reporter<List<IntervalMeasure<ProcCpu>>>, Serializable {
     public static String TOTAL_SUFFIX  = ".TOT";
     public static String USER_SUFFIX   = ".USR";
     public static String SYSTEM_SUFFIX = ".SYS";
@@ -23,21 +25,32 @@ public class ProcCpuReporter implements Sensor.Reporter<ProcCpu>, Serializable {
     }
 
     @Override
-    public void report(ProcCpu cpu1, ProcCpu cpu2, long timeNs) {        
-        if (cpu1 != null && cpu2 != null) {            
-            double usrTime = TimeUnit.MILLISECONDS.toNanos(cpu2.getUsr() - cpu1.getUsr());
-            double sysTime = TimeUnit.MILLISECONDS.toNanos(cpu2.getSys() - cpu1.getSys());
-            double totTime = TimeUnit.MILLISECONDS.toNanos(cpu2.getTot() - cpu1.getTot());
-            
-            Map<String, Object> report = new HashMap<String, Object>();
-
-            report.put(getTotStatsName(statistica), totTime / timeNs);
-            report.put(getUsrStatsName(statistica), usrTime / timeNs);
-            report.put(getSysStatsName(statistica), sysTime / timeNs);
-            report.put(getCntStatsName(statistica), cpu1.getCnt());
-            
-            statsReporter.report(report);
+    public void report(List<IntervalMeasure<ProcCpu>> measures) {
+        double usr = 0.0;
+        double sys = 0.0;
+        double tot = 0.0;
+        int    cnt = 0;
+        
+        for (IntervalMeasure<ProcCpu> measure : measures) {
+            usr += getCpuUsage(measure.getLeftState().getUser(),  measure.getRightState().getUser(),  measure);
+            sys += getCpuUsage(measure.getLeftState().getSys(),   measure.getRightState().getSys(),   measure);
+            tot += getCpuUsage(measure.getLeftState().getTotal(), measure.getRightState().getTotal(), measure);
+            cnt += 1;
         }
+        
+        Map<String, Object> sample = new HashMap<String, Object>();
+        
+        sample.put(getUsrStatsName(statistica), usr);
+        sample.put(getSysStatsName(statistica), sys);
+        sample.put(getTotStatsName(statistica), tot);
+        sample.put(getCntStatsName(statistica), cnt);
+            
+        statsReporter.report(sample);
+    }
+
+    private static double getCpuUsage(long leftCpuMs, long rightCpuMs, IntervalMeasure<?> measure) {
+        double timeNs = TimeUnit.MILLISECONDS.toNanos(rightCpuMs - leftCpuMs);
+        return timeNs / (measure.getRightTsNs() - measure.getLeftTsNs());
     }
     
     public static String getTotStatsName(String statistica) {
