@@ -8,14 +8,14 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.gridkit.nimble.util.Pair;
 
+// TODO add sorting priority to columns
 public abstract class TablePrinter {
     private DecimalFormat decFormat = new DecimalFormat("0.00");
-    private boolean sortColumns = false;
     private Object nullValue = "";
+    private boolean printHead = true;
     
     protected abstract void print(PrintStream stream, List<List<Object>> table);
     
@@ -28,7 +28,9 @@ public abstract class TablePrinter {
         
         List<List<Object>> table = new ArrayList<List<Object>>();
         
-        table.add(new ArrayList<Object>(data.getA()));
+        if (printHead) {
+            table.add(new ArrayList<Object>(data.getA()));
+        }
         
         for (Map<String,Object> mapRow : data.getB()) {
             List<Object> listRow = new ArrayList<Object>();
@@ -75,7 +77,7 @@ public abstract class TablePrinter {
     }
     
     private Set<String> newColumnsSet() {
-        return sortColumns ? new TreeSet<String>() : new LinkedHashSet<String>();
+        return new LinkedHashSet<String>(); 
     }
     
     protected String toString(Object value) {
@@ -96,19 +98,19 @@ public abstract class TablePrinter {
         this.decFormat = decFormat;
     }
 
-    public boolean isSortColumns() {
-        return sortColumns;
-    }
-
-    public void setSortColumns(boolean sortColumns) {
-        this.sortColumns = sortColumns;
-    }
-
     public Object getNullValue() {
         return nullValue;
     }
 
     public void setNullValue(Object nullValue) {
         this.nullValue = nullValue;
+    }
+
+    public boolean isPrintHead() {
+        return printHead;
+    }
+
+    public void setPrintHead(boolean printHead) {
+        this.printHead = printHead;
     }
 }

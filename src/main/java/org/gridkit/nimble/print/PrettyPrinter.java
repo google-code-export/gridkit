@@ -13,15 +13,12 @@ public class PrettyPrinter extends TablePrinter {
             stream.print("| ");
             
             for (int c = 0; c < lens.size(); ++c) {
-                String cell = c < row.size() ? toString(row.get(c)) : "";
-                boolean number = false;
-                try {
-                    Double.parseDouble(cell);
-                    number = true;
-                }
-                catch(NumberFormatException e) {
-                    // ignore
-                }
+                Object value = row.get(c);
+                
+                String cell = c < row.size() ? toString(value) : "";
+                
+                boolean number = value instanceof Double || value instanceof Float;
+                
                 if (number) {
                     stream.printf("%" + lens.get(c) + "s | ", cell);
                 }
