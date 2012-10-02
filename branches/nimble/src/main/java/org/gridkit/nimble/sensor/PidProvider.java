@@ -2,7 +2,6 @@ package org.gridkit.nimble.sensor;
 
 import static org.gridkit.nimble.util.StringOps.F;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,7 +17,8 @@ import org.hyperic.sigar.ptql.ProcessFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.tools.attach.VirtualMachine;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.sun.tools.attach.VirtualMachineDescriptor;
 
 public interface PidProvider {
@@ -63,20 +63,21 @@ public interface PidProvider {
     }
     
     @SuppressWarnings("serial")
-    public static class JavaPidProvider implements PidProvider, Serializable {
-        private static final Logger log = LoggerFactory.getLogger(JavaPidProvider.class);
-        
-        private String key;
-        private String value;
-        private List<String> displayNames;
+    public static class JavaPidProvider implements PidProvider, Serializable {        
+        private Predicate<String> namePredicate;
+        private Predicate<Properties> propsPredicate;
 
-        //TODO add more precise filtering
-        // /tmp/.gridagent/.cache/ef379967543782d3de6b0954fb92ebdda73bc340/booter.jar d1c5837e2f12ec412e933d6b44270528 localhost 50009 /tmp/.gridagent
-        // org.gridkit.vicluster.telecontrol.bootstraper.Bootstraper                  d1452176ab6291598303f77f5299d13d localhost 48669
-        public JavaPidProvider(String key, String value, List<String> displayNames) {
-            this.key = key;
-            this.value = value;
-            this.displayNames = displayNames;
+        public JavaPidProvider(Predicate<String> namePredicate, Predicate<Properties> propsPredicate) {
+            this.namePredicate = namePredicate;
+            this.propsPredicate = propsPredicate;
+        }
+
+        public static JavaPidProvider byName(Predicate<String> namePredicate) {
+            return new JavaPidProvider(namePredicate, Predicates.<Properties>alwaysTrue());
+        }
+        
+        public static JavaPidProvider byProps(Predicate<Properties> propsPredicate) {
+            return new JavaPidProvider(Predicates.<String>alwaysTrue(), propsPredicate);
         }
 
         @Override
@@ -87,45 +88,14 @@ public interface PidProvider {
             Collections.shuffle(descs);
                             
             for (VirtualMachineDescriptor desc : descs) {
-                if (displayNames != null) {
-                    boolean valid = false;
-                    
-                    for (String displayName : displayNames) {
-                        if (desc.displayName() != null && desc.displayName().contains(displayName)) {
-                            valid = true;
-                        }
-                    }
-                    
-                    if (!valid) {
-                        continue;
-                    }
+                if (!namePredicate.apply(desc.displayName())) {
+                    continue;
                 }
                 
-                VirtualMachine vm = null;
+                Properties props = JvmOps.getProps(desc);
                 
-                long pid = Long.valueOf(desc.id());
-                
-                synchronized (JavaPidProvider.class) {
-                    try {
-                        vm = VirtualMachine.attach(desc);
-                        
-                        Properties props = vm.getSystemProperties();
-                        
-                        if (value.equals(props.getProperty(key))) {
-                            pids.add(pid);
-                        }
-                    } catch (Exception e) {
-                        log.error("Failed to retrieve JVM properties of " + desc, e);
-                        continue;
-                    } finally {
-                        if (vm != null) {
-                            try {
-                                vm.detach();
-                            } catch (IOException e) {
-                                log.warn("Failed to detach from vm " + desc, e);
-                            }
-                        }
-                    }
+                if (props != null && propsPredicate.apply(props)) {
+                    pids.add(Long.valueOf(desc.id()));
                 }
             }
                                         
@@ -134,7 +104,7 @@ public interface PidProvider {
         
         @Override
         public String toString() {
-            return F("%s[%s,%s]", JavaPidProvider.class.getSimpleName(), key, value);
+            return F("%s[%s,%s]", JavaPidProvider.class.getSimpleName(), namePredicate, propsPredicate);
         }
     }
     
