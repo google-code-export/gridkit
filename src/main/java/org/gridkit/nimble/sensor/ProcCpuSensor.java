@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
-public class ProcCpuSensor extends IntervalMeasureSensor<List<IntervalMeasure<ProcCpu>>, Map<Long, Pair<Long, ProcCpu>>> {
+public class ProcCpuSensor extends IntervalMeasureSensor<List<ProcCpuSensor.ProcCpuMeasure>, Map<Long, Pair<Long, ProcCpu>>> {
     private static final Logger log = LoggerFactory.getLogger(ProcCpuSensor.class);
     
     private static long MIN_MEASURE_INTERVAL_MS = 3;
@@ -29,6 +29,18 @@ public class ProcCpuSensor extends IntervalMeasureSensor<List<IntervalMeasure<Pr
     
     private transient Set<Long> pids;
 
+    public static class ProcCpuMeasure extends IntervalMeasure<ProcCpu> {
+        private long pid;
+
+        public long getPid() {
+            return pid;
+        }
+
+        public void setPid(long pid) {
+            this.pid = pid;
+        }
+    }
+    
     public ProcCpuSensor(PidProvider pidProvider, long measureInterval, TimeUnit unit, boolean refreshPids) {
         super(Math.max(unit.toMillis(measureInterval), TimeUnit.SECONDS.toMillis(MIN_MEASURE_INTERVAL_MS)));
         this.pidProvider = pidProvider;
@@ -59,11 +71,11 @@ public class ProcCpuSensor extends IntervalMeasureSensor<List<IntervalMeasure<Pr
     }
 
     @Override
-    protected List<IntervalMeasure<ProcCpu>> getMeasure(Map<Long, Pair<Long, ProcCpu>> leftState, Map<Long, Pair<Long, ProcCpu>> rightState) {
-        List<IntervalMeasure<ProcCpu>> result = new ArrayList<IntervalMeasure<ProcCpu>>();
+    protected List<ProcCpuMeasure> getMeasure(Map<Long, Pair<Long, ProcCpu>> leftState, Map<Long, Pair<Long, ProcCpu>> rightState) {
+        List<ProcCpuMeasure> result = new ArrayList<ProcCpuMeasure>();
         
         for (Long pid : SetOps.<Long>intersection(leftState.keySet(), rightState.keySet())) {
-            IntervalMeasure<ProcCpu> measure = new IntervalMeasure<ProcCpu>();
+            ProcCpuMeasure measure = new ProcCpuMeasure();
             
             Pair<Long, ProcCpu> left = leftState.get(pid);
             Pair<Long, ProcCpu> right = rightState.get(pid);
@@ -73,6 +85,8 @@ public class ProcCpuSensor extends IntervalMeasureSensor<List<IntervalMeasure<Pr
             
             measure.setRightTsNs(right.getA());
             measure.setRightState(right.getB());
+            
+            measure.setPid(pid);
 
             result.add(measure);
         }

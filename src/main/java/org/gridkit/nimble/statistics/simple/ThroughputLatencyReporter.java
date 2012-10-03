@@ -1,5 +1,7 @@
 package org.gridkit.nimble.statistics.simple;
 
+import static org.gridkit.nimble.statistics.simple.SimpleStatsOps.mark;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,7 +76,7 @@ public class ThroughputLatencyReporter extends DelegatingStatsReporter {
         Map<String, Object> report = new HashMap<String, Object>();
         
         for (Map.Entry<String, Object> entry : attrs.entrySet()) {
-            report.put(SimpleStatOps.mark(SAMPLER_NAME, statistica, entry.getKey()), entry.getValue());
+            report.put(mark(SAMPLER_NAME, statistica, entry.getKey()), entry.getValue());
         }
         
         getDelegate().report(report);
@@ -83,7 +85,7 @@ public class ThroughputLatencyReporter extends DelegatingStatsReporter {
     public void latency(String statistica, double latency, TimeUnit unit) {
         Map<String, Object> report = new HashMap<String, Object>();
         
-        report.put(StatsOps.mark(statistica, TIME_NS), StatsOps.convert(latency, unit, TimeUnit.NANOSECONDS));
+        report.put(mark(SAMPLER_NAME, statistica, TIME_NS), StatsOps.convert(latency, unit, TimeUnit.NANOSECONDS));
         
         getDelegate().report(report);
     }

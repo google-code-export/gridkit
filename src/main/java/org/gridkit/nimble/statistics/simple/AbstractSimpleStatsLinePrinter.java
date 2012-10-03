@@ -1,6 +1,7 @@
 package org.gridkit.nimble.statistics.simple;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -13,7 +14,6 @@ import com.google.common.base.Predicates;
 
 public abstract class AbstractSimpleStatsLinePrinter implements SimpleStatsTablePrinter.SimpleStatsLinePrinter {
     protected static final String VALUE = "Value";
-    protected static final String TYPE = "Type";
     
     private Predicate<String> valuePredicate = Predicates.alwaysTrue();
     
@@ -70,13 +70,14 @@ public abstract class AbstractSimpleStatsLinePrinter implements SimpleStatsTable
         Map<String, Map<String, StatisticalSummary>> result = new TreeMap<String, Map<String,StatisticalSummary>>();
         
         for (String statistica : stats.getValStatsNames()) {
-            if (SimpleStatOps.isMarked(statistica)) {
-                String sampler = SimpleStatOps.getSampler(statistica);
+            List<String> unmarks = SimpleStatsOps.unmark(statistica);
+            
+            if (unmarks.size() > 2) {
+                String sampler   = unmarks.get(0);
+                String value     = unmarks.get(1);
+                String aggregate = SimpleStatsOps.mark(unmarks.subList(2, unmarks.size()));
                 
-                if (sampler.equals(getSamplerName())) {
-                    String value = SimpleStatOps.getValue(statistica);
-                    String aggregate = SimpleStatOps.getAggregate(statistica);
-                    
+                if (sampler.equals(getSamplerName())) {                    
                     Map<String, StatisticalSummary> aggrs = result.get(value);
                     
                     if (aggrs == null) {
