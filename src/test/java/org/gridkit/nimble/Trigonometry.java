@@ -6,17 +6,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import org.gridkit.lab.sigar.SigarFactory;
 import org.gridkit.nimble.platform.Director;
 import org.gridkit.nimble.platform.Play;
 import org.gridkit.nimble.platform.RemoteAgent;
 import org.gridkit.nimble.platform.local.ThreadPoolAgent;
 import org.gridkit.nimble.platform.remote.LocalAgentFactory;
+import org.gridkit.nimble.print.PrettyPrinter;
+import org.gridkit.nimble.print.TablePrinter;
 import org.gridkit.nimble.scenario.DemonScenario;
 import org.gridkit.nimble.scenario.ParScenario;
 import org.gridkit.nimble.scenario.Scenario;
@@ -28,16 +27,16 @@ import org.gridkit.nimble.sensor.PidProvider;
 import org.gridkit.nimble.sensor.ProcCpuReporter;
 import org.gridkit.nimble.sensor.ProcCpuSensor;
 import org.gridkit.nimble.sensor.SensorDemon;
-import org.gridkit.nimble.sensor.SensorReporter;
-import org.gridkit.nimble.statistics.SmartReporter;
 import org.gridkit.nimble.statistics.StatsReporter;
-import org.gridkit.nimble.statistics.ThroughputSummary;
 import org.gridkit.nimble.statistics.simple.AggregatingSimpleStatsReporter;
 import org.gridkit.nimble.statistics.simple.QueuedSimpleStatsAggregator;
-import org.gridkit.nimble.statistics.simple.SimplePrettyPrinter;
-import org.gridkit.nimble.statistics.simple.SimplePrinter;
 import org.gridkit.nimble.statistics.simple.SimpleStats;
 import org.gridkit.nimble.statistics.simple.SimpleStatsAggregator;
+import org.gridkit.nimble.statistics.simple.SimpleStatsTablePrinter;
+import org.gridkit.nimble.statistics.simple.SimpleStatsTablePrinter.SimpleStatsLinePrinter;
+import org.gridkit.nimble.statistics.simple.ThroughputLatencyPrinter;
+import org.gridkit.nimble.statistics.simple.ThroughputLatencyReporter;
+import org.gridkit.nimble.statistics.simple.WhitelistPrinter;
 import org.gridkit.nimble.task.SimpleStatsReporterFactory;
 import org.gridkit.nimble.task.Task;
 import org.gridkit.nimble.task.TaskSLA;
@@ -58,7 +57,7 @@ public class Trigonometry {
     
     private static final long NUMBERS = 10;
     private static final long ITERATIONS = 100000;
-    private static final long DURATION = 15; // seconds
+    private static final long DURATION = 3; // seconds
 
     private static LocalAgentFactory localFactory = new LocalAgentFactory();
     
@@ -105,20 +104,21 @@ public class Trigonometry {
             director.shutdown(false);
         }
         
-        SimplePrinter printer = new SimplePrettyPrinter();
-                
         SimpleStats stats = rAggr.calculate();
         
-        printer.print(System.err, stats);
+        TablePrinter tablePrinter = new PrettyPrinter();
         
-        List<String> metrics = Arrays.asList("SINCOS.SYS", "SINCOS.TOT", "SINCOS.USR", "TAN.SYS", "TAN.TOT", "TAN.USR");
+        SimpleStatsTablePrinter statsPrinter = new SimpleStatsTablePrinter();
+
+        statsPrinter.setStatsPrinters(Collections.<SimpleStatsLinePrinter>singletonList(new ThroughputLatencyPrinter()));
+        statsPrinter.print(System.err, tablePrinter, stats);
         
         System.err.println();
         
-        printer.printValues(System.err, stats, metrics);
+        statsPrinter.setStatsPrinters(Collections.<SimpleStatsLinePrinter>singletonList(new WhitelistPrinter()));
+        statsPrinter.print(System.err, tablePrinter, stats);
         
-        System.err.println();
-        
+        /*
         Set<String> inters = new TreeSet<String>(Arrays.asList(SigarFactory.newSigar().getNetInterfaceList()));
         inters.add(NetInterfaceReporter.TOTAL_INTERFACE);
         
@@ -136,7 +136,7 @@ public class Trigonometry {
             System.err.println("Total Send for " + inter + " = " + sentTh.getSum());
             System.err.println("Total Received for " + inter + " = " + receivedTh.getSum());
             System.err.println();
-        }
+        }*/
     }
     
     private static Scenario getScenario(long numbers, long iterations, long duration, SimpleStatsAggregator aggr) {
@@ -265,7 +265,7 @@ public class Trigonometry {
 
         @Override
         public void excute(Context context) throws Exception {            
-            SmartReporter reporter = new SmartReporter(context.getStatReporter(), context.getTimeService());
+            ThroughputLatencyReporter reporter = new ThroughputLatencyReporter(context.getStatReporter(), context.getTimeService());
             
             String initStats = initStats(funcName);
             String calsStats = calcStats(funcName);
