@@ -64,20 +64,20 @@ public interface PidProvider {
     
     @SuppressWarnings("serial")
     public static class JavaPidProvider implements PidProvider, Serializable {        
-        private Predicate<String> namePredicate;
+        private Predicate<CharSequence> namePredicate;
         private Predicate<Properties> propsPredicate;
 
-        public JavaPidProvider(Predicate<String> namePredicate, Predicate<Properties> propsPredicate) {
+        public JavaPidProvider(Predicate<CharSequence> namePredicate, Predicate<Properties> propsPredicate) {
             this.namePredicate = namePredicate;
             this.propsPredicate = propsPredicate;
         }
 
-        public static JavaPidProvider byName(Predicate<String> namePredicate) {
+        public static JavaPidProvider byName(Predicate<CharSequence> namePredicate) {
             return new JavaPidProvider(namePredicate, Predicates.<Properties>alwaysTrue());
         }
         
         public static JavaPidProvider byProps(Predicate<Properties> propsPredicate) {
-            return new JavaPidProvider(Predicates.<String>alwaysTrue(), propsPredicate);
+            return new JavaPidProvider(Predicates.<CharSequence>alwaysTrue(), propsPredicate);
         }
 
         @Override

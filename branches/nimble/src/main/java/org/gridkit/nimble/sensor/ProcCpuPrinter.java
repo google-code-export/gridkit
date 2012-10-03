@@ -23,17 +23,29 @@ public class ProcCpuPrinter extends AbstractSimpleStatsLinePrinter {
         StatisticalSummary cnt = aggregates.get(ProcCpuReporter.CNT);
         
         if (time != null) {
-            context.cell("Usr", usr.getSum() / time.getSum());
-            context.cell("Sys", sys.getSum() / time.getSum());
-            context.cell("Tot", tot.getSum() / time.getSum());
+            context.cell("Usr", usr.getSum() / time.getSum() * cnt.getMean());
+            context.cell("Sys", sys.getSum() / time.getSum() * cnt.getMean());
+            context.cell("Tot", tot.getSum() / time.getSum() * cnt.getMean());
+            
+            context.cell("Usr/pid", usr.getSum() / time.getSum());
+            context.cell("Sys/pid", sys.getSum() / time.getSum());
+            context.cell("Tot/pid", tot.getSum() / time.getSum());
+        } else {
+            context.cell("Usr", "");
+            context.cell("Sys", "");
+            context.cell("Tot", "");
+            
+            context.cell("Usr/pid", "");
+            context.cell("Sys/pid", "");
+            context.cell("Tot/pid", "");
         }
         
-        if (cnt != null) {
-            context.cell("# of Proc", cnt.getMean());
-        }
+        context.cell("# of Proc", cnt.getMean());
         
         if (time != null) {
             context.cell("# of Mesures", time.getN());
+        } else {
+            context.cell("# of Mesures", "");
         }
         
         context.newline();

@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -20,6 +21,7 @@ import org.gridkit.nimble.scenario.DemonScenario;
 import org.gridkit.nimble.scenario.ParScenario;
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.SeqScenario;
+import org.gridkit.nimble.sensor.IntervalMeasure;
 import org.gridkit.nimble.sensor.NetInterfacePrinter;
 import org.gridkit.nimble.sensor.NetInterfaceReporter;
 import org.gridkit.nimble.sensor.NetInterfaceSensor;
@@ -28,6 +30,9 @@ import org.gridkit.nimble.sensor.ProcCpuPrinter;
 import org.gridkit.nimble.sensor.ProcCpuReporter;
 import org.gridkit.nimble.sensor.ProcCpuSensor;
 import org.gridkit.nimble.sensor.SensorDemon;
+import org.gridkit.nimble.sensor.SysCpuPrinter;
+import org.gridkit.nimble.sensor.SysCpuReporter;
+import org.gridkit.nimble.sensor.SysCpuSensor;
 import org.gridkit.nimble.statistics.StatsReporter;
 import org.gridkit.nimble.statistics.simple.AggregatingSimpleStatsReporter;
 import org.gridkit.nimble.statistics.simple.QueuedSimpleStatsAggregator;
@@ -42,9 +47,12 @@ import org.gridkit.nimble.task.SimpleStatsReporterFactory;
 import org.gridkit.nimble.task.Task;
 import org.gridkit.nimble.task.TaskSLA;
 import org.gridkit.nimble.task.TaskScenario;
+import org.hyperic.sigar.Cpu;
 import org.junit.Test;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 
 public class Trigonometry {    
     private static final String SIN = "sin";
@@ -117,6 +125,11 @@ public class Trigonometry {
         
         statsPrinter.setStatsPrinters(Collections.<SimpleStatsLinePrinter>singletonList(new ProcCpuPrinter()));
         statsPrinter.print(System.err, tablePrinter, stats);
+
+        System.err.println();
+        
+        statsPrinter.setStatsPrinters(Collections.<SimpleStatsLinePrinter>singletonList(new SysCpuPrinter()));
+        statsPrinter.print(System.err, tablePrinter, stats);
         
         System.err.println();
         
@@ -129,6 +142,7 @@ public class Trigonometry {
         statsPrinter.print(System.err, tablePrinter, stats);
     }
     
+    @SuppressWarnings("unchecked")
     private static Scenario getScenario(long numbers, long iterations, long duration, SimpleStatsAggregator aggr) {
         Task sinInitTask = new InitTask("SinInitTask", SIN, new Sin());
         Task cosInitTask = new InitTask("CosInitTask", COS, new Cos());
@@ -189,32 +203,43 @@ public class Trigonometry {
 
         Scenario init = new ParScenario(Arrays.asList(sinInitScen, cosInitScen, tanInitScen));
         
-        StatsReporter netStatsRep = new AggregatingSimpleStatsReporter(aggr, 1);
-        StatsReporter firstCpuRep = new AggregatingSimpleStatsReporter(aggr, 1);
-        StatsReporter secondCpuRep = new AggregatingSimpleStatsReporter(aggr, 1);
+        StatsReporter tanCpuRep  = new AggregatingSimpleStatsReporter(aggr, 1);
+        StatsReporter netStatRep = new AggregatingSimpleStatsReporter(aggr, 1);
+        StatsReporter sysCpuRep  = new AggregatingSimpleStatsReporter(aggr, 1);
         
-        SensorDemon<?> firstCpuDemon = new SensorDemon<List<ProcCpuSensor.ProcCpuMeasure>>(
-            new ProcCpuSensor(new PidProvider.CurPidProvider()), new ProcCpuReporter("SINCOS", firstCpuRep)
+        SensorDemon<?> tanCpuDemon = new SensorDemon<List<ProcCpuSensor.ProcCpuMeasure>>(
+            new ProcCpuSensor(newPidProvider()), new ProcCpuReporter("TAN_CPU", tanCpuRep)
         );
-        
-        SensorDemon<?> secondCpuDemon = new SensorDemon<List<ProcCpuSensor.ProcCpuMeasure>>(
-            new ProcCpuSensor(new PidProvider.CurPidProvider()), new ProcCpuReporter("TAN", secondCpuRep)
+
+        SensorDemon<?> sysCpuDemon = new SensorDemon<IntervalMeasure<Cpu>>(
+            new SysCpuSensor(), new SysCpuReporter("SYS_CPU", sysCpuRep)
         );
         
         SensorDemon<?> netStatsDemon = new SensorDemon<List<NetInterfaceSensor.InterfaceMeasure>>(
-            new NetInterfaceSensor(), new NetInterfaceReporter("net", netStatsRep)
+            new NetInterfaceSensor(), new NetInterfaceReporter("net", netStatRep)
         );
         
         Scenario first = new ParScenario(Arrays.asList(sinCalcScen, cosCalcScen));
-        Scenario firstCpu = DemonScenario.newInstance("FirstCpu", first, Collections.singleton(SIN), Collections.<Callable<Void>>singleton(firstCpuDemon));
         
-        Scenario secondCpu = DemonScenario.newInstance("SecondCpu", tanCalsScen, Collections.singleton(COS), Collections.<Callable<Void>>singleton(secondCpuDemon));
+        Scenario second = DemonScenario.newInstance(
+            "TanCpu", tanCalsScen, Collections.singleton(COS), Arrays.<Callable<Void>>asList(tanCpuDemon, sysCpuDemon)
+        );
 
-        //Scenario whole = SeqScenario(Arrays.asList(init, first, tanCalsScen)); 
-        Scenario whole = new SeqScenario(Arrays.asList(init, firstCpu, secondCpu));
+        Scenario whole = new SeqScenario(Arrays.asList(init, first, second));
         
-        return DemonScenario.newInstance("Whole", whole, Collections.singleton(SIN), Collections.<Callable<Void>>singleton(netStatsDemon));
+        return DemonScenario.newInstance("Whole", whole, Collections.singleton(SIN), Arrays.<Callable<Void>>asList(netStatsDemon));
     }    
+    
+    private static PidProvider newPidProvider() {
+        Predicate<Properties> propsPred = new Predicate<Properties>() {
+            @Override
+            public boolean apply(Properties input) {
+                return "a".equals(input.getProperty("a"));
+            }
+        };
+        
+        return new PidProvider.JavaPidProvider(Predicates.containsPattern("Bootstraper"), propsPred);
+    }
     
     @SuppressWarnings("serial")
     public static class InitTask implements Task {
@@ -230,6 +255,7 @@ public class Trigonometry {
 
         @Override
         public void excute(Context context) throws Exception {
+            System.setProperty("a", "a");
             Thread.sleep(250);
             context.getLogger().info("log " + name);
             context.getAttrsMap().put(funcName, func);

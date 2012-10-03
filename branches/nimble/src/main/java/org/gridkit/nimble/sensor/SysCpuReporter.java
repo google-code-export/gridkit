@@ -55,9 +55,7 @@ public class SysCpuReporter implements Sensor.Reporter<IntervalMeasure<Cpu>>, Se
             double timeMs = StatsOps.convert(m.getRightTsNs() - m.getLeftTsNs(), TimeUnit.NANOSECONDS, TimeUnit.MILLISECONDS);
             
             sample.put(mark(SAMPLER_NAME, statistica, MS), timeMs);
-            
-            System.err.println((rightCpu.getTotal() - leftCpu.getTotal()) / timeMs);
-            
+                        
             statsReporter.report(sample);
 
         }

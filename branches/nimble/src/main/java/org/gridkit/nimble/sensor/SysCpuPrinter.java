@@ -36,6 +36,8 @@ public class SysCpuPrinter extends AbstractSimpleStatsLinePrinter {
         context.cell("Stolen",  stolen.getSum()  / time.getSum());
         context.cell("Tot",     tot.getSum()     / time.getSum());
         
+        context.cell("# of Mesures", time.getN());
+        
         context.newline();
     }
 }
