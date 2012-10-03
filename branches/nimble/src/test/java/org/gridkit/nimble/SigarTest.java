@@ -1,11 +1,14 @@
 package org.gridkit.nimble;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.gridkit.nimble.print.PrettyPrinter;
+import org.gridkit.nimble.print.TablePrinter;
 import org.gridkit.nimble.sensor.IntervalMeasure;
 import org.gridkit.nimble.sensor.PidProvider;
 import org.gridkit.nimble.sensor.ProcCpuReporter;
@@ -14,9 +17,10 @@ import org.gridkit.nimble.sensor.SensorDemon;
 import org.gridkit.nimble.statistics.StatsReporter;
 import org.gridkit.nimble.statistics.simple.AggregatingSimpleStatsReporter;
 import org.gridkit.nimble.statistics.simple.QueuedSimpleStatsAggregator;
-import org.gridkit.nimble.statistics.simple.SimplePrettyPrinter;
-import org.gridkit.nimble.statistics.simple.SimplePrinter;
 import org.gridkit.nimble.statistics.simple.SimpleStatsAggregator;
+import org.gridkit.nimble.statistics.simple.SimpleStatsTablePrinter;
+import org.gridkit.nimble.statistics.simple.SimpleStatsTablePrinter.SimpleStatsLinePrinter;
+import org.gridkit.nimble.statistics.simple.WhitelistPrinter;
 import org.hyperic.sigar.ProcCpu;
 import org.junit.Ignore;
 
@@ -49,10 +53,13 @@ public class SigarTest {
         Thread.sleep(10000);
         
         executor.shutdownNow();
+                
+        TablePrinter tablePrinter = new PrettyPrinter();
         
-        SimplePrinter printer = new SimplePrettyPrinter();
-        
-        printer.printValues(System.err, aggr.calculate());
+        SimpleStatsTablePrinter statsPrinter = new SimpleStatsTablePrinter();
+
+        statsPrinter.setStatsPrinters(Collections.<SimpleStatsLinePrinter>singletonList(new WhitelistPrinter()));
+        statsPrinter.print(System.err, tablePrinter, aggr.calculate());
     }
     
     private static class SinCalc implements Callable<Void> {

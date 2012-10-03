@@ -8,24 +8,19 @@ import java.util.Map;
 
 import org.gridkit.nimble.print.LinePrinter;
 import org.gridkit.nimble.print.LinePrinter.Contetx;
-import org.gridkit.nimble.print.PrettyPrinter;
 import org.gridkit.nimble.print.TablePrinter;
 
 public class SimpleStatsTablePrinter { 
-    public static final String NAME = "Name";
-    
     public interface SimpleStatsLinePrinter {
         public void print(SimpleStats stats, LinePrinter.Contetx context);
     }
-    
-    private TablePrinter tablePrinter = new PrettyPrinter();
-    
+        
     private List<SimpleStatsLinePrinter> statsPrinters = new ArrayList<SimpleStatsLinePrinter>();
     
     private Map<String, Object> leftConsts = new HashMap<String, Object>();
     private Map<String, Object> rightConsts = new HashMap<String, Object>();
 
-    public void print(PrintStream stream, SimpleStats stats) {
+    public void print(PrintStream stream, TablePrinter tablePrinter, SimpleStats stats) {
         tablePrinter.print(stream, new InternalLinePrinter(stats));
     }
     
@@ -81,14 +76,6 @@ public class SimpleStatsTablePrinter {
                 cell(entry.getKey(), entry.getValue());
             }
         }
-    }
-    
-    public TablePrinter getTablePrinter() {
-        return tablePrinter;
-    }
-
-    public void setTablePrinter(TablePrinter tablePrinter) {
-        this.tablePrinter = tablePrinter;
     }
     
     public Map<String, Object> getLeftConsts() {

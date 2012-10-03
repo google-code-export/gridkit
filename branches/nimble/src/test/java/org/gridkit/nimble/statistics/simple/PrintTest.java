@@ -1,15 +1,10 @@
 package org.gridkit.nimble.statistics.simple;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-
-import org.gridkit.nimble.platform.TimeService;
-import org.gridkit.nimble.statistics.SmartReporter;
 import org.junit.Ignore;
 
 @Ignore
 public class PrintTest {
+    /*
     public static void main(String[] args) throws InterruptedException, IOException {
         SimpleStats stats = gerateStats();
         
@@ -60,4 +55,5 @@ public class PrintTest {
             return System.nanoTime();
         }
     };
+    */
 }

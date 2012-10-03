@@ -9,8 +9,10 @@ import org.gridkit.nimble.statistics.StatsReporter;
 
 @SuppressWarnings("serial")
 public class NetInterfaceReporter implements Sensor.Reporter<List<NetInterfaceSensor.InterfaceMeasure>>, Serializable {
-    public static String SENT_BYTES_SUFFIX = ".SENT";
-    public static String RECEIVED_BYTES_SUFFIX = ".RECEIVED";
+    public static final String SAMPLER_NAME = "ni";
+    
+    public static String SENT_BYTES     = "SENT";
+    public static String RECEIVED_BYTES = "RECEIVED";
     
     public static String TOTAL_INTERFACE = "TOTAL";
     
@@ -63,10 +65,10 @@ public class NetInterfaceReporter implements Sensor.Reporter<List<NetInterfaceSe
     }
     
     public static String getSentBytesStatsName(String inter) {
-        return inter.toUpperCase() + SENT_BYTES_SUFFIX;
+        return inter.toUpperCase() + SENT_BYTES;
     }
     
     public static String getReceivedBytesStatsName(String inter) {
-        return inter.toUpperCase() + RECEIVED_BYTES_SUFFIX;
+        return inter.toUpperCase() + RECEIVED_BYTES;
     }
 }
