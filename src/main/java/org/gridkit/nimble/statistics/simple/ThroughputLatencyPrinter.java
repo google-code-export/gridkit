@@ -41,11 +41,19 @@ public class ThroughputLatencyPrinter extends AbstractSimpleStatsLinePrinter {
                 context.cell("Sd (ms^2)", ltStats.getStandardDeviation());
                 context.cell("Min (ms)",  ltStats.getMin());
                 context.cell("Max (ms)",  ltStats.getMax());
+            } else {
+                context.cell("Mean (ms)", "");
+                context.cell("Sd (ms^2)", "");
+                context.cell("Min (ms)",  "");
+                context.cell("Max (ms)",  "");
             }
             
             if (thStats != null) {
                 context.cell("Th (osp/s)", thStats.getThroughput(TimeUnit.SECONDS));
                 context.cell("Dur (s)", thStats.getDuration(TimeUnit.SECONDS));
+            } else {
+                context.cell("Th (osp/s)", "");
+                context.cell("Dur (s)", "");
             }
             
             context.newline();
