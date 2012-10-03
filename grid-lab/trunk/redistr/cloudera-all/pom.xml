@@ -997,6 +997,12 @@
 		<dependency>
 			<groupId>org.apache.mahout</groupId>
 			<artifactId>mahout-math</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>jfree</groupId>
+					<artifactId>jfreechart</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.whirr</groupId>
