@@ -3,6 +3,7 @@ package org.gridkit.nimble.sensor;
 import java.util.concurrent.TimeUnit;
 
 import org.gridkit.nimble.statistics.StatsOps;
+import org.gridkit.nimble.util.Pair;
 
 public class IntervalMeasure<S> {
     private long leftTsNs;
@@ -10,6 +11,16 @@ public class IntervalMeasure<S> {
     
     private S leftState;
     private S rightState;
+    
+    public IntervalMeasure() {}
+    
+    public IntervalMeasure(Pair<Long, S> left, Pair<Long, S> right) {
+        this.leftTsNs = left.getA();
+        this.rightTsNs = right.getA();
+        
+        this.leftState = left.getB();
+        this.rightState = right.getB();
+    }
     
     public double getInterval(TimeUnit unit) {
         return StatsOps.convert(rightTsNs - leftTsNs, TimeUnit.NANOSECONDS, unit);

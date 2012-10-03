@@ -52,7 +52,13 @@ public class ThroughputLatencyPrinter extends AbstractSimpleStatsLinePrinter {
         }
     }
     
-    private StatisticalSummary getLatency(Map<String, StatisticalSummary> aggregates, TimeUnit timeUnit) {
+    public static StatisticalSummary getLatency(String statistica, SimpleStats stats, TimeUnit timeUnit) {
+        Map<String, StatisticalSummary> unmarked = SimpleStatsOps.unmark(stats.toMap()).get(ThroughputLatencyReporter.SAMPLER_NAME);
+        unmarked = SimpleStatsOps.unmark(unmarked).get(statistica);
+        return getLatency(unmarked, timeUnit);
+    }
+    
+    private static StatisticalSummary getLatency(Map<String, StatisticalSummary> aggregates, TimeUnit timeUnit) {
         StatisticalSummary vs = aggregates.get(ThroughputLatencyReporter.TIME_NS);
         
         if (vs == null) {
@@ -62,7 +68,7 @@ public class ThroughputLatencyPrinter extends AbstractSimpleStatsLinePrinter {
         }
     }
     
-    private ThroughputSummary getThroughput(Map<String, StatisticalSummary> aggregates, double scale) {
+    private static ThroughputSummary getThroughput(Map<String, StatisticalSummary> aggregates, double scale) {
         if (!isThroughput(aggregates)) {
             return null;
         }

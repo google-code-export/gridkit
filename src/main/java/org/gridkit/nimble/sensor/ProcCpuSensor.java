@@ -13,13 +13,13 @@ import java.util.concurrent.TimeUnit;
 
 import org.gridkit.nimble.util.Pair;
 import org.gridkit.nimble.util.SetOps;
-import org.hyperic.sigar.ProcCpu;
+import org.hyperic.sigar.ProcTime;
 import org.hyperic.sigar.SigarException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
-public class ProcCpuSensor extends IntervalMeasureSensor<List<ProcCpuSensor.ProcCpuMeasure>, Map<Long, Pair<Long, ProcCpu>>> {
+public class ProcCpuSensor extends IntervalMeasureSensor<List<ProcCpuSensor.ProcCpuMeasure>, Map<Long, Pair<Long, ProcTime>>> {
     private static final Logger log = LoggerFactory.getLogger(ProcCpuSensor.class);
     
     private static long MIN_MEASURE_INTERVAL_MS = 3;
@@ -29,7 +29,7 @@ public class ProcCpuSensor extends IntervalMeasureSensor<List<ProcCpuSensor.Proc
     
     private transient Set<Long> pids;
 
-    public static class ProcCpuMeasure extends IntervalMeasure<ProcCpu> {
+    public static class ProcCpuMeasure extends IntervalMeasure<ProcTime> {
         private long pid;
 
         public long getPid() {
@@ -44,6 +44,7 @@ public class ProcCpuSensor extends IntervalMeasureSensor<List<ProcCpuSensor.Proc
     public ProcCpuSensor(PidProvider pidProvider, long measureInterval, TimeUnit unit, boolean refreshPids) {
         super(Math.max(unit.toMillis(measureInterval), TimeUnit.SECONDS.toMillis(MIN_MEASURE_INTERVAL_MS)));
         this.pidProvider = pidProvider;
+        this.refreshPids = refreshPids;
     }
     
     public ProcCpuSensor(PidProvider pidProvider, long measureIntervalS, boolean refreshPids) {
@@ -55,12 +56,12 @@ public class ProcCpuSensor extends IntervalMeasureSensor<List<ProcCpuSensor.Proc
     }
 
     @Override
-    protected Map<Long, Pair<Long, ProcCpu>> getState() {
-        Map<Long, Pair<Long, ProcCpu>> result = new HashMap<Long, Pair<Long, ProcCpu>>();
+    protected Map<Long, Pair<Long, ProcTime>> getState() {
+        Map<Long, Pair<Long, ProcTime>> result = new HashMap<Long, Pair<Long, ProcTime>>();
         
         for (Long pid : getPids()) {
             try {
-                result.put(pid, Pair.newPair(System.nanoTime(), getSigar().getProcCpu(pid)));
+                result.put(pid, Pair.newPair(System.nanoTime(), getSigar().getProcTime(pid)));
             } catch (SigarException e) {
                 log.error(F("Error while getting processes CPU usage for pid '%d'", pid), e);
                 invalidate(pid);
@@ -71,14 +72,14 @@ public class ProcCpuSensor extends IntervalMeasureSensor<List<ProcCpuSensor.Proc
     }
 
     @Override
-    protected List<ProcCpuMeasure> getMeasure(Map<Long, Pair<Long, ProcCpu>> leftState, Map<Long, Pair<Long, ProcCpu>> rightState) {
+    protected List<ProcCpuMeasure> getMeasure(Map<Long, Pair<Long, ProcTime>> leftState, Map<Long, Pair<Long, ProcTime>> rightState) {
         List<ProcCpuMeasure> result = new ArrayList<ProcCpuMeasure>();
         
         for (Long pid : SetOps.<Long>intersection(leftState.keySet(), rightState.keySet())) {
             ProcCpuMeasure measure = new ProcCpuMeasure();
             
-            Pair<Long, ProcCpu> left = leftState.get(pid);
-            Pair<Long, ProcCpu> right = rightState.get(pid);
+            Pair<Long, ProcTime> left = leftState.get(pid);
+            Pair<Long, ProcTime> right = rightState.get(pid);
             
             measure.setLeftTsNs(left.getA());
             measure.setLeftState(left.getB());

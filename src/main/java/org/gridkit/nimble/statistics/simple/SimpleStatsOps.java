@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 
@@ -34,7 +35,7 @@ public class SimpleStatsOps {
     }
     
     public static Map<String, Map<String, StatisticalSummary>> unmark(Map<String, StatisticalSummary> aggregates) {        
-        Map<String, Map<String, StatisticalSummary>> result = new HashMap<String, Map<String, StatisticalSummary>>();
+        Map<String, Map<String, StatisticalSummary>> result = new TreeMap<String, Map<String, StatisticalSummary>>();
         
         for (Map.Entry<String, StatisticalSummary> entry : aggregates.entrySet()) {
             List<String> marks = unmark(entry.getKey());
