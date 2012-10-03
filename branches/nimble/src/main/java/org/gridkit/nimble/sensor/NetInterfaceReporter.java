@@ -1,74 +1,63 @@
 package org.gridkit.nimble.sensor;
 
+import static org.gridkit.nimble.statistics.simple.SimpleStatsOps.mark;
+
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.gridkit.nimble.sensor.NetInterfaceSensor.InterfaceMeasure;
+import org.gridkit.nimble.statistics.StatsOps;
 import org.gridkit.nimble.statistics.StatsReporter;
 
 @SuppressWarnings("serial")
 public class NetInterfaceReporter implements Sensor.Reporter<List<NetInterfaceSensor.InterfaceMeasure>>, Serializable {
     public static final String SAMPLER_NAME = "ni";
     
-    public static String SENT_BYTES     = "SENT";
-    public static String RECEIVED_BYTES = "RECEIVED";
+    public static String SENT_BYTES     = "sent";
+    public static String RECEIVED_BYTES = "received";
+    public static String MS             = "ms";
     
-    public static String TOTAL_INTERFACE = "TOTAL";
-    
-    private SensorReporter reporter;
+    private String statistica;
     private Set<String> interfaces;
+    private StatsReporter reporter;
     
-    public NetInterfaceReporter(StatsReporter reporter, Set<String> interfaces) {
-        this.reporter = new SensorReporter(reporter);
+    public NetInterfaceReporter(String statistica, Set<String> interfaces, StatsReporter reporter) {
+        this.statistica = statistica;
+        this.reporter = reporter;
         this.interfaces = interfaces;
     }
     
-    public NetInterfaceReporter(StatsReporter reporter) {
-        this(reporter, null);
+    public NetInterfaceReporter(String statistica, StatsReporter reporter) {
+        this(statistica, null, reporter);
     }
 
     @Override
-    public void report(List<InterfaceMeasure> measures) {
-        long totalSent = 0;
-        long totalReceived = 0;
-        
-        long minLeftTs = Long.MAX_VALUE;
-        long minRightTs = Long.MAX_VALUE;
-        
+    public void report(List<InterfaceMeasure> measures) {        
         for (InterfaceMeasure measure : measures) {
-            long sent = measure.getRightState().getTxBytes() - measure.getLeftState().getTxBytes();
-            long received = measure.getRightState().getRxBytes() -  measure.getLeftState().getRxBytes();
-            
-            totalSent += sent;
-            totalReceived += received;
-            
-            minLeftTs = Math.min(minLeftTs, measure.getLeftTsNs());
-            minRightTs = Math.min(minRightTs, measure.getRightTsNs());
-            
-            long timeNs = measure.getRightTsNs() - measure.getLeftTsNs();
-            
             if (isReported(measure.getInterfaceName())) {
-                reporter.report(getSentBytesStatsName(measure.getInterfaceName()), sent, timeNs);
-                reporter.report(getReceivedBytesStatsName(measure.getInterfaceName()), received, timeNs);
+                long sent = measure.getRightState().getTxBytes() - measure.getLeftState().getTxBytes();
+                long received = measure.getRightState().getRxBytes() -  measure.getLeftState().getRxBytes();
+                                            
+                Map<String, Object> sample = new HashMap<String, Object>();
+                
+                sample.put(mark(SAMPLER_NAME, statistica, measure.getInterfaceName(), SENT_BYTES),     sent);
+                sample.put(mark(SAMPLER_NAME, statistica, measure.getInterfaceName(), RECEIVED_BYTES), received);
+                
+                sample.put(
+                    mark(SAMPLER_NAME, statistica, measure.getInterfaceName(), MS),
+                    StatsOps.convert(measure.getRightTsNs() - measure.getLeftTsNs(), TimeUnit.NANOSECONDS, TimeUnit.MILLISECONDS)
+                );
+                
+                reporter.report(sample);
             }
          }
-         
-         long totalTime = minRightTs - minLeftTs;
-        
-         reporter.report(getSentBytesStatsName(TOTAL_INTERFACE), totalSent, totalTime);
-         reporter.report(getReceivedBytesStatsName(TOTAL_INTERFACE), totalReceived, totalTime);
     }
     
     private boolean isReported(String inter) {
         return interfaces == null ? true : interfaces.contains(inter);
-    }
-    
-    public static String getSentBytesStatsName(String inter) {
-        return inter.toUpperCase() + SENT_BYTES;
-    }
-    
-    public static String getReceivedBytesStatsName(String inter) {
-        return inter.toUpperCase() + RECEIVED_BYTES;
     }
 }

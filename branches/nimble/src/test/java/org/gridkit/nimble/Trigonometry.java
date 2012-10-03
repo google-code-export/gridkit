@@ -20,10 +20,11 @@ import org.gridkit.nimble.scenario.DemonScenario;
 import org.gridkit.nimble.scenario.ParScenario;
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.SeqScenario;
-import org.gridkit.nimble.sensor.IntervalMeasure;
+import org.gridkit.nimble.sensor.NetInterfacePrinter;
 import org.gridkit.nimble.sensor.NetInterfaceReporter;
 import org.gridkit.nimble.sensor.NetInterfaceSensor;
 import org.gridkit.nimble.sensor.PidProvider;
+import org.gridkit.nimble.sensor.ProcCpuPrinter;
 import org.gridkit.nimble.sensor.ProcCpuReporter;
 import org.gridkit.nimble.sensor.ProcCpuSensor;
 import org.gridkit.nimble.sensor.SensorDemon;
@@ -41,7 +42,6 @@ import org.gridkit.nimble.task.SimpleStatsReporterFactory;
 import org.gridkit.nimble.task.Task;
 import org.gridkit.nimble.task.TaskSLA;
 import org.gridkit.nimble.task.TaskScenario;
-import org.hyperic.sigar.ProcCpu;
 import org.junit.Test;
 
 import com.google.common.base.Function;
@@ -57,7 +57,7 @@ public class Trigonometry {
     
     private static final long NUMBERS = 10;
     private static final long ITERATIONS = 100000;
-    private static final long DURATION = 3; // seconds
+    private static final long DURATION = 15; // seconds
 
     private static LocalAgentFactory localFactory = new LocalAgentFactory();
     
@@ -115,28 +115,18 @@ public class Trigonometry {
         
         System.err.println();
         
-        statsPrinter.setStatsPrinters(Collections.<SimpleStatsLinePrinter>singletonList(new WhitelistPrinter()));
+        statsPrinter.setStatsPrinters(Collections.<SimpleStatsLinePrinter>singletonList(new ProcCpuPrinter()));
         statsPrinter.print(System.err, tablePrinter, stats);
         
-        /*
-        Set<String> inters = new TreeSet<String>(Arrays.asList(SigarFactory.newSigar().getNetInterfaceList()));
-        inters.add(NetInterfaceReporter.TOTAL_INTERFACE);
+        System.err.println();
         
-        for (String inter : inters) {
-            ThroughputSummary sentTh = SensorReporter.getThroughput(
-                NetInterfaceReporter.getSentBytesStatsName(inter), stats, 1.0 / 1024.0 / 1024.0
-            );
-            
-            ThroughputSummary receivedTh = SensorReporter.getThroughput(
-                NetInterfaceReporter.getReceivedBytesStatsName(inter), stats, 1.0 / 1024.0 / 1024.0
-            );
-            
-            System.err.println("Send Th for " + inter + " = " + sentTh.getThroughput(TimeUnit.SECONDS));
-            System.err.println("Receive Th for " + inter + " = " + receivedTh.getThroughput(TimeUnit.SECONDS));
-            System.err.println("Total Send for " + inter + " = " + sentTh.getSum());
-            System.err.println("Total Received for " + inter + " = " + receivedTh.getSum());
-            System.err.println();
-        }*/
+        statsPrinter.setStatsPrinters(Collections.<SimpleStatsLinePrinter>singletonList(new NetInterfacePrinter()));
+        statsPrinter.print(System.err, tablePrinter, stats);
+        
+        System.err.println();
+        
+        statsPrinter.setStatsPrinters(Collections.<SimpleStatsLinePrinter>singletonList(new WhitelistPrinter()));
+        statsPrinter.print(System.err, tablePrinter, stats);
     }
     
     private static Scenario getScenario(long numbers, long iterations, long duration, SimpleStatsAggregator aggr) {
@@ -203,16 +193,16 @@ public class Trigonometry {
         StatsReporter firstCpuRep = new AggregatingSimpleStatsReporter(aggr, 1);
         StatsReporter secondCpuRep = new AggregatingSimpleStatsReporter(aggr, 1);
         
-        SensorDemon<?> firstCpuDemon = new SensorDemon<List<IntervalMeasure<ProcCpu>>>(
+        SensorDemon<?> firstCpuDemon = new SensorDemon<List<ProcCpuSensor.ProcCpuMeasure>>(
             new ProcCpuSensor(new PidProvider.CurPidProvider()), new ProcCpuReporter("SINCOS", firstCpuRep)
         );
         
-        SensorDemon<?> secondCpuDemon = new SensorDemon<List<IntervalMeasure<ProcCpu>>>(
+        SensorDemon<?> secondCpuDemon = new SensorDemon<List<ProcCpuSensor.ProcCpuMeasure>>(
             new ProcCpuSensor(new PidProvider.CurPidProvider()), new ProcCpuReporter("TAN", secondCpuRep)
         );
         
         SensorDemon<?> netStatsDemon = new SensorDemon<List<NetInterfaceSensor.InterfaceMeasure>>(
-            new NetInterfaceSensor(), new NetInterfaceReporter(netStatsRep)
+            new NetInterfaceSensor(), new NetInterfaceReporter("net", netStatsRep)
         );
         
         Scenario first = new ParScenario(Arrays.asList(sinCalcScen, cosCalcScen));
