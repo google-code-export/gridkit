@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.gridkit.nimble.statistics.StatsOps;
 import org.gridkit.nimble.statistics.StatsReporter;
-import org.hyperic.sigar.ProcCpu;
+import org.hyperic.sigar.ProcTime;
 
 @SuppressWarnings("serial")
 public class ProcCpuReporter implements Sensor.Reporter<List<ProcCpuSensor.ProcCpuMeasure>>, Serializable {
@@ -34,8 +34,8 @@ public class ProcCpuReporter implements Sensor.Reporter<List<ProcCpuSensor.ProcC
     @Override
     public void report(List<ProcCpuSensor.ProcCpuMeasure> measures) {
         for (ProcCpuSensor.ProcCpuMeasure measure : measures) {
-            ProcCpu leftCpu = measure.getLeftState();
-            ProcCpu rightCpu = measure.getRightState();
+            ProcTime leftCpu = measure.getLeftState();
+            ProcTime rightCpu = measure.getRightState();
             
             Map<String, Object> sample = new HashMap<String, Object>();
             

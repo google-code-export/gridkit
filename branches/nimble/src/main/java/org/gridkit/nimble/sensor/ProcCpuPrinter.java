@@ -23,9 +23,9 @@ public class ProcCpuPrinter extends AbstractSimpleStatsLinePrinter {
         StatisticalSummary cnt = aggregates.get(ProcCpuReporter.CNT);
         
         if (time != null) {
-            context.cell("Usr",       usr.getSum() / time.getSum());
-            context.cell("Sys",       sys.getSum() / time.getSum());
-            context.cell("Tot",       tot.getSum() / time.getSum());
+            context.cell("Usr", usr.getSum() / time.getSum());
+            context.cell("Sys", sys.getSum() / time.getSum());
+            context.cell("Tot", tot.getSum() / time.getSum());
         }
         
         if (cnt != null) {

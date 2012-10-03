@@ -33,6 +33,10 @@ public class SimpleStats implements Serializable {
         return new HashSet<String>(valStats.keySet());
     }
     
+    public Map<String, StatisticalSummary> toMap() {
+        return new HashMap<String, StatisticalSummary>(valStats);
+    }
+    
     public static SimpleStats combine(SimpleStats s1, SimpleStats s2) {
         return new SimpleStats(combine(s1.valStats, s2.valStats));
     }
