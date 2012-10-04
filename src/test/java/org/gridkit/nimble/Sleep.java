@@ -14,7 +14,6 @@ import org.gridkit.nimble.scenario.ExecScenario.Executable;
 import org.gridkit.nimble.scenario.ParScenario;
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.SeqScenario;
-import org.gridkit.nimble.statistics.simple.SimpleStats;
 import org.junit.Test;
 import org.slf4j.Logger;
 
@@ -36,7 +35,7 @@ public class Sleep {
     }
     
     public static void test(RemoteAgent agent) throws Exception {
-        Director<SimpleStats> director = new Director<SimpleStats>(Collections.singletonList(agent));
+        Director director = new Director(Collections.singletonList(agent));
         
         Scenario s1 = new ExecScenario(new SimpleExecutable("A"), agent);
         Scenario s2 = new ExecScenario(new SimpleExecutable("B"), agent);

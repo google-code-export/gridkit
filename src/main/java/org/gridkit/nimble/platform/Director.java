@@ -12,7 +12,7 @@ import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.util.NamedThreadFactory;
 import org.gridkit.nimble.util.ValidOps;
 
-public class Director<T> {
+public class Director {
     private final Collection<RemoteAgent> agents;
     private final ExecutorService executor;
 

@@ -15,7 +15,6 @@ import org.gridkit.nimble.platform.remote.LocalAgentFactory;
 import org.gridkit.nimble.scenario.Scenario;
 import org.gridkit.nimble.scenario.SeqScenario;
 import org.gridkit.nimble.statistics.simple.QueuedSimpleStatsAggregator;
-import org.gridkit.nimble.statistics.simple.SimpleStats;
 import org.gridkit.nimble.statistics.simple.SimpleStatsAggregator;
 import org.gridkit.nimble.task.SimpleStatsReporterFactory;
 import org.gridkit.nimble.task.Task;
@@ -52,7 +51,7 @@ public class RemotePushTopicTest {
         RemoteAgent subscriber1 = localFactory.createAgent("subscriber1", SUBSCRIBER);
         RemoteAgent subscriber2 = localFactory.createAgent("subscriber2", SUBSCRIBER);
                 
-        Director<SimpleStats> director = new Director<SimpleStats>(
+        Director director = new Director(
             Arrays.asList(publisher, subscriber1, subscriber2)
         );
 
