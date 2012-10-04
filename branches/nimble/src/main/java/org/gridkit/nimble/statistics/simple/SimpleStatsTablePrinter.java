@@ -73,7 +73,7 @@ public class SimpleStatsTablePrinter {
         
         private void printConsts(Map<String, Object> consts) {
             for (Map.Entry<String, Object> entry : consts.entrySet()) {
-                cell(entry.getKey(), entry.getValue());
+                context.cell(entry.getKey(), entry.getValue());
             }
         }
     }

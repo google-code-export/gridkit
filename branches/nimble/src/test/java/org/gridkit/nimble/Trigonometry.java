@@ -95,7 +95,7 @@ public class Trigonometry {
         RemoteAgent sinAgent = createAgent(mode, SIN);
         RemoteAgent cosAgent = createAgent(mode, COS);
         
-        Director<SimpleStats> director = new Director<SimpleStats>(Arrays.asList(sinAgent, cosAgent));
+        Director director = new Director(Arrays.asList(sinAgent, cosAgent));
 
         SimpleStatsAggregator wAggr = new QueuedSimpleStatsAggregator();        
         SimpleStatsAggregator rAggr = new QueuedSimpleStatsAggregator();
@@ -238,7 +238,9 @@ public class Trigonometry {
             }
         };
         
-        return new PidProvider.JavaPidProvider(Predicates.containsPattern("Bootstraper"), propsPred);
+        Predicate<String> namePred = Predicates.and(Predicates.alwaysTrue(), Predicates.containsPattern("Bootstraper"));
+        
+        return new PidProvider.JavaPidProvider(namePred, propsPred);
     }
     
     @SuppressWarnings("serial")
