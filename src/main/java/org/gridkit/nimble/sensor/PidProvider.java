@@ -8,8 +8,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.gridkit.nimble.util.JvmOps;
 import org.hyperic.sigar.SigarException;
@@ -131,4 +135,70 @@ public interface PidProvider {
             return result;
         }
     }
+
+	@SuppressWarnings("serial")
+	public static class PatternJvmPidProvider implements PidProvider, Serializable {        
+	    
+	    private final Map<String, Pattern> patterns = new LinkedHashMap<String, Pattern>();
+	
+	    public PatternJvmPidProvider() {
+	    }
+
+	    public void matchVmName(String pattern) {
+	    	matchProp(":name", pattern);
+	    }
+	    
+	    public void matchProp(String prop, String pattern) {
+	    	Pattern p = Pattern.compile(pattern);
+	    	patterns.put(prop, p);
+	    }
+
+	    public void matchPropExact(String prop, String pattern) {
+	    	matchProp(prop, Pattern.quote(pattern));
+	    }
+	
+	    @Override
+	    public Collection<Long> getPids() {
+	        Collection<Long> pids = new HashSet<Long>();
+	        
+	        List<VirtualMachineDescriptor> descs = new ArrayList<VirtualMachineDescriptor>(JvmOps.listVms());
+	        Collections.shuffle(descs);
+	        
+	        nextVm:
+	        for (VirtualMachineDescriptor desc : descs) {
+	        	if (patterns.containsKey(":name")) {
+	        		if (!match(":name", desc.displayName())) {
+	        			continue;
+	        		}
+	        	}
+	            
+	            Properties props = JvmOps.getProps(desc);
+	            
+	            for(String prop: patterns.keySet()) {
+	            	if (!prop.startsWith(":")) {
+	            		if (!match(prop, props.getProperty(prop))) {
+	            			continue nextVm;
+	            		}
+	            	}
+	            }
+	            
+	            pids.add(Long.parseLong(desc.id()));
+	        }
+	        
+//	        System.err.println(this.toString() + " -> " + pids.toString());
+	                                    
+	        return pids;
+	    }
+	    
+	    private boolean match(String prop, String value) {
+			Matcher matcher = patterns.get(prop).matcher(value);
+			return matcher.matches();
+		}
+
+
+		@Override
+	    public String toString() {
+	        return F("%s%s", getClass().getSimpleName(), patterns.toString());
+	    }
+	}
 }

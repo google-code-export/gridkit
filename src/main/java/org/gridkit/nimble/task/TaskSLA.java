@@ -29,7 +29,7 @@ public class TaskSLA implements Cloneable, Serializable {
     
     private Long finishDelay = null;
     
-    private Integer rate = null;
+    private Double rate = null;
     
     private Long iterationsCount = 1l; 
 
@@ -185,11 +185,11 @@ public class TaskSLA implements Cloneable, Serializable {
         this.finishDelay = TimeUnit.MILLISECONDS.convert(finishDelay, timeUnit);
     }
 
-    public Integer getRate() {
+    public Double getRate() {
         return rate;
     }
 
-    public void setRate(Integer rate) {
+    public void setRate(Double rate) {
         if (rate != null) {
             ValidOps.positive(rate, "rate");
         }
