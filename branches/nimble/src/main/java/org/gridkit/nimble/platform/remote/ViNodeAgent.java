@@ -2,6 +2,7 @@ package org.gridkit.nimble.platform.remote;
 
 import static org.gridkit.nimble.util.StringOps.F;
 
+import java.lang.reflect.UndeclaredThrowableException;
 import java.rmi.Remote;
 import java.util.Collections;
 import java.util.HashSet;
@@ -117,7 +118,12 @@ public class ViNodeAgent implements RemoteAgent {
             }
             
             if (execHandle != null) {
-               execHandle.cancel(hard);
+            	try {
+            		execHandle.cancel(hard);
+            	}
+            	catch(UndeclaredThrowableException e) {
+            		// ignore
+            	}
             } else {
                 throw new IllegalStateException();
             }

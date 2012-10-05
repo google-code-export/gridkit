@@ -21,9 +21,6 @@ import com.sun.tools.attach.VirtualMachineDescriptor;
 public class JvmOps {
     private static final Logger log = LoggerFactory.getLogger(JvmOps.class);
     
-    private static LoadingCache<VirtualMachineDescriptor, Properties> vmPropsCache =
-        CacheBuilder.newBuilder().expireAfterWrite(15, TimeUnit.MINUTES).build(new JvmPropsLoader());
-        
     static {
         try {
             String javaHome = System.getProperty("java.home");
@@ -39,6 +36,9 @@ public class JvmOps {
             log.error("Failed to add tools.jar to classpath", e);
         }
     }
+
+    private static LoadingCache<VirtualMachineDescriptor, Properties> vmPropsCache =
+            CacheBuilder.newBuilder().expireAfterWrite(15, TimeUnit.MINUTES).build(new JvmPropsLoader());
     
     private static class JvmPropsLoader extends CacheLoader<VirtualMachineDescriptor, Properties> {
         @Override
