@@ -43,6 +43,14 @@ public class ValidOps {
             throw new IllegalArgumentException(shouldBe(name, "positive")); 
         }
     }
+
+    public static void positive(Double num, String name) {
+    	notNull(num, name);
+    	
+    	if (num <= 0) {
+    		throw new IllegalArgumentException(shouldBe(name, "positive")); 
+    	}
+    }
     
     public static void positive(Long num, String name) {
         notNull(num, name);
