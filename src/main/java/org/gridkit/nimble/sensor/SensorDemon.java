@@ -10,20 +10,34 @@ import org.slf4j.LoggerFactory;
 public class SensorDemon<M> implements Callable<Void>, Serializable {
     private static final Logger log = LoggerFactory.getLogger(SensorDemon.class);
     
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public static <M, N> SensorDemon<M> create(Sensor<M> sensor, Sensor.Reporter<N> reporter, long interval) {
+    	return new SensorDemon(sensor, reporter, interval);
+    }
+    
     private Sensor<M> sensor;
     private Sensor.Reporter<M> reporter;
     private boolean ignoreFailures;
+    private long delay;
 
     public SensorDemon(Sensor<M> sensor, Sensor.Reporter<M> reporter) {
+    	this(sensor, reporter, 0);
+    }
+    
+    public SensorDemon(Sensor<M> sensor, Sensor.Reporter<M> reporter, long delayMillis) {
         this.sensor = sensor;
         this.reporter = reporter;
         this.ignoreFailures = true;
+        this.delay = delayMillis;
     }
 
     @Override
     public Void call() throws Exception {
         while (!Thread.interrupted()) {
             try {
+                if (delay > 0) {
+                	Thread.sleep(delay);
+                }
                 M m = sensor.measure();
                 reporter.report(m);
             } catch (InterruptedException e) {
@@ -39,5 +53,10 @@ public class SensorDemon<M> implements Callable<Void>, Serializable {
         }
         
         return null;
+    }
+    
+    @Override
+    public String toString() {
+    	return "SensorDemon:" + sensor;
     }
 }

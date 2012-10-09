@@ -8,13 +8,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.gridkit.nimble.sensor.JvmMatcher.PatternJvmMatcher;
 import org.gridkit.nimble.util.JvmOps;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.ptql.ProcessFinder;
@@ -25,6 +23,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.sun.tools.attach.VirtualMachineDescriptor;
 
+@SuppressWarnings("restriction")
 public interface PidProvider {
     Collection<Long> getPids();
     
@@ -139,7 +138,7 @@ public interface PidProvider {
 	@SuppressWarnings("serial")
 	public static class PatternJvmPidProvider implements PidProvider, Serializable {        
 	    
-	    private final Map<String, Pattern> patterns = new LinkedHashMap<String, Pattern>();
+	    private final PatternJvmMatcher matcher = new PatternJvmMatcher();
 	
 	    public PatternJvmPidProvider() {
 	    }
@@ -149,8 +148,7 @@ public interface PidProvider {
 	    }
 	    
 	    public void matchProp(String prop, String pattern) {
-	    	Pattern p = Pattern.compile(pattern);
-	    	patterns.put(prop, p);
+	    	matcher.matchProp(prop, pattern);
 	    }
 
 	    public void matchPropExact(String prop, String pattern) {
@@ -159,46 +157,19 @@ public interface PidProvider {
 	
 	    @Override
 	    public Collection<Long> getPids() {
-	        Collection<Long> pids = new HashSet<Long>();
-	        
-	        List<VirtualMachineDescriptor> descs = new ArrayList<VirtualMachineDescriptor>(JvmOps.listVms());
-	        Collections.shuffle(descs);
-	        
-	        nextVm:
-	        for (VirtualMachineDescriptor desc : descs) {
-	        	if (patterns.containsKey(":name")) {
-	        		if (!match(":name", desc.displayName())) {
-	        			continue;
-	        		}
-	        	}
-	            
-	            Properties props = JvmOps.getProps(desc);
-	            
-	            for(String prop: patterns.keySet()) {
-	            	if (!prop.startsWith(":")) {
-	            		if (!match(prop, props.getProperty(prop))) {
-	            			continue nextVm;
-	            		}
-	            	}
-	            }
-	            
-	            pids.add(Long.parseLong(desc.id()));
+	        List<Long> pids = new ArrayList<Long>();
+	        List<VirtualMachineDescriptor> vms = new ArrayList<VirtualMachineDescriptor>(JvmOps.listVms(matcher));
+	        for(VirtualMachineDescriptor vm: vms) {
+	        	pids.add(Long.parseLong(vm.id()));
 	        }
 	        
-//	        System.err.println(this.toString() + " -> " + pids.toString());
-	                                    
+	        Collections.shuffle(pids);
 	        return pids;
 	    }
 	    
-	    private boolean match(String prop, String value) {
-			Matcher matcher = patterns.get(prop).matcher(value);
-			return matcher.matches();
-		}
-
-
 		@Override
 	    public String toString() {
-	        return F("%s%s", getClass().getSimpleName(), patterns.toString());
+	        return matcher.toString();
 	    }
 	}
 }
