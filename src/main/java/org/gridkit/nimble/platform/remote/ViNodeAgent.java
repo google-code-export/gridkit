@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -55,10 +56,18 @@ public class ViNodeAgent implements RemoteAgent {
 	}
 
 	@Override
-	public <T> ListenableFuture<T> invoke(Invocable<T> invocable) {	    
+	public <T> ListenableFuture<T> invoke(final Invocable<T> invocable) {	    
 	    RemoteResultPromise<T> remoteResult = new RemoteResultPromise<T>();
+	    final RemoteResult<T> remoteResultHandle = remoteResult;
+	    
+	    final LocalAgentHandle localAgent = this.localAgent;
 
-	    RemoteExecutionHandle execHandle = localAgent.invoke(invocable, remoteResult);
+	    Future<RemoteExecutionHandle> execHandle = node.submit(new Callable<RemoteExecutionHandle>() {
+            @Override
+            public RemoteExecutionHandle call() throws Exception {
+               return localAgent.invoke(invocable, remoteResultHandle);
+            }
+	    });
 	    
 	    remoteResult.getResultFuture().setExecHandle(execHandle);
 	    
@@ -110,7 +119,9 @@ public class ViNodeAgent implements RemoteAgent {
 	}
 	
 	private static class RemoteResultFuture<T> extends AbstractFuture<T> {
-	    private RemoteExecutionHandle execHandle;
+	    private static final Logger log = LoggerFactory.getLogger(RemoteResultFuture.class);
+	    
+	    private Future<RemoteExecutionHandle> execHandle;
 	    
         public boolean cancel(boolean hard) {
             if (isDone()) {
@@ -119,11 +130,14 @@ public class ViNodeAgent implements RemoteAgent {
             
             if (execHandle != null) {
             	try {
-            		execHandle.cancel(hard);
-            	}
-            	catch(UndeclaredThrowableException e) {
+            		execHandle.get().cancel(hard);
+            	} catch(UndeclaredThrowableException e) {
             		// ignore
-            	}
+            	} catch (InterruptedException e) {
+            	    // ignore
+                } catch (ExecutionException e) {
+                    log.error("Error while waiting for RemoteExecutionHandle", e);
+                }
             } else {
                 throw new IllegalStateException();
             }
@@ -139,7 +153,7 @@ public class ViNodeAgent implements RemoteAgent {
             return super.setException(throwable);
         };
 
-	    public void setExecHandle(RemoteExecutionHandle execHandle) {
+	    public void setExecHandle(Future<RemoteExecutionHandle> execHandle) {
             this.execHandle = execHandle;
         }
 	}
