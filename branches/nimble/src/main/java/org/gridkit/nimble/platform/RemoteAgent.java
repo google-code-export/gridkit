@@ -34,5 +34,9 @@ public interface RemoteAgent {
         public T call() throws Exception {
             return delegate.call();
         }
+        
+        public String toString() {
+        	return delegate.toString();
+        }
     }
 }
