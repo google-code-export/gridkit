@@ -14,6 +14,10 @@ public class CacheTemplate {
 		props.setProp("cache-template.scheme", "distributed-scheme--local");
 	}
 
+	public static void usePartitionCount(ViProps props, int partCount) {
+		props.setProp("cache-template.distributed-scheme.partition-count", String.valueOf(partCount));
+	}
+
 	public static void usePartitionedReadWriteCache(ViProps props, Class<?> cacheStoreClass) {
 		props.setProp("cache-template.scheme", "distributed-scheme--read-write");
 		props.setProp("cache-template.read-write-backing-map.cache-store-class", cacheStoreClass.getName());
@@ -31,6 +35,30 @@ public class CacheTemplate {
 		props.setProp("cache-template.distributed-scheme.guardian-timeout", timeout);
 	}
 
+	public static void usePartitionedServiceTaskTimeout(ViCluster props, long timeout) {
+		usePartitionedServiceTaskTimeout(props, timeout + "ms");
+	}
+	
+	public static void usePartitionedServiceTaskTimeout(ViCluster props, String timeout) {
+		props.setProp("cache-template.distributed-scheme.task-timeout", timeout);
+	}
+	
+	public static void usePartitionedServiceTaskHungThreshold(ViCluster props, long timeout) {
+		usePartitionedServiceTaskHungThreshold(props, timeout + "ms");
+	}
+	
+	public static void usePartitionedServiceTaskHungThreshold(ViCluster props, String timeout) {
+		props.setProp("cache-template.distributed-scheme.task-hung-threshold", timeout);
+	}
+	
+	public static void usePartitionedServiceRequestTimeout(ViCluster props, long timeout) {
+		usePartitionedServiceRequestTimeout(props, timeout + "ms");
+	}
+	
+	public static void usePartitionedServiceRequestTimeout(ViCluster props, String timeout) {
+		props.setProp("cache-template.distributed-scheme.request-timeout", timeout);
+	}
+	
 	public static void useWriteDelay(ViProps props, String delay) {
 		props.setProp("cache-template.read-write-backing-map.write-delay", delay);
 	}

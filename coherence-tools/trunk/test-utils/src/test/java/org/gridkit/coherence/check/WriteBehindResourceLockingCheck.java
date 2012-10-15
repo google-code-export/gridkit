@@ -97,6 +97,8 @@ public class WriteBehindResourceLockingCheck {
 		}
 		catch(Exception e) {
 			// We have only one storage node
+			// once it is killed by guardian
+			// RequestPolicyException is expected
 			Assert.assertSame(RequestPolicyException.class, e.getCause().getCause().getClass());
 		}
 	}
