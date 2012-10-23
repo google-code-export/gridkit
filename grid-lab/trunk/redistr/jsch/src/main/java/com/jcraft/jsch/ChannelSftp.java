@@ -217,10 +217,9 @@ public class ChannelSftp extends ChannelSession{
   public void start() throws JSchException{
     try{
 
-      PipedOutputStream pos=new PipedOutputStream();
-      io.setOutputStream(pos);
-      PipedInputStream pis=new MyPipedInputStream(pos, rmpsize);
-      io.setInputStream(pis);
+      StreamPipe pipe = new StreamPipe(rmpsize);
+      io.setOutputStream(pipe.getOutputStream());
+      io.setInputStream(pipe.getInputStream());
 
       io_in=io.in;
 
@@ -307,7 +306,6 @@ public class ChannelSftp extends ChannelSession{
 
   public void cd(String path) throws SftpException{
     try{
-      ((MyPipedInputStream)io_in).updateReadSide();
 
       path=remoteAbsolutePath(path);
       path=isUnique(path);
@@ -348,7 +346,6 @@ public class ChannelSftp extends ChannelSession{
 		  SftpProgressMonitor monitor, int mode) throws SftpException{
 
     try{
-      ((MyPipedInputStream)io_in).updateReadSide();
 
       src=localAbsolutePath(src);
       dst=remoteAbsolutePath(dst);
@@ -463,7 +460,6 @@ public class ChannelSftp extends ChannelSession{
   public void put(InputStream src, String dst, 
 		  SftpProgressMonitor monitor, int mode) throws SftpException{
     try{
-      ((MyPipedInputStream)io_in).updateReadSide();
 
       dst=remoteAbsolutePath(dst);
 
@@ -505,8 +501,7 @@ public class ChannelSftp extends ChannelSession{
   public void _put(InputStream src, String dst, 
                    SftpProgressMonitor monitor, int mode) throws SftpException{
     try{
-      ((MyPipedInputStream)io_in).updateReadSide();
-
+    	
       byte[] dstb=Util.str2byte(dst, fEncoding);
       long skip=0;
       if(mode==RESUME || mode==APPEND){
@@ -651,7 +646,6 @@ public class ChannelSftp extends ChannelSession{
   }
   public OutputStream put(String dst, final SftpProgressMonitor monitor, final int mode, long offset) throws SftpException{
     try{
-      ((MyPipedInputStream)io_in).updateReadSide();
 
       dst=remoteAbsolutePath(dst);
       dst=isUnique(dst);
@@ -821,7 +815,6 @@ public class ChannelSftp extends ChannelSession{
     boolean _dstExist = false;
     String _dst=null;
     try{
-      ((MyPipedInputStream)io_in).updateReadSide();
 
       src=remoteAbsolutePath(src);
       dst=localAbsolutePath(dst);
@@ -929,7 +922,6 @@ public class ChannelSftp extends ChannelSession{
 		   SftpProgressMonitor monitor, int mode, long skip) throws SftpException{
 //System.err.println("get: "+src+", "+dst);
     try{
-      ((MyPipedInputStream)io_in).updateReadSide();
 
       src=remoteAbsolutePath(src);
       src=isUnique(src);
@@ -1176,7 +1168,6 @@ public class ChannelSftp extends ChannelSession{
   public InputStream get(String src, final SftpProgressMonitor monitor, final long skip) throws SftpException{
 
     try{
-      ((MyPipedInputStream)io_in).updateReadSide();
 
       src=remoteAbsolutePath(src);
       src=isUnique(src);
@@ -1420,7 +1411,6 @@ public class ChannelSftp extends ChannelSession{
    public void ls(String path, LsEntrySelector selector) throws SftpException{
      //System.out.println("ls: "+path);
      try{
-       ((MyPipedInputStream)io_in).updateReadSide();
 
        path=remoteAbsolutePath(path);
        byte[] pattern=null;
@@ -1609,8 +1599,6 @@ public class ChannelSftp extends ChannelSession{
                                  "The remote sshd is too old to support symlink operation.");
        }
 
-       ((MyPipedInputStream)io_in).updateReadSide();
-
        path=remoteAbsolutePath(path);
 
        path=isUnique(path);
@@ -1658,7 +1646,6 @@ public class ChannelSftp extends ChannelSession{
      }
 
      try{
-       ((MyPipedInputStream)io_in).updateReadSide();
 
        oldpath=remoteAbsolutePath(oldpath);
        newpath=remoteAbsolutePath(newpath);
@@ -1703,7 +1690,6 @@ public class ChannelSftp extends ChannelSession{
      }
 
      try{
-       ((MyPipedInputStream)io_in).updateReadSide();
 
        oldpath=remoteAbsolutePath(oldpath);
        newpath=remoteAbsolutePath(newpath);
@@ -1751,7 +1737,6 @@ public class ChannelSftp extends ChannelSession{
   }
   public void rm(String path) throws SftpException{
     try{
-      ((MyPipedInputStream)io_in).updateReadSide();
 
       path=remoteAbsolutePath(path);
 
@@ -1810,7 +1795,6 @@ public class ChannelSftp extends ChannelSession{
 
   public void chgrp(int gid, String path) throws SftpException{
     try{
-      ((MyPipedInputStream)io_in).updateReadSide();
 
       path=remoteAbsolutePath(path);
 
@@ -1836,7 +1820,6 @@ public class ChannelSftp extends ChannelSession{
 
   public void chown(int uid, String path) throws SftpException{
     try{
-      ((MyPipedInputStream)io_in).updateReadSide();
 
       path=remoteAbsolutePath(path);
 
@@ -1862,7 +1845,6 @@ public class ChannelSftp extends ChannelSession{
 
   public void chmod(int permissions, String path) throws SftpException{
     try{
-      ((MyPipedInputStream)io_in).updateReadSide();
 
       path=remoteAbsolutePath(path);
 
@@ -1888,7 +1870,6 @@ public class ChannelSftp extends ChannelSession{
 
   public void setMtime(String path, int mtime) throws SftpException{
     try{
-      ((MyPipedInputStream)io_in).updateReadSide();
 
       path=remoteAbsolutePath(path);
 
@@ -1914,7 +1895,6 @@ public class ChannelSftp extends ChannelSession{
 
   public void rmdir(String path) throws SftpException{
     try{
-      ((MyPipedInputStream)io_in).updateReadSide();
 
       path=remoteAbsolutePath(path);
 
@@ -1953,7 +1933,6 @@ public class ChannelSftp extends ChannelSession{
 
   public void mkdir(String path) throws SftpException{
     try{
-      ((MyPipedInputStream)io_in).updateReadSide();
 
       path=remoteAbsolutePath(path);
 
@@ -1984,7 +1963,6 @@ public class ChannelSftp extends ChannelSession{
 
   public SftpATTRS stat(String path) throws SftpException{
     try{
-      ((MyPipedInputStream)io_in).updateReadSide();
 
       path=remoteAbsolutePath(path);
       path=isUnique(path);
@@ -2037,7 +2015,6 @@ public class ChannelSftp extends ChannelSession{
 
   public SftpATTRS lstat(String path) throws SftpException{
     try{
-      ((MyPipedInputStream)io_in).updateReadSide();
 
       path=remoteAbsolutePath(path);
       path=isUnique(path);
@@ -2114,7 +2091,6 @@ public class ChannelSftp extends ChannelSession{
 
   public void setStat(String path, SftpATTRS attr) throws SftpException{
     try{
-      ((MyPipedInputStream)io_in).updateReadSide();
 
       path=remoteAbsolutePath(path);
 
@@ -2165,7 +2141,6 @@ public class ChannelSftp extends ChannelSession{
   public String getHome() throws SftpException {
     if(home==null){
       try{
-        ((MyPipedInputStream)io_in).updateReadSide();
 
         byte[] _home=_realpath("");
         home=Util.byte2str(_home, fEncoding);

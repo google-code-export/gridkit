@@ -20,7 +20,7 @@
 
     <groupId>com.jcraft</groupId>
     <artifactId>jsch</artifactId>
-    <version>0.1.49-pipe-fix</version>
+    <version>0.1.49-pipe-fix-b2</version>
     <packaging>jar</packaging>
     <name>${project.groupId}::${project.artifactId}</name>
     <description>Java Secure Channel</description>
