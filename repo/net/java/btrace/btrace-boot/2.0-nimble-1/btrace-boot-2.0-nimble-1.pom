@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <artifactId>btrace-parent</artifactId>
+    <groupId>net.java.btrace</groupId>
+    <version>2.0-nimble-1</version>
+    <relativePath>../btrace-parent/pom.xml</relativePath>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>btrace-boot</artifactId>
+  <name>Agent (Bootstrap)</name>
+  <description>An essential set of binaries to be loaded by the BTrace server.</description>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>1.7.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <filters>
+            <filter>
+              <artifact>*:*</artifact>
+              <includes>
+                <include>net/java/btrace/runtime/*</include>
+                <include>net/java/btrace/annotations/*</include>
+                <include>net/java/btrace/api/extensions/**</include>
+                <include>net/java/btrace/api/core/*</include>
+                <include>net/java/btrace/api/wireio/*</include>
+                <include>net/java/btrace/spi/**</include>
+                <include>net/java/btrace/wireio/**</include>
+              </includes>
+            </filter>
+          </filters>
+          <minimizeJar>true</minimizeJar>
+          <transformers>
+            <transformer>
+              <manifestEntries>
+                <BTrace-Boot>true</BTrace-Boot>
+              </manifestEntries>
+            </transformer>
+          </transformers>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+</project>
+
