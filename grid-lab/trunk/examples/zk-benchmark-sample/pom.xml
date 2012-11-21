@@ -3,10 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.gridkit.lab.examples</groupId>
-    <artifactId>nanocloud-getting-started</artifactId>
+    <artifactId>zk-benchmark-sample</artifactId>
     <version>0.1-SNAPSHOT</version>
 
-    <name>NanoCloud: Getting started guide</name>
+    <name>Nimble: ZooKeeper benchmark sample</name>
 
     <repositories>
         <!-- GridKit public maven repository -->
@@ -41,7 +41,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.10</version>
+            <version>4.11</version>
             <scope>test</scope>
         </dependency>
 
