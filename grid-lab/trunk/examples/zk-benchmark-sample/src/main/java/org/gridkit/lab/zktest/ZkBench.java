@@ -26,9 +26,12 @@ import org.gridkit.nimble.driver.ExecutionDriver.ExecutionConfig;
 import org.gridkit.nimble.driver.ExecutionHelper;
 import org.gridkit.nimble.driver.MeteringDriver;
 import org.gridkit.nimble.driver.PivotMeteringDriver;
+import org.gridkit.nimble.metering.DSpanReporter;
 import org.gridkit.nimble.metering.DTimeReporter;
 import org.gridkit.nimble.metering.Measure;
+import org.gridkit.nimble.metering.PointSampler;
 import org.gridkit.nimble.metering.RawSampleCollector;
+import org.gridkit.nimble.metering.SamplerBuilder;
 import org.gridkit.nimble.monitoring.MonitoringStack;
 import org.gridkit.nimble.monitoring.ProcessCpuMonitoring;
 import org.gridkit.nimble.monitoring.StandardSamplerReportBundle;
@@ -42,6 +45,7 @@ import org.gridkit.nimble.pivot.display.PivotPrinter2;
 import org.gridkit.nimble.print.PrettyPrinter;
 import org.gridkit.nimble.probe.probe.Monitoring;
 import org.gridkit.nimble.probe.probe.MonitoringDriver;
+import org.gridkit.nimble.statistics.TimeUtils;
 import org.gridkit.nimble.util.ConfigurationTemplate;
 import org.gridkit.util.concurrent.FutureBox;
 import org.gridkit.vicluster.ViNode;
@@ -49,6 +53,8 @@ import org.gridkit.vicluster.ViNodeSet;
 
 public class ZkBench {
 
+	private static String ZK_OPS = "ZK_OPS";
+	
 	private MonitoringStack mstack = new MonitoringStack();
 	
 	@SuppressWarnings("serial")
@@ -72,7 +78,7 @@ public class ZkBench {
 	}
 	
 	private final ZkBenchConfig config;
-	private boolean dumpLevels = false;
+	boolean dumpLevels = false;
 	private String csvFileName;
 	private String rawSampleFile;
 	
@@ -96,8 +102,11 @@ public class ZkBench {
 	}
 
 	public void addReporting() {
-		StandardSamplerReportBundle mon = new StandardSamplerReportBundle("sampler");		
-		mon.sortByField(Measure.NAME);		
+		StandardSamplerReportBundle mon = new StandardSamplerReportBundle(ZK_OPS);		
+		mon.sortByField(SamplerBuilder.OPERATION);		
+		mon.sortByField(SamplerBuilder.DESCRIMINATOR);		
+		mon.sortByField(Measure.NAME);
+		mon.showWeightedFrequency(false);		
 		mstack.addBundle(mon, "Operation statistics");
 	}
 
@@ -311,7 +320,7 @@ public class ZkBench {
 			
 			return new Runnable() {
 				
-				DTimeReporter<Op> rep = metering.samplerBuilder().timeReporter("Read (%s)", Op.class);
+				DTimeReporter<Op> rep = metering.samplerBuilder(ZK_OPS).timeReporter("Read (%s)", Op.class);
 				Random rand = new Random();
 				
 				@Override
@@ -343,7 +352,8 @@ public class ZkBench {
 			
 			return new Runnable() {
 				
-				DTimeReporter<Op> rep = metering.samplerBuilder().timeReporter("Write (%s)", Op.class);
+				DSpanReporter<Op> rep = metering.samplerBuilder(ZK_OPS).spanReporter("Write (%s)", Op.class);
+				PointSampler sp = metering.samplerBuilder(ZK_OPS).pointSampler("Time sampler");
 				Random rand = new Random();
 				
 				@Override
@@ -358,26 +368,29 @@ public class ZkBench {
 						byte[] data = new byte[128];
 						rand.nextBytes(data);
 						
+						// TODO to test reporting
+						sp.write(n, TimeUtils.normalize(System.nanoTime()));
+						
 						String path = basePath + "/node-" + n;
-						DTimeReporter.StopWatch<Op> sw = rep.start();
+						DSpanReporter.StopWatch<Op> sw = rep.start();
 						Stat st = client.exists(path, false);
 						if (st == null) {
 							try {
 								client.create(path, data, acl, CreateMode.PERSISTENT);
-								sw.stop(Op.create);
+								sw.stop(10, Op.create);
 							}
 							catch(NodeExistsException e) {
-								sw.stop(Op.fail);
+								sw.stop(10, Op.fail);
 								return;								
 							}
 						}
 						else {
 							try {
 								client.setData(path, data, st.getVersion());
-								sw.stop(Op.update);
+								sw.stop(10, Op.update);
 							}
 							catch(BadVersionException e) {
-								sw.stop(Op.fail);
+								sw.stop(10, Op.fail);
 								return;								
 							}
 						}

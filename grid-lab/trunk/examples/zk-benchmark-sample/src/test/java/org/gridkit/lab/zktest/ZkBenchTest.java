@@ -5,11 +5,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.plaf.TableUI;
-
 import org.gridkit.lab.zktest.ZkBench.ZkBenchConfig;
 import org.gridkit.nanocloud.CloudFactory;
 import org.gridkit.vicluster.ViManager;
+import org.gridkit.vicluster.ViProps;
 import org.junit.After;
 import org.junit.Test;
 
@@ -33,17 +32,21 @@ public class ZkBenchTest {
 	@Test
 	public void start_and_run() throws IOException {
 		cloud.nodes("ZK.1", "ZK.2", "ZK.3");
-		cloud.nodes("WORKER.1", "WORKER.2", "WORKER.3");
+//		cloud.nodes("WORKER.1", "WORKER.2", "WORKER.3");
+		cloud.nodes("WORKER.1");
 		cloud.nodes("MON");
 		cloud.node("ZK.**").setProp("proc-type", "ZooServer");
 		cloud.node("WORKER.**").setProp("proc-type", "Worker");
-//		ViProps.at(cloud.node("MON")).setInProcessType();
+//		ViProps.at(cloud.node("WORKER.1")).setInProcessType();
 		cloud.node("**").touch();
 		
 		ZkBenchConfig config = new ZkBenchConfig();
+		config.testTime = TimeUnit.SECONDS.toMillis(30);
 		
 		ZkBench bench = new ZkBench(config);
-		bench.addCpuReporting();
+		bench.dumpLevels = true;
+		
+//		bench.addCpuReporting();
 		bench.setSummaryCsvPath("zk-local.csv");
 		bench.setRawCsvPath("raw-local.csv");
 		
