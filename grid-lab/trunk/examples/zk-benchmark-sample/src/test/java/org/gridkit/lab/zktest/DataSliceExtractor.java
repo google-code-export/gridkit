@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.gridkit.nimble.metering.Measure;
 import org.gridkit.nimble.metering.SampleReader;
 import org.gridkit.nimble.pivot.Filters;
 import org.gridkit.nimble.pivot.SampleFilter;
@@ -64,6 +63,12 @@ public class DataSliceExtractor {
 	
 	public void sort(int n) {
 		Collections.sort(data, new DoubleArrayComparator(n));
+	}
+	
+	public void shift(int n, double value) {
+		for(double[] row: data) {
+			row[n] += value;
+		}
 	}
 
 	private static class DoubleArrayComparator implements Comparator<double[]> {

@@ -8,11 +8,10 @@ import java.util.concurrent.TimeUnit;
 import org.gridkit.lab.zktest.ZkBench.ZkBenchConfig;
 import org.gridkit.nanocloud.CloudFactory;
 import org.gridkit.vicluster.ViManager;
-import org.gridkit.vicluster.ViProps;
 import org.junit.After;
 import org.junit.Test;
 
-public class ZkBenchTest {
+public class ZkBenchCheck {
 
 	private ViManager cloud = CloudFactory.createLocalCloud();
 	
