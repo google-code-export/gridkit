@@ -29,14 +29,12 @@ public class ZkBenchRun {
 	}
 
 	@Test
-	public void start_and_run() throws IOException {
+	public void start_and_run_locally() throws IOException {
 		cloud.nodes("ZK.1", "ZK.2", "ZK.3");
-//		cloud.nodes("WORKER.1", "WORKER.2", "WORKER.3");
-		cloud.nodes("WORKER.1");
+		cloud.nodes("WORKER.1", "WORKER.2", "WORKER.3");
 		cloud.nodes("MON");
 		cloud.node("ZK.**").setProp("proc-type", "ZooServer");
 		cloud.node("WORKER.**").setProp("proc-type", "Worker");
-//		ViProps.at(cloud.node("WORKER.1")).setInProcessType();
 		cloud.node("**").touch();
 		
 		ZkBenchConfig config = new ZkBenchConfig();
@@ -45,7 +43,7 @@ public class ZkBenchRun {
 		ZkBench bench = new ZkBench(config);
 		bench.dumpLevels = true;
 		
-//		bench.addCpuReporting();
+		bench.addCpuReporting();
 		bench.setSummaryCsvPath("zk-local.csv");
 		bench.setRawCsvPath("raw-local.csv");
 		
@@ -53,7 +51,7 @@ public class ZkBenchRun {
 	}
 
 	@Test
-	public void start_and_run_df() throws IOException {
+	public void start_and_run_on_cluster() throws IOException {
 		cloud = CloudFactory.createSshCloud("~/nanocloud-testcluster.viconf");
 		
 		for(String host: new String[]{"host1", "host2", "host3"}) {
