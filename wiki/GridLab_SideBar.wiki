@@ -1,5 +1,5 @@
 #summary Side bar for GridLab project
-!GridLab<br/>_Excluding human from loop_
+GridLab<br/>_Excluding human from loop_
  * [GridLab Overview]
  * !NanoCloud
   * Overview
