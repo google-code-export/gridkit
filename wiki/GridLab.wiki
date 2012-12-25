@@ -1,5 +1,6 @@
 #summary GridLab - infrastructure for developing and testing distributed application.
 #labels GridLab
+#sidebar GridLab_TOC
 
 = API preview warning =
 ----
