@@ -1,3 +1,14 @@
 #summary Side bar for GridLab project
  * !GridLab
   * [GridLab Overview]
+  * !NanoCloud
+   * Overview
+   * Configuration
+   * [NanoCloudTutorial Tutorial]
+    * [NanoCloudTutorial#Test_project Test project]
+    * [NanoCloudTutorial#Quick_introduction_of_ViNode Quick introduction of ViNode]
+    * [NanoCloudTutorial#Test_project]
+    * [NanoCloudTutorial#Test_project]
+  * Scenario builder
+  * Monitoring infrastructure
+  * BTrace integration
