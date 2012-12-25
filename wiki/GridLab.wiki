@@ -9,7 +9,7 @@
 
 = Introduction =
 
-Developing of distributed (i.e. mass parallel and clustered) is a quite challenging. In particular there is a lack of tools to cover
+Developing of distributed  software (i.e. mass parallel and clustered) is a quite challenging. In particular there is a lack of tools to cover
  * Test automation for distributed applications
  * Distributed performance and stress testing
  * Collecting and process comprehensive runtime metering from for distributed tests (experiment)
