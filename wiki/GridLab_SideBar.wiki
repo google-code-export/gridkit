@@ -7,8 +7,8 @@
    * [NanoCloudTutorial Tutorial]
     * [NanoCloudTutorial#Test_project Test project]
     * [NanoCloudTutorial#Quick_introduction_of_ViNode Quick introduction of ViNode]
-    * [NanoCloudTutorial#Test_project]
-    * [NanoCloudTutorial#Test_project]
+    * [NanoCloudTutorial#Local_cloud Local cloud]
+    * [NanoCloudTutorial#Going_distributed Going distributed]
   * Scenario builder
   * Monitoring infrastructure
   * BTrace integration
