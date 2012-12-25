@@ -23,7 +23,7 @@ In particular, this library is positioned as backbone for distributed performanc
 Please checkout test project at ([http://code.google.com/p/gridkit/source/browse/#svn%2Fgrid-lab%2Ftrunk%2Fexamples%2Fnanocloud-getting-started-1 https://gridkit.googlecode.com/svn/grid-lab/trunk/examples/nanocloud-getting-started-1])
 This project contains code referenced in this tutorial.
 
-== Quick introduction of ViNode ==
+== Quick introduction of !ViNode ==
 NanoCloud API is build around concept of ViNode. With a little over simplification, ViNode is a remote process which allow us to execute code. ViNode offers a set of method to executed code. ViNode could also be a group of real nodes (thus providing us simple way for parallel execution).
 
 There are 3 standard type of nodes backing ViNode instances:
