@@ -1,14 +1,16 @@
 #summary Side bar for GridLab project
- * !GridLab
-  * [GridLab Overview]
-  * !NanoCloud
-   * Overview
-   * Configuration
-   * [NanoCloudTutorial Tutorial]
-    * [NanoCloudTutorial#Test_project Test project]
-    * [NanoCloudTutorial#Quick_introduction_of_ViNode Quick introduction of ViNode]
-    * [NanoCloudTutorial#Local_cloud Local cloud]
-    * [NanoCloudTutorial#Going_distributed Going distributed]
-  * Scenario builder
-  * Monitoring infrastructure
-  * BTrace integration
+!GridLab<br/>_Excluding human from loop_
+ * [GridLab Overview]
+ * !NanoCloud
+  * Overview
+  * Configuration
+ * Scenario builder
+ * Monitoring infrastructure
+ * BTrace integration
+ * Tutorials
+  * [NanoCloudTutorial Nano cloud tutorial]
+   * [NanoCloudTutorial#Test_project Test project]
+   * [NanoCloudTutorial#Quick_introduction_of_ViNode Quick introduction of ViNode]
+   * [NanoCloudTutorial#Local_cloud Local cloud]
+   * [NanoCloudTutorial#Going_distributed Going distributed]
+  * [ZooKeeperBenchmarkTutorial Zookeeper benchmark]
