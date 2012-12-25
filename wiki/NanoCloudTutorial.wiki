@@ -61,7 +61,7 @@ In console you would see something like this:
 [node1] 16:48:31.349 [main] INFO  o.g.zerormi.hub.RemotingEndPoint - Connecting to master socket
 16:48:31.537 [Control hub accepter [127.0.0.1:42122]] INFO  o.g.v.t.LocalJvmProcessFactory - Conntected: Socket[addr=/127.0.0.1,port=2384,localport=42122]
 16:48:31.552 [Control hub accepter [127.0.0.1:42122]] INFO  org.gridkit.zerormi.hub.RemotingHub - Stream connected at end point 478c40e92e912c524ce3937aad5f541d - Socket[addr=/127.0.0.1,port=2384,localport=42122]
-[node1] My name is '1456@dbmosws4199'. Hello!
+[node1] My name is '1456@ws4199'. Hello!
 16:48:31.709 [main] INFO  org.gridkit.zerormi.RmiGateway - RMI gateway [node1] terminated.
 16:48:31.709 [RMI-Receiver: Socket[addr=/127.0.0.1,port=2384,localport=42122]] INFO  org.gridkit.zerormi.RmiGateway - RMI gateway [node1] disconneted.
 16:48:31.709 [RMI-Receiver: Socket[addr=/127.0.0.1,port=2384,localport=42122]] INFO  org.gridkit.zerormi.hub.RemotingHub - Closed: RmiObjectInputStream[node1]
@@ -69,7 +69,7 @@ In console you would see something like this:
 
 Important part is
 {{{
-[node1] My name is '1456@dbmosws4199'. Hello!
+[node1] My name is '1456@ws4199'. Hello!
 }}}
 This is a result of `System.out.println()` from our runnable.
 All outputs from nodes are redirected to parent process console and prefixed with node name for convenience.
@@ -103,14 +103,14 @@ Now we have created 4 different slave processes and got responses from all of th
 16:53:12.082 [Control hub accepter [127.0.0.1:48486]] INFO  org.gridkit.zerormi.hub.RemotingHub - Stream connected at end point ec32abfbe8edf8f4438e8cf7050c4885 - Socket[addr=/127.0.0.1,port=2674,localport=48486]
 16:53:12.082 [Control hub accepter [127.0.0.1:47857]] INFO  o.g.v.t.LocalJvmProcessFactory - Conntected: Socket[addr=/127.0.0.1,port=2673,localport=47857]
 16:53:12.082 [Control hub accepter [127.0.0.1:47857]] INFO  org.gridkit.zerormi.hub.RemotingHub - Stream connected at end point 6c3c0022c372c16528e952405efda9c6 - Socket[addr=/127.0.0.1,port=2673,localport=47857]
-[node1] My name is '4364@dbmosws4199'. Hello!
-[node2] My name is '4352@dbmosws4199'. Hello!
+[node1] My name is '4364@ws4199'. Hello!
+[node2] My name is '4352@ws4199'. Hello!
 [node3] Exec command: []
 [node3] 16:53:11.925 [main] INFO  o.g.zerormi.hub.RemotingEndPoint - Connecting to master socket
-[node3] My name is '1528@dbmosws4199'. Hello!
+[node3] My name is '1528@ws4199'. Hello!
 [node4] Exec command: []
 [node4] 16:53:11.925 [main] INFO  o.g.zerormi.hub.RemotingEndPoint - Connecting to master socket
-[node4] My name is '5256@dbmosws4199'. Hello!
+[node4] My name is '5256@ws4199'. Hello!
 16:53:12.238 [main] INFO  org.gridkit.zerormi.RmiGateway - RMI gateway [node1] terminated.
 16:53:12.253 [RMI-Receiver: Socket[addr=/127.0.0.1,port=2672,localport=44134]] INFO  org.gridkit.zerormi.RmiGateway - RMI gateway [node1] disconneted.
 16:53:12.253 [RMI-Receiver: Socket[addr=/127.0.0.1,port=2672,localport=44134]] INFO  org.gridkit.zerormi.hub.RemotingHub - Closed: RmiObjectInputStream[node1]
@@ -154,10 +154,10 @@ Now with "warm up" we could see something like this in console.
 ...
 [node4] Exec command: []
 [node4] 16:55:43.078 [main] INFO  o.g.zerormi.hub.RemotingEndPoint - Connecting to master socket
-[node2] My name is '4624@dbmosws4199'. Hello!
-[node3] My name is '4696@dbmosws4199'. Hello!
-[node1] My name is '5596@dbmosws4199'. Hello!
-[node4] My name is '4316@dbmosws4199'. Hello!
+[node2] My name is '4624@ws4199'. Hello!
+[node3] My name is '4696@ws4199'. Hello!
+[node1] My name is '5596@ws4199'. Hello!
+[node4] My name is '4316@ws4199'. Hello!
 16:55:43.718 [main] INFO  org.gridkit.zerormi.RmiGateway - RMI gateway [node1] terminated.
 ...
 }}}
@@ -198,8 +198,8 @@ You should see something like this in console:
 ...
 [node2] Exec command: [-Xms512m, -Xmx512m]
 [node2] 17:13:48.828 [main] INFO  o.g.zerormi.hub.RemotingEndPoint - Connecting to master socket
-[node1] My name is '3756@dbmosws4199'. Memory limit is 247MiB
-[node2] My name is '5668@dbmosws4199'. Memory limit is 494MiB
+[node1] My name is '3756@ws4199'. Memory limit is 247MiB
+[node2] My name is '5668@ws4199'. Memory limit is 494MiB
 17:13:49.468 [main] INFO  org.gridkit.zerormi.RmiGateway - RMI gateway [node1] terminated.
 ...
 }}}
@@ -340,3 +340,65 @@ API call for remote execution is same as for local but behind of scene few more 
 In particular:
  * Classpath of master (parent) JVM is replicated to remote host via SSH (and cached there)
  * RPC comunitation between master and slave JVM is tunneled via SSH TCP tunnel (to avoid possible firewall issues) 
+
+=== Step 2. Mixing remote and embedded node ===
+Now, we can run our code remotely. But imagine you want to debug your code. One option is to use remote debugging. But in many cases you could just run node you want to debug in master process thus avoiding these hurdles.
+
+Let's modify previous example to run just one node in master JVM process.
+{{{
+@Test
+public void test_distributed_hello_world__with_debug() throws InterruptedException {
+	
+	// Using SSH for remote execution requires some configuration
+	// it could be done programmatically, but we will use config file in this example
+	cloud = CloudFactory.createSshCloud("resource:cbox-cluster.viconf");
+	
+	// Our cloud config (box-cluster.viconf) is using first segment of node name 
+	// for mapping of node node to hostname
+	cloud.node("cbox1.node1");
+	cloud.node("cbox2.node1");
+	
+			
+	// Now imagine, that you want to debug one of slave processes.
+	// If it could be run on your dev. box (no OS dependencies, etc),
+	// you could easy redirect on of slave node to run inside of master JVM.
+	// You can achieve this but using either in-process or isolate node type
+	ViProps.at(cloud.node("cbox1.node1")).setInProcessType();		
+	
+	ViNode allNodes = cloud.node("**");
+
+	allNodes.touch(); // warm up, equivalent to sending empty runnable
+	
+	System.out.println("Master JVM name is '" + ManagementFactory.getRuntimeMXBean().getName() + "'");
+	// you can set break point in runnable and catch cbox1.node1 executing it
+	// other vinodes are running as separate processes, so they out of reach
+	allNodes.exec(new Callable<Void>() {
+
+		@Override
+		public Void call() throws Exception {
+			String jvmName = ManagementFactory.getRuntimeMXBean().getName();
+			System.out.println("My name is '" + jvmName + "'. Hello!");
+			return null;
+		}
+	});
+	
+	// Notice that output of "in-process" vinode are still prefixed for your convenience.
+	// Same isolation applies to system properties too. 
+	
+	// give console output a chance to reach us from remote node
+	Thread.sleep(300);
+}	
+}}}
+
+Output would contain something like this
+{{{
+...
+Master JVM name is '6392@ws4199'
+[cbox1.node1] My name is '6392@ws4199'. Hello!
+[cbox2.node1] My name is '2118@cbox2'. Hello!
+[cbox1.node1] Stopping ...
+[cbox1.node1] Stopped
+...
+}}}
+You can see that "cbox1.node1" actually were running locally in a JVM of master process. So you cloud debug it freely.
+Output of "cbox1.node1" is still prefixed. All threads of "cbox1.node1" are also running in dedicated thread group, so it could be forcefully killed (it is impossible to reliably kill thread in JVM, but we are doing our best).
