@@ -5,7 +5,7 @@ GridLab<br/>_Excluding human from loop_
   * Overview
   * Configuration
  * Scenario builder
- * Monitoring infrastructure
+ * [GridLab_Monitoring Monitoring infrastructure]
  * BTrace integration
  * Tutorials
   * [NanoCloudTutorial Nano cloud tutorial]
