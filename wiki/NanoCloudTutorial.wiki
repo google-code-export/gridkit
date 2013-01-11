@@ -1,5 +1,6 @@
 #summary NanoCloud getting started article.
 #labels GridLab,NanoCloud
+#sidebar GridLab_SideBar
 
 = API preview warning =
 ----
