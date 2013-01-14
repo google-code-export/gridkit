@@ -73,4 +73,9 @@ public class CacheTemplate {
 	public static void useMaxWriteBatchSize(ViProps props, int size) {
 		props.setProp("cache-template.read-write-backing-map.write-max-batch-size", String.valueOf(size));
 	}
+	
+	public static void usePartitionedCacheBackingMapListener(ViProps props, Class<?> bmlistener) {
+		props.setProp("cache-template.distributed-scheme.backing-map", "local-cache--with-backing-map-listener");		
+		props.setProp("cache-template.backing-map-listener-class", bmlistener.getName());		
+	}
 }
