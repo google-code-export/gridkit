@@ -14,10 +14,6 @@ public class CacheTemplate {
 		props.setProp("cache-template.scheme", "distributed-scheme--local");
 	}
 
-	public static void usePartitionCount(ViProps props, int partCount) {
-		props.setProp("cache-template.distributed-scheme.partition-count", String.valueOf(partCount));
-	}
-
 	public static void usePartitionedReadWriteCache(ViProps props, Class<?> cacheStoreClass) {
 		props.setProp("cache-template.scheme", "distributed-scheme--read-write");
 		props.setProp("cache-template.read-write-backing-map.cache-store-class", cacheStoreClass.getName());
@@ -25,6 +21,14 @@ public class CacheTemplate {
 
 	public static void usePartitionedServiceThreadCount(ViProps props, int threadCount) {
 		props.setProp("cache-template.distributed-scheme.thread-count", String.valueOf(threadCount));
+	}
+
+	public static void usePartitionedServiceBackupCount(ViProps props, int threadCount) {
+		props.setProp("cache-template.distributed-scheme.backup-count", String.valueOf(threadCount));
+	}
+
+	public static void usePartitionedServicePartitionCount(ViProps props, int threadCount) {
+		props.setProp("cache-template.distributed-scheme.partition-count", String.valueOf(threadCount));
 	}
 
 	public static void usePartitionedServiceGuardianTimeout(ViCluster props, long timeout) {

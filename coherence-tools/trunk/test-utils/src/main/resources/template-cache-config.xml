@@ -14,12 +14,13 @@
 
         <distributed-scheme>
         	<scheme-name>distributed-scheme--base</scheme-name>
-			<service-name system-property="cache-template.distributed-scheme.service-name">DistributedService</service-name>
-			<partition-count system-property="cache-template.distributed-scheme.partition-count">257</partition-count>
-			<thread-count system-property="cache-template.distributed-scheme.thread-count">0</thread-count>
+            <service-name system-property="cache-template.distributed-scheme.service-name">DistributedService</service-name>
+            <partition-count system-property="cache-template.distributed-scheme.partition-count">257</partition-count>
+            <thread-count system-property="cache-template.distributed-scheme.thread-count">0</thread-count>
+            <backup-count system-property="cache-template.distributed-scheme.backup-count">1</backup-count>
             <guardian-timeout system-property="cache-template.distributed-scheme.guardian-timeout"></guardian-timeout>
+            <task-hung-threshold system-property="cache-template.distributed-scheme.task-hung-threshold"></task-hung-threshold>            
             <task-timeout system-property="cache-template.distributed-scheme.task-timeout"></task-timeout>
-            <task-hung-threshold system-property="cache-template.distributed-scheme.task-hung-threshold"></task-hung-threshold>
         </distributed-scheme>
 
 		<distributed-scheme>
@@ -40,6 +41,7 @@
                     <scheme-ref system-property="cache-template.distributed-scheme.backing-map">local-cache</scheme-ref>
                 </local-scheme>
 			</backing-map-scheme>
+            <guardian-timeout system-property="cache-template.distributed-scheme.guardian-timeout"></guardian-timeout>
 		</distributed-scheme>
 
         <read-write-backing-map-scheme>
@@ -61,6 +63,25 @@
 
         <local-scheme>
             <scheme-name>local-cache</scheme-name>
+        </local-scheme>
+
+        <local-scheme>
+            <scheme-name>local-cache--with-backing-map-listener</scheme-name>
+            <listener>
+                <class-scheme>
+                    <class-name system-property="cache-template.backing-map-listener-class"></class-name>
+                    <init-params>
+                        <init-param>
+                            <param-type>string</param-type>
+                            <param-value>{cache-name}</param-value>
+                        </init-param>
+                        <init-param>
+                            <param-type>com.tangosol.net.BackingMapManagerContext</param-type>
+                            <param-value>{manager-context}</param-value>
+                        </init-param>                                
+                    </init-params>
+                </class-scheme>
+            </listener>                                        
         </local-scheme>
 
 	</caching-schemes>
