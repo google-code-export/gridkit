@@ -142,10 +142,6 @@ public class Isolate {
 		System.setProperties(mProps);
 	}
 
-	public static Isolate currentIsolate() {
-		return ISOLATE.get();
-	}
-	
 	private static final Map<Class<?>, Object> PRIMITIVE_DEFAULTS = new HashMap<Class<?>, Object>();
 	static {
 		PRIMITIVE_DEFAULTS.put(boolean.class, Boolean.FALSE);
@@ -158,6 +154,9 @@ public class Isolate {
 		PRIMITIVE_DEFAULTS.put(double.class, Double.valueOf(0f));
 	}
 
+	public static Isolate currentIsolate() {
+		return ISOLATE.get();
+	}
 	
 	private String name;
 	private Thread isolatedThread;
@@ -242,6 +241,11 @@ public class Isolate {
 		for(Map.Entry<String, String> e : props.entrySet()) {
 			setProp(e.getKey(), e.getValue());
 		}
+	}
+	
+	public void silence() {
+		wrpOut.setSilenced(true);
+		wrpErr.setSilenced(true);
 	}
 
 	private void abortablePut(WorkUnit wu) throws InterruptedException {
@@ -490,7 +494,7 @@ public class Isolate {
 					+ removeShutdownHooks()
 					+ removeAppContexts() ) {
 				try {
-					Thread.sleep(10);
+					Thread.sleep(20);
 				} catch (InterruptedException e) {
 				}
 				++shutdownRetry;
@@ -504,8 +508,9 @@ public class Isolate {
 			catch(IllegalThreadStateException e) {
 				stdErr.println(e);
 			}
-			if (shutdownRetry >  1000) {
+			if (shutdownRetry >  20) {				
 				stdErr.println("Isolate clean up failed");
+				break;
 			}
 		}
 		cl = null;
@@ -1271,6 +1276,7 @@ public class Isolate {
 		private String prefix;
 		private PrintStream printStream;
 		private ByteArrayOutputStream buffer;
+		private boolean silenced;
 		
 		public WrapperPrintStream(String prefix, PrintStream printStream) {
 			super(printStream);
@@ -1282,11 +1288,17 @@ public class Isolate {
 		public void setPrefix(String prefix) {
 			this.prefix = prefix;
 		}
-				
+		
+		public void setSilenced(boolean silenced) {
+			this.silenced = silenced;
+		}
+		
 		private void dumpBuffer() throws IOException {
-			printStream.append(prefix);
-			printStream.write(buffer.toByteArray());
-			printStream.flush();
+			if (!silenced) {
+				printStream.append(prefix);
+				printStream.write(buffer.toByteArray());
+				printStream.flush();
+			}
 			buffer.reset();
 		}
 		

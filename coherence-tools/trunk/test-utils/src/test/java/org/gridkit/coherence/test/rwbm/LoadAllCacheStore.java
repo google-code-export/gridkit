@@ -6,24 +6,40 @@ import java.util.Map;
 
 import com.tangosol.net.cache.CacheStore;
 
-public class SimpleCacheStore implements CacheStore {
+public class LoadAllCacheStore implements CacheStore {
 
-	public SimpleCacheStore() {
+	public LoadAllCacheStore() {
 		System.out.println("SimpleCacheStore created");
 	}
 	
 	@Override
-	public Object load(Object key) {
+	public Object load(Object key) {		
 		System.out.println("load:" + key);
 		return key;
 	}
 
 	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Map loadAll(Collection keys) {
 		System.out.println("loadAll: " + keys);
 		Map result = new HashMap();
 		for(Object key: keys) {
-			result.put(key, key);
+			if ("ALL".equals(key)) {
+				keys.clear();
+				keys.add("A");
+				keys.add("B");
+				keys.add("C");
+				keys.add("D");
+				result.clear();
+				result.put("A", "aaa");
+				result.put("B", "bbb");
+				result.put("C", "ccc");
+				result.put("D", "ddd");
+				return result;
+			}
+			else {
+				result.put(key, key);
+			}			
 		}
 		return result;
 	}

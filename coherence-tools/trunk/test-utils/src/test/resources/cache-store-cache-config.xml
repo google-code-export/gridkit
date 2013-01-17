@@ -9,9 +9,21 @@
 			<scheme-name>store-scheme</scheme-name>
 		</cache-mapping>
 		<cache-mapping>
+			<cache-name>simple-*</cache-name>
+			<scheme-name>simple-store-scheme</scheme-name>
+		</cache-mapping>
+		<cache-mapping>
+			<cache-name>load-all-*</cache-name>
+			<scheme-name>load-all-store-scheme</scheme-name>
+		</cache-mapping>
+		<cache-mapping>
 			<cache-name>write-behind-*</cache-name>
 			<scheme-name>write-behind-store-scheme</scheme-name>
 		</cache-mapping>
+        <cache-mapping>
+            <cache-name>xml-configurable-*</cache-name>
+            <scheme-name>xml-configurable-store-scheme</scheme-name>
+        </cache-mapping>
 	</caching-scheme-mapping>
 
 	<caching-schemes>
@@ -39,6 +51,69 @@
 				</read-write-backing-map-scheme>
 			</backing-map-scheme>
 		</distributed-scheme>
+
+		<distributed-scheme>
+			<scheme-name>simple-store-scheme</scheme-name>
+			<service-name>StoreScheme</service-name>
+			<autostart>true</autostart>
+			<partition-count>3</partition-count>
+			<backing-map-scheme>
+				<read-write-backing-map-scheme>
+					<internal-cache-scheme>
+						<local-scheme />
+					</internal-cache-scheme>
+					<cachestore-scheme>
+						<class-scheme>
+							<class-name>org.gridkit.coherence.test.rwbm.SimpleCacheStore</class-name>
+						</class-scheme>
+					</cachestore-scheme>
+				</read-write-backing-map-scheme>
+			</backing-map-scheme>
+		</distributed-scheme>
+
+        <distributed-scheme>
+            <scheme-name>load-all-store-scheme</scheme-name>
+            <service-name>StoreScheme</service-name>
+            <autostart>true</autostart>
+            <partition-count>3</partition-count>
+            <backing-map-scheme>
+                <read-write-backing-map-scheme>
+                    <internal-cache-scheme>
+                        <local-scheme />
+                    </internal-cache-scheme>
+                    <cachestore-scheme>
+                        <class-scheme>
+                            <class-name>org.gridkit.coherence.test.rwbm.LoadAllCacheStore</class-name>
+                        </class-scheme>
+                    </cachestore-scheme>
+                </read-write-backing-map-scheme>
+            </backing-map-scheme>
+        </distributed-scheme>
+
+        <distributed-scheme>
+            <scheme-name>xml-configurable-store-scheme</scheme-name>
+            <service-name>StoreScheme</service-name>
+            <autostart>true</autostart>
+            <partition-count>3</partition-count>
+            <backing-map-scheme>
+                <read-write-backing-map-scheme>
+                    <internal-cache-scheme>
+                        <local-scheme />
+                    </internal-cache-scheme>
+                    <cachestore-scheme>
+                        <class-scheme>
+                            <class-name>org.gridkit.coherence.test.rwbm.XmlConfigurableLoader</class-name>
+                            <init-params>
+                                <init-param>
+                                    <param-name>paramA</param-name>
+                                    <param-value>somevalue</param-value>
+                                </init-param>
+                            </init-params>
+                        </class-scheme>
+                    </cachestore-scheme>
+                </read-write-backing-map-scheme>
+            </backing-map-scheme>
+        </distributed-scheme>
 
 		<distributed-scheme>
 			<scheme-name>write-behind-store-scheme</scheme-name>

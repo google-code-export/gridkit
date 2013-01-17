@@ -1,6 +1,7 @@
 package org.gridkit.utils.vicluster;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.net.Socket;
@@ -13,10 +14,28 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
+import javax.management.Attribute;
+import javax.management.AttributeList;
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
+import javax.management.InvalidAttributeValueException;
+import javax.management.ListenerNotFoundException;
+import javax.management.MBeanException;
+import javax.management.MBeanInfo;
+import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
+import javax.management.NotCompliantMBeanException;
+import javax.management.NotificationFilter;
+import javax.management.NotificationListener;
+import javax.management.ObjectInstance;
 import javax.management.ObjectName;
+import javax.management.OperationsException;
+import javax.management.QueryExp;
+import javax.management.ReflectionException;
+import javax.management.loading.ClassLoaderRepository;
 
 import com.tangosol.coherence.component.net.extend.RemoteService;
 import com.tangosol.coherence.component.net.extend.connection.TcpConnection;
@@ -94,6 +113,26 @@ public class CohHelper {
 	}
 
 	/**
+	 * Coherence does not have standard property for TCMP packet timeout.
+	 * This method will patch op. configuration directly.
+	 */
+	public static void setTCMPTimeout(ViNode node, final long timeout) {
+		node.exec(new Runnable() {
+			@Override
+			public void run() {
+				Cluster cluster = CacheFactory.getCluster();
+				if (cluster.isRunning()) {
+					throw new IllegalStateException("Cluster is already started");
+				}
+				XmlElement config = CacheFactory.getClusterConfig();
+				XmlHelper.ensureElement(config, "packet-publisher/packet-delivery/timeout-milliseconds")
+				.setLong(timeout);
+				CacheFactory.setServiceConfig("Cluster", config);
+			}
+		});
+	}
+
+	/**
 	 * Coherence does not have standard property to disable TCP ring.
 	 * TCP ring tends to hung in isolate environment, so disabling it makes testing more stable.
 	 * This method will patch op. configuration directly.
@@ -107,7 +146,7 @@ public class CohHelper {
 					throw new IllegalStateException("Cluster is already started");
 				}
 				XmlElement config = CacheFactory.getClusterConfig();
-				XmlHelper.ensureElement(config, "cluster-config/tcp-ring-listener/enabled")
+				XmlHelper.ensureElement(config, "tcp-ring-listener/enabled")
 				.setBoolean(false);
 				CacheFactory.setServiceConfig("Cluster", config);
 			}
@@ -370,6 +409,179 @@ public class CohHelper {
 		}
 	}
 	
+	private static class IsolatedMBeanServerProxy implements MBeanServer {
+		
+		private MBeanServer shared;
+		private MBeanServer internal;
+		private String isolateName;
+		
+		public IsolatedMBeanServerProxy(String name, MBeanServer shared, MBeanServer internal) {
+			this.isolateName = name;
+			this.shared = shared;
+			this.internal = internal;
+		}
+
+		private ObjectName decorate(ObjectName name) {			
+			try {
+				String mname = name.getDomain();
+				mname += "[" + isolateName + "]:";
+				mname += name.toString().substring(name.toString().indexOf(':') + 1);
+				return new ObjectName(mname);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		public ObjectInstance createMBean(String className, ObjectName name) throws ReflectionException, InstanceAlreadyExistsException, MBeanRegistrationException, MBeanException, NotCompliantMBeanException {
+			return internal.createMBean(className, name);
+		}
+
+		public ObjectInstance createMBean(String className, ObjectName name, ObjectName loaderName) throws ReflectionException, InstanceAlreadyExistsException, MBeanRegistrationException, MBeanException, NotCompliantMBeanException, InstanceNotFoundException {
+			return internal.createMBean(className, name, loaderName);
+		}
+
+		public ObjectInstance createMBean(String className, ObjectName name, Object[] params, String[] signature) throws ReflectionException, InstanceAlreadyExistsException, MBeanRegistrationException, MBeanException,  NotCompliantMBeanException {
+			return internal.createMBean(className, name, params, signature);
+		}
+
+		public ObjectInstance createMBean(String className, ObjectName name, ObjectName loaderName, Object[] params, String[] signature) throws ReflectionException, InstanceAlreadyExistsException, MBeanRegistrationException, MBeanException, NotCompliantMBeanException, InstanceNotFoundException {
+			return internal.createMBean(className, name, loaderName, params, signature);
+		}
+
+		public ObjectInstance registerMBean(Object object, ObjectName name) throws InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
+			shared.registerMBean(object, decorate(name));
+			return internal.registerMBean(object, name);
+		}
+
+		public void unregisterMBean(ObjectName name) throws InstanceNotFoundException, MBeanRegistrationException {
+			shared.unregisterMBean(decorate(name));
+			internal.unregisterMBean(name);
+		}
+
+		public ObjectInstance getObjectInstance(ObjectName name) throws InstanceNotFoundException {
+			return internal.getObjectInstance(name);
+		}
+
+		public Set<ObjectInstance> queryMBeans(ObjectName name, QueryExp query) {
+			return internal.queryMBeans(name, query);
+		}
+
+		public Set<ObjectName> queryNames(ObjectName name, QueryExp query) {
+			return internal.queryNames(name, query);
+		}
+
+		public boolean isRegistered(ObjectName name) {
+			return internal.isRegistered(name);
+		}
+
+		public Integer getMBeanCount() {
+			return internal.getMBeanCount();
+		}
+
+		public Object getAttribute(ObjectName name, String attribute) throws MBeanException, AttributeNotFoundException, InstanceNotFoundException, ReflectionException {
+			return internal.getAttribute(name, attribute);
+		}
+
+		public AttributeList getAttributes(ObjectName name, String[] attributes) throws InstanceNotFoundException, ReflectionException {
+			return internal.getAttributes(name, attributes);
+		}
+
+		public void setAttribute(ObjectName name, Attribute attribute) throws InstanceNotFoundException, AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException {
+			internal.setAttribute(name, attribute);
+		}
+
+		public AttributeList setAttributes(ObjectName name, AttributeList attributes) throws InstanceNotFoundException, ReflectionException {
+			return internal.setAttributes(name, attributes);
+		}
+
+		public Object invoke(ObjectName name, String operationName, Object[] params, String[] signature) throws InstanceNotFoundException, MBeanException, ReflectionException {
+			return internal.invoke(name, operationName, params, signature);
+		}
+
+		public String getDefaultDomain() {
+			return internal.getDefaultDomain();
+		}
+
+		public String[] getDomains() {
+			return internal.getDomains();
+		}
+
+		public void addNotificationListener(ObjectName name, NotificationListener listener, NotificationFilter filter, Object handback) throws InstanceNotFoundException {
+			internal.addNotificationListener(name, listener, filter, handback);
+		}
+
+		public void addNotificationListener(ObjectName name, ObjectName listener, NotificationFilter filter, Object handback) throws InstanceNotFoundException {
+			internal.addNotificationListener(name, listener, filter, handback);
+		}
+
+		public void removeNotificationListener(ObjectName name, ObjectName listener) throws InstanceNotFoundException, ListenerNotFoundException {
+			internal.removeNotificationListener(name, listener);
+		}
+
+		public void removeNotificationListener(ObjectName name, ObjectName listener, NotificationFilter filter, Object handback) throws InstanceNotFoundException, ListenerNotFoundException {
+			internal.removeNotificationListener(name, listener, filter,	handback);
+		}
+
+		public void removeNotificationListener(ObjectName name, NotificationListener listener) 	throws InstanceNotFoundException, ListenerNotFoundException {
+			internal.removeNotificationListener(name, listener);
+		}
+
+		public void removeNotificationListener(ObjectName name, NotificationListener listener, NotificationFilter filter, Object handback) throws InstanceNotFoundException, ListenerNotFoundException {
+			internal.removeNotificationListener(name, listener, filter,	handback);
+		}
+
+		public MBeanInfo getMBeanInfo(ObjectName name) throws InstanceNotFoundException, IntrospectionException, ReflectionException {
+			return internal.getMBeanInfo(name);
+		}
+
+		public boolean isInstanceOf(ObjectName name, String className) throws InstanceNotFoundException {
+			return internal.isInstanceOf(name, className);
+		}
+
+		public Object instantiate(String className) throws ReflectionException, MBeanException {
+			return internal.instantiate(className);
+		}
+
+		public Object instantiate(String className, ObjectName loaderName) throws ReflectionException, MBeanException, InstanceNotFoundException {
+			return internal.instantiate(className, loaderName);
+		}
+
+		public Object instantiate(String className, Object[] params, String[] signature) throws ReflectionException, MBeanException {
+			return internal.instantiate(className, params, signature);
+		}
+
+		public Object instantiate(String className, ObjectName loaderName, Object[] params, String[] signature) throws ReflectionException, MBeanException, InstanceNotFoundException {
+			return internal.instantiate(className, loaderName, params, signature);
+		}
+
+		@SuppressWarnings("deprecation")
+		public ObjectInputStream deserialize(ObjectName name, byte[] data) throws InstanceNotFoundException, OperationsException {
+			return internal.deserialize(name, data);
+		}
+
+		@SuppressWarnings("deprecation")
+		public ObjectInputStream deserialize(String className, byte[] data) throws OperationsException, ReflectionException {
+			return internal.deserialize(className, data);
+		}
+
+		@SuppressWarnings("deprecation")
+		public ObjectInputStream deserialize(String className, ObjectName loaderName, byte[] data) throws InstanceNotFoundException, OperationsException, ReflectionException {
+			return internal.deserialize(className, loaderName, data);
+		}
+
+		public ClassLoader getClassLoaderFor(ObjectName mbeanName) throws InstanceNotFoundException {
+			return internal.getClassLoaderFor(mbeanName);
+		}
+
+		public ClassLoader getClassLoader(ObjectName loaderName) throws InstanceNotFoundException {
+			return internal.getClassLoader(loaderName);
+		}
+
+		public ClassLoaderRepository getClassLoaderRepository() {
+			return internal.getClassLoaderRepository();
+		}
+	}
+	
 	public static class IsolateMBeanFinder implements MBeanServerFinder {
 
 		static MBeanServer MSERVER = null;
@@ -377,7 +589,9 @@ public class CohHelper {
 		@Override
 		public synchronized MBeanServer findMBeanServer(String sDefaultDomain) {
 			if (MSERVER == null) {
-				MSERVER = MBeanServerFactory.newMBeanServer(System.getProperty("isolate.name"));
+				String iname = System.getProperty("isolate.name");
+				MBeanServer internal = MBeanServerFactory.newMBeanServer(iname); 
+				MSERVER = new IsolatedMBeanServerProxy(iname, ManagementFactory.getPlatformMBeanServer(), internal);
 			}
 			return MSERVER;
 		}

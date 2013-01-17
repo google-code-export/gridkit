@@ -142,7 +142,7 @@ public class TaskTimeoutSematicCheck {
 		
 		CacheTemplate.useTemplateCacheConfig(cluster);
 		CacheTemplate.usePartitionedInMemoryCache(cluster);
-		CacheTemplate.usePartitionCount(cluster, 1023);
+		CacheTemplate.usePartitionedServicePartitionCount(cluster, 1023);
 		CacheTemplate.usePartitionedServiceThreadCount(cluster, 2);
 		CacheTemplate.usePartitionedServiceTaskTimeout(cluster, 5000);
 		CacheTemplate.usePartitionedServiceTaskHungThreshold(cluster, 10000);

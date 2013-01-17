@@ -8,9 +8,28 @@
 			<cache-name>a-*</cache-name>
 			<scheme-name system-property="cache-template.scheme"></scheme-name>
 		</cache-mapping>
+        <cache-mapping>
+            <!-- 
+                This is special configuration element for data loss monitor.
+                Do not modify.
+             -->
+            <cache-name>CANARY_CACHE</cache-name>
+            <scheme-name>CANARY_SCHEME</scheme-name>
+        </cache-mapping>
 	</caching-scheme-mapping>
 
 	<caching-schemes>
+
+        <distributed-scheme>
+            <!-- 
+                This is special configuration element for data loss monitor.
+                Do not modify.
+             -->
+            <scheme-name>CANARY_SCHEME</scheme-name>
+            <backing-map-scheme>
+                <local-scheme/>
+            </backing-map-scheme>
+        </distributed-scheme>
 
         <distributed-scheme>
         	<scheme-name>distributed-scheme--base</scheme-name>
@@ -41,7 +60,6 @@
                     <scheme-ref system-property="cache-template.distributed-scheme.backing-map">local-cache</scheme-ref>
                 </local-scheme>
 			</backing-map-scheme>
-            <guardian-timeout system-property="cache-template.distributed-scheme.guardian-timeout"></guardian-timeout>
 		</distributed-scheme>
 
         <read-write-backing-map-scheme>

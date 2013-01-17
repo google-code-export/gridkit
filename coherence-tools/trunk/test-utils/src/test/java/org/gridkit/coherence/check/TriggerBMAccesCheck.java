@@ -1,8 +1,6 @@
 package org.gridkit.coherence.check;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -20,13 +18,10 @@ import com.tangosol.net.BackingMapContext;
 import com.tangosol.net.BackingMapManagerContext;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.util.BinaryEntry;
-import com.tangosol.util.CompositeKey;
 import com.tangosol.util.MapEvent;
 import com.tangosol.util.MapListener;
 import com.tangosol.util.MapTrigger;
 import com.tangosol.util.MapTriggerListener;
-import com.tangosol.util.filter.AlwaysFilter;
-import com.tangosol.util.processor.ConditionalPut;
 
 public class TriggerBMAccesCheck {
 

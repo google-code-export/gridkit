@@ -1,4 +1,4 @@
-package org.gridkit.coherence.test.cqcflood;
+package org.gridkit.coherence.util;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -18,14 +18,14 @@ import com.tangosol.net.NamedCache;
 import com.tangosol.net.cache.ContinuousQueryCache;
 import com.tangosol.util.filter.AlwaysFilter;
 
-public class ExtendCQCBloatCheck {
+public class ExtendConnectionCheck {
 
 	static {
 		DefaultConfigurableCacheFactory.class.toString();
 	}
 	
 	public static void main(String[] args) throws Exception {
-		new ExtendCQCBloatCheck().test_cqc_memory_leak();
+		new ExtendConnectionCheck().test_cqc_memory_leak();
 	}
 
 	@Test
@@ -64,39 +64,19 @@ public class ExtendCQCBloatCheck {
 			client1.exec(new Runnable() {
 				@Override
 				public void run() {
-					((InvocationService)CacheFactory.getService("ExtendInvocation")).query(new Task(), null);
+					ExtendConnection con1 = new ExtendConnection("/extend-client-cache-config.xml");
+					ExtendConnection con2 = new ExtendConnection("/extend-client-cache-config.xml");
+					
+					con1.getCache(cacheName);
+					con2.getCache(cacheName);
+					con2.getCache(cacheName);
+					con1.getInvocationService("ExtendInvocation");
+					
+					con1.disconnect();
+					con2.disconnect();
+					
 				}
 			});
-			proxy.suspend();
-			System.out.println("Proxy is suspended, wait client timeout");
-			client1.exec(new Runnable() {
-				@Override
-				public void run() {
-					((InvocationService)CacheFactory.getService("ExtendInvocation")).query(new Task(), null);
-				}
-			});
-			client1.getCache(cacheName).get("A");
-			System.out.println("Passed");
-			
-			ViNode client2 = remote.node("client2");
-			client2.getCache(cacheName);
-			ViNode client3 = remote.node("client3");
-			client3.getCache(cacheName);
-			
-			for(int i = 0; i != 100; ++i) {
-				new EventProducer(cacheName, proxy).start();
-			}
-
-			client1.exec(new CQCClient(cacheName));
-			client2.exec(new CQCClient(cacheName));
-			client3.exec(new CQCClient(cacheName));
-
-			System.out.println("Killing remote");
-			client1.suspend();
-//			remote.kill();
-			System.out.println("Client has been killed");
-			
-			Thread.sleep(600 * 1000);			
 		}
 		catch(Exception e) {
 			e.printStackTrace();

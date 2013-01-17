@@ -34,6 +34,7 @@ public class ViCluster implements ViProps {
 	private Map<String, ViNode> nodes = new HashMap<String, ViNode>();
 	
 	private Map<String, String> props = new HashMap<String, String>();
+	private List<Class<?>> excludeClasses = new ArrayList<Class<?>>();
 	private List<URL> incClasspath = new ArrayList<URL>();
 	private List<URL> excClasspath = new ArrayList<URL>();
 	
@@ -54,6 +55,10 @@ public class ViCluster implements ViProps {
 		}
 	}
 
+	public void shareClass(Class<?> type) {
+		excludeClasses.add(type);
+	}
+	
 	public void addToClasspath(URL url) {
 		incClasspath.add(url);
 		for(ViNode node: nodes.values()) {
@@ -84,6 +89,9 @@ public class ViCluster implements ViProps {
 		for(URL u: excClasspath) {
 			is.removeFromClasspath(u);
 		}
+		for(Class<?> c: excludeClasses) {
+			is.exclude(c);
+		}
 		
 		ViNode vnode = new ViNode(this, name, is);
 		nodes.put(name, vnode);
@@ -91,6 +99,12 @@ public class ViCluster implements ViProps {
 	
 	void remove(ViNode node) {
 		nodes.values().remove(node);
+	}
+	
+	public void silence() {
+		for(ViNode node: new ArrayList<ViNode>(nodes.values())) {
+			node.getIsolate().silence();
+		}		
 	}
 	
 	public void shutdown() {

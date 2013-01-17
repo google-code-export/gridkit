@@ -10,7 +10,7 @@ public class CacheTemplate {
 		CohHelper.cacheConfig(props, "template-cache-config.xml");
 	}
 	
-	public static void usePartitionedInMemoryCache(ViProps props) {
+	public static void usePartitionedInMemoryCache(ViProps props) {		
 		props.setProp("cache-template.scheme", "distributed-scheme--local");
 	}
 

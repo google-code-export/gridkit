@@ -1,6 +1,5 @@
 package org.gridkit.coherence.check;
 
-import java.io.Serializable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

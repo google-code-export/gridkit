@@ -181,6 +181,7 @@ public class ViNode implements ViProps {
 	public void shutdown() {
 		if (!terminated) {
 			try {
+				isolate.resume();
 				isolate.exec(new Runnable() {
 					@Override
 					public void run() {
@@ -211,6 +212,7 @@ public class ViNode implements ViProps {
 			terminated = true;
 		}
 		if (!terminated) {
+			isolate.resume();
 			isolate.stop();
 			isolate = null;
 			terminated = true;
