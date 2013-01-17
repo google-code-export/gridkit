@@ -29,11 +29,12 @@ import com.tangosol.net.partition.PartitionListener;
  * @author malekseev
  * 05.04.2011
  */
+@Deprecated
 public class PartitionLossListener implements PartitionListener {
 	
 	private static final Logger logger = LoggerFactory.getLogger(PartitionLossListener.class);
 	
-	private final DataLossMonitor dataLossMonitor;
+	private final CanaryMonitor dataLossMonitor;
 	
 	public PartitionLossListener(String cacheName, String dataLossListenerClass) {
 		try {
@@ -45,7 +46,7 @@ public class PartitionLossListener implements PartitionListener {
 						"] does not implement " +
 						DataLossListener.class.getCanonicalName());
 			}
-			this.dataLossMonitor = new DataLossMonitor(cacheName, (DataLossListener) listenerClass.newInstance());
+			this.dataLossMonitor = new CanaryMonitor(cacheName, (DataLossListener) listenerClass.newInstance());
 		} catch (Exception e) {
 			logger.error("Exception occured during partition listener initialization", e);
 			throw new RuntimeException(e);

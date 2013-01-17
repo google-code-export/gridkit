@@ -15,10 +15,9 @@
  */
 package org.gridkit.coherence.util.dataloss;
 
-import junit.framework.Assert;
-
 import org.gridkit.coherence.util.classloader.Isolate;
 import org.gridkit.coherence.util.classloader.NodeActions;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -30,6 +29,7 @@ import com.tangosol.net.CacheFactory;
  * @author malekseev
  * 05.04.2011
  */
+@SuppressWarnings("deprecation")
 public class ListenerTest {
 	
 	@BeforeClass

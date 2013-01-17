@@ -1,244 +1,471 @@
-/**
- * Copyright 2011 Grid Dynamics Consulting Services, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.gridkit.coherence.util.dataloss;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
-
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tangosol.net.CacheFactory;
+import com.tangosol.net.CacheService;
+import com.tangosol.net.Cluster;
+import com.tangosol.net.DistributedCacheService;
+import com.tangosol.net.Member;
+import com.tangosol.net.MemberEvent;
+import com.tangosol.net.MemberListener;
 import com.tangosol.net.NamedCache;
-import com.tangosol.net.PartitionedService;
-import com.tangosol.net.partition.KeyPartitioningStrategy;
+import com.tangosol.net.RequestPolicyException;
+import com.tangosol.net.partition.PartitionSet;
+import com.tangosol.net.partition.SimplePartitionKey;
+import com.tangosol.util.CompositeKey;
+import com.tangosol.util.Filter;
+import com.tangosol.util.extractor.IdentityExtractor;
+import com.tangosol.util.filter.AlwaysFilter;
+import com.tangosol.util.filter.EqualsFilter;
+import com.tangosol.util.processor.ConditionalPut;
+import com.tangosol.util.processor.ConditionalRemove;
 
-/**
- * Holds all "canary" cache maintenance issues. 
- * Processes cache population, consistency checks, restores in an async executor thread.
- * 
- * @author malekseev
- * 06.04.2011
- */
-class DataLossMonitor {
+public class DataLossMonitor {
+
+	private final static Logger LOGGER = LoggerFactory.getLogger(DataLossMonitor.class);
 	
-	private static final Logger logger = LoggerFactory.getLogger(DataLossMonitor.class);
+	private String canaryCacheName = "CANARY_CACHE";
+	private ExecutorService workerPool;
+	private Cluster cluster;
 	
-	private final DataLossListener listener;
-	private final String cacheName;
-	private final Semaphore lock;
-	private final Future<Map<Integer, Integer>> wrappedPartitionsMap;
+	private Map<String, ServiceContext> monitoredServices = new ConcurrentHashMap<String, ServiceContext>();
 	
-	public DataLossMonitor(String cacheName, DataLossListener listener) {
-		this.listener = listener;
-		this.cacheName = cacheName;
-		this.lock = new Semaphore(0);
-		ExecutorService executor = Executors.newSingleThreadExecutor();
-		try {
-			wrappedPartitionsMap = executor.submit(new CachePopulator());
-			// ensure that validator thread is started after population is completed
-			final String validatorThreadName = "Consistency validator: " + cacheName;
-			executor.execute(new Runnable() {
+	private boolean terminated = false;
+	private MembershipListener memberListener = new MembershipListener();
+	
+	public DataLossMonitor() {
+		this(16);
+	}
+
+	public DataLossMonitor(int poolSize) {
+		workerPool = new ThreadPoolExecutor(poolSize, poolSize, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new ThreadFactory() {
+			@Override
+			public Thread newThread(Runnable r) {
+				Thread th = new Thread(r);
+				th.setDaemon(true);
+				return th;
+			}
+		});
+	}
+
+	public void attachPartitionMonitor(NamedCache cache, PartitionListener monitor) {
+		attachPartitionMonitor(cache, monitor, Integer.MAX_VALUE);
+	}
+	
+	public synchronized void attachPartitionMonitor(NamedCache cache, PartitionListener monitor, int maxPartitionsPerCall) {
+		CacheService service = cache.getCacheService();
+		if (cluster == null) {
+			cluster = service.getCluster();
+		}
+		if (service instanceof DistributedCacheService) {
+			DistributedCacheService dservice = (DistributedCacheService) service;
+			String sname = dservice.getInfo().getServiceName();
+			ServiceContext ctx = monitoredServices.get(sname);
+			if (ctx == null) {
+				ctx = newContext(dservice);
+				service.addMemberListener(memberListener);
+				monitoredServices.put(sname, ctx);
+			}
+			
+			String cacheName = cache.getCacheName();
+			
+			if (ctx.caches.containsKey(cacheName)) {
+				throw new IllegalArgumentException("Monitor is already registered for cache '" + cacheName + "'");
+			}			
+			
+			CacheContext cctx = new CacheContext(ctx, cache, monitor, maxPartitionsPerCall);
+			ctx.caches.put(cacheName, cctx);
+			
+			updateService(dservice);
+		}
+		else {
+			throw new IllegalArgumentException("May work only with distributed-scheme. Cannot be used from Extend clients");
+		}						
+	}
+
+	private ServiceContext newContext(DistributedCacheService dservice) {
+		NamedCache canaryCache = dservice.ensureCache(canaryCacheName, null);				
+		return new ServiceContext(dservice, canaryCache);
+	}
+
+	public synchronized void removePartitionMonitor(NamedCache cache) {
+		CacheService service = cache.getCacheService();
+		if (service instanceof DistributedCacheService) {
+			DistributedCacheService dservice = (DistributedCacheService) service;
+			String sname = dservice.getInfo().getServiceName();
+			ServiceContext ctx = monitoredServices.get(sname);
+			if (ctx == null) {
+				throw new IllegalArgumentException("No monitor installed for cache '" + cache.getCacheName() + "'");
+			}
+			
+			String cacheName = cache.getCacheName();
+			
+			if (!ctx.caches.containsKey(cacheName)) {
+				throw new IllegalArgumentException("No monitor installed for cache '" + cache.getCacheName() + "'");
+			}			
+			
+			ctx.caches.remove(cacheName);
+			
+			if (ctx.caches.isEmpty()) {
+				monitoredServices.remove(sname);
+				dservice.removeMemberListener(memberListener);
+			}
+			
+			updateService(dservice);
+		}
+		else {
+			throw new IllegalArgumentException("May work only with distributed-scheme. Cannot be used from Extend clients");
+		}						
+	}
+	
+	@SuppressWarnings("unchecked")
+	public PartitionSet getEmptyPartitions(NamedCache cache) {
+		CacheService service = cache.getCacheService();
+		if (service instanceof DistributedCacheService) {
+			DistributedCacheService dservice = (DistributedCacheService) service;
+			int pcount = dservice.getPartitionCount();
+			NamedCache canaryCache = dservice.ensureCache(canaryCacheName, null);
+			Set<CompositeKey> ckeys = new HashSet<CompositeKey>();
+			String cacheName = cache.getCacheName();
+			for(int i = 0; i != pcount; ++i) {
+				ckeys.add(canaryKey(cacheName, i));
+			}
+			ckeys = canaryCache.getAll(ckeys).keySet();
+			PartitionSet missing = new PartitionSet(pcount);
+			missing.invert();
+			for(CompositeKey key: ckeys) {
+				missing.remove(((SimplePartitionKey)key.getPrimaryKey()).getPartitionId());
+			}
+			return missing;
+		}
+		else {
+			throw new IllegalArgumentException("May work only with distributed-scheme. Cannot be used from Extend clients");
+		}		
+	}
+
+	private CompositeKey canaryKey(String cacheName, int p) {
+		return new CompositeKey(SimplePartitionKey.getPartitionKey(p), cacheName);
+	}
+
+	public void updateService(DistributedCacheService service) {
+		final ServiceContext ctx = monitoredServices.get(service.getInfo().getServiceName());
+		if (ctx != null) {
+			workerPool.submit(new Runnable() {
 				@Override
 				public void run() {
-					new Thread(new ConsistencyValidator(), validatorThreadName).start();
+					try {
+						checkService(ctx);
+					}
+					catch(Throwable e) {
+						LOGGER.error("Error in DataLossMonitor for service [" + ctx.serviceName + "]", e);
+					}
 				}
 			});
-		} catch (Exception e) {
-			logger.error("Exception during \"canary\" cache init.", e);
-			throw new RuntimeException(e);
-		} finally {
-			executor.shutdown();
 		}
 	}
 	
-	public void checkConsistency() {
-		logger.trace("Posting consistency check request...");
-		lock.release();
-	}
-	
-	
-	
-	
-	/**
-	 * Initially populates "canary" cache with data. 
-	 * Cache consists of integer pairs   
-	 * 		some guessed key -> partition no
-	 * 
-	 * Callable returns partitions map (partition no -> "canary" key), i.e. reverse canary cache, 
-	 * for future restores after partitions loss. 
-	 */
-	private class CachePopulator implements Callable<Map<Integer, Integer>> {
-		
-		private static final int LOOP_LIMIT_PER_PARTITION = 10000;
-		
-		private final Logger logger = LoggerFactory.getLogger(CachePopulator.class);
-		
-		private Map<Integer, Integer> cacheMap;
-		private Map<Integer, Integer> partitionsMap;
-		
-		@Override
-		public Map<Integer, Integer> call() throws Exception {
-			CacheFactory.ensureCluster();
-			
-			NamedCache canaryCache = CacheFactory.getCache(cacheName);
-			PartitionedService partitionedService = (PartitionedService) canaryCache.getCacheService();
-			
-			int partitionsCount = partitionedService.getPartitionCount();
-			
-			cacheMap = new HashMap<Integer, Integer>(partitionsCount);
-			partitionsMap = new HashMap<Integer, Integer>(partitionsCount);
-			
-			KeyPartitioningStrategy kps = partitionedService.getKeyPartitioningStrategy();
-			
-			long start = System.nanoTime();
-			for (int i = 0; i < partitionsCount * LOOP_LIMIT_PER_PARTITION; i++) {
-				int partitionNo = kps.getKeyPartition(i);
-				if (!partitionsMap.containsKey(partitionNo)) {
-					partitionsMap.put(partitionNo, i);
-					cacheMap.put(i, partitionNo);
-					if (partitionsMap.size() == partitionsCount) break; /* exit for */
-				}
-			}
-			long elapsed = System.nanoTime() - start;
-			
-			if (partitionsMap.size() < partitionsCount) {
-				StringBuilder sb = new StringBuilder("Unable to fill \"canary\" cache partitions with sample data: parts no ");
-				for (int i = 0; i < partitionsCount; i++) {
-					if (!partitionsMap.containsKey(i)) {
-						sb.append(i);
-						sb.append(' ');
+	private void checkService(ServiceContext ctx) {
+		Thread currentThread = Thread.currentThread();
+		String origThreadName = currentThread.getName();
+		try {
+			currentThread.setName("DataLossMonitor-CheckService[" + ctx.service.getInfo().getServiceName() + "]");
+			ctx.signal.release(1);
+			if (ctx.lock.tryLock()) {
+				try {
+					while(ctx.signal.drainPermits() > 0) {
+						performServiceCheck(ctx);
 					}
 				}
-				sb.append("for service ");
-				sb.append(partitionedService.getInfo().getServiceName());
-				logger.error(sb.toString());
-				throw new IllegalStateException("Canary cache construction failed");
-			}
-			
-			Object lockKey = 0;
-			canaryCache.lock(lockKey, -1);
-			try {
-				if (canaryCache.size() == 0) {
-					canaryCache.putAll(cacheMap);
-					logger.info("Canary cache for service '{}' filled successfully in {} ms", 
-							partitionedService.getInfo().getServiceName(), 
-							MILLISECONDS.convert(elapsed, NANOSECONDS));
+				finally {
+					ctx.lock.unlock();
 				}
-			} catch(Exception e) {
-				logger.error("Exception during \"canary\" cache population.", e);
-				throw new RuntimeException(e);
-			} finally {
-				canaryCache.unlock(lockKey);
 			}
-			
-			return partitionsMap;
+		}
+		finally {
+			currentThread.setName(origThreadName);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void performServiceCheck(ServiceContext ctx) {
+		try {
+			List<CacheContext> caches;
+			synchronized(this) {
+				caches = new ArrayList<CacheContext>(ctx.caches.values());
+			}
+			Set<CompositeKey> ckeys = new HashSet<CompositeKey>();
+			ckeys.addAll(ctx.canaryCache.keySet());
+			for(CacheContext context: caches) {
+				PartitionSet missing = getEmptyPartitions(ctx.service.getPartitionCount(), ckeys, context.cacheName);
+				missing.remove(context.localLocks);
+				if (!missing.isEmpty()) {
+					checkCache(context);
+				}
+			}
+			ctx.deadCache.clear();
+		}
+		catch(RequestPolicyException e) {
+			// service is not online
+			LOGGER.warn("Service is not online [" + ctx.serviceName + "]");			
+		}
+	}
+
+	private PartitionSet getEmptyPartitions(int partitionCount, Set<CompositeKey>ckeys, String cacheName) {
+		PartitionSet missing = new PartitionSet(partitionCount);
+		missing.invert();
+		for(CompositeKey ckey: ckeys) {
+			if (cacheName.equals(ckey.getSecondaryKey())) {
+				SimplePartitionKey pk = (SimplePartitionKey) ckey.getPrimaryKey();
+				missing.remove(pk.getPartitionId());
+			}
+		}
+		return missing;
+	}
+
+	private void checkCache(CacheContext ctx) {
+		Thread currentThread = Thread.currentThread();
+		String origThreadName = currentThread.getName();
+		try {
+			currentThread.setName("DataLossMonitor-CheckCache[" + ctx.id + "]");
+			ctx.signal.release(1);
+			if (ctx.lock.tryLock()) {
+				try {
+					while(ctx.signal.drainPermits() > 0) {
+						performCheckCache(ctx);
+					}
+				}
+				finally {
+					ctx.lock.unlock();
+				}
+			}
+		}
+		finally {
+			currentThread.setName(origThreadName);
+		}
+	}
+	
+	private void performCheckCache(final CacheContext ctx) {
+		PartitionSet missing = getEmptyPartitions(ctx.cache);
+		missing.remove(ctx.localLocks);
+		if(!missing.isEmpty()) {
+			final PartitionSet batch = new PartitionSet(missing.getPartitionCount());
+			while(batch.cardinality() < ctx.batchLimit && !missing.isEmpty()) {
+				int p = missing.next(0);
+				missing.remove(p);
+				if (lockCanary(ctx, p)) {
+					batch.add(p);
+				}
+			}
+			if (!batch.isEmpty()) {
+				lockLocally(ctx, batch);
+				workerPool.submit(new Runnable() {
+					@Override
+					public void run() {
+						processBatch(ctx, batch);
+					}
+				});
+			}
+		}
+	}
+
+	private static Filter isNull() {
+		return new EqualsFilter(new IdentityExtractor(), null);
+	}
+	
+	private boolean lockCanary(CacheContext ctx, int p) {
+		CompositeKey key = new CompositeKey(SimplePartitionKey.getPartitionKey(p), new CompositeKey(ctx.cacheName, "lock"));
+		while(true) {
+			String uid = (String) ctx.canaryCache.invoke(key, new ConditionalPut(isNull(), getLocalUID(), true));		
+			if (uid != null) {
+				if (getLocalUID().equals(uid) || !isActive(ctx.service, uid)) {
+					if (!getLocalUID().equals(uid) && !ctx.deadCache.contains(uid)) {
+						ctx.deadCache.add(uid);
+						LOGGER.warn("Removing dead member lock: " + uid);
+					}
+					ctx.canaryCache.invoke(key, new ConditionalRemove(new EqualsFilter(new IdentityExtractor(), uid)));
+					continue;
+				}
+				else {
+					return false;
+				}
+			}
+			return true;
+		}		
+	}
+	
+	private void addCanaries(CacheContext ctx, PartitionSet set) {
+		Set<Object> keys = new HashSet<Object>();
+		for(int p: set.toArray()) {
+			CompositeKey key = new CompositeKey(SimplePartitionKey.getPartitionKey(p), ctx.cacheName);
+			keys.add(key);
+		}
+		ctx.canaryCache.invokeAll(keys, new ConditionalPut(AlwaysFilter.INSTANCE, Boolean.TRUE));		
+	}
+
+	private void unlockCanaries(CacheContext ctx, PartitionSet set) {
+		Set<Object> keys = new HashSet<Object>();
+		for(int p: set.toArray()) {
+			CompositeKey key = new CompositeKey(SimplePartitionKey.getPartitionKey(p), new CompositeKey(ctx.cacheName, "lock"));
+			keys.add(key);
+		}
+		ctx.canaryCache.invokeAll(keys, new ConditionalRemove(new EqualsFilter(new IdentityExtractor(), getLocalUID())));		
+	}
+
+	private String getLocalUID() {
+		return getUID(cluster.getLocalMember());
+	}
+
+	private boolean isActive(DistributedCacheService service, String uid) {
+		@SuppressWarnings("unchecked")
+		Set<Member> members = service.getInfo().getServiceMembers();
+		for(Member m: members) {
+			if (uid.equals(getUID(m))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private String getUID(Member m) {
+		return m.getRoleName() + "-" + m.getProcessName() + "-" + m.getUid().toString();
+	}
+
+	protected void processBatch(CacheContext ctx, PartitionSet batch) {
+		Thread currentThread = Thread.currentThread();
+		String origThreadName = currentThread.getName();
+		try {
+			currentThread.setName("DataLossMonitor-Process[" + ctx.id + ", " + batch + "]");
+			try {
+				PartitionSet ckeys = getEmptyPartitions(ctx.cache);
+				PartitionSet finalBatch = new PartitionSet(batch);
+				finalBatch.retain(ckeys);
+				if (!finalBatch.isEmpty()) {
+					ctx.monitor.onEmptyPartition(ctx.cache, new PartitionSet(finalBatch));
+				}
+				addCanaries(ctx, batch);
+			}			
+			finally {
+				unlockCanaries(ctx, batch);
+				unlockLocally(ctx, batch);
+				// verify cache state
+				updateService((DistributedCacheService) ctx.cache.getCacheService());
+			}
+		}
+		catch(Exception e) {
+			LOGGER.warn("Execption in listener for cache [" + ctx.cacheName + "]", e);
+		}
+		finally {
+			currentThread.setName(origThreadName);
+		}		
+	}
+
+	private void lockLocally(CacheContext ctx, PartitionSet batch) {
+		synchronized (ctx) {
+			PartitionSet nlock = new PartitionSet(ctx.localLocks);
+			nlock.add(batch);				
+			ctx.localLocks = nlock;
+		}
+	}
+
+	private void unlockLocally(CacheContext ctx, PartitionSet batch) {
+		synchronized (ctx) {
+			PartitionSet nlock = new PartitionSet(ctx.localLocks);
+			nlock.remove(batch);				
+			ctx.localLocks = nlock;
+		}
+	}
+
+	public static interface PartitionListener {
+		
+		public void onEmptyPartition(NamedCache cache, PartitionSet partitions);
+		
+	}
+	
+	private class MembershipListener implements MemberListener {
+
+		@Override
+		public void memberJoined(MemberEvent member) {
+			if (!terminated) {
+				updateService((DistributedCacheService) member.getService());
+			}
 		}
 
-	}
-	
-	
-	/**
-	 * Checks if there are some lost entries in "canary" cache, indication lost Coherence 
-	 * partitions.
-	 * 
-	 * When found, delegates processing to application-provided listener class, then 
-	 * restores "canary" cache contents using previously generated partitions map.
-	 */
-	private class ConsistencyValidator implements Runnable {
-		
-		private final Logger logger = LoggerFactory.getLogger(ConsistencyValidator.class);
-		
 		@Override
-		public void run() {
-			final NamedCache canaryCache = CacheFactory.getCache(cacheName);
-			final PartitionedService service = (PartitionedService) canaryCache.getCacheService();
-			
-			while (true) {
-				try {
-					lock.acquire();
-					lock.drainPermits();
-				} catch (InterruptedException e) {
-					logger.error("Consistency validation thread interrupted", e);
-					break;
-				}
-				
-				logger.trace("Processing consistency check request...");
-				
-				@SuppressWarnings("unchecked")
-				// canaryCache.size() may work too, but we'll stick with getAll() to be absolutely sure
-				Map<Integer, Integer> cacheMap = canaryCache.getAll(canaryCache.keySet());
-				
-				if (cacheMap.size() != service.getPartitionCount()) {
-					// write log message
-					logger.error(lossMessage(service, cacheMap));
-					
-					// calculate lost partitions list
-					int lostCount = 0, lostPartitions[] = new int[service.getPartitionCount()];
-					for (int i = 0; i < service.getPartitionCount(); i++) {
-						if (!cacheMap.containsValue(i)) {
-							lostPartitions[lostCount] = i;
-							lostCount++;
-						}
-					}
-					
-					// delegate to application-provided listener
-					listener.onPartitionLost(service, Arrays.copyOf(lostPartitions, lostCount));
-					
-					// recover lost "canary" cache partitions
-					try {
-						Map<Integer, Integer> partitionsMap = wrappedPartitionsMap.get();
-						Map<Integer, Integer> lostCanaryPart = new HashMap<Integer, Integer>(lostCount);
-						for (int i = 0; i < lostCount; i++) {
-							lostCanaryPart.put(partitionsMap.get(lostPartitions[i]), lostPartitions[i]);
-						}
-						canaryCache.putAll(lostCanaryPart);
-						logger.info("Canary cache partitions for service '{}' restored successfully", 
-								service.getInfo().getServiceName());
-					} catch (InterruptedException e) {
-						logger.error("Exception during \"canary\" cache recovery", e);
-						throw new RuntimeException(e);
-					} catch (ExecutionException e) {
-						logger.error("Exception during \"canary\" cache recovery", e);
-						throw new RuntimeException(e);
-					}
-				}
+		public void memberLeaving(MemberEvent member) {
+			// ignore
+		}
+
+		@Override
+		public void memberLeft(MemberEvent member) {
+			if (!terminated) {
+				updateService((DistributedCacheService) member.getService());
 			}
 		}
-		
-		private String lossMessage(PartitionedService service, Map<Integer, Integer> cacheMap) {
-			StringBuilder sb = new StringBuilder();
-			sb.append("Detected loss of ");
-			sb.append(service.getPartitionCount() - cacheMap.size());
-			sb.append(" partitions for service '");
-			sb.append(service.getInfo().getServiceName());
-			sb.append("', delegating to application-provided listener");
-			return sb.toString();
-		}
-		
 	}
 	
+	private static class ServiceContext {
+		
+		final DistributedCacheService service;
+		final String serviceName;
+		final Semaphore signal = new Semaphore(0);
+		final Lock lock = new ReentrantLock();
+		final Map<String, CacheContext> caches = new HashMap<String, CacheContext>();
+		final NamedCache canaryCache;
+		final Set<String> deadCache = Collections.synchronizedSet(new HashSet<String>());
+
+		public ServiceContext(DistributedCacheService service,	NamedCache canaryCache) {
+			this.service = service;
+			this.serviceName = service.getInfo().getServiceName();
+			this.canaryCache = canaryCache;
+		}
+	}
+	
+	private static class CacheContext {
+		
+		final String cacheName;
+		final CompositeKey id;
+		final NamedCache cache;
+		final Semaphore signal = new Semaphore(0);
+		final Lock lock = new ReentrantLock();
+		
+		final DistributedCacheService service;
+		final NamedCache canaryCache;
+		final PartitionListener monitor;
+		final int batchLimit;		
+		
+		volatile PartitionSet localLocks;
+		final Set<String> deadCache;
+		
+		
+		public CacheContext(ServiceContext ctx, NamedCache cache, PartitionListener monitor, int batchLimit) {
+			cacheName = cache.getCacheName();
+			this.cache = cache;
+			service = ctx.service;
+			canaryCache = ctx.canaryCache;
+			id = new CompositeKey(service.getInfo().getServiceName(), cacheName);
+			this.monitor = monitor;
+			this.batchLimit = batchLimit;
+			
+			localLocks = new PartitionSet(service.getPartitionCount());
+			deadCache = ctx.deadCache;
+		}
+	}
 }
