@@ -111,7 +111,9 @@
                 </configuration>
             </plugin>
 
-            <plugin> <!-- usage: http://code.google.com/p/maven-license-plugin/wiki/HowTo -->
+            <!-- usage: http://code.google.com/p/maven-license-plugin/wiki/HowTo -->
+            <!--
+            <plugin> 
                 <artifactId>maven-license-plugin</artifactId>
                 <groupId>com.mathieucarbou.mojo</groupId>
                 <configuration>
@@ -132,6 +134,7 @@
                     </execution>
                 </executions>
             </plugin>
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>

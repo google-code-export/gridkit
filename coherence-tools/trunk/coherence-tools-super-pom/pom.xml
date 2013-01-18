@@ -22,12 +22,12 @@
     <artifactId>coherence-tools-parent</artifactId>
     <version>1.4-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>coherence-tools-parent</name>
+    <name>coherence-tools-super-pom</name>
     <description>Tools collection for Oracle Coherence IMDG (parent project).</description>
     
     <scm>
-        <connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/trunk</connection>
-        <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/trunk</developerConnection>
+        <connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/trunk/coherence-tools-super-pom</connection>
+        <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/trunk/coherence-tools-super-pom</developerConnection>
         <url>http://gridkit.googlecode.com/svn/coherence-tools/trunk</url>
     </scm>
     
@@ -125,7 +125,7 @@
                 <version>1.0-beta-7</version>
             </extension>
             <extension>
-			    <!-- Enables SVN repository access -->
+                <!-- Enables SVN repository access -->
                 <groupId>com.google.code.maven-svn-wagon</groupId>
                 <artifactId>maven-svn-wagon</artifactId>
                 <version>1.4</version>
