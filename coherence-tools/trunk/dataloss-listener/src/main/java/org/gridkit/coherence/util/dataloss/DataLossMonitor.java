@@ -38,6 +38,54 @@ import com.tangosol.util.filter.EqualsFilter;
 import com.tangosol.util.processor.ConditionalPut;
 import com.tangosol.util.processor.ConditionalRemove;
 
+/**
+ * <p>
+ * {@link DataLossMonitor} helps to track data consistency in Coherence cache.
+ * Each partition in cache has associated consistency flag (canary key).
+ * <br/>
+ * In partition without such flag is present {@link DataLossMonitor} will invoke user provided {@link PartitionListener}
+ * which is supposed to preload data in partition. Once {@link PartitionListener} for partition is executed, consitency flag would be set.
+ * <br/>
+ * Consistency flag cloud be reset again if data would be lost do to failure of cluster storage node.
+ * <br/>
+ * {@link DataLossMonitor} is using distributed locks to ensure what each partition would be preloaded exectly once.
+ * Multiple instances of {@link DataLossMonitor} cloud work concurrently.
+ * <br/>
+ * {@link DataLossMonitor} is encapsulating a thread pool, so it is recommended to have single instance {@link DataLossMonitor} per JVM.
+ * </p>
+ * <p>
+ * {@link DataLossMonitor} requires following elements in {@code cache-config.xml}
+ * <br/>
+ * In {@code <caching-scheme-mapping>} add element
+ * <pre>
+ * {@code
+ * <cache-mapping>
+ *     <!-- 
+ *       This is special configuration element for data loss monitor.
+ *       Do not modify.
+ *      -->
+ *     <cache-name>CANARY_CACHE</cache-name>
+ *     <scheme-name>CANARY_SCHEME</scheme-name>
+ * </cache-mapping>}
+ * </pre>
+ * In {@code <caching-schemes>} add element
+ * <pre>
+ * {@code
+ * <distributed-scheme>
+ *     <!-- 
+ *         This is special configuration element for data loss monitor.
+ *         Do not modify.
+ *      -->
+ *     <scheme-name>CANARY_SCHEME</scheme-name>
+ *     <backing-map-scheme>
+ *         <local-scheme/>
+ *     </backing-map-scheme>
+ * </distributed-scheme>}
+ * </pre>
+ * </p>
+ * 
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ */
 public class DataLossMonitor {
 
 	private final static Logger LOGGER = LoggerFactory.getLogger(DataLossMonitor.class);
@@ -70,6 +118,9 @@ public class DataLossMonitor {
 		attachPartitionMonitor(cache, monitor, Integer.MAX_VALUE);
 	}
 	
+	/**
+	 * @param maxPartitionsPerCall - will limit number of partition per call to {@link PartitionListener#onEmptyPartition(NamedCache, PartitionSet)} method
+	 */
 	public synchronized void attachPartitionMonitor(NamedCache cache, PartitionListener monitor, int maxPartitionsPerCall) {
 		CacheService service = cache.getCacheService();
 		if (cluster == null) {
@@ -395,6 +446,13 @@ public class DataLossMonitor {
 
 	public static interface PartitionListener {
 		
+		/**
+		 * This method is called once one or more empty partitions in cache have been detected.
+		 * After execution of this method. Partition fill be automatically marked as initialized.
+		 * 
+		 * @param cache
+		 * @param partitions - set of not initialized partitions
+		 */
 		public void onEmptyPartition(NamedCache cache, PartitionSet partitions);
 		
 	}
