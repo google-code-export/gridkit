@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<!DOCTYPE cache-config SYSTEM "cache-config.dtd">
+
+<cache-config>
+
+	<caching-scheme-mapping>
+		<cache-mapping>
+			<cache-name>a-*</cache-name>
+			<scheme-name system-property="cache-template.scheme"></scheme-name>
+		</cache-mapping>
+	</caching-scheme-mapping>
+
+	<caching-schemes>
+
+		<distributed-scheme>
+			<scheme-name>distributed-scheme--read-write</scheme-name>
+			<service-name system-property="cache-template.distributed-scheme.service-name">DistributedService</service-name>
+			<partition-count system-property="cache-template.distributed-scheme.partition-count">257</partition-count>
+			<thread-count system-property="cache-template.distributed-scheme.thread-count">0</thread-count>
+			<backing-map-scheme>
+				<read-write-backing-map-scheme>
+                    <scheme-ref system-property="cache-template.distributed-scheme.backing-map">read-write-backing-map</scheme-ref>
+                </read-write-backing-map-scheme>
+			</backing-map-scheme>
+		</distributed-scheme>
+
+		<distributed-scheme>
+			<scheme-name>distributed-scheme--local</scheme-name>
+			<service-name system-property="cache-template.distributed-scheme.service-name">DistributedService</service-name>
+			<partition-count system-property="cache-template.distributed-scheme.partition-count">257</partition-count>
+			<backing-map-scheme>
+				<local-scheme>
+                    <scheme-ref system-property="cache-template.distributed-scheme.backing-map">local-cache</scheme-ref>
+                </local-scheme>
+			</backing-map-scheme>
+		</distributed-scheme>
+
+
+        <read-write-backing-map-scheme>
+            <scheme-name>read-write-backing-map</scheme-name>
+            <write-delay system-property="cache-template.read-write-backing-map.write-delay"></write-delay>
+            <write-batch-factor system-property="cache-template.read-write-backing-map.write-batch-factor"></write-batch-factor>
+            <write-max-batch-size system-property="cache-template.read-write-backing-map.write-max-batch-size"></write-max-batch-size>
+            <internal-cache-scheme>
+                <local-scheme>
+                    <scheme-ref system-property="cache-template.read-write-backing-map.internal-map">local-cache</scheme-ref>
+                </local-scheme>
+            </internal-cache-scheme>
+            <cachestore-scheme>
+                <class-scheme>
+                    <class-name system-property="cache-template.read-write-backing-map.cache-store-class"></class-name>
+                </class-scheme>
+            </cachestore-scheme>
+        </read-write-backing-map-scheme>
+
+        <local-scheme>
+            <scheme-name>local-cache</scheme-name>
+        </local-scheme>
+
+	</caching-schemes>
+
+</cache-config>
