@@ -29,6 +29,12 @@
     <name>test-utils</name>
     <description>Utility classes for unit and integration testing</description>
 
+    <scm>
+        <connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/trunk/test-utils</connection>
+        <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/trunk/test-utils</developerConnection>
+        <url>http://gridkit.googlecode.com/svn/coherence-tools/trunk/test-utils</url>
+    </scm>
+
     <!-- this repository is required to get parent POM -->
     <repositories>
         <!-- GridKit maven2 repository -->

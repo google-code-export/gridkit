@@ -36,6 +36,12 @@
         <javaVersion>1.6</javaVersion>
     </properties>
 
+    <scm>
+        <connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/trunk/reflection-pof-serializer</connection>
+        <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/trunk/reflection-pof-serializer</developerConnection>
+        <url>http://gridkit.googlecode.com/svn/coherence-tools/trunk/reflection-pof-serializer</url>
+    </scm>
+
     <repositories>
         <!-- GridKit maven2 repository -->
         <repository>
