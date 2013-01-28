@@ -2,7 +2,7 @@ package org.gridkit.data.extractors.common;
 
 import java.nio.ByteBuffer;
 
-public interface BinaryExtractorSet<X extends BinaryExtractor<?>> {
+public interface BinaryExtractorSet {
 	
 	/**
 	 * Adds extractor to a array and return its ID 
@@ -10,8 +10,12 @@ public interface BinaryExtractorSet<X extends BinaryExtractor<?>> {
 	 * @param extractor
 	 * @return id of added extractor
 	 */
-	public int addExtractor(X extractor);
+	public int addExtractor(BinaryExtractor<?> extractor);
+
+	public int getSize();
 	
-	public Object[] extractAll(ByteBuffer buffer);
+	public void compile();
+	
+	public void extractAll(ByteBuffer buffer, ResultVectorReceiver resultReceiver);
 
 }
