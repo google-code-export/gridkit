@@ -1,31 +1,26 @@
 package org.gridkit.data.extractors.protobuf;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.gridkit.data.extractors.common.BinaryExtractor;
 import org.gridkit.data.extractors.common.BinaryExtractorSet;
 import org.gridkit.data.extractors.common.CompositeExtractorSet;
 import org.gridkit.data.extractors.common.ResultVectorReceiver;
 
-import com.google.protobuf.CodedInputStream;
-import com.google.protobuf.WireFormat;
-
 public class ProtoBufExtractorSet implements BinaryExtractorSet, Serializable {
 
 	private int numExtractors;
-	private Entry root;
+	private Entry root = new Entry(null, 0);
 	
 	@Override
 	public int addExtractor(BinaryExtractor<?> extractor) {
-		ProtoBufExtractor<?> pbx = (ProtoBufExtractor<?>) extractor;
-		int[] path = pbx.getPath();
-		return 0;
+		return root.addExtractor((ProtoBufExtractor<?>) extractor);
 	}
 	
 	@Override
@@ -42,170 +37,90 @@ public class ProtoBufExtractorSet implements BinaryExtractorSet, Serializable {
 	public void extractAll(ByteBuffer buffer, ResultVectorReceiver resultReceiver) {
 		
 	}
+	
+	private static int[] set(int[] array, int index, int value) {
+		if (array == null) {
+			array = new int[index + 1];
+			Arrays.fill(array, -1);
+		}
+		else if (array.length <= index) {
+			int n = array.length;
+			array = Arrays.copyOf(array, index + 1);
+			Arrays.fill(array, n, array.length, -1);
+		}
+		array[index] = value;
+		
+		return array;
+	}
 
-	private static class Entry implements Serializable, Comparable<Entry> {
+
+	private class Entry implements Serializable, Comparable<Entry> {
 		
 		private static final long serialVersionUID = 20130127L;
 		
 		private final Entry parent;
-		private final int attrIndex;
+		private final int pbIndex;
 		
-		private List<Entry> childEntries;
-		private 
+		private SortedMap<Integer, Entry> childEntries = new TreeMap<Integer, ProtoBufExtractorSet.Entry>();
+
+		private int[] outIndexes;
+		private CompositeExtractorSet composite = new CompositeExtractorSet();
+		private Map<ProtoBufExtractor<?>, Integer> leafs = new HashMap<ProtoBufExtractor<?>, Integer>();
 		
-		private CompositeExtractorSet extractor;
-		
-		public Entry(Entry parent, int attrIndex) {
+		public Entry(Entry parent, int pbIndex) {
 			this.parent = parent;
-			this.attrIndex = attrIndex;
+			this.pbIndex = pbIndex;
 		}
 		
 		@Override
 		public int compareTo(Entry o) {
-			return attrIndex - o.attrIndex;
+			return pbIndex - o.pbIndex;
 		} 
 		
+		public int addExtractor(ProtoBufExtractor<?> extractor) {
+			if (extractor.isLeaf()) {
+				if (extractor.getNestedExtractor() == null) {
+					if (leafs.containsKey(extractor)) {
+						return leafs.get(extractor);
+					}
+					else {
+						int id = numExtractors++;
+						leafs.put(extractor, id);
+						return id;
+					}
+				}
+				else {
+					int cid = composite.addExtractor(extractor.getNestedExtractor());
+					if (outIndexes != null && outIndexes.length > cid && outIndexes[cid] != -1) {
+						return outIndexes[cid];
+					}
+					else {
+						int id = numExtractors++;
+						outIndexes = set(outIndexes, cid, id);
+						return id;
+					}
+				}
+			}
+			else {
+				int pbi = extractor.getPrefix();
+				Entry child = childEntries.get(pbi);
+				if (child == null) {
+					child = new Entry(this, pbi);
+					childEntries.put(pbi, child);
+				}
+				return child.addExtractor(extractor.trim());
+			}
+		}
+		
 		public void prepare() {
+			if (composite != null) {
+				composite.compile();
+			}
 			if (childEntries != null) {
-				Collections.sort(childEntries);
-				for(Entry child: childEntries) {
+				for(Entry child: childEntries.values()) {
 					child.prepare();
 				}
 			}
-			if (processors != null) {
-				for(Processor processor: processors) {
-					processor.prepare();
-				}
-			}
 		}
-	}
-	
-	private static abstract class Processor implements Serializable {
-		
-		public abstract void init(ResultWrapper receiver);
-
-		public abstract void prepare();
-		
-		public abstract void process(ResultWrapper receiver, int wireType, ByteBuffer buffer) throws IOException;
-		
-	}
-	
-	private static class ScalarProcessor extends Processor {
-
-		private final int outIndex;
-		private final ProtoBufExtractor<?> extractor;
-		
-		public ScalarProcessor(int outIndex, ProtoBufExtractor<?> extractor) {
-			this.outIndex = outIndex;
-			this.extractor = extractor;
-		}
-
-		@Override
-		public void prepare() {
-			// do nothing
-		}
-
-		@Override
-		public void init(ResultWrapper receiver) {
-		}
-
-		@Override
-		public void process(ResultWrapper receiver, int wireType, ByteBuffer buffer) throws IOException {
-			receiver.push(outIndex, extractor.decode(wireType, buffer));			
-		}
-	}
-
-	private static class ListProcessor extends Processor {
-		
-		private final int outIndex;
-		private final ProtoBufExtractor<?> extractor;
-		
-		public ListProcessor(int outIndex, ProtoBufExtractor<?> extractor) {
-			this.outIndex = outIndex;
-			this.extractor = extractor;
-		}
-		
-		@Override
-		public void prepare() {
-		}
-
-		@Override
-		public void init(ResultWrapper receiver) {
-			receiver.createList(outIndex);
-		}
-		
-		@Override
-		@SuppressWarnings("unchecked")
-		public void process(ResultWrapper receiver, int wireType, ByteBuffer buffer) throws IOException {
-			receiver.push(outIndex, extractor.decode(wireType, buffer));			
-		}
-	}
-	
-	private static class AlienProcessor extends Processor {
-		
-		private int[] outIndexes;
-		private int[] groupIndexes;
-		private BinaryExtractorSet extractorSet;
-
-		@Override
-		public void prepare() {
-			extractorSet.compile();			
-		}
-		
-		@Override
-		public void init(ResultWrapper receiver) {
-			for(int i: groupIndexes) {
-				receiver.createList(i);
-			}
-		}
-		
-		@Override
-		public void process(final ResultWrapper receiver, int wireType, ByteBuffer buffer) throws IOException {
-			int wireFormat = wireType & 0x7;
-			if (wireFormat == WireFormat.WIRETYPE_LENGTH_DELIMITED) {
-				CodedInputStream cis = PBHelper.inputStream(buffer);
-				int len = cis.readInt32();
-				int offs = cis.getTotalBytesRead();
-				ByteBuffer bb = buffer.slice();
-				bb.position(offs);
-				bb.limit(offs + len);
-				extractorSet.extractAll(bb, new ResultVectorReceiver() {
-					
-					@Override
-					public void push(int id, Object part) {
-						receiver.push(outIndexes[id], part);
-					}
-				});
-			}
-		}
-	}
-	
-	private static class ResultWrapper implements ResultVectorReceiver {
-		
-		private final Object[] buffer;
-		private final boolean[] collections;
-		
-		public ResultWrapper(int size) {
-			buffer = new Object[size];
-			collections = new boolean[size];
-		}
-
-		@Override
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public void push(int id, Object part) {
-			if (collections[id]) {
-				((Collection)buffer[id]).add(part);
-			}
-			else {
-				if (buffer[id] == null) {
-					buffer[id] = part;
-				}
-			}
-		}
-		
-		public void createList(int id) {
-			collections[id] = true;
-			buffer[id] = new ArrayList<Object>();
-		}
-	}
+	}	
 }
