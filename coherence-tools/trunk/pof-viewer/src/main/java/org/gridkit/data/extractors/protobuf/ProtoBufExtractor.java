@@ -3,37 +3,39 @@ package org.gridkit.data.extractors.protobuf;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import org.gridkit.data.extractors.common.BinaryExtractor;
 import org.gridkit.data.extractors.common.BinaryExtractorSet;
 import org.gridkit.data.extractors.common.Blob;
 
-import com.google.protobuf.CodedInputStream;
 import com.google.protobuf.WireFormat;
 
 public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 
 	private static final long serialVersionUID = 20130125L;
 
+	private static final Charset UTF8 = Charset.forName("UTF8");
+	
 	public static ProtoBufExtractor<Blob> newBlobExtractor(int... path) {
 		return new ProtoBufExtractor<Blob>(path, Encoding.BLOB, false);
 	}
 
-	public static ProtoBufExtractor<Number> newSignedIntegerExtractor(int... path) {
-		return new ProtoBufExtractor<Number>(path, Encoding.SINGNED_INT32, false);
+	public static ProtoBufExtractor<Integer> newSignedIntegerExtractor(int... path) {
+		return new ProtoBufExtractor<Integer>(path, Encoding.SINGNED_INT32, false);
 	}
 	
-	public static ProtoBufExtractor<Number> newUnsignedIntegerExtractor(int... path) {
-		return new ProtoBufExtractor<Number>(path, Encoding.UNSIGNED_INT32, false);
+	public static ProtoBufExtractor<Integer> newUnsignedIntegerExtractor(int... path) {
+		return new ProtoBufExtractor<Integer>(path, Encoding.UNSIGNED_INT32, false);
 	}
 
-	public static ProtoBufExtractor<Number> newSignedLongExtractor(int... path) {
-		return new ProtoBufExtractor<Number>(path, Encoding.SINGNED_INT64, false);
+	public static ProtoBufExtractor<Long> newSignedLongExtractor(int... path) {
+		return new ProtoBufExtractor<Long>(path, Encoding.SINGNED_INT64, false);
 	}
 	
-	public static ProtoBufExtractor<Number> newUnsignedLongExtractor(int... path) {
-		return new ProtoBufExtractor<Number>(path, Encoding.UNSIGNED_INT64, false);
+	public static ProtoBufExtractor<Long> newUnsignedLongExtractor(int... path) {
+		return new ProtoBufExtractor<Long>(path, Encoding.UNSIGNED_INT64, false);
 	}
 	
 	public static ProtoBufExtractor<Number> newFloatingPointExtractor(int... path) {
@@ -44,14 +46,86 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 		return new ProtoBufExtractor<String>(path, Encoding.UTF8, false);
 	}
 	
-	enum Encoding {
-		SINGNED_INT32,
-		UNSIGNED_INT32,
-		SINGNED_INT64,
-		UNSIGNED_INT64,
-		FLOATING_POINT,
-		UTF8,
-		BLOB
+	enum Encoding implements Encoder {
+		SINGNED_INT32 {
+			@Override
+			public Object decode(int wireType, ByteBuffer buffer) throws IOException {
+				return decodeSignedInt(wireType, buffer);
+			}
+
+			@Override
+			public String code() {
+				return "i";
+			}			
+		},
+		UNSIGNED_INT32 {
+			@Override
+			public Object decode(int wireType, ByteBuffer buffer) throws IOException {
+				return decodeUnsignedInt(wireType, buffer);
+			}
+
+			@Override
+			public String code() {
+				return "u";
+			}			
+		},
+		SINGNED_INT64 {
+			@Override
+			public Object decode(int wireType, ByteBuffer buffer) throws IOException {
+				return decodeSignedLong(wireType, buffer);
+			}
+
+			@Override
+			public String code() {
+				return "ii";
+			}			
+		},
+		UNSIGNED_INT64{
+			@Override
+			public Object decode(int wireType, ByteBuffer buffer) throws IOException {
+				return decodeUnsignedLong(wireType, buffer);
+			}
+
+			@Override
+			public String code() {
+				return "uu";
+			}			
+		},
+		FLOATING_POINT{
+			@Override
+			public Object decode(int wireType, ByteBuffer buffer) throws IOException {
+				return decodeFloat(wireType, buffer);
+			}
+
+			@Override
+			public String code() {
+				return "f";
+			}			
+		},
+		UTF8{
+			@Override
+			public Object decode(int wireType, ByteBuffer buffer) throws IOException {
+				return decodeUTF8(wireType, buffer);
+			}
+
+			@Override
+			public String code() {
+				return "s";
+			}
+		},
+		BLOB{
+			@Override
+			public Object decode(int wireType, ByteBuffer buffer) throws IOException {
+				return decodeBlob(wireType, buffer);
+			}
+
+			@Override
+			public String code() {
+				return "b";
+			}
+		}
+		;
+		public abstract String code();
 	}
 	
 	private final int[] path;
@@ -105,6 +179,10 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 		this.nested = nested; 
 	}
 	
+	protected boolean isLengthDelimited() {
+		return encoding == null || encoding == Encoding.UTF8 || encoding == Encoding.BLOB;
+	}
+	
 	protected boolean isLeaf() {
 		return path.length == 0;
 	}
@@ -115,7 +193,7 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 	
 	protected ProtoBufExtractor<V> trim() {
 		int[] subpath = new int[path.length - 1];
-		System.arraycopy(path, 0, subpath, 0, subpath.length);
+		System.arraycopy(path, 1, subpath, 0, subpath.length);
 		return new ProtoBufExtractor<V>(subpath, encoding, group, nested);
 		
 	}
@@ -157,7 +235,7 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 		}
 	}
 	
-	private int decodeSignedInt(int wireType, ByteBuffer buffer) throws IOException {
+	private static int decodeSignedInt(int wireType, ByteBuffer buffer) throws IOException {
 		int wireFormat = wireType & 0x7;
 		switch(wireFormat) {
 		case WireFormat.WIRETYPE_VARINT:
@@ -171,7 +249,7 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 		}
 	}
 
-	private int decodeUnsignedInt(int wireType, ByteBuffer buffer) throws IOException {
+	private static int decodeUnsignedInt(int wireType, ByteBuffer buffer) throws IOException {
 		int wireFormat = wireType & 0x7;
 		switch(wireFormat) {
 		case WireFormat.WIRETYPE_VARINT:
@@ -185,7 +263,7 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 		}
 	}
 
-	private long decodeSignedLong(int wireType, ByteBuffer buffer) throws IOException {
+	private static long decodeSignedLong(int wireType, ByteBuffer buffer) throws IOException {
 		int wireFormat = wireType & 0x7;
 		switch(wireFormat) {
 		case WireFormat.WIRETYPE_VARINT:
@@ -199,7 +277,7 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 		}
 	}
 	
-	private long decodeUnsignedLong(int wireType, ByteBuffer buffer) throws IOException {
+	private static long decodeUnsignedLong(int wireType, ByteBuffer buffer) throws IOException {
 		int wireFormat = wireType & 0x7;
 		switch(wireFormat) {
 		case WireFormat.WIRETYPE_VARINT:
@@ -213,7 +291,7 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 		}
 	}
 
-	private double decodeFloat(int wireType, ByteBuffer buffer) throws IOException {
+	private static Object decodeFloat(int wireType, ByteBuffer buffer) throws IOException {
 		int wireFormat = wireType & 0x7;
 		switch(wireFormat) {
 		case WireFormat.WIRETYPE_FIXED32:
@@ -225,28 +303,21 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 		}
 	}
 
-	private String decodeUTF8(int wireType, ByteBuffer buffer) throws IOException {
+	private static String decodeUTF8(int wireType, ByteBuffer buffer) throws IOException {
 		int wireFormat = wireType & 0x7;
 		switch(wireFormat) {
 		case WireFormat.WIRETYPE_LENGTH_DELIMITED:
-			CodedInputStream cis = PBHelper.inputStream(buffer);
-			return cis.readString();
+			return UTF8.decode(buffer).toString();
 		default:
 			throw new IOException("Wire format " + wireFormat + " cannot be interpreted as floating point");
 		}
 	}
 
-	private Object decodeBlob(int wireType, ByteBuffer buffer) throws IOException {
+	private static Object decodeBlob(int wireType, ByteBuffer buffer) throws IOException {
 		int wireFormat = wireType & 0x7;
 		switch(wireFormat) {
 		case WireFormat.WIRETYPE_LENGTH_DELIMITED:
-			CodedInputStream cis = PBHelper.inputStream(buffer);
-			int len = cis.readInt32();
-			int offs = cis.getTotalBytesRead();
-			ByteBuffer bb = buffer.slice();
-			bb.position(offs);
-			bb.limit(offs + len);
-			return new Blob(bb);
+			return new Blob(buffer);
 		default:
 			throw new IOException("Wire format " + wireFormat + " cannot be interpreted as binary");
 		}
@@ -296,5 +367,15 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 	@Override
 	public boolean isCompatible(BinaryExtractorSet set) {
 		return set instanceof ProtoBufExtractorSet;
+	}
+	
+	interface Encoder {
+		
+		public Object decode(int wireType, ByteBuffer buffer) throws IOException;
+		
+	}
+	
+	public String toString() {
+		return "PB" + (encoding != null ? encoding.code() : "") + Arrays.toString(path) + (nested != null ? "/" + nested.toString() : ""); 
 	}
 }

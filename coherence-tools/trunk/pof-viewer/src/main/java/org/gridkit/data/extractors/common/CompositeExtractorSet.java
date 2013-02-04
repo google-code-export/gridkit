@@ -48,6 +48,7 @@ public class CompositeExtractorSet implements BinaryExtractorSet, Serializable {
 			}
 			// create new batch
 			Batch batch = new Batch();
+			batches.add(batch);
 			batch.extractors = add(batch.extractors, extractor);
 			batch.extractorSet = extractor.newExtractorSet();
 			int x = batch.extractorSet.addExtractor(extractor);
