@@ -6,6 +6,9 @@ public interface CompositeExtractor<V> extends BinaryExtractor<V> {
 
 	public List<BinaryExtractor<?>> getSubExtractors();
 	
-	public V extract(Object[] arguments);
+	public ValueComposer<V> newComposer();
 	
+	interface ValueComposer<V> extends ResultVectorReceiver {		
+		public void compose(ResultVectorReceiver output, int outputIndex);		
+	}	
 }

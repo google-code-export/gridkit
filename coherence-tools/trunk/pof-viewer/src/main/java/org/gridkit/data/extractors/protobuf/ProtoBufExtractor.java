@@ -9,41 +9,50 @@ import java.util.Arrays;
 import org.gridkit.data.extractors.common.BinaryExtractor;
 import org.gridkit.data.extractors.common.BinaryExtractorSet;
 import org.gridkit.data.extractors.common.Blob;
+import org.gridkit.data.extractors.common.PushDownBinaryExtractor;
 
 import com.google.protobuf.WireFormat;
 
-public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
+public class ProtoBufExtractor<V> implements BinaryExtractor<V>, PushDownBinaryExtractor, Serializable {
 
 	private static final long serialVersionUID = 20130125L;
 
 	private static final Charset UTF8 = Charset.forName("UTF8");
 	
 	public static ProtoBufExtractor<Blob> newBlobExtractor(int... path) {
-		return new ProtoBufExtractor<Blob>(path, Encoding.BLOB, false);
+		return new ProtoBufExtractor<Blob>(path, Encoding.BLOB);
+	}
+
+	public static ProtoBufExtractor<ByteBuffer> newBinaryExtractor(int... path) {
+		return new ProtoBufExtractor<ByteBuffer>(path, Encoding.BINARY);
 	}
 
 	public static ProtoBufExtractor<Integer> newSignedIntegerExtractor(int... path) {
-		return new ProtoBufExtractor<Integer>(path, Encoding.SINGNED_INT32, false);
+		return new ProtoBufExtractor<Integer>(path, Encoding.SINGNED_INT32);
 	}
 	
 	public static ProtoBufExtractor<Integer> newUnsignedIntegerExtractor(int... path) {
-		return new ProtoBufExtractor<Integer>(path, Encoding.UNSIGNED_INT32, false);
+		return new ProtoBufExtractor<Integer>(path, Encoding.UNSIGNED_INT32);
 	}
 
 	public static ProtoBufExtractor<Long> newSignedLongExtractor(int... path) {
-		return new ProtoBufExtractor<Long>(path, Encoding.SINGNED_INT64, false);
+		return new ProtoBufExtractor<Long>(path, Encoding.SINGNED_INT64);
 	}
 	
 	public static ProtoBufExtractor<Long> newUnsignedLongExtractor(int... path) {
-		return new ProtoBufExtractor<Long>(path, Encoding.UNSIGNED_INT64, false);
+		return new ProtoBufExtractor<Long>(path, Encoding.UNSIGNED_INT64);
 	}
 	
 	public static ProtoBufExtractor<Number> newFloatingPointExtractor(int... path) {
-		return new ProtoBufExtractor<Number>(path, Encoding.FLOATING_POINT, false);
+		return new ProtoBufExtractor<Number>(path, Encoding.FLOATING_POINT);
 	}
 
 	public static ProtoBufExtractor<String> newStringExtractor(int... path) {
-		return new ProtoBufExtractor<String>(path, Encoding.UTF8, false);
+		return new ProtoBufExtractor<String>(path, Encoding.UTF8);
+	}
+
+	public static <V> ProtoBufExtractor<V> newChainedExtractor(BinaryExtractor<V> nested, int... path) {
+		return new ProtoBufExtractor<V>(path, nested);
 	}
 	
 	enum Encoding implements Encoder {
@@ -123,6 +132,17 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 			public String code() {
 				return "b";
 			}
+		},
+		BINARY{
+			@Override
+			public Object decode(int wireType, ByteBuffer buffer) throws IOException {
+				return buffer.slice();
+			}
+			
+			@Override
+			public String code() {
+				return "b";
+			}
 		}
 		;
 		public abstract String code();
@@ -130,14 +150,12 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 	
 	private final int[] path;
 	private final Encoding encoding;
-	private final boolean group;
 	private final BinaryExtractor<V> nested;
 
 	// copy constructor
-	private ProtoBufExtractor(int[] path, Encoding encoding, boolean group, BinaryExtractor<V> nested) {
+	private ProtoBufExtractor(int[] path, Encoding encoding, BinaryExtractor<V> nested) {
 		this.path = path;
 		this.encoding = encoding;
-		this.group = group;
 		this.nested = nested;
 	}
 
@@ -147,7 +165,7 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 	 * @param encoding - decoding convention
 	 * @param group - collect all values for key
 	 */
-	public ProtoBufExtractor(int[] path, Encoding encoding, boolean group) {
+	public ProtoBufExtractor(int[] path, Encoding encoding) {
 		if (path == null) {
 			throw new NullPointerException("Path cannot be null");
 		}
@@ -156,7 +174,6 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 		}
 		this.path = path;
 		this.encoding = encoding;
-		this.group = group;
 		this.nested = null; 
 	}
 
@@ -166,7 +183,7 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 	 * @param group - collect all values for key
 	 * @param nested - use provided extractor to transform binary
 	 */
-	public ProtoBufExtractor(int[] path, boolean group, BinaryExtractor<V> nested) {
+	public ProtoBufExtractor(int[] path, BinaryExtractor<V> nested) {
 		if (path == null) {
 			throw new NullPointerException("Path cannot be null");
 		}
@@ -175,7 +192,6 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 		}
 		this.path = path;
 		this.encoding = null;
-		this.group = group;
 		this.nested = nested; 
 	}
 	
@@ -194,7 +210,7 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 	protected ProtoBufExtractor<V> trim() {
 		int[] subpath = new int[path.length - 1];
 		System.arraycopy(path, 1, subpath, 0, subpath.length);
-		return new ProtoBufExtractor<V>(subpath, encoding, group, nested);
+		return new ProtoBufExtractor<V>(subpath, encoding, nested);
 		
 	}
 	
@@ -206,10 +222,6 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 		return encoding;
 	}
 	
-	protected boolean group() {
-		return group;
-	}
-
 	protected BinaryExtractor<?> getNestedExtractor() {
 		return nested;
 	}
@@ -329,7 +341,6 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 		int result = 1;
 		result = prime * result
 				+ ((encoding == null) ? 0 : encoding.hashCode());
-		result = prime * result + (group ? 1231 : 1237);
 		result = prime * result + ((nested == null) ? 0 : nested.hashCode());
 		result = prime * result + Arrays.hashCode(path);
 		return result;
@@ -346,8 +357,6 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 			return false;
 		ProtoBufExtractor other = (ProtoBufExtractor) obj;
 		if (encoding != other.encoding)
-			return false;
-		if (group != other.group)
 			return false;
 		if (nested == null) {
 			if (other.nested != null)
@@ -369,6 +378,21 @@ public class ProtoBufExtractor<V> implements BinaryExtractor<V>, Serializable {
 		return set instanceof ProtoBufExtractorSet;
 	}
 	
+	@Override
+	public boolean canPushDown(BinaryExtractor<?> nested) {		
+		return encoding == Encoding.BINARY;
+	}
+
+	@Override
+	public <VV> BinaryExtractor<VV> pushDown(BinaryExtractor<VV> nested) {
+		if (encoding == Encoding.BINARY) {
+			return new ProtoBufExtractor<VV>(path, nested);
+		}
+		else {
+			throw new IllegalArgumentException("Cannot push down");
+		}
+	}
+
 	interface Encoder {
 		
 		public Object decode(int wireType, ByteBuffer buffer) throws IOException;

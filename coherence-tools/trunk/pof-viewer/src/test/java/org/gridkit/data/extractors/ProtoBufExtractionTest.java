@@ -1,6 +1,13 @@
 package org.gridkit.data.extractors;
 
+import java.util.Arrays;
+
+import org.gridkit.data.extractors.common.BinaryExtractor;
+import org.gridkit.data.extractors.common.BinaryFilterExtractor;
 import org.gridkit.data.extractors.common.Blob;
+import org.gridkit.data.extractors.common.ConstExtractor;
+import org.gridkit.data.extractors.common.EqualsPredicate;
+import org.gridkit.data.extractors.common.ListCollector;
 import org.gridkit.data.extractors.protobuf.ProtoBufExtractor;
 import org.junit.Test;
 
@@ -90,6 +97,34 @@ public class ProtoBufExtractionTest extends BaseExtractionAssertTest {
 		extract(getBytes("protobuf/Tree-1.bin"));
 		assertValue("l/l/v/int", 1000);
 		assertValue("r/r/v/string", "Abc");
+	}
+	
+	@Test
+	public void extract_key_set_from_properties() {
+		ProtoBufExtractor<String> keyPath = ProtoBufExtractor.newStringExtractor(1,1);
+		ListCollector<String> collector = new ListCollector<String>(keyPath);
+		addExtractor("keySet", collector);
+		extract(getBytes("protobuf/TextProperties-1.bin"));
+		assertValue("keySet", Arrays.asList("A", "B", "C", "D"));
+	}
+
+	@Test
+	public void extract_property_by_name() {
+		ProtoBufExtractor<String> keyField = ProtoBufExtractor.newStringExtractor(1);
+		ProtoBufExtractor<String> valueField = ProtoBufExtractor.newStringExtractor(2);
+
+		BinaryExtractor<Boolean> keyAPred = new EqualsPredicate(keyField, ConstExtractor.newConst("A"));
+		BinaryExtractor<Boolean> keyBPred = new EqualsPredicate(keyField, ConstExtractor.newConst("B"));
+		
+		BinaryFilterExtractor<String> keyAFilter = new BinaryFilterExtractor<String>(keyAPred, valueField);
+		BinaryFilterExtractor<String> keyBFilter = new BinaryFilterExtractor<String>(keyBPred, valueField);
+		
+		
+		addExtractor("get(A)", ProtoBufExtractor.newChainedExtractor(keyAFilter, 1));
+		addExtractor("get(B)", ProtoBufExtractor.newChainedExtractor(keyBFilter, 1));
+		extract(getBytes("protobuf/TextProperties-1.bin"));
+		assertValue("get(A)", "aaa");
+		assertValue("get(B)", "bbb");
 	}
 	
 }
