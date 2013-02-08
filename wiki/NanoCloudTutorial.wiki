@@ -18,14 +18,22 @@ As API matured, idea to use exactly same API to manipulate real distributed clus
 
 In particular, this library is positioned as backbone for distributed performance/stress testing.
 
-= Starting with NanoCloud =
+= Getting started with !NanoCloud =
 
 == Test project ==
-Please checkout test project at ([http://code.google.com/p/gridkit/source/browse/#svn%2Fgrid-lab%2Ftrunk%2Fexamples%2Fnanocloud-getting-started-1 https://gridkit.googlecode.com/svn/grid-lab/trunk/examples/nanocloud-getting-started-1])
+Please checkout test project at https://gridkit.googlecode.com/svn/grid-lab/trunk/examples/nanocloud-getting-started ([http://code.google.com/p/gridkit/source/browse/grid-lab/trunk/examples/nanocloud-getting-started browse]).
 This project contains code referenced in this tutorial.
 
+All tutorial examples are implemented as runnable !JUnit test and organized into few files:
+ * [http://code.google.com/p/gridkit/source/browse/grid-lab/trunk/examples/nanocloud-getting-started/src/test/java/org/gridkit/lab/examples/nanocloud/StartingWithLocalCloud.java StartingWithLocalCloud.java] - executing code in other java processes on same box.
+ * [http://code.google.com/p/gridkit/source/browse/grid-lab/trunk/examples/nanocloud-getting-started/src/test/java/org/gridkit/lab/examples/nanocloud/StartingWithDistributedCloud.java StartingWithDistributedCloud.java] - executing code remotely using SSH ([NanoCloud_Configuring_SSH_credentials SSH access should be setup]).
+ * [http://code.google.com/p/gridkit/source/browse/grid-lab/trunk/examples/nanocloud-getting-started/src/test/java/org/gridkit/lab/examples/nanocloud/BasicViNodeUsage.java BasicViNodeUsage.java] - essentials of !NanoCloud API.
+ * [http://code.google.com/p/gridkit/source/browse/grid-lab/trunk/examples/nanocloud-getting-started/src/test/java/org/gridkit/lab/examples/nanocloud/TransaprentRmi.java TransaprentRmi.java] - examples of "transparent" RMI between nodes.
+
+Examples in Java sources above may be slightly ahead of tutorial text. 
+
 == Quick introduction of !ViNode ==
-NanoCloud API is build around concept of ViNode. With a little over simplification, ViNode is a remote process which allow us to execute code. ViNode offers a set of method to executed code. ViNode could also be a group of real nodes (thus providing us simple way for parallel execution).
+!NanoCloud API is build around concept of !ViNode. With a little over simplification, ViNode is a remote process which allow us to execute code. ViNode offers a set of method to executed code. ViNode could also be a group of real nodes (thus providing us simple way for parallel execution).
 
 There are 3 standard type of nodes backing ViNode instances:
  * separate JVM, running locally
