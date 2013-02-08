@@ -4,6 +4,7 @@ GridLab<br/>_Excluding human from loop_
  * !NanoCloud
   * Overview
   * Configuration
+   * [NanoCloud_Configuring_SSH_credentials Configuring SSH credentials]
  * Scenario builder
  * [GridLab_Monitoring Monitoring infrastructure]
  * BTrace integration
