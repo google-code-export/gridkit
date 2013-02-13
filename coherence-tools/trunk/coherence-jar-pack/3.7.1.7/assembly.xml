@@ -1,0 +1,22 @@
+<assembly>
+    <id>xxx</id>
+    
+    <formats>
+        <format>jar</format>
+    </formats>
+    
+    <includeBaseDirectory>false</includeBaseDirectory>
+    
+    <fileSets>
+        <fileSet>
+            <directory>${project.build.directory}/lib</directory>
+            <outputDirectory>/</outputDirectory>
+            <filtered>false</filtered>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+            <fileMode>0600</fileMode>
+        </fileSet>
+    </fileSets>
+
+</assembly>

@@ -1,0 +1,108 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.gridkit.jar-pack.coherence</groupId>
+  <artifactId>coherence-jar-pack</artifactId>
+  <version>1.0</version>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>3.7.1.1</module>
+    <module>3.7.1.3</module>
+    <module>3.7.1.5</module>
+    <module>3.7.1.7</module>
+  </modules>
+
+  <distributionManagement>
+    <!-- GridKit maven2 repository location -->
+    <repository>
+      <id>gridkit-repo.googlecode.com</id>
+      <url>svn:https://gridkit.googlecode.com/svn/repo/</url>
+    </repository>
+  </distributionManagement>
+
+
+  <scm>
+    <connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/trunk/coherence-versions-bundle</connection>
+    <developerConnection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/trunk/coherence-versions-bundle</developerConnection>
+    <url>http://gridkit.googlecode.com/svn/coherence-tools/trunk/coherence-versions-bundle</url>
+  </scm>
+  
+  <build>
+    <pluginManagement>
+      <plugins>
+
+        <!-- Importing assembly descriptor 
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-remote-resources-plugin</artifactId>
+          <version>1.4</version>
+          <configuration>
+            <resourceBundles>
+              <resourceBundle>${project.groupId}:assembly:${project.version}:pom</resourceBundle>
+            </resourceBundles>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>process</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+-->
+
+        <!-- Retrieving JARs -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>2.1</version>
+          <executions>
+              <execution>
+                  <id>copy-model</id>
+                  <phase>process-resources</phase>
+                  <goals>
+                      <goal>copy</goal>
+                  </goals>
+                  <configuration>
+                      <artifactItems>
+                          <artifactItem>
+                              <groupId>com.oracle.coherence</groupId>
+                              <artifactId>coherence</artifactId>
+                              <version>${project.artifactId}</version>
+                              <type>jar</type>
+                          </artifactItem>
+                      </artifactItems>
+                      <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                  </configuration>
+              </execution>
+          </executions>
+        </plugin>
+
+
+        <!-- Running assembly -->
+        <plugin>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>2.3</version>
+          <configuration combine.self="override">
+            <appendAssemblyId>false</appendAssemblyId>
+            <descriptors>
+              <descriptor>${basedir}/assembly.xml</descriptor>
+            </descriptors>
+          </configuration>
+          <executions>
+            <execution>
+              <id>main</id>
+              <phase>package</phase>
+              <goals>
+                <goal>single</goal>
+              </goals>
+            </execution>            
+          </executions>
+        </plugin>
+
+      </plugins>
+    </pluginManagement>
+  </build>
+
+</project>
