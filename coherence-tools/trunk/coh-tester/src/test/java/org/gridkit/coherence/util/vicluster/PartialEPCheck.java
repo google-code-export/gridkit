@@ -8,7 +8,7 @@ import java.util.Set;
 import junit.framework.Assert;
 
 import org.gridkit.coherence.util.classloader.Isolate;
-import org.gridkit.utils.vicluster.CohHelper;
+import org.gridkit.util.coherence.cohtester.CohHelper;
 import org.gridkit.utils.vicluster.ViCluster;
 import org.gridkit.utils.vicluster.ViNode;
 import org.junit.Test;

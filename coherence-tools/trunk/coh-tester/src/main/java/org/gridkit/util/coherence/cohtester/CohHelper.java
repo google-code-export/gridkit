@@ -1,4 +1,4 @@
-package org.gridkit.utils.vicluster;
+package org.gridkit.util.coherence.cohtester;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -26,6 +26,7 @@ import javax.management.MBeanException;
 import javax.management.MBeanInfo;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerFactory;
 import javax.management.NotCompliantMBeanException;
 import javax.management.NotificationFilter;
@@ -36,6 +37,11 @@ import javax.management.OperationsException;
 import javax.management.QueryExp;
 import javax.management.ReflectionException;
 import javax.management.loading.ClassLoaderRepository;
+
+import org.gridkit.util.concurrent.DebugHelper;
+import org.gridkit.vicluster.ViConfigurable;
+import org.gridkit.vicluster.ViExecutor;
+import org.gridkit.vicluster.isolate.Isolate;
 
 import com.tangosol.coherence.component.net.extend.RemoteService;
 import com.tangosol.coherence.component.net.extend.connection.TcpConnection;
@@ -49,19 +55,23 @@ import com.tangosol.run.xml.XmlHelper;
 
 public class CohHelper {
 
-	public static void pofConfig(ViProps node, String path) {
+	static {
+		DebugHelper.enableJUnitTimeouts();
+	}
+	
+	public static void pofConfig(ViConfigurable node, String path) {
 		node.setProp("tangosol.pof.config", path);
 	}
 
-	public static void cacheConfig(ViProps node, String path) {
+	public static void cacheConfig(ViConfigurable node, String path) {
 		node.setProp("tangosol.coherence.cacheconfig", path);
 	}
 
-	public static void localstorage(ViProps node, boolean enabled) {
+	public static void localstorage(ViConfigurable node, boolean enabled) {
 		node.setProp("tangosol.coherence.distributed.localstorage", String.valueOf(enabled));
 	}
 
-	public static void enableFastLocalCluster(ViProps node) {
+	public static void enableFastLocalCluster(ViConfigurable node) {
 		int port = new Random().nextInt(10000) + 50000;
 		node.setProp("tangosol.coherence.ttl", "0");
 		node.setProp("tangosol.coherence.wka", "127.0.0.1");
@@ -72,20 +82,11 @@ public class CohHelper {
 		node.setProp("tangosol.coherence.cluster", "jvm::" + ManagementFactory.getRuntimeMXBean().getName());
 	}
 
-	public static void shareCluster(ViProps node, ViCluster cluster) {
-		node.setProp("tangosol.coherence.ttl", 			cluster.getClusterProp("tangosol.coherence.ttl"));
-		node.setProp("tangosol.coherence.wka", 			cluster.getClusterProp("tangosol.coherence.wka"));
-		node.setProp("tangosol.coherence.wka.port", 	cluster.getClusterProp("tangosol.coherence.wka.port"));
-		node.setProp("tangosol.coherence.localhost", 	cluster.getClusterProp("tangosol.coherence.localhost"));
-		node.setProp("tangosol.coherence.localport", 	cluster.getClusterProp("tangosol.coherence.localport"));
-		node.setProp("tangosol.coherence.cluster", 		cluster.getClusterProp("tangosol.coherence.cluster"));
-	}
-	
-	public static void disableTCMP(ViProps node) {
+	public static void disableTCMP(ViConfigurable node) {
 		node.setProp("tangosol.coherence.tcmp.enabled", "false");
 	}
 
-	public static void enableJmx(ViProps node) {
+	public static void enableJmx(ViConfigurable node) {
 		node.setProp("tangosol.coherence.management", "local-only");
 		node.setProp("tangosol.coherence.management.jvm.all", "false");
 		node.setProp("tangosol.coherence.management.remote", "false");
@@ -96,8 +97,8 @@ public class CohHelper {
 	 * Coherence does not have standard property for cluster join timeout.
 	 * This method will patch op. configuration directly.
 	 */
-	public static void setJoinTimeout(ViNode node, final long timeout) {
-		node.exec(new Runnable() {
+	public static void setJoinTimeout(ViConfigurable node, final long timeout) {
+		node.addStartupHook("coherence-cluster-join-timeout", new Runnable() {
 			@Override
 			public void run() {
 				Cluster cluster = CacheFactory.getCluster();
@@ -109,15 +110,15 @@ public class CohHelper {
 					.setLong(timeout);
 				CacheFactory.setServiceConfig("Cluster", config);
 			}
-		});
+		}, true);
 	}
 
 	/**
 	 * Coherence does not have standard property for TCMP packet timeout.
 	 * This method will patch op. configuration directly.
 	 */
-	public static void setTCMPTimeout(ViNode node, final long timeout) {
-		node.exec(new Runnable() {
+	public static void setTCMPTimeout(ViConfigurable node, final long timeout) {
+		node.addStartupHook("coherence-tcmp-timeout", new Runnable() {
 			@Override
 			public void run() {
 				Cluster cluster = CacheFactory.getCluster();
@@ -129,7 +130,7 @@ public class CohHelper {
 				.setLong(timeout);
 				CacheFactory.setServiceConfig("Cluster", config);
 			}
-		});
+		}, true);
 	}
 
 	/**
@@ -137,8 +138,8 @@ public class CohHelper {
 	 * TCP ring tends to hung in isolate environment, so disabling it makes testing more stable.
 	 * This method will patch op. configuration directly.
 	 */
-	public static void disableTcpRing(ViNode node) {
-		node.exec(new Runnable() {
+	public static void disableTcpRing(ViConfigurable node) {
+		node.addStartupHook("coherence-disable-tcp-ring", new Runnable() {
 			@Override
 			public void run() {
 				Cluster cluster = CacheFactory.getCluster();
@@ -150,9 +151,15 @@ public class CohHelper {
 				.setBoolean(false);
 				CacheFactory.setServiceConfig("Cluster", config);
 			}
-		});
+		}, true);
 	}
 
+	/**
+	 * Kills Coherence*Extends connection for given remote service.
+	 * Could be used only on Extend client.
+	 * 
+	 * @param serviceName - remote service name
+	 */
 	public static void killTcpInitiator(String serviceName) {
 		for(Service s: getLocalServices()) {
 			if (serviceName.equals(s.getInfo().getServiceName())) {
@@ -161,6 +168,10 @@ public class CohHelper {
 		}
 	}
 	
+	/**
+	 * Kills Coherence*Extends connections.
+	 * Could be used only on Extend client.
+	 */
 	public static void killTcpAllInitiators() {
 		for(Service s: getLocalServices()) {
 			if (s instanceof RemoteService) {
@@ -193,9 +204,21 @@ public class CohHelper {
 		}
 	}
 	
-	private static Object jmxAttribute(ViNode node, ObjectName name, String attribute) {
+	private static Object jmxAttribute(ViExecutor node, final ObjectName name, final String attribute) {
+		if (node == null) {
+			return jmxAttribute(name, attribute);
+		}
+		else return node.exec(new Callable<Object>() {
+			@Override
+			public Object call() throws Exception {
+				return jmxAttribute(name, attribute);
+			}
+		});
+	}
+	
+	private static Object jmxAttribute(ObjectName name, String attribute) {
 		try {
-			MBeanServer mserver = getMBeanServer(node);
+			MBeanServerConnection mserver = getContextMBeanServer();
 			Object bi = mserver.getAttribute(name, attribute);
 			if (bi == null) {
 				return 0;
@@ -211,7 +234,7 @@ public class CohHelper {
 			throw new RuntimeException(e);
 		}		
 	}
-	
+
 	private static <V> boolean waitFor(Callable<V> condition, V excepted, long timeoutMs) {
 		long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeoutMs);
 		do {
@@ -258,66 +281,123 @@ public class CohHelper {
 		}
 	}
 	
-	public static int jmxMemberId(ViNode node) {
-		Object x = jmxAttribute(node, mbeanCluster(), "LocalMemberId");
+	public static int jmxMemberId() {
+		Object x = jmxAttribute(mbeanCluster(), "LocalMemberId");
 		return x == null ? 0 : ((Integer)x).intValue();
 	}
 
-	public static void jmxCloseProxyConnections(ViNode node) {
-		jmxCloseProxyConnections(node, "*");
+	public static int jmxMemberId(ViExecutor node) {
+		return node == null ? jmxMemberId() : node.exec(new Callable<Integer>() {
+			@Override
+			public Integer call() throws Exception {
+				return jmxMemberId();
+			}
+		});
 	}
 
-	public static void jmxCloseProxyConnections(ViNode node, String proxyServiceName) {		
-		final MBeanServer server = getMBeanServer(node);
-		int id = jmxMemberId(node);
-		for(final ObjectName name : server.queryNames(null, null)) {
-			if (isConnectionBean(name) && String.valueOf(id).equals(name.getKeyProperty("nodeId"))) {
-				if (!"*".equals(proxyServiceName)) {
-					if (!proxyServiceName.equals(name.getKeyProperty("name"))) {
-						continue;
-					}
+	/**
+	 * Use JMX to drop Coherence*Extend connections on proxy side.
+	 * @param node ViNode to operate
+	 */
+	public static void jmxCloseAllProxyConnections(ViExecutor node) {
+		if (node == null) {
+			jmxCloseProxyConnections("*");
+		}
+		else {
+			node.exec(new Runnable() {
+				
+				@Override
+				public void run() {
+					jmxCloseProxyConnections("*");
 				}
-				// Separate thread is required if we are executing on that connection
-				Thread thread = new Thread() {
-					@Override
-					public void run() {
-						try {
-							server.invoke(name, "closeConnection", new Object[0], new String[0]);
-							System.err.println("Extend conntection closed: " + name);
-						} catch (Exception e) {
-							e.printStackTrace();
+			});
+		}
+	}
+
+	/**
+	 * Use JMX to drop Coherence*Extend connections on proxy side.
+	 * @param node ViNode to operate
+	 */
+	public static void jmxCloseProxyConnections(ViExecutor node, final String service) {
+		if (node == null) {
+			jmxCloseProxyConnections(service);
+		}
+		else {
+			node.exec(new Runnable() {
+				
+				@Override
+				public void run() {
+					jmxCloseProxyConnections(service);
+				}
+			});
+		}
+	}
+
+	public static void jmxCloseProxyConnections(String proxyServiceName) {		
+		try {
+			final MBeanServerConnection server = getContextMBeanServer();
+			int id = jmxMemberId();
+			for(final ObjectName name : server.queryNames(null, null)) {
+				if (isConnectionBean(name) && String.valueOf(id).equals(name.getKeyProperty("nodeId"))) {
+					if (!"*".equals(proxyServiceName)) {
+						if (!proxyServiceName.equals(name.getKeyProperty("name"))) {
+							continue;
 						}
 					}
-				};
-				thread.start();
-				try {
-					thread.join();
-				} catch (InterruptedException e) {
-					// ignore
-				}
-			}
-		}
-	}
-
-	public static Collection<ObjectName> jmxListProxyConnections(ViNode node) {
-		return jmxListProxyConnections(node, "*");
-	}
-
-	public static Collection<ObjectName> jmxListProxyConnections(ViNode node, String proxyServiceName) {		
-		final MBeanServer server = getMBeanServer(node);
-		int id = jmxMemberId(node);
-		List<ObjectName> result = new ArrayList<ObjectName>();
-		for(final ObjectName name : server.queryNames(null, null)) {
-			if (isConnectionBean(name) && String.valueOf(id).equals(name.getKeyProperty("nodeId"))) {
-				if (!"*".equals(proxyServiceName)) {
-					if (!proxyServiceName.equals(name.getKeyProperty("name"))) {
-						continue;
+					// Separate thread is required if we are executing on that connection
+					Thread thread = new Thread() {
+						@Override
+						public void run() {
+							try {
+								server.invoke(name, "closeConnection", new Object[0], new String[0]);
+								System.err.println("Extend conntection closed: " + name);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					};
+					thread.start();
+					try {
+						thread.join();
+					} catch (InterruptedException e) {
+						// ignore
 					}
 				}
-				result.add(name);
 			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
-		return result;
+	}
+
+	/**
+	 * List Coherence*Extend connections MBeans.
+	 */
+	public static Collection<ObjectName> jmxListProxyConnections() {
+		return jmxListProxyConnections("*");
+	}
+
+	/**
+	 * List Coherence*Extend connections MBeans.
+	 */
+	public static Collection<ObjectName> jmxListProxyConnections(String proxyServiceName) {		
+		try {
+			final MBeanServerConnection server = getContextMBeanServer();
+			int id = jmxMemberId();
+			List<ObjectName> result = new ArrayList<ObjectName>();
+			for(final ObjectName name : server.queryNames(null, null)) {
+				if (isConnectionBean(name) && String.valueOf(id).equals(name.getKeyProperty("nodeId"))) {
+					if (!"*".equals(proxyServiceName)) {
+						if (!proxyServiceName.equals(name.getKeyProperty("name"))) {
+							continue;
+						}
+					}
+					result.add(name);
+				}
+			}
+			return result;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	private static boolean isConnectionBean(ObjectName name) {
@@ -325,26 +405,32 @@ public class CohHelper {
 				&& "Connection".equals(name.getKeyProperty("type"));
 	}
 
-	public static String jmxServiceStatusHA(ViNode node, String serviceName) {
-		String s = (String) jmxAttribute(node, mbeanServiceName(serviceName, jmxMemberId(node)), "StatusHA");
+	/**
+	 * Check service HA status via JMX.
+	 */
+	public static String jmxServiceStatusHA(String serviceName) {
+		String s = (String) jmxAttribute(mbeanServiceName(serviceName, jmxMemberId()), "StatusHA");
 		return s;
 	}
 
-	public static boolean jmxServiceRunning(ViNode node, String serviceName) {
-		Boolean b = (Boolean) jmxAttribute(node, mbeanServiceName(serviceName, jmxMemberId(node)), "Running");
+	/**
+	 * Check that service is running using JMX.  
+	 */
+	public static boolean jmxServiceRunning(String serviceName) {
+		Boolean b = (Boolean) jmxAttribute(mbeanServiceName(serviceName, jmxMemberId()), "Running");
 		return b == null ?  false : b.booleanValue();
 	}
 
-	public static void jmxWaitForService(ViNode node, String serviceName) {
-		jmxWaitForService(node, serviceName, 30000); // Coherence is slow, 30000
+	public static void jmxWaitForService(String serviceName) {
+		jmxWaitForService(serviceName, 30000); // Coherence is slow, 30000
 	}
 
-	public static void jmxWaitForService(final ViNode node, final String serviceName, long timeoutMs) {
+	public static void jmxWaitForService(final String serviceName, long timeoutMs) {
 		if (!waitFor(new Callable<Boolean>() {
 
 			@Override
 			public Boolean call() throws Exception {
-				return jmxServiceRunning(node, serviceName);
+				return jmxServiceRunning(serviceName);
 			}
 			
 		}, Boolean.TRUE, timeoutMs)) {
@@ -352,16 +438,16 @@ public class CohHelper {
 		}
 	}
 
-	public static void jmxWaitForStatusHA(ViNode node, String serviceName, String status) {
-		jmxWaitForStatusHA(node, serviceName, status, 30000); // Coherence is slow, 30000		
+	public static void jmxWaitForStatusHA(String serviceName, String status) {
+		jmxWaitForStatusHA(serviceName, status, 30000); // Coherence is slow, 30000		
 	}
 
-	public static void jmxWaitForStatusHA(final ViNode node, final String serviceName, final String status, long timeoutMs) {
+	public static void jmxWaitForStatusHA(final String serviceName, final String status, long timeoutMs) {
 		if (!waitFor(new Callable<String>() {
 			
 			@Override
 			public String call() throws Exception {
-				return jmxServiceStatusHA(node, serviceName);
+				return jmxServiceStatusHA(serviceName);
 			}
 			
 		}, status, timeoutMs)) {
@@ -369,44 +455,34 @@ public class CohHelper {
 		}
 	}
 
-	public static void jmxDumpMBeans(ViNode node) {
-		MBeanServer server = getMBeanServer(node);
-		for(ObjectName name : server.queryNames(null, null)) {
-			System.out.println(name);
+	public static void jmxDumpMBeans() {
+		try {
+			MBeanServerConnection server = getContextMBeanServer();
+			for(ObjectName name : server.queryNames(null, null)) {
+				System.out.println(name);
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 	
-	private static MBeanServer getMBeanServer(ViNode node) {
-		if (node != null) {
-			// cluster connection my take sometime
-			long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(3500);
-			MBeanServer server = null;
-			while(deadline > System.nanoTime()) {			
-				server = node.getIsolate().exportNoProxy(new Callable<MBeanServer>() {
-					@Override
-					public MBeanServer call() throws Exception {
-						return IsolateMBeanFinder.MSERVER;
-					}
-				});
-				if (server == null) {
-					LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(10));
-				}
-				else {
-					break;
-				}			
-			}
+	private static MBeanServerConnection getContextMBeanServer() {
+		// cluster connection my take sometime
+		long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(3500);
+		MBeanServer server = null;
+		while(deadline > System.nanoTime()) {			
+			server = IsolateMBeanFinder.MSERVER;
 			if (server == null) {
-				throw new IllegalStateException("Local JMX is not enabled for node " + node.getName());
+				LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(10));
 			}
-			return server;
+			else {
+				break;
+			}			
 		}
-		else {
-			MBeanServer server = IsolateMBeanFinder.MSERVER;
-			if (server == null) {
-				throw new IllegalStateException("Local JMX is not enabled for this node");
-			}
-			return server;
+		if (server == null) {
+			throw new IllegalStateException("Local JMX is not enabled for node " + Isolate.currentIsolate().getName());
 		}
+		return server;
 	}
 	
 	private static class IsolatedMBeanServerProxy implements MBeanServer {

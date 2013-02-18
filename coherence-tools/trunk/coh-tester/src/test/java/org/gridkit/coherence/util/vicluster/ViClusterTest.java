@@ -2,8 +2,9 @@ package org.gridkit.coherence.util.vicluster;
 
 import junit.framework.Assert;
 
-import org.gridkit.utils.vicluster.CohHelper;
+import org.gridkit.util.coherence.cohtester.CohHelper;
 import org.gridkit.utils.vicluster.ViCluster;
+import org.gridkit.vicluster.ViManager;
 import org.junit.Test;
 
 import com.tangosol.net.DefaultCacheServer;
@@ -14,7 +15,7 @@ public class ViClusterTest {
 	@Test
 	public void failoverTest() throws InterruptedException {
 		
-		ViCluster cluster = new ViCluster("failoverTest", "com.tangosol", "org.gridkit");
+		ViManager cluster = new ViCluster("failoverTest", "com.tangosol", "org.gridkit");
 		CohHelper.enableFastLocalCluster(cluster);
 		CohHelper.enableJmx(cluster);
 		CohHelper.disableTcpRing(cluster.node("server1"));

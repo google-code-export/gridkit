@@ -4,7 +4,8 @@ import java.util.concurrent.Callable;
 
 import junit.framework.Assert;
 
-import org.gridkit.utils.vicluster.ViCluster;
+import org.gridkit.util.coherence.cohtester.ClusterFactory;
+import org.gridkit.vicluster.ViManager;
 import org.junit.Test;
 
 public class ConversionTest {
@@ -12,7 +13,7 @@ public class ConversionTest {
 	@Test
 	public void test_annonimous_primitive_in_args() {
 		
-		ViCluster c = new ViCluster("test_annonimous_primitive_in_args", "org.gridkit");
+		ViManager c = ClusterFactory.createEmbededTestCluster();
 		
 		final boolean fb = trueConst();
 		final int fi = int_10();
@@ -29,7 +30,7 @@ public class ConversionTest {
 			}			
 		});
 		
-		c.kill();
+		c.shutdown();
 	}
 
 	private double double_10_1() {

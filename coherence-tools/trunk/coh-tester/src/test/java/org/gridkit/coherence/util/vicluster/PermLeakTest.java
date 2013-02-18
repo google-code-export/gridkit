@@ -2,7 +2,7 @@ package org.gridkit.coherence.util.vicluster;
 
 import java.util.concurrent.Callable;
 
-import org.gridkit.utils.vicluster.CohHelper;
+import org.gridkit.util.coherence.cohtester.CohHelper;
 import org.gridkit.utils.vicluster.ViCluster;
 import org.junit.Assert;
 import org.junit.Test;

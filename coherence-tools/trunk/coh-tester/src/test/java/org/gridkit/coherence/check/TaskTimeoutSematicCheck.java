@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import junit.framework.Assert;
 
 import org.gridkit.coherence.test.CacheTemplate;
-import org.gridkit.utils.vicluster.CohHelper;
+import org.gridkit.util.coherence.cohtester.CohHelper;
 import org.gridkit.utils.vicluster.ViCluster;
 import org.gridkit.utils.vicluster.ViNode;
 import org.junit.After;
