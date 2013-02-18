@@ -1,4 +1,4 @@
-package org.gridkit.coherence.util.vicluster;
+package org.gridkit.util.coherence.cohtester;
 
 import java.util.concurrent.Callable;
 

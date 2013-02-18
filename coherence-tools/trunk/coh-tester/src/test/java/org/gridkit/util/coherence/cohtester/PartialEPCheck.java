@@ -1,4 +1,4 @@
-package org.gridkit.coherence.util.vicluster;
+package org.gridkit.util.coherence.cohtester;
 
 import java.io.Serializable;
 import java.util.HashSet;
