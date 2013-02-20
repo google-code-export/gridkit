@@ -1,28 +1,26 @@
-package org.gridkit.coherence.util;
+package org.gridkit.util.coherence.extendconn;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import org.gridkit.util.coherence.cohtester.CohHelper;
-import org.gridkit.utils.vicluster.ViCluster;
-import org.gridkit.utils.vicluster.ViNode;
+import junit.framework.Assert;
+
+import org.gridkit.util.coherence.cohtester.CohCloud.CohNode;
+import org.gridkit.util.coherence.cohtester.CohCloudRule;
+import org.gridkit.util.coherence.cohtester.DisposableCohCloud;
+import org.gridkit.vicluster.ViNode;
 import org.junit.Test;
 
 import com.tangosol.net.CacheFactory;
-import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.Invocable;
 import com.tangosol.net.InvocationService;
 import com.tangosol.net.NamedCache;
-import com.tangosol.net.cache.ContinuousQueryCache;
-import com.tangosol.util.filter.AlwaysFilter;
 
 public class ExtendConnectionCheck {
 
-	static {
-		DefaultConfigurableCacheFactory.class.toString();
-	}
+	public CohCloudRule cloud = new DisposableCohCloud();
 	
 	public static void main(String[] args) throws Exception {
 		new ExtendConnectionCheck().test_cqc_memory_leak();
@@ -33,37 +31,59 @@ public class ExtendConnectionCheck {
 		
 		final String cacheName = "test";
 		
-		ViCluster cluster = new ViCluster("test_cluster", "org.gridkit", "com.tangosol");
-		ViCluster remote = new ViCluster("test_client", "org.gridkit", "com.tangosol");
+		// cluster member role
+		cloud.node("cluster.**")
+			.enableFastLocalCluster()
+			.autoStartCluster()
+			.cacheConfig("/extend-server-cache-config.xml");
+
+		// storage enabled for storage role
+		cloud.node("cluster.storage.**")
+			.localStorage(true);
+
+		// storage enabled for proxy role
+		cloud.node("cluster.proxy.**")
+			.localStorage(false);
+		
+		// Extend client role
+		cloud.node("xclient.**")
+			.enableFastLocalCluster()
+			.cacheConfig("/extend-client-cache-config.xml");
+		
 		try {
 			
-			CohHelper.enableFastLocalCluster(cluster);
-			CohHelper.cacheConfig(cluster, "/extend-server-cache-config.xml");
+			String[] cluster = {
+					"cluster.storage.1",
+					"cluster.storage.2",
+					"cluster.proxy.1",					
+			};
 			
-			final ViNode storage1 = cluster.node("storage1");
-			final ViNode storage2 = cluster.node("storage2");
-			CohHelper.localstorage(storage1, true);			
-			CohHelper.localstorage(storage2, true);			
-			storage1.getCache(cacheName);
-			storage2.getCache(cacheName);
+			// declare cluster nodes and start them
+			cloud.nodes(cluster).touch();
 			
-			ViNode proxy = cluster.node("proxy");
-			CohHelper.localstorage(proxy, false);			
-			proxy.getCache(cacheName);
-			proxy.getService("ExtendTcpProxyService");
+			// ensure cache/cache service on all nodes
+			cloud.nodes("cluster.**").getCache(cacheName);
 			
-			proxy.getCache(cacheName).put("A", "A");
+			// start proxy service on proxies
+			cloud.nodes("cluster.proxy.**")
+				.ensureService("ExtendTcpProxyService");
 			
-			CohHelper.enableFastLocalCluster(remote);
-			CohHelper.cacheConfig(remote, "/extend-client-cache-config.xml");
+			
+			// check that cache is writeable
+			cloud.node("cluster.proxy.1").getCache(cacheName).put("A", "A");
 
-			ViNode client1 = remote.node("client1");
-			client1.getCache(cacheName);
+			// define client instance
+			CohNode client = cloud.node("xclient.1");
 
-			client1.getCache(cacheName).get("A");
-			client1.exec(new Runnable() {
+			// verify connection to remote cache
+			Assert.assertEquals("A", client.getCache(cacheName).get("A"));
+			
+			client.exec(new Runnable() {
 				@Override
 				public void run() {
+					
+					// TODO code is used only as invokation framework
+					// few asserts should be added
 					ExtendConnection con1 = new ExtendConnection("/extend-client-cache-config.xml");
 					ExtendConnection con2 = new ExtendConnection("/extend-client-cache-config.xml");
 					
@@ -82,44 +102,9 @@ public class ExtendConnectionCheck {
 			e.printStackTrace();
 			throw e;
 		}
-		finally {
-			cluster.shutdown();
-			remote.shutdown();
-		}		
 	}
 
-	private final static class CQCClient implements Runnable, Serializable {
-
-		private final String cacheName;
-
-		private CQCClient(String cacheName) {
-			this.cacheName = cacheName;
-		}
-
-		@Override
-		public void run() {
-			NamedCache cache = CacheFactory.getCache(cacheName);
-			ContinuousQueryCache cqc1 = new ContinuousQueryCache(cache, AlwaysFilter.INSTANCE);
-			ContinuousQueryCache cqc2 = new ContinuousQueryCache(cache, AlwaysFilter.INSTANCE);
-			ContinuousQueryCache cqc3 = new ContinuousQueryCache(cache, AlwaysFilter.INSTANCE);
-			
-			System.out.println("CQC is started");
-			try {
-				Thread.sleep(20000);
-			} catch (InterruptedException e) {
-				return;
-			}
-			
-			System.out.println("CQC1 size " + cqc1.size());
-			System.out.println("CQC2 size " + cqc2.size());
-			System.out.println("CQC3 size " + cqc3.size());
-			
-			System.out.println("Shutdown cluster");
-			
-//			CacheFactory.shutdown();
-		}
-	}
-
+	@SuppressWarnings("unused")
 	private final class EventProducer extends Thread {
 		private final String cacheName;
 		private final ViNode storage;
@@ -167,6 +152,7 @@ public class ExtendConnectionCheck {
 		}
 	}
 	
+	@SuppressWarnings("serial")
 	public static class Task implements Invocable, Serializable {
 
 		@Override

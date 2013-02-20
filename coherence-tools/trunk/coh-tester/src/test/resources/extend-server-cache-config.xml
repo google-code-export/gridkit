@@ -27,7 +27,7 @@
                 <tcp-acceptor>
                     <local-address>
                         <address>127.0.0.1</address>
-                        <port>9999</port>
+                        <port system-property="test-proxy-port">22000</port>
                     </local-address>
                 </tcp-acceptor>
             </acceptor-config>

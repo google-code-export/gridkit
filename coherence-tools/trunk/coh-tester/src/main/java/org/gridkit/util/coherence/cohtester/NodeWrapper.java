@@ -1,12 +1,13 @@
 package org.gridkit.util.coherence.cohtester;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.gridkit.util.coherence.cohtester.CohCloud.CohNode;
 import org.gridkit.vicluster.ViNode;
-import org.gridkit.zerormi.util.DynamicExporter;
+import org.gridkit.zerormi.util.RemoteExporter;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.CacheService;
@@ -37,8 +38,26 @@ class NodeWrapper extends ViNode.Delegate implements CohNode {
 	@Override
 	public CohNode enableFastLocalCluster() {
 		CohHelper.enableFastLocalCluster(getDelegate());
-		CohHelper.setJoinTimeout(getDelegate(), 100);
+		CohHelper.setJoinTimeout(getDelegate(), 50);
 		CohHelper.disableTcpRing(getDelegate());
+		return this;
+	}
+	
+	@Override
+	public CohNode disableTCMP() {
+		CohHelper.disableTCMP(this);
+		return this;
+	}
+
+	@Override
+	public CohNode enableJmx() {
+		CohHelper.enableJmx(this);
+		return this;
+	}
+
+	@Override
+	public CohNode setTCMPTimeout(long timeoutMs) {
+		CohHelper.setTCMPTimeout(this, timeoutMs);
 		return this;
 	}
 
@@ -67,6 +86,14 @@ class NodeWrapper extends ViNode.Delegate implements CohNode {
 	}
 	
 	@Override
+	public CohNode gracefulShutdown(boolean graceful) {
+		if (graceful) {
+			addShutdownHook("coherence-graceful-shutdown", new ClusterShutdown(graceful), true);
+		}
+		return this;
+	}
+
+	@Override
 	public void startCacheServer() {
 		exec(new Runnable() {
 			@Override
@@ -92,7 +119,17 @@ class NodeWrapper extends ViNode.Delegate implements CohNode {
 			@Override
 			public NamedCache call() throws Exception {
 				NamedCache cache = CacheFactory.getCache(cacheName);
-				return DynamicExporter.export(cache, NamedCache.class);
+				return RemoteExporter.export(cache, NamedCache.class);
+			}
+		});
+	}
+
+	@Override
+	public String getServiceNameForCache(final String string) {
+		return exec(new Callable<String>() {
+			@Override
+			public String call() throws Exception {
+				return CacheFactory.getCache(string).getCacheService().getInfo().getServiceName();
 			}
 		});
 	}
@@ -114,10 +151,26 @@ class NodeWrapper extends ViNode.Delegate implements CohNode {
 				if (service instanceof InvocationService) {
 					list.add(InvocationService.class);					
 				}
-				return (Service)DynamicExporter.export(service, list);
+				return (Service)RemoteExporter.export(service, list);
 			}
 		});
 	}
 	
-	
+	@SuppressWarnings("serial")
+	private static class ClusterShutdown implements Runnable, Serializable {
+
+		final boolean graceful;
+		
+		public ClusterShutdown(boolean graceful) {
+			this.graceful = graceful;
+		}
+
+		@Override
+		public void run() {
+			if (graceful) {
+				System.err.println("Coherence node shutdown");
+				CacheFactory.shutdown();
+			}
+		}
+	}
 }

@@ -16,6 +16,8 @@ public interface CohCloud {
 
 	public Collection<CohNode> listNodes(String namePattern);
 
+	public CohNode all();
+	
 	public CohNode nodes(String... namePatterns);
 
 	public CohNode node(String namePattern);
@@ -34,6 +36,12 @@ public interface CohCloud {
 		
 		CohNode enableFastLocalCluster();
 		
+		CohNode disableTCMP();
+		
+		CohNode enableJmx();
+		
+		CohNode setTCMPTimeout(long timeoutMs);
+		
 		/**
 		 * Configure node to automatically invoke {@link CacheFactory#ensureCluster()} on startup.
 		 */
@@ -41,8 +49,17 @@ public interface CohCloud {
 
 		/**
 		 * Configure node to automatically invoke {@link DefaultCacheServer#startServices()} on startup.
+		 * <br/>
+		 * This option simulates {@link DefaultCacheServer#main(String[])}.
 		 */
 		CohNode autoStartServices();
+		
+		/**
+		 * If <code>true</code> {@link CacheFactory#shutdown()} will be invoked on node shutdown. 
+		 */
+		// TODO graceful shutdown is provoking perm gen leak
+		// TODO need to investigate
+		CohNode gracefulShutdown(boolean graceful);
 		
 		/**
 		 * Invokes {@link DefaultCacheServer#startServices()}.
@@ -56,10 +73,13 @@ public interface CohCloud {
 		 */
 		NamedCache getCache(String cacheName);
 		
+		String getServiceNameForCache(String string);
+
 		/**
 		 * @return proxy of remote {@link Service} instantiated on node 
 		 */
 		Service ensureService(String serviceName);
+
 		
 	}
 }

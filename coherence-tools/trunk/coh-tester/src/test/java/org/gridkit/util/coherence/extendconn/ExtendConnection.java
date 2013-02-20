@@ -1,4 +1,4 @@
-package org.gridkit.coherence.util;
+package org.gridkit.util.coherence.extendconn;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -7,9 +7,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
-import com.tangosol.net.CacheFactory;
-import com.tangosol.net.Cluster;
 import com.tangosol.net.ConfigurableCacheFactory;
 import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.InvocationService;

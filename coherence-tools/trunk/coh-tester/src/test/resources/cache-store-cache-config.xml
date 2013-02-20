@@ -40,12 +40,7 @@
 					</internal-cache-scheme>
 					<cachestore-scheme>
 						<class-scheme>
-							<class-name>org.gridkit.coherence.test.rwbm.BinaryEntryExpiryLoader</class-name>
-							<init-params>
-								<init-param>
-									<param-value>{manager-context}</param-value>
-								</init-param>
-							</init-params>
+							<class-name system-property="test-cache-store-class"></class-name>
 						</class-scheme>
 					</cachestore-scheme>
 				</read-write-backing-map-scheme>

@@ -1,36 +1,26 @@
 package org.gridkit.util.coherence.cohtester;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
-import org.gridkit.nanocloud.CloudFactory;
 import org.gridkit.vicluster.ViManager;
-import org.gridkit.vicluster.ViNode;
-import org.gridkit.vicluster.ViProps;
 import org.junit.rules.ExternalResource;
 
 public class DisposableCohCloud extends ExternalResource implements CohCloudRule {
 
-	private ViManager cloud;
+	private SimpleCohCloud cloud;
 	
 	public DisposableCohCloud() {
-		cloud = CloudFactory.createCloud();
-		ViProps.at(cloud.node("**"))
-			.setIsolateType()
-			.setSilentShutdown();
+		cloud = new SimpleCohCloud();
 	}
 	
 	@Override
 	public void useLocalCluster() {
-		ViProps.at(cloud.node("**"))
-			.setLocalType();
+		cloud.useLocalCluster();
 	}
 
 	@Override
 	public void useEmbededCluster() {
-		ViProps.at(cloud.node("**"))
-		.setLocalType();
+		cloud.useEmbededCluster();
 	}
 
 	@Override
@@ -40,20 +30,25 @@ public class DisposableCohCloud extends ExternalResource implements CohCloudRule
 
 	@Override
 	public ViManager getCloud() {
-		return cloud;
+		return cloud.getCloud();
 	}
 	
+	@Override
+	public CohNode all() {
+		return cloud.all();
+	}
+
 	/**
 	 * Return node by name (or group of nodes for pattern).
 	 */
 	@Override
 	public CohNode node(String namePattern) {
-		return new NodeWrapper(cloud.node(namePattern));
+		return cloud.node(namePattern);
 	}
 
 	@Override
 	public CohNode nodes(String... namePatterns) {
-		return new NodeWrapper(cloud.nodes(namePatterns));
+		return cloud.nodes(namePatterns);
 	}
 
 	/**
@@ -61,11 +56,7 @@ public class DisposableCohCloud extends ExternalResource implements CohCloudRule
 	 */	
 	@Override
 	public Collection<CohNode> listNodes(String namePattern) {
-		List<CohNode> list = new ArrayList<CohNode>();
-		for(ViNode node: cloud.listNodes(namePattern)) {
-			list.add(new NodeWrapper(node));
-		}
-		return list;
+		return cloud.listNodes(namePattern);
 	}
 	
 	@Override

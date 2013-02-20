@@ -2,6 +2,7 @@ package org.gridkit.coherence.test.rwbm;
 
 import java.util.Set;
 
+import com.tangosol.net.BackingMapContext;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.cache.BinaryEntryStore;
 import com.tangosol.util.Binary;
@@ -14,6 +15,12 @@ public class BinaryEntryExpiryLoader implements BinaryEntryStore {
 	
 	int counter = 0; 
 		
+	public BinaryEntryExpiryLoader() {		
+	}
+	
+	public BinaryEntryExpiryLoader(BackingMapContext bmContext) {		
+	}
+	
 	@Override
 	public void load(BinaryEntry entry) {
 		Object key = entry.getKey();

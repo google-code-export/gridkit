@@ -6,14 +6,11 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 
-import org.gridkit.util.coherence.cohtester.CohHelper;
-import org.gridkit.utils.vicluster.ViCluster;
-import org.gridkit.utils.vicluster.ViNode;
+import org.gridkit.util.coherence.cohtester.CohCloud.CohNode;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.tangosol.net.CacheFactory;
-import com.tangosol.net.DefaultCacheServer;
-import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
 import com.tangosol.net.cache.AbstractCacheLoader;
 import com.tangosol.net.cache.CacheLoader;
@@ -25,10 +22,6 @@ import com.tangosol.util.MapTriggerListener;
 
 public class CacheLoaderCheck {
 
-	static {
-		DefaultConfigurableCacheFactory.class.toString();
-	}
-	
 	@Test
 	public void test_cache_loader__no_miss_cache() {
 		test_cache_loader("vanila-A");
@@ -49,51 +42,49 @@ public class CacheLoaderCheck {
 		test_cache_loader("nf-A");
 	}
 	
+	@Rule
+	public CohCloudRule cloud = new DisposableCohCloud();
+	
 	public void test_cache_loader(final String cacheName) {
 		
-		ViCluster cluster = new ViCluster("test_cache_loader", "org.gridkit", "com.tangosol");
-		try {
-			
-			CohHelper.enableFastLocalCluster(cluster);
-			CohHelper.cacheConfig(cluster, "/cache-loader-cache-config.xml");
-			
-			ViNode storage = cluster.node("storage");
-			CohHelper.localstorage(storage, true);
-			
-			storage.getCache(cacheName);
-			
-			ViNode client = cluster.node("client");
-			CohHelper.localstorage(client, false);
-			
-			storage.start(DefaultCacheServer.class);
-			
-			client.exec(new Callable<Void>(){
-				@SuppressWarnings({ "rawtypes", "unchecked" })
-				@Override
-				public Void call() throws Exception {
-					
-					NamedCache cache = CacheFactory.getCache(cacheName);
-					
-					List<Integer> keys = Arrays.asList(1,2,3,4,5,6,7);
+		cloud.node("**")
+			.enableFastLocalCluster()
+			.cacheConfig("/cache-loader-cache-config.xml");
+		
+		CohNode storage = cloud.node("storage");
+		storage.localStorage(true);
+		storage.autoStartServices();
+		
+		CohNode client = cloud.node("client");
+		client.localStorage(false);
 
-					cache.put(0, 0);
-					
-					TreeMap result = new TreeMap(cache.getAll(keys));
-					
-					System.out.println("getAll -> " + result);
+		// Trigger cluster instantiation by asking for a cache
+		cloud.node("**").getCache(cacheName);
+		
+		
+		client.exec(new Callable<Void>(){
+			@SuppressWarnings({ "rawtypes", "unchecked" })
+			@Override
+			public Void call() throws Exception {
+				
+				NamedCache cache = CacheFactory.getCache(cacheName);
+				
+				List<Integer> keys = Arrays.asList(1,2,3,4,5,6,7);
 
-					result = new TreeMap(cache.getAll(keys));
-					
-					System.out.println("getAll -> " + result);
-					
-					
-					return null;
-				}
-			});
-		}
-		finally {
-			cluster.shutdown();
-		}		
+				cache.put(0, 0);
+				
+				TreeMap result = new TreeMap(cache.getAll(keys));
+				
+				System.out.println("getAll -> " + result);
+
+				result = new TreeMap(cache.getAll(keys));
+				
+				System.out.println("getAll -> " + result);
+				
+				
+				return null;
+			}
+		});
 	}
 	
 	

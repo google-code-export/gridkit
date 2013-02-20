@@ -20,7 +20,13 @@
                     <remote-addresses>
                         <socket-address>
                             <address>127.0.01</address>
-                            <port>9999</port>
+                            <port>22000</port>
+                        </socket-address>
+                    </remote-addresses>
+                    <remote-addresses>
+                        <socket-address>
+                            <address>127.0.01</address>
+                            <port>33000</port>
                         </socket-address>
                     </remote-addresses>
                 </tcp-initiator>
@@ -39,7 +45,13 @@
                     <remote-addresses>
                         <socket-address>
                             <address>127.0.01</address>
-                            <port>9999</port>
+                            <port>22000</port>
+                        </socket-address>
+                    </remote-addresses>
+                    <remote-addresses>
+                        <socket-address>
+                            <address>127.0.01</address>
+                            <port>33000</port>
                         </socket-address>
                     </remote-addresses>
                 </tcp-initiator>

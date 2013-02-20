@@ -7,52 +7,50 @@ import java.util.Set;
 
 import junit.framework.Assert;
 
-import org.gridkit.coherence.util.classloader.Isolate;
-import org.gridkit.util.coherence.cohtester.CohHelper;
-import org.gridkit.utils.vicluster.ViCluster;
-import org.gridkit.utils.vicluster.ViNode;
+import org.gridkit.util.coherence.cohtester.CohCloud.CohNode;
+import org.gridkit.vicluster.isolate.Isolate;
+import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.tangosol.net.CacheFactory;
-import com.tangosol.net.DefaultCacheServer;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.InvocableMap.Entry;
 import com.tangosol.util.processor.AbstractProcessor;
 
-//@Ignore
+@Ignore
 public class PartialEPCheck {
 
+	@Rule
+	public CohCloudRule cloud = new DisposableCohCloud();
+	
 	@Test
 	public void testPartialEPFailure() throws InterruptedException {
 		
-		ViCluster cluster = new ViCluster("testPartialEPFailure", "com.tangosol", "org.gridkit");
+		CohNode all = cloud.node("**");
 		
-		cluster.setProp("tangosol.coherence.guard.timeout", "5s");
-		cluster.setProp("tangosol.coherence.distributed.task.hung", "5s");
-		cluster.setProp("tangosol.coherence.distributed.task.timeout", "5s");
-//		cluster.setProp("tangosol.coherence.distributed.threads", "4");
-//		cluster.setProp("tangosol.coherence.distributed.request.timeout", "10s");
+		all.setProp("tangosol.coherence.guard.timeout", "5s");
+		all.setProp("tangosol.coherence.distributed.task.hung", "5s");
+		all.setProp("tangosol.coherence.distributed.task.timeout", "5s");
+//		all.setProp("tangosol.coherence.distributed.threads", "4");
+//		all.setProp("tangosol.coherence.distributed.request.timeout", "10s");
 		
-		CohHelper.enableFastLocalCluster(cluster);
-		CohHelper.enableJmx(cluster);
+		all.enableFastLocalCluster();		
+		all.enableJmx();
 
-		cluster.node("first-node").getCluster();
+		cloud.node("server*")
+			.localStorage(true)
+			.autoStartServices();
 		
-		ViNode server1 = cluster.node("server1"); 
-		ViNode server2 = cluster.node("server2"); 
-		ViNode server3 = cluster.node("server3"); 
+		for(int i = 1; i <= 3; ++i) {
+			cloud.nodes("server" + i);
+		}
+				
+		CohNode client = cloud.node("client");
 		
-		server1.start(DefaultCacheServer.class);
-		server2.start(DefaultCacheServer.class);
-		server3.start(DefaultCacheServer.class);
+		client.localStorage(false);
 		
-		ViNode client = cluster.node("client");
-		
-		CohHelper.localstorage(client, false);
-
-		server1.getCache("distr-A");
-		server2.getCache("distr-A");
-		server3.getCache("distr-A");
+		all.getCache("distr-A");
 		
 		NamedCache cache =  client.getCache("distr-A");
 		for (int i = 0; i != 1000; ++i) {
@@ -77,8 +75,6 @@ public class PartialEPCheck {
 				Assert.assertEquals("Result set size", keySet.size(), values.size());
 			}
 		});
-		
-		cluster.kill();
 	}
 	
 	@SuppressWarnings("serial")

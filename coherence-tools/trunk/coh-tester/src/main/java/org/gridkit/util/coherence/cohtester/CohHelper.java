@@ -2,6 +2,7 @@ package org.gridkit.util.coherence.cohtester;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.net.Socket;
@@ -91,6 +92,7 @@ public class CohHelper {
 		node.setProp("tangosol.coherence.management.jvm.all", "false");
 		node.setProp("tangosol.coherence.management.remote", "false");
 		node.setProp("tangosol.coherence.management.serverfactory", IsolateMBeanFinder.class.getName());
+		node.addShutdownHook("wipeout-jmx", new JmxProxyCleanUp(), false);
 	}
 	
 	/**
@@ -204,6 +206,7 @@ public class CohHelper {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private static Object jmxAttribute(ViExecutor node, final ObjectName name, final String attribute) {
 		if (node == null) {
 			return jmxAttribute(name, attribute);
@@ -405,6 +408,15 @@ public class CohHelper {
 				&& "Connection".equals(name.getKeyProperty("type"));
 	}
 
+	public static String jmxServiceStatusHA(ViExecutor node, final String serviceName) {
+		return node.exec(new Callable<String>() {
+			@Override
+			public String call() throws Exception {
+				return jmxServiceStatusHA(serviceName);
+			}
+		});
+	}
+	
 	/**
 	 * Check service HA status via JMX.
 	 */
@@ -416,15 +428,41 @@ public class CohHelper {
 	/**
 	 * Check that service is running using JMX.  
 	 */
+	public static boolean jmxServiceRunning(ViExecutor node, final String serviceName) {
+		return node.exec(new Callable<Boolean>() {
+			@Override
+			public Boolean call() throws Exception {
+				return jmxServiceRunning(serviceName);
+			}
+		});
+	}
+
+	/**
+	 * Check that service is running using JMX.  
+	 */
 	public static boolean jmxServiceRunning(String serviceName) {
 		Boolean b = (Boolean) jmxAttribute(mbeanServiceName(serviceName, jmxMemberId()), "Running");
 		return b == null ?  false : b.booleanValue();
+	}
+
+	public static void jmxWaitForService(ViExecutor node, String serviceName) {
+		jmxWaitForService(node, serviceName, 30000); // Coherence is slow, 30000
 	}
 
 	public static void jmxWaitForService(String serviceName) {
 		jmxWaitForService(serviceName, 30000); // Coherence is slow, 30000
 	}
 
+	public static void jmxWaitForService(ViExecutor node, final String serviceName, final long timeoutMs) {
+		node.exec(new Callable<Void>() {
+			@Override
+			public Void call() throws Exception {
+				jmxWaitForService(serviceName, timeoutMs);
+				return null;
+			}
+		});
+	}
+	
 	public static void jmxWaitForService(final String serviceName, long timeoutMs) {
 		if (!waitFor(new Callable<Boolean>() {
 
@@ -440,6 +478,20 @@ public class CohHelper {
 
 	public static void jmxWaitForStatusHA(String serviceName, String status) {
 		jmxWaitForStatusHA(serviceName, status, 30000); // Coherence is slow, 30000		
+	}
+
+	public static void jmxWaitForStatusHA(ViExecutor node, String serviceName, String status) {
+		jmxWaitForStatusHA(node, serviceName, status, 30000); // Coherence is slow, 30000		
+	}
+
+	public static void jmxWaitForStatusHA(ViExecutor node, final String serviceName, final String status, final long timeoutMs) {
+		node.exec(new Callable<Void>() {
+			@Override
+			public Void call() throws Exception {
+				jmxWaitForStatusHA(serviceName, status, timeoutMs);
+				return null;
+			}
+		});
 	}
 
 	public static void jmxWaitForStatusHA(final String serviceName, final String status, long timeoutMs) {
@@ -500,7 +552,7 @@ public class CohHelper {
 		private ObjectName decorate(ObjectName name) {			
 			try {
 				String mname = name.getDomain();
-				mname += "[" + isolateName + "]:";
+				mname += "@" + isolateName + ":";
 				mname += name.toString().substring(name.toString().indexOf(':') + 1);
 				return new ObjectName(mname);
 			} catch (Exception e) {
@@ -508,7 +560,24 @@ public class CohHelper {
 			}
 		}
 		
+		public void dispose() {
+			for(ObjectName name: internal.queryNames(null, null)) {
+				try {
+					shared.unregisterMBean(decorate(name));
+				} catch (Exception e) {
+					// ignore
+				}
+			}
+		}
+		
 		public ObjectInstance createMBean(String className, ObjectName name) throws ReflectionException, InstanceAlreadyExistsException, MBeanRegistrationException, MBeanException, NotCompliantMBeanException {
+			if (internal.isRegistered(name)) {
+				try {
+					internal.unregisterMBean(name);
+				} catch (InstanceNotFoundException e) {
+					// ignore
+				}
+			}
 			return internal.createMBean(className, name);
 		}
 
@@ -525,6 +594,13 @@ public class CohHelper {
 		}
 
 		public ObjectInstance registerMBean(Object object, ObjectName name) throws InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
+			if (shared.isRegistered(decorate(name))) {
+				try {
+					shared.unregisterMBean(decorate(name));
+				} catch (InstanceNotFoundException e) {
+					// ignore
+				}
+			}
 			shared.registerMBean(object, decorate(name));
 			return internal.registerMBean(object, name);
 		}
@@ -660,7 +736,7 @@ public class CohHelper {
 	
 	public static class IsolateMBeanFinder implements MBeanServerFinder {
 
-		static MBeanServer MSERVER = null;
+		static IsolatedMBeanServerProxy MSERVER = null;
 		
 		@Override
 		public synchronized MBeanServer findMBeanServer(String sDefaultDomain) {
@@ -670,6 +746,18 @@ public class CohHelper {
 				MSERVER = new IsolatedMBeanServerProxy(iname, ManagementFactory.getPlatformMBeanServer(), internal);
 			}
 			return MSERVER;
+		}
+	}
+	
+	@SuppressWarnings("serial")
+	public static class JmxProxyCleanUp implements Runnable, Serializable {
+
+		@Override
+		public void run() {
+			IsolatedMBeanServerProxy proxy = IsolateMBeanFinder.MSERVER;
+			if (proxy != null) {
+				proxy.dispose();
+			}
 		}
 	}
 }
