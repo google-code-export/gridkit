@@ -20,18 +20,16 @@
                     <remote-addresses>
                         <socket-address>
                             <address>127.0.01</address>
-                            <port>22000</port>
+                            <port>33000</port>
                         </socket-address>
-                    </remote-addresses>
-                    <remote-addresses>
                         <socket-address>
                             <address>127.0.01</address>
-                            <port>33000</port>
+                            <port>22000</port>
                         </socket-address>
                     </remote-addresses>
                 </tcp-initiator>
                 <outgoing-message-handler>
-                    <request-timeout>5s</request-timeout>
+                    <request-timeout>30s</request-timeout>
                 </outgoing-message-handler>                                    
             </initiator-config>
         </remote-invocation-scheme>
@@ -45,18 +43,16 @@
                     <remote-addresses>
                         <socket-address>
                             <address>127.0.01</address>
-                            <port>22000</port>
+                            <port>33000</port>
                         </socket-address>
-                    </remote-addresses>
-                    <remote-addresses>
                         <socket-address>
                             <address>127.0.01</address>
-                            <port>33000</port>
+                            <port>22000</port>
                         </socket-address>
                     </remote-addresses>
                 </tcp-initiator>
                 <outgoing-message-handler>
-                    <request-timeout>5s</request-timeout>
+                    <request-timeout>30s</request-timeout>
                 </outgoing-message-handler>                    
             </initiator-config>
         </remote-cache-scheme>

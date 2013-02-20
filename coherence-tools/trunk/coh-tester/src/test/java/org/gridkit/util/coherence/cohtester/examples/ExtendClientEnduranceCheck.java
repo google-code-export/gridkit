@@ -1,6 +1,7 @@
 package org.gridkit.util.coherence.cohtester.examples;
 
 import java.io.Serializable;
+import java.rmi.Remote;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -9,12 +10,11 @@ import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import junit.framework.Assert;
-
 import org.gridkit.util.coherence.cohtester.CohCloud.CohNode;
 import org.gridkit.util.coherence.cohtester.CohCloudRule;
+import org.gridkit.util.coherence.cohtester.CohHelper;
 import org.gridkit.util.coherence.cohtester.DisposableCohCloud;
-import org.gridkit.zerormi.util.RemoteExporter;
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.tangosol.net.CacheFactory;
@@ -32,15 +32,19 @@ public class ExtendClientEnduranceCheck {
 	
 	@Test
 	public void test_cqc() throws InterruptedException {
-//		cloud.useLocalCluster();
+		cloud.useLocalCluster();
+		CohHelper.enableFastLocalCluster(cloud.all());
+		CohHelper.setJoinTimeout(cloud.all(), 50);
 		cloud.all().enableJmx();		
-		test_extend_cqc_endurance("cache", 100, 1, 10, 30, 5);
+		test_extend_cqc_endurance("cache", 100, 1, 10, 300, 5);
 	}
 	
 	public void test_extend_cqc_endurance(final String cacheName, final int initialCacheSize, final int mutators, final int delta, long execTimeS, long proxyRestartPeriod) throws InterruptedException {
 		
+//		cloud.node("cluster.**")
+//			.enableFastLocalCluster();
+
 		cloud.node("cluster.**")
-			.enableFastLocalCluster()
 			.cacheConfig("extend-server-cache-config.xml");
 		
 		cloud.node("xclient.**")
@@ -75,14 +79,13 @@ public class ExtendClientEnduranceCheck {
 		// start extend client
 		cloud.node("xclient").getCache(cacheName);
 				
-		final NamedCache xcqc = cloud.node("xclient").exec(new Callable<NamedCache>() {
+		Verifier verifier = cloud.node("xclient").exec(new Callable<Verifier>() {
 
 			@Override
-			public NamedCache call() throws Exception {
-				NamedCache cache = CacheFactory.getCache(cacheName);
-				NamedCache cqc = new ContinuousQueryCache(cache, AlwaysFilter.INSTANCE);
-				return RemoteExporter.export(cqc, NamedCache.class);
+			public Verifier call() throws Exception {
+				return new CQCVerifer(cacheName, initialCacheSize, initialCacheSize + mutators * delta);
 			}
+			
 		});
 		
 		CacheMutator mutator = new CacheMutator(cacheName, delta);
@@ -96,6 +99,8 @@ public class ExtendClientEnduranceCheck {
 			
 			Thread.sleep(proxyRestartPeriod);
 			
+			verifier.verify();
+			
 			CohNode prevProxy = cloud.node("cluster.proxy." + lastProxy);
 			CohNode nextProxy = cloud.node("cluster.proxy." + ++lastProxy);
 			
@@ -104,29 +109,51 @@ public class ExtendClientEnduranceCheck {
 				nextProxy.setProp("test-proxy-port", "33000");
 			}
 			
+			nextProxy.getCache(cacheName);
 			nextProxy.ensureService("ExtendTcpProxyService");
-//			prevProxy.shutdown();
-//			
-//			Thread.sleep(1000);
+			prevProxy.shutdown();
 			
-			// verify
-			cloud.node("xclient").exec(new Runnable() {
-				@SuppressWarnings("unchecked")
-				@Override
-				public void run() {
-//					int size = xcqc.size();
-//					if (size < initialCacheSize || size > initialCacheSize + (mutators * delta)) {
-//						Assert.assertFalse("Size is " + size, true);
-//					}
-//					SortedSet<String> keys = new TreeSet<String>();
-//					keys.addAll(xcqc.keySet());
-//					String max = keys.last();
-//					long ts = Long.parseLong(max);
-//					long lag = System.nanoTime() - ts;
-//					System.out.println("CQC lag: " + TimeUnit.NANOSECONDS.toMillis(lag));
-					System.out.println("Hallo");
-				}
-			});
+			Thread.sleep(1000);
+			verifier.verify();
+		}
+	}
+	
+	public interface Verifier extends Remote {
+		
+		public void verify();
+		
+	}
+	
+	public class CQCVerifer implements Verifier {
+		
+		private final int highBound;
+		private final int lowBound;
+		private final NamedCache cqc;
+
+		public CQCVerifer(String cacheName, int lowBound,int highBound) {
+			this.highBound = highBound;
+			this.lowBound = lowBound;
+			NamedCache cache = CacheFactory.getCache(cacheName);
+			cqc = new ContinuousQueryCache(cache, AlwaysFilter.INSTANCE);
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public void verify() {
+			int size = size();
+			if (size < lowBound || size > highBound) {
+				Assert.assertFalse("Size is " + size, true);
+			}
+			SortedSet<String> keys = new TreeSet<String>();
+			keys.addAll(cqc.keySet());
+			String max = keys.last();
+			long ts = Long.parseLong(max);
+			long lag = System.nanoTime() - ts;
+			System.out.println("CQC lag: " + TimeUnit.NANOSECONDS.toMillis(lag) + " size: " + size);
+		}
+
+		private int size() {
+			return new ArrayList(cqc.keySet()).size();
 		}
 	}
 	
@@ -154,12 +181,12 @@ public class ExtendClientEnduranceCheck {
 				Filter notPresent = new NotFilter(present);
 	
 				while(true) {
-					if (balance < delta && rnd.nextBoolean()) {
+					if (balance == 0 || (balance < delta && rnd.nextBoolean())) {
 						// add key
 						String key = "" + System.nanoTime();
 						if (cache.invoke(key, new ConditionalPut(notPresent, "", true)) == null) {
 							++balance;
-							Thread.sleep(10);
+							Thread.sleep(30);
 						}
 					}
 					else {
@@ -169,7 +196,7 @@ public class ExtendClientEnduranceCheck {
 						String key = keyCache.remove(rnd.nextInt(keyCache.size()));
 						if (cache.remove(key) != null) {
 							--balance;
-							Thread.sleep(10);
+							Thread.sleep(30);
 						}
 					}
 				}
