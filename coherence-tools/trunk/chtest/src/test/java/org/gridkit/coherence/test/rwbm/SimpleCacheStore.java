@@ -19,6 +19,7 @@ public class SimpleCacheStore implements CacheStore {
 	}
 
 	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Map loadAll(Collection keys) {
 		System.out.println("loadAll: " + keys);
 		Map result = new HashMap();
@@ -34,6 +35,7 @@ public class SimpleCacheStore implements CacheStore {
 	}
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public void storeAll(Map paramMap) {
 	}
 
@@ -43,6 +45,7 @@ public class SimpleCacheStore implements CacheStore {
 	}
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public void eraseAll(Collection paramCollection) {
 	}
 }

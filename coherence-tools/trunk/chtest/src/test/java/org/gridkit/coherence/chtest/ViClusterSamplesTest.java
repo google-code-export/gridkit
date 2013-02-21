@@ -30,7 +30,7 @@ public class ViClusterSamplesTest {
 		// topology used in all test.
 		
 		// Use present for single host Coherence cluster
-		node("**").fastLocalClusterPreset();
+		node("**").presetFastLocalCluster();
 
 		// use default config file from coherence.jar
 		node("**").cacheConfig("/coherence-cache-config.xml");

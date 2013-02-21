@@ -3,128 +3,99 @@ package org.gridkit.coherence.test.rwbm;
 import java.io.Serializable;
 import java.util.concurrent.Callable;
 
-import junit.framework.Assert;
-
-import org.gridkit.coherence.chtest.CohHelper;
-import org.gridkit.utils.vicluster.ViCluster;
-import org.gridkit.utils.vicluster.ViNode;
+import org.gridkit.coherence.chtest.CohCloud.CohNode;
+import org.gridkit.coherence.chtest.CohCloudRule;
+import org.gridkit.coherence.chtest.DisposableCohCloud;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.tangosol.net.CacheFactory;
-import com.tangosol.net.DefaultCacheServer;
-import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.MapEvent;
 import com.tangosol.util.MapListener;
 import com.tangosol.util.MapTrigger;
-import com.tangosol.util.MapTrigger.Entry;
 import com.tangosol.util.filter.EqualsFilter;
 
 public class DecoratorEventCheck {
 
-	static {
-		DefaultConfigurableCacheFactory.class.toString();
-	}
+	@Rule
+	public CohCloudRule cloud = new DisposableCohCloud();
 	
 	@Test
 	public void test_decorator_listener() {
 		final String cacheName = "write-behind-A";
 		
-		ViCluster cluster = new ViCluster("test_decorator_listener", "org.gridkit", "com.tangosol");
-		try {
-			
-			CohHelper.enableFastLocalCluster(cluster);
-			CohHelper.cacheConfig(cluster, "/cache-store-cache-config.xml");
-			
-			ViNode storage = cluster.node("storage");
-			CohHelper.localstorage(storage, true);
-			
-			storage.getCache(cacheName);
-			
-			ViNode client = cluster.node("client");
-			CohHelper.localstorage(client, false);
-			
-			client.exec(new Callable<Void>(){
-				@Override
-				public Void call() throws Exception {
-					
-					NamedCache cache = CacheFactory.getCache(cacheName);
-					cache.addMapListener(new EntryListener());
-					
-					cache.put("A", "aaaa");
-					System.out.println("A <- aaaa");
-					System.out.println("not-yet-stored " + cache.keySet(new EqualsFilter(new StoreFlagExtractor(), Boolean.FALSE)));
-					
-					Thread.sleep(5000);
-					System.out.println("not-yet-stored " + cache.keySet(new EqualsFilter(new StoreFlagExtractor(), Boolean.FALSE)));
-					
-					return null;
-				}
-			});
-		}
-		finally {
-			cluster.shutdown();
-		}		
+		cloud.all().presetFastLocalCluster();
+		cloud.all().cacheConfig("/cache-store-cache-config.xml");
+		
+		CohNode storage = cloud.node("storage");
+		storage.localStorage(true);
+		
+		CohNode client = cloud.node("client");
+		client.localStorage(false);
+		
+		cloud.all().getCache(cacheName);
+		
+		client.exec(new Callable<Void>(){
+			@Override
+			public Void call() throws Exception {
+				
+				NamedCache cache = CacheFactory.getCache(cacheName);
+				cache.addMapListener(new EntryListener());
+				
+				cache.put("A", "aaaa");
+				System.out.println("A <- aaaa");
+				System.out.println("not-yet-stored " + cache.keySet(new EqualsFilter(new StoreFlagExtractor(), Boolean.FALSE)));
+				
+				Thread.sleep(5000);
+				System.out.println("not-yet-stored " + cache.keySet(new EqualsFilter(new StoreFlagExtractor(), Boolean.FALSE)));
+				
+				return null;
+			}
+		});
 	}
-
 	
 	@Test
 	public void test_decorator_index() {
 		final String cacheName = "write-behind-A";
 		
-		ViCluster cluster = new ViCluster("test_decorator_listener", "org.gridkit", "com.tangosol");
-		try {
-			
-			CohHelper.enableFastLocalCluster(cluster);
-			CohHelper.cacheConfig(cluster, "/cache-store-cache-config.xml");
-			
-			ViNode storage1 = cluster.node("storage");
-//			ViNode storage2 = cluster.node("storage2");
-			CohHelper.localstorage(storage1, true);
-//			CohHelper.localstorage(storage2, true);
-			
-			storage1.getCache(cacheName);
-//			storage2.getCache(cacheName);
-			
-			ViNode client = cluster.node("client");
-			CohHelper.localstorage(client, false);
-			
-			client.exec(new Callable<Void>(){
-				@Override
-				public Void call() throws Exception {
-					
-					NamedCache cache = CacheFactory.getCache(cacheName);
-					
+		cloud.all().presetFastLocalCluster();
+		cloud.all().cacheConfig("/cache-store-cache-config.xml");
+		
+		CohNode storage = cloud.node("storage");
+		storage.localStorage(true);
+		
+		CohNode client = cloud.node("client");
+		client.localStorage(false);
+		
+		cloud.all().getCache(cacheName);
+		
+		client.exec(new Callable<Void>(){
+			@Override
+			public Void call() throws Exception {
+				
+				NamedCache cache = CacheFactory.getCache(cacheName);
+				
 //					for(int i = 0; i != 1000; ++i) {
 //						cache.put(i, i);
 //					}
 //					
 //					cache.addMapListener(new EntryListener("test"));
-					
-					cache.addIndex(new StoreFlagExtractor(), false, null);
-					
-					cache.put("A", "aaaa");
-					System.out.println("A <- aaaa");
-					System.out.println("not-yet-stored " + cache.keySet(new EqualsFilter(new StoreFlagExtractor(), Boolean.FALSE)));
-					System.out.println("...");
-					
-					Thread.sleep(5000);
-					System.out.println("...");
-					System.out.println("not-yet-stored " + cache.keySet(new EqualsFilter(new StoreFlagExtractor(), Boolean.FALSE)));
 				
-					Thread.sleep(10000000l);
-					return null;
-				}
-			});
-		}
-		finally {
-			try {
-				cluster.shutdown();
+				cache.addIndex(new StoreFlagExtractor(), false, null);
+				
+				cache.put("A", "aaaa");
+				System.out.println("A <- aaaa");
+				System.out.println("not-yet-stored " + cache.keySet(new EqualsFilter(new StoreFlagExtractor(), Boolean.FALSE)));
+				System.out.println("...");
+				
+				Thread.sleep(5000);
+				System.out.println("...");
+				System.out.println("not-yet-stored " + cache.keySet(new EqualsFilter(new StoreFlagExtractor(), Boolean.FALSE)));
+			
+				return null;
 			}
-			catch(Exception e) {
-				// ignore
-			}
-		}		
+		});
 	}
 	
 	@SuppressWarnings("serial")
@@ -159,6 +130,7 @@ public class DecoratorEventCheck {
 	@SuppressWarnings("serial")
 	public static class EntryTrigger implements MapTrigger, Serializable {
 
+		@SuppressWarnings("unused")
 		private String marker = "default";
 		
 		public EntryTrigger() {

@@ -7,11 +7,13 @@ import java.util.concurrent.Executors;
 
 import junit.framework.Assert;
 
+import org.gridkit.coherence.chtest.CohCloud.CohNode;
+import org.gridkit.coherence.chtest.CohCloudRule;
 import org.gridkit.coherence.chtest.CohHelper;
+import org.gridkit.coherence.chtest.DisposableCohCloud;
 import org.gridkit.coherence.test.CacheTemplate;
-import org.gridkit.utils.vicluster.ViCluster;
-import org.gridkit.utils.vicluster.ViNode;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.tangosol.net.BackingMapContext;
@@ -23,27 +25,27 @@ import com.tangosol.util.MapListener;
 import com.tangosol.util.MapTrigger;
 import com.tangosol.util.MapTriggerListener;
 
-public class TriggerBMAccesCheck {
+public class ShadowCopyTriggerCheck {
 
-	private ViCluster cluster;
+	@Rule
+	public CohCloudRule cloud = new DisposableCohCloud();
 	private ExecutorService executor = Executors.newCachedThreadPool();
 
 	@After
 	public void shutdown_cluster_after_test() {
-		cluster.shutdown();
 		executor.shutdownNow();
 	}
 	
 	@Test
 	public void test_shadow_copy_trigger() throws InterruptedException, ExecutionException {
 		
-		cluster = new ViCluster("test", "org.gridkit", "com.tangosol");
+		cloud.all().presetFastLocalCluster();
 		
-		CacheTemplate.useTemplateCacheConfig(cluster);
-		CacheTemplate.usePartitionedInMemoryCache(cluster);
-		CacheTemplate.usePartitionedCacheBackingMapListener(cluster, BMListener.class);
+		CacheTemplate.useTemplateCacheConfig(cloud.all());
+		CacheTemplate.usePartitionedInMemoryCache(cloud.all());
+		CacheTemplate.usePartitionedCacheBackingMapListener(cloud.all(), BMListener.class);
 		
-		ViNode storage = cluster.node("storage");
+		CohNode storage = cloud.node("storage");
 		CohHelper.localstorage(storage, true);
 
 		storage.exec(new Runnable() {
@@ -60,50 +62,6 @@ public class TriggerBMAccesCheck {
 		Assert.assertEquals("bbb", storage.getCache("a-B").get("BBB"));
 	}
 
-	
-	/* garbage code to investigate threading picture
-	@Test
-	public void __test_shadow_copy_trigger() throws InterruptedException, ExecutionException {
-		
-		cluster = new ViCluster("test", "org.gridkit", "com.tangosol");
-		
-		CacheTemplate.useTemplateCacheConfig(cluster);
-		CacheTemplate.usePartitionedServiceThreadCount(cluster, 2);
-		CacheTemplate.usePartitionedInMemoryCache(cluster);
-		CacheTemplate.usePartitionedCacheBackingMapListener(cluster, BMListener.class);
-		
-		final ViNode storage = cluster.node("storage");
-		CohHelper.localstorage(storage, true);
-		
-		storage.getCache("a-A");		
-
-		executor.submit(new Runnable() {
-			@Override
-			public void run() {
-				List<CompositeKey> keys = Arrays.asList(new CompositeKey("A", 1), new CompositeKey("A", 11));
-				storage.getCache("a-A").invokeAll(keys, new ConditionalPut(AlwaysFilter.INSTANCE, "A"));
-			}
-		});
-
-		executor.submit(new Runnable() {
-			@Override
-			public void run() {
-				List<CompositeKey> keys = Arrays.asList(new CompositeKey("A", 1), new CompositeKey("A", 11));
-				storage.getCache("a-A").invokeAll(keys, new ConditionalPut(AlwaysFilter.INSTANCE, "A"));
-			}
-		});
-
-		executor.submit(new Runnable() {
-			@Override
-			public void run() {
-				List<CompositeKey> keys = Arrays.asList(new CompositeKey("A", 1), new CompositeKey("A", 11));
-				storage.getCache("a-A").invokeAll(keys, new ConditionalPut(AlwaysFilter.INSTANCE, "A"));
-			}
-		});
-		
-		Thread.sleep(1000000);
-	}
-	*/
 	
 	@SuppressWarnings("serial")
 	public static class CacheTrigger implements MapTrigger, Serializable {

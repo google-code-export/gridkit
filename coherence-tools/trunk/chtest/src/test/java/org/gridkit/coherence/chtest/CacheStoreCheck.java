@@ -27,7 +27,7 @@ public class CacheStoreCheck {
 	public void test_cache_store(final String cacheName) {
 		
 		cloud.node("**")
-			.fastLocalClusterPreset()
+			.presetFastLocalCluster()
 			.cacheConfig("/cache-store-cache-config.xml");
 		
 		cloud.node("**").setProp("test-cache-store-class", TestStore.class.getName());

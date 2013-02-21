@@ -4,74 +4,61 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 
-import junit.framework.Assert;
-
-import org.gridkit.coherence.chtest.CohHelper;
-import org.gridkit.utils.vicluster.ViCluster;
-import org.gridkit.utils.vicluster.ViNode;
+import org.gridkit.coherence.chtest.CohCloud.CohNode;
+import org.gridkit.coherence.chtest.CohCloudRule;
+import org.gridkit.coherence.chtest.DisposableCohCloud;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.tangosol.net.CacheFactory;
-import com.tangosol.net.DefaultCacheServer;
-import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.MapEvent;
 import com.tangosol.util.MapListener;
 import com.tangosol.util.MapTrigger;
-import com.tangosol.util.MapTrigger.Entry;
-import com.tangosol.util.filter.EqualsFilter;
 
 public class BulkLoadEventCheck {
 
-	static {
-		DefaultConfigurableCacheFactory.class.toString();
-	}
+	@Rule
+	public CohCloudRule cloud = new DisposableCohCloud();
 	
 	@Test
 	public void test_decorator_listener() {
 		final String cacheName = "load-all-A";
-		
-		ViCluster cluster = new ViCluster("test_decorator_listener", "org.gridkit", "com.tangosol");
-		try {
-			
-			CohHelper.enableFastLocalCluster(cluster);
-			CohHelper.cacheConfig(cluster, "/cache-store-cache-config.xml");
-			
-			ViNode storage1 = cluster.node("storage1");
-			ViNode storage2 = cluster.node("storage2");
-			ViNode storage3 = cluster.node("storage3");
-			CohHelper.localstorage(storage1, true);
-			CohHelper.localstorage(storage2, true);
-			CohHelper.localstorage(storage3, true);
-			
-			storage1.getCache(cacheName);
-			storage2.getCache(cacheName);
-			storage3.getCache(cacheName);
-			
-			ViNode client = cluster.node("client");
-			CohHelper.localstorage(client, false);
-			
-			client.exec(new Callable<Void>(){
-				@Override
-				public Void call() throws Exception {
-					
-					NamedCache cache = CacheFactory.getCache(cacheName);
-					cache.addMapListener(new EntryListener());
-					
-					cache.getAll(Arrays.asList("ALL", "ALLALL"));
 
-					System.out.println("A -> " + cache.get("A"));
-					System.out.println("B -> " + cache.get("B"));
-					System.out.println("C -> " + cache.get("C"));
-					System.out.println("D -> " + cache.get("D"));
-					
-					return null;
-				}
-			});
+		cloud.all().presetFastLocalCluster();
+		cloud.all().cacheConfig("/cache-store-cache-config.xml");
+
+		
+		cloud.node("storage*")
+			.localStorage(true);
+		
+		for(int i = 1; i <= 3; ++i) {
+			cloud.node("storage" + 1);
 		}
-		finally {
-			cluster.shutdown();
-		}		
+
+		
+		CohNode client = cloud.node("client");
+		client.localStorage(false);
+		
+		cloud.all().getCache(cacheName);
+		
+		client.exec(new Callable<Void>(){
+			@Override
+			public Void call() throws Exception {
+				
+				NamedCache cache = CacheFactory.getCache(cacheName);
+				cache.addMapListener(new EntryListener());
+				
+				cache.getAll(Arrays.asList("ALL", "ALLALL"));
+
+				System.out.println("A -> " + cache.get("A"));
+				System.out.println("B -> " + cache.get("B"));
+				System.out.println("C -> " + cache.get("C"));
+				System.out.println("D -> " + cache.get("D"));
+				
+				return null;
+			}
+		});
 	}
 
 	
@@ -107,6 +94,7 @@ public class BulkLoadEventCheck {
 	@SuppressWarnings("serial")
 	public static class EntryTrigger implements MapTrigger, Serializable {
 
+		@SuppressWarnings("unused")
 		private String marker = "default";
 		
 		public EntryTrigger() {

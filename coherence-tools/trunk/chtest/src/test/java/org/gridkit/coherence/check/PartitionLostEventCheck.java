@@ -7,11 +7,13 @@ import java.util.concurrent.Executors;
 
 import junit.framework.Assert;
 
+import org.gridkit.coherence.chtest.CohCloud.CohNode;
+import org.gridkit.coherence.chtest.CohCloudRule;
 import org.gridkit.coherence.chtest.CohHelper;
+import org.gridkit.coherence.chtest.DisposableCohCloud;
 import org.gridkit.coherence.test.CacheTemplate;
-import org.gridkit.utils.vicluster.ViCluster;
-import org.gridkit.utils.vicluster.ViNode;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.tangosol.coherence.component.util.safeService.SafeCacheService;
@@ -25,30 +27,28 @@ import com.tangosol.net.partition.PartitionSet;
 
 public class PartitionLostEventCheck {
 
-	private ViCluster cluster;
+	@Rule
+	public CohCloudRule cloud = new DisposableCohCloud();
 	private ExecutorService executor = Executors.newCachedThreadPool();
 
 	@After
 	public void shutdown_cluster_after_test() {
-		cluster.shutdown();
 		executor.shutdownNow();
 	}
 	
 	@Test
 	public void verify_two_node_partition_lost_event() throws InterruptedException, ExecutionException {
-		
-		cluster = new ViCluster("test", "org.gridkit", "com.tangosol");
 
-		CohHelper.enableFastLocalCluster(cluster);
+		cloud.all().presetFastLocalCluster();
 		
-		CacheTemplate.useTemplateCacheConfig(cluster);
-		CacheTemplate.usePartitionedInMemoryCache(cluster);
-		CacheTemplate.usePartitionedServiceBackupCount(cluster, 0);
-		CacheTemplate.usePartitionedServicePartitionCount(cluster, 3);
+		CacheTemplate.useTemplateCacheConfig(cloud.all());
+		CacheTemplate.usePartitionedInMemoryCache(cloud.all());
+		CacheTemplate.usePartitionedServiceBackupCount(cloud.all(), 0);
+		CacheTemplate.usePartitionedServicePartitionCount(cloud.all(), 3);
 		
-		ViNode storage1 = cluster.node("node1");
+		CohNode storage1 = cloud.node("node1");
 		CohHelper.localstorage(storage1, true);
-		ViNode storage2 = cluster.node("node2");
+		CohNode storage2 = cloud.node("node2");
 		CohHelper.localstorage(storage2, true);
 
 		storage1.exec(new LossListener());
@@ -58,7 +58,7 @@ public class PartitionLostEventCheck {
 		
 		storage1.exec(new ShowOwnership());
 		
-		storage2.kill();
+		storage2.shutdown();
 		
 		Thread.sleep(100);
 

@@ -1,17 +1,19 @@
-package org.gridkit.coherence.test.cqcflood;
+package org.gridkit.coherence.check;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import org.gridkit.coherence.chtest.CohCloud.CohNode;
+import org.gridkit.coherence.chtest.CohCloudRule;
 import org.gridkit.coherence.chtest.CohHelper;
-import org.gridkit.utils.vicluster.ViCluster;
-import org.gridkit.utils.vicluster.ViNode;
+import org.gridkit.coherence.chtest.DisposableCohCloud;
+import org.gridkit.vicluster.ViNode;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.tangosol.net.CacheFactory;
-import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.Invocable;
 import com.tangosol.net.InvocationService;
 import com.tangosol.net.NamedCache;
@@ -20,9 +22,8 @@ import com.tangosol.util.filter.AlwaysFilter;
 
 public class ExtendCQCBloatCheck {
 
-	static {
-		DefaultConfigurableCacheFactory.class.toString();
-	}
+	@Rule
+	public CohCloudRule cloud = new DisposableCohCloud(); 
 	
 	public static void main(String[] args) throws Exception {
 		new ExtendCQCBloatCheck().test_cqc_memory_leak();
@@ -32,82 +33,73 @@ public class ExtendCQCBloatCheck {
 	public void test_cqc_memory_leak() throws Exception {
 		
 		final String cacheName = "test";
+
+		CohNode grid = cloud.node("grid.**");
+		CohNode client = cloud.node("client.**");
+
+		grid.presetFastLocalCluster();
+		grid.cacheConfig("/extend-server-cache-config.xml");
 		
-		ViCluster cluster = new ViCluster("test_cluster", "org.gridkit", "com.tangosol");
-		ViCluster remote = new ViCluster("test_client", "org.gridkit", "com.tangosol");
-		try {
-			
-			CohHelper.enableFastLocalCluster(cluster);
-			CohHelper.cacheConfig(cluster, "/extend-server-cache-config.xml");
-			
-			final ViNode storage1 = cluster.node("storage1");
-			final ViNode storage2 = cluster.node("storage2");
-			CohHelper.localstorage(storage1, true);			
-			CohHelper.localstorage(storage2, true);			
-			storage1.getCache(cacheName);
-			storage2.getCache(cacheName);
-			
-			ViNode proxy = cluster.node("proxy");
-			CohHelper.localstorage(proxy, false);			
-			proxy.getCache(cacheName);
-			proxy.getService("ExtendTcpProxyService");
-			
-			proxy.getCache(cacheName).put("A", "A");
-			
-			CohHelper.enableFastLocalCluster(remote);
-			CohHelper.cacheConfig(remote, "/extend-client-cache-config.xml");
+		client.enableTCMP(false);
+		client.cacheConfig("/extend-client-cache-config.xml");
+		
+		final CohNode storage1 = cloud.node("grid.storage1");
+		final CohNode storage2 = cloud.node("grid.storage2");
+		CohHelper.localstorage(storage1, true);			
+		CohHelper.localstorage(storage2, true);			
+		storage1.getCache(cacheName);
+		storage2.getCache(cacheName);
+		
+		CohNode proxy = cloud.node("grid.proxy");
+		CohHelper.localstorage(proxy, false);			
+		proxy.getCache(cacheName);
+		proxy.ensureService("ExtendTcpProxyService");
+		
+		proxy.getCache(cacheName).put("A", "A");
+		
+		CohNode client1 = cloud.node("client.1");
+		client1.getCache(cacheName);
 
-			ViNode client1 = remote.node("client1");
-			client1.getCache(cacheName);
-
-			client1.getCache(cacheName).get("A");
-			client1.exec(new Runnable() {
-				@Override
-				public void run() {
-					((InvocationService)CacheFactory.getService("ExtendInvocation")).query(new Task(), null);
-				}
-			});
-			proxy.suspend();
-			System.out.println("Proxy is suspended, wait client timeout");
-			client1.exec(new Runnable() {
-				@Override
-				public void run() {
-					((InvocationService)CacheFactory.getService("ExtendInvocation")).query(new Task(), null);
-				}
-			});
-			client1.getCache(cacheName).get("A");
-			System.out.println("Passed");
-			
-			ViNode client2 = remote.node("client2");
-			client2.getCache(cacheName);
-			ViNode client3 = remote.node("client3");
-			client3.getCache(cacheName);
-			
-			for(int i = 0; i != 100; ++i) {
-				new EventProducer(cacheName, proxy).start();
+		client1.getCache(cacheName).get("A");
+		client1.exec(new Runnable() {
+			@Override
+			public void run() {
+				((InvocationService)CacheFactory.getService("ExtendInvocation")).query(new Task(), null);
 			}
+		});
+		proxy.suspend();
+		System.out.println("Proxy is suspended, wait client timeout");
+		client1.exec(new Runnable() {
+			@Override
+			public void run() {
+				((InvocationService)CacheFactory.getService("ExtendInvocation")).query(new Task(), null);
+			}
+		});
+		client1.getCache(cacheName).get("A");
+		System.out.println("Passed");
+		
+		CohNode client2 = cloud.node("client.2");
+		client2.getCache(cacheName);
+		CohNode client3 = cloud.node("client.3");
+		client3.getCache(cacheName);
+		
+		for(int i = 0; i != 100; ++i) {
+			new EventProducer(cacheName, proxy).start();
+		}
 
-			client1.exec(new CQCClient(cacheName));
-			client2.exec(new CQCClient(cacheName));
-			client3.exec(new CQCClient(cacheName));
+		client1.exec(new CQCClient(cacheName));
+		client2.exec(new CQCClient(cacheName));
+		client3.exec(new CQCClient(cacheName));
 
-			System.out.println("Killing remote");
-			client1.suspend();
+		System.out.println("Killing remote");
+		client1.suspend();
 //			remote.kill();
-			System.out.println("Client has been killed");
-			
-			Thread.sleep(600 * 1000);			
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-			throw e;
-		}
-		finally {
-			cluster.shutdown();
-			remote.shutdown();
-		}		
+		System.out.println("Client has been killed");
+		
+		Thread.sleep(600 * 1000);			
 	}
 
+	@SuppressWarnings("serial")
 	private final static class CQCClient implements Runnable, Serializable {
 
 		private final String cacheName;
@@ -187,6 +179,7 @@ public class ExtendCQCBloatCheck {
 		}
 	}
 	
+	@SuppressWarnings("serial")
 	public static class Task implements Invocable, Serializable {
 
 		@Override

@@ -33,7 +33,7 @@ public class ExtendConnectionCheck {
 		
 		// cluster member role
 		cloud.node("cluster.**")
-			.fastLocalClusterPreset()
+			.presetFastLocalCluster()
 			.autoStartCluster()
 			.cacheConfig("/extend-server-cache-config.xml");
 
@@ -47,7 +47,7 @@ public class ExtendConnectionCheck {
 		
 		// Extend client role
 		cloud.node("xclient.**")
-			.fastLocalClusterPreset()
+			.presetFastLocalCluster()
 			.cacheConfig("/extend-client-cache-config.xml");
 		
 		try {

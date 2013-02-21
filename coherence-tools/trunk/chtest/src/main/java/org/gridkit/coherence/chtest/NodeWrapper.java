@@ -37,7 +37,7 @@ class NodeWrapper extends ViNode.Delegate implements CohNode {
 	}
 
 	@Override
-	public CohNode fastLocalClusterPreset() {
+	public CohNode presetFastLocalCluster() {
 		CohHelper.enableFastLocalCluster(getDelegate());
 		CohHelper.setJoinTimeout(getDelegate(), 50);
 		CohHelper.enableTcpRing(getDelegate(), false);

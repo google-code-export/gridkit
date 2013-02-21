@@ -14,49 +14,50 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import org.gridkit.coherence.chtest.CohCloud.CohNode;
+import org.gridkit.coherence.chtest.CohCloudRule;
 import org.gridkit.coherence.chtest.CohHelper;
+import org.gridkit.coherence.chtest.DisposableCohCloud;
 import org.gridkit.coherence.test.CacheTemplate;
-import org.gridkit.utils.vicluster.ViCluster;
-import org.gridkit.utils.vicluster.ViNode;
-import org.hamcrest.number.OrderingComparisons;
+import org.gridkit.vicluster.ViNode;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.RequestPolicyException;
 import com.tangosol.net.cache.CacheStore;
 
-public class WriteBehindResourceLockingCheck {
+public class CacheStoreResourceLockingCheck {
 
 	private static final long CACHE_LOADER_DELAY = 2000;
 	
-	private ViCluster cluster;
+	@Rule
+	public CohCloudRule cloud = new DisposableCohCloud();
+	
 	private ExecutorService executor = Executors.newCachedThreadPool();
-	private ViNode client1;
-	private ViNode client2;
-	private ViNode client3;
-	private ViNode client4;
+	private CohNode client1;
+	private CohNode client2;
+	private CohNode client3;
+	private CohNode client4;
 
 	@After
 	public void shutdown_cluster_after_test() {
-		cluster.shutdown();
 		executor.shutdownNow();
 	}
 	
 	@Test
 	public void verify_resource_lock_chaining() throws InterruptedException, ExecutionException {
 		
-		cluster = new ViCluster("test", "org.gridkit", "com.tangosol");
+		cloud.all().presetFastLocalCluster();
 		
-		CohHelper.enableFastLocalCluster(cluster);
-		
-		CacheTemplate.useTemplateCacheConfig(cluster);
-		CacheTemplate.usePartitionedReadWriteCache(cluster, DelayCacheStore.class);
-		CacheTemplate.usePartitionedServiceThreadCount(cluster, 10);
-		CacheTemplate.useWriteDelay(cluster, "100s");
+		CacheTemplate.useTemplateCacheConfig(cloud.all());
+		CacheTemplate.usePartitionedReadWriteCache(cloud.all(), DelayCacheStore.class);
+		CacheTemplate.usePartitionedServiceThreadCount(cloud.all(), 10);
+		CacheTemplate.useWriteDelay(cloud.all(), "100s");
 
-		ViNode storage = cluster.node("storage");
+		CohNode storage = cloud.node("storage");
 		CohHelper.localstorage(storage, true);
 
 		storage.getCache("a-test");
@@ -71,17 +72,15 @@ public class WriteBehindResourceLockingCheck {
 	@Test
 	public void reproduce_guardian_timeout() throws InterruptedException, ExecutionException {
 		
-		cluster = new ViCluster("test", "org.gridkit", "com.tangosol");
+		cloud.all().presetFastLocalCluster();
 		
-		CohHelper.enableFastLocalCluster(cluster);
-		
-		CacheTemplate.useTemplateCacheConfig(cluster);
-		CacheTemplate.usePartitionedReadWriteCache(cluster, DelayCacheStore.class);
-		CacheTemplate.usePartitionedServiceThreadCount(cluster, 10);
-		CacheTemplate.useWriteDelay(cluster, "100s");
-		CacheTemplate.usePartitionedServiceGuardianTimeout(cluster, 2 * CACHE_LOADER_DELAY);
+		CacheTemplate.useTemplateCacheConfig(cloud.all());
+		CacheTemplate.usePartitionedReadWriteCache(cloud.all(), DelayCacheStore.class);
+		CacheTemplate.usePartitionedServiceThreadCount(cloud.all(), 10);
+		CacheTemplate.useWriteDelay(cloud.all(), "100s");
+		CacheTemplate.usePartitionedServiceGuardianTimeout(cloud.all(), 2 * CACHE_LOADER_DELAY);
 
-		ViNode storage = cluster.node("storage");
+		CohNode storage = cloud.node("storage");
 		CohHelper.localstorage(storage, true);
 
 		storage.getCache("a-test");
@@ -104,19 +103,13 @@ public class WriteBehindResourceLockingCheck {
 	}
 
 	private void initClientsAndCache() {
-		client1 = cluster.node("client1");
-		client2 = cluster.node("client2");
-		client3 = cluster.node("client3");
-		client4 = cluster.node("client4");
-		CohHelper.localstorage(client1, false);
-		CohHelper.localstorage(client2, false);
-		CohHelper.localstorage(client3, false);
-		CohHelper.localstorage(client4, false);
+		client1 = cloud.node("client1");
+		client2 = cloud.node("client2");
+		client3 = cloud.node("client3");
+		client4 = cloud.node("client4");
 		
-		client1.getCache("a-test");
-		client2.getCache("a-test");
-		client3.getCache("a-test");
-		client4.getCache("a-test");
+		cloud.node("client*").localStorage(false);
+		cloud.node("client*").getCache("a-test");
 
 		for(int i = 0; i != 23; ++i) {
 			String key = String.valueOf((char)('A' + i));
@@ -205,10 +198,10 @@ public class WriteBehindResourceLockingCheck {
 			
 			Collections.sort(timings);
 			
-			Assert.assertThat(timings.get(0), OrderingComparisons.greaterThan(CACHE_LOADER_DELAY));
-			Assert.assertThat(timings.get(1), OrderingComparisons.greaterThan(2 * CACHE_LOADER_DELAY));
-			Assert.assertThat(timings.get(2), OrderingComparisons.greaterThan(3 * CACHE_LOADER_DELAY));
-			Assert.assertThat(timings.get(3), OrderingComparisons.greaterThan(4 * CACHE_LOADER_DELAY));
+			Assert.assertTrue(timings.get(0) > CACHE_LOADER_DELAY);
+			Assert.assertTrue(timings.get(1) > 2 * CACHE_LOADER_DELAY);
+			Assert.assertTrue(timings.get(2) > 3 * CACHE_LOADER_DELAY);
+			Assert.assertTrue(timings.get(3) > 4 * CACHE_LOADER_DELAY);
 			
 			
 		} catch (Exception e) {

@@ -7,12 +7,10 @@ import java.util.concurrent.Callable;
 import org.gridkit.coherence.chtest.CohCloud.CohNode;
 import org.gridkit.coherence.chtest.CohCloudRule;
 import org.gridkit.coherence.chtest.DisposableCohCloud;
-import org.gridkit.vicluster.ViNode;
 import org.junit.Rule;
 import org.junit.Test;
 
 import com.tangosol.net.CacheFactory;
-import com.tangosol.net.DefaultCacheServer;
 import com.tangosol.net.NamedCache;
 import com.tangosol.net.cache.CacheLoader;
 import com.tangosol.run.xml.XmlConfigurable;
@@ -47,6 +45,7 @@ public class XmlConfigurableLoader implements CacheLoader, XmlConfigurable {
 	}
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public Map loadAll(Collection paramCollection) {
 		return null;
 	}
@@ -59,7 +58,7 @@ public class XmlConfigurableLoader implements CacheLoader, XmlConfigurable {
 		
 		final String cacheName = "xml-configurable-A";
 			
-		cloud.all().fastLocalClusterPreset();
+		cloud.all().presetFastLocalCluster();
 		cloud.all().cacheConfig("/cache-store-cache-config.xml");
 		
 		CohNode storage = cloud.node("storage");

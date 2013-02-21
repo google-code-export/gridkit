@@ -4,10 +4,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.gridkit.coherence.chtest.CohHelper;
-import org.gridkit.utils.vicluster.ViCluster;
-import org.gridkit.utils.vicluster.ViNode;
+import org.gridkit.coherence.chtest.CohCloud.CohNode;
+import org.gridkit.coherence.chtest.CohCloudRule;
+import org.gridkit.coherence.chtest.DisposableCohCloud;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.tangosol.net.BackingMapManagerContext;
@@ -17,28 +18,26 @@ import com.tangosol.util.MapListener;
 
 public class BMCheck {
 
+	@Rule
+	public CohCloudRule cloud = new DisposableCohCloud();
 	
-	private ViCluster cluster;
 	private ExecutorService executor = Executors.newCachedThreadPool();
 
 	@After
 	public void shutdown_cluster_after_test() {
-		cluster.shutdown();
 		executor.shutdownNow();
 	}
 	
 	@Test
 	public void touch_vanila_cache() throws InterruptedException, ExecutionException {
+
+		cloud.all().presetFastLocalCluster();
+		cloud.all().cacheConfig("bm-check-cache-config.xml");
 		
-		cluster = new ViCluster("test", "org.gridkit", "com.tangosol");
-		
-		CohHelper.cacheConfig(cluster, "bm-check-cache-config.xml");
-		
-		ViNode storage = cluster.node("storage");
-		CohHelper.localstorage(storage, true);
+		CohNode storage = cloud.node("storage");
+		storage.localStorage(true);
 
 		storage.exec(new Runnable() {
-			
 			@Override
 			public void run() {
 				CacheFactory.getCache("vanila-a").addMapListener(new Listener2());
@@ -50,12 +49,11 @@ public class BMCheck {
 	@Test
 	public void touch_partitioned_cache() throws InterruptedException, ExecutionException {
 		
-		cluster = new ViCluster("test", "org.gridkit", "com.tangosol");
+		cloud.all().presetFastLocalCluster();
+		cloud.all().cacheConfig("bm-check-cache-config.xml");
 		
-		CohHelper.cacheConfig(cluster, "bm-check-cache-config.xml");
-		
-		ViNode storage = cluster.node("storage");
-		CohHelper.localstorage(storage, true);
+		CohNode storage = cloud.node("storage");
+		storage.localStorage(true);
 		
 		storage.getCache("partitioned-a").put("A", "A");
 	}

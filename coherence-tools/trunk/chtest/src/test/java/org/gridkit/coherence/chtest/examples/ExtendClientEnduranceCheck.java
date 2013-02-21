@@ -10,9 +10,9 @@ import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import org.gridkit.coherence.chtest.CohCloud.CohNode;
 import org.gridkit.coherence.chtest.CohCloudRule;
 import org.gridkit.coherence.chtest.DisposableCohCloud;
-import org.gridkit.coherence.chtest.CohCloud.CohNode;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,7 +31,7 @@ public class ExtendClientEnduranceCheck {
 	
 	@Test
 	public void test_cqc_in_isolate() throws InterruptedException {
-		cloud.all().fastLocalClusterPreset();
+		cloud.all().presetFastLocalCluster();
 		// enable Coherence JMX, try to open test runner process in JConsole  
 		cloud.all().enableJmx(true);		
 		test_extend_cqc_endurance("cache", 100, 1, 10, 300, 5);
@@ -156,7 +156,7 @@ public class ExtendClientEnduranceCheck {
 			System.out.println("CQC lag: " + TimeUnit.NANOSECONDS.toMillis(lag) + " size: " + size);
 		}
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		private int size() {
 			return new ArrayList(cqc.keySet()).size();
 		}

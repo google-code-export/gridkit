@@ -5,14 +5,13 @@ import java.util.concurrent.Callable;
 
 import junit.framework.Assert;
 
-import org.gridkit.coherence.chtest.CohHelper;
-import org.gridkit.utils.vicluster.ViCluster;
-import org.gridkit.utils.vicluster.ViNode;
+import org.gridkit.coherence.chtest.CohCloud.CohNode;
+import org.gridkit.coherence.chtest.CohCloudRule;
+import org.gridkit.coherence.chtest.DisposableCohCloud;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.tangosol.net.CacheFactory;
-import com.tangosol.net.DefaultCacheServer;
-import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
 import com.tangosol.net.cache.AbstractCacheLoader;
 import com.tangosol.net.cache.CacheLoader;
@@ -24,9 +23,8 @@ import com.tangosol.util.MapTriggerListener;
 
 public class BinaryEntryCheck {
 
-	static {
-		DefaultConfigurableCacheFactory.class.toString();
-	}
+	@Rule
+	public CohCloudRule cloud = new DisposableCohCloud();
 	
 	@Test
 	public void test_binary_store__vanila() {
@@ -35,52 +33,46 @@ public class BinaryEntryCheck {
 	
 	public void test_binary_store(final String cacheName) {
 		
-		ViCluster cluster = new ViCluster("test_cache_loader", "org.gridkit", "com.tangosol");
-		try {
-			
-			CohHelper.enableFastLocalCluster(cluster);
-			CohHelper.cacheConfig(cluster, "/binary-expiry-cache-store-cache-config.xml");
-			
-			ViNode storage = cluster.node("storage");
-			CohHelper.localstorage(storage, true);
-			
-			storage.getCache(cacheName);
-			
-			ViNode client = cluster.node("client");
-			CohHelper.localstorage(client, false);
-			
-			storage.start(DefaultCacheServer.class);
-			
-			client.exec(new Callable<Void>(){
-				@Override
-				public Void call() throws Exception {
-					
-					NamedCache cache = CacheFactory.getCache(cacheName);
+		cloud.all().presetFastLocalCluster();
+		cloud.all().cacheConfig("/binary-expiry-cache-store-cache-config.xml");
+		
+		CohNode storage = cloud.node("storage");
+		storage.localStorage(true);
+		storage.autoStartServices();
+		
+		storage.getCache(cacheName);
+		
+		CohNode client = cloud.node("client");
+		client.localStorage(false);
+		
+		cloud.all().ensureCluster();
+		
+		client.exec(new Callable<Void>(){
+			@Override
+			public Void call() throws Exception {
+				
+				NamedCache cache = CacheFactory.getCache(cacheName);
 
-					String val = (String) cache.get(1);
-					
-					Assert.assertEquals("1-0", val);
-					
-					Thread.sleep(100);
+				String val = (String) cache.get(1);
+				
+				Assert.assertEquals("1-0", val);
+				
+				Thread.sleep(100);
 
-					val = (String) cache.get(1);
-					Assert.assertEquals("1-1", val);
-					
-					val = (String) cache.get(1000);
-					Assert.assertEquals("1000-2", val);
-					
-					Thread.sleep(5);
+				val = (String) cache.get(1);
+				Assert.assertEquals("1-1", val);
+				
+				val = (String) cache.get(1000);
+				Assert.assertEquals("1000-2", val);
+				
+				Thread.sleep(5);
 
-					val = (String) cache.get(1000);
-					Assert.assertEquals("1000-2", val);
-					
-					return null;
-				}
-			});
-		}
-		finally {
-			cluster.shutdown();
-		}		
+				val = (String) cache.get(1000);
+				Assert.assertEquals("1000-2", val);
+				
+				return null;
+			}
+		});
 	}
 	
 	

@@ -30,7 +30,7 @@ public class PermLeakTest {
 			try {
 				cluster.all()
 //					.gracefulShutdown(graceful)
-					.fastLocalClusterPreset()
+					.presetFastLocalCluster()
 					.setTCMPTimeout(10000)
 					.enableJmx(true);
 				

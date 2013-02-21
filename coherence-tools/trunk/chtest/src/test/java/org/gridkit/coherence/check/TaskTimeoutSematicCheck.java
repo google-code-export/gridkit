@@ -9,11 +9,13 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Assert;
 
+import org.gridkit.coherence.chtest.CohCloud.CohNode;
+import org.gridkit.coherence.chtest.CohCloudRule;
 import org.gridkit.coherence.chtest.CohHelper;
+import org.gridkit.coherence.chtest.DisposableCohCloud;
 import org.gridkit.coherence.test.CacheTemplate;
-import org.gridkit.utils.vicluster.ViCluster;
-import org.gridkit.utils.vicluster.ViNode;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.tangosol.net.CacheFactory;
@@ -24,30 +26,28 @@ import com.tangosol.util.processor.AbstractProcessor;
 
 public class TaskTimeoutSematicCheck {
 
-	private ViCluster cluster;
+	@Rule
+	public CohCloudRule cloud = new DisposableCohCloud();
 	private ExecutorService executor = Executors.newCachedThreadPool();
 
 	@After
 	public void shutdown_cluster_after_test() {
-		cluster.shutdown();
 		executor.shutdownNow();
 	}
 
 	@Test
 	public void verify_task_interruption() throws InterruptedException, ExecutionException {
 		
-		cluster = new ViCluster("test", "org.gridkit", "com.tangosol");
+		cloud.all().presetFastLocalCluster();
 		
-		CohHelper.enableFastLocalCluster(cluster);
-		
-		CacheTemplate.useTemplateCacheConfig(cluster);
-		CacheTemplate.usePartitionedInMemoryCache(cluster);
-		CacheTemplate.usePartitionedServiceThreadCount(cluster, 2);
-		CacheTemplate.usePartitionedServiceTaskTimeout(cluster, 1000);
+		CacheTemplate.useTemplateCacheConfig(cloud.all());
+		CacheTemplate.usePartitionedInMemoryCache(cloud.all());
+		CacheTemplate.usePartitionedServiceThreadCount(cloud.all(), 2);
+		CacheTemplate.usePartitionedServiceTaskTimeout(cloud.all(), 1000);
 
-		ViNode storage = cluster.node("storage");
+		CohNode storage = cloud.node("storage");
 		CohHelper.localstorage(storage, true);
-		ViNode client = cluster.node("client");
+		CohNode client = cloud.node("client");
 		CohHelper.localstorage(client, false);
 
 		storage.getCache("a-test").put("A", "A");
@@ -71,18 +71,16 @@ public class TaskTimeoutSematicCheck {
 	@Test
 	public void verify_task_interruption2() throws InterruptedException, ExecutionException {
 		
-		cluster = new ViCluster("test", "org.gridkit", "com.tangosol");
+		cloud.all().presetFastLocalCluster();
 		
-		CohHelper.enableFastLocalCluster(cluster);
-		
-		CacheTemplate.useTemplateCacheConfig(cluster);
-		CacheTemplate.usePartitionedInMemoryCache(cluster);
-		CacheTemplate.usePartitionedServiceThreadCount(cluster, 2);
-		CacheTemplate.usePartitionedServiceGuardianTimeout(cluster, 1000);
+		CacheTemplate.useTemplateCacheConfig(cloud.all());
+		CacheTemplate.usePartitionedInMemoryCache(cloud.all());
+		CacheTemplate.usePartitionedServiceThreadCount(cloud.all(), 2);
+		CacheTemplate.usePartitionedServiceGuardianTimeout(cloud.all(), 1000);
 
-		ViNode storage = cluster.node("storage");
+		CohNode storage = cloud.node("storage");
 		CohHelper.localstorage(storage, true);
-		ViNode client = cluster.node("client");
+		CohNode client = cloud.node("client");
 		CohHelper.localstorage(client, false);
 
 		storage.getCache("a-test").put("A", "A");
@@ -105,20 +103,18 @@ public class TaskTimeoutSematicCheck {
 
 	@Test
 	public void verify_task_hung_does_not_interrupt() throws InterruptedException, ExecutionException {
-		
-		cluster = new ViCluster("test", "org.gridkit", "com.tangosol");
-		
-		CohHelper.enableFastLocalCluster(cluster);
-		
-		CacheTemplate.useTemplateCacheConfig(cluster);
-		CacheTemplate.usePartitionedInMemoryCache(cluster);
-		CacheTemplate.usePartitionedServiceThreadCount(cluster, 2);
-		CacheTemplate.usePartitionedServiceTaskTimeout(cluster, 30000);
-		CacheTemplate.usePartitionedServiceTaskHungThreshold(cluster, 1000);
 
-		ViNode storage = cluster.node("storage");
+		cloud.all().presetFastLocalCluster();
+		
+		CacheTemplate.useTemplateCacheConfig(cloud.all());
+		CacheTemplate.usePartitionedInMemoryCache(cloud.all());
+		CacheTemplate.usePartitionedServiceThreadCount(cloud.all(), 2);
+		CacheTemplate.usePartitionedServiceTaskTimeout(cloud.all(), 30000);
+		CacheTemplate.usePartitionedServiceTaskHungThreshold(cloud.all(), 1000);
+
+		CohNode storage = cloud.node("storage");
 		CohHelper.localstorage(storage, true);
-		ViNode client = cluster.node("client");
+		CohNode client = cloud.node("client");
 		CohHelper.localstorage(client, false);
 
 		storage.getCache("a-test").put("A", "A");
@@ -135,25 +131,23 @@ public class TaskTimeoutSematicCheck {
 
 	@Test
 	public void verify_abandoning_threads() throws InterruptedException, ExecutionException {
-		
-		cluster = new ViCluster("test", "org.gridkit", "com.tangosol");
-		
-		CohHelper.enableFastLocalCluster(cluster);
-		
-		CacheTemplate.useTemplateCacheConfig(cluster);
-		CacheTemplate.usePartitionedInMemoryCache(cluster);
-		CacheTemplate.usePartitionedServicePartitionCount(cluster, 1023);
-		CacheTemplate.usePartitionedServiceThreadCount(cluster, 2);
-		CacheTemplate.usePartitionedServiceTaskTimeout(cluster, 5000);
-		CacheTemplate.usePartitionedServiceTaskHungThreshold(cluster, 10000);
 
-		ViNode storage = cluster.node("storage");
+		cloud.all().presetFastLocalCluster();
+		
+		CacheTemplate.useTemplateCacheConfig(cloud.all());
+		CacheTemplate.usePartitionedInMemoryCache(cloud.all());
+		CacheTemplate.usePartitionedServicePartitionCount(cloud.all(), 1023);
+		CacheTemplate.usePartitionedServiceThreadCount(cloud.all(), 2);
+		CacheTemplate.usePartitionedServiceTaskTimeout(cloud.all(), 5000);
+		CacheTemplate.usePartitionedServiceTaskHungThreshold(cloud.all(), 10000);
+
+		CohNode storage = cloud.node("storage");
 		CohHelper.localstorage(storage, true);
-		final ViNode client1 = cluster.node("client1");
+		final CohNode client1 = cloud.node("client1");
 		CohHelper.localstorage(client1, false);
-		final ViNode client2 = cluster.node("client2");
+		final CohNode client2 = cloud.node("client2");
 		CohHelper.localstorage(client2, false);
-		final ViNode client3 = cluster.node("client3");
+		final CohNode client3 = cloud.node("client3");
 		CohHelper.localstorage(client3, false);
 
 		storage.getCache("a-test").put("A", "A");

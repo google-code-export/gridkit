@@ -37,7 +37,7 @@ public class PartialEPCheck {
 //		all.setProp("tangosol.coherence.distributed.threads", "4");
 //		all.setProp("tangosol.coherence.distributed.request.timeout", "10s");
 		
-		all.fastLocalClusterPreset();		
+		all.presetFastLocalCluster();		
 		all.enableJmx(true);
 
 		cloud.node("server*")

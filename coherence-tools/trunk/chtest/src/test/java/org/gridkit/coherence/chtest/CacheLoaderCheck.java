@@ -50,7 +50,7 @@ public class CacheLoaderCheck {
 	public void test_cache_loader(final String cacheName) {
 		
 		cloud.node("**")
-			.fastLocalClusterPreset()
+			.presetFastLocalCluster()
 			.cacheConfig("/cache-loader-cache-config.xml");
 		
 		CohNode storage = cloud.node("storage");

@@ -50,6 +50,7 @@ public class LoadAllCacheStore implements CacheStore {
 	}
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public void storeAll(Map paramMap) {
 	}
 
@@ -59,6 +60,7 @@ public class LoadAllCacheStore implements CacheStore {
 	}
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public void eraseAll(Collection paramCollection) {
 	}
 }

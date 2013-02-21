@@ -32,7 +32,7 @@ public interface CohCloud {
 
 		CohNode localStorage(boolean enabled);
 		
-		CohNode fastLocalClusterPreset();
+		CohNode presetFastLocalCluster();
 		
 		CohNode enableTcpRing(boolean enable);
 

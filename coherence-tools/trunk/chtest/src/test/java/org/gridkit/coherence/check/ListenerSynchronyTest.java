@@ -6,11 +6,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.gridkit.coherence.chtest.CohHelper;
+import org.gridkit.coherence.chtest.CohCloud.CohNode;
+import org.gridkit.coherence.chtest.CohCloudRule;
+import org.gridkit.coherence.chtest.DisposableCohCloud;
 import org.gridkit.coherence.test.CacheTemplate;
-import org.gridkit.utils.vicluster.ViCluster;
-import org.gridkit.utils.vicluster.ViNode;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.tangosol.net.CacheFactory;
@@ -20,12 +21,12 @@ import com.tangosol.util.MapListenerSupport;
 
 public class ListenerSynchronyTest {
 
-	private ViCluster cluster;
+	@Rule
+	public CohCloudRule cloud = new DisposableCohCloud();
 	private ExecutorService executor = Executors.newCachedThreadPool();
 
 	@After
 	public void shutdown_cluster_after_test() {
-		cluster.shutdown();
 		executor.shutdownNow();
 	}
 
@@ -34,24 +35,19 @@ public class ListenerSynchronyTest {
 	 */	
 	@Test
 	public void check_synchronous_listener_semantic() throws InterruptedException, ExecutionException {
-		
-		cluster = new ViCluster("test", "org.gridkit", "com.tangosol");
-		
-		CohHelper.enableFastLocalCluster(cluster);
-		
-		CacheTemplate.useTemplateCacheConfig(cluster);
-		CacheTemplate.usePartitionedInMemoryCache(cluster);
 
-		ViNode storage = cluster.node("storage");
-		final ViNode client1 = cluster.node("client1");
-		final ViNode client2 = cluster.node("client2");
-		CohHelper.localstorage(storage, true);
-		CohHelper.localstorage(client1, false);
-		CohHelper.localstorage(client2, false);
+		cloud.all().presetFastLocalCluster();
+		
+		CacheTemplate.useTemplateCacheConfig(cloud.all());
+		CacheTemplate.usePartitionedInMemoryCache(cloud.all());
 
-		storage.getCache("a-test");
-		client1.getCache("a-test");
-		client2.getCache("a-test");
+		final CohNode client1 = cloud.node("client1");
+		final CohNode client2 = cloud.node("client2");
+		
+		cloud.node("storage").localStorage(true);
+		cloud.node("client*").localStorage(false);
+
+		cloud.all().getCache("a-test");
 
 		client1.exec(new Callable<Void>() {
 
@@ -100,24 +96,19 @@ public class ListenerSynchronyTest {
 	 */
 	@Test
 	public void check_asynchronous_listener_semantic() throws InterruptedException, ExecutionException {
-		
-		cluster = new ViCluster("test", "org.gridkit", "com.tangosol");
-		
-		CohHelper.enableFastLocalCluster(cluster);
-		
-		CacheTemplate.useTemplateCacheConfig(cluster);
-		CacheTemplate.usePartitionedInMemoryCache(cluster);
 
-		ViNode storage = cluster.node("storage");
-		final ViNode client1 = cluster.node("client1");
-		final ViNode client2 = cluster.node("client2");
-		CohHelper.localstorage(storage, true);
-		CohHelper.localstorage(client1, false);
-		CohHelper.localstorage(client2, false);
+		cloud.all().presetFastLocalCluster();
+		
+		CacheTemplate.useTemplateCacheConfig(cloud.all());
+		CacheTemplate.usePartitionedInMemoryCache(cloud.all());
 
-		storage.getCache("a-test");
-		client1.getCache("a-test");
-		client2.getCache("a-test");
+		final CohNode client1 = cloud.node("client1");
+		final CohNode client2 = cloud.node("client2");
+		
+		cloud.node("storage").localStorage(true);
+		cloud.node("client*").localStorage(false);
+
+		cloud.all().getCache("a-test");
 
 		client1.exec(new Callable<Void>() {
 

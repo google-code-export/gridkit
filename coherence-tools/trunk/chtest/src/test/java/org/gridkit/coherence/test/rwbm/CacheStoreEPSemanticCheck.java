@@ -5,21 +5,22 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.Callable;
 
-
-import org.gridkit.coherence.chtest.CohHelper;
-import org.gridkit.utils.vicluster.ViCluster;
-import org.gridkit.utils.vicluster.ViNode;
+import org.gridkit.coherence.chtest.CohCloud.CohNode;
+import org.gridkit.coherence.chtest.CohCloudRule;
+import org.gridkit.coherence.chtest.DisposableCohCloud;
+import org.junit.Rule;
 import org.junit.Test;
 
-
 import com.tangosol.net.CacheFactory;
-import com.tangosol.net.DefaultCacheServer;
 import com.tangosol.net.NamedCache;
 import com.tangosol.util.InvocableMap.Entry;
 import com.tangosol.util.processor.AbstractProcessor;
 
 public class CacheStoreEPSemanticCheck {
 
+	@Rule
+	public CohCloudRule cloud = new DisposableCohCloud();
+	
 	@Test
 	public void test_simple_store() {
 		test_cache_store("simple-A");
@@ -27,45 +28,39 @@ public class CacheStoreEPSemanticCheck {
 	
 	public void test_cache_store(final String cacheName) {
 		
-		ViCluster cluster = new ViCluster("test_cache_loader", "org.gridkit", "com.tangosol");
-		try {
-			
-			CohHelper.enableFastLocalCluster(cluster);
-			CohHelper.cacheConfig(cluster, "/cache-store-cache-config.xml");
-			
-			ViNode storage = cluster.node("storage");
-			CohHelper.localstorage(storage, true);
-			
-			storage.getCache(cacheName);
-			
-			ViNode client = cluster.node("client");
-			CohHelper.localstorage(client, false);
-			
-			storage.start(DefaultCacheServer.class);
-			
-			client.exec(new Callable<Void>(){
-				@Override
-				public Void call() throws Exception {
-					
-					NamedCache cache = CacheFactory.getCache(cacheName);
-					Object old = cache.put("a", "AAA");
-					System.out.println("Old a: " + old);
-					cache.putAll(Collections.singletonMap("x", "y"));
+		cloud.all().presetFastLocalCluster();
+		cloud.all().cacheConfig("/cache-store-cache-config.xml");
+		
+		CohNode storage = cloud.node("storage");
+		storage.localStorage(true);
+		storage.autoStartServices();
+		
+		
+		CohNode client = cloud.node("client");
+		client.localStorage(false);
+		
+		cloud.all().getCache(cacheName);
+		
+		client.exec(new Callable<Void>(){
+			@Override
+			public Void call() throws Exception {
+				
+				NamedCache cache = CacheFactory.getCache(cacheName);
+				Object old = cache.put("a", "AAA");
+				System.out.println("Old a: " + old);
+				cache.putAll(Collections.singletonMap("x", "y"));
 //					cache.put("b", "BBB");
 //					cache.put("c", "CCC");
 //					cache.put("d", "DDD");
-					
-					cache.invokeAll(Arrays.asList("123", "456"), new SimpleEP());
-					
-					return null;
-				}
-			});
-		}
-		finally {
-			cluster.shutdown();
-		}		
+				
+				cache.invokeAll(Arrays.asList("123", "456"), new SimpleEP());
+				
+				return null;
+			}
+		});
 	}
 	
+	@SuppressWarnings("serial")
 	public class SimpleEP extends AbstractProcessor implements Serializable {
 
 		@Override

@@ -18,7 +18,7 @@ public class ViClusterTest {
 	@Test
 	public void failoverTest() throws InterruptedException {
 		
-		cloud.all().fastLocalClusterPreset();
+		cloud.all().presetFastLocalCluster();
 		cloud.all().enableJmx(true);
 		
 		
@@ -56,7 +56,7 @@ public class ViClusterTest {
 	@Test
 	public void HAStatusTest() throws InterruptedException {
 
-		cloud.all().fastLocalClusterPreset();
+		cloud.all().presetFastLocalCluster();
 		cloud.all().enableJmx(true);
 
 		cloud.node("server*").autoStartServices();
