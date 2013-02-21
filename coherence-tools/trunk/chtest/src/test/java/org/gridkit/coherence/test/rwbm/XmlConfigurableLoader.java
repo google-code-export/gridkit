@@ -4,9 +4,11 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import org.gridkit.util.coherence.cohtester.CohHelper;
-import org.gridkit.utils.vicluster.ViCluster;
-import org.gridkit.utils.vicluster.ViNode;
+import org.gridkit.coherence.chtest.CohCloud.CohNode;
+import org.gridkit.coherence.chtest.CohCloudRule;
+import org.gridkit.coherence.chtest.DisposableCohCloud;
+import org.gridkit.vicluster.ViNode;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.tangosol.net.CacheFactory;
@@ -49,42 +51,38 @@ public class XmlConfigurableLoader implements CacheLoader, XmlConfigurable {
 		return null;
 	}
 	
+	@Rule
+	public CohCloudRule cloud = new DisposableCohCloud();
+	
 	@Test
 	public void selfTest() {
 		
 		final String cacheName = "xml-configurable-A";
+			
+		cloud.all().fastLocalClusterPreset();
+		cloud.all().cacheConfig("/cache-store-cache-config.xml");
 		
-		ViCluster cluster = new ViCluster("selfTest", "org.gridkit", "com.tangosol");
-		try {
-			
-			CohHelper.enableFastLocalCluster(cluster);
-			CohHelper.cacheConfig(cluster, "/cache-store-cache-config.xml");
-			
-			ViNode storage = cluster.node("storage");
-			CohHelper.localstorage(storage, true);
-			
-			storage.getCache(cacheName);
-			
-			ViNode client = cluster.node("client");
-			CohHelper.localstorage(client, false);
-			
-			storage.start(DefaultCacheServer.class);
-			
-			client.exec(new Callable<Void>(){
-				@Override
-				public Void call() throws Exception {
-					
-					NamedCache cache = CacheFactory.getCache(cacheName);
+		CohNode storage = cloud.node("storage");
+		storage.localStorage(true);
+		
+		storage.getCache(cacheName);
+		
+		CohNode client = cloud.node("client");
+		client.localStorage(false);
+		
+		storage.autoStartServices().touch();
+		
+		client.exec(new Callable<Void>(){
+			@Override
+			public Void call() throws Exception {
+				
+				NamedCache cache = CacheFactory.getCache(cacheName);
 
-					cache.put("A", "A");
-					
-					return null;
-				}
-			});
-		}
-		finally {
-			cluster.shutdown();
-		}		
+				cache.put("A", "A");
+				
+				return null;
+			}
+		});
 	}
 }
 

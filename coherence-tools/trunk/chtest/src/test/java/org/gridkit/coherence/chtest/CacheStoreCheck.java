@@ -1,10 +1,12 @@
-package org.gridkit.util.coherence.cohtester;
+package org.gridkit.coherence.chtest;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import org.gridkit.util.coherence.cohtester.CohCloud.CohNode;
+import org.gridkit.coherence.chtest.CohCloudRule;
+import org.gridkit.coherence.chtest.DisposableCohCloud;
+import org.gridkit.coherence.chtest.CohCloud.CohNode;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -25,7 +27,7 @@ public class CacheStoreCheck {
 	public void test_cache_store(final String cacheName) {
 		
 		cloud.node("**")
-			.enableFastLocalCluster()
+			.fastLocalClusterPreset()
 			.cacheConfig("/cache-store-cache-config.xml");
 		
 		cloud.node("**").setProp("test-cache-store-class", TestStore.class.getName());

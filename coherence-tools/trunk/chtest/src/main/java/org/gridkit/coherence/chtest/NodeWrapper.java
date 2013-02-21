@@ -1,12 +1,13 @@
-package org.gridkit.util.coherence.cohtester;
+package org.gridkit.coherence.chtest;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import org.gridkit.util.coherence.cohtester.CohCloud.CohNode;
+import org.gridkit.coherence.chtest.CohCloud.CohNode;
 import org.gridkit.vicluster.ViNode;
+import org.gridkit.vicluster.ViProps;
 import org.gridkit.zerormi.util.RemoteExporter;
 
 import com.tangosol.net.CacheFactory;
@@ -36,22 +37,39 @@ class NodeWrapper extends ViNode.Delegate implements CohNode {
 	}
 
 	@Override
-	public CohNode enableFastLocalCluster() {
+	public CohNode fastLocalClusterPreset() {
 		CohHelper.enableFastLocalCluster(getDelegate());
 		CohHelper.setJoinTimeout(getDelegate(), 50);
-		CohHelper.disableTcpRing(getDelegate());
+		CohHelper.enableTcpRing(getDelegate(), false);
 		return this;
 	}
 	
 	@Override
-	public CohNode disableTCMP() {
-		CohHelper.disableTCMP(this);
+	public CohNode enableTcpRing(boolean enable) {
+		CohHelper.enableTcpRing(getDelegate(), enable);
+		return this;
+	}
+	
+	@Override
+	public CohNode enableTCMP(boolean enable) {
+		CohHelper.enableTCMP(this, enable);
 		return this;
 	}
 
 	@Override
-	public CohNode enableJmx() {
-		CohHelper.enableJmx(this);
+	public CohNode enableJmx(boolean enable) {
+		CohHelper.enableJmx(this, enable);
+		return this;
+	}
+
+	@Override
+	public CohNode outOfProcess(boolean oop) {
+		if (oop) {
+			ViProps.at(this).setLocalType();
+		}
+		else {
+			ViProps.at(this).setIsolateType();
+		}
 		return this;
 	}
 

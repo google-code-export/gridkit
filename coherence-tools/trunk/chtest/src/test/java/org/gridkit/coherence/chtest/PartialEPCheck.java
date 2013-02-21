@@ -1,4 +1,4 @@
-package org.gridkit.util.coherence.cohtester;
+package org.gridkit.coherence.chtest;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -7,7 +7,9 @@ import java.util.Set;
 
 import junit.framework.Assert;
 
-import org.gridkit.util.coherence.cohtester.CohCloud.CohNode;
+import org.gridkit.coherence.chtest.CohCloudRule;
+import org.gridkit.coherence.chtest.DisposableCohCloud;
+import org.gridkit.coherence.chtest.CohCloud.CohNode;
 import org.gridkit.vicluster.isolate.Isolate;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -35,8 +37,8 @@ public class PartialEPCheck {
 //		all.setProp("tangosol.coherence.distributed.threads", "4");
 //		all.setProp("tangosol.coherence.distributed.request.timeout", "10s");
 		
-		all.enableFastLocalCluster();		
-		all.enableJmx();
+		all.fastLocalClusterPreset();		
+		all.enableJmx(true);
 
 		cloud.node("server*")
 			.localStorage(true)

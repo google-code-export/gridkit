@@ -4,7 +4,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.gridkit.util.coherence.cohtester.CohHelper;
+import org.gridkit.coherence.chtest.CohHelper;
 import org.gridkit.utils.vicluster.ViCluster;
 import org.gridkit.utils.vicluster.ViNode;
 import org.junit.After;

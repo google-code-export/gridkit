@@ -1,4 +1,4 @@
-package org.gridkit.util.coherence.cohtester;
+package org.gridkit.coherence.chtest;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -83,16 +83,26 @@ public class CohHelper {
 		node.setProp("tangosol.coherence.cluster", "jvm::" + ManagementFactory.getRuntimeMXBean().getName());
 	}
 
-	public static void disableTCMP(ViConfigurable node) {
-		node.setProp("tangosol.coherence.tcmp.enabled", "false");
+	public static void enableTCMP(ViConfigurable node, boolean enable) {
+		node.setProp("tangosol.coherence.tcmp.enabled", enable ? "true" : "false");
 	}
 
-	public static void enableJmx(ViConfigurable node) {
-		node.setProp("tangosol.coherence.management", "local-only");
-		node.setProp("tangosol.coherence.management.jvm.all", "false");
-		node.setProp("tangosol.coherence.management.remote", "false");
-		node.setProp("tangosol.coherence.management.serverfactory", IsolateMBeanFinder.class.getName());
-		node.addShutdownHook("wipeout-jmx", new JmxProxyCleanUp(), false);
+	public static void enableJmx(ViConfigurable node, boolean enable) {
+		String hookName = "wipeout-jmx";
+		if (enable) {
+			node.setProp("tangosol.coherence.management", "local-only");
+			node.setProp("tangosol.coherence.management.jvm.all", "false");
+			node.setProp("tangosol.coherence.management.remote", "false");
+			node.setProp("tangosol.coherence.management.serverfactory", IsolateMBeanFinder.class.getName());
+			node.addShutdownHook(hookName, new JmxProxyCleanUp(), true);
+		}
+		else {
+			node.setProp("tangosol.coherence.management", null);
+			node.setProp("tangosol.coherence.management.jvm.all", null);
+			node.setProp("tangosol.coherence.management.remote", null);
+			node.setProp("tangosol.coherence.management.serverfactory", null);
+			node.addShutdownHook(hookName, new Noop(), true);
+		}
 	}
 	
 	/**
@@ -140,20 +150,26 @@ public class CohHelper {
 	 * TCP ring tends to hung in isolate environment, so disabling it makes testing more stable.
 	 * This method will patch op. configuration directly.
 	 */
-	public static void disableTcpRing(ViConfigurable node) {
-		node.addStartupHook("coherence-disable-tcp-ring", new Runnable() {
-			@Override
-			public void run() {
-				Cluster cluster = CacheFactory.getCluster();
-				if (cluster.isRunning()) {
-					throw new IllegalStateException("Cluster is already started");
+	public static void enableTcpRing(ViConfigurable node, boolean enable) {
+		String hookName = "coherence-disable-tcp-ring";
+		if (enable) {
+			node.addStartupHook(hookName, new Noop(), true);
+		}
+		else {
+			node.addStartupHook(hookName, new Runnable() {
+				@Override
+				public void run() {
+					Cluster cluster = CacheFactory.getCluster();
+					if (cluster.isRunning()) {
+						throw new IllegalStateException("Cluster is already started");
+					}
+					XmlElement config = CacheFactory.getClusterConfig();
+					XmlHelper.ensureElement(config, "tcp-ring-listener/enabled")
+					.setBoolean(false);
+					CacheFactory.setServiceConfig("Cluster", config);
 				}
-				XmlElement config = CacheFactory.getClusterConfig();
-				XmlHelper.ensureElement(config, "tcp-ring-listener/enabled")
-				.setBoolean(false);
-				CacheFactory.setServiceConfig("Cluster", config);
-			}
-		}, true);
+			}, true);
+		}
 	}
 
 	/**
@@ -740,12 +756,17 @@ public class CohHelper {
 		
 		@Override
 		public synchronized MBeanServer findMBeanServer(String sDefaultDomain) {
-			if (MSERVER == null) {
-				String iname = System.getProperty("isolate.name");
-				MBeanServer internal = MBeanServerFactory.newMBeanServer(iname); 
-				MSERVER = new IsolatedMBeanServerProxy(iname, ManagementFactory.getPlatformMBeanServer(), internal);
+			if (Isolate.currentIsolate() == null) {
+				return ManagementFactory.getPlatformMBeanServer();
 			}
-			return MSERVER;
+			else {
+				if (MSERVER == null) {
+					String iname = System.getProperty("isolate.name");
+					MBeanServer internal = MBeanServerFactory.newMBeanServer(iname); 
+					MSERVER = new IsolatedMBeanServerProxy(iname, ManagementFactory.getPlatformMBeanServer(), internal);
+				}
+				return MSERVER;
+			}
 		}
 	}
 	
@@ -758,6 +779,14 @@ public class CohHelper {
 			if (proxy != null) {
 				proxy.dispose();
 			}
+		}
+	}
+	
+	
+	@SuppressWarnings("serial")
+	private static class Noop implements Runnable, Serializable {
+		@Override
+		public void run() {
 		}
 	}
 }

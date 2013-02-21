@@ -1,4 +1,4 @@
-package org.gridkit.util.coherence.cohtester;
+package org.gridkit.coherence.chtest;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,18 +20,6 @@ public class SimpleCohCloud implements CohCloud {
 			.setSilentShutdown();
 	}
 	
-	@Override
-	public void useLocalCluster() {
-		ViProps.at(cloud.node("**"))
-			.setLocalType();
-	}
-
-	@Override
-	public void useEmbededCluster() {
-		ViProps.at(cloud.node("**"))
-		.setLocalType();
-	}
-
 	@Override
 	public ViManager getCloud() {
 		return cloud;

@@ -1,4 +1,4 @@
-package org.gridkit.util.coherence.cohtester;
+package org.gridkit.coherence.chtest;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 
-import org.gridkit.util.coherence.cohtester.CohCloud.CohNode;
+import org.gridkit.coherence.chtest.CohCloudRule;
+import org.gridkit.coherence.chtest.DisposableCohCloud;
+import org.gridkit.coherence.chtest.CohCloud.CohNode;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -48,7 +50,7 @@ public class CacheLoaderCheck {
 	public void test_cache_loader(final String cacheName) {
 		
 		cloud.node("**")
-			.enableFastLocalCluster()
+			.fastLocalClusterPreset()
 			.cacheConfig("/cache-loader-cache-config.xml");
 		
 		CohNode storage = cloud.node("storage");

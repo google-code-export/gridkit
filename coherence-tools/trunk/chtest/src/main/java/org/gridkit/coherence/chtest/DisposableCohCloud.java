@@ -1,4 +1,4 @@
-package org.gridkit.util.coherence.cohtester;
+package org.gridkit.coherence.chtest;
 
 import java.util.Collection;
 
@@ -13,16 +13,6 @@ public class DisposableCohCloud extends ExternalResource implements CohCloudRule
 		cloud = new SimpleCohCloud();
 	}
 	
-	@Override
-	public void useLocalCluster() {
-		cloud.useLocalCluster();
-	}
-
-	@Override
-	public void useEmbededCluster() {
-		cloud.useEmbededCluster();
-	}
-
 	@Override
 	protected void after() {
 		cloud.shutdown();

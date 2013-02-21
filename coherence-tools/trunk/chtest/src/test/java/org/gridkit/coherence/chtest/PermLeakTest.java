@@ -1,5 +1,8 @@
-package org.gridkit.util.coherence.cohtester;
+package org.gridkit.coherence.chtest;
 
+import org.gridkit.coherence.chtest.CohCloud;
+import org.gridkit.coherence.chtest.CohHelper;
+import org.gridkit.coherence.chtest.SimpleCohCloud;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -27,9 +30,9 @@ public class PermLeakTest {
 			try {
 				cluster.all()
 //					.gracefulShutdown(graceful)
-					.enableFastLocalCluster()
+					.fastLocalClusterPreset()
 					.setTCMPTimeout(10000)
-					.enableJmx();
+					.enableJmx(true);
 				
 				cluster.node(i + ".server1");
 				cluster.node(i + ".server2");

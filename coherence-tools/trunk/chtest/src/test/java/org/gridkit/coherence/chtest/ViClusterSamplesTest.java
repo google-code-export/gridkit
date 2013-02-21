@@ -1,8 +1,11 @@
-package org.gridkit.util.coherence.cohtester;
+package org.gridkit.coherence.chtest;
 
 import java.util.concurrent.Callable;
 
-import org.gridkit.util.coherence.cohtester.CohCloud.CohNode;
+import org.gridkit.coherence.chtest.CohCloud;
+import org.gridkit.coherence.chtest.CohCloudRule;
+import org.gridkit.coherence.chtest.DisposableCohCloud;
+import org.gridkit.coherence.chtest.CohCloud.CohNode;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,7 +30,7 @@ public class ViClusterSamplesTest {
 		// topology used in all test.
 		
 		// Use present for single host Coherence cluster
-		node("**").enableFastLocalCluster();
+		node("**").fastLocalClusterPreset();
 
 		// use default config file from coherence.jar
 		node("**").cacheConfig("/coherence-cache-config.xml");

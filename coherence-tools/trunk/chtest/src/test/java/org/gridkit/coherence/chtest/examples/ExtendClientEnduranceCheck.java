@@ -1,4 +1,4 @@
-package org.gridkit.util.coherence.cohtester.examples;
+package org.gridkit.coherence.chtest.examples;
 
 import java.io.Serializable;
 import java.rmi.Remote;
@@ -10,10 +10,9 @@ import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import org.gridkit.util.coherence.cohtester.CohCloud.CohNode;
-import org.gridkit.util.coherence.cohtester.CohCloudRule;
-import org.gridkit.util.coherence.cohtester.CohHelper;
-import org.gridkit.util.coherence.cohtester.DisposableCohCloud;
+import org.gridkit.coherence.chtest.CohCloudRule;
+import org.gridkit.coherence.chtest.DisposableCohCloud;
+import org.gridkit.coherence.chtest.CohCloud.CohNode;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,24 +30,29 @@ public class ExtendClientEnduranceCheck {
 	public CohCloudRule cloud = new DisposableCohCloud();
 	
 	@Test
-	public void test_cqc() throws InterruptedException {
-		cloud.useLocalCluster();
-		CohHelper.enableFastLocalCluster(cloud.all());
-		CohHelper.setJoinTimeout(cloud.all(), 50);
-		cloud.all().enableJmx();		
+	public void test_cqc_in_isolate() throws InterruptedException {
+		cloud.all().fastLocalClusterPreset();
+		// enable Coherence JMX, try to open test runner process in JConsole  
+		cloud.all().enableJmx(true);		
+		test_extend_cqc_endurance("cache", 100, 1, 10, 300, 5);
+	}
+
+	@Test
+	public void test_cqc_out_of_process() throws InterruptedException {
+		cloud.all().outOfProcess(true);
+		cloud.all().enableJmx(true);
+		// It is better to have TCP ring for out of process execution
+		cloud.all().enableTcpRing(true);
 		test_extend_cqc_endurance("cache", 100, 1, 10, 300, 5);
 	}
 	
 	public void test_extend_cqc_endurance(final String cacheName, final int initialCacheSize, final int mutators, final int delta, long execTimeS, long proxyRestartPeriod) throws InterruptedException {
 		
-//		cloud.node("cluster.**")
-//			.enableFastLocalCluster();
-
 		cloud.node("cluster.**")
 			.cacheConfig("extend-server-cache-config.xml");
-		
+				
 		cloud.node("xclient.**")
-			.disableTCMP()
+			.enableTCMP(false)
 			.cacheConfig("extend-client-cache-config.xml");
 		
 		cloud.node("cluster.storage.**")
@@ -109,7 +113,7 @@ public class ExtendClientEnduranceCheck {
 				nextProxy.setProp("test-proxy-port", "33000");
 			}
 			
-			nextProxy.getCache(cacheName);
+			nextProxy.getCache(cacheName).size();
 			nextProxy.ensureService("ExtendTcpProxyService");
 			prevProxy.shutdown();
 			
@@ -152,6 +156,7 @@ public class ExtendClientEnduranceCheck {
 			System.out.println("CQC lag: " + TimeUnit.NANOSECONDS.toMillis(lag) + " size: " + size);
 		}
 
+		@SuppressWarnings("unchecked")
 		private int size() {
 			return new ArrayList(cqc.keySet()).size();
 		}
@@ -168,6 +173,7 @@ public class ExtendClientEnduranceCheck {
 			this.delta = delta;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public void run() {
 			try {

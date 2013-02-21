@@ -1,11 +1,13 @@
-package org.gridkit.util.coherence.cohtester;
+package org.gridkit.coherence.chtest;
 
 import junit.framework.Assert;
 
+import org.gridkit.coherence.chtest.CohCloudRule;
+import org.gridkit.coherence.chtest.CohHelper;
+import org.gridkit.coherence.chtest.DisposableCohCloud;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.tangosol.net.DefaultCacheServer;
 import com.tangosol.net.NamedCache;
 
 public class ViClusterTest {
@@ -16,8 +18,8 @@ public class ViClusterTest {
 	@Test
 	public void failoverTest() throws InterruptedException {
 		
-		cloud.all().enableFastLocalCluster();
-		cloud.all().enableJmx();
+		cloud.all().fastLocalClusterPreset();
+		cloud.all().enableJmx(true);
 		
 		
 		cloud.node("server*").autoStartServices();
@@ -54,8 +56,8 @@ public class ViClusterTest {
 	@Test
 	public void HAStatusTest() throws InterruptedException {
 
-		cloud.all().enableFastLocalCluster();
-		cloud.all().enableJmx();
+		cloud.all().fastLocalClusterPreset();
+		cloud.all().enableJmx(true);
 
 		cloud.node("server*").autoStartServices();
 		cloud.node("server*").localStorage(true);

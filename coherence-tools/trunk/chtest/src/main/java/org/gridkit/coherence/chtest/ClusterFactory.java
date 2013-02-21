@@ -1,4 +1,4 @@
-package org.gridkit.util.coherence.cohtester;
+package org.gridkit.coherence.chtest;
 
 import org.gridkit.nanocloud.CloudFactory;
 import org.gridkit.vicluster.ViManager;

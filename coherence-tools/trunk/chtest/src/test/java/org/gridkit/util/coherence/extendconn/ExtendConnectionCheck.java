@@ -7,9 +7,9 @@ import java.util.Random;
 
 import junit.framework.Assert;
 
-import org.gridkit.util.coherence.cohtester.CohCloud.CohNode;
-import org.gridkit.util.coherence.cohtester.CohCloudRule;
-import org.gridkit.util.coherence.cohtester.DisposableCohCloud;
+import org.gridkit.coherence.chtest.CohCloudRule;
+import org.gridkit.coherence.chtest.DisposableCohCloud;
+import org.gridkit.coherence.chtest.CohCloud.CohNode;
 import org.gridkit.vicluster.ViNode;
 import org.junit.Test;
 
@@ -33,7 +33,7 @@ public class ExtendConnectionCheck {
 		
 		// cluster member role
 		cloud.node("cluster.**")
-			.enableFastLocalCluster()
+			.fastLocalClusterPreset()
 			.autoStartCluster()
 			.cacheConfig("/extend-server-cache-config.xml");
 
@@ -47,7 +47,7 @@ public class ExtendConnectionCheck {
 		
 		// Extend client role
 		cloud.node("xclient.**")
-			.enableFastLocalCluster()
+			.fastLocalClusterPreset()
 			.cacheConfig("/extend-client-cache-config.xml");
 		
 		try {

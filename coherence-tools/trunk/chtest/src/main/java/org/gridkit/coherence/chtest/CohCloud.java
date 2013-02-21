@@ -1,4 +1,4 @@
-package org.gridkit.util.coherence.cohtester;
+package org.gridkit.coherence.chtest;
 
 import java.util.Collection;
 
@@ -24,21 +24,21 @@ public interface CohCloud {
 
 	public ViManager getCloud();
 
-	public void useEmbededCluster();
-
-	public void useLocalCluster();
-
 	public interface CohNode extends ViNode {
-		
+
+		CohNode outOfProcess(boolean oop);
+
 		CohNode cacheConfig(String file);
 
 		CohNode localStorage(boolean enabled);
 		
-		CohNode enableFastLocalCluster();
+		CohNode fastLocalClusterPreset();
 		
-		CohNode disableTCMP();
+		CohNode enableTcpRing(boolean enable);
+
+		CohNode enableTCMP(boolean enable);
 		
-		CohNode enableJmx();
+		CohNode enableJmx(boolean enable);
 		
 		CohNode setTCMPTimeout(long timeoutMs);
 		
@@ -79,7 +79,5 @@ public interface CohCloud {
 		 * @return proxy of remote {@link Service} instantiated on node 
 		 */
 		Service ensureService(String serviceName);
-
-		
 	}
 }

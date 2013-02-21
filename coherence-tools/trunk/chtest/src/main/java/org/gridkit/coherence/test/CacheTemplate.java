@@ -1,6 +1,6 @@
 package org.gridkit.coherence.test;
 
-import org.gridkit.util.coherence.cohtester.CohHelper;
+import org.gridkit.coherence.chtest.CohHelper;
 import org.gridkit.vicluster.ViConfigurable;
 
 public class CacheTemplate {
