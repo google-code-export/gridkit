@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.gridkit.vicluster.ViManager;
 import org.gridkit.vicluster.ViNode;
+import org.gridkit.vicluster.isolate.Isolate;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.DefaultCacheServer;
@@ -12,34 +13,84 @@ import com.tangosol.net.Service;
 
 public interface CohCloud {
 
+	/**
+	 * Shutdown all {@link ViNode}s
+	 */
 	public void shutdown();
 
+	/**
+	 * @see {@link ViManager#listNodes(String)}
+	 */
 	public Collection<CohNode> listNodes(String namePattern);
 
+	/**
+	 * Same as <code>node("**")</code>
+	 * @return
+	 */
 	public CohNode all();
-	
+
+	/**
+	 * @return set of nodes matching patterns in list
+	 */
 	public CohNode nodes(String... namePatterns);
 
+	/**
+	 * @return set of nodes matching pattern
+	 */
 	public CohNode node(String namePattern);
 
 	public ViManager getCloud();
 
 	public interface CohNode extends ViNode {
 
+		/**
+		 * @param <code>true</code> - node will run in own JVM, <code>false</code> it will run in parent JVM in {@link Isolate}
+		 */
 		CohNode outOfProcess(boolean oop);
 
+		/**
+		 * Set "tangosol.coherence.cacheconfig" system property.
+		 */		
 		CohNode cacheConfig(String file);
 
+		/**
+		 * Set "tangosol.coherence.distributed.localstorage" system property.
+		 */		
 		CohNode localStorage(boolean enabled);
 		
+		/**
+		 * Use present for embedded Coherence TCMP cluster.
+		 */
 		CohNode presetFastLocalCluster();
 		
+		/**
+		 * Enabled of disable Coherence TCP Ring / IP Monitor facility.
+		 */
 		CohNode enableTcpRing(boolean enable);
 
+		/**
+		 * Set "tangosol.coherence.tcmp.enabled" system property.
+		 */
 		CohNode enableTCMP(boolean enable);
-		
+
+		/**
+		 * Enable or disable Coherence MBeans.
+		 * <br/>
+		 * Below are setting for enabled JMX
+		 * <br/>
+		 * <code>
+		 * tangosol.coherence.management: local-only
+		 * tangosol.coherence.management.jvm.all: false
+		 * tangosol.coherence.management.remote: false
+		 * </code>
+		 * <br/>
+		 * In case of in-proc ({@link Isolate}) node, MBean isolation will also be enabled.
+		 */		
 		CohNode enableJmx(boolean enable);
 		
+		/**
+		 * Override TCMP node disconnection timeout.
+		 */		
 		CohNode setTCMPTimeout(long timeoutMs);
 		
 		/**
@@ -66,6 +117,9 @@ public interface CohCloud {
 		 */
 		void startCacheServer();
 		
+		/**
+		 * Call {@link CacheFactory#ensureCluster()} on node.
+		 */				
 		void ensureCluster();
 		
 		/**
@@ -73,7 +127,10 @@ public interface CohCloud {
 		 */
 		NamedCache getCache(String cacheName);
 		
-		String getServiceNameForCache(String string);
+		/**
+		 * @return Service name for {@link NamedCache} with given name
+		 */						
+		String getServiceNameForCache(String cacheName);
 
 		/**
 		 * @return proxy of remote {@link Service} instantiated on node 
