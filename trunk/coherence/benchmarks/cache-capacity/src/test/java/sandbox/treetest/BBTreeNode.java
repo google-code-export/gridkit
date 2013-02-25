@@ -44,37 +44,47 @@ public class BBTreeNode implements TreeNode {
 
     @Override
     public TreeNode left() {
-        // TODO Auto-generated method stub
-        return null;
+        int p = record.getInt(4);        
+        return deref(p);
     }
 
     @Override
     public TreeNode right() {
-        // TODO Auto-generated method stub
-        return null;
+        int p = record.getInt(8);        
+        return deref(p);
     }
 
     @Override
     public TreeNode addLeft() {
-        // TODO Auto-generated method stub
-        return null;
+        int p = record.getInt(4);        
+        if (p >= 0) {
+            throw new IllegalArgumentException();
+        }
+        BBTreeNode left = new BBTreeNode(freeSpace);
+        left.record.putInt(0, pointer);
+        record.putInt(4, left.pointer);
+        return left;
     }
 
     @Override
     public TreeNode addRight() {
-        // TODO Auto-generated method stub
-        return null;
+        int p = record.getInt(8);        
+        if (p >= 0) {
+            throw new IllegalArgumentException();
+        }
+        BBTreeNode right = new BBTreeNode(freeSpace);
+        right.record.putInt(0, pointer);
+        record.putInt(8, right.pointer);
+        return right;
     }
 
     @Override
     public int value() {
-        // TODO Auto-generated method stub
-        return 0;
+        return record.getInt(12);
     }
 
     @Override
     public void value(int val) {
-        // TODO Auto-generated method stub
-        
+        record.putInt(12, val);        
     }
 }
