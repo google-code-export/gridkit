@@ -1,5 +1,6 @@
 package sandbox.treetest;
 
+import java.nio.ByteBuffer;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -8,9 +9,33 @@ import org.junit.Test;
 
 public class TreeTest {
 
+
     @Test
-    public void test_tree() throws Exception {
-        final TreeNode root = new HeapTreeNode(null);
+    public void test_heap_tree() throws Exception {
+        test_tree(new HeapTreeNode(null));
+        System.gc();
+        test_tree(new HeapTreeNode(null));
+        System.gc();
+        test_tree(new HeapTreeNode(null));
+    }
+
+    @Test
+    public void test_bb_direct_tree() throws Exception {
+        test_tree(new BBTreeNode(ByteBuffer.allocateDirect(100 << 20)));
+        System.gc();
+        test_tree(new BBTreeNode(ByteBuffer.allocateDirect(100 << 20)));
+        System.gc();
+        test_tree(new BBTreeNode(ByteBuffer.allocateDirect(100 << 20)));
+        System.gc();
+        test_tree(new BBTreeNode(ByteBuffer.allocateDirect(100 << 20)));
+    }
+
+    @Test
+    public void test_bb_heap_tree() throws Exception {
+        test_tree(new BBTreeNode(ByteBuffer.allocate(100 << 20)));
+    }
+    
+    public void test_tree(final TreeNode root) throws Exception {
         time("Build heap tree: ", new Callable<Void>() {
 
             @Override
@@ -27,14 +52,14 @@ public class TreeTest {
                 return treeDepth(root);
             }
         });
-        System.out.println("Depth:" + depth);
+        System.out.println("Depth: " + depth);
     }
     
     private <V> V time(String text, Callable<V> r) throws Exception {
+        r.call();
+        r.call();
         long start = System.nanoTime();
         try {
-            r.call();
-            r.call();
             return r.call();
         }
         finally {
@@ -50,7 +75,7 @@ public class TreeTest {
     }
     
     private void buildTree(TreeNode root, int size) {
-        Random rnd = new Random();
+        Random rnd = new Random(1);
         int count = 0;
         for(int i = 0; i != size; ++i) {
             addNode(root, rnd);
