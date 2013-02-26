@@ -80,6 +80,12 @@ class NodeWrapper extends ViNode.Delegate implements CohNode {
 	}
 
 	@Override
+	public CohNode useCoherenceVersion(String version) {
+		CohHelper.configureCoherenceVersion(this, version);
+		return this;
+	}
+
+	@Override
 	public CohNode autoStartCluster() {
 		Runnable starter = new Runnable() {
 			@Override

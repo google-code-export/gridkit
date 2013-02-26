@@ -1,5 +1,6 @@
 package org.gridkit.coherence.chtest;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -43,6 +44,7 @@ import org.gridkit.util.concurrent.DebugHelper;
 import org.gridkit.vicluster.ViConfigurable;
 import org.gridkit.vicluster.ViExecutor;
 import org.gridkit.vicluster.isolate.Isolate;
+import org.gridkit.vicluster.telecontrol.jvm.JvmProps;
 
 import com.tangosol.coherence.component.net.extend.RemoteService;
 import com.tangosol.coherence.component.net.extend.connection.TcpConnection;
@@ -172,6 +174,15 @@ public class CohHelper {
 		}
 	}
 
+	public static void configureCoherenceVersion(ViConfigurable node, String version) {
+		String path = JarManager.getJarPath(version);
+		String urlpath = new File(path).toURI().toString();
+		String curpath = "jar:" + JarManager.getCoherenceJarPath() + "!/";
+		
+		node.setProp(JvmProps.CP_REMOVE + "coherence.jar",  curpath);
+		node.setProp(JvmProps.CP_ADD + "coherence.jar", urlpath);
+	}
+	
 	/**
 	 * Kills Coherence*Extends connection for given remote service.
 	 * Could be used only on Extend client.

@@ -94,6 +94,14 @@ public interface CohCloud {
 		CohNode setTCMPTimeout(long timeoutMs);
 		
 		/**
+		 * Allows to select particular Coherence version, provided that wrapper jar is added to dependencies.
+		 * <br/>
+		 * "out-of-process" nodes are not supported
+		 * @param version
+		 */
+		CohNode useCoherenceVersion(String version);
+		
+		/**
 		 * Configure node to automatically invoke {@link CacheFactory#ensureCluster()} on startup.
 		 */
 		CohNode autoStartCluster();
