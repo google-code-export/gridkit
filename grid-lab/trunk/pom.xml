@@ -21,15 +21,15 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.gridkit.lab</groupId>
     <artifactId>grid-lab-parent</artifactId>
-    <version>0.11</version>
+    <version>0.12-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>grid-lab parent POM</name>
     <description>Tooling for distributed application development in Java</description>
     
     <scm>
-        <connection>scm:svn:http://gridkit.googlecode.com/svn/grid-lab/tags/grid-lab-parent-0.11</connection>
-        <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/grid-lab/tags/grid-lab-parent-0.11</developerConnection>
-        <url>http://gridkit.googlecode.com/svn/grid-lab/tags/grid-lab-parent-0.11</url>
+        <connection>scm:svn:http://gridkit.googlecode.com/svn/grid-lab/trunk</connection>
+        <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/grid-lab/trunk</developerConnection>
+        <url>http://gridkit.googlecode.com/svn/grid-lab/trunk</url>
     </scm>
     
     <distributionManagement>
