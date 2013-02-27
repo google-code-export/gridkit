@@ -24,7 +24,7 @@
     <version>0.11-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>grid-lab parent POM</name>
-    <description>Tools collection for Oracle Coherence IMDG (parent project).</description>
+    <description>Tooling for distributed application development in Java</description>
     
     <scm>
         <connection>scm:svn:http://gridkit.googlecode.com/svn/grid-lab/trunk</connection>
@@ -39,33 +39,6 @@
             <url>svn:https://gridkit.googlecode.com/svn/repo/</url>
         </repository>
     </distributionManagement>
-    
-    <repositories>
-        <!-- GridKit maven2 repository -->
-        <repository>
-            <id>gridkit-releases</id>
-            <name>gridkit-repo.googlecode.com</name>
-            <url>http://gridkit.googlecode.com/svn/repo/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>gridkit-maven</id>
-            <url>https://subversion.assembla.com/svn/gridkit-maven/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
     
     <build>
         <plugins>
@@ -112,12 +85,6 @@
         </plugins>
         <extensions>
             <extension>
-                <!-- Enables webdav repository access -->
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-webdav-jackrabbit</artifactId>
-                <version>1.0-beta-7</version>
-            </extension>
-            <extension>
                 <!-- Enables SVN repository access -->
                 <groupId>com.google.code.maven-svn-wagon</groupId>
                 <artifactId>maven-svn-wagon</artifactId>
@@ -125,6 +92,30 @@
             </extension>
         </extensions>
     </build>
+
+    <profiles>
+      <profile>
+        <id>sign-artifacts</id>
+        <build>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-gpg-plugin</artifactId>
+              <version>1.1</version>
+              <executions>
+                <execution>
+                  <id>sign-artifacts</id>
+                  <phase>verify</phase>
+                  <goals>
+                    <goal>sign</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
+          </plugins>
+        </build>
+      </profile>
+    </profiles>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
