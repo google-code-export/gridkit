@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -38,25 +40,44 @@ public class JarManager {
 	public static String getCoherenceJarPath() {
 		String cfpath = "com/tangosol/net/CacheFactory.class";
 		URL u = JarManager.class.getClassLoader().getResource(cfpath);
-		String path = u.toString();
-		if (path.startsWith("jar:")) {
-			path = path.substring("jar:".length());
-			path = path.substring(0, path.indexOf('!'));
-			return path;
+		if (u != null) { 
+			String path = u.toString();
+			if (path.startsWith("jar:")) {
+				path = path.substring("jar:".length());
+				path = path.substring(0, path.indexOf('!'));
+				return path;
+			}
+			else {
+				path = path.substring(0, path.length() - cfpath.length());
+				return path;
+			}
 		}
 		else {
-			path = path.substring(0, path.length() - cfpath.length());
-			return path;
+			return null;
 		}
 	}
 	
 	public static synchronized String getJarPath(String version) {
 		try {
-			String path = JAR_CACHE.get(version);
+			String path = JAR_CACHE.get(version);			
 			if (path == null) {
+				// First, try find jar assuming maven repository layout
+				String curPath = new URI(getCoherenceJarPath()).getPath();
+				if (curPath != null) {
+					File newPath = new File(curPath).getParentFile().getParentFile();
+					newPath = new File(newPath, version);
+					newPath = new File(newPath, "coherence-" + version + ".jar");
+					if (newPath.exists()) {
+						path = newPath.getCanonicalPath();
+						JAR_CACHE.put(version, path);
+						return path;
+					}
+				}
+				
+				// Second, create jar from resources
 				InputStream is = JarManager.class.getClassLoader().getResourceAsStream("coherence-" + version + ".jar");
 				if (is == null) {
-					throw new IllegalArgumentException("File coherence-" + version + ".jar is found in classpath.\nFor JarManager to work you should add org.gridkit.jar-pack.coherence:" + version + ":1.0 dependecy to you project's pom");
+					throw new IllegalArgumentException("File coherence-" + version + ".jar is not found in classpath.\nFor JarManager to work you should add org.gridkit.jar-pack.coherence:" + version + ":1.0 dependecy to you project's pom");
 				}
 				File f = File.createTempFile("coherence-" + version + "-", ".jar");
 				f.deleteOnExit();
@@ -80,6 +101,8 @@ public class JarManager {
 			}
 			return path;
 		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
 	}
