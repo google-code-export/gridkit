@@ -176,19 +176,25 @@ public class CohHelper {
 		}
 	}
 
-	public static void configureCoherenceVersion(ViConfigurable node, String version) {
+	public static void configureCoherenceVersion(ViConfigurable node, String version) {		
 		String path = JarManager.getJarPath(version);
-		node.setProp(JvmProps.CP_ADD + "coherence.jar", path);
 
 		try {
 			String curUrl = JarManager.getCoherenceJarPath();
 			String curpath = new File(new URI(curUrl).getPath()).getCanonicalPath();
+			if (path.equals(curpath)) {
+				// if would try to add and remove at same time
+				// it would break Isolate
+				return;
+			}
 			node.setProp(JvmProps.CP_REMOVE + "coherence.jar",  curpath);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}		
+
+		node.setProp(JvmProps.CP_ADD + "coherence.jar", path);
 	}
 	
 	/**

@@ -48,6 +48,7 @@ public class JarManagerCheck {
 			cloud.all().presetFastLocalCluster();
 			cloud.all().outOfProcess(outOfProcess);
 			cloud.node("3.7.1.1").useCoherenceVersion("3.7.1.1");
+			cloud.node("3.7.1.3").useCoherenceVersion("3.7.1.3");
 			cloud.node("3.7.1.5").useCoherenceVersion("3.7.1.5");
 			cloud.node("3.7.1.7").useCoherenceVersion("3.7.1.7");
 			cloud.all().ensureCluster();
@@ -59,6 +60,13 @@ public class JarManagerCheck {
 				}
 			});
 
+			cloud.node("3.7.1.3").exec(new Runnable() {
+				@Override
+				public void run() {
+					Assert.assertEquals("3.7.1.3", Coherence.VERSION);
+				}
+			});
+			
 			cloud.node("3.7.1.5").exec(new Runnable() {
 				@Override
 				public void run() {
