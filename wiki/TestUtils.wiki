@@ -1,5 +1,7 @@
 #summary Test-Utils package description
 
+This project has been transformed to ChTest library.
+
 = Test utils package =
 
 This package contains useful utility classes for unit- and integration-testing of data grid applications. These currently include:
