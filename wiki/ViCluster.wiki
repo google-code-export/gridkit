@@ -1,5 +1,7 @@
 #summary ViCluster test framework for simulating cluster using single JVM
 
+This project has been transformed to ChTest
+
 = Introduction =
 `ViCluster` is evolution of TestUtils. It provides an alternative to direct use of Isolate class and few additional enhancements.
 
@@ -187,7 +189,7 @@ Both jar-files, javadocs and source code are available via maven:
 <dependency>
 	<groupId>org.gridkit.coherence-tools</groupId>
 	<artifactId>test-utils</artifactId>
-	<version>0.1.8</version>
+	<version>0.1.13</version>
 	<scope>test</scope>
 </dependency>
 }}}
