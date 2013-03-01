@@ -17,6 +17,11 @@ public class HeapTreeNode implements TreeNode {
     }
 
     @Override
+    public boolean same(TreeNode node) {
+        return this == node;
+    }
+
+    @Override
     public TreeNode left() {
         return left;
     }

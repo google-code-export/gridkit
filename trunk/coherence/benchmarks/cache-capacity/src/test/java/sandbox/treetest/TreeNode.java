@@ -4,6 +4,8 @@ public interface TreeNode {
 	
     public TreeNode parent();
     
+    public boolean same(TreeNode node);
+    
 	public TreeNode left();
 	
 	public TreeNode right();
