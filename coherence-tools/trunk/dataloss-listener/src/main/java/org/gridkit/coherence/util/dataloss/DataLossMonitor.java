@@ -114,14 +114,32 @@ public class DataLossMonitor {
 		});
 	}
 
+	/**
+	 * @see {@link #attachPartitionMonitor(NamedCache, PartitionListener, int, int)}
+	 */
 	public void attachPartitionMonitor(NamedCache cache, PartitionListener monitor) {
 		attachPartitionMonitor(cache, monitor, Integer.MAX_VALUE);
+	}
+
+	/**
+	 * @param maxPartitionsPerCall - will limit number of partition per call to {@link PartitionListener#onEmptyPartition(NamedCache, PartitionSet)} method
+	 * @see {@link #attachPartitionMonitor(NamedCache, PartitionListener, int, int)}
+	 */
+	public void attachPartitionMonitor(NamedCache cache, PartitionListener monitor, int maxPartitionsPerCall) {
+		attachPartitionMonitor(cache, monitor, maxPartitionsPerCall, Integer.MAX_VALUE);
 	}
 	
 	/**
 	 * @param maxPartitionsPerCall - will limit number of partition per call to {@link PartitionListener#onEmptyPartition(NamedCache, PartitionSet)} method
+	 * @param concurrency - max number of listener invocation, which cloud be made in parallel
 	 */
-	public synchronized void attachPartitionMonitor(NamedCache cache, PartitionListener monitor, int maxPartitionsPerCall) {
+	public synchronized void attachPartitionMonitor(NamedCache cache, PartitionListener monitor, int maxPartitionsPerCall, int concurrency) {
+		if (maxPartitionsPerCall <= 0) {
+			throw new IllegalArgumentException("concurency should be positive (" + maxPartitionsPerCall + ")");
+		}
+		if (concurrency <= 0) {
+			throw new IllegalArgumentException("concurency should be positive (" + concurrency + ")");
+		}
 		CacheService service = cache.getCacheService();
 		if (cluster == null) {
 			cluster = service.getCluster();
@@ -142,7 +160,7 @@ public class DataLossMonitor {
 				throw new IllegalArgumentException("Monitor is already registered for cache '" + cacheName + "'");
 			}			
 			
-			CacheContext cctx = new CacheContext(ctx, cache, monitor, maxPartitionsPerCall);
+			CacheContext cctx = new CacheContext(ctx, cache, monitor, maxPartitionsPerCall, concurrency);
 			ctx.caches.put(cacheName, cctx);
 			
 			updateService(dservice);
@@ -313,10 +331,14 @@ public class DataLossMonitor {
 		}
 	}
 	
-	private void performCheckCache(final CacheContext ctx) {
+	private void performCheckCache(final CacheContext ctx) {	
 		PartitionSet missing = getEmptyPartitions(ctx.cache);
 		missing.remove(ctx.localLocks);
-		if(!missing.isEmpty()) {
+		while(!missing.isEmpty()) {
+			if (!ctx.permits.tryAcquire()) {
+				// concurrency threshold has been reached
+				return;
+			}
 			final PartitionSet batch = new PartitionSet(missing.getPartitionCount());
 			while(batch.cardinality() < ctx.batchLimit && !missing.isEmpty()) {
 				int p = missing.next(0);
@@ -333,6 +355,9 @@ public class DataLossMonitor {
 						processBatch(ctx, batch);
 					}
 				});
+			}
+			else {
+				ctx.permits.release();
 			}
 		}
 	}
@@ -414,6 +439,7 @@ public class DataLossMonitor {
 				addCanaries(ctx, batch);
 			}			
 			finally {
+				ctx.permits.release();
 				unlockCanaries(ctx, batch);
 				unlockLocally(ctx, batch);
 				// verify cache state
@@ -511,9 +537,10 @@ public class DataLossMonitor {
 		
 		volatile PartitionSet localLocks;
 		final Set<String> deadCache;
+		final Semaphore permits;
 		
 		
-		public CacheContext(ServiceContext ctx, NamedCache cache, PartitionListener monitor, int batchLimit) {
+		public CacheContext(ServiceContext ctx, NamedCache cache, PartitionListener monitor, int batchLimit, int concurency) {
 			cacheName = cache.getCacheName();
 			this.cache = cache;
 			service = ctx.service;
@@ -524,6 +551,7 @@ public class DataLossMonitor {
 			
 			localLocks = new PartitionSet(service.getPartitionCount());
 			deadCache = ctx.deadCache;
+			permits = new Semaphore(concurency);
 		}
 	}
 }

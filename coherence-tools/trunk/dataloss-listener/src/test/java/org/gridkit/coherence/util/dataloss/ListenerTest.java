@@ -15,13 +15,6 @@
  */
 package org.gridkit.coherence.util.dataloss;
 
-import org.gridkit.coherence.util.classloader.Isolate;
-import org.gridkit.coherence.util.classloader.NodeActions;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.tangosol.net.CacheFactory;
 
 /**
  * Integration test with two cluster nodes
@@ -29,9 +22,10 @@ import com.tangosol.net.CacheFactory;
  * @author malekseev
  * 05.04.2011
  */
-@SuppressWarnings("deprecation")
 public class ListenerTest {
 	
+	// TODO port to ChTest 
+	/*
 	@BeforeClass
 	public static void initCache() {
 		System.setProperty("tangosol.coherence.wka", "localhost");
@@ -70,5 +64,5 @@ public class ListenerTest {
 			CacheFactory.getCache("canary-cache-2");
 		}
 	}
-	
+	*/
 }
