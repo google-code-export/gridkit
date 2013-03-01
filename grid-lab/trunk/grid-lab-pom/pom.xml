@@ -21,7 +21,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.gridkit.lab</groupId>
     <artifactId>grid-lab-pom</artifactId>
-    <version>1-SNAPSHOT</version>
+    <version>1</version>
     <packaging>pom</packaging>
     <name>grid-lab parent POM</name>
     <description>Tooling for distributed application development in Java</description>
@@ -44,9 +44,9 @@
     </developers>
 
     <scm>
-        <connection>scm:svn:http://gridkit.googlecode.com/svn/grid-lab/trunk/grid-lab-pom</connection>
-        <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/grid-lab/trunk/grid-lab-pom</developerConnection>
-        <url>http://code.google.com/p/gridkit/source/browse/grid-lab/trunk/grid-lab-pom</url>
+        <connection>scm:svn:http://gridkit.googlecode.com/svn/grid-lab/tags/grid-lab-pom-1</connection>
+        <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/grid-lab/tags/grid-lab-pom-1</developerConnection>
+        <url>http://code.google.com/p/gridkit/source/browse/grid-lab/tags/grid-lab-pom-1</url>
     </scm>
 
     <distributionManagement>
