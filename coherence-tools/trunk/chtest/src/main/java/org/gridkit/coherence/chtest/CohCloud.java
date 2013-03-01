@@ -129,6 +129,11 @@ public interface CohCloud {
 		 * Call {@link CacheFactory#ensureCluster()} on node.
 		 */				
 		void ensureCluster();
+
+		/**
+		 * Shutdowns Coherence without terminating VM.
+		 */
+		void shutdownCluster();		
 		
 		/**
 		 * @return proxy of remote {@link NamedCache} instantiated on node 
@@ -139,10 +144,16 @@ public interface CohCloud {
 		 * @return Service name for {@link NamedCache} with given name
 		 */						
 		String getServiceNameForCache(String cacheName);
-
+		
 		/**
 		 * @return proxy of remote {@link Service} instantiated on node 
 		 */
 		Service ensureService(String serviceName);
+		
+		CohNode shareClass(Class<?> type);
+
+		CohNode shareClass(String className);
+
+		CohNode sharePackage(String packageName);
 	}
 }

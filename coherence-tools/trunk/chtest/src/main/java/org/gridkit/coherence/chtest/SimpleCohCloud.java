@@ -18,6 +18,7 @@ public class SimpleCohCloud implements CohCloud {
 		ViProps.at(cloud.node("**"))
 			.setIsolateType()
 			.setSilentShutdown();
+		CohHelper.enableViNodeName(cloud.node("**"), true);
 	}
 	
 	@Override

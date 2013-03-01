@@ -108,6 +108,16 @@ public class CohHelper {
 			node.addShutdownHook(hookName, new Noop(), true);
 		}
 	}
+
+	public static void enableViNodeName(ViConfigurable node, boolean enable) {
+		String hookName = "coherence-process-name";
+		if (enable) {
+			node.addStartupHook(hookName, new NodeNameUpdater(), true);
+		}
+		else {
+			node.addShutdownHook(hookName, new Noop(), true);
+		}
+	}
 	
 	/**
 	 * Coherence does not have standard property for cluster join timeout.
@@ -807,11 +817,21 @@ public class CohHelper {
 		}
 	}
 	
-	
 	@SuppressWarnings("serial")
 	private static class Noop implements Runnable, Serializable {
 		@Override
 		public void run() {
+		}
+	}
+
+	@SuppressWarnings("serial")
+	private static class NodeNameUpdater implements Runnable, Serializable {
+		@Override
+		public void run() {
+			String name = System.getProperty("vinode.name");
+			if (name != null) {
+				System.setProperty("tangosol.coherence.process", name);
+			}
 		}
 	}
 }

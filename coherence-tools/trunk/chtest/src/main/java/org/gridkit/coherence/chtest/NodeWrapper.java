@@ -8,6 +8,7 @@ import java.util.concurrent.Callable;
 import org.gridkit.coherence.chtest.CohCloud.CohNode;
 import org.gridkit.vicluster.ViNode;
 import org.gridkit.vicluster.ViProps;
+import org.gridkit.vicluster.isolate.IsolateProps;
 import org.gridkit.zerormi.util.RemoteExporter;
 
 import com.tangosol.net.CacheFactory;
@@ -138,6 +139,16 @@ class NodeWrapper extends ViNode.Delegate implements CohNode {
 	}
 
 	@Override
+	public void shutdownCluster() {
+		exec(new Runnable() {
+			@Override
+			public void run() {
+				CacheFactory.shutdown();
+			}
+		});		
+	}
+
+	@Override
 	public NamedCache getCache(final String cacheName) {
 		return exec(new Callable<NamedCache>() {
 			@Override
@@ -180,6 +191,24 @@ class NodeWrapper extends ViNode.Delegate implements CohNode {
 		});
 	}
 	
+	@Override
+	public CohNode shareClass(Class<?> type) {
+		IsolateProps.at(this).shareClass(type);
+		return this;
+	}
+
+	@Override
+	public CohNode shareClass(String className) {
+		IsolateProps.at(this).shareClass(className);
+		return this;
+	}
+
+	@Override
+	public CohNode sharePackage(String packageName) {
+		IsolateProps.at(this).sharePackage(packageName);
+		return this;
+	}
+
 	@SuppressWarnings("serial")
 	private static class ClusterShutdown implements Runnable, Serializable {
 
