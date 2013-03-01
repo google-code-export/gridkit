@@ -53,6 +53,11 @@ public class BBTreeNode implements TreeNode {
         int p = record.getInt(8);        
         return deref(p);
     }
+    
+    @Override
+    public boolean same(TreeNode node) {
+        return pointer == ((BBTreeNode)node).pointer;
+    }
 
     @Override
     public TreeNode addLeft() {
