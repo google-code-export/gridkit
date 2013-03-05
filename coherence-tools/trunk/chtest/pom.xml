@@ -25,14 +25,14 @@
     </parent>
 
     <artifactId>chtest</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.1</version>
     <name>Coherence test utils</name>
     <description>Utility classes for unit and integration testing</description>
 
     <scm>
-        <connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/trunk/coh-tester</connection>
-        <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/trunk/coh-tester</developerConnection>
-        <url>http://gridkit.googlecode.com/svn/coherence-tools/trunk/coh-tester</url>
+        <connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/tags/chtest-0.1</connection>
+        <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/tags/chtest-0.1</developerConnection>
+        <url>http://gridkit.googlecode.com/svn/coherence-tools/tags/chtest-0.1</url>
     </scm>
 
     <properties>
