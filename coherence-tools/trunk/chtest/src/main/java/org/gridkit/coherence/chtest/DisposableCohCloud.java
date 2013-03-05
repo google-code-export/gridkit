@@ -13,6 +13,8 @@ public class DisposableCohCloud extends ExternalResource implements CohCloudRule
 		cloud = new SimpleCohCloud();
 	}
 
+	
+	
 	@Override
 	protected void before() throws Throwable {
 		cloud = new SimpleCohCloud();

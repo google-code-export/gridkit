@@ -2,14 +2,10 @@ package org.gridkit.coherence.chtest;
 
 import java.util.concurrent.Callable;
 
-import org.gridkit.coherence.chtest.CohCloud;
-import org.gridkit.coherence.chtest.CohCloudRule;
-import org.gridkit.coherence.chtest.DisposableCohCloud;
 import org.gridkit.coherence.chtest.CohCloud.CohNode;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.MethodRule;
 
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.NamedCache;
