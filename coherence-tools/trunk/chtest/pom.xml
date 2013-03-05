@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.gridkit.coherence-tools</groupId>
         <artifactId>coherence-tools-parent-pom</artifactId>
-        <version>1-SNAPSHOT</version>
+        <version>1</version>
     </parent>
 
     <artifactId>chtest</artifactId>
