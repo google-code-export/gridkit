@@ -115,7 +115,20 @@ public class CohHelper {
 			node.addStartupHook(hookName, new NodeNameUpdater(), true);
 		}
 		else {
-			node.addShutdownHook(hookName, new Noop(), true);
+			node.addStartupHook(hookName, new Noop(), true);
+		}
+	}
+
+	public static void enableCoherenceThreadKillers(ViConfigurable node, boolean enable) {
+		String hookName1 = "coherence-socket-killer";
+		String hookName2 = "coherence-daemon-killer";
+		if (enable) {
+			node.addShutdownHook(hookName1, new ShutdownSocketDestructor(), true);
+			node.addShutdownHook(hookName2, new CoherenceDaemonKiller(), true);
+		}
+		else {
+			node.addShutdownHook(hookName1, new Noop(), true);
+			node.addShutdownHook(hookName2, new Noop(), true);
 		}
 	}
 	
