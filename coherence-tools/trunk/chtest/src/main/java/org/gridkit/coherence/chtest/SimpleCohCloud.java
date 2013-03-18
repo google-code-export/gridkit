@@ -18,6 +18,7 @@ public class SimpleCohCloud implements CohCloud {
 		ViProps.at(cloud.node("**"))
 			.setIsolateType()
 			.setSilentShutdown();
+		CohHelper.enableCoherenceThreadKillers(cloud.node("**"), true);
 		CohHelper.enableViNodeName(cloud.node("**"), true);
 	}
 	
