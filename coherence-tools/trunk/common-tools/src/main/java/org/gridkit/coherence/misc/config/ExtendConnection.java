@@ -37,7 +37,7 @@ import com.tangosol.run.xml.XmlHelper;
 public class ExtendConnection {
 
 	private static Logger LOGGER = Logger.getLogger(ExtendConnection.class.getName());
-	
+
 	private static AtomicInteger CONNECTION_COUNTER = new AtomicInteger();
 
 	private int connectionId = CONNECTION_COUNTER.incrementAndGet();
@@ -78,7 +78,7 @@ public class ExtendConnection {
 	}
 
     /** 
-     * Same as {@link CacheFactory#getCache(String)} but using privat cache factory and scoped remote service (if cache is mapped to remote service). 
+     * Same as {@link CacheFactory#getCache(String)} but using private cache factory and scoped remote service (if cache is mapped to remote service). 
      * @param name - cache name
      */
     public NamedCache getCache(String name) {

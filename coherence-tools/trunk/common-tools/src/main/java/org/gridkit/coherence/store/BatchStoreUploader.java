@@ -11,8 +11,8 @@ import com.tangosol.util.Converter;
 import com.tangosol.util.UID;
 
 /**
- * A tool to upload a bulk of entries to the cache with synchronious write to the underlaying storage.
- * This is done by issinig a set of per-node entry processors which performs a per-partition batch put operation directly to the backing map.
+ * A tool to upload a bulk of entries to the cache with synchronous write to the underlying storage.
+ * This is done by issuing a set of per-node entry processors which performs a per-partition batch put operation directly to the backing map.
  * This will work for for write-through backing maps.
  *
  * @author Dmitri Babaev
