@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import org.gridkit.coherence.chtest.CacheConfig.Scheme;
 import org.gridkit.coherence.chtest.CohCloud.CohNode;
 import org.gridkit.vicluster.ViNode;
 import org.gridkit.vicluster.ViProps;
@@ -28,6 +29,41 @@ class NodeWrapper extends ViNode.Delegate implements CohNode {
 	@Override
 	public CohNode cacheConfig(String file) {
 		CohHelper.cacheConfig(getDelegate(), file);
+		return this;
+	}
+	
+	@Override
+	public CohNode useEmptyCacheConfig() {
+		return cacheConfig("empty-cache-config.xml");
+	}
+
+	@Override
+	public CohNode mapCache(String cachePattern, String schemeName) {
+		CohHelper.applyCacheConfigFragment(getDelegate(), CacheConfig.mapCache(cachePattern, schemeName));
+		return this;
+	}
+
+	@Override
+	public CohNode mapCache(String cachePattern, Scheme scheme) {
+		CohHelper.applyCacheConfigFragment(getDelegate(), CacheConfig.mapCache(cachePattern, scheme));
+		return this;
+	}
+
+	@Override
+	public CohNode addScheme(Scheme scheme) {
+		CohHelper.applyCacheConfigFragment(getDelegate(), CacheConfig.addScheme(scheme));
+		return this;
+	}
+
+	@Override
+	public CohNode pofConfig(String file) {
+		CohHelper.pofConfig(getDelegate(), file);
+		return this;
+	}
+
+	@Override
+	public CohNode pofEnabled(boolean enabled) {
+		CohHelper.pofEnabled(getDelegate(), enabled);
 		return this;
 	}
 
@@ -207,6 +243,16 @@ class NodeWrapper extends ViNode.Delegate implements CohNode {
 	public CohNode sharePackage(String packageName) {
 		IsolateProps.at(this).sharePackage(packageName);
 		return this;
+	}
+
+	@Override
+	public void dumpCacheConfig() {
+		getDelegate().exec(new Runnable() {
+			@Override
+			public void run() {
+				System.out.println(CacheFactory.getConfigurableCacheFactory().getConfig());
+			}
+		});		
 	}
 
 	@SuppressWarnings("serial")

@@ -68,12 +68,20 @@ public class CohHelper {
 		node.setProp("tangosol.pof.config", path);
 	}
 
+	public static void pofEnabled(ViConfigurable node, boolean enabled) {
+		node.setProp("tangosol.pof.enabled", enabled ? "true" : "false");
+	}
+
 	public static void cacheConfig(ViConfigurable node, String path) {
 		node.setProp("tangosol.coherence.cacheconfig", path);
 	}
 
 	public static void localstorage(ViConfigurable node, boolean enabled) {
 		node.setProp("tangosol.coherence.distributed.localstorage", String.valueOf(enabled));
+	}
+	
+	public static void applyCacheConfigFragment(ViConfigurable node, XmlConfigFragment fragment) {
+		node.addStartupHook(fragment.toString(), new CacheConfigInjecter(fragment), false);
 	}
 
 	public static void enableFastLocalCluster(ViConfigurable node) {

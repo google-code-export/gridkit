@@ -52,6 +52,28 @@ public interface CohCloud {
 		 * Set "tangosol.coherence.cacheconfig" system property.
 		 */		
 		CohNode cacheConfig(String file);
+		
+		/**
+		 * Set "tangosol.coherence.cacheconfig" to "empty-cache-config.xml".
+		 * This is useful if config will be generated programatically.
+		 */		
+		CohNode useEmptyCacheConfig();
+
+		CohNode mapCache(String cachePattern, String schemeName);
+
+		CohNode mapCache(String cachePattern, CacheConfig.Scheme scheme);
+
+		CohNode addScheme(CacheConfig.Scheme scheme);
+		
+		/**
+		 * Set "tangosol.pof.config" system property.
+		 */		
+		CohNode pofConfig(String file);
+
+		/**
+		 * Set "tangosol.pof.enabled" system property.
+		 */		
+		CohNode pofEnabled(boolean enabled);
 
 		/**
 		 * Set "tangosol.coherence.distributed.localstorage" system property.
@@ -155,5 +177,10 @@ public interface CohCloud {
 		CohNode shareClass(String className);
 
 		CohNode sharePackage(String packageName);
+		
+		/**
+		 * Dumps
+		 */
+		void dumpCacheConfig();
 	}
 }
