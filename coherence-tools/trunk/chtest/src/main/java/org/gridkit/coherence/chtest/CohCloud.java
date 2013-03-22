@@ -61,9 +61,11 @@ public interface CohCloud {
 
 		CohNode mapCache(String cachePattern, String schemeName);
 
-		CohNode mapCache(String cachePattern, CacheConfig.Scheme scheme);
+		CohNode mapCache(String cachePattern, CacheConfig.CacheScheme scheme);
 
-		CohNode addScheme(CacheConfig.Scheme scheme);
+		CohNode addScheme(CacheConfig.CacheScheme scheme);
+
+		CohNode addScheme(CacheConfig.ServiceScheme scheme);
 		
 		/**
 		 * Set "tangosol.pof.config" system property.

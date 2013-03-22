@@ -46,7 +46,7 @@ public class CacheConfig {
 	}
 
 	
-	public static XmlConfigFragment mapCache(String pattern, Scheme scheme) {
+	public static XmlConfigFragment mapCache(String pattern, CacheScheme scheme) {
 		XmlElement xml = scheme.getXml();
 		String name = getSchemeName(xml);
 		if (name == null) {
@@ -62,12 +62,16 @@ public class CacheConfig {
 		return new CacheNameInjector(pattern, schemeName);
 	}
 
-	public static XmlConfigFragment addScheme(Scheme scheme) {
+	public static XmlConfigFragment addScheme(CacheScheme scheme) {
 		XmlElement xml = scheme.getXml();
 		String name = getSchemeName(xml);
 		if (name == null) {
 			throw new IllegalArgumentException("scheme does have a name");
 		}
+		return new CacheSchemeInjector(scheme.getXml());
+	}
+
+	public static XmlConfigFragment addScheme(ServiceScheme scheme) {
 		return new CacheSchemeInjector(scheme.getXml());
 	}
 	
@@ -234,10 +238,22 @@ public class CacheConfig {
 		
 	}
 
-	public interface Scheme extends XmlFragment, Fragment, BackingMap {
+	public interface CacheScheme extends XmlFragment, Fragment, BackingMap {
 		
-		Scheme copy();
+		CacheScheme copy();
 
+		void schemeName(String name);
+		
+		void schemeRef(String name);
+		
+		void serviceName(String serviceName);
+		
+	}
+
+	public interface ServiceScheme extends XmlFragment, Fragment {
+		
+		ServiceScheme copy();
+		
 		void schemeName(String name);
 		
 		void schemeRef(String name);
@@ -258,7 +274,7 @@ public class CacheConfig {
 		
 	}
 
-	public interface LocalScheme extends Scheme, BackingMap {
+	public interface LocalScheme extends CacheScheme, BackingMap {
 		
 		LocalScheme copy();
 
@@ -281,7 +297,7 @@ public class CacheConfig {
 	}
 	
 	
-	public interface DistributedScheme extends Scheme {
+	public interface DistributedScheme extends CacheScheme, BackingMap {
 
 		DistributedScheme copy();
 		
@@ -310,9 +326,13 @@ public class CacheConfig {
 		void autoStart(boolean enabled);
 	}
 	
-	public interface ProxyScheme extends Scheme {
+	public interface ProxyScheme extends ServiceScheme {
 		
 		ProxyScheme copy();
+		
+		void schemeName(String name);
+		
+		void schemeRef(String name);
 		
 		void serviceName(String serviceName);
 		
@@ -331,6 +351,8 @@ public class CacheConfig {
 		void serializer(String serializer);
 		
 		void serializer(Instantiation instantiation);
+
+		void serializer(Class<?> c, Object... arguments);
 		
 		void tcpAcceptorLocalAddress(String host, int port);
 		
@@ -348,7 +370,7 @@ public class CacheConfig {
 		
 	}
 	
-	public interface RemoteCacheScheme extends Scheme {
+	public interface RemoteCacheScheme extends CacheScheme {
 		
 		RemoteCacheScheme copy();
 		
@@ -359,6 +381,8 @@ public class CacheConfig {
 		void serializer(String serializer);
 		
 		void serializer(Instantiation instantiation);
+		
+		void serializer(Class<?> c, Object... arguments);
 		
 		void tpcInitiatorRemoteAddress(String host, int port);
 
@@ -429,10 +453,14 @@ public class CacheConfig {
 		protected void addElement(String element, Fragment frag) {
 			addElement(null, element, frag);
 		}
-		
+
 		@SuppressWarnings("unused")
 		protected void addElement(String element, XmlElement frag) {
 			addElement(null, element, frag);
+		}
+		
+		protected void addElementContent(String element, XmlElement frag) {
+			addElementContent(null, element, frag);
 		}
 		
 		protected void addElement(String path, String element, String value) {
@@ -460,6 +488,13 @@ public class CacheConfig {
 			XmlElement base = path == null ? xml : xml.ensureElement(path);
 			XmlElement e = base.addElement(element);
 			appendElement(e, frag);
+		}
+
+		protected void addElementContent(String path, String element, XmlElement frag) {
+			XmlElement base = path == null ? xml : xml.ensureElement(path);
+			XmlElement copy = (XmlElement) frag.clone();
+			copy.setName(element);
+			appendElement(base, copy);
 		}
 
 		protected void addChild(String path, XmlElement frag) {
@@ -599,7 +634,7 @@ public class CacheConfig {
 
 		@Override
 		public void serializer(Instantiation instance) {
-			addElement("serializer", instance);
+			addElementContent("serializer", instance.getXml());
 		}
 
 		@Override
@@ -784,8 +819,13 @@ public class CacheConfig {
 		}
 
 		@Override
-		public void serializer(Instantiation instantiation) {
-			addElement("acceptor-config", "serializer", instantiation);
+		public void serializer(Instantiation ref) {
+			addElementContent("acceptor-config", "serializer", ref.getXml());
+		}
+
+		@Override
+		public void serializer(Class<?> c, Object... arguments) {
+			serializer(intantiate(c, arguments));			
 		}
 
 		@Override
@@ -867,8 +907,13 @@ public class CacheConfig {
 		}
 
 		@Override
-		public void serializer(Instantiation instantiation) {
-			addElement("initiator-config", "serializer", instantiation);
+		public void serializer(Instantiation ref) {
+			addElementContent("initiator-config", "serializer", ref.getXml());
+		}
+
+		@Override
+		public void serializer(Class<?> c, Object... arguments) {
+			serializer(intantiate(c, arguments));
 		}
 
 		@Override

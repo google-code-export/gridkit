@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import org.gridkit.coherence.chtest.CacheConfig.Scheme;
+import org.gridkit.coherence.chtest.CacheConfig.CacheScheme;
+import org.gridkit.coherence.chtest.CacheConfig.ServiceScheme;
 import org.gridkit.coherence.chtest.CohCloud.CohNode;
 import org.gridkit.vicluster.ViNode;
 import org.gridkit.vicluster.ViProps;
@@ -44,13 +45,19 @@ class NodeWrapper extends ViNode.Delegate implements CohNode {
 	}
 
 	@Override
-	public CohNode mapCache(String cachePattern, Scheme scheme) {
+	public CohNode mapCache(String cachePattern, CacheScheme scheme) {
 		CohHelper.applyCacheConfigFragment(getDelegate(), CacheConfig.mapCache(cachePattern, scheme));
 		return this;
 	}
 
 	@Override
-	public CohNode addScheme(Scheme scheme) {
+	public CohNode addScheme(CacheScheme scheme) {
+		CohHelper.applyCacheConfigFragment(getDelegate(), CacheConfig.addScheme(scheme));
+		return this;
+	}
+
+	@Override
+	public CohNode addScheme(ServiceScheme scheme) {
 		CohHelper.applyCacheConfigFragment(getDelegate(), CacheConfig.addScheme(scheme));
 		return this;
 	}
