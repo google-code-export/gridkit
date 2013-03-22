@@ -15,12 +15,9 @@ public class SftpCacheCheck {
 
 	public Session createSession() throws JSchException {
 		SimpleSshSessionProvider sf = new SimpleSshSessionProvider();
-//		sf.setUser("root");
-//		sf.setPassword("toor");
-//		return sf.getSession("cbox1", null);		
-		sf.setUser("grimisuat");
-		sf.setPassword("@Mon_day5");
-		return sf.getSession("longmrdfappd1.uk.db.com", null);		
+		sf.setUser("root");
+		sf.setPassword("toor");
+		return sf.getSession("cbox1", null);		
 	}
 	
 	@Test

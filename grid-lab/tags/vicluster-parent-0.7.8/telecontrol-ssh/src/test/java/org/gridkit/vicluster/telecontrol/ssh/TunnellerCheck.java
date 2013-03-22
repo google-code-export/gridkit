@@ -12,15 +12,10 @@ public class TunnellerCheck {
 
 	public Map<String, String> config() {
 		Map<String, String> config = new HashMap<String, String>();
-//		config.put(RemoteNodeProps.HOST, "cbox1");
-//		config.put(RemoteNodeProps.ACCOUNT, "root");
-//		config.put(RemoteNodeProps.PASSWORD, "toor");
-//		config.put(RemoteNodeProps.JAVA_EXEC, "java");
-		config.put(RemoteNodeProps.HOST, "longmchcu2.uk.db.com");
-		config.put(RemoteNodeProps.ACCOUNT, "grimisuat");
-		config.put(RemoteNodeProps.PASSWORD, "@Mon_day5");
-		config.put(RemoteNodeProps.JAR_CACHE_PATH, "/tmp/.vigrid/.cache");
-		config.put(RemoteNodeProps.JAVA_EXEC, "/local/apps/java/solaris/jdk1.6.0_18_x86/bin/java");
+		config.put(RemoteNodeProps.HOST, "cbox1");
+		config.put(RemoteNodeProps.ACCOUNT, "root");
+		config.put(RemoteNodeProps.PASSWORD, "toor");
+		config.put(RemoteNodeProps.JAVA_EXEC, "java");
 		return config;
 	}
 	

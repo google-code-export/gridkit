@@ -25,11 +25,7 @@ import com.jcraft.jsch.UserInfo;
 
 public class ScpTo{
 	
-  public static void main(String[] args) {
-	  _main(new String[]{"C:/fire_at_will/dt-logs/dt-longmltsreu9_15-2-mar-2012/dt-h10-x290-1-1.tab.log", "grimisuat@longmltsreu9.uk.db.com:/local/apps/dt-test/g1.log"});
-  }
-	
-  public static void _main(String[] arg){
+  public static void main(String[] arg){
     if(arg.length!=2){
       System.err.println("usage: java ScpTo file1 user@remotehost:file2");
       System.exit(-1);
