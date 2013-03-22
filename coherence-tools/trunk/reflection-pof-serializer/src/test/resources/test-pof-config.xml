@@ -120,7 +120,10 @@
             </serializer>
         </user-type>
 
-
+        <user-type>
+            <type-id>1013</type-id>
+            <class-name>org.gridkit.coherence.utils.pof.PofMultiExtractor</class-name>
+        </user-type>
 
         <user-type>
             <type-id>2000</type-id>

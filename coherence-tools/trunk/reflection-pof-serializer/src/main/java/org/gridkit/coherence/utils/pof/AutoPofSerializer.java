@@ -1,5 +1,5 @@
 /**
- * Copyright 2010 Grid Dynamics Consulting Services, Inc.
+ * Copyright 2011-2013 Alexey Ragozin
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,8 +178,8 @@ public class AutoPofSerializer implements Serializer, PofContext {
 	}
 	
 	private synchronized void initCustomPredefines() {
-		registerArraySerializer(minAutoId++ , Object[].class);
-		registerArraySerializer(minAutoId++ , UUID[].class);
+//		registerArraySerializer(minAutoId++ , Object[].class);
+//		registerArraySerializer(minAutoId++ , UUID[].class);
 		registerSerializationContext(minAutoId++, Collections.singleton(null).getClass(), new SingletonSetSerializer());
 		registerSerializationContext(minAutoId++, Collections.singletonList(null).getClass(), new SingletonListSerializer());
 		registerSerializationContext(minAutoId++, Collections.singletonMap(null, null).getClass(), new SingletonMapSerializer());
@@ -242,15 +242,23 @@ public class AutoPofSerializer implements Serializer, PofContext {
 
 	@Override
 	public boolean isUserType(Object obj) {
-		contextByClass(obj.getClass());
-		return true;
+	    if (obj == null) {
+	    	throw new IllegalArgumentException("Object cannot be null");
+	    }
+	    return isUserType(obj.getClass());
 	}
 
 	@Override
 	@SuppressWarnings("rawtypes")
 	public boolean isUserType(Class cls) {
-		contextByClass(cls);
-		return true;
+		if (cls == Object[].class || cls == UUID[].class) {
+			return false;
+		}
+		else if (cls.getName().startsWith("com.tangosol.util.ConverterCollections")) {
+			return false;
+		}
+
+		return contextByClass(cls) != null;
 	}
 
 	@Override

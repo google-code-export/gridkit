@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,8 @@ import org.junit.runner.RunWith;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
+import com.tangosol.util.Binary;
+import com.tangosol.util.ExternalizableHelper;
 import com.tangosol.util.Filter;
 import com.tangosol.util.extractor.IdentityExtractor;
 import com.tangosol.util.filter.AllFilter;
@@ -51,6 +54,20 @@ import com.tangosol.util.filter.InFilter;
 public class PofSerializerComplexObjectTest {
 
     private static NamedCache cache;
+    
+    
+    @Test
+    public void test() {
+    	Set<Integer> parts = new HashSet<Integer>();
+    	for(int i = 0; i != 32; ++i) {
+    		String name = "DC-ID"+i;
+    		Binary bin = ExternalizableHelper.toBinary(name);
+    		int n = (int) ((0x00FFFFFFFFl & bin.hashCode()) % 257);
+			System.out.println("#" + i + " " + n);
+			parts.add(n);
+    	}    	
+    	System.out.println("Distincts: " + parts.size());
+    }
     
     @BeforeClass
     public static void initCache() throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {

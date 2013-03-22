@@ -59,7 +59,7 @@
                 <tcp-acceptor>
                     <local-address>
                         <address>localhost</address>
-                        <port>9099</port>
+                        <port system-property="extend.port">9099</port>
                     </local-address>
                 </tcp-acceptor>
 	            <serializer>

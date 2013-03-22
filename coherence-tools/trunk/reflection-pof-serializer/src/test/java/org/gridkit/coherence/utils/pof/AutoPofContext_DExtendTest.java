@@ -31,7 +31,7 @@ import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
 
 @RunWith(IsolateTestRunner.class)
-public class AutoPofContext_ExtendTest extends AutoPofContext_FunctionalTest {
+public class AutoPofContext_DExtendTest extends AutoPofContext_FunctionalTest {
 
 	private static Isolate isolate1;
 	private static Isolate isolate2;
@@ -77,7 +77,8 @@ public class AutoPofContext_ExtendTest extends AutoPofContext_FunctionalTest {
 
     	System.setProperty("tangosol.coherence.wka", "127.0.0.1");
     	System.setProperty("tangosol.coherence.localhost", "127.0.0.1");
-
+    	System.setProperty("tangosol.coherence.port", "3333");
+    	
         CacheFactory.setConfigurableCacheFactory(new DefaultConfigurableCacheFactory("auto-pof-cache-config-extend-client.xml"));
         cache = CacheFactory.getCache("AUTO_POF_MAPPING");
         cache = CacheFactory.getCache("objects");        
