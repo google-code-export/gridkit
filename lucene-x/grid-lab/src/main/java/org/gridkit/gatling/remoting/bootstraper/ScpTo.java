@@ -41,7 +41,6 @@ public class ScpTo{
       String rfile=arg[1].substring(arg[1].indexOf(':')+1);
 
       JSch jsch=new JSch();
-//      jsch.addIdentity("C:/fire_at_will/grimis_id.dsa");
       Session session=jsch.getSession(user, host, 22);
 
       // username and password will be given via UserInfo interface.
