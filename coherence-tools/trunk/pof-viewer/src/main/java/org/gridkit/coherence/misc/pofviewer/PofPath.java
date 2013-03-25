@@ -81,6 +81,8 @@ public abstract class PofPath implements Comparable<PofPath>, Serializable {
 		return p;
 	}
 	
+	public abstract int lastIndex();
+	
 	@Override
 	public int compareTo(PofPath o) {
 		PofPath[] a = flatten();
@@ -161,6 +163,11 @@ public abstract class PofPath implements Comparable<PofPath>, Serializable {
 		}
 
 		@Override
+		public int lastIndex() {
+			throw new IllegalArgumentException();
+		}
+
+		@Override
 		public int hashCode() {
 			return Integer.MAX_VALUE / 3;
 		}
@@ -198,6 +205,11 @@ public abstract class PofPath implements Comparable<PofPath>, Serializable {
 		}
 
 		@Override
+		public int lastIndex() {
+			return index;
+		}
+
+		@Override
 		protected int nodeHash() {
 			return index;
 		}
@@ -228,6 +240,11 @@ public abstract class PofPath implements Comparable<PofPath>, Serializable {
 		public ArrayIndex(PofPath pofPath, int i) {
 			this.parent = pofPath;
 			index = i;
+		}
+
+		@Override
+		public int lastIndex() {
+			return index;
 		}
 
 		@Override
