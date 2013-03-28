@@ -33,6 +33,10 @@ import junit.framework.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.tangosol.util.ValueExtractor;
+import com.tangosol.util.aggregator.AbstractAggregator;
+import com.tangosol.util.aggregator.DistinctValues;
+
 public abstract class AutoPofContext_FunctionalTest {
 
 	public abstract Object serDeser(Object value);
@@ -254,14 +258,41 @@ public abstract class AutoPofContext_FunctionalTest {
 		Assert.assertEquals(l1.toString(), l2.toString());
 	}		
 
-	@Test @Ignore
+	@Test @Ignore("No support for RegEx")
 	public void testRegex() {
 		Pattern l1 = Pattern.compile("[0-9]+");
 		
 		Object l2 = serDeser(l1);
 		Assert.assertSame(l1.getClass(), l2.getClass());
 		Assert.assertEquals(l1.toString(), l2.toString());
-	}		
+	}
+
+	@Test
+	public void testPofNonPofComposite() {
+
+		DistinctValues a1 = new DistinctValues(new CustomExtractor());
+		DistinctValues a2 = (DistinctValues) serDeser(a1);
+		Assert.assertSame(a1.getClass(), a2.getClass());
+		Assert.assertEquals(a1.getValueExtractor(), a2.getValueExtractor());
+	}
+
+	@Test
+	public void testInheritance1() {
+		
+		CustomAggregator1 a1 = new CustomAggregator1();
+		CustomAggregator1 a2 = (CustomAggregator1) serDeser(a1);
+		Assert.assertSame(a1.getClass(), a2.getClass());
+		Assert.assertEquals(a1, a2);
+	}
+
+	@Test
+	public void testInheritance2() {
+		
+		CustomAggregator2 a1 = new CustomAggregator2("test");
+		CustomAggregator2 a2 = (CustomAggregator2) serDeser(a1);
+		Assert.assertSame(a1.getClass(), a2.getClass());
+		Assert.assertEquals(a1, a2);
+	}
 	
 	public static enum State {
 		STATE1,
@@ -325,5 +356,139 @@ public abstract class AutoPofContext_FunctionalTest {
 			}
 			return o1.length == o2.length ? 0 : o1.length < o2.length ? -1 : 1;
 		}		
+	}
+	
+	@SuppressWarnings("serial")
+	public static class CustomAggregator1 extends AbstractAggregator {
+		
+		public CustomAggregator1() {
+			// for deserialization
+		}
+		
+		@Override
+		public int hashCode() {
+			return getClass().hashCode();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (!super.equals(obj))
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			return true;
+		}
+
+		@Override
+		protected Object finalizeResult(boolean arg0) {
+			return null;
+		}
+
+		@Override
+		protected void init(boolean arg0) {
+		}
+
+		@Override
+		protected void process(Object arg0, boolean arg1) {
+		}
+	}
+	
+	@SuppressWarnings("serial")
+	public static class CustomAggregator2 extends AbstractAggregator {
+		
+		private String value;
+
+		@SuppressWarnings("unused")
+		private CustomAggregator2() {
+			// for deserialization
+		}
+		
+		public CustomAggregator2(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = super.hashCode();
+			result = prime * result + ((value == null) ? 0 : value.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (!super.equals(obj))
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			CustomAggregator2 other = (CustomAggregator2) obj;
+			if (value == null) {
+				if (other.value != null)
+					return false;
+			} else if (!value.equals(other.value))
+				return false;
+			return true;
+		}
+
+		@Override
+		protected Object finalizeResult(boolean arg0) {
+			return value;
+		}
+
+		@Override
+		protected void init(boolean arg0) {
+		}
+
+		@Override
+		protected void process(Object arg0, boolean arg1) {
+		}
+	}
+	
+	public static class CustomExtractor implements ValueExtractor {
+	
+		private String prefix;
+		
+		private CustomExtractor() {
+			// for deserialization
+		}
+		
+		public CustomExtractor(String prefix) {
+			this.prefix = prefix;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result
+					+ ((prefix == null) ? 0 : prefix.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			CustomExtractor other = (CustomExtractor) obj;
+			if (prefix == null) {
+				if (other.prefix != null)
+					return false;
+			} else if (!prefix.equals(other.prefix))
+				return false;
+			return true;
+		}
+
+		@Override
+		public Object extract(Object arg) {
+			return prefix + String.valueOf(arg);
+		}
 	}
 }

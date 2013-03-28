@@ -22,6 +22,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -401,10 +405,8 @@ public class AutoPofSerializer implements Serializer, PofContext {
 			userType = registerUserType(cls.getName());
 		}
 
-//		System.out.println("AUTOPOF: " + userType + "->" + cls.getName());
-		
 		PofSerializer serializer;
-		if (PortableObject.class.isAssignableFrom(cls)) {
+		if (isPofCompatible(cls)) {
 			serializer = new PortableObjectSerializer(userType);
 		}
 		else {
@@ -416,6 +418,63 @@ public class AutoPofSerializer implements Serializer, PofContext {
 		}
 
 		registerSerializationContext(userType, cls, serializer);
+	}
+
+	private boolean isPofCompatible(Class<?> cls) {
+		return PortableObject.class.isAssignableFrom(cls)
+				&& hasDefaultConstructor(cls)
+				&& hasSerializationCode(cls);		
+	}
+
+	private boolean hasDefaultConstructor(Class<?> cls) {
+		try {
+			Constructor<?> c = cls.getConstructor();
+			return Modifier.isPublic(c.getModifiers());
+		} catch (SecurityException e) {
+			throw new RuntimeException(e);
+		} catch (NoSuchMethodException e) {
+			return false;
+		}
+	}
+
+	private boolean hasSerializationCode(Class<?> cls) {
+		if (hasReadExtrenal(cls) || hasWriteExtrenal(cls)) {
+			return true;
+		}
+		else {
+			return isPofCompatible(cls.getSuperclass()) && declaresNoFields(cls);
+		}
+	}
+	
+	private boolean declaresNoFields(Class<?> cls) {
+		for(Field f: cls.getDeclaredFields()) {
+			if (!Modifier.isStatic(f.getModifiers())) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean hasReadExtrenal(Class<?> cls) {
+		try {
+			cls.getDeclaredMethod("readExternal", PofReader.class);
+			return true;
+		} catch (SecurityException e) {
+			throw new RuntimeException(e);
+		} catch (NoSuchMethodException e) {
+			return false;
+		}
+	}
+
+	private boolean hasWriteExtrenal(Class<?> cls) {
+		try {
+			cls.getDeclaredMethod("writeExternal", PofWriter.class);
+			return true;
+		} catch (SecurityException e) {
+			throw new RuntimeException(e);
+		} catch (NoSuchMethodException e) {
+			return false;
+		}
 	}
 
 	private void registerSerializationContext(int userType, Class<?> cls, PofSerializer serializer) {
