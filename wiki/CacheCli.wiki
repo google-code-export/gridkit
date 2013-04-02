@@ -23,6 +23,13 @@ Another command will dump all cache content in ZIP archive
 java -cp coherence.jar;cache-cli.jar CacheCli -c extend://server.com:9099/MyCache export -zf MyCache.zip
 }}}
 
+Alternatively you can export just a subset of partitions
+{{{
+java -cp coherence.jar;cache-cli.jar CacheCli -c extend://server.com:9099/MyCache export -p 0-127 -zf MyCache_0_127.zip
+}}}
+
+This is useful if you want to do dump in parallel from several boxes.
+
 An of cause we can upload that dump back to a cache
 {{{
 java -cp coherence.jar;cache-cli.jar CacheCli -c extend://server.com:9099/MyCache import -zf MyCache.zip
