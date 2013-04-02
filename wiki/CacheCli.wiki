@@ -43,6 +43,8 @@ java -cp coherence.jar;cache-cli.jar CacheCli -c extend://server.com:9099/MyCach
  * `cache-cli.jar` - path to !CacheCli JAR
  * `coherence.jar` version should match cluster version
 
+== Why not CohQL CLI? ==
+[http://docs.oracle.com/cd/E18686_01/coh.37/e18677/api_cq.htm CohQL CLI tool] is quite capable, but it requires complex setup to work with particular cluster. !CacheCli is designed to be as application agnostic as possible. 
 
 = Project details =
 
