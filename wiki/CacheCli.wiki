@@ -49,3 +49,5 @@ java -cp coherence.jar;cache-cli.jar CacheCli -c extend://server.com:9099/MyCach
 Download: TODO
 
 Checkout: svn co [https://gridkit.googlecode.com/svn/coherence-tools/trunk/cache-cli]
+
+Browse: [http://code.google.com/p/gridkit/source/browse/coherence-tools/trunk/cache-cli/]
