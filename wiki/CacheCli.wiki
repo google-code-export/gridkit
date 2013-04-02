@@ -13,7 +13,7 @@ java -cp coherence.jar;cache-cli.jar CacheCli -c extend://server.com:9099/MyCach
 
 Next command will list content of remote cache parsing POF structure
 {{{
-java -cp coherence.jar;cache-cli.jar CacheCli -c extend://server.com:9099/MyCache list -pp -e
+java -cp coherence.jar;cache-cli.jar CacheCli -c extend://server.com:9099/MyCache list -pp -s entries
 }}}
 
 We cannot show object, because tool may not have all classes, but displaying POF properties make a lot of sense for troubleshooting.
