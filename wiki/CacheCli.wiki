@@ -1,0 +1,44 @@
+#summary CacheCli - CLI tools for simple cache operations
+
+= Introduction =
+
+Main goal of !CacheCli is to be a tool which can do simple cache operation without complex configuration. In particular, it doesn't require application specific JARs or `cache-config.xml`.
+
+= Usage =
+
+Here is command to print size of cache.
+{{{
+java -cp coherence.jar;cache-cli.jar CacheCli -c extend://server.com:9099/MyCache size
+}}}
+
+Next command will list content of remote cache parsing POF structure
+{{{
+java -cp coherence.jar;cache-cli.jar CacheCli -c extend://server.com:9099/MyCache list -pp -e
+}}}
+
+We cannot show object, because tool may not have all classes, but displaying POF properties make a lot of sense for troubleshooting.
+
+Another command will dump all cache content in ZIP archive
+{{{
+java -cp coherence.jar;cache-cli.jar CacheCli -c extend://server.com:9099/MyCache export -zf MyCache.zip
+}}}
+
+An of cause we can upload that dump back to a cache
+{{{
+java -cp coherence.jar;cache-cli.jar CacheCli -c extend://server.com:9099/MyCache import -zf MyCache.zip
+}}}
+
+
+== Important ==
+ * Only Coherence*Extend with POF codec is supported
+ * You should use platform specific separator in `-cp` option
+ * `coherence.jar` - path to your Oracle Coherence JAR
+ * `cache-cli.jar` - path to !CacheCli JAR
+ * `coherence.jar` version should match cluster version
+
+
+= Project details =
+
+Download: TODO
+
+Checkout: svn co [https://gridkit.googlecode.com/svn/coherence-tools/trunk/cache-cli]
