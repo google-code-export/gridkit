@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/netbeans/src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/VisualVM-Mock"/>
+	<classpathentry kind="lib" path="/VisualVM-Mock/lib/org-netbeans-api-progress.jar"/>
+	<classpathentry kind="lib" path="/VisualVM-Mock/lib/org-openide-dialogs.jar"/>
+	<classpathentry kind="lib" path="/VisualVM-Mock/lib/org-openide-util.jar"/>
+	<classpathentry kind="lib" path="/VisualVM-Mock/lib/org-openide-windows.jar"/>
+	<classpathentry kind="lib" path="/VisualVM-Mock/lib/org-openide-util-lookup.jar"/>
+	<classpathentry kind="lib" path="/VisualVM-Mock/lib/org-openide-awt.jar"/>
+	<classpathentry kind="lib" path="/VisualVM-Mock/lib/org-netbeans-lib-profiler-ui.jar"/>
+	<classpathentry kind="lib" path="/VisualVM-Mock/lib/org-openide-modules.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
