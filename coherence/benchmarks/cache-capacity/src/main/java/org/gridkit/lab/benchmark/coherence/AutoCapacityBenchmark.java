@@ -1,4 +1,4 @@
-package com.griddynamics.gridkit.coherence.benchmark.capacity;
+package org.gridkit.lab.benchmark.coherence;
 
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
