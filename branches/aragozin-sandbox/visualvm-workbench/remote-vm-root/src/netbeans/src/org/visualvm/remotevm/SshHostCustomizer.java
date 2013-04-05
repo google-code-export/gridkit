@@ -108,8 +108,8 @@ public class SshHostCustomizer extends JPanel {
     displaynameField.setText(""); // NOI18N
 
     PropertiesSupport support = PropertiesSupport.sharedInstance();
-    settingsPanel = !support.hasProperties(Host.class) ? null :
-                     support.getCustomizer(Host.class);
+    settingsPanel = !support.hasProperties(SshHost.class) ? null :
+                     support.getCustomizer(SshHost.class);
     if (settingsPanel != null) settingsPanel.addChangeListener(listener);
     settingsButton.setVisible(settingsPanel != null);
     if (!settingsButton.isVisible()) settingsButton.setSelected(false);

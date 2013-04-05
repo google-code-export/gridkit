@@ -4,12 +4,11 @@
  */
 package org.visualvm.remotevm;
 
+import java.io.File;
+
 import com.sun.tools.visualvm.core.datasource.DataSource;
 import com.sun.tools.visualvm.core.datasource.descriptor.DataSourceDescriptorFactory;
 import com.sun.tools.visualvm.core.datasupport.Utils;
-import com.sun.tools.visualvm.host.RemoteHostsContainer;
-import java.io.File;
-import java.net.InetAddress;
 
 /**
  *
@@ -76,17 +75,7 @@ public final class SshHostsSupport {
     SshHost createHost(SshHostProperties properties, boolean createOnly, boolean interactive) {
         return hostProvider.createHost(properties, createOnly, interactive);
     }
-    
-    /**
-     * Returns already known Host instance with the same InetAddress or null.
-     * 
-     * @param inetAddress InetAddess to search.
-     * @return already known Host instance with the same InetAddress or null.
-     */
-    public SshHost getHostByAddress(InetAddress inetAddress) {
-        return null; //hostProvider.getHostByAddress(inetAddress);
-    }
-    
+        
     /**
      * Returns storage directory for defined hosts.
      * 
