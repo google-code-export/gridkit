@@ -4,13 +4,14 @@
  */
 package org.visualvm.remotevm;
 
-import com.sun.tools.visualvm.core.datasource.DataSource;
-import com.sun.tools.visualvm.core.datasource.descriptor.DataSourceDescriptor;
-import com.sun.tools.visualvm.host.Host;
 import java.awt.Image;
 import java.util.Comparator;
+
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
+
+import com.sun.tools.visualvm.core.datasource.DataSource;
+import com.sun.tools.visualvm.core.datasource.descriptor.DataSourceDescriptor;
 
 /**
  *
