@@ -212,19 +212,6 @@ public class SshHostProvider {
 		}
 	}
 
-	public SshHost getHostByAddress(InetAddress inetAddress) {
-		try {
-			lockHosts();
-			return getHostByAddressImpl(inetAddress);
-		} catch (InterruptedException ex) {
-			LOGGER.throwing(SshHostProvider.class.getName(),
-					"getHostByAddress", ex); // NOI18N
-			return null;
-		} finally {
-			unlockHosts();
-		}
-	}
-
 	private SshHost getHostByAddressImpl(InetAddress inetAddress) {
 		Set<SshHost> knownHosts = DataSourceRepository.sharedInstance()
 				.getDataSources(SshHost.class);
