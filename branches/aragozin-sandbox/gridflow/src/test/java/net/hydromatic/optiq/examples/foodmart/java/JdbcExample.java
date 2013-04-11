@@ -23,6 +23,8 @@ import net.hydromatic.optiq.jdbc.OptiqConnection;
 
 import java.sql.*;
 
+import org.junit.Test;
+
 /**
  * Example of using Optiq via JDBC.
  *
@@ -33,6 +35,7 @@ public class JdbcExample {
         new JdbcExample().run();
     }
 
+    @Test
     public void run() throws ClassNotFoundException, SQLException {
         Class.forName("net.hydromatic.optiq.jdbc.Driver");
         Connection connection =
@@ -54,11 +57,13 @@ public class JdbcExample {
         while (resultSet.next()) {
             int n = resultSet.getMetaData().getColumnCount();
             for (int i = 1; i <= n; i++) {
-                new StringBuilder().append(
+                System.out.print(
+                	new StringBuilder().append(
                     (i > 1 ? "; " : "")
                     + resultSet.getMetaData().getColumnLabel(i)
                     + "="
-                    + resultSet.getObject(i));
+                    + resultSet.getObject(i))
+                );                
             }
             System.out.println();
         }
