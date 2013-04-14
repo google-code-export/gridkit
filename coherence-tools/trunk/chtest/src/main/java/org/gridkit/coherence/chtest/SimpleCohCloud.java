@@ -16,20 +16,21 @@
 package org.gridkit.coherence.chtest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 import org.gridkit.nanocloud.CloudFactory;
-import org.gridkit.vicluster.ViManager;
 import org.gridkit.vicluster.ViNode;
+import org.gridkit.vicluster.ViNodeSet;
 import org.gridkit.vicluster.ViProps;
 
 public class SimpleCohCloud implements CohCloud {
 
-	private ViManager cloud;
+	private ViNodeSet cloud;
 	
-	public SimpleCohCloud() {
-		cloud = CloudFactory.createCloud();
+	public SimpleCohCloud(ViNodeSet cloud) {
+		this.cloud = cloud;
 		ViProps.at(cloud.node("**"))
 			.setIsolateType()
 			.setSilentShutdown();
@@ -37,8 +38,12 @@ public class SimpleCohCloud implements CohCloud {
 		CohHelper.enableViNodeName(cloud.node("**"), true);
 	}
 	
+	public SimpleCohCloud() {
+		this(CloudFactory.createCloud());
+	}
+	
 	@Override
-	public ViManager getCloud() {
+	public ViNodeSet getCloud() {
 		return cloud;
 	}
 	
@@ -74,5 +79,28 @@ public class SimpleCohCloud implements CohCloud {
 	@Override
 	public void shutdown() {
 		cloud.shutdown();
+		System.gc();
+		pushPerm();
+		System.gc();
+		
+	}	
+	
+	private void pushPerm() {
+		List<String> bloat = new ArrayList<String>();
+		int spree = 0;
+		int n = 0;
+		while(spree < 5) {
+			try {
+				byte[] b = new byte[1 << 20];
+				Arrays.fill(b, (byte)('A' + ++n));
+				bloat.add(new String(b).intern());
+				spree = 0;
+			}
+			catch(OutOfMemoryError e) {
+				++spree;
+				System.gc();
+			}
+		}
+		return;
 	}	
 }

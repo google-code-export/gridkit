@@ -15,9 +15,12 @@
  */
 package org.gridkit.coherence.chtest;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
-import org.gridkit.vicluster.ViManager;
+import org.gridkit.vicluster.ViNodeSet;
 import org.junit.rules.ExternalResource;
 
 public class DisposableCohCloud extends ExternalResource implements CohCloudRule {
@@ -33,6 +36,24 @@ public class DisposableCohCloud extends ExternalResource implements CohCloudRule
 	@Override
 	protected void before() throws Throwable {
 		cloud = new SimpleCohCloud();
+		fillPerm(5);
+	}
+	
+	private void fillPerm(int size) {
+		int tries = 3;
+		while(tries-- > 0) {
+			try {
+				List<String> bloat = new ArrayList<String>();
+				for(int i = 0; i != size; ++i) {
+					byte[] b = new byte[1 << 20];
+					Arrays.fill(b, (byte)('A' + i));
+					bloat.add(new String(b).intern());
+				}
+				return;
+			}
+			catch(OutOfMemoryError e) {				
+			}
+		}
 	}
 
 	@Override
@@ -41,7 +62,7 @@ public class DisposableCohCloud extends ExternalResource implements CohCloudRule
 	}
 
 	@Override
-	public ViManager getCloud() {
+	public ViNodeSet getCloud() {
 		if (cloud == null) {
 			throw new IllegalStateException("Should be used with @Rule annotation");
 		}
