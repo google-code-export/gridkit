@@ -66,8 +66,10 @@ import org.gridkit.vicluster.telecontrol.jvm.JvmProps;
 import com.tangosol.coherence.component.net.extend.RemoteService;
 import com.tangosol.coherence.component.net.extend.connection.TcpConnection;
 import com.tangosol.coherence.component.util.SafeCluster;
+import com.tangosol.coherence.component.util.safeService.SafeProxyService;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Cluster;
+import com.tangosol.net.ProxyService;
 import com.tangosol.net.Service;
 import com.tangosol.net.management.MBeanServerFinder;
 import com.tangosol.run.xml.XmlElement;
@@ -241,6 +243,18 @@ public class CohHelper {
 		}		
 
 		node.setProp(JvmProps.CP_ADD + "coherence.jar", path);
+	}
+	
+	public static int getNumberOfConnections(ProxyService service) {
+		com.tangosol.coherence.component.util.daemon.queueProcessor.service.grid.ProxyService realService;
+		if (service instanceof SafeProxyService) {
+			realService = (com.tangosol.coherence.component.util.daemon.queueProcessor.service.grid.ProxyService) ((SafeProxyService)service).getService();
+		}
+		else {
+			realService = (com.tangosol.coherence.component.util.daemon.queueProcessor.service.grid.ProxyService) service;
+		}
+		
+		return realService.getServiceLoad().getConnectionCount();
 	}
 	
 	/**

@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.gridkit.nanocloud.CloudFactory;
+import org.gridkit.vicluster.ViConfigurable;
 import org.gridkit.vicluster.ViNode;
 import org.gridkit.vicluster.ViNodeSet;
 import org.gridkit.vicluster.ViProps;
@@ -28,18 +29,36 @@ import org.gridkit.vicluster.ViProps;
 public class SimpleCohCloud implements CohCloud {
 
 	private ViNodeSet cloud;
-	
-	public SimpleCohCloud(ViNodeSet cloud) {
-		this.cloud = cloud;
-		ViProps.at(cloud.node("**"))
+
+	/**
+	 * Present configuration for Coherence cluster test.
+	 * <li>Default node type - isolate</li>
+	 * <li>Silent shutdown enables</li>
+	 * <li>Coherence specific thread killers</li>
+	 * <li>Node name is used instead if PID in cluster member description</li>
+	 */
+	public static void applyDefaultConfig(ViConfigurable node) {
+		ViProps.at(node)
 			.setIsolateType()
 			.setSilentShutdown();
-		CohHelper.enableCoherenceThreadKillers(cloud.node("**"), true);
-		CohHelper.enableViNodeName(cloud.node("**"), true);
+		CohHelper.enableCoherenceThreadKillers(node, true);
+		CohHelper.enableViNodeName(node, true);		
 	}
 	
+	/**
+	 * Wrap existing cloud with {@link CohCloud} syntactic sugar.
+	 * <b>Does not apply default config for nodes</b>
+	 */
+	public SimpleCohCloud(ViNodeSet cloud) {
+		this.cloud = cloud;
+	}
+	
+	/**
+	 * Create new cloud and configure it with {@link #applyDefaultConfig(ViConfigurable)} settings.
+	 */
 	public SimpleCohCloud() {
 		this(CloudFactory.createCloud());
+		applyDefaultConfig(cloud.node("**"));
 	}
 	
 	@Override
