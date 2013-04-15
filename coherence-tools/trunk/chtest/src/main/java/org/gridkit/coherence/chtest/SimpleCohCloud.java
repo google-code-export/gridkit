@@ -99,7 +99,9 @@ public class SimpleCohCloud implements CohCloud {
 	public void shutdown() {
 		cloud.shutdown();
 		System.gc();
-		pushPerm();
+		if (Boolean.FALSE.booleanValue()) {
+			pushPerm();
+		}
 		System.gc();
 		
 	}	
