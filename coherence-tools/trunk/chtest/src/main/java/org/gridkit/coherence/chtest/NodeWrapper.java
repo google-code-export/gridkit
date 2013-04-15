@@ -116,6 +116,24 @@ class NodeWrapper extends ViNode.Delegate implements CohNode {
 	}
 
 	@Override
+	public CohNode addWkaAddress(String host, int port) {
+		CohHelper.addWkaAddress(getDelegate(), host, port);
+		return this;
+	}
+
+	@Override
+	public CohNode setClusterLocalHost(String host) {
+		CohHelper.setClusterLocalHost(getDelegate(), host);
+		return this;
+	}
+
+	@Override
+	public CohNode setClusterLocalPort(int port) {
+		CohHelper.setClusterLocalPort(getDelegate(), port);
+		return this;
+	}
+
+	@Override
 	public CohNode enableJmx(boolean enable) {
 		CohHelper.enableJmx(this, enable);
 		return this;

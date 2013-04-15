@@ -113,6 +113,12 @@ public interface CohCloud {
 		 */
 		CohNode enableTCMP(boolean enable);
 
+		CohNode addWkaAddress(String host, int port);
+
+		CohNode setClusterLocalHost(String host);
+
+		CohNode setClusterLocalPort(int port);
+		
 		/**
 		 * Enable or disable Coherence MBeans.
 		 * <br/>

@@ -15,13 +15,29 @@
  */
 package org.gridkit.coherence.chtest;
 
+import java.io.Serializable;
+
+import com.tangosol.net.CacheFactory;
+import com.tangosol.net.Cluster;
 import com.tangosol.run.xml.XmlElement;
 
-/**
- * @author Alexey Ragozin (alexey.ragozin@gmail.com)
- */
-public interface XmlConfigFragment {
-	
-	public void inject(XmlElement config);
+@SuppressWarnings("serial")
+class OperationalConfigInjecter implements Runnable, Serializable {
 
+	private final XmlConfigFragment fragment;
+	
+	public OperationalConfigInjecter(XmlConfigFragment fragment) {
+		this.fragment = fragment;
+	}
+
+	@Override
+	public void run() {
+		Cluster cluster = CacheFactory.getCluster();
+		if (cluster.isRunning()) {
+			throw new IllegalStateException("Cluster is already started");
+		}
+		XmlElement config = CacheFactory.getClusterConfig();
+		fragment.inject(config);
+		CacheFactory.setServiceConfig("Cluster", config);
+	}
 }

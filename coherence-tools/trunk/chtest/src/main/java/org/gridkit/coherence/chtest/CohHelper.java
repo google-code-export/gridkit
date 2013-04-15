@@ -101,6 +101,10 @@ public class CohHelper {
 		node.addStartupHook(fragment.toString(), new CacheConfigInjecter(fragment), false);
 	}
 
+	public static void applyOperationalConfigFragment(ViConfigurable node, XmlConfigFragment fragment) {
+		node.addStartupHook(fragment.toString(), new OperationalConfigInjecter(fragment), false);
+	}
+
 	public static void enableFastLocalCluster(ViConfigurable node) {
 		int port = new Random().nextInt(10000) + 50000;
 		node.setProp("tangosol.coherence.ttl", "0");
@@ -111,11 +115,23 @@ public class CohHelper {
 		node.setProp("tangosol.coherence.socketprovider", "tcp");
 		node.setProp("tangosol.coherence.cluster", "jvm::" + ManagementFactory.getRuntimeMXBean().getName());
 	}
+	
+	public static void setClusterLocalHost(ViConfigurable node, String host) {
+		node.setProp("tangosol.coherence.localhost", host);
+	}
+
+	public static void setClusterLocalPort(ViConfigurable node, int port) {
+		node.setProp("tangosol.coherence.localport", String.valueOf(port));
+	}
 
 	public static void enableTCMP(ViConfigurable node, boolean enable) {
 		node.setProp("tangosol.coherence.tcmp.enabled", enable ? "true" : "false");
 	}
 
+	public static void addWkaAddress(ViConfigurable node, String host, int port) {
+		applyOperationalConfigFragment(node, new AddWkaAddress(host, port));
+	}
+	
 	public static void enableJmx(ViConfigurable node, boolean enable) {
 		String hookName = "wipeout-jmx";
 		if (enable) {
@@ -882,6 +898,30 @@ public class CohHelper {
 			if (name != null) {
 				System.setProperty("tangosol.coherence.process", name);
 			}
+		}
+	}
+	
+	@SuppressWarnings("serial")
+	private static class AddWkaAddress implements XmlConfigFragment, Serializable {
+		
+		private String hostname;
+		private int port;
+
+		public AddWkaAddress(String hostname, int port) {
+			this.hostname = hostname;
+			this.port = port;
+		}
+
+		@Override
+		public void inject(XmlElement opConfig) {
+			XmlElement wka = opConfig.getSafeElement("unicast-listener/well-known-addresses");
+			XmlElement sa = wka.addElement("socket-address");
+			sa.addElement("address").setString(hostname);
+			sa.addElement("port").setInt(port);			
+		}
+		
+		public String toString() {
+			return getClass().getSimpleName() + "[" + hostname + ":" + port + "]";
 		}
 	}
 }
