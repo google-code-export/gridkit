@@ -32,8 +32,8 @@ public class DataLossMonitorTest_Statics {
 	}
 	
 	public void touchPartition(int n) {
-		latches[n].countDown();
 		counters[n].incrementAndGet();
+		latches[n].countDown();
 	}
 	
 	public void waitAllLatches() throws InterruptedException {

@@ -36,6 +36,9 @@ public class DataLossMonitorTest {
 		System.runFinalization();
 		Thread.sleep(100);
 		System.gc();
+		System.runFinalization();
+		Thread.sleep(100);
+		System.gc();
 	}
 	
 	@Before
@@ -354,7 +357,7 @@ public class DataLossMonitorTest {
 		CacheTemplate.usePartitionedServicePartitionCount(cloud.all(), partitions);
 		CacheTemplate.usePartitionedServiceBackupCount(cloud.all(), 0);
 		
-		cloud.all().setTCMPTimeout(5000);
+		cloud.all().setTCMPTimeout(15000);
 		cloud.all().enableTcpRing(false);
 		
 		// init Coherence nodes
@@ -393,7 +396,7 @@ public class DataLossMonitorTest {
 		CacheTemplate.usePartitionedServicePartitionCount(cloud.all(), partitions);
 		CacheTemplate.usePartitionedServiceBackupCount(cloud.all(), 0);
 		
-		cloud.all().setTCMPTimeout(5000);
+		cloud.all().setTCMPTimeout(15000);
 		cloud.all().enableTcpRing(false);
 		
 		// init Coherence nodes
