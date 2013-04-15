@@ -36,7 +36,9 @@ public class DisposableCohCloud extends ExternalResource implements CohCloudRule
 	@Override
 	protected void before() throws Throwable {
 		cloud = new SimpleCohCloud();
-		fillPerm(5);
+		if (Boolean.FALSE.booleanValue()) {
+			fillPerm(5);
+		}
 	}
 	
 	private void fillPerm(int size) {
