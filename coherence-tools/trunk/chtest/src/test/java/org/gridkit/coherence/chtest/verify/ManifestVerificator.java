@@ -40,7 +40,7 @@ public class ManifestVerificator {
 		InputStream in = null;
 		Attributes attrs = null;
 		try {
-			ProtectionDomain pDomain = ManifestVerificator.class
+			ProtectionDomain pDomain = Coherence.class
 					.getProtectionDomain();
 			codeSource = pDomain != null ? pDomain.getCodeSource() : null;
 			URL urlSrc = (codeSource != null ? codeSource.getLocation() : null);
@@ -65,6 +65,7 @@ public class ManifestVerificator {
 					
 					try {
 						new Manifest(in).getMainAttributes();
+						System.out.println(manifestUrl + " - OK");
 					} catch (Exception e) {
 						System.err.println("Failed to parse manifest: " + manifestUrl);
 						e.printStackTrace();
@@ -79,7 +80,7 @@ public class ManifestVerificator {
 			}
 
 			if ((attrs != null ? 0 : 1) != 0) {
-				ClassLoader loader = ManifestVerificator.class.getClassLoader();
+				ClassLoader loader = Coherence.class.getClassLoader();
 				Enumeration<?> enumMF = loader == null 
 							? ClassLoader.getSystemResources(MANIFEST) 
 							: loader.getResources(MANIFEST);
@@ -89,6 +90,7 @@ public class ManifestVerificator {
 					in = manifestUrl.openStream();
 					try {
 						new Manifest(in).getMainAttributes();
+						System.out.println(manifestUrl + " - OK");
 					} catch (Exception e) {
 						System.err.println("Failed to parse manifest: " + manifestUrl);
 						e.printStackTrace();
