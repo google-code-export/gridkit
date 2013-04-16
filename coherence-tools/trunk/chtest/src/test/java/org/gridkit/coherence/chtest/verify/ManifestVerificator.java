@@ -1,6 +1,9 @@
 package org.gridkit.coherence.chtest.verify;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.CodeSource;
@@ -58,7 +61,7 @@ public class ManifestVerificator {
 					try {
 						manifestUrl = new URL(urlSrc + new StringBuffer(String.valueOf('/')).append(	MANIFEST).toString());
 						in = manifestUrl.openStream();
-					} catch (Exception e) {
+					} catch (Exception e) {						
 					}
 				}
 				if (in != null) {
@@ -69,6 +72,16 @@ public class ManifestVerificator {
 					} catch (Exception e) {
 						System.err.println("Failed to parse manifest: " + manifestUrl);
 						e.printStackTrace();
+						BufferedReader reader = new BufferedReader(new InputStreamReader(manifestUrl.openStream()));
+						while(true) {
+							String line = reader.readLine();
+							if (line == null) {
+								break;
+							}
+							else {
+								System.err.println("MF> " + line);
+							}
+						}
 					}
 
 					if ((attrs != null ? 0 : 1) != 0) {
