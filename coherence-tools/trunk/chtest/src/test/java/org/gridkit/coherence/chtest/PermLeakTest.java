@@ -33,6 +33,7 @@ public class PermLeakTest {
 	}
 
 	@Test
+	@Ignore("Temporary")
 	public void test_perm_leak_forceful() throws InterruptedException {
 		permLeakShutdown(false);
 	}
