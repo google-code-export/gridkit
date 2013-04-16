@@ -80,7 +80,7 @@ public class ManifestVerificator {
 
 			if ((attrs != null ? 0 : 1) != 0) {
 				ClassLoader loader = ManifestVerificator.class.getClassLoader();
-				Enumeration enumMF = loader == null 
+				Enumeration<?> enumMF = loader == null 
 							? ClassLoader.getSystemResources(MANIFEST) 
 							: loader.getResources(MANIFEST);
 
