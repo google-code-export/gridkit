@@ -186,7 +186,7 @@ public class CohHelper {
 					throw new IllegalStateException("Cluster is already started");
 				}
 				XmlElement config = CacheFactory.getClusterConfig();
-				XmlHelper.ensureElement(config, "cluster-config/multicast-listener/join-timeout-milliseconds")
+				XmlHelper.ensureElement(config, "multicast-listener/join-timeout-milliseconds")
 					.setLong(timeout);
 				CacheFactory.setServiceConfig("Cluster", config);
 			}
