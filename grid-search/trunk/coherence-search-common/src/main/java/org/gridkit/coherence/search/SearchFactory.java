@@ -55,6 +55,7 @@ import com.tangosol.util.filter.IndexAwareFilter;
  * @param <IC> index config type (see {@link PlugableSearchIndex})
  * @param <Q> query type (see {@link PlugableSearchIndex})
  */
+@SuppressWarnings("rawtypes")
 public class SearchFactory<I, IC, Q> {
 
 	protected PlugableSearchIndex<I, IC, Q> indexPlugin;
@@ -109,7 +110,17 @@ public class SearchFactory<I, IC, Q> {
 		return new QueryFilter<I, Q>(createFilterExtractor(), query);
 	}
 	
-	static class SearchIndexEngine<I,Q> implements MapIndex, IndexInvocationContext {
+	public static interface SearchIndexWrapper<I> extends MapIndex, IndexInvocationContext {
+		
+		public <R> R callCoreIndex(SearchIndexCallable<I, R> callable);		
+	}
+	
+	public static interface SearchIndexCallable<I, R> {
+		
+		public R execute(I index);		
+	}
+	
+	static class SearchIndexEngine<I,Q> implements MapIndex, IndexInvocationContext, SearchIndexWrapper<I> {
 
 		private static Timer INDEX_TIMER = new Timer("IndexFlushTimer", true);
 		
@@ -183,11 +194,10 @@ public class SearchFactory<I, IC, Q> {
 		}
 		
 		@Override
-		@SuppressWarnings("unchecked")
 		public void insert(Entry entry) {
 			checkMode(entry);
 			Object key = getKeyFromEntry(entry);
-			Object value = getValuefromEntry(entry);
+			Object value = getValueFromEntry(entry);
 			IndexUpdateEvent event = new IndexUpdateEvent(key, value, null, Type.INSERT);
 			if (attributeIndex != null) {
 				attributeIndex.delete(entry);
@@ -196,11 +206,10 @@ public class SearchFactory<I, IC, Q> {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public void update(Entry entry) {
 			checkMode(entry);
 			Object key = getKeyFromEntry(entry);
-			Object value = getValuefromEntry(entry);
+			Object value = getValueFromEntry(entry);
 			Object oldValue = getOriginalValueFromEntry(entry);
 			IndexUpdateEvent event = new IndexUpdateEvent(key, value, oldValue, Type.UPDATE);
 			if (attributeIndex != null) {
@@ -210,7 +219,6 @@ public class SearchFactory<I, IC, Q> {
 		}
 		
 		@Override
-		@SuppressWarnings("unchecked")
 		public void delete(Entry entry) {
 			checkMode(entry);
 			Object key = getKeyFromEntry(entry);
@@ -222,7 +230,6 @@ public class SearchFactory<I, IC, Q> {
 			enqueue(event);
 		}
 
-		@SuppressWarnings("unchecked")
 		private void checkMode(Entry entry) {
 			// TODO optimize
 			if (!binaryMode) {
@@ -233,7 +240,6 @@ public class SearchFactory<I, IC, Q> {
 			}			
 		}
 
-		@SuppressWarnings("unchecked")
 		private Object getKeyFromEntry(Entry entry) {
 			if (entry instanceof BinaryEntry) {
 				return ((BinaryEntry)entry).getBinaryKey();
@@ -243,13 +249,11 @@ public class SearchFactory<I, IC, Q> {
 			}
 		}
 
-		@SuppressWarnings("unchecked")
-		private Object getValuefromEntry(Entry entry) {
+		private Object getValueFromEntry(Entry entry) {
 			// TODO extractor helper
 			return attributeExtrator.extract(entry.getValue());
 		}
 
-		@SuppressWarnings("unchecked")
 		private Object getOriginalValueFromEntry(Entry entry) {
 			if (!originalValueForUpdates) {
 				return null;
@@ -302,13 +306,11 @@ public class SearchFactory<I, IC, Q> {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public Comparator getComparator() {
 			return null;
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public Map getIndexContents() {
 			throw new UnsupportedOperationException();
 		}
@@ -380,6 +382,8 @@ public class SearchFactory<I, IC, Q> {
 			throw new UnsupportedOperationException("Raw attribute index is not configured");
 		}
 		
+		
+		
 		public Filter applyIndex(QueryFilter<I, Q> filter, Set<Object> keys) {
 			flush();
 			boolean dirty = psi.applyIndex(coreIndex, filter.getQuery(), keys, this);
@@ -394,6 +398,12 @@ public class SearchFactory<I, IC, Q> {
 		public int calculateEffectiveness(QueryFilter<I, Q> filter, Set<Object> keys) {
 			flush();
 			return psi.calculateEffectiveness(coreIndex, filter.getQuery(), keys, this);
+		}
+
+		@Override
+		public synchronized <R> R callCoreIndex(SearchIndexCallable<I, R> callable) {
+			flush();
+			return callable.execute(coreIndex);
 		}
 	}
 	
@@ -434,7 +444,6 @@ public class SearchFactory<I, IC, Q> {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public boolean equals(Object obj) {
 			if (this == obj)
 				return true;
@@ -463,7 +472,6 @@ public class SearchFactory<I, IC, Q> {
 		
 
 		//@Override in Coherence 3.7
-		@SuppressWarnings("unchecked")
 		public MapIndex createIndex(boolean sorted, Comparator comparator, Map indexMap, BackingMapContext backingMapContext) {
 			// TODO use backing map information to full extent
 			return createIndex(sorted, comparator, indexMap);
@@ -538,7 +546,6 @@ public class SearchFactory<I, IC, Q> {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public boolean equals(Object obj) {
 			if (this == obj)
 				return true;
@@ -592,7 +599,6 @@ public class SearchFactory<I, IC, Q> {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public boolean evaluateEntry(Entry entry) {
 			return evaluate(entry.getValue());
 		}
