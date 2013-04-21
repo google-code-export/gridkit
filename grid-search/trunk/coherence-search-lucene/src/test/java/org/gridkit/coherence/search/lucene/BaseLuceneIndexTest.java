@@ -17,19 +17,29 @@
 package org.gridkit.coherence.search.lucene;
 
 
-import com.tangosol.net.CacheFactory;
-import com.tangosol.net.DefaultConfigurableCacheFactory;
-import com.tangosol.net.NamedCache;
-import com.tangosol.util.extractor.ReflectionExtractor;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-import java.util.*;
+import com.tangosol.net.CacheFactory;
+import com.tangosol.net.DefaultConfigurableCacheFactory;
+import com.tangosol.net.NamedCache;
+import com.tangosol.util.extractor.ReflectionExtractor;
 
 public abstract class BaseLuceneIndexTest {
 
@@ -185,7 +195,7 @@ public abstract class BaseLuceneIndexTest {
 //		Assert.assertEquals(16, query("private").length);
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private String[] query(Query query) {
 		Set entries = cache.entrySet(factory.createFilter(query));
 		List<String> result = new ArrayList<String>();
@@ -196,7 +206,7 @@ public abstract class BaseLuceneIndexTest {
 		return result.toArray(new String[0]);		
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private String[] query(String... terms) {
 		BooleanQuery query = new BooleanQuery();
 		for(String term: terms) {

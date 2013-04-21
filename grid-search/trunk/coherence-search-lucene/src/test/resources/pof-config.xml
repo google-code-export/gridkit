@@ -72,14 +72,26 @@
                 <class-name>org.gridkit.coherence.search.lucene.util.JavaSerializationSerializer</class-name>
             </serializer>
         </user-type>
+
+        <user-type>
+            <type-id>1006</type-id>
+            <class-name>org.gridkit.coherence.search.comparation.RangeFilter</class-name>
+        </user-type>
+
+        <user-type>
+            <type-id>1007</type-id>
+            <class-name>org.gridkit.coherence.search.comparation.TestDocExtractor</class-name>
+        </user-type>
         
     </user-type-list>
 
     <allow-interfaces>true</allow-interfaces>
     <allow-subclasses>false</allow-subclasses>
 
+<!-- 
     <default-serializer>
         <class-name>com.griddynamics.gridkit.coherence.utils.pof.ReflectionPofSerializer</class-name>
     </default-serializer>
+ -->
 
 </pof-config>

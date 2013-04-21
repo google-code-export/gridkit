@@ -163,7 +163,7 @@ public class LuceneDocumentExtractor implements ValueExtractor, Serializable, Po
 				else {
 					throw new IllegalArgumentException("Cannot conver to binary - " + attribute);
 				}
-				return new Field(name, data, store);
+				return new Field(name, data);
 			}
 			else {
 				String text = String.valueOf(attribute);

@@ -81,7 +81,6 @@ public class LuceneSearchPlugin implements PlugableSearchIndex<LuceneInMemoryInd
 
 	@Override
 	public int calculateEffectiveness(LuceneInMemoryIndex index, Query query, Set<Object> keySet, IndexInvocationContext context) {
-		// lucene index does not support evaluate method, so index should be used in all cases
 		return 1;
 	}
 

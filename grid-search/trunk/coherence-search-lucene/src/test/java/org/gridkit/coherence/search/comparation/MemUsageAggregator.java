@@ -19,14 +19,14 @@ public class MemUsageAggregator extends AbstractAggregator implements Serializab
 	protected void init(boolean paramBoolean) {
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Object aggregate(Set setEntries) {
 		System.gc();
 		return ManagementFactory.getRuntimeMXBean().getName() + " -> " + ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Object aggregateResults(Collection collResults) {
 		StringBuilder buf = new StringBuilder();

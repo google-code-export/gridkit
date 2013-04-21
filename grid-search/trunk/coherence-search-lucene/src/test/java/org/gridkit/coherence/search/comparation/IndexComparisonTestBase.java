@@ -112,6 +112,6 @@ public abstract class IndexComparisonTestBase {
         System.out.println((System.nanoTime() - t) / i );
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
 	protected abstract Set entrySet();
 }

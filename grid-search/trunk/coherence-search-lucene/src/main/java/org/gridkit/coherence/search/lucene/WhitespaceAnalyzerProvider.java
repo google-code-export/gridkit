@@ -18,6 +18,7 @@ package org.gridkit.coherence.search.lucene;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
+import org.apache.lucene.util.Version;
 
 import com.tangosol.io.pof.PofReader;
 import com.tangosol.io.pof.PofWriter;
@@ -39,7 +40,7 @@ public class WhitespaceAnalyzerProvider implements LuceneAnalyzerProvider, Seria
 	}
 	
 	public Analyzer getAnalyzer() {
-		return new WhitespaceAnalyzer();
+		return new WhitespaceAnalyzer(Version.LUCENE_33);
 	}
 
 	@Override

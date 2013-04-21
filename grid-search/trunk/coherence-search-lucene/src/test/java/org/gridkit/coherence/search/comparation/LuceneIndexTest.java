@@ -49,7 +49,7 @@ public class LuceneIndexTest extends IndexComparisonTestBase {
     }
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
     protected Set entrySet() {
 
         BooleanQuery query = new BooleanQuery();

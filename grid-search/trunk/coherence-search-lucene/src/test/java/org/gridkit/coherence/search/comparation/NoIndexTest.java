@@ -35,7 +35,7 @@ public class NoIndexTest extends IndexComparisonTestBase {
 //        }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
 	protected Set entrySet() {
         return cache.entrySet(
                 new AndFilter(

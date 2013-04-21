@@ -16,30 +16,34 @@
 
 package org.gridkit.coherence.search.lucene;
 
-import com.tangosol.util.Binary;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Index;
 import org.apache.lucene.document.Field.Store;
-import org.apache.lucene.document.SetBasedFieldSelector;
+import org.apache.lucene.document.FieldSelector;
+import org.apache.lucene.document.FieldSelectorResult;
+import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Scorer;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.util.Version;
 import org.gridkit.coherence.search.IndexInvocationContext;
 import org.gridkit.coherence.search.IndexUpdateEvent;
 import org.gridkit.coherence.search.IndexUpdateEvent.Type;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import com.tangosol.util.Binary;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
@@ -47,27 +51,32 @@ import java.util.Set;
 class LuceneInMemoryIndex {
 
 	public static final String DOCUMENT_KEY = "@doc-key";
+	public static final FieldSelector DOCUMENT_KEY_SELECTOR = new DocKeyFieldSelector();
 	
 	private Directory storage;
 	private Analyzer analyzer;
 	
+	private IndexWriter writer;
 	private IndexSearcher searcher;
 	
 	public LuceneInMemoryIndex(Directory directory, Analyzer analyzer) {
 		this.storage = directory;
 		this.analyzer = analyzer;
+		IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_33, analyzer);
+		try {
+			writer = new IndexWriter(storage, iwc);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	public synchronized void update(Map<Object, IndexUpdateEvent> events, IndexInvocationContext ctx) {
-		IndexWriter writer = null;
-
 		try {
 			if (searcher != null) {
 				searcher.close();
 				searcher = null;
 			}
 
-			writer = new IndexWriter(storage, analyzer, IndexWriter.MaxFieldLength.UNLIMITED);
 			try {
 				for(IndexUpdateEvent event: events.values()) {
 					if (event.getType() == Type.NOPE) {
@@ -89,9 +98,10 @@ class LuceneInMemoryIndex {
 				}
 			}
 			finally {
-				writer.optimize();
-				writer.close();
-				searcher = new IndexSearcher(storage);
+//				writer.optimize();
+//				writer.close();
+				writer.commit();
+				searcher = new IndexSearcher(IndexReader.open(writer, true));
 			}
 			
 		} catch (IOException e) {
@@ -100,7 +110,7 @@ class LuceneInMemoryIndex {
 		}
 	}
 
-	public synchronized void applyIndex(Query query, final Set<Object> keySet,	final IndexInvocationContext context) {
+	public synchronized void applyIndex(Query query, final Set<Object> keySet, final IndexInvocationContext context) {
 		if (searcher == null) {
 			// index is empty
 			keySet.clear();
@@ -110,6 +120,8 @@ class LuceneInMemoryIndex {
 		try {
 			searcher.search(query, new Collector() {
 				
+				IndexReader reader;
+				
 				@Override
 				public void setScorer(Scorer scorer) throws IOException {
 					// ignore
@@ -117,13 +129,12 @@ class LuceneInMemoryIndex {
 				
 				@Override
 				public void setNextReader(IndexReader reader, int docBase) throws IOException {
-					// ignore
+					this.reader = reader; 
 				}
 				
 				@Override
-				@SuppressWarnings("unchecked")
 				public void collect(int doc) throws IOException {
-					Document document = searcher.doc(doc, new SetBasedFieldSelector(Collections.singleton(LuceneInMemoryIndex.DOCUMENT_KEY), Collections.EMPTY_SET));
+					Document document = reader.document(doc, DOCUMENT_KEY_SELECTOR);
 					String key64 = document.get(LuceneInMemoryIndex.DOCUMENT_KEY);
 					Binary bin = new Binary(fromBase64(key64));
 					Object key = context.ensureFilterCompatibleKey(bin);
@@ -144,12 +155,23 @@ class LuceneInMemoryIndex {
 		keySet.retainAll(retained);
 	}	
 	
-    private Document makeDoc(String keyHex, Field[] value) {
+    public synchronized IndexSearcher getSearcher() {
+		try {
+			IndexSearcher searcher = new IndexSearcher(storage);
+			return searcher;
+		} catch (CorruptIndexException e) {
+			throw new RuntimeException(e);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+    
+	private Document makeDoc(String keyHex, Field[] value) {
 		Document doc = new Document();
 		for(int i = 0; i != value.length; ++i) {
 			doc.add(value[i]);
 		}
-		doc.add(new Field(DOCUMENT_KEY, keyHex, Store.YES, Index.NOT_ANALYZED));
+		doc.add(new Field(DOCUMENT_KEY, keyHex, Store.YES, Index.NOT_ANALYZED_NO_NORMS));
 		return doc;
 	}
 
@@ -159,5 +181,20 @@ class LuceneInMemoryIndex {
 
     private byte[] fromBase64(String text) {
     	return Base64.base64ToByteArray(text);
+    }    
+    
+    public static class DocKeyFieldSelector implements FieldSelector {
+
+    	private static final long serialVersionUID = 20110823L;
+
+		@Override
+		public FieldSelectorResult accept(String fieldName) {
+			if (DOCUMENT_KEY.equals(fieldName)) {
+				return FieldSelectorResult.LOAD_AND_BREAK;
+			}
+			else {
+				return FieldSelectorResult.NO_LOAD;
+			}
+		}
     }
 }
