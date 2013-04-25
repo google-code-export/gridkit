@@ -134,6 +134,12 @@ class NodeWrapper extends ViNode.Delegate implements CohNode {
 	}
 
 	@Override
+	public CohNode logLevel(int level) {
+		CohHelper.setLogLevel(this, level);
+		return this;
+	}
+
+	@Override
 	public CohNode enableJmx(boolean enable) {
 		CohHelper.enableJmx(this, enable);
 		return this;

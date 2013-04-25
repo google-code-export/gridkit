@@ -119,6 +119,8 @@ public interface CohCloud {
 
 		CohNode setClusterLocalPort(int port);
 		
+		CohNode logLevel(int level);
+		
 		/**
 		 * Enable or disable Coherence MBeans.
 		 * <br/>

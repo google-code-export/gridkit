@@ -132,6 +132,10 @@ public class CohHelper {
 		applyOperationalConfigFragment(node, new AddWkaAddress(host, port));
 	}
 	
+	public static void setLogLevel(ViConfigurable node, int level) {
+		node.setProp("tangosol.coherence.log.level", String.valueOf(level));
+	}
+	
 	public static void enableJmx(ViConfigurable node, boolean enable) {
 		String hookName = "wipeout-jmx";
 		if (enable) {

@@ -109,6 +109,10 @@ public class CacheConfig {
 	public static RemoteCacheScheme remoteCacheScheme() {
 		return new RemoteCacheSchemeBuilder();
 	}
+
+	public static ReplicatedScheme replicatedScheme() {
+		return new ReplicatedSchemeBuilder();
+	}
 	
 	public static Instantiation intantiate(Class<?> c, Object... args) {
 		Class<?>[] paramTypes = toParamTypes(args);
@@ -340,6 +344,23 @@ public class CacheConfig {
 		
 		void autoStart(boolean enabled);
 	}
+
+	public interface ReplicatedScheme extends CacheScheme, BackingMap {
+
+		ReplicatedScheme copy();
+		
+		void serviceName(String serviceName);
+		
+		void serializer(String name);
+		
+		void serializer(Class<?> type, Object... arguments);
+
+		void serializer(Instantiation instance);
+
+		void backingMapScheme(CacheScheme backingMap);
+				
+		void autoStart(boolean enabled);
+	}	
 	
 	public interface ProxyScheme extends ServiceScheme {
 		
@@ -690,6 +711,62 @@ public class CacheConfig {
 			addElement("backing-map-scheme", backingMap);
 		}
 
+		@Override
+		public void autoStart(boolean enabled) {
+			addElement("autostart", enabled);
+		}
+	}
+
+	private static class ReplicatedSchemeBuilder extends BaseXmlBuilder implements ReplicatedScheme {
+		
+		public ReplicatedSchemeBuilder() {
+			super("replicated-scheme");
+		}
+		
+		private ReplicatedSchemeBuilder(XmlElement xml) {
+			super(xml);
+		}
+		
+		@Override
+		public ReplicatedScheme copy() {
+			return new ReplicatedSchemeBuilder(getXml());
+		}
+		
+		@Override
+		public void schemeRef(String name) {
+			addElement("scheme-ref", name);			
+		}
+		
+		@Override
+		public void schemeName(String name) {
+			addElement("scheme-name", name);
+		}
+		
+		@Override
+		public void serviceName(String serviceName) {
+			addElement("service-name", serviceName);
+		}
+		
+		@Override
+		public void serializer(String name) {
+			addElement("serializer", name);
+		}
+		
+		@Override
+		public void serializer(Class<?> type, Object... arguments) {
+			serializer(intantiate(type, arguments));
+		}
+		
+		@Override
+		public void serializer(Instantiation instance) {
+			addElementContent("serializer", instance.getXml());
+		}
+
+		@Override
+		public void backingMapScheme(CacheScheme backingMap) {
+			addElement("backing-map-scheme", backingMap);
+		}		
+		
 		@Override
 		public void autoStart(boolean enabled) {
 			addElement("autostart", enabled);
