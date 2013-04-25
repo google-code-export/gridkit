@@ -18,7 +18,7 @@ package org.gridkit.coherence.chtest;
 import java.io.Serializable;
 
 import com.tangosol.net.CacheFactory;
-import com.tangosol.net.ConfigurableCacheFactory;
+import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.run.xml.XmlElement;
 
 @SuppressWarnings("serial")
@@ -32,9 +32,14 @@ class CacheConfigInjecter implements Runnable, Serializable {
 
 	@Override
 	public void run() {
-		ConfigurableCacheFactory factory = CacheFactory.getConfigurableCacheFactory();
-		XmlElement element = factory.getConfig();
-		fragment.inject(element);
-		factory.setConfig(element);
+		try {
+			DefaultConfigurableCacheFactory factory = (DefaultConfigurableCacheFactory) CacheFactory.getConfigurableCacheFactory();
+			XmlElement element = factory.getConfig();
+			fragment.inject(element);
+			factory.setConfig(element);
+		}
+		catch(ClassCastException e) {
+			throw new IllegalArgumentException("Cache config injection works only with DefaultConfigurableCacheFactory");
+		}
 	}
 }
