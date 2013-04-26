@@ -23,7 +23,6 @@ public class ZkBenchRun {
 	@Test
 	public void start_only() {
 		cloud.nodes("ZK.1", "ZK.2", "ZK.3");
-//		ViProps.at(cloud.node("ZK.1")).setInProcessType();
 
 		new ZkBench(new ZkBenchConfig()).startZooKeeper(cloud);
 	}

@@ -57,7 +57,7 @@ public class ZooEnsemble {
 		String hostname = node.exec(new Callable<String>() {
 			@Override
 			public String call() throws Exception {
-				return Inet4Address.getLocalHost().getHostName();
+				return Inet4Address.getLocalHost().getHostAddress();
 			}
 		});
 

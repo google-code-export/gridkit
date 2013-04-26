@@ -33,9 +33,9 @@ import org.gridkit.nimble.metering.PointSampler;
 import org.gridkit.nimble.metering.RawSampleCollector;
 import org.gridkit.nimble.metering.SamplerBuilder;
 import org.gridkit.nimble.monitoring.MonitoringStack;
-import org.gridkit.nimble.monitoring.ProcessCpuMonitoring;
 import org.gridkit.nimble.monitoring.StandardSamplerReportBundle;
 import org.gridkit.nimble.monitoring.SysPropSchemaConfig;
+import org.gridkit.nimble.monitoring.sys.ProcessCpuMonitoring;
 import org.gridkit.nimble.orchestration.ScenarioBuilder;
 import org.gridkit.nimble.orchestration.TimeLine;
 import org.gridkit.nimble.pivot.Pivot;
@@ -107,6 +107,7 @@ public class ZkBench {
 		mon.sortByField(SamplerBuilder.DESCRIMINATOR);		
 		mon.sortByField(Measure.NAME);
 		mon.showWeightedFrequency(false);		
+		mon.showValueDistribution(false);		
 		mstack.addBundle(mon, "Operation statistics");
 	}
 
@@ -234,7 +235,7 @@ public class ZkBench {
 			sb.sleep(5000);
 			sb.join("start");
 			sb.from("start");
-			Activity act = exec.start(r, config.getReaderExecConfig(), null);
+			Activity act = exec.start(r, config.getReaderExecConfig());
 			sb.from("stop");
 			act.stop();
 			sb.fromStart();
@@ -247,7 +248,7 @@ public class ZkBench {
 			Runnable r = driver.getWriter(md);
 			sb.join("start");
 			sb.from("start");
-			Activity act = exec.start(r, config.getWriteExecConfig(), null);
+			Activity act = exec.start(r, config.getWriteExecConfig());
 			sb.from("stop");
 			act.stop();
 			sb.fromStart();
