@@ -1,20 +1,20 @@
-package org.gridkit.coherence.util.dataloss;
+package org.gridkit.coherence.cachewatchdog;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.Assert;
 
-public class DataLossMonitorTest_Statics {
+public class PartitionMonitorTest_Statics {
 
-	private static DataLossMonitorTest_Statics INSTANCE = new DataLossMonitorTest_Statics();
+	private static PartitionMonitorTest_Statics INSTANCE = new PartitionMonitorTest_Statics();
 	
-	public static DataLossMonitorTest_Statics getInstance() {
+	public static PartitionMonitorTest_Statics getInstance() {
 		return INSTANCE;
 	}
 
 	public static void reset() {
-		INSTANCE = new DataLossMonitorTest_Statics();
+		INSTANCE = new PartitionMonitorTest_Statics();
 	}
 	
 	public CountDownLatch[] latches;

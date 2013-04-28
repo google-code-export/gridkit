@@ -1,4 +1,19 @@
-package org.gridkit.coherence.util.dataloss;
+/**
+ * Copyright 2013 Alexey Ragozin
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.gridkit.coherence.cachewatchdog;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,21 +55,21 @@ import com.tangosol.util.processor.ConditionalRemove;
 
 /**
  * <p>
- * {@link DataLossMonitor} helps to track data consistency in Coherence cache.
+ * {@link PartitionMonitor} helps to track data consistency in Coherence cache.
  * Each partition in cache has associated consistency flag (canary key).
  * <br/>
- * In partition without such flag is present {@link DataLossMonitor} will invoke user provided {@link PartitionListener}
+ * In partition without such flag is present {@link PartitionMonitor} will invoke user provided {@link PartitionListener}
  * which is supposed to preload data in partition. Once {@link PartitionListener} for partition is executed, consitency flag would be set.
  * <br/>
  * Consistency flag cloud be reset again if data would be lost do to failure of cluster storage node.
  * <br/>
- * {@link DataLossMonitor} is using distributed locks to ensure what each partition would be preloaded exectly once.
- * Multiple instances of {@link DataLossMonitor} cloud work concurrently.
+ * {@link PartitionMonitor} is using distributed locks to ensure what each partition would be preloaded exectly once.
+ * Multiple instances of {@link PartitionMonitor} cloud work concurrently.
  * <br/>
- * {@link DataLossMonitor} is encapsulating a thread pool, so it is recommended to have single instance {@link DataLossMonitor} per JVM.
+ * {@link PartitionMonitor} is encapsulating a thread pool, so it is recommended to have single instance {@link PartitionMonitor} per JVM.
  * </p>
  * <p>
- * {@link DataLossMonitor} requires following elements in {@code cache-config.xml}
+ * {@link PartitionMonitor} requires following elements in {@code cache-config.xml}
  * <br/>
  * In {@code <caching-scheme-mapping>} add element
  * <pre>
@@ -86,9 +101,9 @@ import com.tangosol.util.processor.ConditionalRemove;
  * 
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class DataLossMonitor {
+public class PartitionMonitor {
 
-	private final static Logger LOGGER = LoggerFactory.getLogger(DataLossMonitor.class);
+	private final static Logger LOGGER = LoggerFactory.getLogger(PartitionMonitor.class);
 	
 	private String canaryCacheName = "CANARY_CACHE";
 	private ExecutorService workerPool;
@@ -99,11 +114,11 @@ public class DataLossMonitor {
 	private boolean terminated = false;
 	private MembershipListener memberListener = new MembershipListener();
 	
-	public DataLossMonitor() {
+	public PartitionMonitor() {
 		this(16);
 	}
 
-	public DataLossMonitor(int poolSize) {
+	public PartitionMonitor(int poolSize) {
 		workerPool = new ThreadPoolExecutor(poolSize, poolSize, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(), new ThreadFactory() {
 			@Override
 			public Thread newThread(Runnable r) {
