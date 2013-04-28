@@ -25,14 +25,26 @@
     </parent>
 
     <artifactId>pof-viewer</artifactId>
-    <name>Coherence POF viewer</name>
+    <name>${project.groupId}::${project.artifactId}</name>
     <description>Tool for fine printing of POF binary without deserialization</description>
     <packaging>jar</packaging>
     <version>0.3-SNAPSHOT</version>
 
-    <properties>
-        <javaVersion>1.6</javaVersion>
-    </properties>
+    <licenses>
+      <license>
+        <name>The Apache Software License, Version 2.0</name>
+        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        <distribution>repo</distribution>
+      </license>
+    </licenses>
+
+    <developers>
+      <developer>
+        <id>alexey.ragozin</id>
+        <name>Alexey Ragozin</name>
+        <email>alexey.ragozin@gmail.com</email>
+      </developer>
+    </developers>
 
     <scm>
         <connection>scm:svn:http://gridkit.googlecode.com/svn/coherence-tools/trunk/pof-viewer</connection>
@@ -40,16 +52,22 @@
         <url>http://gridkit.googlecode.com/svn/coherence-tools/trunk/pof-viewer</url>
     </scm>
 
+    <properties>
+        <javaVersion>1.6</javaVersion>
+        <coherence.version>3.7.1.3</coherence.version>
+        <junit.version>4.10</junit.version>
+    </properties>
+    
     <dependencies>
         <dependency>
             <groupId>com.oracle.coherence</groupId>
             <artifactId>coherence</artifactId>
-            <version>3.7.1.3</version>
+            <version>${coherence.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.10</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -62,7 +80,7 @@
             <groupId>org.apache.thrift</groupId>
             <artifactId>libthrift</artifactId>
             <version>0.8.0</version>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.gridkit.coherence.utils</groupId>

@@ -26,7 +26,7 @@
 	<groupId>org.gridkit.coherence-tools</groupId>
 	<artifactId>distributed-resource-coordinator</artifactId>
 	<version>0.1.1-SNAPSHOT</version>
-	<name>distributed-resource-coordinator</name>
+	<name>${project.groupId}::${project.artifactId}</name>
 	<description>Distributed coordinator for nodes-shared resources, such as db and *extend connections</description>
 	
 	<properties>
