@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 
 import com.tangosol.io.pof.ConfigurablePofContext;
 import com.tangosol.io.pof.PofReader;
@@ -28,6 +29,7 @@ import com.tangosol.io.pof.PofWriter;
 import com.tangosol.util.Binary;
 import com.tangosol.util.ExternalizableHelper;
 
+@Ignore("Shouldn't be here any way")
 public class RefTest {
 
 	/* below context of ref-object-pof-config.xml

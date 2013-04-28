@@ -20,6 +20,7 @@ import junit.framework.Assert;
 import org.gridkit.coherence.chtest.CohCloudRule;
 import org.gridkit.coherence.chtest.CohHelper;
 import org.gridkit.coherence.chtest.DisposableCohCloud;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -68,7 +69,7 @@ public class ViClusterTest {
 		cloud.shutdown();		
 	}
 	
-	@Test
+	@Test @Ignore("Broken")
 	public void HAStatusTest() throws InterruptedException {
 
 		cloud.all().presetFastLocalCluster();

@@ -18,7 +18,7 @@ import org.junit.Test;
 
 import com.tangosol.coherence.component.application.console.Coherence;
 
-public class ManifestVerificator {
+public class ManifestVerificatorTest {
 
 	private DisposableCohCloud cloud = new DisposableCohCloud();
 
