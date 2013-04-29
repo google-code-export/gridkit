@@ -124,10 +124,15 @@
                 <version>2.14.1</version>
                 <configuration>
                     <!-- Decoration is causing problem in certain environments -->
-                    <argLine>-Dgridkit.isolate.class-source-decoration=false</argLine>
-                	<reuseForks>false</reuseForks>
+                    <argLine>
+                        -server
+                        -Xms=300m -Xmx=300m
+                        -XX:MaxPermSize=80m
+                        -Dgridkit.isolate.class-source-decoration=false
+                    </argLine>
+                    <reuseForks>false</reuseForks>
                     <includes>
-                    	<include>**/*TestPlan.java</include>
+                        <include>**/*TestPlan.java</include>
                     </includes>
                 </configuration>
             </plugin>
