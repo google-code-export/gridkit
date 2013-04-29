@@ -126,7 +126,7 @@
                     <!-- Decoration is causing problem in certain environments -->
                     <argLine>
                         -server
-                        -Xms=300m -Xmx=300m
+                        -Xms300m -Xmx300m
                         -XX:MaxPermSize=80m
                         -Dgridkit.isolate.class-source-decoration=false
                     </argLine>
