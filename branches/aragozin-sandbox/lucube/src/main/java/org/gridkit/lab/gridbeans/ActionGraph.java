@@ -5,49 +5,76 @@ import java.util.Set;
 
 public interface ActionGraph {
 
-	public Set<Action> getAllActions();
+	public Set<Action> allActions();
 	
-	public Set<Bean> getAllBeans();
+	public Set<Bean> allBeans();
 	
-	public Set<CallAction> getAllCalls(Bean bean, Method method);
+	public Bean getNamed(Object name);
+	
+	public Set<ActionSite> allSites();
+
+	public Set<ActionSite> allSites(Method method);
+
+	public Set<Action> allCalls(ActionSite site);
+
+	public Set<Action> allCalls(Bean bean, Method method);
+	
+	public Set<Action> allConsumer(Bean bean);
+
+	public void addDependency(Action from, Action to);
+
+	public void removeDependency(Action from, Action to);
+
+	public Set<Action> getInitialActions();
+
+	public Set<Action> getUpstream(Action action);
+
+	public Set<Action> getDownstream(Action action);
+
+	public Set<Action> getTerminalActions();
+	
+	public void unify(Bean bean1, Bean bean2);
+
+	public void unify(Action action1, Action action2);
 	
 	public static interface Bean {
 
-		public String describe();
 	}
 
-	public static interface CallSite {
+	public static interface ActionSite {
 		
-		public int getCallId();
+		/** Global chronological sequence number */
+		public int getSeqNo();
+		
+		public Method getMethod();
+
+		/**
+		 * Runtime method may be not accurate due to nature of proxy class.
+		 * This method returns all alternative method declaration.
+		 */
+		public Set<Method> allMethodAliases();
 		
 		public StackTraceElement[] getStackTrace();
 		
 	}
 	
+	public static interface ExternalBean extends Bean {
+		
+		public Object getName();
+		
+	}
+	
+	public static interface LocalBean extends Bean {
+		
+		public Action getOrigin();
+		
+	}
+	
 	public static interface Action {
 
-		public CallSite getCallSite();
+		public ActionSite getSite();
 		
-		public String describe();
-	}
-	
-	public static interface InjectedBean {
-		
-		public Object getId();
-		
-	}
-	
-	public static interface LocalBean {
-		
-		public CallAction getOrigin();
-		
-	}
-	
-	public static interface CallAction extends Action {
-		
-		public Method getMethod();
-		
-		public Set<Method> getMethodAliases();
+		public Bean getHostBean();
 		
 		public Bean getResultBean();
 		
@@ -56,8 +83,16 @@ public interface ActionGraph {
 		public Bean[] getBeanParams();
 		
 	}
-
-	public static interface SyncPoint extends Action {
+	
+	public static interface TrackingObserver {
+		
+		public void afterAction(ActionGraph graph, ActionSite site);
+		
+	}
+	
+	public static interface BeanResolver {
+		
+		public Bean resolve(ActionGraph graph, Object runtimeProxy);
 		
 	}
 }
