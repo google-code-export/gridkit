@@ -14,7 +14,7 @@ public interface ActiveNode extends MonitoringTarget {
 		}
 	}
 	
-	public interface ActiveNodeSource extends Source<ActiveNode>, SamplerHost<ActiveNodeSource, ActiveNode> {
+	public interface ActiveNodeSource extends Source<ActiveNode>, Observable<ActiveNodeSource, ActiveNode> {
 	
 		public ActiveNodeSource filter(String pattern);
 		

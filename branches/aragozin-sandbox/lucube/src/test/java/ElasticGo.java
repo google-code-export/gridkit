@@ -21,8 +21,8 @@ public class ElasticGo {
 		
 		Client client = node.client();
 		
-		RootObjectMapper.Builder rom = new RootObjectMapper.Builder()
-		DocumentMapper.Builder builder = new DocumentMapper.Builder("test-index", null, builder); 
+		RootObjectMapper.Builder rom = new RootObjectMapper.Builder("enitity");
+		DocumentMapper.Builder builder = new DocumentMapper.Builder("test-index", null, rom); 
 		
 		client.admin().indices().prepareCreate("test-index")
 		.

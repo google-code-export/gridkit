@@ -16,13 +16,13 @@ public class MonitoringSchema implements Source<Experiment> {
 	}
 
 	@Override
-	public SamplerHost<? extends Source<Experiment>, Experiment> known() {
+	public Observable<? extends Source<Experiment>, Experiment> known() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public SamplerHost<? extends Source<Experiment>, Experiment> all() {
+	public Observable<? extends Source<Experiment>, Experiment> all() {
 		// TODO Auto-generated method stub
 		return null;
 	}
