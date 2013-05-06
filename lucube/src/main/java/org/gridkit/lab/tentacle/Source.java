@@ -6,8 +6,8 @@ public interface Source<T extends MonitoringTarget> {
 	
 	public <S extends Source<?>> S hosts(Class<S> hostType);
 	
-	public SamplerHost<? extends Source<T>, T> known();
+	public Observable<? extends Source<T>, T> known();
 
-	public SamplerHost<? extends Source<T>, T> all();
+	public Observable<? extends Source<T>, T> all();
 	
 }

@@ -16,7 +16,7 @@ public interface LocalJavaProcess extends LocalProcess {
 		
 	}
 	
-	public interface LocalJavaProcessSource extends Source<LocalJavaProcess>, SamplerHost<LocalJavaProcessSource, LocalJavaProcess> {
+	public interface LocalJavaProcessSource extends Source<LocalJavaProcess>, Observable<LocalJavaProcessSource, LocalJavaProcess> {
 	
 		public LocalJavaProcessSource filter(String propPattern);
 		
