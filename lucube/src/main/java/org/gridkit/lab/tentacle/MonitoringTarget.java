@@ -6,4 +6,6 @@ package org.gridkit.lab.tentacle;
  */
 public interface MonitoringTarget {
 
+	public ObservationHost getObservationHost();
+	
 }

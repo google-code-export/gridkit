@@ -1,14 +1,24 @@
 package org.gridkit.lab.tentacle;
 
-import org.gridkit.lab.tentacle.ActiveNode.ActiveNodeExpander;
+import org.gridkit.lab.gridbeans.GraphUtils;
 import org.gridkit.lab.tentacle.ActiveNode.ActiveNodeSource;
 import org.junit.Test;
 
 public class Example {
 
-	enum HostType {
+	public interface HostType extends Sample {
+		public String hostType();
+	}
+	
+	enum HostTypes implements HostType {
 		CLUSTER,
 		WORKER
+		;
+
+		@Override
+		public String hostType() {
+			return toString();
+		}
 	}
 	
 	@Test
@@ -16,22 +26,17 @@ public class Example {
 		
 		MonitoringSchema schema = new MonitoringSchema();
 		
-		schema.find(ActiveNode.ALL)
-			.report(ActiveNode.HOSTNAME);
+		schema.at(ActiveNode.ALL)
+			.mark(ActiveNode.HOSTNAME);
 		
-		ActiveNodeSource mon = schema.find(ActiveNode.ALL).filter("**.MON.**");
-		mon.mark(HostType.CLUSTER);
+		ActiveNodeSource mon = schema.at(ActiveNode.ALL).filter("**.MON.**");
+		mon.mark(HostTypes.CLUSTER);
 		
-		mon.find(LocalJavaProcess.ALL)
+		mon.at(LocalJavaProcess.ALL)
 			.filter("user.dir=/local/apps/**")
-			.find(AttachJmxTarget.X);
+			.at(AttachJmxTarget.X);
 		
-		mon.find(SysMon.PS)
-		
-		
-		
-		
-		
+		System.out.println(GraphUtils.dump(schema.getActionGraph()));
 	}
 	
 }

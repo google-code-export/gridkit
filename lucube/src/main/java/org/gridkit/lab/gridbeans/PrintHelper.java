@@ -43,6 +43,20 @@ class PrintHelper {
 		return sb.toString();
 	}
 
+	public static String getCallDescriction(Action a) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(a.getResultBean()).append(" <- ");
+		sb.append(a.getHostBean()).append(".");
+		sb.append(a.getSite().getMethod().getName());
+		if (a.getGroundParams().length == 0) {
+			sb.append("()");
+		}
+		else {
+			sb.append("(").append(getParamsDescription(a)).append(')');
+		}
+		return sb.toString();
+	}
+
 	private static Object getParamsDescription(Action a) {
 		StringBuilder sb = new StringBuilder();
 		for(int i = 0; i != a.getBeanParams().length; ++i) {

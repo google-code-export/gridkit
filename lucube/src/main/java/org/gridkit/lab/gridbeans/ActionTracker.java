@@ -202,7 +202,11 @@ public class ActionTracker {
 		return site;
 	}
 	
-	protected UniqueBean newCallAction(UniqueBean target, CallSite site, Method m, Object[] groundParams, UniqueBean[] beanParams) {
+	protected UniqueBean newCallAction(UniqueBean target, CallSite site, Method m, TrackedType dtype, Object[] groundParams, UniqueBean[] beanParams) {
+		
+		if (dtype == null) {
+			dtype = new TrackedType(m.getReturnType());
+		}
 		
 		Call call = new Call();
 		call.actionId = actionCounter.getAndIncrement();
@@ -214,7 +218,7 @@ public class ActionTracker {
 			call.beanParams[i] = beanParams[i] == null ? -1 : beanParams[i].beanId;
 		}
 		
-		Class<?> type = resultType(m);
+		Class<?> type = resultType(m, dtype);
 		if (type != null) {
 			UniqueBean bean = newLocalBean(type, call);
 			call.beanResult = bean.beanId;
@@ -228,8 +232,8 @@ public class ActionTracker {
 		return beanDeref.get(call.beanResult);		
 	}
 	
-	private Class<?> resultType(Method m) {
-		Class<?> rt = m.getReturnType();
+	private Class<?> resultType(Method m, TrackedType dtype) {
+		Class<?> rt = dtype.getRawType();
 		if (rt.isInterface()) {
 			return rt;
 		}
@@ -339,7 +343,23 @@ public class ActionTracker {
 		}
 
 		@Override
-		public Set<Action> allCalls(final Bean bean, final Method method) {
+		public Set<Action> allActions(final ActionSite site) {
+			if (site != null) {
+				verify(site);
+			}
+			return searchActions(new Filter<Call>() {
+				@Override
+				public boolean eval(Call call) {
+					if (site != null && call.site != site) {
+						return false;
+					}
+					return true;
+				}
+			});
+		}
+
+		@Override
+		public Set<Action> allActions(final Bean bean, final Method method) {
 			return searchActions(new Filter<Call>() {
 				@Override
 				public boolean eval(Call call) {
@@ -370,6 +390,24 @@ public class ActionTracker {
 			}
 			else {
 				throw new IllegalArgumentException("Action '" + a + "' does not belong to this graph");
+			}
+		}
+
+		private CallSite verify(ActionSite s) {
+			if (s instanceof CallSite && ((CallSite) s).getHost() == ActionTracker.this) {
+				return (CallSite) s;
+			}
+			else {
+				throw new IllegalArgumentException("Site '" + s + "' does not belong to this graph");
+			}
+		}
+
+		private UniqueBean verify(Bean b) {
+			if (b instanceof BeanHandle && ((BeanHandle)b).getHost() == ActionTracker.this) {
+				return ((BeanHandle)b).bean;
+			}
+			else {
+				throw new IllegalArgumentException("Bean '" + b + "' does not belong to this graph");
 			}
 		}
 		
@@ -428,12 +466,131 @@ public class ActionTracker {
 			});
 		}
 
+		@Override
+		public void unify(Bean victim, Bean victor) {
+			UniqueBean mb1 = verify(victim);
+			UniqueBean mb2 = verify(victor);
+			
+			if (mb1 instanceof ExternalBean) {
+				throw new IllegalArgumentException("Bean '" + mb1 + "' should be external");
+			}
+			if (mb2 instanceof ExternalBean) {
+				throw new IllegalArgumentException("Bean '" + mb2 + "' should be external");
+			}
+
+			if (mb1.runtimeType != mb2.runtimeType) {
+				throw new IllegalArgumentException("Bean type mismatch " + mb1.runtimeType.getName() + " != " + mb2.runtimeType.getName());
+			}
+
+			replaceBean(mb1, mb2);
+			
+			namedBeans.remove(((ExternalBean)mb1).getName());
+			namedBeans.put(((ExternalBean)mb2).getName(), mb2);
+			beans.remove(mb1);
+		}
+
+		@Override
+		public void unify(Action twin1, Action twin2) {
+			Call a1 = verify(twin1);
+			Call a2 = verify(twin2);
+			if (a1 == a2) {
+				throw new IllegalArgumentException("Actions are same");
+			}
+			if (a1.site != a2.site) {
+				throw new IllegalArgumentException("Actions should belong to same site");
+			}
+			if (a1.getHostBean() != a2.getHostBean()) {
+				throw new IllegalArgumentException("Actions be called on same bean");
+			}
+			if (!Arrays.equals(a1.groundParams, a2.groundParams) || !Arrays.equals(a1.beanParams, a2.beanParams)) {
+				throw new IllegalArgumentException("Actions should have same arguments");
+			}
+			
+			Bean r1 = a1.getResultBean();
+			Bean r2 = a2.getResultBean();
+			
+			calls.remove(a2);
+			
+			for(Call a: calls) {
+				if (a.dependencies.contains(a2)) {
+					a.dependencies.remove(a2);
+					if (!a.dependencies.contains(a1)) {
+						a.dependencies.add(a1);
+					}
+				}
+			}
+			
+			for(Call dep: a2.dependencies) {
+				if (!a1.dependencies.contains(dep)) {
+					a1.dependencies.add(dep);
+				}
+			}
+			
+			if (r1 != null) {
+				beans.remove(verify(r2));
+				replaceBean(verify(r2), verify(r1));
+			}
+		}
+
+		@Override
+		public void unify(Action action, Bean bean) {
+			Call a = verify(action);
+			UniqueBean b = verify(bean);
+			
+			if (a.getResultBean() == null) {
+				throw new IllegalArgumentException("Action does not produce bean to unify");
+			}
+			
+			if (a.getResultBean().getType() != b.runtimeType) {
+				throw new IllegalArgumentException("Bean type mismatch " + a.getResultBean().getType() + " != " + b.runtimeType);
+			}
+			
+			UniqueBean r = verify(a.getResultBean());
+			replaceBean(r, b);
+			beans.remove(r);
+			
+			removeActionInternal(a);
+		}
+
+		@Override
+		public void eliminate(Action action) {
+			Call a = verify(action);
+			
+			if (a.getResultBean() == null && allConsumer(a.getResultBean()).isEmpty()) {
+				removeActionInternal(a);
+				if (a.getResultBean() != null) {
+					UniqueBean r = verify(a.getResultBean());
+					beans.remove(r);
+				}
+			}
+		}
+		
+		private void replaceBean(UniqueBean mb1, UniqueBean mb2) {
+			beanDeref.put(mb1.beanId, mb2);
+		}
+
+		private void removeActionInternal(Call c) {
+			calls.remove(c);
+			
+			for(Call x: calls) {
+				x.dependencies.remove(c);
+			}
+			
+			if (allActions(c.getSite()).isEmpty()) {
+				sites.remove(c.site);
+			}
+		}
 	}
 	
 	private class BeanHandle implements Bean {
 		
 		protected UniqueBean bean;
 		
+		@Override
+		public Class<?> getType() {
+			return bean.runtimeType;
+		}
+
 		public ActionTracker getHost() {
 			return ActionTracker.this;
 		}
@@ -490,7 +647,7 @@ public class ActionTracker {
 		
 		public TrackedBean getProxy() {
 			if (mock == null) {
-				BeanInvocationHandler handler = new BeanInvocationHandler(ActionTracker.this, new int[]{beanId}, Collections.<Class<?>>singleton(runtimeType));
+				BeanInvocationHandler handler = new BeanInvocationHandler(ActionTracker.this, new int[]{beanId}, runtimeType);
 				mock = handler.newProxy();
 			}
 			return mock;
@@ -562,6 +719,10 @@ public class ActionTracker {
 		private Set<Method> methodAliases;
 		private StackTraceElement[] trace;
 		
+		public ActionTracker getHost() {
+			return ActionTracker.this;
+		}
+		
 		@Override
 		public int getSeqNo() {
 			return seqNo;
@@ -594,10 +755,17 @@ public class ActionTracker {
 		private final int[] targets;
 		private final Set<Class<?>> runtimeType;
 		
-		public BeanInvocationHandler(ActionTracker host, int[] targets, Set<Class<?>> runtimeType) {
+		private final TrackedType dynamicType;
+		
+		public BeanInvocationHandler(ActionTracker host, int[] targets, Class<?> runtimeType) {
+			this(host, targets, Collections.<Class<?>>singleton(runtimeType), new TrackedType(runtimeType));
+		}
+
+		public BeanInvocationHandler(ActionTracker host, int[] targets, Set<Class<?>> runtimeType, TrackedType dynamicType) {
 			this.host = host;
 			this.targets = targets;
 			this.runtimeType = runtimeType;
+			this.dynamicType = dynamicType;
 		}
 
 		public TrackedBean newProxy() {
@@ -621,13 +789,21 @@ public class ActionTracker {
 			else {
 				
 				CallSite site = host.newSite(method, proxy.getClass());
-				Object result = processCall(method, args, site);
+				TrackedType rtype;
+				if (dynamicType == null) {
+					rtype = new TrackedType(proxy.getClass()).resolve(method, args);
+				}
+				else {
+					rtype = dynamicType.resolve(method, args);
+				}
+				
+				Object result = processCall(method, rtype, args, site);
 				host.afterAction(site);
 				return result;
 			}
 		}
 
-		public Object processCall(Method method, Object[] args, CallSite site) {
+		public Object processCall(Method method, TrackedType resultType, Object[] args, CallSite site) {
 			
 			Object[] grounds = filterGounds(args);
 			
@@ -638,7 +814,7 @@ public class ActionTracker {
 			UniqueBean[] results = new UniqueBean[ftargets.length];
 			
 			for(int i = 0; i != ftargets.length; ++i) {
-				results[i] = host.newCallAction(ftargets[i], site, method, grounds, beans);
+				results[i] = host.newCallAction(ftargets[i], site, method, resultType, grounds, beans);
 			}
 			
 			if (results[0] == null) {
@@ -743,7 +919,7 @@ public class ActionTracker {
 				throw new IllegalArgumentException("Cannot find common interface for types: " + types);
 			}
 			
-			BeanInvocationHandler handler = new BeanInvocationHandler(host, toIds(ntargets.toArray(new UniqueBean[0])), facade);
+			BeanInvocationHandler handler = new BeanInvocationHandler(host, toIds(ntargets.toArray(new UniqueBean[0])), facade, null);
 			
 			return (T) handler.newProxy();
 		}

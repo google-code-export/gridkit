@@ -1,16 +1,37 @@
 package org.gridkit.lab.gridbeans.gridrunner;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.gridkit.lab.gridbeans.ActionTracker;
+
 public class GridScript {
 
-	public Checkpoint checkpoint() {
+	private Map<String, SiteGraph> sites = new HashMap<String, SiteGraph>();
+	private Map<String, Checkpoint> 
+	
+	public Checkpoint checkpoint(String name) {
 		
 	}
 	
-	public Scope auto() {
+	public void sync() {
+		
+	}
+
+	public Site master() {
 		
 	}
 	
-	public Scope at(String pattern) {
+	public Site onDemand() {
+		
+	}
+	
+	public Site at(String pattern) {
+		
+	}
+	
+	
+	private class SiteGraph extends ActionTracker {
 		
 	}
 	

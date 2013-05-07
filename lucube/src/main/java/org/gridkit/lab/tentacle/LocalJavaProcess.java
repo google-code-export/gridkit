@@ -5,7 +5,7 @@ public interface LocalJavaProcess extends LocalProcess {
 	public static final LocalProcessFinder ALL = new LocalProcessFinder();
 	
 	
-	public static class LocalProcessFinder implements SourceExpander<ActiveNode, LocalJavaProcess, LocalJavaProcessSource> {
+	public static class LocalProcessFinder implements Locator<ActiveNode, LocalJavaProcess, LocalJavaProcessSource> {
 
 		@Override
 		public LocalJavaProcessSource expand(MonitoringSchema schema,
