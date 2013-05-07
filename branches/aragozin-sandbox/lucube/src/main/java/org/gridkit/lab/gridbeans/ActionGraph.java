@@ -15,9 +15,9 @@ public interface ActionGraph {
 
 	public Set<ActionSite> allSites(Method method);
 
-	public Set<Action> allCalls(ActionSite site);
+	public Set<Action> allActions(ActionSite site);
 
-	public Set<Action> allCalls(Bean bean, Method method);
+	public Set<Action> allActions(Bean bean, Method method);
 	
 	public Set<Action> allConsumer(Bean bean);
 
@@ -33,12 +33,34 @@ public interface ActionGraph {
 
 	public Set<Action> getTerminalActions();
 	
-	public void unify(Bean bean1, Bean bean2);
+	/**
+	 * Remove alias and replace its usage with primary.
+	 * bean1 should be an external bean.
+	 */
+	public void unify(Bean alias, Bean primary);
 
-	public void unify(Action action1, Action action2);
+	/**
+	 * Unifies two actions. Action should be identical. 
+	 * Intended to be used after bean unification. If action is producing bean,
+	 * beans also going to be unified.
+	 */
+	public void unify(Action twin1, Action twin2);
+
+	/**
+	 * Removes action and unifies its result with provided bean.
+	 */
+	public void unify(Action action, Bean bean);
+	
+	/**
+	 * Removes action. Action's result should be used by other action in graph.
+	 * If call site doesn't have other actions it will be eliminated too.
+	 */
+	public void eliminate(Action action);
 	
 	public static interface Bean {
 
+		Class<?> getType();
+		
 	}
 
 	public static interface ActionSite {
