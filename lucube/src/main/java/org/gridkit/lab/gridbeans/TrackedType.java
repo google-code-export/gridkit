@@ -89,6 +89,18 @@ class TrackedType {
 				throw new IllegalArgumentException("Unexpeted type " + tp);
 			}
 		}
+		if (type.getSuperclass() != null) {
+			Type tp = type.getGenericSuperclass();
+			if (tp instanceof Class) {
+				bindVariables((Class)tp);
+			}
+			else if (tp instanceof ParameterizedType) {
+				bindVariables((ParameterizedType) tp, this);
+			}
+			else {
+				throw new IllegalArgumentException("Unexpeted type " + tp);
+			}
+		}
 	}
 	
 	private void bindVariables(ParameterizedType tp, TrackedType scope) {

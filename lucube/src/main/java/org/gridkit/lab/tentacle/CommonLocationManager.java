@@ -5,45 +5,68 @@ import java.util.List;
 
 import org.gridkit.lab.tentacle.Locator.LocationManager;
 import org.gridkit.lab.tentacle.Locator.TargetAction;
-import org.gridkit.lab.tentacle.Locator.TargetActivity;
-import org.gridkit.util.concurrent.FutureBox;
-import org.gridkit.util.concurrent.FutureEx;
 
-public abstract class CommonLocationManager<T extends MonitoringTarget> implements LocationManager<T> {
+public class CommonLocationManager<T extends MonitoringTarget> implements LocationManager<T> {
 
 	protected T target;
 	
 	protected List<Action> actions = new ArrayList<Action>();
-	protected List<Subnode> nodes = new ArrayList<Subnode>();
+	protected List<Subnode<T>> nodes = new ArrayList<Subnode<T>>();
 	
 	protected boolean deployed;
-	protected boolean started;
-	protected volatile boolean terminated;
-	protected FutureBox<Void> errorBox = new FutureBox<Void>();
-	
+	protected ObservationHost ohost;
+
+	protected T getTarget() {
+		return target;
+	}
 	
 	@Override
 	public void bind(T target) {
 		this.target = target;
+		ohost = target.getObservationHost();
 		bound();
+	}
+	
+	protected void error(String message) {
+		ohost.reportError(message, null);
+	}
+
+	protected void error(Throwable e) {
+		ohost.reportError(e.toString(), e);
+	}
+
+	protected void error(String message, Throwable e) {
+		ohost.reportError(message, e);
 	}
 	
 	protected void bound() {
 		// do nothing
 	}
 	
-	protected synchronized void addSubnode(Subnode node) {
+	protected synchronized void addSubnode(Subnode<T> node) {
 		nodes.add(node);
-		if (deployed && !terminated) {
+		if (deployed) {
 			applyActions(node);
-			node.deploy();
 		}		
 	}
 
-	protected void applyActions(Subnode node) {
-		
+	protected void applyActions(Subnode<T> node) {
+		TargetAction<?> lump = null;
+		for(Action a: actions) {
+			if (node.evaluate(a.getLocator())) {
+				if (lump == null) {
+					lump = a.getScript();
+				}
+				else {
+					lump = lump.stack(a.getScript());
+				}
+			}
+			if (lump != null) {
+				node.deploy(lump);
+			}
+		}
 	}
-
+	
 	@Override
 	public synchronized <TT extends MonitoringTarget> void addAction(Locator<T, TT, ? extends Source<TT>> locator, TargetAction<TT> script) {
 		if (deployed) {
@@ -59,56 +82,14 @@ public abstract class CommonLocationManager<T extends MonitoringTarget> implemen
 	
 	@Override
 	public synchronized void deploy() {
-		if (!terminated && !deployed) {
-			beforeDeploy();
-			deployed = true;
-			
-			for(Subnode node: nodes) {
-				applyActions(node);
-				node.deploy();
-			}
-		}
-	}
-
-	@Override
-	public synchronized FutureEx<Void> start() {
-		beforeStart();
-		started = true;
+		beforeDeploy();
+		deployed = true;
 		
-		return errorBox;
-	}
-
-	protected void beforeStart() {
-		// to be overriden
-	}
-
-	protected void error(Exception e) {
-		terminated = true;
-		try {
-			errorBox.setError(e);
-		}
-		catch(IllegalStateException ee) {
-			// ignore
+		for(Subnode<T> node: nodes) {
+			applyActions(node);
 		}
 	}
-	
-	@Override
-	public void stop() {
-		terminated = true;
-		synchronized (this) {
-			stopNodes();
-			errorBox.setData(null);
-		}
-	}
-	
-	protected void stopNodes() {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	protected abstract boolean evaluate(Locator<T, ?, ?> locator, Subnode node);
 
-	protected abstract TargetActivity deploy(Subnode node, TargetAction<?> script);
 
 	protected class Action {
 		
@@ -129,19 +110,11 @@ public abstract class CommonLocationManager<T extends MonitoringTarget> implemen
 		}
 	}
 	
-	protected interface Subnode {
-		
-	}
-	
-	protected class DefaultSubnode implements Subnode {
+	protected interface Subnode<T extends MonitoringTarget> {
 
-		private List<TargetActivity> activities = new ArrayList<TargetActivity>();
+		public boolean evaluate(Locator<T, ?, ?> locator);
+
+		public void deploy(TargetAction<?> script);
 		
-		
-		public void deploy(TargetAction<T> action) {
-			
-			activities.add(e);
-			
-		}
-	}
+	}	
 }
