@@ -1,6 +1,5 @@
 package org.gridkit.lab.tentacle;
 
-import org.gridkit.util.concurrent.FutureEx;
 
 public interface Locator<F extends MonitoringTarget, T extends MonitoringTarget, S extends Source<T>> {
 
@@ -14,25 +13,26 @@ public interface Locator<F extends MonitoringTarget, T extends MonitoringTarget,
 		
 		public <T extends MonitoringTarget> void addAction(Locator<F, T, ? extends Source<T>> locator, TargetAction<T> script);
 		
+		/**
+		 * Called after last {@link #addAction(Locator, TargetAction)} call.
+		 */
 		public void deploy();
-		
-		public FutureEx<Void> start();
-		
-		public void stop();
 		
 	}
 	
+	/**
+	 * {@link TargetAction} encapsulates downstream configuration related to this node.
+	 * {@link Locator} is expected to stack all actions for given target instance together and apply once.
+	 * It would allow exploit deployment optimizations. 
+	 */
 	public interface TargetAction<T extends MonitoringTarget> {
 		
-		public TargetActivity deploy(T target);
+		/**
+		 * Generic constraints are relaxed to avoid casting. It is not meant to be used to used with bound generic types anyway.
+		 */
+		public TargetAction<T> stack(TargetAction<?> other);
+		
+		public void apply(T target);
 
-	}
-
-	public interface TargetActivity {
-		
-		public FutureEx<Void> start();
-		
-		public void stop();
-		
 	}
 }

@@ -105,7 +105,8 @@ public class ActionTracker {
 			nbean.refName = id;
 			nbean.runtimeType = type;
 			nbean.handle = new EBeanHandle(nbean);
-			
+						
+			namedBeans.put(id, nbean);
 			beanDeref.put(nbean.beanId, nbean);
 			beans.add(nbean);
 			
@@ -931,9 +932,13 @@ public class ActionTracker {
 			result.add(type);
 		}
 		for(Class<?> i: type.getInterfaces()) {
-			result.add(i);
+			for(Class<?> ii: collectInterfaces(i)) {
+				if (!result.contains(ii)) {
+					result.add(ii);
+				}
+			}
 		}
-		if (type.getSuperclass() != Object.class) {
+		if (type.getSuperclass() != null && type.getSuperclass() != Object.class) {
 			for(Class<?> i: collectInterfaces(type.getSuperclass())) {
 				if (!result.contains(i)) {
 					result.add(i);

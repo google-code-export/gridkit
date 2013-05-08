@@ -1,41 +1,17 @@
 package org.gridkit.lab.tentacle;
 
-import java.util.List;
 
-import org.gridkit.lab.tentacle.Locator.LocationManager;
-import org.gridkit.lab.tentacle.Metrics.Hostname;
 
+/**
+ * {@link ActiveNode} is a highlevel monitoring target with assumption, 
+ * what probe code are executed in process being monitoring target.
+ * 
+ * @author Alexey Ragozin (alexey.ragozin@gmail.com)
+ */
 public interface ActiveNode extends MonitoringTarget {
 
-	public static final ActiveNodeLocator ALL = new ActiveNodeLocator();
-
-	public static final Metric<Hostname, ActiveNode> HOSTNAME = null;
+	public static final ActiveNodeLocator ALL = new ActiveNodeLocator.AllLocator();
 	
-	public static class ActiveNodeLocator implements Locator<DistributedExperiment, ActiveNode, ActiveNodeSource>, ActiveNodeFilter<ActiveNodeLocator> {
-
-		private List<String[]> filters;
-		
-		public ActiveNodeLocator(String filter) {
-			
-		}
-		
-		@Override
-		public ActiveNodeLocator filter(String pattern) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public LocationManager<DistributedExperiment> newLocationManager() {
-			return null;
-		}
-
-		@Override
-		public boolean isCompatible(
-				LocationManager<DistributedExperiment> manager) {
-			// TODO Auto-generated method stub
-			return false;
-		}
-	}
 
 	public interface ActiveNodeFilter<X> extends LocationFilterable<X> {
 		
@@ -47,8 +23,5 @@ public interface ActiveNode extends MonitoringTarget {
 	
 		public ActiveNodeSource filter(String pattern);
 		
-	}
-	
-	private static class ActiveNodeManager implements LocationManager<MonitoringTarget>
-	
+	}	
 }
