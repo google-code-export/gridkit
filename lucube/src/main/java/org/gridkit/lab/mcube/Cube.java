@@ -4,6 +4,10 @@ public interface Cube {
 
 	Cube unify(Unification unification);
 	
-	Cube bind()
+	Cube filter(Filter filter);
+	
+	Aggregateable groupBy(Value... attributues);
+	
+	Value aggregate(Aggregation agg);
 	
 }

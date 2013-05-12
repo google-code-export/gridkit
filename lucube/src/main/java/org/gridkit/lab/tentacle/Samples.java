@@ -2,6 +2,8 @@ package org.gridkit.lab.tentacle;
 
 import java.util.concurrent.TimeUnit;
 
+import org.gridkit.lab.mcube.Values;
+
 public class Samples {
 
 	
@@ -27,16 +29,22 @@ public class Samples {
 	
 	public interface Timestamp extends Sample {
 		
+		public static org.gridkit.lab.mcube.Value TIMESTAMP = Values.capture(Values.call(Timestamp.class).timestamp());
+		
 		public double timestamp();
 	}
 	
 	public interface Value extends Sample {
+
+		public static org.gridkit.lab.mcube.Value VALUE = Values.capture(Values.call(Value.class).value());
 		
 		public double value();
 		
 	}
 
 	public interface Duration extends Sample {
+
+		public static org.gridkit.lab.mcube.Value DURATION = Values.capture(Values.call(Duration.class).duration());
 		
 		public double duration();
 		
