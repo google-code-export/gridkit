@@ -6,7 +6,6 @@ import java.util.List;
 
 class ObservationNode implements ObservationHost, StartStop {
 	
-	private final String id;
 	private final SampleSink sink;
 	private final Observer<Sample> observer;
 	
@@ -18,16 +17,11 @@ class ObservationNode implements ObservationHost, StartStop {
 
 	private List<StartStop> bound = new ArrayList<StartStop>();
 
-	public ObservationNode(String id, SampleSink sink) {
-		this.id = id;
+	public ObservationNode(SampleSink sink) {
 		this.sink = sink;
-		this.observer = new SimpleObserver<Sample>(id, sink);
+		this.observer = new SimpleObserver<Sample>(sink);
 	}
 	
-	public String getId() {
-		return id;
-	}
-
 	public SampleSink getSink() {
 		return sink;
 	}
@@ -37,10 +31,9 @@ class ObservationNode implements ObservationHost, StartStop {
 	}
 	
 	@Override
-	public synchronized ObservationHost createChildHost() {
+	public synchronized ObservationHost createChildHost(SourceInfo info) {
 		String suffix = TenUtils.generateId(newChildId());
-		String cid = id + suffix;
-		ObservationNode child = new ObservationNode(cid, sink.newChildSink(suffix));
+		ObservationNode child = new ObservationNode(sink.newChildSink(suffix, info));
 		attach(child);
 		return child;
 	}
@@ -53,8 +46,9 @@ class ObservationNode implements ObservationHost, StartStop {
 	}
 	
 	@Override
-	public <S extends Sample> Observer<S> observer(Class<S> sample) {
-		return observer(sample);
+	@SuppressWarnings("unchecked")
+	public <S extends Sample> Observer<S> observer(Class<? extends S> sample) {
+		return (Observer<S>) observer;
 	}
 
 	@Override
@@ -83,7 +77,7 @@ class ObservationNode implements ObservationHost, StartStop {
 
 	@Override
 	public void reportError(String message, Throwable error) {
-		sink.send(Metrics.alert(message, error));
+		sink.send(Samples.alert(message, error));
 	}
 
 	@Override
@@ -106,7 +100,7 @@ class ObservationNode implements ObservationHost, StartStop {
 		}
 		catch(Throwable e) {
 			String name = TenUtils.toSafeString(ss);
-			sink.send(Metrics.alert("Execption on start() at " + name, e));
+			sink.send(Samples.alert("Execption on start() at " + name, e));
 		}
 	}
 
@@ -130,7 +124,7 @@ class ObservationNode implements ObservationHost, StartStop {
 			}
 			catch(Throwable e) {
 				String name = TenUtils.toSafeString(ss);
-				sink.send(Metrics.alert("Execption on stop() at " + name, e));
+				sink.send(Samples.alert("Execption on stop() at " + name, e));
 			}
 		}
 		
@@ -139,11 +133,9 @@ class ObservationNode implements ObservationHost, StartStop {
 	
 	private static class SimpleObserver<T extends Sample> implements Observer<T> {
 
-		private final String id;
 		private final SampleSink sink;
 		
-		public SimpleObserver(String id, SampleSink sink) {
-			this.id = id;
+		public SimpleObserver(SampleSink sink) {
 			this.sink = sink;
 		}
 

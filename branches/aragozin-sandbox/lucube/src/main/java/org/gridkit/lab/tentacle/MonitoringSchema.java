@@ -4,9 +4,8 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.gridkit.lab.gridbeans.ActionGraph;
@@ -14,7 +13,10 @@ import org.gridkit.lab.gridbeans.ActionGraph.Action;
 import org.gridkit.lab.gridbeans.ActionGraph.ActionSite;
 import org.gridkit.lab.gridbeans.ActionGraph.Bean;
 import org.gridkit.lab.gridbeans.ActionTracker;
+import org.gridkit.lab.tentacle.Locator.LocationManager;
+import org.gridkit.lab.tentacle.Locator.TargetAction;
 import org.gridkit.lab.tentacle.ObservationHost.ObservationActivity;
+import org.gridkit.util.concurrent.TaskService.Task;
 
 public class MonitoringSchema implements Source<DistributedExperiment>, Observable<Source<DistributedExperiment>, DistributedExperiment> {
 
@@ -24,12 +26,14 @@ public class MonitoringSchema implements Source<DistributedExperiment>, Observab
 	
 	private static final Method SOURCE_AT;
 	private static final Method PROBE_MARK_SAMPLE;
+	private static final Method PROBE_MARK_SAMPLER;
 	private static final Method PROBE_REPORT_PROBE;
 
 	static {
 		try {
 			SOURCE_AT = Source.class.getMethod("at", Locator.class);
 			PROBE_MARK_SAMPLE = Observable.class.getMethod("mark", Sample.class);
+			PROBE_MARK_SAMPLER = Observable.class.getMethod("mark", Sampler.class);
 			PROBE_REPORT_PROBE = Observable.class.getMethod("report", Probe.class);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -62,26 +66,30 @@ public class MonitoringSchema implements Source<DistributedExperiment>, Observab
 	}
 
 	@Override
-	public MonitoringSchema report(Probe<?, DistributedExperiment> probe) {
+	public Observable<Source<DistributedExperiment>, DistributedExperiment> mark(Sampler<? super DistributedExperiment, ?> sampler) {
+		root.mark(sampler);
+		return this;
+	}
+
+	@Override
+	public MonitoringSchema report(Probe<?, ? super DistributedExperiment> probe) {
 		root.report(probe);
 		return this;
 	}
 
 	public MonitoringConfig prepare() {
 		
-		Map<Bean, TargetEntry> beanMapping = new HashMap<Bean, TargetEntry>();
-		
 		ActionGraph graph = tracker.getGraph();
 		Bean rootb = graph.getNamed(Global.ROOT);
 		
-		TargetEntry roote = new TargetEntry();
+		TargetConfig roote = new TargetConfig();
 		captureConfig(graph, rootb, roote);
 		
-		return new CompiledSchema(roote); 
+		return new CompiledConfig(roote); 
 	}
 	
 	@SuppressWarnings("rawtypes")
-	private void captureConfig(ActionGraph graph, Bean pointer, TargetEntry entry) {
+	private void captureConfig(ActionGraph graph, Bean pointer, TargetConfig entry) {
 		for(Action a : graph.allActions(pointer, null)) {
 			ActionSite site = a.getSite();
 			if (site.allMethodAliases().contains(SOURCE_AT)) {
@@ -99,6 +107,9 @@ public class MonitoringSchema implements Source<DistributedExperiment>, Observab
 				if (probe instanceof Sample) {
 					probe = new SampleAsProbe((Sample)probe);
 				}
+				else if (probe instanceof Sampler) {
+					probe = new SamplerAsProbe((Sampler)probe);
+				}
 				entry.probes.add((Probe) probe);
 			}
 			else {
@@ -108,7 +119,7 @@ public class MonitoringSchema implements Source<DistributedExperiment>, Observab
 	}
 	
 	@SuppressWarnings("rawtypes")
-	private void captureDownStream(ActionGraph graph, Bean pointer, Locator locator, TargetEntry parent) {
+	private void captureDownStream(ActionGraph graph, Bean pointer, Locator locator, TargetConfig parent) {
 		for(Action a : graph.allActions(pointer, null)) {
 			ActionSite site = a.getSite();
 			if (isFilterCall(site)) {
@@ -120,9 +131,9 @@ public class MonitoringSchema implements Source<DistributedExperiment>, Observab
 				// only filter calls are interested
 			}
 		}		
-		DownstreamEntry dse = new DownstreamEntry(locator);
-		captureConfig(graph, pointer, dse.target);
-		if (!dse.target.isEmpty()) {
+		DownstreamConfig dse = new DownstreamConfig(locator);
+		captureConfig(graph, pointer, dse.targetConfig);
+		if (!dse.targetConfig.isEmpty()) {
 			parent.downstream.add(dse);
 		}
 	}
@@ -174,6 +185,7 @@ public class MonitoringSchema implements Source<DistributedExperiment>, Observab
 	public boolean isProbeCall(ActionSite site) {
 		return 
 			site.allMethodAliases().contains(PROBE_MARK_SAMPLE)
+		||	site.allMethodAliases().contains(PROBE_MARK_SAMPLER)
 		||	site.allMethodAliases().contains(PROBE_REPORT_PROBE);
 	}
 
@@ -197,56 +209,142 @@ public class MonitoringSchema implements Source<DistributedExperiment>, Observab
 	
 	public interface MonitoringConfig {
 	
-		public void deploy(String localname, MonitoringTarget root);
+		public void deploy(DistributedExperiment root);
 		
 	}
 	
 	
-	static class CompiledSchema implements MonitoringConfig {
+	static class CompiledConfig implements MonitoringConfig {
 		
-		private TargetEntry root;
+		private TargetConfig rootConfig;
 
-		public CompiledSchema(TargetEntry root) {
-			this.root = root;
+		public CompiledConfig(TargetConfig root) {
+			this.rootConfig = root;
 		}		
 		
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			sb.append("<schema>");
-			root.dump(sb);
-			sb.append("\n</schema>");
+			sb.append("<config>");
+			rootConfig.dump(sb);
+			sb.append("\n</config>");
 			return TenUtils.indent(sb.toString(), 4);
+		}
+
+		@Override
+		public void deploy(DistributedExperiment root) {
+			
+			Configurator conf = new Configurator(root);
+			conf.apply(rootConfig);
+			conf.deploy();
 		}
 	}
 	
-	static class TargetEntry implements Serializable {
+	static class StackableConfig implements TargetAction<MonitoringTarget>, Serializable {
+
+		private static final long serialVersionUID = 20130510L;
+
+		private final List<TargetConfig> config;
 		
-		private List<DownstreamEntry> downstream = new ArrayList<DownstreamEntry>();
+		public StackableConfig(TargetConfig c) {
+			config = Collections.singletonList(c);
+		}
+
+		public StackableConfig(StackableConfig a, StackableConfig b) {
+			config = new ArrayList<TargetConfig>(a.config.size() + b.config.size());
+			config.addAll(a.config);
+			config.addAll(b.config);
+		}
+		
+		@Override
+		public TargetAction<MonitoringTarget> stack(TargetAction<?> other) {
+			if (other instanceof StackableConfig) {
+				StackableConfig that = (StackableConfig) other;
+				return new StackableConfig(this, that);
+			}
+			throw new IllegalArgumentException("Cannot stack");
+		}
+
+		@Override
+		public void apply(MonitoringTarget target) {
+			Configurator configurator = new Configurator(target);
+			
+			for(TargetConfig tc: this.config) {
+				configurator.apply(tc);
+			}
+			
+			configurator.deploy();
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	static class Configurator {
+		
+		private final MonitoringTarget target;
+
+		private List<LocationManager> managers = new ArrayList<LocationManager>();
+
+		public Configurator(MonitoringTarget target) {
+			this.target = target;
+		}
+		
+		@SuppressWarnings("unchecked")
+		public void apply(TargetConfig config) {
+			for(Probe p : config.probes) {
+				p.deploy(target);
+			}
+			downstreams:
+			for(DownstreamConfig cd : config.downstream) {
+				Locator loc = cd.locator;
+				for (LocationManager m: managers) {
+					if (loc.isCompatible(m)) {
+						m.addAction(loc, new StackableConfig(cd.targetConfig));
+						continue downstreams;
+					}
+				}
+				LocationManager m = loc.newLocationManager();
+				managers.add(m);
+				m.bind(target);
+				m.addAction(loc, new StackableConfig(cd.targetConfig));
+			}
+		}
+		
+		public void deploy() {
+			for(LocationManager m: managers) {
+				m.deploy();
+			}
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	static class TargetConfig implements Serializable {
+		
+		private static final long serialVersionUID = 20130510L;
+		
+		private List<DownstreamConfig> downstream = new ArrayList<DownstreamConfig>();
 		private List<Probe> probes = new ArrayList<Probe>();
 		
 		public boolean isEmpty() {
 			if (!probes.isEmpty()) {
 				return false;
 			}
-			for(DownstreamEntry ds: downstream) {
-				if (!ds.target.isEmpty()) {
+			for(DownstreamConfig ds: downstream) {
+				if (!ds.targetConfig.isEmpty()) {
 					return false;
 				}
 			}
 			return true;
 		}
 		
-		
 		public void dump(StringBuilder sb) {
 			if (!downstream.isEmpty()) {
 				sb.append("\n<subtargets>");
-				for(DownstreamEntry ds: downstream) {
+				for(DownstreamConfig ds: downstream) {
 					sb.append("\n<subtarget>");
 					sb.append("\n<locator>\n");
 					sb.append(ds.locator);
 					sb.append("\n</locator>");
 					sb.append("\n<target>");
-					ds.target.dump(sb);
+					ds.targetConfig.dump(sb);
 					sb.append("\n</target>");
 					sb.append("\n</subtarget>");
 				}
@@ -265,28 +363,24 @@ public class MonitoringSchema implements Source<DistributedExperiment>, Observab
 	}
 	
 	@SuppressWarnings("rawtypes")
-	static class DownstreamEntry implements Serializable {
+	static class DownstreamConfig implements Serializable {
+		
+		private static final long serialVersionUID = 20130510L;
 		
 		private Locator locator;
-		private TargetEntry target;
+		private TargetConfig targetConfig;
 		
-		public DownstreamEntry(Locator locator) {
+		public DownstreamConfig(Locator locator) {
 			this.locator = locator;
-			this.target = new TargetEntry();
+			this.targetConfig = new TargetConfig();
 		}
-		
-	}
-	
-	public interface SingleNodeEnvironment {
-		
-		public SampleSink getRootSink();
-		
-		public String nodename();
 		
 	}
 	
 	private static class SampleAsProbe implements Probe<Sample, MonitoringTarget>, Serializable {
 
+		private static final long serialVersionUID = 20130510L;
+		
 		private final Sample sample;
 		
 		public SampleAsProbe(Sample sample) {
@@ -309,13 +403,47 @@ public class MonitoringSchema implements Source<DistributedExperiment>, Observab
 			});
 		}
 
+		public String toString() {
+			return String.valueOf(sample);
+		}
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static class SamplerAsProbe implements Probe<Sample, MonitoringTarget>, Serializable {
+		
+		private static final long serialVersionUID = 20130510L;
+		
+		private final Sampler sampler;
+		
+		public SamplerAsProbe(Sampler sampler) {
+			this.sampler = sampler;
+		}
+		
 		@Override
-		public void deploy(MonitoringTarget target, double rate) {
-			throw new UnsupportedOperationException();
+		public void deploy(final MonitoringTarget target) {
+			target.getBoundTaskService().schedule(new Task() {
+				
+				@Override
+				@SuppressWarnings("unchecked")
+				public void run() {
+					Sample sample = sampler.sample(target);
+					target.getObservationHost().observer(sample.getClass()).observe(sample);
+				}
+				
+				@Override
+				public void interrupt(Thread taskThread) {
+					// ignore
+				}
+				
+				@Override
+				public void cancled() {
+					// ignore
+				}
+			});
 		}
 		
 		public String toString() {
-			return String.valueOf(sample);
+			return String.valueOf(sampler);
 		}
 	}
 }
