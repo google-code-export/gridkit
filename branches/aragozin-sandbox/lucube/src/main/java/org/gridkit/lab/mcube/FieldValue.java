@@ -2,7 +2,7 @@ package org.gridkit.lab.mcube;
 
 import java.lang.reflect.Method;
 
-class FieldValue implements Value {
+class FieldValue extends BaseValue implements Value {
 
 	private String sample;
 	private String field;

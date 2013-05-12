@@ -1,4 +1,4 @@
-package org.gridkit.lab.tentacle;
+package org.gridkit.lab.mcube;
 
 public class HSample {
 

@@ -27,6 +27,27 @@ public class Values {
 		return new FieldValue(m);
 	}
 
+	private static ThreadLocal<FieldBinder<Sample>> BINDER = new ThreadLocal<FieldBinder<Sample>>();
+	
+	public static Value capture(Object obj) {
+		FieldBinder<Sample> binder = BINDER.get();
+		if (binder == null) {
+			throw new IllegalStateException("Use Values.call() to prepare method to be captured");
+		}
+		BINDER.set(null);
+		return binder.toBase();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <S extends Sample> S call(Class<S> type) {
+		if (BINDER.get() != null) {
+			throw new IllegalStateException("Previous call wasn't consumed");
+		}
+		FieldBinder<S> binder = fieldBinder((Class<S>)type);
+		BINDER.set((FieldBinder<Sample>)binder);
+		return binder.bind();
+	}
+	
 	@SuppressWarnings("unchecked")
 	public static <S extends Sample> FieldBinder<S> fieldBinder(Class<S> type) {
 		return (FieldBinder<S>) new Binder(type);
@@ -35,6 +56,8 @@ public class Values {
 	public interface FieldBinder<S extends Sample> extends Value {
 		
 		public S bind();
+
+		public Value getField();
 		
 	}
 	
@@ -58,6 +81,19 @@ public class Values {
 
 		public Binder(Class<? extends Sample> type) {
 			this.type = type;
+		}
+
+		@Override
+		public Value getField() {
+			if (bound == null) {
+				throw new IllegalStateException("Sample method wasn't called yet");
+			}
+			return bound;
+		}
+		
+		@Override
+		public BaseValue toBase() {
+			return getField().toBase();
 		}
 
 		@Override

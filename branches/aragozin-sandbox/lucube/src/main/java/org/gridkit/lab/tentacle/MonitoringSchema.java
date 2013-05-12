@@ -111,6 +111,8 @@ public class MonitoringSchema implements Source<DistributedExperiment>, Observab
 					probe = new SamplerAsProbe((Sampler)probe);
 				}
 				entry.probes.add((Probe) probe);
+				// collect chained calls
+				captureConfig(graph, a.getResultBean(), entry);
 			}
 			else {
 				schemeException(site, "Cannot interpret");
@@ -127,8 +129,10 @@ public class MonitoringSchema implements Source<DistributedExperiment>, Observab
 				Locator down = safeFilterInvoke(locator, a);
 				captureDownStream(graph, a.getResultBean(), down, parent);
 			}
-			else {
-				// only filter calls are interested
+			else if (isProbeCall(site)) {
+				// filter calls may be chained after probe calls
+				// we have to recur down to scan them
+				captureDownStream(graph, a.getResultBean(), locator, parent);
 			}
 		}		
 		DownstreamConfig dse = new DownstreamConfig(locator);

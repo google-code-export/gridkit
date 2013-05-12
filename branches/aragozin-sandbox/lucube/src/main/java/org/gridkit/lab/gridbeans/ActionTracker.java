@@ -114,12 +114,13 @@ public class ActionTracker {
 		}
 	}
 	
-	protected UniqueBean newLocalBean(Class<?> type, Call source) {
+	protected UniqueBean newLocalBean(Class<?> type, TrackedType dyntype, Call source) {
 
 		UniqueBean nbean = new UniqueBean();
 		nbean.beanId = beanCounter.getAndIncrement();
 		
 		nbean.runtimeType = type;
+		nbean.dynamicType = dyntype;
 		nbean.source = source;
 		nbean.handle = new LBeanHandle(nbean);
 		
@@ -221,7 +222,7 @@ public class ActionTracker {
 		
 		Class<?> type = resultType(m, dtype);
 		if (type != null) {
-			UniqueBean bean = newLocalBean(type, call);
+			UniqueBean bean = newLocalBean(type, dtype, call);
 			call.beanResult = bean.beanId;
 		}
 		else {
@@ -641,6 +642,7 @@ public class ActionTracker {
 		private Call source;
 
 		private Class<?> runtimeType;
+		private TrackedType dynamicType;
 		
 		private ActionGraph.Bean handle;
 		
@@ -648,7 +650,7 @@ public class ActionTracker {
 		
 		public TrackedBean getProxy() {
 			if (mock == null) {
-				BeanInvocationHandler handler = new BeanInvocationHandler(ActionTracker.this, new int[]{beanId}, runtimeType);
+				BeanInvocationHandler handler = new BeanInvocationHandler(ActionTracker.this, new int[]{beanId}, runtimeType, dynamicType);
 				mock = handler.newProxy();
 			}
 			return mock;
@@ -758,8 +760,8 @@ public class ActionTracker {
 		
 		private final TrackedType dynamicType;
 		
-		public BeanInvocationHandler(ActionTracker host, int[] targets, Class<?> runtimeType) {
-			this(host, targets, Collections.<Class<?>>singleton(runtimeType), new TrackedType(runtimeType));
+		public BeanInvocationHandler(ActionTracker host, int[] targets, Class<?> runtimeType, TrackedType dtype) {
+			this(host, targets, Collections.<Class<?>>singleton(runtimeType), dtype == null ? new TrackedType(runtimeType) : dtype);
 		}
 
 		public BeanInvocationHandler(ActionTracker host, int[] targets, Set<Class<?>> runtimeType, TrackedType dynamicType) {
