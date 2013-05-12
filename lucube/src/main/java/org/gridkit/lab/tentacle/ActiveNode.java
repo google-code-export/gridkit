@@ -10,6 +10,8 @@ package org.gridkit.lab.tentacle;
  */
 public interface ActiveNode extends MonitoringTarget {
 
+	public String getNodename();
+	
 	public static final ActiveNodeLocator ALL = new ActiveNodeLocator.AllLocator();
 	
 

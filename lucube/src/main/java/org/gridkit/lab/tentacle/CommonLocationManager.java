@@ -61,9 +61,9 @@ public class CommonLocationManager<T extends MonitoringTarget> implements Locati
 					lump = lump.stack(a.getScript());
 				}
 			}
-			if (lump != null) {
-				node.deploy(lump);
-			}
+		}
+		if (lump != null) {
+			node.deploy(lump);
 		}
 	}
 	

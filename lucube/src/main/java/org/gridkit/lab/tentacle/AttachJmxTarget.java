@@ -7,7 +7,7 @@ public class AttachJmxTarget {
 	public static JmxProcessExpander X = new JmxProcessExpander();
 	
 	
-	public static class JmxProcessExpander implements Locator<LocalJavaProcess, JmxHost, JmxHostSource> {
+	public static class JmxProcessExpander implements Locator<LocalJvmProcess, JmxHost, JmxHostSource> {
 		
 	}
 }

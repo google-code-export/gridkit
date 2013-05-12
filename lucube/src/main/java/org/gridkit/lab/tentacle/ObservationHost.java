@@ -4,7 +4,7 @@ public interface ObservationHost {
 
 	public <S extends Sample> Observer<S> observer(Class<? extends S> sample);
 	
-	public ObservationHost createChildHost();
+	public ObservationHost createChildHost(SourceInfo description);
 	
 	public void addActivity(ObservationActivity activity);
 	

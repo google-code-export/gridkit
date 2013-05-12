@@ -32,7 +32,10 @@ public interface Locator<F extends MonitoringTarget, T extends MonitoringTarget,
 		 */
 		public TargetAction<T> stack(TargetAction<?> other);
 		
-		public void apply(T target);
+		/**
+		 * Generic constraints are relaxed to avoid casting. It is not meant to be used to used with bound generic types anyway.
+		 */
+		public void apply(MonitoringTarget target);
 
 	}
 }

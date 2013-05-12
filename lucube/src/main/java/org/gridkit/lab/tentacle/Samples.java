@@ -2,7 +2,7 @@ package org.gridkit.lab.tentacle;
 
 import java.util.concurrent.TimeUnit;
 
-public class Metrics {
+public class Samples {
 
 	
 	private static double S = TimeUnit.SECONDS.toNanos(1);
@@ -30,11 +30,38 @@ public class Metrics {
 		public double timestamp();
 	}
 	
+	public interface Value extends Sample {
+		
+		public double value();
+		
+	}
+
+	public interface Duration extends Sample {
+		
+		public double duration();
+		
+	}
+	
 	public interface Alert extends Timestamp {
 		
 		public String message();
 		
 		public Throwable expection();
+		
+	}
+
+	public interface Node extends SourceInfo {
+		
+		public String nodename();
+		
+	}
+	
+	public interface Process extends Hostname, SourceInfo {
+		
+		public String pid();
+	}
+
+	public interface Terminated extends Timestamp {
 		
 	}
 	
@@ -54,6 +81,40 @@ public class Metrics {
 			@Override
 			public Throwable expection() {
 				return e;
+			}
+		};
+	}
+	
+	public static Node node(final String nodename) {
+		return new Node() {
+			
+			@Override
+			public String nodename() {
+				return nodename;
+			}
+		};
+	}
+
+	public static Process process(final String hostname, final String pid) {
+		return new Process() {
+
+			@Override
+			public String hostname() {
+				return hostname;
+			}
+
+			@Override
+			public String pid() {
+				return pid;
+			}			
+		};
+	}
+
+	public static Terminated terminated() {
+		return new Terminated() {
+			@Override
+			public double timestamp() {
+				return wallclockTime();
 			}
 		};
 	}
