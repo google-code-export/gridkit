@@ -43,8 +43,6 @@ public class Example {
 		
 		MonitoringSchema schema = new MonitoringSchema();
 		
-		schema.at(ActiveNode.ALL);
-		
 		ActiveNodeSource mon = schema.at(ActiveNode.ALL).filter("**.MON.**");
 		mon.mark(HostType.V.CLUSTER);
 		
@@ -52,6 +50,8 @@ public class Example {
 			.mark(JvmInfo.sysProperty("user.dir"))
 			.mark(memusage(10))
 			.mark(memusage(20));
+		
+	
 		
 		dumpAndExecute(schema);
 		
