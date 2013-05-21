@@ -1,6 +1,6 @@
 package org.gridkit.lab.mcube;
 
-public interface Cube {
+public interface Cube extends Aggregateable {
 
 	Cube unify(Unification unification);
 	
