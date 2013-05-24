@@ -1,6 +1,8 @@
 package org.gridkit.lab.mcube;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 class QueryGraph {
 	
@@ -20,6 +22,10 @@ class QueryGraph {
 	
 	interface Criterion {
 		
+		public Attribute getAttribute();
+		
+		public Function getFunction();
+		
 	}
 	
 	interface FilterNode extends RowSource {
@@ -36,13 +42,13 @@ class QueryGraph {
 		
 	}
 	
-	interface Mapper extends VirtualRowSource {
+	interface MapperSource extends VirtualRowSource {
 		
 		public RowSource getSource();
 		
-		public Collection<Attribute> getGroupAttributes();
+		public List<Attribute> getRoutingKey();
 		
-		public RowSource getGroupSourcePrototype();
+		public VirtualRowSource getGroupSourcePrototype();
 		
 	}
 	
@@ -62,17 +68,17 @@ class QueryGraph {
 		
 		public Attribute getAttribute();
 		
-		public Transform getValuePredicate();
+		public Function getValuePredicate();
 		
 	}
 
-	interface SampleTypeCriterion {
-		
-		public 
+	interface StaticMarkersSource extends RowSource {
 		
 	}
 	
-	interface SampleAttribute {
+	interface SampleField extends Attribute {
+		
+		public Set<String> getNamespaces();
 		
 		public String getName();
 		
@@ -80,9 +86,11 @@ class QueryGraph {
 		
 	}
 	
-	interface Transform {
+	interface 
+	
+	interface Function {
 		
-		public Object transfrom(Object value);
+		public Object apply(Object value);
 		
 	}
 }
