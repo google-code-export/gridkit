@@ -19,6 +19,9 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import org.gridkit.vicluster.ViConfigurable;
+import org.gridkit.vicluster.telecontrol.jvm.JvmProps;
+
 
 /**
  * Utility class to configure inclusion, exclusion and replacement
@@ -26,9 +29,9 @@ import java.util.jar.Manifest;
  * 
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class MavenClassPathHelper {
+public class MavenClasspathManager {
 
-	private static Class<?> ANCHOR = MavenClassPathHelper.class;
+	private static Class<?> ANCHOR = MavenClasspathManager.class;
 	
 	private static Map<String, SourceInfo> CLASSPATH_JARS;
 	
@@ -94,10 +97,71 @@ public class MavenClassPathHelper {
 		return version;
 	}
 	
+	public static void replaceArtifactVersion(ViConfigurable node, String groupId, String artifactId, String version) {
+		removeArtifactVersion(node, groupId, artifactId);
+		addArtifactVersion(node, groupId, artifactId, version);
+	}
+
+	public static void removeArtifactVersion(ViConfigurable node, String groupId, String artifactId) {
+		String version = getArtifactVersion(groupId, artifactId);
+		if (version == null) {
+			throw new IllegalArgumentException("Artifact " + groupId + ":" + artifactId + " wasn't detected in classpath");
+		}
+		URL url = getArtifactClasspathUrl(groupId, artifactId);
+		if (url == null) {
+			throw new IllegalArgumentException("Artifact " + groupId + ":" + artifactId + " wasn't detected in classpath");
+		}
+		if ("jar".equals(url.getProtocol())) {
+			url = findJar(groupId, artifactId, version);
+		}
+		if (url == null) {
+			throw new IllegalArgumentException("Artifact " + groupId + ":" + artifactId + " wasn't detected in classpath");
+		}
+		
+		try {
+			if ("file".equals(url.getProtocol())) {
+				File file = new File(url.toURI());
+				if (!file.exists()) {
+					throw new IllegalArgumentException("Artifact " + groupId + ":" + artifactId + ":" + version + " is not available");
+				}
+				node.setProp(JvmProps.CP_REMOVE + file.getPath(), file.getPath());
+			}
+			else {
+				throw new IllegalArgumentException("Bad URL " + url.toString());
+			}
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException("Bad URL " + url.toString());
+		}
+	}
+
+	public static void addArtifactVersion(ViConfigurable node, String groupId, String artifactId, String version) {
+		URL url = findJar(groupId, artifactId, version);
+		if (url == null) {
+			throw new IllegalArgumentException("Artifact " + groupId + ":" + artifactId + ":" + version + " is not available");
+		}
+		try {
+			if ("file".equals(url.getProtocol())) {
+				File file = new File(url.toURI());
+				if (!file.exists()) {
+					throw new IllegalArgumentException("Artifact " + groupId + ":" + artifactId + ":" + version + " is not available");
+				}
+				node.setProp(JvmProps.CP_ADD + file.getPath(), file.getPath());
+			}
+			else {
+				throw new IllegalArgumentException("Bad URL " + url.toString());
+			}
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException("Bad URL " + url.toString());
+		}
+	}
+	
 	private static String findJar(File c, String artifactId) {
-		for(File f: c.listFiles()) {
+		for(File f: c.listFiles()) {			
 			if (!f.isDirectory() && f.getName().startsWith(artifactId + "-") && f.getName().endsWith(".jar")) {
-				return f.getName();
+				// TODO read maven metadata xml
+				if (!f.getName().endsWith("-javadoc.jar") && !f.getName().endsWith("-sources.jar")) {
+					return f.getName();
+				}
 			}
 		}
 		return null;
@@ -161,6 +225,21 @@ public class MavenClassPathHelper {
 		return null;
 	}
 	
+	public static void dumpClasspathInfo() {
+		initClasspath();
+		for(SourceInfo si: CLASSPATH_JARS.values()) {
+			if (si.mavenProps == null) {
+				System.out.println("<unknown> " + si.baseUrl);
+			}
+			else {
+				String g = si.mavenProps.getProperty("groupId");
+				String a = si.mavenProps.getProperty("artifactId");
+				String v = si.mavenProps.getProperty("version");
+				System.out.println(g + ":" + a + ":" + v + " " + si.baseUrl);
+			}
+		}
+	}
+	
 	private static String getMavenArtifactBase(String path) {
 		int c = path.lastIndexOf('/');
 		if (c <= 0) {
@@ -199,7 +278,7 @@ public class MavenClassPathHelper {
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to scan classpath", e);
 		}
-		CLASSPATH_JARS = new HashMap<String, MavenClassPathHelper.SourceInfo>();
+		CLASSPATH_JARS = new HashMap<String, MavenClasspathManager.SourceInfo>();
 		while(en.hasMoreElements()) {
 			URL url = en.nextElement();
 			SourceInfo info;

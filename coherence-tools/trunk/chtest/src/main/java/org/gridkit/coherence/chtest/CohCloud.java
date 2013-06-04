@@ -143,8 +143,6 @@ public interface CohCloud {
 		
 		/**
 		 * Allows to select particular Coherence version, provided that wrapper jar is added to dependencies.
-		 * <br/>
-		 * "out-of-process" nodes are not supported
 		 * @param version
 		 */
 		CohNode useCoherenceVersion(String version);
