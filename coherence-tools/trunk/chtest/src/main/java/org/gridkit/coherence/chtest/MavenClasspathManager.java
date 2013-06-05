@@ -171,11 +171,14 @@ public class MavenClasspathManager {
 	}
 	
 	private static String findJar(File c, String artifactId) {
-		for(File f: c.listFiles()) {			
-			if (!f.isDirectory() && f.getName().startsWith(artifactId + "-") && f.getName().endsWith(".jar")) {
-				// TODO read maven metadata xml
-				if (!f.getName().endsWith("-javadoc.jar") && !f.getName().endsWith("-sources.jar")) {
-					return f.getName();
+		File[] files = c.listFiles();
+		if (files != null) {
+			for(File f: files) {			
+				if (!f.isDirectory() && f.getName().startsWith(artifactId + "-") && f.getName().endsWith(".jar")) {
+					// TODO read maven metadata xml
+					if (!f.getName().endsWith("-javadoc.jar") && !f.getName().endsWith("-sources.jar")) {
+						return f.getName();
+					}
 				}
 			}
 		}

@@ -51,7 +51,7 @@ public class ConfigureWkaTest {
 		all.setClusterLocalHost("127.0.0.1");
 		nodeA.setClusterLocalPort(port1);
 		nodeB.setClusterLocalPort(port2);
-		all.setTCMPTimeout(5000);
+		all.setTCMPTimeout(20000);
 		
 		all.addWkaAddress("127.0.0.1", port2);
 		all.addWkaAddress("127.0.0.1", port3);
@@ -68,7 +68,7 @@ public class ConfigureWkaTest {
 		all.setClusterLocalHost("127.0.0.1");
 		nodeA.setClusterLocalPort(port1);
 		nodeB.setClusterLocalPort(port2);
-		all.setTCMPTimeout(5000);
+		all.setTCMPTimeout(20000);
 		
 		all.addWkaAddress("127.0.0.1", port3);
 		all.addWkaAddress("127.0.0.1", port2);

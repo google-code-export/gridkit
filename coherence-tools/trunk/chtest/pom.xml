@@ -167,6 +167,16 @@
                             <artifact>com.oracle.coherence:coherence:3.7.1.7</artifact>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>chtest-0.2.1</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>get</goal>
+                        </goals>
+                        <configuration>
+                            <artifact>${project.groupId}:${project.artifactId}:0.2.1</artifact>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>                
         </plugins>
