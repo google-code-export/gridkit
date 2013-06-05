@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<!DOCTYPE cache-config SYSTEM "cache-config.dtd">
+
+<cache-config>
+
+    <caching-scheme-mapping>
+        <cache-mapping>
+            <cache-name>vanila-*</cache-name>
+            <scheme-name>vanila-scheme</scheme-name>
+        </cache-mapping>
+        <cache-mapping>
+            <cache-name>partitioned-*</cache-name>
+            <scheme-name>partitioned-scheme</scheme-name>
+        </cache-mapping>
+    </caching-scheme-mapping>
+
+    <caching-schemes>
+
+        <distributed-scheme>
+            <scheme-name>vanila-scheme</scheme-name>
+            <service-name>VanilaScheme</service-name>
+            <autostart>true</autostart>
+            <partition-count>15</partition-count>
+            <backing-map-scheme>
+                <read-write-backing-map-scheme>
+                    <internal-cache-scheme>
+                        <class-scheme>
+                            <class-name>com.tangosol.util.ObservableHashMap</class-name>
+                        </class-scheme>
+                    </internal-cache-scheme>
+                    <listener>
+                        <class-scheme>
+                            <class-name>org.gridkit.coherence.check.BMCheck$Listener</class-name>
+                            <init-params>
+                                <init-param>
+                                    <param-type>com.tangosol.net.BackingMapManagerContext</param-type>
+                                    <param-value>{manager-context}</param-value>
+                                </init-param>
+                                <init-param>
+                                    <param-type>java.lang.String</param-type>
+                                    <param-value>{cache-name}</param-value>
+                                </init-param>
+                            </init-params>
+                        </class-scheme>
+                    </listener>
+                </read-write-backing-map-scheme>
+            </backing-map-scheme>
+        </distributed-scheme>
+
+        <distributed-scheme>
+            <scheme-name>partitioned-scheme</scheme-name>
+            <service-name>PartitionedScheme</service-name>
+            <autostart>true</autostart>
+            <partition-count>15</partition-count>
+            <backing-map-scheme>
+                <partitioned>true</partitioned>
+                <local-scheme>
+                    <listener>
+                        <class-scheme>
+                            <class-name>org.gridkit.coherence.check.BMCheck$Listener</class-name>
+                            <init-params>
+                                <init-param>
+                                    <param-type>com.tangosol.net.BackingMapManagerContext</param-type>
+                                    <param-value>{manager-context}</param-value>
+                                </init-param>
+                                <init-param>
+                                    <param-type>java.lang.String</param-type>
+                                    <param-value>{cache-name}</param-value>
+                                </init-param>
+                            </init-params>
+                        </class-scheme>
+                    </listener>
+                </local-scheme>
+            </backing-map-scheme>
+        </distributed-scheme>
+
+    </caching-schemes>
+
+</cache-config>
