@@ -198,6 +198,16 @@ public class MavenClasspathManager {
 			// artifact we are looking for does not provide Maven manifest, let's take hard way
 			initClasspath();
 			for(SourceInfo si: CLASSPATH_JARS.values()) {
+				if (si.matchMavenProps(groupId, artifactId)) {
+					try {
+						return new URL(si.baseUrl);
+					} catch (MalformedURLException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+			
+			for(SourceInfo si: CLASSPATH_JARS.values()) {
 				if (si.jarUrl != null) {
 					String artBase = getMavenArtifactBase(si.jarUrl);
 					if (artBase != null) {
@@ -394,14 +404,18 @@ public class MavenClasspathManager {
 		if (prop == null && upath.startsWith("file:")) {
 			// unfortunately vanilla maven test run will not have pom.properties on classpath
 			// in this case lets check presence of pom.xml
-			try {
-				File f = new File(new URI(upath));
-				File pom = new File(f.getParentFile().getParentFile(), "pom.xml");
-				if (pom.isFile()) {
-					prop = loadPomProp(pom);
+			if (!upath.endsWith("test-classes/")) {
+				// we should ignore test classes
+				// current test classpath should be available otherwise retoning will not work
+				try {
+					File f = new File(new URI(upath));
+					File pom = new File(f.getParentFile().getParentFile(), "pom.xml");
+					if (pom.isFile()) {
+						prop = loadPomProp(pom);
+					}
+				} catch (Exception e) {
+					// ignore error
 				}
-			} catch (Exception e) {
-				// ignore error
 			}
 		}
 		return prop;
@@ -465,6 +479,14 @@ public class MavenClasspathManager {
 		Manifest manifest;
 		Properties mavenProps;
 		
+		public boolean matchMavenProps(String groupId, String artifactId) {
+			if (mavenProps == null) {
+				return false;
+			}
+			else {
+				return groupId.equals(mavenProps.get("groupId")) && artifactId.equals(mavenProps.get("artifactId"));
+			}
+		}
 	}	
 	
 	static List<String> findFiles(String path) throws IOException {
