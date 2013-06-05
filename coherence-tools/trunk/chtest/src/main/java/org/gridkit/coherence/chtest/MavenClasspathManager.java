@@ -19,8 +19,18 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.gridkit.vicluster.ViConfigurable;
 import org.gridkit.vicluster.telecontrol.jvm.JvmProps;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 
 
 /**
@@ -60,6 +70,11 @@ public class MavenClasspathManager {
 			// artifact we are looking for does not provide Maven manifest, let's take hard way
 			initClasspath();
 			for(SourceInfo si: CLASSPATH_JARS.values()) {
+				if (si.mavenProps != null) {
+					if (groupId.equals(si.mavenProps.get("groupId")) && artifactId.equals(si.mavenProps.get("artifactId"))) {
+						return si.mavenProps.getProperty("version");
+					}
+				}
 				if (si.jarUrl != null) {
 					String artBase = getMavenArtifactBase(si.jarUrl);
 					if (artBase != null) {
@@ -68,7 +83,7 @@ public class MavenClasspathManager {
 							return getMavenVersionFromRepoPath(si.jarUrl);
 						}
 					}
-				}
+				}				
 			}
 			throw new IllegalArgumentException("Cannot detect version for " + groupId + ":" + artifactId);
 		}
@@ -272,23 +287,41 @@ public class MavenClasspathManager {
 		if (CLASSPATH_JARS != null) {
 			return;
 		}
-		Enumeration<URL> en;
-		try {
-			en = ANCHOR.getClassLoader().getResources("META-INF/MANIFEST.MF");
-		} catch (IOException e) {
-			throw new RuntimeException("Failed to scan classpath", e);
-		}
 		CLASSPATH_JARS = new HashMap<String, MavenClasspathManager.SourceInfo>();
-		while(en.hasMoreElements()) {
-			URL url = en.nextElement();
+		for(URL url: getClasspathResources("META-INF/MANIFEST.MF")) {
 			SourceInfo info;
 			try {
-				info = readInfo(url);
+				String upath = url.toString();
+				upath = upath.substring(0, upath.length() - "META-INF/MANIFEST.MF".length());
+				info = readInfo(upath);
 				CLASSPATH_JARS.put(info.baseUrl, info);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
+		for(URL url: getClasspathResources("")) {
+			SourceInfo info;
+			try {
+				info = readInfo(url.toString());
+				CLASSPATH_JARS.put(info.baseUrl, info);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private static List<URL> getClasspathResources(String path) {
+		Enumeration<URL> en;
+		try {
+			en = ANCHOR.getClassLoader().getResources(path);
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to scan classpath", e);
+		}
+		List<URL> list = new ArrayList<URL>();
+		while(en.hasMoreElements()) {
+			list.add(en.nextElement());
+		}
+		return list;
 	}
 	
 	private synchronized static void findLocalMavenRepo() {
@@ -316,14 +349,21 @@ public class MavenClasspathManager {
 		}
 	}
 	
-	private static SourceInfo readInfo(URL url) throws IOException {
-		String upath = url.toString();
-		upath = upath.substring(0, upath.length() - "META-INF/MANIFEST.MF".length());
-		InputStream is = url.openStream();
-		Manifest mf = new Manifest();
-		mf.read(is);
-		is.close();
+	private static SourceInfo readInfo(String upath) throws IOException {
 		SourceInfo info = new SourceInfo();
+		try {
+			URL url = new URL(upath + "META-INF/MANIFEST.MF");
+			InputStream is = url.openStream();
+			if (is != null) {
+				Manifest mf = new Manifest();
+				mf.read(is);
+				is.close();
+				info.manifest = mf;
+			}
+		}
+		catch(IOException e) {
+			// ignore
+		}
 		if (upath.startsWith("jar:")) {
 			String jarPath = upath.substring("jar:".length());
 			int c = jarPath.indexOf('!');
@@ -331,7 +371,6 @@ public class MavenClasspathManager {
 			info.jarUrl = jarPath;
 		}
 		info.baseUrl = upath;
-		info.manifest = mf;
 		info.mavenProps = loadMavenProps(upath);
 		return info;
 	}
@@ -352,9 +391,72 @@ public class MavenClasspathManager {
 				is.close();
 			}
 		}
+		if (prop == null && upath.startsWith("file:")) {
+			// unfortunately vanilla maven test run will not have pom.properties on classpath
+			// in this case lets check presence of pom.xml
+			try {
+				File f = new File(new URI(upath));
+				File pom = new File(f.getParentFile().getParentFile(), "pom.xml");
+				if (pom.isFile()) {
+					prop = loadPomProp(pom);
+				}
+			} catch (Exception e) {
+				// ignore error
+			}
+		}
 		return prop;
 	}
 
+	private static Properties loadPomProp(File pom) throws ParserConfigurationException, SAXException, IOException {
+		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		
+		Document doc = builder.parse(pom);
+		Element root = doc.getDocumentElement();
+		
+		String groupId = getText(root, "groupId");
+		String artifactId = getText(root, "artifactId");
+		String version = getText(root, "version");
+		
+		if (groupId == null || groupId.startsWith("$")) {
+			groupId = getText(root, "parent/groupId");
+		}
+		if (version == null || version.startsWith("$")) {
+			version = getText(root, "parent/version");
+		}
+
+		if (	   groupId != null && !groupId.startsWith("$") 
+				&& artifactId != null && !artifactId.startsWith("$")
+				&& version != null && !version.startsWith("$")) {
+			
+			Properties props = new Properties();
+			props.put("groupId", groupId);
+			props.put("artifactId", artifactId);
+			props.put("version", version);
+			return props;
+		}
+		else {
+			// TODO warning
+			return null;
+		}
+	}
+
+	private static String getText(Element e, String path) {
+		String[] tags = path.split("[/]");
+		path:
+		for(String tag: tags) {
+			NodeList nl = e.getChildNodes();
+			for(int i = 0; i != nl.getLength(); ++i) {
+				Node n = nl.item(i);
+				if (n instanceof Element && tag.equals(((Element)n).getNodeName())) {
+					e = (Element) n;
+					continue path;
+				}
+			}
+			return null;
+		}
+		return e.getTextContent();
+	}
+	
 	private static class SourceInfo {
 		
 		String baseUrl;
