@@ -14,13 +14,15 @@ import java.util.jar.Manifest;
 
 import org.gridkit.coherence.chtest.DisposableCohCloud;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.tangosol.coherence.component.application.console.Coherence;
 
 public class ManifestVerificatorTest {
 
-	private DisposableCohCloud cloud = new DisposableCohCloud();
+	@Rule
+	public DisposableCohCloud cloud = new DisposableCohCloud();
 
 	@Test
 	public void read_manifest() {

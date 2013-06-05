@@ -19,6 +19,7 @@ import java.util.concurrent.Callable;
 
 import org.gridkit.coherence.chtest.CohCloud.CohNode;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -36,24 +37,27 @@ public class ViClusterSamplesTest {
 	 * Though, you can adjust these rules. 
 	 */
 	@Rule
-	public CohCloudRule cloud = new DisposableCohCloud() {{
+	public CohCloudRule cloud = new DisposableCohCloud();
+	
+	@Before
+	public void configureCloud() {
 		// Here we can configure our default test
 		// topology used in all test.
 		
 		// Use present for single host Coherence cluster
-		node("**").presetFastLocalCluster();
+		cloud.node("**").presetFastLocalCluster();
 
 		// use default config file from coherence.jar
-		node("**").cacheConfig("/coherence-cache-config.xml");
+		cloud.node("**").cacheConfig("/coherence-cache-config.xml");
 		
 		// set 'tangosol.coherence.distributed.localstorage'
 		// based on role of node
-		node("**.storage.**").localStorage(true);
-		node("**.client.**").localStorage(false);
+		cloud.node("**.storage.**").localStorage(true);
+		cloud.node("**.client.**").localStorage(false);
 		
 		// configure storage node to use DefaultServer class for initialization
-		node("**.storage.**").autoStartServices();
-	}};
+		cloud.node("**.storage.**").autoStartServices();
+	};
 	
 	@Test
 	public void test_simple_cluster() {
