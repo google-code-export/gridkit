@@ -4,6 +4,42 @@
   <artifactId>young-gc-benchmark</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <dependencies>
+    
+    <dependency>
+        <groupId>org.gridkit.lab</groupId>
+        <artifactId>telecontrol-ssh</artifactId>
+        <version>0.7.15</version>
+        <scope>test</scope>
+    </dependency>
+
+    <dependency>
+        <groupId>org.gridkit.jvmtool</groupId>
+        <artifactId>ygc-bench</artifactId>
+        <version>0.1-SNAPSHOT</version>
+        <scope>test</scope>
+    </dependency>
+
+    <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.10</version>
+        <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.xeiam.xchart</groupId>
+      <artifactId>xchart</artifactId>
+      <version>2.2.0</version>
+    </dependency>
+
+<!-- 
+    <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>1.0.6</version>
+        <scope>test</scope>
+    </dependency>
+ -->
   </dependencies>
   <build>
     <plugins>
@@ -13,6 +49,14 @@
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <configuration>
+          <mainClass>org.gridkit.benchmark.gc.RemoteBenchRunner</mainClass>
+          <classpathScope>test</classpathScope>
         </configuration>
       </plugin>
     </plugins>
