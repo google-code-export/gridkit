@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/net.entropysoft.jmx.feature_2.0.14.jar" id="net.entropysoft.jmx.feature" version="2.0.14"/>
+   <feature url="features/net.entropysoft.dashboard.feature_2.0.14.jar" id="net.entropysoft.dashboard.feature" version="2.0.14"/>
+</site>
