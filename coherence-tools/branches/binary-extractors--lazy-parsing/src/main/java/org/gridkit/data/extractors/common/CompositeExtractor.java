@@ -1,26 +1,32 @@
 package org.gridkit.data.extractors.common;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import org.gridkit.data.extractors.common.RetrivalControl.InputStatus;
 
 public interface CompositeExtractor<V> extends BinaryExtractor<V> {
 
 	public List<BinaryExtractor<?>> getSubExtractors();
 	
-	public ValueComposer newComposer();
+	public VectorResultReceiver newComposer(CompositionCallback callback);
 	
-	interface ValueComposer extends VectorResultReceiver {		
-		public void compose(ScalarResultReceiver receiver);		
-	}	
+	interface CompositionCallback extends ScalarResultReceiver, RetrivalControl {
 		
-	public static abstract class SingleArgumentComposer implements ValueComposer {
+	}
+	
+	public static abstract class SingleArgumentComposer implements VectorResultReceiver {
 
-		protected List<Object> inputs = new ArrayList<Object>(1);
+		protected CompositionCallback callback;
 		
+		public SingleArgumentComposer(CompositionCallback callback) {
+			this.callback = callback;
+			this.callback.setInputStatus(0, InputStatus.ACCEPT);
+		}
+
 		@Override
 		public void push(int id, Object part) {
 			if (id == 0) {
-				inputs.add(part);
+				processInput(part, callback);
 			}
 			else {
 				throw new IllegalArgumentException("No such input slot #" + id);
@@ -28,10 +34,7 @@ public interface CompositeExtractor<V> extends BinaryExtractor<V> {
 		}
 
 		@Override
-		public void compose(ScalarResultReceiver receiver) {
-			for(Object input: inputs) {
-				processInput(input, receiver);
-			}
+		public void done() {
 		}
 
 		protected abstract void processInput(Object input, ScalarResultReceiver receiver);

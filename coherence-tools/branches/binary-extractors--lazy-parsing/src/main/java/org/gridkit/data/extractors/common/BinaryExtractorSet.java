@@ -18,6 +18,8 @@ public interface BinaryExtractorSet {
 	
 	public void dump(StringBuilder builder);
 	
+	public RetrivalControl extract(BinaryReader buffer, VectorResultReceiver resultReceiver);
+
 	public void extractAll(ByteBuffer buffer, VectorResultReceiver resultReceiver);
 
 }

@@ -135,6 +135,8 @@ public class ProtoBufExtractionTest extends BaseExtractionAssertTest {
 		extract(getBytes("protobuf/TextProperties-1.bin"));
 		assertValue("get(A)", "aaa");
 		assertValue("get(B)", "bbb");
+		
+		dump();
 	}
 
 	@Test

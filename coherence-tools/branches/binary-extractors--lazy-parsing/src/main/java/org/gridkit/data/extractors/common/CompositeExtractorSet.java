@@ -6,10 +6,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.gridkit.data.extractors.common.CompositeExtractor.ValueComposer;
+import org.gridkit.data.extractors.common.CompositeExtractor.CompositionCallback;
+import org.gridkit.data.extractors.common.RetrivalControl.InputStatus;
 
 public class CompositeExtractorSet implements BinaryExtractorSet, Serializable {
 
@@ -172,6 +174,12 @@ public class CompositeExtractorSet implements BinaryExtractorSet, Serializable {
 		}
 	}
 
+	public RetrivalControl extract(BinaryReader reader, VectorResultReceiver resultReceiver) {
+		if (!compiled) {
+			throw new IllegalStateException("Extractor set is not compiled");
+		}
+	}
+
 	@Override
 	public void extractAll(ByteBuffer buffer, VectorResultReceiver resultReceiver) {
 		if (!compiled) {
@@ -200,16 +208,42 @@ public class CompositeExtractorSet implements BinaryExtractorSet, Serializable {
 			return new ExtractionContext(resultVector, composers);
 		}
 	}
-	
-	private static class ExtractionContext {
 		
-		final VectorResultReceiver resultVector;
-		final List<ValueComposer> composers;
+	private static class ExtractionContext extends GateControl {
 		
-		private ExtractionContext(VectorResultReceiver resultVector, List<ValueComposer> composers) {
+		final VectorResultReceiver resultVector;		
+		final CompositionContext[] composers;
+		
+		List<Pending> pendings;
+		
+		private ExtractionContext(int arity, VectorResultReceiver resultVector, CompositionContext[] composers) {
+			super(null, arity);
+			context = this;
+			
 			this.resultVector = resultVector;
 			this.composers = composers;
 		}
+		
+		public void checkPendings() {
+			if (pendings != null) {
+				Iterator<Pending> it = pendings.iterator();
+				while(it.hasNext()) {
+					Pending p = it.next();
+					InputStatus pstatus = p.link.status(context); 
+					if (pstatus == InputStatus.ACCEPT) {
+						p.link.push(context, p.value);
+						it.remove();
+					}
+					else if (pstatus == InputStatus.DROP) {
+						it.remove();
+					}
+				}
+			}
+		}		
+		
+		public void addPending(ValueLink link, Object value) {
+			pendings.add(new Pending(link, value));
+		}		
 	}
 	
 	private static class Batch {
@@ -248,6 +282,9 @@ public class CompositeExtractorSet implements BinaryExtractorSet, Serializable {
 	}
 	
 	private static interface ValueLink {
+		
+		public InputStatus status(ExtractionContext context);
+		
 		public void push(ExtractionContext context, Object value);
 	}
 	
@@ -283,9 +320,25 @@ public class CompositeExtractorSet implements BinaryExtractorSet, Serializable {
 		}
 
 		@Override
+		public InputStatus status(ExtractionContext context) {
+			return a.status(context).merge(b.status(context));
+		}
+
+		@Override
 		public void push(ExtractionContext context, Object value) {
 			a.push(context, value);
 			b.push(context, value);			
+		}
+	}
+	
+	private static class Pending {
+		
+		final ValueLink link;
+		final Object value;
+
+		public Pending(ValueLink link, Object value) {
+			this.link = link;
+			this.value = value;
 		}
 	}
 	
@@ -295,6 +348,11 @@ public class CompositeExtractorSet implements BinaryExtractorSet, Serializable {
 		
 		public ResultVectorLink(int outIndex) {
 			this.outIndex = outIndex;
+		}
+
+		@Override
+		public InputStatus status(ExtractionContext context) {
+			return context.resultGates[outIndex];
 		}
 
 		@Override
@@ -308,6 +366,140 @@ public class CompositeExtractorSet implements BinaryExtractorSet, Serializable {
 		}
 	}
 
+	private static InputStatus[] NULL_GATE = {null};
+	private static InputStatus[] NULL_GATE2 = {null, null};
+	private static InputStatus[] ACCEPT = {InputStatus.ACCEPT};
+	private static InputStatus[] ACCEPT2 = {InputStatus.ACCEPT, InputStatus.ACCEPT};
+	private static InputStatus[] DROP = {InputStatus.DROP};
+	private static InputStatus[] DROP2 = {InputStatus.DROP, InputStatus.DROP};
+
+	private static InputStatus[] newStatus(int arity) {
+		InputStatus[] vector = new InputStatus[arity];
+		for(int i = 0; i != arity; ++i) {
+			vector[i] = InputStatus.POSTPONE;
+		}
+	}
+
+	private static InputStatus[] nullStatus(int arity) {
+		if (arity == 1) {
+			return NULL_GATE;
+		}
+		else if (arity == 2) {
+			return NULL_GATE2;
+		}
+		else {
+			return new InputStatus[arity];
+		}
+	}
+
+	private static InputStatus[] acceptStatus(int arity) {
+		if (arity == 1) {
+			return ACCEPT;
+		}
+		else if (arity == 2) {
+			return ACCEPT2;
+		}
+		else {
+			InputStatus[] status = new InputStatus[arity];
+			for(int i = 0; i != arity; ++i) {
+				status[i] = InputStatus.ACCEPT;
+			}
+		}
+	}
+
+	private static InputStatus[] dropStatus(int arity) {
+		if (arity == 1) {
+			return DROP;
+		}
+		else if (arity == 2) {
+			return DROP2;
+		}
+		else {
+			InputStatus[] status = new InputStatus[arity];
+			for(int i = 0; i != arity; ++i) {
+				status[i] = InputStatus.DROP;
+			}
+		}
+	}
+	
+	private static abstract class GateControl implements RetrivalControl {
+
+		ExtractionContext context;
+		private InputStatus[] inputGates;
+		
+		public GateControl(ExtractionContext context, int arity) {
+			this.context = context;
+			inputGates = nullStatus(arity);
+		}
+
+		@Override
+		public void requireAll() {
+			if (inputGates[0] == null) {
+				inputGates = acceptStatus(inputGates.length);
+			}
+			else {
+				for(int i = 0; i != inputGates.length; ++i) {
+					setInputStatus(i, InputStatus.ACCEPT);
+				}
+			}
+		}
+
+		@Override
+		public void dropAll() {
+			if (inputGates[0] == null) {
+				inputGates = dropStatus(inputGates.length);
+			}
+			else {
+				for(int i = 0; i != inputGates.length; ++i) {
+					setInputStatus(i, InputStatus.DROP);
+				}
+			}
+		}
+
+		void ensureGates() {
+			if (inputGates[0] == null) {
+				inputGates = newStatus(inputGates.length);
+			}			
+		}
+		
+		@Override
+		public void setInputStatus(int inputId, InputStatus status) {
+			ensureGates();
+			if (inputGates[inputId] == InputStatus.POSTPONE || inputGates[inputId] == status) {
+				inputGates[inputId] = status;
+			}
+			else {
+				throw new IllegalArgumentException("Cannot change " + inputGates[inputId] + " to " + status);
+			}
+			context.checkPendings();
+		}
+
+		public void addPending(ValueLink link, Object value) {
+			context.addPending(link, value);
+		}		
+	}
+	
+	private static class CompositionContext implements CompositionCallback {
+		
+		private final ExtractionContext context;
+		private final ValueLink output;
+		
+		private VectorResultReceiver receiver;
+		private InputStatus[] inputGates;
+		
+		private List<Pending> pendings;
+		
+		public InputStatus gateStatus(int argIndex) {
+			InputStatus status = output.status(context);
+			if (status == InputStatus.ACCEPT) {
+				return inputGates[argIndex];
+			}
+			else {
+				return status;
+			}
+		}
+	}
+	
 	private static class CompositionLink implements ValueLink {
 		
 		private final int compositionId;
@@ -319,8 +511,13 @@ public class CompositeExtractorSet implements BinaryExtractorSet, Serializable {
 		}
 
 		@Override
+		public InputStatus status(ExtractionContext context) {
+			return null;
+		}
+
+		@Override
 		public void push(ExtractionContext context, Object value) {
-			context.composers.get(compositionId).push(argIndex, value);
+			context.composers[compositionId].receiver.push(argIndex, value);
 		}		
 		
 		@Override

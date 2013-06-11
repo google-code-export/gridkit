@@ -4,6 +4,8 @@ public interface VectorResultReceiver {
 
 	public void push(int id, Object part);
 	
+	public void done();
+	
 	public static class VectorResult implements VectorResultReceiver {
 		
 		private final Object[] vector;
@@ -17,6 +19,11 @@ public interface VectorResultReceiver {
 			vector[id] = part;
 		}
 		
+		@Override
+		public void done() {
+			// do nothing
+		}
+
 		public Object[] getVector() {
 			return vector;
 		}
