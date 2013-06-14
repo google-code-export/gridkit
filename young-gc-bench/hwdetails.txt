@@ -1,0 +1,15 @@
+Env1
+
+OS:  SUSE Linux Enterprise Server 11 (kernel 2.6.32.24)  
+CPU:  AMD Opteron(tm) Processor 6172  
+Cores:  48 (4 x 12)  
+Memory:  128 GiB  
+
+///
+
+Env2
+
+OS:  SUSE Linux Enterprise Server 11 (kernel 2.6.32.54)  
+CPU:  Intel(R) Xeon(R) CPU L5640 @ 2.27GHz  
+Cores:  12 (2 x 6) (Hyper-Threading turned off)  
+Memory:  96 GiB  
