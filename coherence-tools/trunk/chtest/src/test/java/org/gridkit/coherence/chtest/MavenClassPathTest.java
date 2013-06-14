@@ -71,9 +71,59 @@ public class MavenClassPathTest {
 		}
 	}	
 
+	@Test(expected = NoClassDefFoundError.class)
+	public void verify_version_replacement__no_class_def__out_of_proc() {
+		CohCloud cloud = new SimpleCohCloud();
+		cloud.all().outOfProcess(true);
+		try {
+			CohNode node =cloud.node("chtest-0.2.1");
+			MavenClasspathManager.replaceArtifactVersion(node, "org.gridkit.coherence-tools", "chtest", "0.2.1");
+			node.exec(new Runnable() {
+				
+				@Override
+				public void run() {
+					// this should throw NoClassDefFoundError
+					System.out.println("chtest version: " + MavenClasspathManager.getArtifactVersion("org.gridkit.coherence-tools", "chtest"));				
+				}
+			});
+		}
+		finally {
+			cloud.shutdown();
+		}
+	}	
+
 	@Test
 	public void verify_version_replacement__meta_data() {
 		CohCloud cloud = new SimpleCohCloud();
+		try {
+			CohNode node =cloud.node("chtest-0.2.1");
+			MavenClasspathManager.replaceArtifactVersion(node, "org.gridkit.coherence-tools", "chtest", "0.2.1");
+			String version = node.exec(new Callable<String>() {
+				
+				@Override
+				public String call() throws Exception {
+					// this should throw NoClassDefFoundError
+					String cppath = "/META-INF/maven/org.gridkit.coherence-tools/chtest/pom.properties";
+					InputStream is = getClass().getResourceAsStream(cppath);
+					Properties prop = new Properties();
+					prop.load(is);
+					is.close();
+					return prop.getProperty("version");
+				}
+			});
+			
+			System.out.println("chtest version: " + version);
+			Assert.assertEquals("0.2.1", version);
+		}
+		finally {
+			cloud.shutdown();
+		}
+	}	
+
+	@Test
+	public void verify_version_replacement__meta_data__out_of_proc() {
+		CohCloud cloud = new SimpleCohCloud();
+		cloud.all().outOfProcess(true);
 		try {
 			CohNode node =cloud.node("chtest-0.2.1");
 			MavenClasspathManager.replaceArtifactVersion(node, "org.gridkit.coherence-tools", "chtest", "0.2.1");

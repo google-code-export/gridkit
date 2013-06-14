@@ -131,6 +131,11 @@ public class CohHelper {
 	public static void addWkaAddress(ViConfigurable node, String host, int port) {
 		applyOperationalConfigFragment(node, new AddWkaAddress(host, port));
 	}
+
+	public static void addWkaAddress(String host, int port) {
+		OperationalConfigInjecter injecter = new OperationalConfigInjecter(new AddWkaAddress(host, port));
+		injecter.run();
+	}
 	
 	public static void setLogLevel(ViConfigurable node, int level) {
 		node.setProp("tangosol.coherence.log.level", String.valueOf(level));

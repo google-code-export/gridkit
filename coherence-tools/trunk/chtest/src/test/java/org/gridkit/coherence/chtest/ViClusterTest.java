@@ -36,6 +36,8 @@ public class ViClusterTest {
 		
 		cloud.all().presetFastLocalCluster();
 		cloud.all().enableJmx(true);
+		cloud.all().setTCMPTimeout(10000);
+		cloud.all().enableTcpRing(false);
 		
 		
 		cloud.node("server*").autoStartServices();
@@ -63,6 +65,8 @@ public class ViClusterTest {
 		
 		CohHelper.jmxWaitForService(cloud.node("server2"), cacheService);
 		cloud.node("server1").shutdown();
+		System.out.println("Stopping Server1, it may take some time");
+		
 		
 		Assert.assertEquals("Value at 'A'", "A", cache.get("A"));
 		
