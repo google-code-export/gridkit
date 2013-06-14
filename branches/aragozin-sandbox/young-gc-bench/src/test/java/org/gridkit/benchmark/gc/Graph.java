@@ -1,5 +1,6 @@
 package org.gridkit.benchmark.gc;
 
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -17,6 +18,7 @@ import org.junit.Test;
 import com.xeiam.xchart.Chart;
 import com.xeiam.xchart.ChartBuilder;
 import com.xeiam.xchart.Series;
+import com.xeiam.xchart.SeriesLineStyle;
 import com.xeiam.xchart.SeriesMarker;
 import com.xeiam.xchart.StyleManager.ChartTheme;
 import com.xeiam.xchart.StyleManager.ChartType;
@@ -58,23 +60,97 @@ public class Graph {
 	}
 	
 	@Test
-	public void showThreadsGraph() throws IOException {
-		showThreadSeries(readSamples("gcrep.1076.txt"), "hs6u43", range(4, 50));
+	public void showTreadsGraph_hs6u43() throws IOException {
+		SampleList samples = readSamples("gcrep.cms.txt");
+
+		samples = samples.filter("algo", "Serial", "ParNew");
+		
+		showThreadSeries("Young GC pause times [Java 6u43, MSC]", samples, "hs6u43", null, range(4, 50));
 	}
 
+	@Test
+	public void showTreadsGraph_hs7u15() throws IOException {
+		SampleList samples = readSamples("gcrep.cms.txt");
+		
+		samples = samples.filter("algo", "Serial", "ParNew");
+		
+		showThreadSeries("Young GC pause times [Java 7u15, MSC]", samples, "hs7u15", null, range(4, 50));
+	}
+
+	@Test
+	public void showTreadsGraph_MSC_compare_hs7_hs6_low() throws IOException {
+		SampleList samples = readSamples("gcrep.cms.txt");
+		
+		samples = samples.filter("algo", "Serial", "ParNew");
+		
+		showThreadSeries("Young GC pause times [Java 6u43 Vs. 7u15, MSC]", samples, "hs6u43", "hs7u15", range(0, 8));
+	}
+
+	@Test	
+	public void showTreadsGraph_MSC_compare_hs7_hs6_high() throws IOException {
+		SampleList samples = readSamples("gcrep.cms.txt");
+		
+		samples = samples.filter("algo", "Serial", "ParNew");
+		
+		showThreadSeries("Young GC pause times [Java 6u43 Vs. 7u15, MSC]", samples, "hs6u43", "hs7u15", range(9, 50));
+	}
+	
+	@Test
+	public void showTreadsGraph_CMS_compare_hs7_hs6_low() throws IOException {
+		SampleList samples = readSamples("gcrep.cms.txt");
+		
+		samples = samples.filter("algo", "CMS_DefNew", "CMS_ParNew");
+		samples = samples.replace("algo", "CMS_DefNew", "Serial");
+		samples = samples.replace("algo", "CMS_ParNew", "ParNew");
+		
+		showThreadSeries("Young GC pause times [Java 6u43 Vs. 7u15, CMS]", samples, "hs6u43", "hs7u15", range(0, 8));
+	}
+	
+	@Test	
+	public void showTreadsGraph_CMS_compare_hs7_hs6_high() throws IOException {
+		SampleList samples = readSamples("gcrep.cms.txt");
+		
+		samples = samples.filter("algo", "CMS_DefNew", "CMS_ParNew");
+		samples = samples.replace("algo", "CMS_DefNew", "Serial");
+		samples = samples.replace("algo", "CMS_ParNew", "ParNew");
+		
+		showThreadSeries("Young GC pause times [Java 6u43 Vs. 7u15, MSC]", samples, "hs6u43", "hs7u15", range(9, 50));
+	}
+	
 	@Test
 	public void showSizeGraph() throws IOException {
-		SampleList data = readSamples("gcrep.1076.txt");
+		SampleList data = readSamples("gcrep.1488.txt");
 		data = data.filter("threads", 8, 100);
-		showSizeSeries(data, "hs6u43");
+//		showSizeSeries(data, "hs6u43");
+		showSizeSeries(data, "hs7u15");
 	}
 
 	@Test
-	public void showNormalizedSizeGraph() throws IOException {
-		SampleList data = readSamples("gcrep.1076.txt");
-//		data = data.filter("threads", 1, 16);
-//		showNormalizedSizeSeries(data, "hs6u43", 8);
-		showNormalizedSizeSeries(data, "hs7u15", 8);
+	public void showNormalizedSizeGraph_MSC_j6() throws IOException {
+//		SampleList data = readSamples("gcrep.2462.txt");
+		SampleList data = readSamples("gcrep.cms.txt");
+		showNormalizedSizeSeries(data, "hs6u43", "Java 6u43, MSC", 8);
+	}
+
+	@Test
+	public void showNormalizedSizeGraph_MSC_j7() throws IOException {
+//		SampleList data = readSamples("gcrep.2462.txt");
+		SampleList data = readSamples("gcrep.cms.txt");
+		showNormalizedSizeSeries(data, "hs7u15", "Java 7u15, MSC", 8);
+	}
+
+	@Test
+	public void showNormalizedSizeGraph_CMS_j6() throws IOException {
+//		SampleList data = readSamples("gcrep.2462.txt");
+		SampleList data = readSamples("gcrep.cms.txt");
+		showNormalizedSizeSeries(data, "hs6u43", "Java 6u43, CMS", 4);
+	}
+
+	@Test
+	public void showNormalizedSizeGraph_CMS_j7() throws IOException {
+//		SampleList data = readSamples("gcrep.2462.txt");
+		SampleList data = readSamples("gcrep.cms.txt");
+		showNormalizedSizeSeries(data, "hs7u15", "Java 7u15, CMS", 4);
 	}
 	
 	private int[] range(int l, int h) {
@@ -94,25 +170,51 @@ public class Graph {
 		return false;
 	}
 	
-	public void showThreadSeries(SampleList samples, String jvm, int... threads) throws IOException {
+	private String jvm1Tag(String jvm1, String jvm2) {
+		return jvm2 == null ? "" : " [" + jvm1 + "]"; 
+	}
+
+	private String jvm2Tag(String jvm1, String jvm2) {
+		return jvm2 == null ? "" : " [" + jvm2 + "]"; 
+	}
+	
+	public void showThreadSeries(String title, SampleList samples, String jvm1, String jvm2, int... threads) throws IOException {
 		// Create Chart
 		Chart chart = new ChartBuilder()
 			.width(800).height(600)
 			.theme(ChartTheme.Matlab)
-			.title("Young GC pause mean [" + jvm + ", CMS]")
+			.title(title)
 			.xAxisTitle("Old space [GiB]").yAxisTitle("Pause mean [ms]")
 		.build();
+		
+		ColorPallete pal1 = new ColorPallete(0.9f, 0.8f, -0.01f, 0.30f);
+		ColorPallete pal2 = new ColorPallete(0.9f, 0.7f, -0.01f, 0.30f);
 		
 		chart.getStyleManager().setPlotGridLinesVisible(true);
 		chart.getStyleManager().setChartType(ChartType.Line);
 		 
 		SampleList series;
-		
-		samples = samples.filter("jvm", jvm);
+
+		SampleList samples1 = samples.filter("jvm", jvm1);
+		SampleList samples2 = jvm2 == null ? null : samples.filter("jvm", jvm2);
 		
 		if (has(threads, 0)) {
-			series = newThreadSeries(samples, jvm, "Serial", 1);
-			chart.addSeries("Serial", series.numericSeries("size"), series.numericSeries("mean"));
+			series = newThreadSeries(samples1, jvm1, "Serial", 1);
+			Series ser1 = chart.addSeries("Serial" + jvm1Tag(jvm1, jvm2), series.numericSeries("size"), series.numericSeries("mean"));
+			Color c = pal1.nextColor();
+			ser1.setMarker(SeriesMarker.CIRCLE);
+			ser1.setLineColor(c);
+			ser1.setMarkerColor(c);
+			ser1.setLineStyle(SeriesLineStyle.SOLID);
+			if (jvm2 != null) {
+				series = newThreadSeries(samples2, jvm2, "Serial", 1);
+				Series ser2 = chart.addSeries("Serial"  + jvm2Tag(jvm1, jvm2), series.numericSeries("size"), series.numericSeries("mean"));
+				c = pal2.nextColor();
+				ser2.setMarker(SeriesMarker.CIRCLE);
+				ser2.setMarkerColor(c);
+				ser2.setLineColor(c);
+				ser2.setLineStyle(SeriesLineStyle.DOT_DOT);
+			}
 		}
 
 		samples = samples.filter("algo", "ParNew");
@@ -120,9 +222,22 @@ public class Graph {
 		for(Object t: new TreeSet<Object>(samples.groupBy("threads").keySet())) {
 			int tc = ((Number)t).intValue();
 			if (has(threads, tc)) {
-				series = newThreadSeries(samples, jvm, "ParNew", tc);
-				Series ser = chart.addSeries("pt=" + tc, series.numericSeries("size"), series.numericSeries("mean"));
-				ser.setMarker(SeriesMarker.CIRCLE);
+				series = newThreadSeries(samples, jvm1, "ParNew", tc);
+				Series ser1 = chart.addSeries("pt=" + tc + jvm1Tag(jvm1, jvm2), series.numericSeries("size"), series.numericSeries("mean"));
+				Color c = pal1.nextColor();
+				ser1.setMarker(SeriesMarker.CIRCLE);
+				ser1.setLineColor(c);
+				ser1.setMarkerColor(c);
+				ser1.setLineStyle(SeriesLineStyle.SOLID);
+				if (jvm2 != null) {
+					series = newThreadSeries(samples2, jvm2, "ParNew", tc);
+					Series ser2 = chart.addSeries("pt=" + tc + jvm2Tag(jvm1, jvm2), series.numericSeries("size"), series.numericSeries("mean"));
+					c = pal2.nextColor();
+					ser2.setMarker(SeriesMarker.CIRCLE);
+					ser2.setMarkerColor(c);
+					ser2.setLineColor(c);
+					ser2.setLineStyle(SeriesLineStyle.DOT_DOT);
+				}
 			}
 		}
 
@@ -169,12 +284,12 @@ public class Graph {
 		dialog.show();
 	}
 	
-	public void showNormalizedSizeSeries(SampleList samples, String jvm, int etalon) throws IOException {
+	public void showNormalizedSizeSeries(SampleList samples, String jvm, String caption, int etalon) throws IOException {
 		// Create Chart
 		Chart chart = new ChartBuilder()
 			.width(800).height(600)
 			.theme(ChartTheme.Matlab)
-			.title("Young GC parallerism normalized by " + etalon + " threads case [" + jvm + "]")
+			.title("Young GC parallerism normalized by " + etalon + " threads case [" + caption + "]")
 			.xAxisTitle("Parallel threads").yAxisTitle("Parallel factor")
 		.build();
 		
