@@ -89,6 +89,17 @@ public class SampleList {
 		return new SampleList(samples);
 	}
 
+	public SampleList filter(String field, Object... anyOf) {
+		Set<Object> values = new HashSet<Object>(Arrays.asList(anyOf));
+		List<Map<String, Object>> samples = new ArrayList<Map<String,Object>>();
+		for(Map<String, Object> sample: this.samples) {
+			if (values.contains(sample.get(field))) {
+				samples.add(sample);
+			}
+		}
+		return new SampleList(samples);
+	}
+
 	public SampleList filter(String field, double l, double h) {
 		List<Map<String, Object>> samples = new ArrayList<Map<String,Object>>();
 		for(Map<String, Object> sample: this.samples) {
@@ -98,6 +109,18 @@ public class SampleList {
 			}
 		}
 		return new SampleList(samples);
+	}
+	
+	public SampleList replace(String field, Object oldValue, Object newValue) {
+		List<Map<String,Object>> result = new ArrayList<Map<String,Object>>();
+		for(Map<String, Object> sample: samples) {
+			Map<String, Object> sample2 = new LinkedHashMap<String, Object>(sample);
+			if (oldValue.equals(sample2.get(field))) {
+				sample2.put(field, newValue);
+			}
+			result.add(sample2);
+		}
+		return new SampleList(result);
 	}
 	
 	public Map<Object, SampleList> groupBy(String field) {
