@@ -894,8 +894,11 @@ public class CohHelper {
 		}
 	}
 
-	@SuppressWarnings("serial")
 	private static class NodeNameUpdater implements Runnable, Serializable {
+
+		// have to add this, for the same of classpath test
+		private static final long serialVersionUID = -5706063734155297889L;
+
 		@Override
 		public void run() {
 			String name = System.getProperty("vinode.name");
