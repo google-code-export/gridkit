@@ -61,7 +61,7 @@ public class Graph {
 	
 	@Test
 	public void showTreadsGraph_hs6u43() throws IOException {
-		SampleList samples = readSamples("gcrep.cms.txt");
+		SampleList samples = readSamples("gcrep.cms-full.txt");
 
 		samples = samples.filter("algo", "Serial", "ParNew");
 		
@@ -70,7 +70,7 @@ public class Graph {
 
 	@Test
 	public void showTreadsGraph_hs7u15() throws IOException {
-		SampleList samples = readSamples("gcrep.cms.txt");
+		SampleList samples = readSamples("gcrep.cms-full.txt");
 		
 		samples = samples.filter("algo", "Serial", "ParNew");
 		
@@ -79,7 +79,7 @@ public class Graph {
 
 	@Test
 	public void showTreadsGraph_MSC_compare_hs7_hs6_low() throws IOException {
-		SampleList samples = readSamples("gcrep.cms.txt");
+		SampleList samples = readSamples("gcrep.cms-full.txt");
 		
 		samples = samples.filter("algo", "Serial", "ParNew");
 		
@@ -88,7 +88,7 @@ public class Graph {
 
 	@Test	
 	public void showTreadsGraph_MSC_compare_hs7_hs6_high() throws IOException {
-		SampleList samples = readSamples("gcrep.cms.txt");
+		SampleList samples = readSamples("gcrep.cms-full.txt");
 		
 		samples = samples.filter("algo", "Serial", "ParNew");
 		
@@ -97,7 +97,7 @@ public class Graph {
 	
 	@Test
 	public void showTreadsGraph_CMS_compare_hs7_hs6_low() throws IOException {
-		SampleList samples = readSamples("gcrep.cms.txt");
+		SampleList samples = readSamples("gcrep.cms-full.txt");
 		
 		samples = samples.filter("algo", "CMS_DefNew", "CMS_ParNew");
 		samples = samples.replace("algo", "CMS_DefNew", "Serial");
@@ -108,13 +108,23 @@ public class Graph {
 	
 	@Test	
 	public void showTreadsGraph_CMS_compare_hs7_hs6_high() throws IOException {
-		SampleList samples = readSamples("gcrep.cms.txt");
+		SampleList samples = readSamples("gcrep.cms-full.txt");
 		
 		samples = samples.filter("algo", "CMS_DefNew", "CMS_ParNew");
 		samples = samples.replace("algo", "CMS_DefNew", "Serial");
 		samples = samples.replace("algo", "CMS_ParNew", "ParNew");
 		
 		showThreadSeries("Young GC pause times [Java 6u43 Vs. 7u15, MSC]", samples, "hs6u43", "hs7u15", range(9, 50));
+	}
+
+	@Test	
+	public void showTreadsGraph_G1() throws IOException {
+		SampleList samples = readSamples("g1rep.txt");
+		
+		samples = samples.filter("algo", "G1");
+		samples = samples.replace("algo", "G1", "ParNew");
+		
+		showThreadSeries("Young GC pause times [7u15, G1]", samples, "hs7u15", null, range(8, 50));
 	}
 	
 	@Test
@@ -128,28 +138,28 @@ public class Graph {
 	@Test
 	public void showNormalizedSizeGraph_MSC_j6() throws IOException {
 //		SampleList data = readSamples("gcrep.2462.txt");
-		SampleList data = readSamples("gcrep.cms.txt");
+		SampleList data = readSamples("gcrep.cms-full.txt");
 		showNormalizedSizeSeries(data, "hs6u43", "Java 6u43, MSC", 8);
 	}
 
 	@Test
 	public void showNormalizedSizeGraph_MSC_j7() throws IOException {
 //		SampleList data = readSamples("gcrep.2462.txt");
-		SampleList data = readSamples("gcrep.cms.txt");
+		SampleList data = readSamples("gcrep.cms-full.txt");
 		showNormalizedSizeSeries(data, "hs7u15", "Java 7u15, MSC", 8);
 	}
 
 	@Test
 	public void showNormalizedSizeGraph_CMS_j6() throws IOException {
-//		SampleList data = readSamples("gcrep.2462.txt");
-		SampleList data = readSamples("gcrep.cms.txt");
+//		SampleList data = readSamples("gcrep.txt");
+		SampleList data = readSamples("gcrep.cms-full.txt");
 		showNormalizedSizeSeries(data, "hs6u43", "Java 6u43, CMS", 4);
 	}
 
 	@Test
 	public void showNormalizedSizeGraph_CMS_j7() throws IOException {
 //		SampleList data = readSamples("gcrep.2462.txt");
-		SampleList data = readSamples("gcrep.cms.txt");
+		SampleList data = readSamples("gcrep.cms-full.txt");
 		showNormalizedSizeSeries(data, "hs7u15", "Java 7u15, CMS", 4);
 	}
 	
@@ -247,7 +257,7 @@ public class Graph {
 		dialog.add(panel);
 		dialog.setModal(true);
 		dialog.pack();
-		dialog.show();
+		dialog.setVisible(true);
 	}
 
 	public void showSizeSeries(SampleList samples, String jvm) throws IOException {
@@ -281,7 +291,7 @@ public class Graph {
 		dialog.add(panel);
 		dialog.setModal(true);
 		dialog.pack();
-		dialog.show();
+		dialog.setVisible(true);
 	}
 	
 	public void showNormalizedSizeSeries(SampleList samples, String jvm, String caption, int etalon) throws IOException {
@@ -302,6 +312,8 @@ public class Graph {
 		
 		samples = samples.filter("algo", "ParNew");
 		
+		int maxThreads = etalon;
+		
 		for(Object t: new TreeSet<Object>(samples.groupBy("size").keySet())) {
 			double size = ((Number)t).intValue();
 			series = newSizeSeries(samples, jvm, "ParNew", size);
@@ -312,15 +324,26 @@ public class Graph {
 			}
 			Series ser = chart.addSeries("" + size + " [GiB]", series.numericSeries("threads"), factor);
 			ser.setMarker(SeriesMarker.CIRCLE);
+			for(double tc: factor) {
+				if (maxThreads < tc) {
+					maxThreads = (int) Math.ceil(tc);
+				}
+			}
 		}
 	
+		double[] diag = {1, maxThreads};
+		Series diagSer = chart.addSeries("x=y", diag, diag);
+		diagSer.setMarker(SeriesMarker.NONE);
+		diagSer.setLineStyle(SeriesLineStyle.DASH_DASH);
+		diagSer.setLineColor(Color.GRAY.brighter());
+		
 		XChartPanel panel = new XChartPanel(chart);
 		
 		JDialog dialog = new JDialog();
 		dialog.add(panel);
 		dialog.setModal(true);
 		dialog.pack();
-		dialog.show();
+		dialog.setVisible(true);
 	}
 
 	private SampleList newThreadSeries(SampleList list, String jvm, String algo, int threads) {
