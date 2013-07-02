@@ -191,10 +191,10 @@ public class MavenClasspathManager {
 		if (url != null) {
 			try {
 				String us = url.toExternalForm();
-				us = us.substring(0, us.length() - cppath.length());
+				us = us.substring(0, us.length() - cppath.length() + 1);
 				return new URL(us);
 			} catch (IOException e) {
-				throw new RuntimeException(e);
+				throw new RuntimeException("Failed to derive root path from resouce URL '" + url.toExternalForm() + "', resource '"+ cppath + "'", e);
 			}
 		}
 		else {

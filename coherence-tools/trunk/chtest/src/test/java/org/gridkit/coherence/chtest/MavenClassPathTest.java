@@ -42,9 +42,23 @@ public class MavenClassPathTest {
 	}
 	
 	@Test
-	public void verify_find_jar() {
+	public void verify_find_coherence_jar() {
+		// maven meta data is not available in this jar
 		URL path = MavenClasspathManager.findJar("com.oracle.coherence", "coherence", MavenClasspathManager.getArtifactVersion("com.oracle.coherence", "coherence"));
 		URL cppath = MavenClasspathManager.getArtifactClasspathUrl("com.oracle.coherence", "coherence");
+		System.out.println("verify_find_jar [jar path]: " + path);
+		System.out.println("verify_find_jar [base url]: " + cppath);
+		Assert.assertTrue(path != null);
+		Assert.assertTrue(cppath != null);
+	}
+
+	@Test
+	public void verify_find_nanocloud_jar() {
+		// maven meta data is present in this jar
+		String group = "org.gridkit.lab";
+		String artifact = "telecontrol-ssh";
+		URL path = MavenClasspathManager.findJar(group, artifact, MavenClasspathManager.getArtifactVersion(group, artifact));
+		URL cppath = MavenClasspathManager.getArtifactClasspathUrl(group, artifact);
 		System.out.println("verify_find_jar [jar path]: " + path);
 		System.out.println("verify_find_jar [base url]: " + cppath);
 		Assert.assertTrue(path != null);
