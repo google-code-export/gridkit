@@ -127,9 +127,10 @@ public class MavenClasspathManager {
 			throw new IllegalArgumentException("Artifact " + groupId + ":" + artifactId + " wasn't detected in classpath");
 		}
 		if ("jar".equals(url.getProtocol())) {
-			url = findJar(groupId, artifactId, version);
+			url = baseUrlToJarUrl(url);
 		}
 		if (url == null) {
+			dumpClasspathInfo();
 			throw new IllegalArgumentException("Artifact " + groupId + ":" + artifactId + " wasn't detected in classpath");
 		}
 		
@@ -231,6 +232,7 @@ public class MavenClasspathManager {
 
 	public static URL findJar(String groupId, String artifactId, String version) {
 		File localRepo = getLocalMavenRepoPath();
+		// TODO search in local classpath first, jar may be in reactor
 		if (localRepo == null) {
 			throw new IllegalArgumentException("Cannot detect local repo");
 		}
@@ -265,6 +267,26 @@ public class MavenClasspathManager {
 				String v = si.mavenProps.getProperty("version");
 				System.out.println(g + ":" + a + ":" + v + " " + si.baseUrl);
 			}
+		}
+	}
+	
+	private static URL baseUrlToJarUrl(URL url) {
+		if ("jar".equals(url.getProtocol())) {
+			String u = url.toExternalForm();
+			u = u.substring("jar:".length());
+			int c = u.lastIndexOf('!');
+			if (c < 0) {
+				throw new IllegalArgumentException(url.toExternalForm() + " doesn't ends with !/");
+			}
+			u = u.substring(0, c);
+			try {
+				return new URL(u);
+			} catch (MalformedURLException e) {
+				throw new IllegalArgumentException(e);
+			}
+		}
+		else {
+			throw new IllegalArgumentException("Protocol is to jar: " + url.toExternalForm());
 		}
 	}
 	
