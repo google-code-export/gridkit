@@ -15,42 +15,42 @@ public class SampleListTest {
 		Sample s;
 		s = new Sample();
 		s.setCoord("N", 1);
-		s.setCoord("UID", "3333");
+		s.setCoord("UID", "u3333");
 		s.setCoord("System", "X1");
 		s.setResult("Count", 1);
 		s.setResult("Value", -1);
 		samples.add(s);
 		s = new Sample();
 		s.setCoord("N", 2);
-		s.setCoord("UID", "2222");
+		s.setCoord("UID", "u2222");
 		s.setCoord("System", "X2");
 		s.setResult("Count", 10);
 		s.setResult("Value", -10);
 		samples.add(s);
 		s = new Sample();
 		s.setCoord("N", 3);
-		s.setCoord("UID", "1111");
+		s.setCoord("UID", "u1111");
 		s.setCoord("System", "X3");
 		s.setResult("Count", 20);
 		s.setResult("Value", -20);
 		samples.add(s);
 		s = new Sample();
 		s.setCoord("N", 4);
-		s.setCoord("UID", "4444");
+		s.setCoord("UID", "u4444");
 		s.setCoord("System", "X3*");
 		s.setResult("Count", 100);
 		s.setResult("Value", -2);
 		samples.add(s);
 		s = new Sample();
 		s.setCoord("N", 5);
-		s.setCoord("UID", "5555");
+		s.setCoord("UID", "u5555");
 		s.setCoord("System", "X3*");
 		s.setResult("Count", 100);
 		s.setResult("Value", -3);
 		samples.add(s);
 		s = new Sample();
 		s.setCoord("N", 6);
-		s.setCoord("UID", "6666");
+		s.setCoord("UID", "u6666");
 		s.setCoord("System", "X3*");
 		s.setResult("Count", 100);
 		s.setResult("Value", -4);
@@ -62,21 +62,30 @@ public class SampleListTest {
 	}
 	
 	@Test
-	public void verify_string_sort() {
+	public void verify_string_field_sort() {
 		
-		double[] expected = {3, 2, 1, 4, 5, 6};
-		double[] result = series1().sort("UID").numericSeries("N");
+		long[] expected = {3, 2, 1, 4, 5, 6};
+		long[] result = series1().sort("UID").integerSeries("N");
 		
 		Assert.assertEquals(Arrays.toString(expected), Arrays.toString(result));
 	}
 
-//	@Test
-//	public void verify_string_sort() {
-//		
-//		double[] expected = {3, 2, 1, 4, 5, 6};
-//		double[] result = series1().sort("UID").numericSeries("N");
-//		
-//		Assert.assertEquals(Arrays.toString(expected), Arrays.toString(result));
-//	}
-//	
+	@Test
+	public void verify_integer_field_sort_1() {
+		
+		long[] expected = {-20, -10, -4, -3, -2, -1};
+		long[] result = series1().sort("Value").integerSeries("Value");
+		
+		Assert.assertEquals(Arrays.toString(expected), Arrays.toString(result));
+	}
+
+	@Test
+	public void verify_two_field_sort() {
+		
+		long[] expected = {1, 2, 3, 4, 5, 6};
+		long[] result = series1().sortReverse("N").sort("Count", "UID").integerSeries("N");
+		
+		Assert.assertEquals(Arrays.toString(expected), Arrays.toString(result));
+	}
+	
 }
