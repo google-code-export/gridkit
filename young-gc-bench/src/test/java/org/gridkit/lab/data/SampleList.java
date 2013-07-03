@@ -154,6 +154,14 @@ public class SampleList {
 		return s;
 	}
 
+	public long[] integerSeries(String field) {
+		long[] s = new long[samples.size()];
+		for(int i = 0; i != s.length; ++i) {
+			s[i] = ((Number)getTyped(i, field)).longValue();
+		}
+		return s;
+	}
+
 	public double[] scaledNumericSeries(String field, double factor) {
 		double[] s = new double[samples.size()];
 		for(int i = 0; i != s.length; ++i) {
