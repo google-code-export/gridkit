@@ -29,6 +29,22 @@
     <name>Coherence test utils</name>
     <description>Utility classes for unit and integration testing</description>
 
+    <licenses>
+      <license>
+        <name>The Apache Software License, Version 2.0</name>
+        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        <distribution>repo</distribution>
+      </license>
+    </licenses>
+    
+    <developers>
+      <developer>
+        <id>alexey.ragozin</id>
+        <name>Alexey Ragozin</name>
+        <email>alexey.ragozin@gmail.com</email>
+      </developer>
+    </developers>
+
     <scm>
         <connection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/trunk/chtest</connection>
         <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/coherence-tools/trunk/chtest</developerConnection>
