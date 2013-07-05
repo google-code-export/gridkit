@@ -3,6 +3,7 @@ package org.gridkit.lab.data;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -367,6 +368,10 @@ public class SampleList {
 	
 	public int size() {
 		return samples.size();
+	}
+	
+	public List<Sample> asList() {
+		return Collections.unmodifiableList(samples);
 	}
 
 	public String toString() {

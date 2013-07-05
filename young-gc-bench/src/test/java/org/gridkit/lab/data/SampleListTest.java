@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -60,6 +61,58 @@ public class SampleListTest {
 		
 		return new SampleList(samples);
 	}
+
+	public SampleList newList(int n) {
+		List<Sample> list = new ArrayList<Sample>();
+		for(int i = 0; i != n; ++i) {
+			Sample s = new Sample();
+			s.setCoord("N", i);
+			list.add(s);
+		}
+		return new SampleList(list);
+	}
+	
+	public void addGausian(SampleList samples, String field, long seed) {
+		Random rnd = new Random(seed);
+		for(Sample s: samples.asList()) {
+			s.setResult(field, rnd.nextGaussian());
+		}
+	}
+
+	public void addRandom(SampleList samples, String field, long seed, String... values) {
+		Random rnd = new Random(seed);
+		for(Sample s: samples.asList()) {
+			s.setCoord(field, values[rnd.nextInt(values.length)]);
+		}
+	}
+
+	public void addRoundRobin(SampleList samples, String field, String... values) {
+		int n = 0;
+		for(Sample s: samples.asList()) {
+			s.setCoord(field, values[(n++) % values.length]);
+		}
+	}
+
+	public void addColumn(SampleList samples, String field, long... values) {
+		int n = 0;
+		for(Sample s: samples.asList()) {
+			s.setCoord(field, values[n++]);
+		}
+	}
+
+	public void addColumn(SampleList samples, String field, double... values) {
+		int n = 0;
+		for(Sample s: samples.asList()) {
+			s.setCoord(field, values[n++]);
+		}
+	}
+
+	public void addColumn(SampleList samples, String field, String... values) {
+		int n = 0;
+		for(Sample s: samples.asList()) {
+			s.setCoord(field, values[n++]);
+		}
+	}
 	
 	@Test
 	public void verify_string_field_sort() {
@@ -67,7 +120,7 @@ public class SampleListTest {
 		long[] expected = {3, 2, 1, 4, 5, 6};
 		long[] result = series1().sort("UID").integerSeries("N");
 		
-		Assert.assertEquals(Arrays.toString(expected), Arrays.toString(result));
+		assertEquals(expected, result);
 	}
 
 	@Test
@@ -76,7 +129,7 @@ public class SampleListTest {
 		long[] expected = {-20, -10, -4, -3, -2, -1};
 		long[] result = series1().sort("Value").integerSeries("Value");
 		
-		Assert.assertEquals(Arrays.toString(expected), Arrays.toString(result));
+		assertEquals(expected, result);
 	}
 
 	@Test
@@ -85,6 +138,53 @@ public class SampleListTest {
 		long[] expected = {1, 2, 3, 4, 5, 6};
 		long[] result = series1().sortReverse("N").sort("Count", "UID").integerSeries("N");
 		
+		assertEquals(expected, result);
+	}
+
+	@Test
+	public void verify_first() {
+	
+		SampleList list;
+	
+		list = gausianSeries1().filterFirst("T");
+		long[] first_unsorted = {0, 1, 3};
+		assertEquals(first_unsorted, list.integerSeries("N"));
+		
+		list = gausianSeries1().sort("T", "X").filterFirst("T");
+		long[] first_by_X = {8, 1, 5};
+		assertEquals(first_by_X, list.integerSeries("N"));
+
+		list = gausianSeries1().sortReverse("X").sort("T").filterFirst("T");
+		long[] last_by_X = {0, 2, 4};
+		assertEquals(last_by_X, list.integerSeries("N"));
+	}
+
+	@Test
+	public void verify_median() {
+		
+		SampleList list;
+		
+		list = gausianSeries1().filterMedian("T");
+		long[] med_unsorted = {7, 2, 5};
+		assertEquals(med_unsorted, list.integerSeries("N"));
+		
+		list = gausianSeries1().sort("T", "X").filterMedian("T");
+		long[] med_by_X = {7, 2, 6};
+		assertEquals(med_by_X, list.integerSeries("N"));
+		
+		list = gausianSeries1().sortReverse("X").sort("T").filterMedian("T");
+		long[] reverse_med_by_X = {7, 1, 6};
+		assertEquals(reverse_med_by_X, list.integerSeries("N"));
+	}
+
+	private SampleList gausianSeries1() {
+		SampleList list = newList(10);
+		addGausian(list, "X", 0);
+		addRandom(list, "T", 0, "A", "B", "C");
+		return list;
+	}
+
+	private void assertEquals(long[] expected, long[] result) {
 		Assert.assertEquals(Arrays.toString(expected), Arrays.toString(result));
 	}
 	
