@@ -16,12 +16,16 @@ import au.com.bytecode.opencsv.CSVReader;
 public class SampleCSVReader {
 
 	public static List<Sample> read(String path) throws IOException {
+		return read(path, ',');
+	}
+
+	public static List<Sample> read(String path, char sep) throws IOException {
 		InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
 		if (is != null) {
-			return new SampleCSVReader(is).readAll();
+			return new SampleCSVReader(is, sep).readAll();
 		}
 		else if (new File(path).exists()) {
-			return new SampleCSVReader(new FileReader(path)).readAll();
+			return new SampleCSVReader(new FileReader(path), sep).readAll();
 		}
 		throw new FileNotFoundException(path);
 	}
@@ -29,13 +33,13 @@ public class SampleCSVReader {
 	private CSVHeader header;
 	private CSVReader reader;
 	
-	public SampleCSVReader(Reader reader) throws IOException {
-		this.reader = new CSVReader(reader);
+	public SampleCSVReader(Reader reader, char separator) throws IOException {
+		this.reader = new CSVReader(reader, separator);
 		this.header = readHeader(this.reader.readNext());
 	}
 
-	public SampleCSVReader(InputStream stream) throws IOException {
-		this(new InputStreamReader(stream));
+	public SampleCSVReader(InputStream stream, char separator) throws IOException {
+		this(new InputStreamReader(stream), separator);
 	}
 
 	protected CSVHeader readHeader(String[] h) throws IOException {
@@ -46,7 +50,9 @@ public class SampleCSVReader {
 			List<String> t = Arrays.asList(h);
 			int n = t.indexOf("-");
 			if (n < 0) {
-				throw new IllegalArgumentException("Invalid header format");
+				t = new ArrayList<String>(t);
+				n = t.size();
+				t.add("-");
 			}
 			return new CSVHeader(t.subList(0, n), t.subList(n + 1, t.size()));
 		}

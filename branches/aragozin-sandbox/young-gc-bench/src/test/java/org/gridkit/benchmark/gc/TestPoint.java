@@ -7,7 +7,7 @@ import org.gridkit.vicluster.ViConfigurable;
 import org.gridkit.vicluster.telecontrol.jvm.JvmProps;
 
 @SuppressWarnings("serial")
-	public class TestPoint implements Serializable {
+	public class TestPoint implements Serializable, Cloneable {
 		
 		String javaId;
 		GcMode mode;
@@ -64,6 +64,17 @@ import org.gridkit.vicluster.telecontrol.jvm.JvmProps;
 //			}
 		}
 		
+		@Override
+		public TestPoint clone() {
+			try {
+				return (TestPoint)super.clone();
+			} catch (CloneNotSupportedException e) {
+				throw new Error();
+			}
+		}
+
+
+
 		public String getPointInfo() {
 			StringBuilder sb = new StringBuilder();
 			sb.append(javaId);
