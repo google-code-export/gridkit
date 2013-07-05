@@ -8,14 +8,16 @@ import java.util.Map;
 
 class CSVHeader {
 	
-	List<String> header1 = new ArrayList<String>();
-	List<String> header2 = new ArrayList<String>();
+	List<String> header1;
+	List<String> header2;
 	
 	Map<String, Integer> columns = new HashMap<String, Integer>();
 
 	public CSVHeader(List<String> h1, List<String> h2) {
-		header1 = h1;
-		header2 = h2;
+		header1 = new ArrayList<String>(h1);
+		header2 = new ArrayList<String>(h2);
+		
+		header1.removeAll(h2);
 		
 		int n = 0;
 		for(String h: header1) {
@@ -52,7 +54,12 @@ class CSVHeader {
 	
 	public Sample read(String[] values) {
 		if (header1.size() + header2.size() + 1 != values.length) {
-			throw new IllegalArgumentException("Invalid number of fields");
+			if (header2.size() == 0 && header1.size() == values.length) {
+				// special case
+			}
+			else {
+				throw new IllegalArgumentException("Invalid number of fields");
+			}
 		}
 		Sample dp = new Sample();
 		int n = 0;
@@ -62,13 +69,15 @@ class CSVHeader {
 				dp.setCoord(field, val);
 			}
 		}
-		if (values[n++].trim().length() != 0) {
-			throw new IllegalArgumentException("Illegal row format, '-' field is not empty");
-		}
-		for(String field: header2) {
-			String val = values[n++];
-			if (val.length() > 0) {
-				dp.setResult(field, val);
+		if (values.length > n) { 
+			if (values[n++].trim().length() != 0) {
+				throw new IllegalArgumentException("Illegal row format, '-' field is not empty");
+			}
+			for(String field: header2) {
+				String val = values[n++];
+				if (val.length() > 0) {
+					dp.setResult(field, val);
+				}
 			}
 		}
 		return dp;

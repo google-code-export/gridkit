@@ -1,8 +1,6 @@
 package org.gridkit.benchmark.gc;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ColorPallete {
 
@@ -16,6 +14,13 @@ public class ColorPallete {
 		this.bright = bright;
 		this.hue = hue;
 		this.hueStep = hueStep;
+	}
+
+	public ColorPallete(double sat, double bright, double hue, double hueStep) {
+		this.sat = (float) sat;
+		this.bright = (float) bright;
+		this.hue = (float) hue;
+		this.hueStep = (float) hueStep;
 	}
 
 

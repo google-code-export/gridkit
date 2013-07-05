@@ -2,13 +2,17 @@ package org.gridkit.lab.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SampleList {
 
@@ -88,17 +92,17 @@ public class SampleList {
 		return new SampleList(samples);
 	}
 	
-	public SampleList filter(String field, Object value) {
-		List<Sample> samples = new ArrayList<Sample>();
-		for(Sample sample: this.samples) {
-			if (value.equals(sample.get(field))) {
-				samples.add(sample);
-			}
-		}
-		return new SampleList(samples);
-	}
+//	public SampleList retain(String field, String value) {
+//		List<Sample> samples = new ArrayList<Sample>();
+//		for(Sample sample: this.samples) {
+//			if (value.equals(sample.get(field))) {
+//				samples.add(sample);
+//			}
+//		}
+//		return new SampleList(samples);
+//	}
 
-	public SampleList filter(String field, String... anyOf) {
+	public SampleList retain(String field, String... anyOf) {
 		Set<Object> values = new HashSet<Object>(Arrays.asList(anyOf));
 		List<Sample> samples = new ArrayList<Sample>();
 		for(Sample sample: this.samples) {
@@ -109,11 +113,54 @@ public class SampleList {
 		return new SampleList(samples);
 	}
 
-	public SampleList filter(String field, double l, double h) {
+	public SampleList retain(String field, Collection<String> anyOf) {
+		Set<Object> values = new HashSet<Object>(anyOf);
+		List<Sample> samples = new ArrayList<Sample>();
+		for(Sample sample: this.samples) {
+			if (values.contains(sample.get(field))) {
+				samples.add(sample);
+			}
+		}
+		return new SampleList(samples);
+	}
+
+	public SampleList retain(String field, double l, double h) {
 		List<Sample> samples = new ArrayList<Sample>();
 		for(Sample sample: this.samples) {
 			double v = sample.getDouble(field);					
 			if (v >= l && v <= h) {
+				samples.add(sample);
+			}
+		}
+		return new SampleList(samples);
+	}
+
+//	public SampleList remove(String field, String value) {
+//		List<Sample> samples = new ArrayList<Sample>();
+//		for(Sample sample: this.samples) {
+//			if (!(value.equals(sample.get(field)))) {
+//				samples.add(sample);
+//			}
+//		}
+//		return new SampleList(samples);
+//	}
+//	
+	public SampleList remove(String field, String... anyOf) {
+		Set<Object> values = new HashSet<Object>(Arrays.asList(anyOf));
+		List<Sample> samples = new ArrayList<Sample>();
+		for(Sample sample: this.samples) {
+			if (!(values.contains(sample.get(field)))) {
+				samples.add(sample);
+			}
+		}
+		return new SampleList(samples);
+	}
+	
+	public SampleList remove(String field, double l, double h) {
+		List<Sample> samples = new ArrayList<Sample>();
+		for(Sample sample: this.samples) {
+			double v = sample.getDouble(field);					
+			if (!(v >= l && v <= h)) {
 				samples.add(sample);
 			}
 		}
@@ -131,6 +178,28 @@ public class SampleList {
 		}
 		return new SampleList(result);
 	}
+
+	public SampleList transformRegEx(String field, String pattern, String format) {
+		Pattern re = Pattern.compile(pattern);
+		List<Sample> result = new ArrayList<Sample>();
+		for(Sample sample: samples) {
+			Sample sample2 = sample.clone();
+			String value = sample2.get(field);
+			if (value != null) {
+				Matcher m = re.matcher(value);
+				if (m.matches()) {
+					Object[] gg = new Object[m.groupCount()];
+					for (int i = 0; i != gg.length; ++i) {
+						gg[i] = m.group(i + 1);
+					}
+					value = String.format(format, gg);
+					sample2.set(field, value);
+					result.add(sample2);
+				}
+			}
+		}
+		return new SampleList(result);
+	}
 	
 	public Map<Object, SampleList> groupBy(String field) {
 		Map<Object, SampleList> result = new HashMap<Object, SampleList>();
@@ -142,6 +211,32 @@ public class SampleList {
 				result.put(val, s);
 			}
 			s.samples.add(sample);
+		}
+		return result;
+	}
+
+	public Set<String> distinct(String field) {
+		Set<String> result = new LinkedHashSet<String>();
+		for(Sample sample: samples) {
+			String val = sample.get(field);
+			result.add(val);
+		}
+		return result;
+	}
+
+	public Set<List<String>> distinct(String first, String... rest) {
+		String[] fields = new String[rest.length + 1];
+		fields[0] = first;
+		for(int i = 0; i != rest.length; ++i) {
+			fields[i + i] = rest[i];
+		}
+		Set<List<String>> result = new HashSet<List<String>>();
+		for(Sample sample: samples) {
+			String[] val = new String[fields.length];
+			for(int i = 0; i != val.length; ++i) {
+				val[i] = sample.get(fields[i]); 
+			}
+			result.add(Arrays.asList(val));
 		}
 		return result;
 	}
@@ -204,6 +299,7 @@ public class SampleList {
 					continue;
 				}
 			} catch (NumberFormatException e) {
+				dl = null;
 				// not a long
 			}
 			try {
@@ -212,7 +308,8 @@ public class SampleList {
 					continue;
 				}
 			} catch (NumberFormatException e) {
-				// not a long
+				dv = null;
+				// not a decimal
 			}
 			return String.class;
 		}

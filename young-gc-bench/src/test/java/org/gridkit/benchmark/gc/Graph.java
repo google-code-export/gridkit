@@ -118,7 +118,17 @@ public class Graph {
 	}
 
 	@Test	
-	public void showTreadsGraph_G1() throws IOException {
+	public void showTreadsGraph_G1_low() throws IOException {
+		SampleList samples = readSamples("g1rep.txt");
+		
+		samples = samples.filter("algo", "G1");
+		samples = samples.replace("algo", "G1", "ParNew");
+		
+		showThreadSeries("Young GC pause times [7u15, G1]", samples, "hs7u15", null, range(1, 8));
+	}
+
+	@Test	
+	public void showTreadsGraph_G1_high() throws IOException {
 		SampleList samples = readSamples("g1rep.txt");
 		
 		samples = samples.filter("algo", "G1");
