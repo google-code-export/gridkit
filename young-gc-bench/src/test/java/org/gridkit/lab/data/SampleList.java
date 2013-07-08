@@ -136,6 +136,19 @@ public class SampleList {
 		return new SampleList(samples);
 	}
 
+	public SampleList retainRegEx(String field, String pattern) {
+		Pattern re = Pattern.compile(pattern);
+		List<Sample> samples = new ArrayList<Sample>();
+		for(Sample sample: this.samples) {
+			String val = sample.get(field);
+			if (val != null && re.matcher(val).matches()) {
+				samples.add(sample);
+			}
+		}
+		return new SampleList(samples);
+	}
+	
+
 //	public SampleList remove(String field, String value) {
 //		List<Sample> samples = new ArrayList<Sample>();
 //		for(Sample sample: this.samples) {
