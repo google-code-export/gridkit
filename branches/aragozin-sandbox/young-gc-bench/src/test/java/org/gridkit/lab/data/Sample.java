@@ -126,7 +126,7 @@ public class Sample implements Serializable, Comparable<Sample>, Cloneable {
 	}
 	
 	public double getDouble(String key) {
-		return Double.parseDouble(key);
+		return Double.parseDouble(data.get(key));
 	}
 
 	@Override
