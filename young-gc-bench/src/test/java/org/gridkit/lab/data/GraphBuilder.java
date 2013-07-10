@@ -14,6 +14,8 @@ import javax.swing.JDialog;
 
 import org.gridkit.benchmark.gc.ColorPallete;
 
+import cern.colt.list.tdouble.DoubleArrayList;
+
 import com.xeiam.xchart.BitmapEncoder;
 import com.xeiam.xchart.Chart;
 import com.xeiam.xchart.ChartBuilder;
@@ -53,6 +55,18 @@ public class GraphBuilder {
 //		System.out.println("Series " + name + " " + Arrays.toString(y));
 		Series s = chart.addSeries(name, x, y);
 		group(group).add(s);
+	}
+
+	public void addSeries(String group, String name, DoubleArrayList x, DoubleArrayList y) {
+		addSeries(group, name, asArray(x), asArray(y));
+	}
+
+	private double[] asArray(DoubleArrayList list) {
+		double[] a = new double[list.size()];
+		for(int i = 0; i != a.length; ++i) {
+			a[i] = list.get(i);
+		}
+		return a;
 	}
 
 	public void addStub(String group) {
