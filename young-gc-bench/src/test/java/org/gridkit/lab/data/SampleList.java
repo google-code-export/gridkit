@@ -69,7 +69,7 @@ public class SampleList {
 	}
 
 	/**
-	 * Retains only first sample in each group
+	 * Retains only middle sample in each group
 	 */
 	public SampleList filterMedian(String... fields) {
 		Map<List<Object>, List<Sample>> groups = new LinkedHashMap<List<Object>, List<Sample>>();
@@ -92,6 +92,65 @@ public class SampleList {
 		}
 		return new SampleList(samples);
 	}
+
+	/**
+	 * Retains only middle sample in each group
+	 */
+	public SampleList filterMedRange(int size, String... fields) {
+		Map<List<Object>, List<Sample>> groups = new LinkedHashMap<List<Object>, List<Sample>>();
+		
+		List<Sample> samples = new ArrayList<Sample>();
+		for(Sample sample: this.samples) {
+			Object[] tag = new Object[fields.length];
+			for(int i = 0; i != fields.length; ++i) {
+				tag[i] = sample.get(fields[i]);
+			}
+			List<Sample> group = groups.get(Arrays.asList(tag));
+			if (group == null) {
+				group = new ArrayList<Sample>();
+				groups.put(Arrays.asList(tag), group);
+			}
+			group.add(sample);
+		}
+		for(List<Sample> group: groups.values()) {
+			while(group.size() > size) {
+				group.remove(0);
+				if (group.size() > size) {
+					group.remove(group.size() - 1);
+				}
+			}
+			samples.addAll(group);
+		}
+		return new SampleList(samples);
+	}
+	
+	/**
+	 * Groups sample by selected attributes and allows further aggregation
+	 */
+	public Aggregation aggregate(String... fields) {
+		Map<List<String>, List<Sample>> groups = new LinkedHashMap<List<String>, List<Sample>>();
+		
+		List<Sample> samples = new ArrayList<Sample>();
+		for(Sample sample: this.samples) {
+			String[] tag = new String[fields.length];
+			for(int i = 0; i != fields.length; ++i) {
+				tag[i] = sample.get(fields[i]);
+			}
+			List<Sample> group = groups.get(Arrays.asList(tag));
+			if (group == null) {
+				group = new ArrayList<Sample>();
+				groups.put(Arrays.asList(tag), group);
+				Sample gg = new Sample();
+				for(int i = 0; i != tag.length; ++i) {
+					gg.setCoord(fields[i], tag[i]);
+				}
+				samples.add(gg);				
+			}
+			group.add(sample);
+		}
+		return new Aggregation(samples, new ArrayList<List<Sample>>(groups.values()));
+	}
+	
 	
 //	public SampleList retain(String field, String value) {
 //		List<Sample> samples = new ArrayList<Sample>();
@@ -104,6 +163,9 @@ public class SampleList {
 //	}
 
 	public SampleList retain(String field, String... anyOf) {
+		if (anyOf.length == 0) {
+			throw new IllegalArgumentException("Value list is empty");
+		}
 		Set<Object> values = new HashSet<Object>(Arrays.asList(anyOf));
 		List<Sample> samples = new ArrayList<Sample>();
 		for(Sample sample: this.samples) {
@@ -112,6 +174,24 @@ public class SampleList {
 			}
 		}
 		return new SampleList(samples);
+	}
+
+	public SampleList retain(String field, double... anyOf) {
+		if (anyOf.length == 0) {
+			throw new IllegalArgumentException("Value list is empty");
+		}
+		Arrays.sort(anyOf);
+		List<Sample> result = new ArrayList<Sample>();
+		for(int i = 0; i != samples.size(); ++i) {
+			Object v = getTyped(i, field);
+			if (v instanceof Number) {
+				double d = ((Number)v).doubleValue(); 
+				if (Arrays.binarySearch(anyOf, d) >= 0) {
+					result.add(samples.get(i));
+				}
+			}
+		}
+		return new SampleList(result);
 	}
 
 	public SampleList retain(String field, Collection<String> anyOf) {
@@ -125,7 +205,7 @@ public class SampleList {
 		return new SampleList(samples);
 	}
 
-	public SampleList retain(String field, double l, double h) {
+	public SampleList retainRange(String field, double l, double h) {
 		List<Sample> samples = new ArrayList<Sample>();
 		for(Sample sample: this.samples) {
 			double v = sample.getDouble(field);					
@@ -215,10 +295,10 @@ public class SampleList {
 		return new SampleList(result);
 	}
 	
-	public Map<Object, SampleList> groupBy(String field) {
-		Map<Object, SampleList> result = new HashMap<Object, SampleList>();
+	public Map<String, SampleList> groupBy(String field) {
+		Map<String, SampleList> result = new HashMap<String, SampleList>();
 		for(Sample sample: samples) {
-			Object val = sample.get(field);
+			String val = sample.get(field);
 			SampleList s = result.get(val);
 			if (s == null) {
 				s = new SampleList(new ArrayList<Sample>());
@@ -398,4 +478,48 @@ public class SampleList {
 
 		return sb.toString();
 	}	
+	
+	public class Aggregation {
+		
+		List<Sample> result = new ArrayList<Sample>();
+		List<List<Sample>> groups = new ArrayList<List<Sample>>();
+
+		private Aggregation(List<Sample> result, List<List<Sample>> groups) {
+			this.result = result;
+			this.groups = groups;
+		}
+
+		public Aggregation average(String sourceField) {
+			return average(sourceField, sourceField);
+		}
+
+		public Aggregation average(String sourceField, String targetField) {
+			for(int i = 0; i != result.size(); ++i) {
+				double avg = average(groups.get(i), sourceField);
+				result.get(i).setResult(targetField, avg);
+			}
+			
+			return this;
+		}
+
+		public Aggregation count(String targetField) {
+			for(int i = 0; i != result.size(); ++i) {
+				result.get(i).setResult(targetField, groups.get(i).size());
+			}
+			
+			return this;
+		}
+		
+		private double average(List<Sample> list, String sourceField) {
+			double sum = 0;
+			for(Sample s: list) {
+				sum += s.getDouble(sourceField);
+			}
+			return sum / list.size();
+		}
+
+		public SampleList toList() {
+			return new SampleList(result);
+		}
+	}
 }

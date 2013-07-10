@@ -2,8 +2,9 @@ package org.gridkit.lab.data;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,7 @@ import javax.swing.JDialog;
 
 import org.gridkit.benchmark.gc.ColorPallete;
 
+import com.xeiam.xchart.BitmapEncoder;
 import com.xeiam.xchart.Chart;
 import com.xeiam.xchart.ChartBuilder;
 import com.xeiam.xchart.Series;
@@ -120,6 +122,17 @@ public class GraphBuilder {
 		return list;
 	}
 
+	public GraphBuilder writeTo(String fileName) throws IOException {
+		File file = new File(fileName);
+		if (file.getParentFile() != null) {
+			file.getParentFile().mkdirs();
+		}
+		file.delete();
+		
+		BitmapEncoder.savePNGWithDPI(chart, fileName, 360);
+		return this;
+	}
+	
 	public void show() {
 		XChartPanel panel = new XChartPanel(chart);
 		
