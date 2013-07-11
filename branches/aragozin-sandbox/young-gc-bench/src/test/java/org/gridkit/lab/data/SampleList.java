@@ -273,6 +273,21 @@ public class SampleList {
 		return new SampleList(result);
 	}
 
+	public SampleList withField(String field, String... values) {
+		if (values.length == 0) {
+			throw new IllegalArgumentException("value list is empty");
+		}
+		List<Sample> result = new ArrayList<Sample>();
+		for(Sample sample: samples) {
+			for(String v: values) {
+				Sample s = sample.clone();
+				s.setCoord(field, v);
+				result.add(s);
+			}
+		}
+		return new SampleList(result);
+	}
+	
 	public SampleList transformRegEx(String field, String pattern, String format) {
 		Pattern re = Pattern.compile(pattern);
 		List<Sample> result = new ArrayList<Sample>();

@@ -11,6 +11,8 @@ import java.util.List;
 import javax.swing.JDialog;
 
 import org.gridkit.lab.data.Sample;
+import org.gridkit.lab.data.SampleCSVReader;
+import org.gridkit.lab.data.SampleCSVWriter;
 import org.gridkit.lab.data.SampleList;
 import org.junit.Test;
 
@@ -26,26 +28,40 @@ import com.xeiam.xchart.XChartPanel;
 public class Graph {
 
 	public SampleList readSamples(String file) throws IOException {
-		BufferedReader reader = new BufferedReader(new FileReader(new File(file)));
-		List<Sample> samples = new ArrayList<Sample>();
-		while(true) {
-			String line = reader.readLine();
-			if (line == null) {
-				break;
+		if (file.endsWith(".txt")) {
+			BufferedReader reader = new BufferedReader(new FileReader(new File(file)));
+			List<Sample> samples = new ArrayList<Sample>();
+			while(true) {
+				String line = reader.readLine();
+				if (line == null) {
+					break;
+				}
+				String[] fields = line.split("[,]");
+				Sample sample = new Sample();
+				sample.setCoord("tag", fields[0]);
+				sample.setCoord("jvm", fields[1]);
+				sample.setCoord("algo", fields[2]);
+				sample.setCoord("size", Double.parseDouble(fields[3]) / 1024);
+				sample.setCoord("threads", fields[4]);
+				sample.setResult("mean", fields[5]);
+				sample.setResult("stdDev", fields[6]);
+				sample.setResult("count", fields[7]);
+				samples.add(sample);
 			}
-			String[] fields = line.split("[,]");
-			Sample sample = new Sample();
-			sample.setCoord("tag", fields[0]);
-			sample.setCoord("jvm", fields[1]);
-			sample.setCoord("algo", fields[2]);
-			sample.setCoord("size", Double.parseDouble(fields[3]) / 1024);
-			sample.setCoord("threads", fields[4]);
-			sample.setResult("mean", fields[5]);
-			sample.setResult("stdDev", fields[6]);
-			sample.setResult("count", fields[7]);
-			samples.add(sample);
+			return new SampleList(samples);
 		}
-		return new SampleList(samples);
+		else {
+			return new SampleList(SampleCSVReader.read(file));
+		}
+	}
+	
+//	@Test
+	public void convert() throws IOException {
+		String name = "gcrep.cms-full";
+		SampleList list = readSamples(name + ".txt");
+		list = list.withField("compressed-oops", "off").sort("jvm", "algo", "threads", "size");
+		list = list.withField("dry-mode", "false").sort("jvm", "threads", "algo", "size");
+		SampleCSVWriter.overrride(name + ".csv", list.asList());
 	}
 	
 	@Test
@@ -107,7 +123,7 @@ public class Graph {
 	
 	@Test	
 	public void showTreadsGraph_CMS_compare_hs7_hs6_high() throws IOException {
-		SampleList samples = readSamples("gcrep.cms-full.txt");
+		SampleList samples = readSamples("gcrep.cms-full.csv");
 		
 		samples = samples.retain("algo", "CMS_DefNew", "CMS_ParNew");
 		samples = samples.replace("algo", "CMS_DefNew", "Serial");
@@ -194,7 +210,7 @@ public class Graph {
 	@Test
 	public void G1_samples_count() throws IOException {
 //		SampleList data = readSamples("gcrep.2462.txt");
-		SampleList data = readSamples("g1rep.txt");
+		SampleList data = readSamples("g1rep.txt").retain("jvm", "hs7u15");
 		data = data.aggregate("jvm", "algo", "size", "threads").count("count").toList();
 		data = data.sort("threads", "size");
 		System.out.println(data);
@@ -264,7 +280,7 @@ public class Graph {
 			}
 		}
 
-		samples = samples.retain("algo", "ParNew");
+		samples = samples.retain("algo", "ParNew").sort("threads");
 		
 		for(String t: samples.distinct("threads")) {
 			int tc = Integer.parseInt(t);

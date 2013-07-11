@@ -23,7 +23,10 @@ public class SampleCSVWriter {
 	}
 
 	public static void overrride(String path, Iterable<Sample> points) throws IOException {
-		new File(path).getParentFile().mkdirs();
+		File dir = new File(path).getParentFile();
+		if (dir != null) {
+			dir.mkdirs();
+		}
 		SampleCSVWriter writer = new SampleCSVWriter(path, false);
 		writer.writeAll(points);
 		writer.close();
