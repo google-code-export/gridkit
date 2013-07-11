@@ -8,10 +8,8 @@ Oracle Coherence has a very powerful ability to create secondary indexes for any
  * only hash table or binary tree implementations are available.
 Coherence 3.6 has introduced a new API which allows developers to overcome these limitations by plugging in custom implementations for secondary indexes into Coherence caches. Index API opens a way to integrate full-text and other specialized indexes for your distributed caches.
 
-[http://griddynamics.com GridDynamics] has developed a solution, [# Grid4Search], to help integrate Oracle Coherence 3.6 with Apache Lucene.
-
 = Project Goals =
-Coherence custom index API is quite complicated. The purpose of this project by [http://griddynamics.com GridDynamics] is to develop generic layer to simplify integration of custom indexes and to adapt widely used search libraries (like [http://lucene.apache.org Apache Lucene]) to be used with Coherence.
+Coherence custom index API is quite complicated. The purpose of this project is to develop generic layer to simplify integration of custom indexes and to adapt widely used search libraries (like [http://lucene.apache.org Apache Lucene]) to be used with Coherence.
 
 == Advantages of Lucene index over built in Coherence index ==
  * Full text search with various query types
