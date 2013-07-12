@@ -59,8 +59,8 @@ public class Graph {
 	public void convert() throws IOException {
 		String name = "gcrep.cms-full";
 		SampleList list = readSamples(name + ".txt");
-		list = list.withField("compressed-oops", "off").sort("jvm", "algo", "threads", "size");
-		list = list.withField("dry-mode", "false").sort("jvm", "threads", "algo", "size");
+		list = list.withFields("compressed-oops", "off").sort("jvm", "algo", "threads", "size");
+		list = list.withFields("dry-mode", "false").sort("jvm", "threads", "algo", "size");
 		SampleCSVWriter.overrride(name + ".csv", list.asList());
 	}
 	

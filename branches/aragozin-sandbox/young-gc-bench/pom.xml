@@ -68,7 +68,10 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <configuration>
+          <!--
           <mainClass>org.gridkit.benchmark.gc.RemoteBenchRunner</mainClass>
+            -->
+          <mainClass>org.gridkit.benchmark.gc.GcAutoLabRunner</mainClass>
           <classpathScope>test</classpathScope>
         </configuration>
       </plugin>

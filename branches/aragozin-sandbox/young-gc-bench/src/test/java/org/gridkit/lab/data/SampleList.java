@@ -273,13 +273,50 @@ public class SampleList {
 		return new SampleList(result);
 	}
 
-	public SampleList withField(String field, String... values) {
+	public SampleList withField(String field, String val) {
+		return withFields(field, val);
+	}
+
+	public SampleList times(int n) {
+		if (n < 0) {
+			throw new IllegalArgumentException("n cannot be negative");
+		}
+		List<Sample> result = new ArrayList<Sample>();
+		for(Sample sample: samples) {
+			for(int i = 0; i != n; ++i) {
+				Sample s = sample.clone();
+				result.add(s);
+			}
+		}
+		return new SampleList(result);
+	}
+
+	public SampleList withField(String field, double val) {
+		return withFields(field, val);
+	}
+
+	public SampleList withFields(String field, String... values) {
 		if (values.length == 0) {
 			throw new IllegalArgumentException("value list is empty");
 		}
 		List<Sample> result = new ArrayList<Sample>();
 		for(Sample sample: samples) {
 			for(String v: values) {
+				Sample s = sample.clone();
+				s.setCoord(field, v);
+				result.add(s);
+			}
+		}
+		return new SampleList(result);
+	}
+
+	public SampleList withFields(String field, double... values) {
+		if (values.length == 0) {
+			throw new IllegalArgumentException("value list is empty");
+		}
+		List<Sample> result = new ArrayList<Sample>();
+		for(Sample sample: samples) {
+			for(double v: values) {
 				Sample s = sample.clone();
 				s.setCoord(field, v);
 				result.add(s);

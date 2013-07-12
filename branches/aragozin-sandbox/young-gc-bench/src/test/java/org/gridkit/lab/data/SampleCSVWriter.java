@@ -16,7 +16,10 @@ import au.com.bytecode.opencsv.CSVWriter;
 public class SampleCSVWriter {
 
 	public static void append(String path, Iterable<Sample> points) throws IOException {
-		new File(path).getParentFile().mkdirs();
+		File dir = new File(path).getParentFile();
+		if (dir != null) {
+			dir.mkdirs();
+		}
 		SampleCSVWriter writer = new SampleCSVWriter(path, true);
 		writer.writeAll(points);
 		writer.close();
