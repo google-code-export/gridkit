@@ -63,6 +63,14 @@ public class Sample implements Serializable, Comparable<Sample>, Cloneable {
 	public Collection<String> resultsKeys() {
 		return Collections.unmodifiableSet(results);
 	}
+	
+	public Sample retainFields(Collection<String> fields) {
+		Sample that = clone();
+		that.data.keySet().retainAll(fields);
+		that.coordinates.retainAll(fields);
+		that.results.retainAll(fields);
+		return that;
+	}
 
 	public String get(String key) {
 		return data.get(key);
@@ -73,14 +81,27 @@ public class Sample implements Serializable, Comparable<Sample>, Cloneable {
 		data.put(key, value);
 	}
 
+	private static String toString(long value) {
+		return String.valueOf(value);
+	}
+
+	private static String toString(double value) {
+		if (value == (double)((long)value)) {
+			return String.valueOf((long)value);
+		}
+		else {
+			return String.valueOf(value);
+		}
+	}
+	
 	public void setCoord(String key, long value) {
 		coordinates.add(key);
-		data.put(key, String.valueOf(value));
+		data.put(key, toString(value));
 	}
 	
 	public void setCoord(String key, double value) {
 		coordinates.add(key);
-		data.put(key, String.valueOf(value));
+		data.put(key, toString(value));
 	}
 	
 	public void setResult(String key, String value) {
@@ -90,12 +111,12 @@ public class Sample implements Serializable, Comparable<Sample>, Cloneable {
 
 	public void setResult(String key, long value) {
 		results.add(key);
-		data.put(key, String.valueOf(value));
+		data.put(key, toString(value));
 	}
 	
 	public void setResult(String key, double value) {
 		results.add(key);
-		data.put(key, String.valueOf(value));
+		data.put(key, toString(value));
 	}
 
 	public void set(String key, String value) {
@@ -161,6 +182,14 @@ public class Sample implements Serializable, Comparable<Sample>, Cloneable {
 	
 	@Override
 	public String toString() {
-		return data.toString();
+		StringBuilder sb = new StringBuilder();
+		for(String c: coordinates) {
+			sb.append(c).append(": ").append(data.get(c)).append(' ');
+		}
+		sb.append("-");
+		for(String c: results) {
+			sb.append(' ').append(c).append(": ").append(data.get(c));
+		}
+		return sb.toString();
 	}
 }
