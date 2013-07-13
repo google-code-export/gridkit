@@ -117,7 +117,7 @@ public class RemoteGCBenchRunner implements DataPointExecutor {
 				algoCmd = "|-XX:-UseParNewGC|-XX:+UseConcMarkSweepGC";
 			}
 			else {
-				algoCmd = "|-XX:-UseParNewGC|-XX:+UseConcMarkSweepGC";
+				algoCmd = "|-XX:+UseParNewGC|-XX:+UseConcMarkSweepGC";
 			}
 		}
 		else if (GC_ALGO__PMSC.equals(algo)) {
