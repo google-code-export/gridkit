@@ -3,10 +3,11 @@
   <groupId>org.gridkit.lab</groupId>
   <artifactId>grid-lab-pom</artifactId>
   <versioning>
-    <release>1</release>
+    <release>2</release>
     <versions>
       <version>1</version>
+      <version>2</version>
     </versions>
-    <lastUpdated>20130301220921</lastUpdated>
+    <lastUpdated>20130714181518</lastUpdated>
   </versioning>
 </metadata>
