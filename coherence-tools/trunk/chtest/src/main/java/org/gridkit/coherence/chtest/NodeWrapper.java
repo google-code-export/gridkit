@@ -31,6 +31,7 @@ import org.gridkit.zerormi.util.RemoteExporter;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.CacheService;
 import com.tangosol.net.DefaultCacheServer;
+import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.DistributedCacheService;
 import com.tangosol.net.InvocationService;
 import com.tangosol.net.NamedCache;
@@ -296,7 +297,12 @@ class NodeWrapper extends ViNode.Delegate implements CohNode {
 		getDelegate().exec(new Runnable() {
 			@Override
 			public void run() {
-				System.out.println(CacheFactory.getConfigurableCacheFactory().getConfig());
+				try {
+					System.out.println(((DefaultConfigurableCacheFactory)CacheFactory.getConfigurableCacheFactory()).getConfig());
+				}
+				catch(ClassCastException e) {
+					System.out.println(CacheFactory.getConfigurableCacheFactory().toString());
+				}
 			}
 		});		
 	}
