@@ -28,10 +28,12 @@ import org.gridkit.coherence.chtest.CacheConfig.ProxyScheme;
 import org.gridkit.coherence.chtest.CacheConfig.ReadWriteBackingMap;
 import org.gridkit.coherence.chtest.CacheConfig.RemoteCacheScheme;
 import org.gridkit.coherence.chtest.CohCloud.CohNode;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
 import com.tangosol.net.BackingMapManagerContext;
+import com.tangosol.net.DefaultConfigurableCacheFactory;
 import com.tangosol.net.NamedCache;
 import com.tangosol.net.cache.BinaryEntryStore;
 import com.tangosol.net.cache.CacheLoader;
@@ -42,6 +44,12 @@ public class GeneratedCacheConfigurationTest {
 
 	@Rule
 	public DisposableCohCloud cloud = new DisposableCohCloud();
+	
+	@Before
+	public void configureCloud() {
+		// needed for 12.1.2
+		cloud.all().setProp("tangosol.coherence.cachefactory", DefaultConfigurableCacheFactory.class.getName());
+	}
 	
 	@Test
 	public void verify_proxy_extend_configuration() {
