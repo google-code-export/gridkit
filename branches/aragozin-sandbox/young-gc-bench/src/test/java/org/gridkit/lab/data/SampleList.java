@@ -194,6 +194,24 @@ public class SampleList {
 		return new SampleList(result);
 	}
 
+	public SampleList retain(String field, int[] anyOf) {
+		if (anyOf.length == 0) {
+			throw new IllegalArgumentException("Value list is empty");
+		}
+		Arrays.sort(anyOf);
+		List<Sample> result = new ArrayList<Sample>();
+		for(int i = 0; i != samples.size(); ++i) {
+			Object v = getTyped(i, field);
+			if (v instanceof Number) {
+				int d = ((Number)v).intValue(); 
+				if (Arrays.binarySearch(anyOf, d) >= 0) {
+					result.add(samples.get(i));
+				}
+			}
+		}
+		return new SampleList(result);
+	}
+
 	public SampleList retain(String field, Collection<String> anyOf) {
 		Set<Object> values = new HashSet<Object>(anyOf);
 		List<Sample> samples = new ArrayList<Sample>();
@@ -265,7 +283,7 @@ public class SampleList {
 		List<Sample> result = new ArrayList<Sample>();
 		for(Sample sample: samples) {
 			Sample sample2 = sample.clone();
-			if (oldValue.equals(sample2.get(field))) {
+			if (areEqual(oldValue, sample2.get(field))) {
 				sample2.set(field, newValue);
 			}
 			result.add(sample2);
@@ -273,6 +291,15 @@ public class SampleList {
 		return new SampleList(result);
 	}
 
+	private boolean areEqual(Object v1, Object v2) {
+		if (v1 == null) {
+			return v2 == null;
+		}
+		else {
+			return v1.equals(v2);
+		}
+	}
+	
 	public SampleList withField(String field, String val) {
 		return withFields(field, val);
 	}

@@ -97,13 +97,13 @@ public class RemoteGCBenchRunner implements DataPointExecutor {
 			throw new IllegalArgumentException("Unknown JVM: " + dataPoint.get(JVM));
 		}
 		
-		long youngSize = (dataPoint.get(HEAP_NEW) == null) ? defaultYoung  : (int)(dataPoint.getDouble(HEAP_NEW) * (1l	 << 20));
-		long oldSize = (int)(dataPoint.getDouble(HEAP_OLD) * (1l << 30));
+		long youngSize = (dataPoint.get(HEAP_NEW) == null) ? defaultYoung  : (long)(dataPoint.getDouble(HEAP_NEW) * (1l	 << 20));
+		long oldSize = (long)(dataPoint.getDouble(HEAP_OLD) * (1l << 30));
 		
-		youngSize = youngSize >> 20;
-		long fullSize = (youngSize + oldSize) >> 20;
+		long fullSizeMiB = (youngSize + oldSize) >> 20;
+		long youngSizeMiB = youngSize >> 20;
 		
-		String memCmd = "|-Xmx" + fullSize + "m|-Xms" + fullSize + "m|-Xmn" + youngSize + "m";
+		String memCmd = "|-Xmx" + fullSizeMiB + "m|-Xms" + fullSizeMiB + "m|-Xmn" + youngSizeMiB + "m";
 		
 		RemoteNodeProps.at(node).setRemoteJavaExec(jvm);
 		JvmProps.at(node).addJvmArg(memCmd);
