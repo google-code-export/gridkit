@@ -129,7 +129,23 @@ public class Graph {
 		samples = samples.replace("algo", "CMS_DefNew", "Serial");
 		samples = samples.replace("algo", "CMS_ParNew", "ParNew");
 		
-		showThreadSeries("Young GC pause times [Java 6u43 Vs. 7u15, MSC]", samples, "hs6u43", "hs7u15", range(9, 50));
+		showThreadSeries("Young GC pause times [Java 6u43 Vs. 7u15, CMS]", samples, "hs6u43", "hs7u15", range(9, 50));
+	}
+
+	@Test	
+	public void showTreadsGraph_CMS_compare_hs7_coops() throws IOException {
+		SampleList samples = readSamples("big-gcrep.csv");
+		
+		samples = samples.retain(RemoteGCBenchRunner.GC_ALGO, RemoteGCBenchRunner.GC_ALGO__CMS);
+		samples = samples.replace(RemoteGCBenchRunner.COOPS, null, "false");
+		samples = samples.retain(RemoteGCBenchRunner.GC_THREADS, range(1, 50));
+		samples = samples.retain(RemoteGCBenchRunner.DRYMODE, "false");
+		
+		SampleList coopsOn = samples.retain(RemoteGCBenchRunner.COOPS, "true");
+		SampleList coopsOff = samples.retain(RemoteGCBenchRunner.COOPS, "false");
+		
+		showThreadSeries("Young GC pause times [Java 7u15, CMS]", coopsOff, "coops:off", coopsOn, "coops:on");
+//		showThreadSeries("Young GC pause times [Java 7u15, CMS]", coopsOff, "coops:off", (SampleList)null, null);
 	}
 
 	@Test	
@@ -262,7 +278,7 @@ public class Graph {
 		SampleList samples2 = jvm2 == null ? null : samples.retain("jvm", jvm2);
 		
 		if (has(threads, 0)) {
-			series = newThreadSeries(samples1, jvm1, "Serial", 1);
+			series = legacy_newThreadSeries(samples1, jvm1, "Serial", 1);
 			Series ser1 = chart.addSeries("Serial" + jvm1Tag(jvm1, jvm2), series.numericSeries("size"), series.numericSeries("mean"));
 			Color c = pal1.nextColor();
 			ser1.setMarker(SeriesMarker.CIRCLE);
@@ -270,7 +286,7 @@ public class Graph {
 			ser1.setMarkerColor(c);
 			ser1.setLineStyle(SeriesLineStyle.SOLID);
 			if (jvm2 != null) {
-				series = newThreadSeries(samples2, jvm2, "Serial", 1);
+				series = legacy_newThreadSeries(samples2, jvm2, "Serial", 1);
 				Series ser2 = chart.addSeries("Serial"  + jvm2Tag(jvm1, jvm2), series.numericSeries("size"), series.numericSeries("mean"));
 				c = pal2.nextColor();
 				ser2.setMarker(SeriesMarker.CIRCLE);
@@ -285,7 +301,7 @@ public class Graph {
 		for(String t: samples.distinct("threads")) {
 			int tc = Integer.parseInt(t);
 			if (has(threads, tc)) {
-				series = newThreadSeries(samples, jvm1, "ParNew", tc);
+				series = legacy_newThreadSeries(samples, jvm1, "ParNew", tc);
 				Series ser1 = chart.addSeries("pt=" + tc + jvm1Tag(jvm1, jvm2), series.numericSeries("size"), series.numericSeries("mean"));
 				Color c = pal1.nextColor();
 				ser1.setMarker(SeriesMarker.CIRCLE);
@@ -293,7 +309,7 @@ public class Graph {
 				ser1.setMarkerColor(c);
 				ser1.setLineStyle(SeriesLineStyle.SOLID);
 				if (jvm2 != null) {
-					series = newThreadSeries(samples2, jvm2, "ParNew", tc);
+					series = legacy_newThreadSeries(samples2, jvm2, "ParNew", tc);
 					Series ser2 = chart.addSeries("pt=" + tc + jvm2Tag(jvm1, jvm2), series.numericSeries("size"), series.numericSeries("mean"));
 					c = pal2.nextColor();
 					ser2.setMarker(SeriesMarker.CIRCLE);
@@ -304,6 +320,55 @@ public class Graph {
 			}
 		}
 
+		XChartPanel panel = new XChartPanel(chart);
+		
+		JDialog dialog = new JDialog();
+		dialog.add(panel);
+		dialog.setModal(true);
+		dialog.pack();
+		dialog.setVisible(true);
+	}
+
+	public void showThreadSeries(String title, SampleList primary, String plabel, SampleList secondary, String slabel) throws IOException {
+		// Create Chart
+		Chart chart = new ChartBuilder()
+		.width(800).height(600)
+		.theme(ChartTheme.Matlab)
+		.title(title)
+		.xAxisTitle("Old space [GiB]").yAxisTitle("Pause mean [ms]")
+		.build();
+		
+		ColorPallete pal1 = new ColorPallete(0.9f, 0.8f, -0.01f, 0.30f);
+		ColorPallete pal2 = new ColorPallete(0.9f, 0.7f, -0.01f, 0.30f);
+		
+		chart.getStyleManager().setPlotGridLinesVisible(true);
+		chart.getStyleManager().setChartType(ChartType.Line);
+		
+		SampleList series;
+		
+		SampleList samples1 = primary.sort(RemoteGCBenchRunner.GC_THREADS);
+		SampleList samples2 = secondary == null ? null : secondary.sort(RemoteGCBenchRunner.GC_THREADS);
+				
+		for(String t: samples1.distinct(RemoteGCBenchRunner.GC_THREADS)) {
+			int tc = Integer.parseInt(t);
+			series = newThreadSeries(samples1, tc);
+			Series ser1 = chart.addSeries("pt=" + tc + jvm1Tag(plabel, slabel), series.numericSeries(RemoteGCBenchRunner.HEAP_OLD), series.numericSeries(RemoteGCBenchRunner.PAUSE_AVG));
+			Color c = pal1.nextColor();
+			ser1.setMarker(SeriesMarker.CIRCLE);
+			ser1.setLineColor(c);
+			ser1.setMarkerColor(c);
+			ser1.setLineStyle(SeriesLineStyle.SOLID);
+			if (samples2 != null) {
+				series = newThreadSeries(samples2, tc);
+				Series ser2 = chart.addSeries("pt=" + tc + jvm2Tag(plabel, slabel), series.numericSeries(RemoteGCBenchRunner.HEAP_OLD), series.numericSeries(RemoteGCBenchRunner.PAUSE_AVG));
+				c = pal2.nextColor();
+				ser2.setMarker(SeriesMarker.CIRCLE);
+				ser2.setMarkerColor(c);
+				ser2.setLineColor(c);
+				ser2.setLineStyle(SeriesLineStyle.DOT_DOT);
+			}
+		}
+		
 		XChartPanel panel = new XChartPanel(chart);
 		
 		JDialog dialog = new JDialog();
@@ -401,11 +466,17 @@ public class Graph {
 		dialog.setVisible(true);
 	}
 
-	private SampleList newThreadSeries(SampleList list, String jvm, String algo, int threads) {
+	private SampleList legacy_newThreadSeries(SampleList list, String jvm, String algo, int threads) {
 		list = list.retain("jvm", jvm).retain("algo", algo).retain("threads", threads);
 //		list = list.sort("stdDev").reverseSort("count").filterFirst("jvm", "algo", "size", "threads");
 		list = list.sort("mean").filterMedian("jvm", "algo", "size", "threads");
 		return list.sort("size");
+	}
+
+	private SampleList newThreadSeries(SampleList list, int threads) {
+		list = list.retain(RemoteGCBenchRunner.GC_THREADS, threads).sort(RemoteGCBenchRunner.HEAP_OLD);
+		list = list.sort(RemoteGCBenchRunner.PAUSE_AVG).filterMedian(RemoteGCBenchRunner.JVM, RemoteGCBenchRunner.GC_ALGO, RemoteGCBenchRunner.HEAP_OLD, RemoteGCBenchRunner.GC_THREADS);
+		return list.sort(RemoteGCBenchRunner.HEAP_OLD);
 	}
 
 	@SuppressWarnings("unused")
