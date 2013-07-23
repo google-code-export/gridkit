@@ -150,6 +150,29 @@ public class MavenClasspathManager {
 		}
 	}
 
+	public static void removeArtifactVersion(ViConfigurable node, String groupId, String artifactId, String version) {
+		URL url = findJar(groupId, artifactId, version);
+		
+		if (url == null) {
+			throw new IllegalArgumentException("Cannot locate artifact: " + groupId + ":" + artifactId + ":" + version);
+		}
+		
+		try {
+			if ("file".equals(url.getProtocol())) {
+				File file = new File(url.toURI());
+				if (!file.exists()) {
+					throw new IllegalArgumentException("Artifact " + groupId + ":" + artifactId + ":" + version + " is not available");
+				}
+				node.setProp(JvmProps.CP_REMOVE + file.getPath(), file.getPath());
+			}
+			else {
+				throw new IllegalArgumentException("Bad URL " + url.toString());
+			}
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException("Bad URL " + url.toString());
+		}
+	}
+
 	public static void addArtifactVersion(ViConfigurable node, String groupId, String artifactId, String version) {
 		URL url = findJar(groupId, artifactId, version);
 		if (url == null) {
