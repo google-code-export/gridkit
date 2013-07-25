@@ -158,7 +158,7 @@ public class Graph {
 		
 		samples = samples.retain(RemoteGCBenchRunner.GC_ALGO, RemoteGCBenchRunner.GC_ALGO__CMS);
 		samples = samples.replace(RemoteGCBenchRunner.COOPS, null, "false");
-		samples = samples.retain(RemoteGCBenchRunner.GC_THREADS, range(1, 50));
+		samples = samples.retain(RemoteGCBenchRunner.GC_THREADS, range(9, 50));
 		samples = samples.retain(RemoteGCBenchRunner.DRYMODE, "false");
 		
 		SampleList coopsOn = samples.retain(RemoteGCBenchRunner.COOPS, "true");
@@ -173,7 +173,7 @@ public class Graph {
 		
 		samples = samples.retain(RemoteGCBenchRunner.GC_ALGO, RemoteGCBenchRunner.GC_ALGO__CMS);
 		samples = samples.replace(RemoteGCBenchRunner.COOPS, null, "false");
-		samples = samples.retain(RemoteGCBenchRunner.GC_THREADS, range(1, 50));
+		samples = samples.retain(RemoteGCBenchRunner.GC_THREADS, range(9, 50));
 		samples = samples.retain(RemoteGCBenchRunner.DRYMODE, "false");
 		
 		SampleList coopsOn = samples.retain(RemoteGCBenchRunner.COOPS, "true");
