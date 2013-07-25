@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JDialog;
@@ -27,6 +28,25 @@ import com.xeiam.xchart.XChartPanel;
 
 public class Graph {
 
+	public static String JVM = RemoteGCBenchRunner.JVM;
+	public static String HEAP_OLD = RemoteGCBenchRunner.HEAP_OLD;
+	public static String HEAP_NEW = RemoteGCBenchRunner.HEAP_NEW;
+	public static String DRYMODE = RemoteGCBenchRunner.DRYMODE;
+	public static String GC_THREADS = RemoteGCBenchRunner.GC_THREADS;
+	public static String GC_ALGO = RemoteGCBenchRunner.GC_ALGO;
+	public static String GC_ALGO__CMS = RemoteGCBenchRunner.GC_ALGO__CMS;
+	public static String GC_ALGO__G1 = RemoteGCBenchRunner.GC_ALGO__G1;
+	public static String GC_ALGO__PMSC = RemoteGCBenchRunner.GC_ALGO__PMSC;
+	public static String GC_STRIDES = RemoteGCBenchRunner.GC_STRIDES;
+	public static String COOPS = RemoteGCBenchRunner.COOPS;
+
+	public static String PAUSE_AVG = RemoteGCBenchRunner.PAUSE_AVG;
+	public static String PAUSE_SDEV = RemoteGCBenchRunner.PAUSE_SDEV;
+	public static String PAUSE_COUNT = RemoteGCBenchRunner.PAUSE_COUNT;
+	public static String PAUSE_TOTAL = RemoteGCBenchRunner.PAUSE_TOTAL;
+	public static String PAUSE_SQTOTAL = RemoteGCBenchRunner.PAUSE_SQTOTAL;
+
+	
 	public SampleList readSamples(String file) throws IOException {
 		if (file.endsWith(".txt")) {
 			BufferedReader reader = new BufferedReader(new FileReader(new File(file)));
@@ -145,7 +165,21 @@ public class Graph {
 		SampleList coopsOff = samples.retain(RemoteGCBenchRunner.COOPS, "false");
 		
 		showThreadSeries("Young GC pause times [Java 7u15, CMS]", coopsOff, "coops:off", coopsOn, "coops:on");
-//		showThreadSeries("Young GC pause times [Java 7u15, CMS]", coopsOff, "coops:off", (SampleList)null, null);
+	}
+
+	@Test	
+	public void showTreadsGraph_CMS_relative_hs7_coops() throws IOException {
+		SampleList samples = readSamples("big-gcrep.csv");
+		
+		samples = samples.retain(RemoteGCBenchRunner.GC_ALGO, RemoteGCBenchRunner.GC_ALGO__CMS);
+		samples = samples.replace(RemoteGCBenchRunner.COOPS, null, "false");
+		samples = samples.retain(RemoteGCBenchRunner.GC_THREADS, range(1, 50));
+		samples = samples.retain(RemoteGCBenchRunner.DRYMODE, "false");
+		
+		SampleList coopsOn = samples.retain(RemoteGCBenchRunner.COOPS, "true");
+		SampleList coopsOff = samples.retain(RemoteGCBenchRunner.COOPS, "false");
+		
+		showRelativeThreadSeries("Young GC relative pause times grow factor for compressed OOPs [Java 7u15, CMS]", coopsOff, coopsOn);
 	}
 
 	@Test	
@@ -221,6 +255,22 @@ public class Graph {
 //		SampleList data = readSamples("gcrep.2462.txt");
 		SampleList data = readSamples("gcrep.cms-full.txt");
 		showNormalizedSizeSeries(data, "hs7u15", "Java 7u15, CMS", 4);
+	}
+
+	@Test
+	public void showParallelFactoryBySizeGraph_CMS_j7_coops() throws IOException {
+		SampleList samples = readSamples("big-gcrep.csv");
+		
+		samples = samples.retain(RemoteGCBenchRunner.GC_ALGO, RemoteGCBenchRunner.GC_ALGO__CMS);
+		samples = samples.replace(RemoteGCBenchRunner.COOPS, null, "false");
+		samples = samples.retain(RemoteGCBenchRunner.GC_THREADS, range(1, 50));
+		samples = samples.retain(RemoteGCBenchRunner.DRYMODE, "false");
+		samples = samples.retain(RemoteGCBenchRunner.HEAP_OLD, 0.7, 1, 2, 4, 8, 16, 28);
+		
+		SampleList coopsOn = samples.retain(RemoteGCBenchRunner.COOPS, "true");
+		SampleList coopsOff = samples.retain(RemoteGCBenchRunner.COOPS, "false");
+		
+		showNormalizedSizeSeries(coopsOff, "coops:off", coopsOn, "coops:on", 8);
 	}
 
 	@Test
@@ -378,6 +428,56 @@ public class Graph {
 		dialog.setVisible(true);
 	}
 
+	public void showRelativeThreadSeries(String title, SampleList base, SampleList relative) throws IOException {
+		// Create Chart
+		Chart chart = new ChartBuilder()
+		.width(800).height(600)
+		.theme(ChartTheme.Matlab)
+		.title(title)
+		.xAxisTitle("Old space [GiB]").yAxisTitle("Pause mean [ms]")
+		.build();
+		
+		chart.getStyleManager().setPlotGridLinesVisible(true);
+		chart.getStyleManager().setChartType(ChartType.Line);
+		
+		ColorPallete pal1 = new ColorPallete(0.9f, 0.8f, -0.01f, 0.30f);
+
+		SampleList samples1 = base.sort(RemoteGCBenchRunner.GC_THREADS);
+		SampleList samples2 = relative.sort(RemoteGCBenchRunner.GC_THREADS);
+				
+		for(String t: samples1.distinct(RemoteGCBenchRunner.GC_THREADS)) {
+			int tc = Integer.parseInt(t);
+			SampleList sbase = newThreadSeries(samples1, tc);
+			SampleList srel = newThreadSeries(samples2, tc);
+			double[] x = sbase.numericSeries(RemoteGCBenchRunner.HEAP_OLD);
+			double[] f = sbase.numericSeries(RemoteGCBenchRunner.PAUSE_AVG);
+			
+			double[] x_ = srel.numericSeries(RemoteGCBenchRunner.HEAP_OLD);
+			double[] f2 = srel.numericSeries(RemoteGCBenchRunner.PAUSE_AVG);
+			
+			if (Arrays.equals(x, x_)) {
+				for(int i = 0; i != f2.length; ++i) {
+					f2[i] /= f[i];
+				}
+				Series ser1 = chart.addSeries("pt=" + tc, x, f2);
+				
+				Color c = pal1.nextColor();
+				ser1.setMarker(SeriesMarker.CIRCLE);
+				ser1.setLineColor(c);
+				ser1.setMarkerColor(c);
+				ser1.setLineStyle(SeriesLineStyle.SOLID);
+			}
+		}
+		
+		XChartPanel panel = new XChartPanel(chart);
+		
+		JDialog dialog = new JDialog();
+		dialog.add(panel);
+		dialog.setModal(true);
+		dialog.pack();
+		dialog.setVisible(true);
+	}
+	
 	public void showSizeSeries(SampleList samples, String jvm) throws IOException {
 		// Create Chart
 		Chart chart = new ChartBuilder()
@@ -466,6 +566,78 @@ public class Graph {
 		dialog.setVisible(true);
 	}
 
+	public void showNormalizedSizeSeries(SampleList set1, String caption1, SampleList set2, String caption2, int etalon) throws IOException {
+		// Create Chart
+		Chart chart = new ChartBuilder()
+		.width(800).height(600)
+		.theme(ChartTheme.Matlab)
+		.title("Young GC parallerism normalized by " + etalon + " threads case")
+		.xAxisTitle("Parallel threads").yAxisTitle("Parallel factor")
+		.build();
+		
+		chart.getStyleManager().setPlotGridLinesVisible(true);
+		chart.getStyleManager().setChartType(ChartType.Line);
+		
+		ColorPallete pal1 = new ColorPallete(0.9f, 0.8f, -0.01f, 0.30f);
+		ColorPallete pal2 = new ColorPallete(0.9f, 0.7f, -0.01f, 0.30f);
+		
+		SampleList series;
+		
+		set1 = set1.sort(RemoteGCBenchRunner.HEAP_OLD);
+		set2 = set2 == null ? null : set2.sort(RemoteGCBenchRunner.HEAP_OLD);
+		
+		int maxThreads = etalon;
+		
+		for(String t: set1.distinct(RemoteGCBenchRunner.HEAP_OLD)) {
+			double size = Double.parseDouble(t);
+			series = newSizeSeries(set1, size);
+			double norm = series.retain(RemoteGCBenchRunner.GC_THREADS, etalon).numericSeries(RemoteGCBenchRunner.PAUSE_AVG)[0];
+			double[] factor = series.numericSeries(RemoteGCBenchRunner.PAUSE_AVG);
+			for(int i = 0; i != factor.length; ++i) {
+				factor[i] = etalon * norm / factor[i];
+			}
+			Series ser = chart.addSeries("" + size + " [GiB] " + jvm1Tag(caption1, caption2), series.numericSeries(RemoteGCBenchRunner.GC_THREADS), factor);
+			ser.setMarker(SeriesMarker.CIRCLE);
+			for(double tc: factor) {
+				if (maxThreads < tc) {
+					maxThreads = (int) Math.ceil(tc);
+				}
+			}
+			if (set2 != null) {
+				series = newSizeSeries(set2, size);
+				double norm2 = series.retain(RemoteGCBenchRunner.GC_THREADS, etalon).numericSeries(RemoteGCBenchRunner.PAUSE_AVG)[0];
+				double[] factor2 = series.numericSeries(RemoteGCBenchRunner.PAUSE_AVG);
+				for(int i = 0; i != factor2.length; ++i) {
+					factor2[i] = etalon * norm2 / factor2[i];
+				}
+				Series ser2 = chart.addSeries("" + size + " [GiB] " + jvm2Tag(caption1, caption2), series.numericSeries(RemoteGCBenchRunner.GC_THREADS), factor);
+				ser2.setMarker(SeriesMarker.CIRCLE);
+				ser2.setLineStyle(SeriesLineStyle.DOT_DOT);
+				ser2.setMarkerColor(ser.getMarkerColor());
+				ser2.setLineColor(ser.getStrokeColor());
+				for(double tc: factor2) {
+					if (maxThreads < tc) {
+						maxThreads = (int) Math.ceil(tc);
+					}
+				}
+			}
+		}
+		
+		double[] diag = {1, maxThreads};
+		Series diagSer = chart.addSeries("x=y", diag, diag);
+		diagSer.setMarker(SeriesMarker.NONE);
+		diagSer.setLineStyle(SeriesLineStyle.DASH_DASH);
+		diagSer.setLineColor(Color.GRAY.brighter());
+		
+		XChartPanel panel = new XChartPanel(chart);
+		
+		JDialog dialog = new JDialog();
+		dialog.add(panel);
+		dialog.setModal(true);
+		dialog.pack();
+		dialog.setVisible(true);
+	}
+
 	private SampleList legacy_newThreadSeries(SampleList list, String jvm, String algo, int threads) {
 		list = list.retain("jvm", jvm).retain("algo", algo).retain("threads", threads);
 //		list = list.sort("stdDev").reverseSort("count").filterFirst("jvm", "algo", "size", "threads");
@@ -493,5 +665,12 @@ public class Graph {
 //		list = list.sort("stdDev").reverseSort("count").filterFirst("jvm", "algo", "size", "threads");
 		list = list.sort("mean").filterMedian("jvm", "algo", "size", "threads");
 		return list.sort("threads");
+	}
+
+	private SampleList newSizeSeries(SampleList list, double size) {
+		list = list.retain(RemoteGCBenchRunner.HEAP_OLD, size);
+//		list = list.sort("stdDev").reverseSort("count").filterFirst("jvm", "algo", "size", "threads");
+		list = list.sort(RemoteGCBenchRunner.PAUSE_AVG).filterMedian(RemoteGCBenchRunner.HEAP_OLD, RemoteGCBenchRunner.GC_THREADS);
+		return list.sort(RemoteGCBenchRunner.GC_THREADS);
 	}
 }
