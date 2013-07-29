@@ -645,22 +645,27 @@ public class CohHelper {
 	}
 	
 	private static MBeanServerConnection getContextMBeanServer() {
-		// cluster connection my take sometime
-		long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(3500);
-		MBeanServer server = null;
-		while(deadline > System.nanoTime()) {			
-			server = IsolateMBeanFinder.MSERVER;
-			if (server == null) {
-				LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(10));
+		if (Isolate.currentIsolate() == null) {
+			return ManagementFactory.getPlatformMBeanServer();
+		}
+		else {
+			// cluster connection my take sometime
+			long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(3500);
+			MBeanServer server = null;
+			while(deadline > System.nanoTime()) {			
+				server = IsolateMBeanFinder.MSERVER;
+				if (server == null) {
+					LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(10));
+				}
+				else {
+					break;
+				}			
 			}
-			else {
-				break;
-			}			
+			if (server == null) {
+				throw new IllegalStateException("Local JMX is not enabled for node " + Isolate.currentIsolate().getName());
+			}
+			return server;
 		}
-		if (server == null) {
-			throw new IllegalStateException("Local JMX is not enabled for node " + Isolate.currentIsolate().getName());
-		}
-		return server;
 	}
 	
 	private static class IsolatedMBeanServerProxy implements MBeanServer {
