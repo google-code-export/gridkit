@@ -31,7 +31,7 @@ Both jar-files, javadocs and source code are available via maven:
 <dependency>
 	<groupId>org.gridkit.coherence-tools</groupId>
 	<artifactId>chtest</artifactId>
-	<version>0.1</version>
+	<version>0.2.3</version>
 	<scope>test</scope>
 </dependency>
 }}}
