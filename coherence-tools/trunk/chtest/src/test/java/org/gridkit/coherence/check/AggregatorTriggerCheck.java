@@ -22,30 +22,24 @@ import java.util.concurrent.Executors;
 
 import junit.framework.Assert;
 
+import org.gridkit.coherence.chtest.CacheConfig;
 import org.gridkit.coherence.chtest.CacheConfig.DistributedScheme;
 import org.gridkit.coherence.chtest.CohCloud.CohNode;
-import org.gridkit.coherence.chtest.CacheConfig;
 import org.gridkit.coherence.chtest.CohCloudRule;
-import org.gridkit.coherence.chtest.CohHelper;
 import org.gridkit.coherence.chtest.DisposableCohCloud;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 
-import ch.qos.logback.core.spi.ScanException;
-
 import com.tangosol.net.BackingMapContext;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.NamedCache;
-import com.tangosol.net.partition.PartitionSplittingBackingMap.AggregatingCacheStatistics;
 import com.tangosol.util.Binary;
 import com.tangosol.util.BinaryEntry;
 import com.tangosol.util.CompositeKey;
 import com.tangosol.util.InvocableMap;
 import com.tangosol.util.MapTrigger;
-import com.tangosol.util.MapTriggerListener;
 import com.tangosol.util.ValueExtractor;
-import com.tangosol.util.extractor.IdentityExtractor;
 import com.tangosol.util.processor.AbstractProcessor;
 
 public class AggregatorTriggerCheck {
