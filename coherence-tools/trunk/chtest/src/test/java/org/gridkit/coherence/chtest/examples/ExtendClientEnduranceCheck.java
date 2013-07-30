@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import org.gridkit.coherence.chtest.CohCloud.CohNode;
 import org.gridkit.coherence.chtest.CohCloudRule;
 import org.gridkit.coherence.chtest.DisposableCohCloud;
+import org.gridkit.vicluster.telecontrol.jvm.JvmProps;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -55,6 +56,9 @@ public class ExtendClientEnduranceCheck {
 	@Test
 	public void test_cqc_out_of_process() throws InterruptedException {
 		cloud.all().outOfProcess(true);
+		JvmProps.at(cloud.all()).addJvmArg("-Xmx300m");
+		JvmProps.at(cloud.all()).addJvmArg("-Xms300m");
+		
 		cloud.all().enableJmx(true);
 		// It is better to have TCP ring for out of process execution
 		cloud.all().enableTcpRing(true);
