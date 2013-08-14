@@ -67,8 +67,8 @@ public class MavenClassPathTest {
 		Assert.assertTrue(cppath != null);
 	}
 	
-	@Test(expected = NoClassDefFoundError.class)
-	public void verify_version_replacement__no_class_def() {
+	@Test(expected = NoSuchMethodError.class)
+	public void verify_version_replacement__no_such_method() {
 		CohCloud cloud = new SimpleCohCloud();
 		try {
 			CohNode node =cloud.node("chtest-0.2.1");
@@ -77,8 +77,9 @@ public class MavenClassPathTest {
 				
 				@Override
 				public void run() {
-					// this should throw NoClassDefFoundError
 					System.out.println("chtest version: " + MavenClasspathManager.getArtifactVersion("org.gridkit.coherence-tools", "chtest"));				
+					// this should throw NoSuchMethodError, because this method was added in 0.2.4
+					CacheConfig.distributedSheme().listener(null);
 				}
 			});
 		}
@@ -87,8 +88,8 @@ public class MavenClassPathTest {
 		}
 	}	
 
-	@Test(expected = NoClassDefFoundError.class)
-	public void verify_version_replacement__no_class_def__out_of_proc() {
+	@Test(expected = NoSuchMethodError.class)
+	public void verify_version_replacement__no_such_method__out_of_proc() {
 		CohCloud cloud = new SimpleCohCloud();
 		cloud.all().outOfProcess(true);
 		try {
@@ -98,8 +99,9 @@ public class MavenClassPathTest {
 				
 				@Override
 				public void run() {
-					// this should throw NoClassDefFoundError
 					System.out.println("chtest version: " + MavenClasspathManager.getArtifactVersion("org.gridkit.coherence-tools", "chtest"));				
+					// this should throw NoSuchMethodError, because this method was added in 0.2.4
+					CacheConfig.distributedSheme().listener(null);
 				}
 			});
 		}
