@@ -62,6 +62,7 @@ public class ClusterKillTest {
         	cloud.node("server"+i);
         } 
         
+        // Initialization will be done in parallel
         cloud.node("server*").ensureCluster();
         
         // Let's put some data
