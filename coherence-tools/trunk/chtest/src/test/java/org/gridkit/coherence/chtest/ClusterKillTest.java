@@ -1,3 +1,18 @@
+/**
+ * Copyright 2013 Alexey Ragozin
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gridkit.coherence.chtest;
 
 import junit.framework.Assert;
@@ -66,16 +81,22 @@ public class ClusterKillTest {
         cloud.node("server*").ensureCluster();
         
         // Let's put some data
-        cloud.node("server0").exec(new Runnable() {
-			@Override
-			public void run() {
-				NamedCache cache = CacheFactory.getCache("TestCache");
-				for(int i = 0; i != 1000; ++i) {
-					cache.put(i, i);
-				}
-				Assert.assertTrue("Cache size (" + cache.size() + ") should be 1000", cache.size() == 1000);
-			}
-		});
+//        cloud.node("server0").exec(new Runnable() {
+//			@Override
+//			public void run() {
+//				NamedCache cache = CacheFactory.getCache("TestCache");
+//				for(int i = 0; i != 1000; ++i) {
+//					cache.put(i, i);
+//				}
+//				Assert.assertTrue("Cache size (" + cache.size() + ") should be 1000", cache.size() == 1000);
+//			}
+//		});
+        NamedCache cache = cloud.node("server0").getCache("test");
+		for(int i = 0; i != 1000; ++i) {
+			cache.put(i, i);
+		}
+		Assert.assertTrue("Cache size (" + cache.size() + ") should be 1000", cache.size() == 1000);
+        
         
         System.out.println("Killing couple of nodes");
         cloud.nodes("server1", "server2").kill();

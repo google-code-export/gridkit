@@ -57,7 +57,7 @@
           -->
         <coherence.version>3.7.1.3</coherence.version>
         <junit.version>4.10</junit.version>
-        <nanocloud.version>0.7.22-SNAPSHOT</nanocloud.version>
+        <nanocloud.version>0.7.22</nanocloud.version>
     </properties>
 
     <dependencies>

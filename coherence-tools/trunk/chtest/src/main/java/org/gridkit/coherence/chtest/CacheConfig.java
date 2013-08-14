@@ -265,8 +265,7 @@ public class CacheConfig {
 		
 		void schemeRef(String name);
 		
-		void serviceName(String serviceName);
-		
+		void serviceName(String serviceName);		
 	}
 
 	public interface ServiceScheme extends XmlFragment, Fragment {
@@ -285,6 +284,9 @@ public class CacheConfig {
 		
 		BackingMap copy();
 		
+		void listener(Class<?> c, Object... params);
+
+		void listener(Instantiation ref);
 	}
 
 	public interface BinaryBackingMap extends XmlFragment, Fragment {
@@ -312,6 +314,10 @@ public class CacheConfig {
 		void unitFactor(int factor);
 		
 		void expiryDelay(String delay);
+		
+		void listener(Class<?> c, Object... params);
+
+		void listener(Instantiation ref);
 		
 	}
 	
@@ -342,7 +348,11 @@ public class CacheConfig {
 		
 		void backingMapScheme(BinaryBackingMap backingMap);
 		
-		void autoStart(boolean enabled);
+		void autoStart(boolean enabled);	
+		
+		void listener(Class<?> c, Object... params);
+
+		void listener(Instantiation ref);
 	}
 
 	public interface ReplicatedScheme extends CacheScheme, BackingMap {
@@ -360,6 +370,10 @@ public class CacheConfig {
 		void backingMapScheme(CacheScheme backingMap);
 				
 		void autoStart(boolean enabled);
+		
+		void listener(Class<?> c, Object... params);
+
+		void listener(Instantiation ref);
 	}	
 	
 	public interface ProxyScheme extends ServiceScheme {
@@ -626,6 +640,16 @@ public class CacheConfig {
 			XmlHelper.parseTime(delay);
 			addElement("expiry-delay", delay);
 		}
+		
+		@Override
+		public void listener(Class<?> c, Object... params) {
+			addElement("listener", intantiate(c, params));
+		}
+
+		@Override
+		public void listener(Instantiation ref) {
+			addElement("listener", ref);
+		}
 	}
 	
 	private static class DistributedSchemeBuilder extends BaseXmlBuilder implements DistributedScheme {
@@ -712,6 +736,16 @@ public class CacheConfig {
 		}
 
 		@Override
+		public void listener(Class<?> c, Object... params) {
+			addElement("listener", intantiate(c, params));
+		}
+
+		@Override
+		public void listener(Instantiation ref) {
+			addElement("listener", ref);
+		}
+
+		@Override
 		public void autoStart(boolean enabled) {
 			addElement("autostart", enabled);
 		}
@@ -771,6 +805,16 @@ public class CacheConfig {
 		public void autoStart(boolean enabled) {
 			addElement("autostart", enabled);
 		}
+		
+		@Override
+		public void listener(Class<?> c, Object... params) {
+			addElement("listener", intantiate(c, params));
+		}
+
+		@Override
+		public void listener(Instantiation ref) {
+			addElement("listener", ref);
+		}
 	}
 	
 	private static class ReadWriteBackingMapBuilder extends BaseXmlBuilder implements ReadWriteBackingMap {
@@ -821,6 +865,16 @@ public class CacheConfig {
 		@Override
 		public void cacheStoreScheme(Class<?> c, Object... params) {
 			cacheStoreScheme(intantiate(c, params));
+		}
+
+		@Override
+		public void listener(Class<?> c, Object... params) {
+			addElement("listener", intantiate(c, params));
+		}
+
+		@Override
+		public void listener(Instantiation ref) {
+			addElement("listener", ref);
 		}
 
 		@Override
@@ -1016,6 +1070,16 @@ public class CacheConfig {
 			
 			addChild("initiator-config/tcp-initiator/remote-addresses", doc);
 		}
+		
+		@Override
+		public void listener(Class<?> c, Object... params) {
+			addElement("listener", intantiate(c, params));
+		}
+
+		@Override
+		public void listener(Instantiation ref) {
+			addElement("listener", ref);
+		}		
 	}
 	
 	@SuppressWarnings("serial")

@@ -79,15 +79,18 @@ public class AggregatorTriggerCheck {
 			public void run() {
 
 				PutAggregateProcessor putp = new PutAggregateProcessor(1d);
-				
+
+				NamedCache summary = CacheFactory.getCache("data-total");
+
+				Assert.assertEquals(null, summary.get(new CompositeKey("A", "total")));
+				Assert.assertEquals(null, summary.get(new CompositeKey("B", "total")));
+
 				NamedCache cache = CacheFactory.getCache("data");
 				cache.invoke(new CompositeKey("A", 1), putp);
 				cache.invoke(new CompositeKey("A", 2), putp);
 				cache.invoke(new CompositeKey("A", 3), putp);
 				cache.invoke(new CompositeKey("B", 1), putp);
 				cache.invoke(new CompositeKey("B", 2), putp);
-				
-				NamedCache summary = CacheFactory.getCache("data-total");
 				
 				Assert.assertEquals(3d, summary.get(new CompositeKey("A", "total")));
 				Assert.assertEquals(2d, summary.get(new CompositeKey("B", "total")));
@@ -156,7 +159,6 @@ public class AggregatorTriggerCheck {
 			this.extractor = extractor;
 		}
 
-
 		@Override
 		public void process(Entry e) {
 			CompositeKey key = (CompositeKey) e.getKey();
@@ -218,8 +220,6 @@ public class AggregatorTriggerCheck {
 			} else if (!summaryCacheName.equals(other.summaryCacheName))
 				return false;
 			return true;
-		}
-		
-		
+		}			
 	}
 }

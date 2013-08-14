@@ -8,12 +8,14 @@ import java.util.Properties;
 import java.util.concurrent.Callable;
 
 import org.gridkit.coherence.chtest.CohCloud.CohNode;
+import org.gridkit.nanocloud.testutil.maven.MavenClasspathManager;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class MavenClassPathTest {
 
 	@Test
+	
 	public void verify_self_version() {
 		String ver = MavenClasspathManager.getArtifactVersion("org.gridkit.coherence-tools", "chtest");
 		System.out.println("verify_self_version: " + ver);
