@@ -24,6 +24,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.tangosol.net.CacheFactory;
+import com.tangosol.net.Cluster;
 import com.tangosol.net.NamedCache;
 
 public class ViClusterSamplesTest {
@@ -54,6 +55,8 @@ public class ViClusterSamplesTest {
 		// based on role of node
 		cloud.node("**.storage.**").localStorage(true);
 		cloud.node("**.client.**").localStorage(false);
+		
+		cloud.all().setTCMPTimeout(15000);
 		
 		// configure storage node to use DefaultServer class for initialization
 		cloud.node("**.storage.**").autoStartServices();
@@ -169,4 +172,46 @@ public class ViClusterSamplesTest {
 			}
 		});
 	}	
+	
+	@Test
+	public void kill_coherence_node() throws InterruptedException {
+		cloud.node("storage.1");
+		cloud.node("storage.2");
+		cloud.node("storage.3");
+
+		cloud.node("**").getCache("distr-a");
+		
+		Thread.sleep(5000);
+
+		NamedCache cache = cloud.node("storage.2").getCache("distr-a");
+		for(int i = 0; i != 1000; ++i) {
+			cache.put(i, i);
+		}
+		
+		cloud.node("storage.1").exec(new Runnable() {
+			@Override
+			public void run() {
+				System.out.println("Going to kill cluster");
+				Cluster cluster = CacheFactory.getCluster();
+				cluster.stop();
+				System.out.println("Killing cluster node");
+			}
+		});
+		
+		Thread.sleep(5000);
+		
+		int n = cloud.node("storage.2").exec(new Callable<Integer>() {
+			@Override
+			public Integer call() {
+				NamedCache cache = CacheFactory.getCache("distr-a");
+				int n = 0;
+				for(int i = 0; i != 1000; ++i) {
+					n += cache.get(i) == null ? 0 : 1;
+				}
+				return n;
+			}
+		});
+		
+		Assert.assertEquals(1000, n);
+	}
 }

@@ -114,6 +114,7 @@ public class CohHelper {
 		node.setProp("tangosol.coherence.localport", String.valueOf(port));
 		node.setProp("tangosol.coherence.socketprovider", "tcp");
 		node.setProp("tangosol.coherence.cluster", "jvm::" + ManagementFactory.getRuntimeMXBean().getName());
+		node.setProp("tangosol.coherence.site", "jvm::" + ManagementFactory.getRuntimeMXBean().getName());
 	}
 	
 	public static void setClusterLocalHost(ViConfigurable node, String host) {

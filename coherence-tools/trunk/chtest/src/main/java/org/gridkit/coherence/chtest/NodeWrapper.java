@@ -51,6 +51,8 @@ class NodeWrapper extends ViNode.Delegate implements CohNode {
 	
 	@Override
 	public CohNode useEmptyCacheConfig() {
+		// enforce DefaultConfigurableCacheFactory is used
+		setProp("tangosol.coherence.cachefactory", DefaultConfigurableCacheFactory.class.getName());
 		return cacheConfig("empty-cache-config.xml");
 	}
 
