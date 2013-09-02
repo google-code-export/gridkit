@@ -69,6 +69,8 @@ import com.tangosol.coherence.component.util.SafeCluster;
 import com.tangosol.coherence.component.util.safeService.SafeProxyService;
 import com.tangosol.net.CacheFactory;
 import com.tangosol.net.Cluster;
+import com.tangosol.net.Member;
+import com.tangosol.net.PartitionedService;
 import com.tangosol.net.ProxyService;
 import com.tangosol.net.Service;
 import com.tangosol.net.management.MBeanServerFinder;
@@ -307,6 +309,41 @@ public class CohHelper {
 				killTcpInitiator(s);
 			}
 		}
+	}
+
+	public static void ensurePartitionOwnership(ViExecutor target, final String service) {
+		target.exec(new Runnable() {
+			@Override
+			public void run() {
+				ensurePartitionOwnership(service, 60 * 1000);				
+			}
+		});
+	}
+	
+	public static void ensurePartitionOwnership(String service, int timeout) {
+		PartitionedService s = (PartitionedService)CacheFactory.getService(service);	
+		Member local = CacheFactory.getCluster().getLocalMember();
+		if (!s.getOwnershipEnabledMembers().contains(local)) {
+			throw new IllegalArgumentException("Member is not storage enabled");
+		}
+		long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);
+		while(true) {
+			if (s.getOwnedPartitions(local).isEmpty()) {
+				if (deadline < System.nanoTime()) {
+					throw new RuntimeException("Timeout exceed while waiting for partition ownership");
+				}
+				else {
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						throw new RuntimeException("Interrupted while waiting for partition ownership");
+					}
+				}
+			}
+			else {
+				return;
+			}
+		}		
 	}
 	
 	private static void killTcpInitiator(Service s) {
