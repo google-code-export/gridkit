@@ -37,7 +37,7 @@ public class CohernceEventReliabilityTest {
 		// It is better to have TCP ring for out of process execution
 		cloud.all().enableTcpRing(true);
 		
-		test_extend_cqc_event_reliability("test", 1000, 10, TimeUnit.MINUTES.toMillis(5), 5000);
+		test_extend_cqc_event_reliability("test", 1000, 0.5, TimeUnit.MINUTES.toMillis(5), 5000);
 	}
 	
 	public void test_extend_cqc_event_reliability(final String cacheName, final int cacheSize, double updateRate, long execTimeS, long proxyRestartPeriod) throws InterruptedException {
@@ -69,7 +69,7 @@ public class CohernceEventReliabilityTest {
 				
 		cloud.node("xclient").exec(new CQCEventObserver(cacheName, "A"));
 		System.out.println("Observer started");
-		cloud.node("cluster.storage.1").submit(new CacheMutator(cacheName, "A", cacheSize, 1));
+		cloud.node("cluster.storage.1").submit(new CacheMutator(cacheName, "A", cacheSize, updateRate));
 		System.out.println("Mutator started");
 		
 		int lastProxy = 1;
@@ -103,7 +103,23 @@ public class CohernceEventReliabilityTest {
 
 		@Override
 		NamedCache getCache() {
-			return new ContinuousQueryCache(CacheFactory.getCache(cacheName), AlwaysFilter.INSTANCE);
+			final ContinuousQueryCache cache = new ContinuousQueryCache(CacheFactory.getCache(cacheName), AlwaysFilter.INSTANCE);
+			// CQC will not reconnect automatically
+			// we need to kick it periodically
+			new Thread("CQC-pinger") {
+				@Override
+				public void run() {
+					while(true) {
+						try {
+							Thread.sleep(1000);
+							System.out.println("CQC size is " + cache.size());
+						} catch (Exception e) {
+							// ignore
+						}
+					}
+				}
+			}.start();
+			return cache;
 		}
 	}
 	
@@ -146,21 +162,7 @@ public class CohernceEventReliabilityTest {
 						// do nothing						
 					}
 
-				}, AlwaysFilter.INSTANCE, true);
-				
-				new Thread("CQC-pinger") {
-					@Override
-					public void run() {
-						while(true) {
-							try {
-								Thread.sleep(500);
-								cache.size();
-							} catch (Exception e) {
-								// ignore
-							}
-						}
-					}
-				}.start();
+				}, AlwaysFilter.INSTANCE, false);				
 			}
 			catch(Exception e) {
 				e.printStackTrace();
@@ -169,6 +171,7 @@ public class CohernceEventReliabilityTest {
 		
 		private void process(MapEvent b) {
 			if (((CompositeKey)b.getKey()).getPrimaryKey().equals(primaryKey)) {
+				System.out.println(b);
 				if (nextExpected == Long.MIN_VALUE) {
 					nextExpected = ((Long)b.getNewValue()) + 1; 
 				}
