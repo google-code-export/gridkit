@@ -30,6 +30,7 @@ import org.gridkit.coherence.chtest.CohCloudRule;
 import org.gridkit.coherence.chtest.DisposableCohCloud;
 import org.gridkit.vicluster.telecontrol.jvm.JvmProps;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
 
 import com.tangosol.net.CacheFactory;
@@ -43,6 +44,7 @@ import com.tangosol.util.processor.ConditionalPut;
 
 public class ExtendClientEnduranceCheck {
 
+	@Rule
 	public CohCloudRule cloud = new DisposableCohCloud();
 	
 	@Test
@@ -134,7 +136,7 @@ public class ExtendClientEnduranceCheck {
 			
 			nextProxy.getCache(cacheName).size();
 			nextProxy.ensureService("ExtendTcpProxyService");
-			prevProxy.shutdown();
+			prevProxy.kill();
 			
 			Thread.sleep(1000);
 			verifier.verify();
