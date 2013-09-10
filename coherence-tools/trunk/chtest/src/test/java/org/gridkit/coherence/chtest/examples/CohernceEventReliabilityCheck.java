@@ -55,7 +55,22 @@ public class CohernceEventReliabilityCheck {
 		// It is better to have TCP ring for out of process execution
 		cloud.all().enableTcpRing(true);
 		
-		test_cluster_event_reliability("test", 1000, 200, TimeUnit.MINUTES.toMillis(5), 5000);
+		test_cluster_event_reliability("test", 1000, 200, TimeUnit.MINUTES.toMillis(5), 5000, false);
+	}
+
+	@Test
+	public void test_cluster_cqc_event_reliability_out_of_proc() throws InterruptedException {
+		cloud.all().presetFastLocalCluster();
+		cloud.all().outOfProcess(true);
+		cloud.all().logLevel(1);
+		JvmProps.at(cloud.all()).addJvmArg("-Xmx300m");
+		JvmProps.at(cloud.all()).addJvmArg("-Xms300m");
+		
+		cloud.all().enableJmx(true);
+		// It is better to have TCP ring for out of process execution
+		cloud.all().enableTcpRing(true);
+		
+		test_cluster_event_reliability("test", 1000, 200, TimeUnit.MINUTES.toMillis(5), 5000, true);
 	}
 	
 	public void test_extend_cqc_event_reliability(final String cacheName, final int cacheSize, double updateRate, long execTimeS, long proxyRestartPeriod) throws InterruptedException {
@@ -111,7 +126,7 @@ public class CohernceEventReliabilityCheck {
 		}
 	}
 
-	public void test_cluster_event_reliability(final String cacheName, final int cacheSize, double updateRate, long execTimeS, long proxyRestartPeriod) throws InterruptedException {
+	public void test_cluster_event_reliability(final String cacheName, final int cacheSize, double updateRate, long execTimeS, long proxyRestartPeriod, boolean cqc) throws InterruptedException {
 		
 		cloud.node("cluster.**")
 			.cacheConfig("extend-server-cache-config.xml");
@@ -134,7 +149,7 @@ public class CohernceEventReliabilityCheck {
 		// start cluster and init named cache 
 		cloud.node("cluster.**").getCache(cacheName);
 						
-		cloud.node("cluster.proxy.1").exec(new EventObserver(cacheName, "A"));
+		cloud.node("cluster.proxy.1").exec(cqc ? new CQCEventObserver(cacheName, "A") : new EventObserver(cacheName, "A"));
 		System.out.println("Observer started");
 		cloud.node("cluster.proxy.2").submit(new CacheMutator(cacheName, "A", cacheSize, updateRate));
 		// extra mutator should keep service busy
