@@ -20,13 +20,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.gridkit.bjtest.BetterParameterized;
-import org.gridkit.bjtest.BetterParameterized.Parameters;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
-@RunWith(BetterParameterized.class)
+@RunWith(Parameterized.class)
 public class GlobHelperTest {
 
 	@Parameters
