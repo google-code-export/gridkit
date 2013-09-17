@@ -116,9 +116,18 @@ public class CohHelper {
 		node.setProp("tangosol.coherence.localport", String.valueOf(port));
 		node.setProp("tangosol.coherence.socketprovider", "tcp");
 		node.setProp("tangosol.coherence.cluster", "jvm::" + ManagementFactory.getRuntimeMXBean().getName());
-		node.setProp("tangosol.coherence.site", "jvm::" + ManagementFactory.getRuntimeMXBean().getName());
+		node.setProp("tangosol.coherence.site", trim("jvm::" + ManagementFactory.getRuntimeMXBean().getName(), 32));
 	}
 	
+	private static String trim(String string, int length) {
+		if (string.length() > length) {
+			return string.substring(0, length);
+		}
+		else {
+			return string;
+		}
+	}
+
 	public static void setClusterLocalHost(ViConfigurable node, String host) {
 		node.setProp("tangosol.coherence.localhost", host);
 	}
