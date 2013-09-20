@@ -15,6 +15,11 @@
 		    <version>2.1.6.Final</version>
 		</dependency>
         <dependency>
+            <groupId>org.basex</groupId>
+            <artifactId>basex</artifactId>
+            <version>7.3.1</version>
+        </dependency>
+        <dependency>
             <groupId>se.fishtank</groupId>
             <artifactId>css-selectors</artifactId>
             <version>1.0.4</version>
@@ -23,6 +28,11 @@
             <groupId>org.jooq</groupId>
             <artifactId>joox</artifactId>
             <version>1.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.siemens.ct.exi</groupId>
+            <artifactId>exificient</artifactId>
+            <version>0.9.2</version>
         </dependency>
 	</dependencies>
 </project>
