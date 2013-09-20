@@ -239,7 +239,7 @@ class NodeWrapper extends ViNode.Delegate implements CohNode {
 			@Override
 			public NamedCache call() throws Exception {
 				NamedCache cache = CacheFactory.getCache(cacheName);
-				return RemoteExporter.export(cache, NamedCache.class);
+				return new RemoteNamedCacheProxy(cache);
 			}
 		});
 	}

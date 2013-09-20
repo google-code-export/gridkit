@@ -126,7 +126,7 @@ public class CacheConfig {
 			}
 		}
 		if (winner == null) {
-			throw new RuntimeException("No matching constructor found");
+			throw new RuntimeException("No matching constructor found for " + c.getName());
 		}
 		XmlElement element = new SimpleDocument("class-scheme");
 		element.addElement("class-name").setString(c.getName());
@@ -182,6 +182,9 @@ public class CacheConfig {
 			else if (args[i] instanceof String || args[i] instanceof Integer || args[i] instanceof Double) {
 				paramTypes[i] = args[i].getClass();
 			}
+			else if (args[i] instanceof FixedInstantiation) {
+				paramTypes[i] = ((FixedInstantiation)args[i]).getClass();
+			}
 			else {
 				throw new IllegalArgumentException("Unsupported argument type: " + args[i].getClass().getName());
 			}
@@ -206,7 +209,13 @@ public class CacheConfig {
 				type = ct.getName();
 			}
 			param.addElement("param-type").setString(type);
-			param.addElement("param-value").setString(args[i].toString());
+			if (args[i] instanceof Instantiation) {
+				XmlElement e = param.addElement("param-value");
+				appendElement(e, ((Instantiation)args[i]).getXml());
+			}
+			else {
+				param.addElement("param-value").setString(args[i].toString());
+			}
 		}
 	}
 	

@@ -211,6 +211,7 @@ public class CohernceEventReliabilityCheck {
 		
 		
 		long nextExpected = Long.MIN_VALUE;
+		long counter = 0;
 
 		public EventObserver(String cacheName, Object primaryKey) {
 			this.cacheName = cacheName;
@@ -249,8 +250,9 @@ public class CohernceEventReliabilityCheck {
 			}
 		}
 		
-		private void process(MapEvent b) {
+		private synchronized void process(MapEvent b) {
 			if (((CompositeKey)b.getKey()).getPrimaryKey().equals(primaryKey)) {
+				++counter;
 //				System.out.println(b);
 				if (nextExpected == Long.MIN_VALUE) {
 					nextExpected = ((Long)b.getNewValue()) + 1; 
@@ -262,7 +264,7 @@ public class CohernceEventReliabilityCheck {
 						nextExpected = sn + 1;
 					}
 					else if (sn < nextExpected) {
-						System.out.println("Out of bound event: " + sn + " (last seen " + (nextExpected - 1) + ")");
+						System.out.println("Out of bound event: " + sn + " (last seen " + (nextExpected - 1) + ", total " + counter + ")");
 					}
 					else {
 						nextExpected = sn + 1;
