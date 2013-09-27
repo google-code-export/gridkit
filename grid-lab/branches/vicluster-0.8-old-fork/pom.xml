@@ -32,9 +32,9 @@
     <name>${project.groupId}::${project.artifactId}</name>
 
     <scm>
-        <connection>scm:svn:http://gridkit.googlecode.com/svn/grid-lab/trunk/vicluster</connection>
-        <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/grid-lab/trunk/vicluster</developerConnection>
-        <url>http://gridkit.googlecode.com/svn/grid-lab/trunk/vicluster</url>
+        <connection>scm:svn:http://gridkit.googlecode.com/svn/grid-lab/branches/vicluster-0.8-old-fork</connection>
+        <developerConnection>scm:svn:https://gridkit.googlecode.com/svn/grid-lab/branches/vicluster-0.8-old-fork</developerConnection>
+        <url>http://gridkit.googlecode.com/svn/grid-lab/branches/vicluster-0.8-old-fork</url>
     </scm>
 
     <properties>
