@@ -274,7 +274,7 @@ public class CacheConfig {
 		
 		void schemeRef(String name);
 		
-		void serviceName(String serviceName);		
+		void serviceName(String serviceName);
 	}
 
 	public interface ServiceScheme extends XmlFragment, Fragment {
@@ -286,6 +286,12 @@ public class CacheConfig {
 		void schemeRef(String name);
 		
 		void serviceName(String serviceName);
+		
+		void guardianTimeout(String timeout);
+
+		void guardianTimeout(long timeoutMs);
+		
+		void autoStart(boolean enabled);	
 		
 	}
 	
@@ -331,11 +337,9 @@ public class CacheConfig {
 	}
 	
 	
-	public interface DistributedScheme extends CacheScheme, BackingMap {
+	public interface DistributedScheme extends CacheScheme, ServiceScheme, BackingMap {
 
 		DistributedScheme copy();
-		
-		void serviceName(String serviceName);
 		
 		void serializer(String name);
 		
@@ -356,8 +360,6 @@ public class CacheConfig {
 		void backupCountAfterWriteBehind(int backupCount);
 		
 		void backingMapScheme(BinaryBackingMap backingMap);
-		
-		void autoStart(boolean enabled);	
 		
 		void listener(Class<?> c, Object... params);
 
@@ -745,6 +747,16 @@ public class CacheConfig {
 		}
 
 		@Override
+		public void guardianTimeout(String timeout) {
+			addElement("guardian-timeout", timeout);
+		}
+
+		@Override
+		public void guardianTimeout(long timeoutMs) {
+			addElement("guardian-timeout", String.valueOf(timeoutMs));
+		}
+
+		@Override
 		public void listener(Class<?> c, Object... params) {
 			addElement("listener", intantiate(c, params));
 		}
@@ -976,6 +988,16 @@ public class CacheConfig {
 		@Override
 		public void serializer(Instantiation ref) {
 			addElementContent("acceptor-config", "serializer", ref.getXml());
+		}
+
+		@Override
+		public void guardianTimeout(String timeout) {
+			addElement("guardian-timeout", timeout);
+		}
+
+		@Override
+		public void guardianTimeout(long timeoutMs) {
+			addElement("guardian-timeout", String.valueOf(timeoutMs));
 		}
 
 		@Override
