@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+// TODO handle generic return types
 public class ClassOps {
     public static Class<?>[] interfaces(Class<?> clazz) {
         if (clazz.isPrimitive()) {

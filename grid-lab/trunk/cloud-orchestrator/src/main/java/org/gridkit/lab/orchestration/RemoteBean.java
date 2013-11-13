@@ -25,7 +25,94 @@ public abstract class RemoteBean implements SourceAction, Serializable {
         this.clazz = clazz;
         this.createPoint = createPoint;
     }
+        
+    public static class Deploy extends RemoteBean implements ViNodeAction, Callable<Void> {
+        private static final long serialVersionUID = -488868113954566425L;
+        
+        protected Object prototype;
+        
+        public Deploy(Object prototype, BeanRef ref, Scope scope, StackTraceElement createPoint) {
+            super(prototype.getClass(), ref, scope, createPoint);
+            this.prototype = prototype;
+        }
+        
+        @Override
+        public Callable<Void> getExecutor() {
+            return this;
+        }
+
+        @Override
+        public Void call() {
+            BeanRegistry.getInstance().deploy(ref, prototype);
+            return null;
+        }
+        
+        @Override
+        public String getSource() {
+            return "deploy(" + prototype.getClass().getSimpleName() + ")";
+        }
+    }
     
+    public static class Invoke extends RemoteBean implements ViNodeAction, Callable<Void> {
+        private static final long serialVersionUID = 613178071091607041L;
+        
+        //TODO remove to avoid long chain
+        protected RemoteBean target;
+        protected MethodRef method;
+        protected List<BeanProxy.Argument> args;
+        protected String source;
+        
+        public Invoke(BeanRef ref, Scope scope,
+                      RemoteBean target, Method method, 
+                      List<BeanProxy.Argument> args,
+                      StackTraceElement createPoint) {
+            super(method.getReturnType(), ref, scope, createPoint);
+            this.target = target;
+            this.method = new MethodRef(method);
+            this.args = args;
+            this.source = method.getDeclaringClass().getSimpleName() + "." + method.getName() + "()";
+        }
+        
+        @Override
+        public Void call() throws Exception {
+            try {
+                BeanRegistry.getInstance().invoke(target.ref, method, getRegistryArgs(), ref);
+            } catch (InvocationTargetException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof Exception) {
+                    throw (Exception)cause;
+                } else {
+                    throw e;
+                }
+            }
+            return null;
+        }
+        
+        private List<BeanRegistry.Argument> getRegistryArgs() {
+            List<BeanRegistry.Argument> result = new ArrayList<BeanRegistry.Argument>(args.size());
+            
+            for (BeanProxy.Argument arg : args) {
+                if (arg.isRemote()) {
+                    result.add(BeanRegistry.Argument.newRef(arg.getRemote().ref));
+                } else {
+                    result.add(BeanRegistry.Argument.newVal(arg.getValue()));
+                }
+            }
+            
+            return result;
+        }
+
+        @Override
+        public Callable<Void> getExecutor() {
+            return this;
+        }
+        
+        @Override
+        public String getSource() {
+            return source;
+        }
+    }
+
     private static class ProxyHandler implements BeanProxy.Handler {
         private RemoteBean bean;
         private Platform platform;
@@ -60,73 +147,25 @@ public abstract class RemoteBean implements SourceAction, Serializable {
             
             return result;
         }
-    }
-    
-    public static class Deploy extends RemoteBean implements ViNodeAction {
-        private static final long serialVersionUID = -488868113954566425L;
         
-        protected Object prototype;
-        
-        public Deploy(Object prototype, BeanRef ref, Scope scope, StackTraceElement createPoint) {
-            super(prototype.getClass(), ref, scope, createPoint);
-            this.prototype = prototype;
-        }
-        
-        @Override
-        public Callable<Void> getExecutor() {
-            return new ScenarioDeploy(ref, prototype);
-        }
-
-        @Override
-        public String getSource() {
-            return "deploy(" + prototype.getClass().getSimpleName() + ")";
-        }
-    }
-    
-    public static class Invoke extends RemoteBean implements ViNodeAction {
-        private static final long serialVersionUID = 613178071091607041L;
-        
-        protected RemoteBean target;
-        protected MethodRef method;
-        protected List<BeanProxy.Argument> args;
-        protected String source;
-        
-        public Invoke(BeanRef ref, Scope scope,
-                      RemoteBean target, Method method, 
-                      List<BeanProxy.Argument> args,
-                      StackTraceElement createPoint) {
-            super(method.getReturnType(), ref, scope, createPoint);
-            this.target = target;
-            this.method = new MethodRef(method);
-            this.args = args;
-            this.source = method.getDeclaringClass().getSimpleName() + "." + method.getName() + "()";
-        }
-       
-        @Override
-        public Callable<Void> getExecutor() {
-            return new ScenarioInvoke(target.ref, method, getRegistryArgs(), ref);
-        }
-                
-        private List<BeanRegistry.Argument> getRegistryArgs() {
-            List<BeanRegistry.Argument> result = new ArrayList<BeanRegistry.Argument>(args.size());
-            
+        private static void validate(List<BeanProxy.Argument> args) {
             for (BeanProxy.Argument arg : args) {
-                if (arg.isRemote()) {
-                    result.add(BeanRegistry.Argument.newRef(arg.getRemote().ref));
-                } else {
-                    result.add(BeanRegistry.Argument.newVal(arg.getValue()));
+                validate(arg);
+            }
+        }
+        
+        private static void validate(BeanProxy.Argument arg) {
+            if (arg.isLocal()) {
+                throw new IllegalArgumentException();
+            } else if (arg.isValue()) {
+                boolean valid = arg.getValue() instanceof Serializable || arg.getValue() instanceof Remote;
+                if (!valid){
+                    throw new IllegalArgumentException();
                 }
             }
-            
-            return result;
-        }
-
-        @Override
-        public String getSource() {
-            return source;
         }
     }
-
+    
     @SuppressWarnings("unchecked")
     public <T> T getProxy(Platform platform) {
         return (T)BeanProxy.newInstance(clazz, new ProxyHandler(this, platform));
@@ -144,72 +183,4 @@ public abstract class RemoteBean implements SourceAction, Serializable {
     public StackTraceElement getLocation() {
         return createPoint;
     }
-    
-    private static void validate(List<BeanProxy.Argument> args) {
-        for (BeanProxy.Argument arg : args) {
-            validate(arg);
-        }
-    }
-    
-    private static void validate(BeanProxy.Argument arg) {
-        if (arg.isLocal()) {
-            throw new IllegalArgumentException();
-        } else if (arg.isValue()) {
-            boolean valid = arg.getValue() instanceof Serializable || arg.getValue() instanceof Remote;
-            if (!valid){
-                throw new IllegalArgumentException();
-            }
-        }
-    }
-    
-    private static class ScenarioDeploy implements Callable<Void>, Serializable {
-        private static final long serialVersionUID = -1013487079759748972L;
-        
-        private BeanRef ref;
-        private Object bean;
-
-        public ScenarioDeploy(BeanRef ref, Object bean) {
-            this.ref = ref;
-            this.bean = bean;
-        }
-
-        @Override
-        public Void call() {
-            BeanRegistry.getInstance().deploy(ref, bean);
-            return null;
-        }
-    }
-
-    public static class ScenarioInvoke implements Callable<Void>, Serializable {
-        private static final long serialVersionUID = 3020445566627386839L;
-        
-        private BeanRef target;
-        private MethodRef method;
-        private List<BeanRegistry.Argument> args;
-        private BeanRef result;
-
-        public ScenarioInvoke(BeanRef target, MethodRef method,
-                              List<BeanRegistry.Argument> args,
-                              BeanRef result) {
-            this.target = target;
-            this.method = method;
-            this.args = args;
-            this.result = result;
-        }
-
-        @Override
-        public Void call() throws Exception {
-            try {
-                BeanRegistry.getInstance().invoke(target, method, args, result);
-            } catch (InvocationTargetException e) {
-                Throwable cause = e.getCause();
-                if (cause instanceof Exception) {
-                    throw (Exception)cause;
-                } else {
-                    throw e;
-                }
-            }
-            return null;
-        }
-    }   
 }

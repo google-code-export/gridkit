@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 
 // TODO to do start and end added incorrectly (the should always be first and last actions)
+// all checkpoint depends on start
+// finish checkpoint depends on all checkpoints
 public class ScriptBuilder {
     public static final String START  = "start";
     public static final String FINISH = "finish";
