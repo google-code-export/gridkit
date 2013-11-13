@@ -1,12 +1,28 @@
 package org.gridkit.lab.orchestration;
 
-import java.util.Collections;
+import java.util.Iterator;
+import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-import org.gridkit.lab.orchestration.script.Checkpoint.LogListener;
+import org.gridkit.lab.orchestration.script.Checkpoint;
+import org.gridkit.lab.orchestration.script.CycleDetectedException;
 import org.gridkit.lab.orchestration.script.Script;
+import org.gridkit.lab.orchestration.script.ScriptAction;
 import org.gridkit.lab.orchestration.script.ScriptBuilder;
+import org.gridkit.lab.orchestration.script.ScriptExecutor.Box;
+import org.gridkit.lab.orchestration.util.NamedThreadFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ScenarioBuilder implements Platform.ScriptConstructor {
+    private static final Logger log = LoggerFactory.getLogger(ScenarioBuilder.class);
+    
+    private static ScheduledExecutorService SLEEP_EXECUTOR = Executors.newScheduledThreadPool(
+        1, new NamedThreadFactory("Scenario-Builder-Sleep-Executor", true)
+    );
+    
     private Platform platform;
     private ScriptBuilder builder;
     private LocalNode localNode;
@@ -25,19 +41,52 @@ public class ScenarioBuilder implements Platform.ScriptConstructor {
     }
     
     public void from(String name) {
-        builder.from(name).setListener(LogListener.INSTANCE);
+        builder.from(name);
     }
     
     public void fromStart() {
-        builder.fromStart().setListener(LogListener.INSTANCE);
+        builder.fromStart();
     }
     
     public void join(String name) {
-        builder.join(name).setListener(LogListener.INSTANCE);
+        try {
+            builder.join(name);
+        } catch (CycleDetectedException e) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Cycle detected during scenario construction:\n");
+            Iterator<ScriptAction> iter = e.getCycle().iterator();
+            
+            while (iter.hasNext()) {
+                ScriptAction rawAction = iter.next();
+                
+                sb.append("\t");
+                
+                if (rawAction instanceof Checkpoint) {
+                    Checkpoint action = (Checkpoint)rawAction;
+                    sb.append("\tCheckpoint " + action.getName());
+                } else if (rawAction instanceof SourceAction) {
+                    SourceAction action = (SourceAction)rawAction;
+                    sb.append("\t" + action.getSource() + " at " + ClassOps.location(action.getLocation()));
+                } else {
+                    sb.append("\t" + rawAction);
+                }
+                
+                if (iter.hasNext()) {
+                    sb.append("\n");
+                }
+            }
+            
+            log.error(sb.toString());
+            throw e;
+        }
     }
     
     public void joinFinish() {
-        builder.joinFinish().setListener(LogListener.INSTANCE);
+        builder.joinFinish();
+    }
+    
+    public void sleep(long timeout, TimeUnit unit) {
+        builder.action(new Sleep(timeout, unit));
     }
     
     public RemoteNode node(Scope scope) {
@@ -60,7 +109,7 @@ public class ScenarioBuilder implements Platform.ScriptConstructor {
         Script script = builder.build();
         platform.clearScriptConstructor();
         builder = null;
-        return new Scenario(script);
+        return new Scenario(script, platform);
     }
     
     public class RemoteNode {
@@ -72,8 +121,8 @@ public class ScenarioBuilder implements Platform.ScriptConstructor {
 
         public <T> T deploy(T prototype) {
             RemoteBean.Deploy bean = platform.newRemoteBean(scope, prototype, ClassOps.stackTraceElement(1));
-            builder.create(bean.getScenarioBean(), Collections.emptyList());
-            return bean.getProxy();
+            builder.action(bean);
+            return bean.getProxy(platform);
         }
         
         public <T> T bean(T bean) {
@@ -84,6 +133,39 @@ public class ScenarioBuilder implements Platform.ScriptConstructor {
     public class LocalNode {
         public <T> T deploy(T prototype) {
             return null;
+        }
+    }
+    
+    private static class Sleep implements ExecutableAction, Runnable {
+        private final long timeout;
+        private final TimeUnit unit;
+        private final String id = UUID.randomUUID().toString();
+        
+        private Box box;
+        
+        public Sleep(long timeout, TimeUnit unit) {
+            this.timeout = timeout;
+            this.unit = unit;
+        }
+
+        @Override
+        public void execute(Box box) {
+            this.box = box;
+            try {
+                SLEEP_EXECUTOR.schedule(this, timeout, unit);
+            } catch (RuntimeException e) {
+                box.failure(e);
+            }
+        }
+
+        @Override
+        public void run() {
+            box.success();
+        }
+
+        @Override
+        public Object getId() {
+            return id;
         }
     }
 }

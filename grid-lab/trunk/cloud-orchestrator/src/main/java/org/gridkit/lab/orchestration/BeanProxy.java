@@ -1,5 +1,6 @@
 package org.gridkit.lab.orchestration;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -73,7 +74,9 @@ public class BeanProxy implements InvocationHandler {
         return ((Handler)Proxy.getInvocationHandler(object));
     }
     
-    public static class Argument {
+    public static class Argument implements Serializable {
+        private static final long serialVersionUID = 8666908818704216236L;
+        
         private RemoteBean remote;
         private LocalBean local;
         private Object value;

@@ -3,25 +3,17 @@ package org.gridkit.lab.orchestration;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.gridkit.lab.orchestration.BeanProxy.Argument;
 import org.gridkit.lab.orchestration.BeanRegistry.BeanRef;
-import org.gridkit.lab.orchestration.script.ScriptBean;
+import org.gridkit.lab.orchestration.script.ScriptAction;
 import org.gridkit.lab.orchestration.script.ScriptBuilder;
 import org.gridkit.nanocloud.CloudFactory;
-import org.gridkit.util.concurrent.Box;
 import org.gridkit.vicluster.ViNode;
 import org.gridkit.vicluster.ViNodeSet;
 
 public class Platform {
-    
-    protected interface ScriptBeanProvider {
-        ScriptBean getScenarioBean();
-        
-        ScriptBean getHookBean();
-    }
     
     protected interface ScriptConstructor {
         ScriptBuilder getScriptBuilder();
@@ -94,9 +86,9 @@ public class Platform {
         }
         
         public <T> T deploy(T prototype) {
-            RemoteBean bean = newRemoteBean(scope, prototype, ClassOps.stackTraceElement(1));
-            create(bean.getScenarioBean());
-            return bean.getProxy();
+            RemoteBean.Deploy bean = newRemoteBean(scope, prototype, ClassOps.stackTraceElement(1));
+            execute(bean);
+            return bean.getProxy(Platform.this);
         }
         
         public <T> T bean(T bean) {
@@ -117,13 +109,15 @@ public class Platform {
         return names.toArray(new String[names.size()]);
     }
     
-    protected void invoke(ScriptBeanProvider provider, List<Object> refs) {
+    protected void invoke(ScriptAction action, List<Object> refs) {
         if (scriptCtor instanceof HookBuilder) {
-            scriptCtor.getScriptBuilder().create(provider.getHookBean(), refs);
+            scriptCtor.getScriptBuilder().action(action, refs);
         } else if (scriptCtor instanceof ScenarioBuilder) {
-            scriptCtor.getScriptBuilder().create(provider.getScenarioBean(), refs);
+            scriptCtor.getScriptBuilder().action(action, refs);
+        } else if (action instanceof ViNodeAction){
+            execute((ViNodeAction)action);
         } else {
-            create(provider.getScenarioBean());
+            throw new IllegalArgumentException();
         }
     }
             
@@ -133,7 +127,7 @@ public class Platform {
     
     protected RemoteBean.Deploy newRemoteBean(Scope scope, Object prototype, StackTraceElement createPoint) {
         return new RemoteBean.Deploy(
-            prototype, nextBeanRef(), scope, this, createPoint
+            prototype, nextBeanRef(), scope, createPoint
         );
     }
     
@@ -141,7 +135,7 @@ public class Platform {
                                               Method method, List<Argument> args,
                                               StackTraceElement createPoint) {
         return new RemoteBean.Invoke(
-            nextBeanRef(), scope, this, target, method, args, createPoint
+            nextBeanRef(), scope, target, method, args, createPoint
         );
     }
         
@@ -149,47 +143,7 @@ public class Platform {
         return new BeanRef("" + (nextBeanId++) + "-" + id);
     }
     
-    private static void create(ScriptBean bean) {
-        CountDownBox box = new CountDownBox();
-        bean.create(box);
-        box.await();
-    }
-    
-    private static class CountDownBox implements Box<Void> {
-        private final CountDownLatch latch = new CountDownLatch(1);
-        private Throwable error = null;
-        
-        @Override
-        public synchronized void setData(Void data) {
-            validate();
-            latch.countDown();
-        }
-        
-        @Override
-        public synchronized void setError(Throwable error) {
-            validate();
-            this.error = error;
-            latch.countDown();
-        }
-
-        private void validate() {
-            if (latch.getCount() == 0) {
-                throw new IllegalStateException();
-            }
-        } 
-        
-        public void await() {
-            try {
-                latch.await();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            
-            if (error instanceof RuntimeException) {
-                throw (RuntimeException)error; 
-            } else if (error != null) {
-                throw new RuntimeException(error);
-            }
-        }
+    private void execute(ViNodeAction action) {
+        cloud.nodes(vinode(action.getScope())).exec(action.getExecutor());
     }
 }

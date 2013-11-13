@@ -1,10 +1,11 @@
 package org.gridkit.lab.orchestration;
 
 import java.io.Serializable;
-import java.util.Collections;
 
 import org.gridkit.lab.orchestration.script.Script;
+import org.gridkit.lab.orchestration.script.ScriptAction;
 import org.gridkit.lab.orchestration.script.ScriptBuilder;
+import org.gridkit.lab.orchestration.script.ScriptExecutor;
 import org.gridkit.vicluster.ViNode;
 
 public abstract class HookBuilder implements Platform.ScriptConstructor {    
@@ -22,12 +23,12 @@ public abstract class HookBuilder implements Platform.ScriptConstructor {
 
     public <T> T deploy(T prototype) {
         RemoteBean.Deploy bean = platform.newRemoteBean(scope, prototype, ClassOps.stackTraceElement(1));
-        builder.create(bean.getHookBean(), Collections.emptyList());
-        return bean.getProxy();
+        builder.action(bean);
+        return bean.getProxy(platform);
     }
 
     public void build() {
-        HookExecutor executor = new HookExecutor(builder.build(), scope);
+        ScriptHook executor = new ScriptHook(builder.build(), scope);
         platform.clearScriptConstructor();
         builder = null;
         addHook(platform.cloud().node("**"), hookName, executor);
@@ -61,13 +62,13 @@ public abstract class HookBuilder implements Platform.ScriptConstructor {
         }
     }
     
-    private static class HookExecutor implements Runnable, Serializable {
+    private static class ScriptHook implements Runnable, Serializable {
         private static final long serialVersionUID = -1392214150235120525L;
         
         private final Script script;
         private final Scope scope;
         
-        public HookExecutor(Script script, Scope scope) {
+        public ScriptHook(Script script, Scope scope) {
             this.script = script;
             this.scope = scope;
         }
@@ -75,12 +76,34 @@ public abstract class HookBuilder implements Platform.ScriptConstructor {
         @Override
         public void run() {
             if (isScopeNode(scope)) {
-                script.execute();
+                script.execute(new HookExecutor());
             }
         }
     }
     
-    protected static boolean isScopeNode(Scope scope) {
-        return scope.contains(RemoteBean.getNodeName());
+    private static boolean isScopeNode(Scope scope) {
+        return scope.contains(getNodeName());
+    }
+    
+    private static String getNodeName() {
+        return System.getProperty("vinode.name");
+    }
+    
+    private static class HookExecutor implements ScriptExecutor {
+        @Override
+        public void execute(ScriptAction rawAction, Box box) {
+            if (rawAction instanceof ViNodeAction) {
+                ViNodeAction action = (ViNodeAction)rawAction;
+                try {
+                    action.getExecutor().call();
+                } catch (Exception e) {
+                    box.failure(e);
+                    return;
+                }
+                box.success();
+            } else {
+                box.success();
+            }
+        }
     }
 }

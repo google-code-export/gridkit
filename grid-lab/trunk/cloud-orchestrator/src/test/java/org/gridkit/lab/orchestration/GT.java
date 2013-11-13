@@ -1,23 +1,27 @@
 package org.gridkit.lab.orchestration;
 
-import org.jgrapht.alg.TransitiveClosure;
-import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
-import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.experimental.dag.DirectedAcyclicGraph.CycleFoundException;
 
 public class GT {
-    public static void main(String[] args) {
-        DirectedAcyclicGraph<String, DefaultEdge> dag = new DirectedAcyclicGraph<String, DefaultEdge>(DefaultEdge.class);
+    public static void main(String[] args) throws CycleFoundException {
+        /*
+        ScriptGraph dag = new ScriptGraph();
         
-        dag.addVertex("a");
-        dag.addVertex("b");
-        dag.addVertex("c");
+        dag.add("1", "2");
+        dag.add("1", "3");
+        dag.add("2", "4");
+        dag.add("3", "4");
         
-        dag.addEdge("a", "b");
-        dag.addEdge("b", "c");
-        dag.addEdge("a", "c");
-                
-        TransitiveClosure.INSTANCE.closeSimpleDirectedGraph(dag);
-                
+        dag.add("a", "b");
+        dag.add("b", "c");
+        
+        try {
+            dag.add("c", "a");
+        } catch (CycleDetectedException e) {
+            System.err.println(e.getCycle());
+        }
+        
         System.err.println(dag);
+        */
     }
 }

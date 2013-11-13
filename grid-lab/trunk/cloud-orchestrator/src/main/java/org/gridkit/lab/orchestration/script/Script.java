@@ -4,106 +4,46 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.gridkit.util.concurrent.Box;
-
 public class Script implements Serializable {
     private static final long serialVersionUID = 9125786087888501718L;
     
-    private final List<Edge> edges;
+    private final ScriptGraph graph;
 
-    public Script(List<Edge> edges) {
-        this.edges = edges;
+    public Script(ScriptGraph graph) {
+        this.graph = graph;
     }
 
-    public void execute() {
-        new Execution().execute();
+    public void execute(ScriptExecutor executor) {
+        new Execution(executor).execute();
     }
     
-    public void execute(long timeout, TimeUnit unit) throws TimeoutException {
-        
-    }
-    
-    public static class Edge implements Serializable {
-        private static final long serialVersionUID = -2805529944634989587L;
-        
-        private ScriptAction from;
-        private ScriptAction to;
-        
-        public ScriptAction getFrom() {
-            return from;
-        }
-        
-        public void setFrom(ScriptAction from) {
-            this.from = from;
-        }
-        
-        public ScriptAction getTo() {
-            return to;
-        }
-        
-        public void setTo(ScriptAction to) {
-            this.to = to;
-        }
-    }
-    
-    public Set<ScriptAction> getDependencies(ScriptAction action) {
-        Set<ScriptAction> result = new HashSet<ScriptAction>();
-        
-        for (Edge edge : edges) {
-            if (edge.getTo().equals(action)) {
-                result.add(edge.getFrom());
-            }
-        }
-        
-        return result;
-    }
-    
-    public Set<ScriptAction> getActions() {
-        Set<ScriptAction> result = new HashSet<ScriptAction>();
-        
-        for (Edge edge : edges) {
-            result.add(edge.getFrom());
-            result.add(edge.getTo());
-        }
-        
-        return result;
-    }
-      
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Script[\n");
-        for (Edge edge : edges) {
-            sb.append('\t');
-            sb.append(edge);
-            sb.append('\n');
-        }
-        sb.append("]");
-        return sb.toString();
+    public void execute(ScriptExecutor executor, long timeout, TimeUnit unit) throws TimeoutException {
+        throw new UnsupportedOperationException();
     }
     
     private class Execution {
-        private Set<ScriptAction> nextSteps;
-        private Set<ScriptAction> prevSteps;
+        private Set<Object> nextSteps;
+        private Set<Object> prevSteps;
         private BlockingQueue<ActionBox> queue;
+        private ScriptExecutor executor;
         
-        public Execution() {
-            this.nextSteps = getActions();
-            this.prevSteps = new HashSet<ScriptAction>();
+        public Execution(ScriptExecutor executor) {
+            this.nextSteps = graph.getActionIds();
+            this.prevSteps = new HashSet<Object>();
             this.queue = new LinkedBlockingQueue<ActionBox>();
+            this.executor = executor;
         }
         
         public void execute() {
             while (!nextSteps.isEmpty()) {
-                for (ScriptAction action : nextStep()) {
-                    start(action);
+                for (Object actionId : nextStep()) {
+                    start(actionId);
                 }
 
                 ActionBox doneBox;
@@ -121,28 +61,29 @@ public class Script implements Serializable {
             }
         }
         
-        private void start(ScriptAction action) {
-            if (!prevSteps.contains(action)) {
+        private void start(Object actionId) {
+            if (!prevSteps.contains(actionId)) {
+                ScriptAction action = graph.getAction(actionId);
                 ActionBox box = new ActionBox(action, queue);
-                action.execute(box);
-                prevSteps.add(action);
+                executor.execute(action, box);
+                prevSteps.add(actionId);
             }
         }
         
         private void finish(ScriptAction action) {
-            nextSteps.remove(action);
+            nextSteps.remove(action.getId());
         }
         
-        private Collection<ScriptAction> nextStep() {
-            Collection<ScriptAction> result = new ArrayList<ScriptAction>();
+        private Collection<Object> nextStep() {
+            Collection<Object> result = new ArrayList<Object>();
             
-            for (ScriptAction action : nextSteps) {
-                Set<ScriptAction> deps = getDependencies(action);
+            for (Object actionId : nextSteps) {
+                Set<Object> deps = graph.getDependencies(actionId);
                 
                 deps.retainAll(nextSteps);
                 
                 if (deps.isEmpty()) {
-                    result.add(action);
+                    result.add(actionId);
                 }
             }
             
@@ -150,7 +91,7 @@ public class Script implements Serializable {
         }
     }
     
-    private static class ActionBox implements Box<Void> {
+    private static class ActionBox implements ScriptExecutor.Box {
         private final ScriptAction action;
         private final BlockingQueue<ActionBox> queue;
 
@@ -162,12 +103,12 @@ public class Script implements Serializable {
         }
 
         @Override
-        public void setData(Void data) {
+        public void success() {
             queue.add(this);
         }
 
         @Override
-        public void setError(Throwable error) {
+        public void failure(Throwable error) {
             this.error = error;
             queue.add(this);
         }

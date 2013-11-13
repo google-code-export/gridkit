@@ -10,7 +10,6 @@ public class PlatformTest {
     public void test() {
         ViNodeSet cloud = CloudFactory.createCloud();
         ViProps.at(cloud.node("**")).setIsolateType();
-        
         Platform platform = new Platform(cloud);
         
         // --- Start scenario
@@ -26,7 +25,7 @@ public class PlatformTest {
         
         // ---
         
-        cloud.nodes("qqq", "ttt").touch();
+        cloud.nodes("ttt", "qqq").touch();
         
         ScenarioBuilder sb = platform.newScenario();
             printer.out("scenario 1");

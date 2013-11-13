@@ -1,7 +1,6 @@
 package org.gridkit.lab.orchestration;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,19 +14,10 @@ public class BeanRegistry {
     
     private Map<BeanRef, Object> beanMap = new HashMap<BeanRef, Object>();
 
-    public void invoke(BeanRef targetRef, MethodRef method, List<Argument> args, BeanRef resultRef) throws InvocationTargetException {
+    public void invoke(BeanRef targetRef, MethodRef method, List<Argument> args, BeanRef resultRef) throws Exception {
         Object targetBean = bean(targetRef);
         Object[] targetArgs = resolve(args);
-        
-        Object resultBean;
-        try {
-            resultBean = method.invoke(targetBean, targetArgs);
-        } catch (InvocationTargetException e) {
-            throw e;
-        } catch (RuntimeException e) {
-            throw e;
-        }
-        
+        Object resultBean = method.invoke(targetBean, targetArgs);
         register(resultRef, resultBean);
     }
     
