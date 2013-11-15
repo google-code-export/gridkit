@@ -1,9 +1,0 @@
-sb.from().scope()
-sb.at().bean()
-sb.at().deploy()
-
-and, or scopes
-
-local beans
-
-factory beans
