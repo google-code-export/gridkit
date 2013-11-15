@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.rmi.Remote;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.gridkit.lab.orchestration.script.Checkpoint;
 import org.gridkit.lab.orchestration.script.Script;
@@ -29,45 +28,54 @@ public class Scenario {
         script.execute(new ScenarioExecutor());
     }
     
-    public void play(long timeout, TimeUnit unit) throws TimeoutException {
+    public void play(long millis) {
+        script.execute(new ScenarioExecutor(), millis, TimeUnit.MILLISECONDS);
+    }
+    
+    public void play(long timeout, TimeUnit unit) {
         script.execute(new ScenarioExecutor(), timeout, unit);
     }
 
     private class ScenarioExecutor implements ScriptExecutor {
         @Override
-        public void execute(ScriptAction rawAction, Box box) {
-            if (rawAction instanceof Checkpoint) {
-                Checkpoint action = (Checkpoint)rawAction;
-                log.info("Checkpoint '" + action.getName() + "' reached");
-                box.success();
-            } else if (rawAction instanceof ExecutableAction) {
-                ExecutableAction action = (ExecutableAction)rawAction;
-                action.execute(box);
+        public void execute(ScriptAction action, Box box) {
+            if (action instanceof Checkpoint) {
+                execute((Checkpoint)action, box);
+            } else if (action instanceof ExecutableAction) {
+                execute((ExecutableAction)action, box);
+            } else if (action instanceof ViNodeAction) {
+                execute((ViNodeAction)action, box);
             } else {
-                SourceAction source = (SourceAction)rawAction;
-                ViNodeAction viAction = (ViNodeAction)rawAction;
-                
-                String[] nodes = platform.vinode(viAction.getScope());
-
-                String logTarget = source.getSource() + " at " + ClassOps.location(source.getLocation());
-
-                if (nodes.length == 0) {
-                    log.info("No nodes found for execution of " + logTarget);
-                    box.success();
-                } else {
-                    String aboutMsg   = "About to execute " + logTarget;
-                    String successMsg = "Execution of " + logTarget + " finished successfully";
-                    String failureMsg = "Execution of " + logTarget + " finished with error";
-
-                    log.info(aboutMsg);
-                    RemoteBox remoteBox = new LoggingRemoteBox(box, nodes.length, successMsg, failureMsg);
-                    Runnable executor = new ViNodeActionExecutor(viAction.getExecutor(), remoteBox);
-                    platform.cloud().nodes(nodes).submit(executor);
-                }
+                box.failure(new IllegalArgumentException("unknown action class " + action.getClass()));
             }
         }
-    }
 
+        private void execute(Checkpoint checkpoint, Box box) {
+            log.info("Checkpoint [" + checkpoint.getName() + "] reached");
+            box.success();
+        }
+        
+        private void execute(ExecutableAction action, Box box) {
+            action.execute(log(action, box));
+        }
+        
+        private void execute(ViNodeAction action, Box box) {
+            String[] nodes = platform.vinode(action.getScope());
+
+            if (nodes.length == 0) {
+                log.info("No nodes found for execution of " + action + " on scope " + action.getScope());
+                box.success();
+            } else {
+                RemoteBox remoteBox = new ViNodeBox(log(action, box), nodes.length);
+                Runnable executor = new ViNodeActionExecutor(action.getExecutor(), remoteBox);
+                platform.cloud().nodes(nodes).submit(executor);
+            }
+        }
+
+        private LoggingBox log(ScriptAction action, Box box) {
+            return new LoggingBox(box, action);
+        }
+    }
     
     private interface RemoteBox extends Remote, Box {}
     
@@ -94,17 +102,36 @@ public class Scenario {
         }
     }
     
-    private static class LoggingRemoteBox implements RemoteBox {
+    private static class LoggingBox implements Box {
+        private Box delegate;
+        private ScriptAction target;
+        
+        public LoggingBox(Box delegate, ScriptAction target) {
+            this.delegate = delegate;
+            this.target = target;
+            log.info("About to execute " + target);
+        }
+        
+        @Override
+        public void success() {
+            log.info("Execution of " + target + " finished successfully");
+            delegate.success();
+        }
+
+        @Override
+        public void failure(Throwable e) {
+            log.error("Execution of " + target + " finished with exception - " + e);
+            delegate.failure(e);
+        }
+    }
+    
+    private static class ViNodeBox implements RemoteBox {
         private Box delegate;
         private int counter;
-        private String successMsg;
-        private String failureMsg;
 
-        public LoggingRemoteBox(Box delegate, int counter, String successMsg, String failureMsg) {
+        public ViNodeBox(Box delegate, int counter) {
             this.delegate = delegate;
             this.counter = counter;
-            this.successMsg = successMsg;
-            this.failureMsg = failureMsg;
         }
         
         @Override
@@ -113,9 +140,6 @@ public class Scenario {
             if (counter == 0 && delegate != null) {
                 delegate.success();
                 delegate = null;
-                if (successMsg != null) {
-                    log.info(successMsg);
-                }
             }
         }
 
@@ -124,9 +148,6 @@ public class Scenario {
             if (delegate != null) {
                 delegate.failure(e);
                 delegate = null;
-                if (failureMsg != null) {
-                    log.info(failureMsg);
-                }
             }
         }
     }

@@ -1,6 +1,5 @@
 package org.gridkit.lab.orchestration;
 
-import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -8,10 +7,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.gridkit.lab.orchestration.util.ClassOps;
+
 public class BeanProxy implements InvocationHandler {
     
     public interface Handler {
-        Object invoke(Method method, List<Argument> args); 
+        Object invoke(Method method, List<Argument<Handler>> args); 
     }
 
     public static Object newInstance(Class<?> clazz, Handler handler) {
@@ -30,10 +31,10 @@ public class BeanProxy implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        List<Argument> actionArgs;
+        List<Argument<Handler>> actionArgs;
         
         if (args != null) {
-            actionArgs = new ArrayList<Argument>(args.length);
+            actionArgs = new ArrayList<Argument<Handler>>(args.length);
             for (Object arg : args) {
                 actionArgs.add(translate(arg));
             }
@@ -44,19 +45,17 @@ public class BeanProxy implements InvocationHandler {
         return handler.invoke(method, actionArgs);
     }
     
-    private Argument translate(Object object) {
+    private Argument<Handler> translate(Object object) {
         if (isBeanProxy(object)) {
             Handler handler = getHandler(object);
             
-            if (handler instanceof RemoteBean) {
-                return Argument.newRemote((RemoteBean)handler);
-            } else if (handler instanceof LocalBean) {
-                return Argument.newLocal((LocalBean)handler);
+            if (handler instanceof Handler) {
+                return Argument.newRef((Handler)handler);
             } else {
                 throw new IllegalArgumentException();
             }
         } else {
-            return Argument.newValue(object);
+            return Argument.newVal(object);
         }
     }
     
@@ -72,55 +71,5 @@ public class BeanProxy implements InvocationHandler {
     
     private static Handler getHandler(Object object) {
         return ((Handler)Proxy.getInvocationHandler(object));
-    }
-    
-    public static class Argument implements Serializable {
-        private static final long serialVersionUID = 8666908818704216236L;
-        
-        private RemoteBean remote;
-        private LocalBean local;
-        private Object value;
-        
-        private Argument(RemoteBean remote, LocalBean local, Object value) {
-            this.remote = remote;
-            this.local = local;
-            this.value = value;
-        }
-       
-        private static Argument newRemote(RemoteBean remote) {
-            return new Argument(remote, null, null);
-        }
-        
-        private static Argument newLocal(LocalBean local) {
-            return new Argument(null, local, null);
-        }
-        
-        private static Argument newValue(Object value) {
-            return new Argument(null, null, value);
-        }
-        
-        public boolean isRemote() {
-            return remote != null;
-        }
-        
-        public boolean isLocal() {
-            return local != null;
-        }
-        
-        public boolean isValue() {
-            return remote == null && local == null;
-        }
-        
-        public RemoteBean getRemote() {
-            return remote;
-        }
-        
-        public LocalBean getLocal() {
-            return local;
-        }
-        
-        public Object getValue() {
-            return value;
-        }
     }
 }

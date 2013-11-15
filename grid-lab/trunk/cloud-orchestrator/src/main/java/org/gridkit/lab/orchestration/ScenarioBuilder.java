@@ -1,24 +1,16 @@
 package org.gridkit.lab.orchestration;
 
-import java.util.Iterator;
-import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.gridkit.lab.orchestration.script.Checkpoint;
-import org.gridkit.lab.orchestration.script.CycleDetectedException;
 import org.gridkit.lab.orchestration.script.Script;
-import org.gridkit.lab.orchestration.script.ScriptAction;
 import org.gridkit.lab.orchestration.script.ScriptBuilder;
 import org.gridkit.lab.orchestration.script.ScriptExecutor.Box;
+import org.gridkit.lab.orchestration.util.ClassOps;
 import org.gridkit.lab.orchestration.util.NamedThreadFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class ScenarioBuilder implements Platform.ScriptConstructor {
-    private static final Logger log = LoggerFactory.getLogger(ScenarioBuilder.class);
-    
+public class ScenarioBuilder implements Platform.ScriptConstructor {    
     private static ScheduledExecutorService SLEEP_EXECUTOR = Executors.newScheduledThreadPool(
         1, new NamedThreadFactory("Scenario-Builder-Sleep-Executor", true)
     );
@@ -36,59 +28,38 @@ public class ScenarioBuilder implements Platform.ScriptConstructor {
     }
 
     public void sync() {
-        String location = ClassOps.location(ClassOps.stackTraceElement(1));
+        String location = ClassOps.toString(ClassOps.location(1));
         join("sync-" + (nextSync++) + " at " + location);
     }
     
-    public void from(String name) {
+    public SectionOptions from(String name) {
         builder.from(name);
+        return new SectionOptions();
     }
     
-    public void fromStart() {
+    public SectionOptions fromStart() {
         builder.fromStart();
+        return new SectionOptions();
     }
     
-    public void join(String name) {
-        try {
-            builder.join(name);
-        } catch (CycleDetectedException e) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Cycle detected during scenario construction:\n");
-            Iterator<ScriptAction> iter = e.getCycle().iterator();
-            
-            while (iter.hasNext()) {
-                ScriptAction rawAction = iter.next();
-                
-                sb.append("\t");
-                
-                if (rawAction instanceof Checkpoint) {
-                    Checkpoint action = (Checkpoint)rawAction;
-                    sb.append("\tCheckpoint " + action.getName());
-                } else if (rawAction instanceof SourceAction) {
-                    SourceAction action = (SourceAction)rawAction;
-                    sb.append("\t" + action.getSource() + " at " + ClassOps.location(action.getLocation()));
-                } else {
-                    sb.append("\t" + rawAction);
-                }
-                
-                if (iter.hasNext()) {
-                    sb.append("\n");
-                }
-            }
-            
-            log.error(sb.toString());
-            throw e;
-        }
+    public SectionOptions join(String name) {
+        builder.join(name);
+        return new SectionOptions();
     }
     
-    public void joinFinish() {
+    public SectionOptions joinFinish() {
         builder.joinFinish();
+        return new SectionOptions();
     }
-    
+
     public void sleep(long timeout, TimeUnit unit) {
-        builder.action(new Sleep(timeout, unit));
+        builder.action(new Sleep(timeout, unit, ClassOps.location(1)));
     }
     
+    public void sleep(long millis) {
+        builder.action(new Sleep(millis, TimeUnit.MILLISECONDS, ClassOps.location(1)));
+    }
+        
     public RemoteNode node(Scope scope) {
         return new RemoteNode(scope);
     }
@@ -120,7 +91,7 @@ public class ScenarioBuilder implements Platform.ScriptConstructor {
         }
 
         public <T> T deploy(T prototype) {
-            RemoteBean.Deploy bean = platform.newRemoteBean(scope, prototype, ClassOps.stackTraceElement(1));
+            RemoteBean.Deploy bean = RemoteBean.newDeploy(prototype, scope, ClassOps.location(1));
             builder.action(bean);
             return bean.getProxy(platform);
         }
@@ -136,14 +107,28 @@ public class ScenarioBuilder implements Platform.ScriptConstructor {
         }
     }
     
+    public class SectionOptions {
+        public SectionOptions par() {
+            builder.par();
+            return this;
+        }
+        
+        public SectionOptions seq() {
+            builder.seq();
+            return this;
+        }
+        //TODO scope empty section
+    }
+    
     private static class Sleep implements ExecutableAction, Runnable {
+        private final SourceRef ref;
         private final long timeout;
         private final TimeUnit unit;
-        private final String id = UUID.randomUUID().toString();
         
         private Box box;
         
-        public Sleep(long timeout, TimeUnit unit) {
+        public Sleep(long timeout, TimeUnit unit, StackTraceElement location) {
+            this.ref = new SourceRef("sleep(" + timeout + " " + toString(unit) + ")", location);
             this.timeout = timeout;
             this.unit = unit;
         }
@@ -164,8 +149,33 @@ public class ScenarioBuilder implements Platform.ScriptConstructor {
         }
 
         @Override
-        public Object getId() {
-            return id;
+        public String getId() {
+            return ref.getId();
+        }
+        
+        @Override
+        public String toString() {
+            return ref.toString();
+        }
+        
+        private static String toString(TimeUnit unit) {
+            if (TimeUnit.NANOSECONDS == unit) {
+                return "ns";
+            } else if (TimeUnit.MICROSECONDS == unit) {
+                return "us";
+            } else if (TimeUnit.MILLISECONDS == unit) {
+                return "ms";
+            } else if (TimeUnit.SECONDS == unit) {
+                return "s";
+            } else if (TimeUnit.MINUTES == unit) {
+                return "m";
+            } else if (TimeUnit.HOURS == unit) {
+                return "h";
+            } else if (TimeUnit.DAYS == unit) {
+                return "d";
+            } else {
+                throw new IllegalArgumentException();
+            }
         }
     }
 }

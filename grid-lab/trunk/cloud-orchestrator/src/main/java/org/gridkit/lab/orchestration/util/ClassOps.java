@@ -1,5 +1,6 @@
-package org.gridkit.lab.orchestration;
+package org.gridkit.lab.orchestration.util;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -27,11 +28,11 @@ public class ClassOps {
         }
     }
     
-    public static StackTraceElement stackTraceElement(int depth) {
+    public static StackTraceElement location(int depth) {
         return new Exception().getStackTrace()[depth+1];
     }
     
-    public static String location(StackTraceElement trace) {
+    public static String toString(StackTraceElement trace) {
         if (trace.isNativeMethod()) {
             return "(Native Method)";
         } else if (trace.getFileName() != null && trace.getLineNumber() >=0) {
@@ -41,5 +42,20 @@ public class ClassOps {
         } else {
             return "(Unknown Source)";
         }
+    }
+    
+    public static String toString(Class<?> clazz) {
+        String name = clazz.getName();
+        
+        int index = name.lastIndexOf('.');
+        if (index == -1) {
+            return name.replace('$', '.');
+        } else {
+            return name.substring(index + 1).replace('$', '.');
+        }
+    }
+    
+    public static String toString(Method method) {
+        return method.getDeclaringClass().getSimpleName() + "." + method.getName() + "()";
     }
 }

@@ -1,14 +1,11 @@
 package org.gridkit.lab.orchestration;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import org.gridkit.lab.orchestration.BeanProxy.Argument;
-import org.gridkit.lab.orchestration.BeanRegistry.BeanRef;
 import org.gridkit.lab.orchestration.script.ScriptAction;
 import org.gridkit.lab.orchestration.script.ScriptBuilder;
+import org.gridkit.lab.orchestration.util.ClassOps;
 import org.gridkit.nanocloud.CloudFactory;
 import org.gridkit.vicluster.ViNode;
 import org.gridkit.vicluster.ViNodeSet;
@@ -18,18 +15,11 @@ public class Platform {
     protected interface ScriptConstructor {
         ScriptBuilder getScriptBuilder();
     }
-    
-    private static AtomicInteger nextPlatformId = new AtomicInteger(0);
-    
+        
     private final ViNodeSet cloud;
     
     private ScriptConstructor scriptCtor = null;
-    
-    private int id = nextPlatformId.getAndIncrement();
-    private int nextBeanId = 0;
-    private int nextStartupHook = 0;
-    private int nextShutdownHook = 0;
-    
+        
     public Platform(ViNodeSet cloud) {
         this.cloud = cloud;
     }
@@ -56,26 +46,32 @@ public class Platform {
         return result;
     }
 
-    public HookBuilder onStart(Scope scope) {
-        String name = "platform-startup-" + id + "-" + (nextStartupHook++);
-        HookBuilder result = new HookBuilder.Startup(this, scope, name);
+    private HookBuilder onStart(Scope scope, StackTraceElement location) {
+        HookBuilder result = new HookBuilder.Startup(this, scope, location);
         this.scriptCtor = result;
         return result;
     }
     
-    public HookBuilder onShutdown(Scope scope) {
-        String name = "platform-shutdown-" + id + "-" + (nextShutdownHook++);
-        HookBuilder result = new HookBuilder.Shutdown(this, scope, name);
+    private HookBuilder onShutdown(Scope scope, StackTraceElement location) {
+        HookBuilder result = new HookBuilder.Shutdown(this, scope, location);
         this.scriptCtor = result;
         return result;
     }
     
     public HookBuilder onStart(String pattern) {
-        return onStart(Scopes.pattern(pattern));
+        return onStart(Scopes.pattern(pattern), ClassOps.location(1));
     }
     
     public HookBuilder onShutdown(String pattern) {
-        return onShutdown(Scopes.pattern(pattern));
+        return onShutdown(Scopes.pattern(pattern), ClassOps.location(1));
+    }
+    
+    public HookBuilder onStart(Scope scope) {
+        return onStart(scope, ClassOps.location(1));
+    }
+    
+    public HookBuilder onShutdown(Scope scope) {
+        return onShutdown(scope, ClassOps.location(1));
     }
     
     public class RemoteNode {
@@ -86,7 +82,7 @@ public class Platform {
         }
         
         public <T> T deploy(T prototype) {
-            RemoteBean.Deploy bean = newRemoteBean(scope, prototype, ClassOps.stackTraceElement(1));
+            RemoteBean.Deploy bean = RemoteBean.newDeploy(prototype, scope, ClassOps.location(1));
             execute(bean);
             return bean.getProxy(Platform.this);
         }
@@ -109,7 +105,7 @@ public class Platform {
         return names.toArray(new String[names.size()]);
     }
     
-    protected void invoke(ScriptAction action, List<Object> refs) {
+    protected void invoke(ScriptAction action, List<String> refs) {
         if (scriptCtor instanceof HookBuilder) {
             scriptCtor.getScriptBuilder().action(action, refs);
         } else if (scriptCtor instanceof ScenarioBuilder) {
@@ -123,24 +119,6 @@ public class Platform {
             
     protected void clearScriptConstructor() {
         scriptCtor = null;
-    }
-    
-    protected RemoteBean.Deploy newRemoteBean(Scope scope, Object prototype, StackTraceElement createPoint) {
-        return new RemoteBean.Deploy(
-            prototype, nextBeanRef(), scope, createPoint
-        );
-    }
-    
-    protected RemoteBean.Invoke newRemoteBean(Scope scope, RemoteBean target,
-                                              Method method, List<Argument> args,
-                                              StackTraceElement createPoint) {
-        return new RemoteBean.Invoke(
-            nextBeanRef(), scope, target, method, args, createPoint
-        );
-    }
-        
-    private BeanRef nextBeanRef() {
-        return new BeanRef("" + (nextBeanId++) + "-" + id);
     }
     
     private void execute(ViNodeAction action) {

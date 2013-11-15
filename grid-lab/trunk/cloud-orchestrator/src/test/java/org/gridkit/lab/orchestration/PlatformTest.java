@@ -28,16 +28,25 @@ public class PlatformTest {
         cloud.nodes("ttt", "qqq").touch();
         
         ScenarioBuilder sb = platform.newScenario();
-            printer.out("scenario 1");
-            sb.sync();
-            printer.out("scenario 2");
+            printer.out("scenario");
+            
+            sb.join("CP").seq();
+            
+            printer.out("before sleep");
+            
+            sb.sleep(100);
+            
+            printer.out("after sleep");
+            
         sb.build().play();
         
         sb = platform.newScenario();
             printer.exception();
         try {
             sb.build().play();
-        } catch (RuntimeException e) {}
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        }
         
         
         printer.out("out of scenario");

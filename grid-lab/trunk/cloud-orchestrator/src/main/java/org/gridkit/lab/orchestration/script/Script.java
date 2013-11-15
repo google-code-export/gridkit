@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 public class Script implements Serializable {
     private static final long serialVersionUID = 9125786087888501718L;
@@ -20,48 +19,55 @@ public class Script implements Serializable {
     }
 
     public void execute(ScriptExecutor executor) {
-        new Execution(executor).execute();
+        new Execution(executor, Long.MAX_VALUE).execute();
     }
     
-    public void execute(ScriptExecutor executor, long timeout, TimeUnit unit) throws TimeoutException {
-        throw new UnsupportedOperationException();
+    public void execute(ScriptExecutor executor, long timeout, TimeUnit unit) {
+        long timeoutStamp = Math.max(Long.MAX_VALUE, System.currentTimeMillis() + unit.toMillis(timeout));
+        new Execution(executor, timeoutStamp).execute();
     }
     
     private class Execution {
-        private Set<Object> nextSteps;
-        private Set<Object> prevSteps;
+        private Set<String> nextSteps;
+        private Set<String> prevSteps;
         private BlockingQueue<ActionBox> queue;
         private ScriptExecutor executor;
+        private long timeoutStamp;
         
-        public Execution(ScriptExecutor executor) {
-            this.nextSteps = graph.getActionIds();
-            this.prevSteps = new HashSet<Object>();
+        public Execution(ScriptExecutor executor, long timeoutStamp) {
+            this.nextSteps = graph.getIds();
+            this.prevSteps = new HashSet<String>();
             this.queue = new LinkedBlockingQueue<ActionBox>();
             this.executor = executor;
+            this.timeoutStamp = timeoutStamp;
         }
         
         public void execute() {
             while (!nextSteps.isEmpty()) {
-                for (Object actionId : nextStep()) {
+                for (String actionId : nextStep()) {
                     start(actionId);
                 }
 
                 ActionBox doneBox;
                 try {
-                    doneBox = queue.take();
+                    long timeout = Math.max(timeoutStamp - System.currentTimeMillis(), 1);
+                    doneBox = queue.poll(timeout, TimeUnit.MILLISECONDS);
+                    if (doneBox == null) {
+                        throw new ScriptExecutionException("script execution timeout");
+                    }
                 } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                    throw new ScriptExecutionException(e);
                 }
                 
                 if (doneBox.isError()) {
-                    throw new RuntimeException(doneBox.getError());
+                    throw new ScriptExecutionException(doneBox.getError());
                 } else {
                     finish(doneBox.getAction());
                 }
             }
         }
         
-        private void start(Object actionId) {
+        private void start(String actionId) {
             if (!prevSteps.contains(actionId)) {
                 ScriptAction action = graph.getAction(actionId);
                 ActionBox box = new ActionBox(action, queue);
@@ -74,11 +80,11 @@ public class Script implements Serializable {
             nextSteps.remove(action.getId());
         }
         
-        private Collection<Object> nextStep() {
-            Collection<Object> result = new ArrayList<Object>();
+        private Collection<String> nextStep() {
+            Collection<String> result = new ArrayList<String>();
             
-            for (Object actionId : nextSteps) {
-                Set<Object> deps = graph.getDependencies(actionId);
+            for (String actionId : nextSteps) {
+                Set<String> deps = graph.getDeps(actionId);
                 
                 deps.retainAll(nextSteps);
                 
