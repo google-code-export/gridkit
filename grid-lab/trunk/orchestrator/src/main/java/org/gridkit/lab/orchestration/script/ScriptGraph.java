@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -84,11 +83,10 @@ public class ScriptGraph implements Serializable {
         StringBuilder sb = new StringBuilder();
         
         sb.append("Cycle detected during script construction:\n\n");
-        
-        Iterator<ScriptAction> iter = cycle.iterator();
-        while (iter.hasNext()) {                
-            sb.append("\t" + iter.next() + "\n");
+        for (ScriptAction action : cycle) {
+            sb.append("\t" + action + "\n");
         }
+        sb.append("\n");
         
         log.error(sb.toString());
         

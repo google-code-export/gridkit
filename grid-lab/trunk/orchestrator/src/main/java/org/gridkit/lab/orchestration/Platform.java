@@ -3,22 +3,24 @@ package org.gridkit.lab.orchestration;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.gridkit.lab.orchestration.script.ScriptAction;
 import org.gridkit.lab.orchestration.script.ScriptBuilder;
 import org.gridkit.lab.orchestration.util.ClassOps;
 import org.gridkit.nanocloud.CloudFactory;
 import org.gridkit.vicluster.ViNode;
 import org.gridkit.vicluster.ViNodeSet;
+import org.gridkit.vicluster.ViProps;
 
 public class Platform {
     
     protected interface ScriptConstructor {
         ScriptBuilder getScriptBuilder();
+        
+        Scope getScope();
     }
         
     private final ViNodeSet cloud;
     
-    private ScriptConstructor scriptCtor = null;
+    private ScriptConstructor constructor = null;
         
     public Platform(ViNodeSet cloud) {
         this.cloud = cloud;
@@ -26,35 +28,36 @@ public class Platform {
     
     public Platform() {
         this(CloudFactory.createCloud());
+        ViProps.at(cloud.node("**")).setIsolateType();
     }
     
     public ViNodeSet cloud() {
         return cloud;
     }
     
-    public RemoteNode node(Scope scope) {
-        return new RemoteNode(scope);
+    public RemoteOps at(Scope scope) {
+        return new RemoteOps(scope);
     }
     
-    public RemoteNode node(String pattern) {
-        return node(Scopes.pattern(pattern));
+    public RemoteOps at(String pattern) {
+        return at(Scopes.pattern(pattern));
     }
     
     public ScenarioBuilder newScenario() {
         ScenarioBuilder result = new ScenarioBuilder(this);
-        this.scriptCtor = result;
+        this.constructor = result;
         return result;
     }
 
     private HookBuilder onStart(Scope scope, StackTraceElement location) {
         HookBuilder result = new HookBuilder.Startup(this, scope, location);
-        this.scriptCtor = result;
+        this.constructor = result;
         return result;
     }
     
     private HookBuilder onShutdown(Scope scope, StackTraceElement location) {
         HookBuilder result = new HookBuilder.Shutdown(this, scope, location);
-        this.scriptCtor = result;
+        this.constructor = result;
         return result;
     }
     
@@ -74,21 +77,37 @@ public class Platform {
         return onShutdown(scope, ClassOps.location(1));
     }
     
-    public class RemoteNode {
+    public HookBuilder onStart() {
+        return onStart(Scopes.any(), ClassOps.location(1));
+    }
+    
+    public HookBuilder onShutdown() {
+        return onShutdown(Scopes.any(), ClassOps.location(1));
+    }
+    
+    public class RemoteOps {
         private Scope scope;
 
-        public RemoteNode(Scope scope) {
+        public RemoteOps(Scope scope) {
             this.scope = scope;
         }
         
         public <T> T deploy(T prototype) {
             RemoteBean.Deploy bean = RemoteBean.newDeploy(prototype, scope, ClassOps.location(1));
             execute(bean);
-            return bean.getProxy(Platform.this);
+            return bean.<T>getProxy(Platform.this);
         }
         
         public <T> T bean(T bean) {
-            throw new UnsupportedOperationException();
+            RemoteBean.ProxyHandler handler = BeanProxy.getHandler(
+                bean, RemoteBean.ProxyHandler.class
+            );
+            
+            if (handler != null) {
+                return handler.getBean().onScope(scope).getProxy(Platform.this);
+            } else {
+                throw new IllegalArgumentException();
+            }
         }
     }
     
@@ -104,24 +123,16 @@ public class Platform {
         
         return names.toArray(new String[names.size()]);
     }
-    
-    protected void invoke(ScriptAction action, List<String> refs) {
-        if (scriptCtor instanceof HookBuilder) {
-            scriptCtor.getScriptBuilder().action(action, refs);
-        } else if (scriptCtor instanceof ScenarioBuilder) {
-            scriptCtor.getScriptBuilder().action(action, refs);
-        } else if (action instanceof ViNodeAction){
-            execute((ViNodeAction)action);
-        } else {
-            throw new IllegalArgumentException();
-        }
+        
+    public ScriptConstructor getScriptConstructor() {
+        return constructor;
     }
-            
+    
     protected void clearScriptConstructor() {
-        scriptCtor = null;
+        constructor = null;
     }
     
-    private void execute(ViNodeAction action) {
+    protected void execute(ViAction action) {
         cloud.nodes(vinode(action.getScope())).exec(action.getExecutor());
     }
 }

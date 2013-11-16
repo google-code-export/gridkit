@@ -9,6 +9,7 @@ import org.gridkit.lab.orchestration.script.ScriptAction;
 import org.gridkit.lab.orchestration.script.ScriptBuilder;
 import org.gridkit.lab.orchestration.script.ScriptExecutor;
 import org.gridkit.lab.orchestration.util.ClassOps;
+import org.gridkit.lab.orchestration.util.ViOps;
 import org.gridkit.vicluster.ViNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,11 +33,12 @@ public abstract class HookBuilder implements Platform.ScriptConstructor {
     public <T> T deploy(T prototype) {
         RemoteBean.Deploy bean = RemoteBean.newDeploy(prototype, scope, ClassOps.location(1));
         builder.action(bean);
-        return bean.getProxy(platform);
+        return bean.<T>getProxy(platform);
     }
 
     public void build() {
-        ScriptHook executor = new ScriptHook(builder.build(), scope, location);
+        builder.join(ScriptBuilder.FINISH);
+        ScriptHook executor = new ScriptHook(builder.getScript(), scope, location);
         platform.clearScriptConstructor();
         builder = null;
         addHook(platform.cloud().node("**"), UUID.randomUUID().toString(), executor);
@@ -46,6 +48,10 @@ public abstract class HookBuilder implements Platform.ScriptConstructor {
     
     public ScriptBuilder getScriptBuilder() {
         return builder;
+    }
+    
+    public Scope getScope() {
+        return scope;
     }
     
     protected static class Startup extends HookBuilder {
@@ -85,7 +91,7 @@ public abstract class HookBuilder implements Platform.ScriptConstructor {
 
         @Override
         public void run() {
-            if (isScopeNode(scope)) {
+            if (ViOps.isScopeNode(scope)) {
                 log.info("About to execute hook at " + location);
                 try {
                     script.execute(new HookExecutor());
@@ -98,19 +104,11 @@ public abstract class HookBuilder implements Platform.ScriptConstructor {
         }
     }
     
-    private static boolean isScopeNode(Scope scope) {
-        return scope.contains(getNodeName());
-    }
-    
-    private static String getNodeName() {
-        return System.getProperty("vinode.name");
-    }
-    
     private static class HookExecutor implements ScriptExecutor {
         @Override
         public void execute(ScriptAction action, Box box) {
-            if (action instanceof ViNodeAction) {
-                execute((ViNodeAction)action, box);
+            if (action instanceof ViAction) {
+                execute((ViAction)action, box);
             } else if (action instanceof Checkpoint) {
                 execute((Checkpoint)action, box);
             } else {
@@ -118,7 +116,7 @@ public abstract class HookBuilder implements Platform.ScriptConstructor {
             }
         }
         
-        private void execute(ViNodeAction action, Box box) {
+        private void execute(ViAction action, Box box) {
             try {
                 action.getExecutor().call();
             } catch (Exception e) {

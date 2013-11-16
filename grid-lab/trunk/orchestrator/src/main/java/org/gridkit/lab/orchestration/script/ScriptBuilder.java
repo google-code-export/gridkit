@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-// TODO use locations in start and end checkpoints
+
 public class ScriptBuilder {
     public static final String START  = "start";
     public static final String FINISH = "finish";
@@ -24,6 +24,9 @@ public class ScriptBuilder {
         if (!section.isEmpty()) {
             throw new IllegalStateException("not empty section, call join first");
         }
+        if (FINISH.equals(name)) {
+            throw new IllegalArgumentException("construction from finish isn't allowed");
+        }
         begin = checkpoint(name);
     }
     
@@ -42,6 +45,10 @@ public class ScriptBuilder {
     }
     
     public void join(String name) {
+        if (START.equals(name)) {
+            throw new IllegalArgumentException("join to start isn't allowed");
+        }
+        
         Checkpoint end = checkpoint(name);
 
         Iterator<ScriptAction> iter = section.iterator();
@@ -54,16 +61,11 @@ public class ScriptBuilder {
         
         graph.edge(begin, end);
         
-        from(name);
-        par();
-    }
-    
-    public void fromStart() {
-        from(START);
-    }
-    
-    public void joinFinish() {
-        join(FINISH);
+        if (FINISH.equals(name)) {
+            from(START);
+        } else {
+            from(name);
+        }
     }
 
     public void action(ScriptAction action, List<String> refs) {        
@@ -84,11 +86,8 @@ public class ScriptBuilder {
         action(action, Collections.<String>emptyList());
     }
     
-    public Script build() {
-        joinFinish();
-        Script result = new Script(graph);
-        graph = null;
-        return result;
+    public Script getScript() {
+        return new Script(graph);
     }
     
     public boolean isSectionEmpty() {

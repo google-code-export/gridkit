@@ -4,7 +4,7 @@ import java.util.concurrent.Callable;
 
 import org.gridkit.lab.orchestration.script.ScriptAction;
 
-public interface ViNodeAction extends ScriptAction {
+public interface ViAction extends ScriptAction {
     Scope getScope();
     
     Callable<Void> getExecutor();

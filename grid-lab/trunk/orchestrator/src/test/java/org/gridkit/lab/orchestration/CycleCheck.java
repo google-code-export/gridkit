@@ -16,7 +16,7 @@ public class CycleCheck {
             ScenarioBuilder sb = platform.newScenario();
             
             sb.from("A");
-                Printer printer = sb.node("**").deploy(new Printer.Impl());
+                Printer printer = sb.at("**").deploy(new Printer.Impl());
             sb.join("B");
             
             sb.fromStart();

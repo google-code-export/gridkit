@@ -9,6 +9,8 @@ public interface Printer extends Generic<Printer> {
     
     String i(String str);
     
+    void sleep(long millis);
+    
     Runnable function();
     
     void exception();
@@ -54,6 +56,15 @@ public interface Printer extends Generic<Printer> {
         @Override
         public Printer getGeneric() {
             return this;
+        }
+
+        @Override
+        public void sleep(long millis) {
+            try {
+                Thread.sleep(millis);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

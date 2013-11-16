@@ -1,20 +1,17 @@
 package org.gridkit.lab.orchestration;
 
-import org.gridkit.nanocloud.CloudFactory;
-import org.gridkit.vicluster.ViNodeSet;
-import org.gridkit.vicluster.ViProps;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Test;
 
 public class PlatformTest {
     @Test
     public void test() {
-        ViNodeSet cloud = CloudFactory.createCloud();
-        ViProps.at(cloud.node("**")).setIsolateType();
-        Platform platform = new Platform(cloud);
+        Platform platform = new Platform();
         
         // --- Start scenario
         
-        HookBuilder hb = platform.onStart("**");
+        HookBuilder hb = platform.onStart();
             Printer printer = hb.deploy(new Printer.Impl());
             printer.out("all nodes on start");
         hb.build();
@@ -25,29 +22,41 @@ public class PlatformTest {
         
         // ---
         
-        cloud.nodes("ttt", "qqq").touch();
+        platform.cloud().nodes("ttt", "qqq").touch();
+        
+        System.err.println("\n------\n");
         
         ScenarioBuilder sb = platform.newScenario();
-            printer.out("scenario");
             
-            sb.join("CP").seq();
+            sb.from("A").par();
+        
+                printer.sleep(100);
             
-            printer.out("before sleep");
-            
-            sb.sleep(100);
-            
-            printer.out("after sleep");
+                printer.out("scenario");
+                
+                sb.sync();
+                
+                printer.out("before sleep");
+                
+                sb.sleep(100);
+                
+                sb.at("qqq").bean(printer).out("qqq after sleep");
+                
+           sb.join("B").seq().scope("ttt");
+           
+               printer.out("1");
+               printer.out("2");
+               printer.out("3");
+               
+               sb.at("qqq").bean(printer).out("no nodes");
+           
+           sb.join("C");
             
         sb.build().play();
         
-        sb = platform.newScenario();
-            printer.exception();
-        try {
-            sb.build().play();
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-        }
-        
+        //sb = platform.newScenario();
+        //    printer.exception();
+        //try { sb.build().play(); } catch (RuntimeException e) {}
         
         printer.out("out of scenario");
         

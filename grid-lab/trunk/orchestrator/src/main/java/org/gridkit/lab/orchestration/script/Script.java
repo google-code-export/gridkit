@@ -56,11 +56,11 @@ public class Script implements Serializable {
                         throw new ScriptExecutionException("script execution timeout");
                     }
                 } catch (InterruptedException e) {
-                    throw new ScriptExecutionException(e);
+                    throw new ScriptExecutionException("script execution interrupted", e);
                 }
                 
                 if (doneBox.isError()) {
-                    throw new ScriptExecutionException(doneBox.getError());
+                    throw new ScriptExecutionException("script execution error", doneBox.getError());
                 } else {
                     finish(doneBox.getAction());
                 }

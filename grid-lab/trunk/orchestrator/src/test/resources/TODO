@@ -1,9 +1,9 @@
-sb.from().scope()
-sb.at().bean()
-sb.at().deploy()
-
-and, or scopes
-
 local beans
 
 factory beans
+
+support for generics
+
+deploy with composite interface (PlatformBean) to avoid cast to PlatformBean
+
+scenario daemon for death nodes detection

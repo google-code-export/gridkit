@@ -9,9 +9,10 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.gridkit.lab.orchestration.BeanProxy.Handler;
+import org.gridkit.lab.orchestration.Platform.ScriptConstructor;
 import org.gridkit.lab.orchestration.util.ClassOps;
 
-public abstract class RemoteBean implements Serializable, ViNodeAction {        
+public class RemoteBean implements Serializable {        
     private static final long serialVersionUID = -6430323142684195091L;
     
     protected SourceRef ref;
@@ -28,7 +29,7 @@ public abstract class RemoteBean implements Serializable, ViNodeAction {
         return new RemoteBean.Deploy(prototype, scope, location);
     }
     
-    public static class Deploy extends RemoteBean implements Callable<Void> {
+    public static class Deploy extends RemoteBean implements Callable<Void>, ViAction {
         private static final long serialVersionUID = -488868113954566425L;
         
         protected Object prototype;
@@ -52,7 +53,7 @@ public abstract class RemoteBean implements Serializable, ViNodeAction {
         }
     }
     
-    public static class Invoke extends RemoteBean implements Callable<Void> {
+    public static class Invoke extends RemoteBean implements Callable<Void>, ViAction {
         private static final long serialVersionUID = 613178071091607041L;
         
         protected SourceRef targetRef;
@@ -89,7 +90,7 @@ public abstract class RemoteBean implements Serializable, ViNodeAction {
         }
     }
 
-    private static class ProxyHandler implements Handler {
+    protected static class ProxyHandler implements Handler {
         private RemoteBean bean;
         private Platform platform;
         
@@ -102,13 +103,24 @@ public abstract class RemoteBean implements Serializable, ViNodeAction {
         public Object invoke(Method method, List<Argument<Handler>> args) {
             validate(args);
             
-            List<Argument<SourceRef>> registryRefs = getRegistryRefs(args);
+            ScriptConstructor constructor = platform.getScriptConstructor();
             
+            Scope scope = bean.scope;
+            if (constructor != null) {
+                scope = Scopes.and(scope, constructor.getScope());
+            }
+            
+            List<Argument<SourceRef>> registryRefs = getRegistryRefs(args);
+
             RemoteBean.Invoke result = new RemoteBean.Invoke(
-                bean.ref, method, registryRefs, bean.scope, ClassOps.location(3)
+                bean.ref, method, registryRefs, scope, ClassOps.location(3)
             );
             
-            platform.invoke(result, getScriptRefs(registryRefs));
+            if (constructor != null) {
+                constructor.getScriptBuilder().action(result, getScriptRefs(registryRefs));
+            } else {
+                platform.execute(result);
+            }
 
             return result.getProxy(platform);
         }
@@ -140,7 +152,6 @@ public abstract class RemoteBean implements Serializable, ViNodeAction {
             
             return result;
         }
-
         
         private void validate(List<Argument<Handler>> args) {
             for (Argument<Handler> arg : args) {
@@ -166,8 +177,16 @@ public abstract class RemoteBean implements Serializable, ViNodeAction {
                 }
             }
         }
+        
+        public RemoteBean getBean() {
+            return bean;
+        }
     }
     
+    public RemoteBean onScope(Scope scope) {
+        return new RemoteBean(this.clazz, Scopes.and(this.scope, scope), this.ref);
+    }
+
     @SuppressWarnings("unchecked")
     public <T> T getProxy(Platform platform) {
         return (T)BeanProxy.newInstance(clazz, new ProxyHandler(this, platform));

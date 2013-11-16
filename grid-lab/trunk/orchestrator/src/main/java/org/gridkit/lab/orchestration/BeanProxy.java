@@ -23,7 +23,7 @@ public class BeanProxy implements InvocationHandler {
         );
     }
     
-    private final Handler handler;
+    private Handler handler;
     
     private BeanProxy(Handler handler) {
         this.handler = handler;
@@ -44,32 +44,32 @@ public class BeanProxy implements InvocationHandler {
 
         return handler.invoke(method, actionArgs);
     }
-    
+
+    public Handler getHandler() {
+        return handler;
+    }
+
     private Argument<Handler> translate(Object object) {
-        if (isBeanProxy(object)) {
-            Handler handler = getHandler(object);
-            
-            if (handler instanceof Handler) {
-                return Argument.newRef((Handler)handler);
-            } else {
-                throw new IllegalArgumentException();
-            }
+        Handler handler = getHandler(object, Handler.class);
+        
+        if (handler != null) {
+            return Argument.newRef(handler);
         } else {
             return Argument.newVal(object);
         }
     }
     
-    private static boolean isBeanProxy(Object object) {
+    @SuppressWarnings("unchecked")
+    public static <T extends Handler> T getHandler(Object object, Class<T> clazz) {
         if (Proxy.isProxyClass(object.getClass())) {
-            Object handler = Proxy.getInvocationHandler(object);
-            if (handler instanceof BeanProxy) {
-                return true;
+            Object proxy = Proxy.getInvocationHandler(object);
+            if (proxy instanceof BeanProxy) {
+                BeanProxy bProxy = (BeanProxy)proxy;
+                if (clazz.isInstance(bProxy.getHandler())) {
+                    return (T)bProxy.getHandler();
+                }
             }
         }
-        return false;
-    }
-    
-    private static Handler getHandler(Object object) {
-        return ((Handler)Proxy.getInvocationHandler(object));
+        return null;
     }
 }
