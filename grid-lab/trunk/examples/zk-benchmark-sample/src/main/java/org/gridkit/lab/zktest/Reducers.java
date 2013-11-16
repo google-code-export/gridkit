@@ -40,12 +40,17 @@ public class Reducers {
 		
 		@Override
 		protected void collect(String nodename, T value) {
-			set = true;
-			result = value;
+			if (!set) {
+				set = true;
+				result = value;
+			}
 		}
 
 		@Override
 		protected T calculate() {
+			if (!set) {
+				throw new IllegalArgumentException("Reducer is empty");
+			}
 			return result;
 		}
 	}

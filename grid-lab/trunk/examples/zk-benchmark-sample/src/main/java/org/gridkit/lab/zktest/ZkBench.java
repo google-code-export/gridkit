@@ -46,7 +46,6 @@ import org.gridkit.nimble.print.PrettyPrinter;
 import org.gridkit.nimble.probe.probe.Monitoring;
 import org.gridkit.nimble.probe.probe.MonitoringDriver;
 import org.gridkit.nimble.statistics.TimeUtils;
-import org.gridkit.nimble.util.ConfigurationTemplate;
 import org.gridkit.util.concurrent.FutureBox;
 import org.gridkit.vicluster.ViNode;
 import org.gridkit.vicluster.ViNodeSet;
@@ -57,8 +56,8 @@ public class ZkBench {
 	
 	private MonitoringStack mstack = new MonitoringStack();
 	
-	@SuppressWarnings("serial")
-	public static class ZkBenchConfig extends ConfigurationTemplate {
+	@SuppressWarnings({ "serial", "deprecation" })
+	public static class ZkBenchConfig extends org.gridkit.nimble.util.ConfigurationTemplate {
 		
 		public long testTime = 60000;
 

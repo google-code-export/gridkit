@@ -8,12 +8,16 @@ import java.util.concurrent.TimeUnit;
 import org.gridkit.lab.zktest.ZkBench.ZkBenchConfig;
 import org.gridkit.nanocloud.CloudFactory;
 import org.gridkit.vicluster.ViManager;
+import org.gridkit.vicluster.ViProps;
 import org.junit.After;
 import org.junit.Test;
 
 public class ZkBenchRun {
 
-	private ViManager cloud = CloudFactory.createLocalCloud();
+	private ViManager cloud = CloudFactory.createCloud();
+	{
+		ViProps.at(cloud.node("**")).setLocalType();
+	}
 	
 	@After
 	public void dropCloud() {
@@ -51,7 +55,7 @@ public class ZkBenchRun {
 
 	@Test
 	public void start_and_run_on_cluster() throws IOException {
-		cloud = CloudFactory.createSshCloud("~/nanocloud-testcluster.viconf");
+		cloud = CloudFactory.createCloud("~/nanocloud-testcluster.viconf");
 		
 		for(String host: new String[]{"host1", "host2", "host3"}) {
 			cloud.node(host + ".ZK.1");
