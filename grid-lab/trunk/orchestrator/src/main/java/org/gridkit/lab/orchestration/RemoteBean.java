@@ -26,45 +26,71 @@ public class RemoteBean implements Serializable {
     }
     
     public static RemoteBean.Deploy newDeploy(Object prototype, Scope scope, StackTraceElement location) {
-        return new RemoteBean.Deploy(prototype, scope, location);
+        SourceRef ref = new SourceRef(
+            "Deploy[" + ClassOps.toString(prototype.getClass()) + "]", location
+        );
+        
+        RemoteBean bean = new RemoteBean(prototype.getClass(), scope, ref);
+        
+        return new RemoteBean.Deploy(bean, prototype);
     }
     
-    public static class Deploy extends RemoteBean implements Callable<Void>, ViAction {
-        private static final long serialVersionUID = -488868113954566425L;
+    private static abstract class BeanAction implements Callable<Void>, ViAction, Serializable {
+        private static final long serialVersionUID = 4825392097027091793L;
         
-        protected Object prototype;
-        
-        public Deploy(Object prototype, Scope scope, StackTraceElement location) {
-            super(prototype.getClass(), scope, new SourceRef(
-                "Deploy[" + ClassOps.toString(prototype.getClass()) + "]", location
-            ));
-            this.prototype = prototype;
+        protected RemoteBean result;
+
+        public BeanAction(RemoteBean result) {
+            this.result = result;
         }
 
-        @Override
-        public Void call() {
-            BeanRegistry.getInstance().deploy(ref, prototype);
-            return null;
+        public String getId() {
+            return result.ref.getId();
         }
-        
-        @Override
+
+        public Scope getScope() {
+            return result.scope;
+        }
+
         public Callable<Void> getExecutor() {
             return this;
         }
+        
+        public String toString() {
+            return result.ref.toString();
+        }
+        
+        public <T> T getProxy(Platform platform) {
+            return result.getProxy(platform);
+        }
     }
     
-    public static class Invoke extends RemoteBean implements Callable<Void>, ViAction {
+    public static class Deploy extends BeanAction {
+        private static final long serialVersionUID = -488868113954566425L;
+        
+        private Object prototype;
+        
+        public Deploy(RemoteBean bean, Object prototype) {
+            super(bean);
+            this.prototype = prototype;
+        }
+
+        public Void call() {
+            BeanRegistry.getInstance().deploy(result.ref, prototype);
+            return null;
+        }
+    }
+    
+    public static class Invoke extends BeanAction {
         private static final long serialVersionUID = 613178071091607041L;
         
-        protected SourceRef targetRef;
+        protected RemoteBean target;
         protected MethodRef method;
-        protected List<Argument<SourceRef>> args;
+        protected List<Argument<RemoteBean>> args;
         
-        public Invoke(SourceRef targetRef, Method method, List<Argument<SourceRef>> args, Scope scope, StackTraceElement location) {
-            super(method.getReturnType(), scope, new SourceRef(
-                    ClassOps.toString(method), location
-            ));
-            this.targetRef = targetRef;
+        public Invoke(RemoteBean target, Method method, List<Argument<RemoteBean>> args, RemoteBean result) {
+            super(result);
+            this.target = target;
             this.method = new MethodRef(method);
             this.args = args;
         }
@@ -72,7 +98,7 @@ public class RemoteBean implements Serializable {
         @Override
         public Void call() throws Exception {
             try {
-                BeanRegistry.getInstance().invoke(targetRef, method, args, ref);
+                BeanRegistry.getInstance().invoke(target.ref, method, getArgs(), result.ref);
             } catch (InvocationTargetException e) {
                 Throwable cause = e.getCause();
                 if (cause instanceof Exception) {
@@ -84,9 +110,18 @@ public class RemoteBean implements Serializable {
             return null;
         }
         
-        @Override
-        public Callable<Void> getExecutor() {
-            return this;
+        private List<Argument<SourceRef>> getArgs() {
+            List<Argument<SourceRef>> result = new ArrayList<Argument<SourceRef>>();
+            
+            for (Argument<RemoteBean> arg : args) {
+                if (arg.isRef()) {
+                    result.add(Argument.newRef(arg.getRef().ref));
+                } else {
+                    result.add(Argument.<SourceRef>newVal(arg.getVal()));
+                }
+            }
+            
+            return result;
         }
     }
 
@@ -100,8 +135,10 @@ public class RemoteBean implements Serializable {
         }
 
         @Override
-        public Object invoke(Method method, List<Argument<Handler>> args) {
-            validate(args);
+        public Object invoke(Method method, List<Argument<Handler>> rawArgs) {
+            validate(rawArgs);
+            
+            SourceRef ref = new SourceRef(ClassOps.toString(method), ClassOps.location(3));
             
             ScriptConstructor constructor = platform.getScriptConstructor();
             
@@ -110,27 +147,27 @@ public class RemoteBean implements Serializable {
                 scope = Scopes.and(scope, constructor.getScope());
             }
             
-            List<Argument<SourceRef>> registryRefs = getRegistryRefs(args);
-
-            RemoteBean.Invoke result = new RemoteBean.Invoke(
-                bean.ref, method, registryRefs, scope, ClassOps.location(3)
-            );
+            RemoteBean result = new RemoteBean(method.getReturnType(), scope, ref);
+            
+            List<Argument<RemoteBean>> args = getArgs(rawArgs);
+            
+            RemoteBean.Invoke invoke = new RemoteBean.Invoke(bean, method, args, result);
             
             if (constructor != null) {
-                constructor.getScriptBuilder().action(result, getScriptRefs(registryRefs));
+                constructor.getScriptBuilder().action(invoke, getRefs(args));
             } else {
-                platform.execute(result);
+                platform.execute(invoke);
             }
 
             return result.getProxy(platform);
         }
         
-        private List<String> getScriptRefs(List<Argument<SourceRef>> args) {
+        private List<String> getRefs(List<Argument<RemoteBean>> args) {
             List<String> result = new ArrayList<String>();
             
-            for (Argument<SourceRef> arg : args) {
+            for (Argument<RemoteBean> arg : args) {
                 if (arg.isRef()) {
-                    result.add(arg.getRef().getId());
+                    result.add(arg.getRef().ref.getId());
                 }
             }
             result.add(bean.ref.getId());
@@ -138,15 +175,15 @@ public class RemoteBean implements Serializable {
             return result;
         }
         
-        private static List<Argument<SourceRef>> getRegistryRefs(List<Argument<Handler>> args) {
-            List<Argument<SourceRef>> result = new ArrayList<Argument<SourceRef>>(args.size());
+        private static List<Argument<RemoteBean>> getArgs(List<Argument<Handler>> args) {
+            List<Argument<RemoteBean>> result = new ArrayList<Argument<RemoteBean>>(args.size());
             
             for (Argument<Handler> arg : args) {
                 if (arg.isRef()) {
-                    SourceRef ref = ((ProxyHandler)arg.getRef()).bean.ref;
-                    result.add(Argument.newRef(ref));
+                    RemoteBean bean = ((ProxyHandler)arg.getRef()).bean;
+                    result.add(Argument.newRef(bean));
                 } else {
-                    result.add(Argument.<SourceRef>newVal(arg.getVal()));
+                    result.add(Argument.<RemoteBean>newVal(arg.getVal()));
                 }
             }
             
@@ -190,18 +227,5 @@ public class RemoteBean implements Serializable {
     @SuppressWarnings("unchecked")
     public <T> T getProxy(Platform platform) {
         return (T)BeanProxy.newInstance(clazz, new ProxyHandler(this, platform));
-    }
-    
-    public String getId() {
-        return ref.getId();
-    }
-    
-    public Scope getScope() {
-        return scope;
-    }
-    
-    @Override
-    public String toString() {
-        return ref.toString();
     }
 }

@@ -85,6 +85,10 @@ public class Platform {
         return onShutdown(Scopes.any(), ClassOps.location(1));
     }
     
+    public <T> T local(T object) {
+        return new LocalBean(object, ClassOps.location(1)).getProxy(this);
+    }
+    
     public class RemoteOps {
         private Scope scope;
 

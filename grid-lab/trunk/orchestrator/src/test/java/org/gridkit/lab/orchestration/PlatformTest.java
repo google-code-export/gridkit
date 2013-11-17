@@ -1,7 +1,5 @@
 package org.gridkit.lab.orchestration;
 
-import java.util.concurrent.TimeUnit;
-
 import org.junit.Test;
 
 public class PlatformTest {
@@ -44,9 +42,13 @@ public class PlatformTest {
                 
            sb.join("B").seq().scope("ttt");
            
+               Printer localPrinter = sb.local(new Printer.Impl());
+           
+               localPrinter.out("local before seq");
                printer.out("1");
                printer.out("2");
                printer.out("3");
+               localPrinter.function().run();
                
                sb.at("qqq").bean(printer).out("no nodes");
            
@@ -61,8 +63,8 @@ public class PlatformTest {
         printer.out("out of scenario");
         
         printer.function().run();
-        
-        printer.out("end of out of scenario");
+                
+        localPrinter.out("end of local out of scenario");
         
         /*
         

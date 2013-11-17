@@ -12,7 +12,7 @@ import org.gridkit.lab.orchestration.util.ClassOps;
 public class BeanProxy implements InvocationHandler {
     
     public interface Handler {
-        Object invoke(Method method, List<Argument<Handler>> args); 
+        Object invoke(Method method, List<Argument<Handler>> args) throws Throwable; 
     }
 
     public static Object newInstance(Class<?> clazz, Handler handler) {

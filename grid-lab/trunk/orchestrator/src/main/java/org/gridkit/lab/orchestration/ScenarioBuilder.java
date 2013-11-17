@@ -11,7 +11,6 @@ import org.gridkit.lab.orchestration.util.ClassOps;
 public class ScenarioBuilder implements Platform.ScriptConstructor {        
     private Platform platform;
     private ScriptBuilder builder = new ScriptBuilder();
-    private LocalOps localOps = new LocalOps();
     private Scope scope = Scopes.any();
     private Map<String, String> captions = new HashMap<String, String>();
     private int sectionNum = 0;
@@ -52,6 +51,10 @@ public class ScenarioBuilder implements Platform.ScriptConstructor {
         captions.put(name, "sync() at " + location);
     }
     
+    public <T> T local(T object) {
+        return new LocalBean(object, ClassOps.location(1)).getProxy(platform);
+    }
+    
     private void sleep(long timeout, TimeUnit unit, StackTraceElement location) {
         SourceRef ref = new SourceRef("sleep(" + timeout + " " + toString(unit) + ")", location);
         
@@ -82,11 +85,7 @@ public class ScenarioBuilder implements Platform.ScriptConstructor {
     public RemoteOps at(String pattern) {
         return at(Scopes.pattern(pattern)); 
     }
-    
-    public LocalOps local() {
-        return localOps;
-    }
-    
+        
     public ScriptBuilder getScriptBuilder() {
         return builder;
     }
@@ -132,13 +131,7 @@ public class ScenarioBuilder implements Platform.ScriptConstructor {
             return platform.at(scope).bean(bean);
         }
     }
-    
-    public class LocalOps {
-        public <T> T deploy(T prototype) {
-            return null;
-        }
-    }
-    
+        
     public class SectionOptions extends SectionObject {
         public SectionOptions par() {
             validate();
@@ -154,6 +147,9 @@ public class ScenarioBuilder implements Platform.ScriptConstructor {
         
         public SectionOptions scope(Scope scope) {
             validate();
+            if (!builder.isSectionEmpty()) {
+                throw new IllegalStateException("not empty section");
+            }
             ScenarioBuilder.this.scope = scope;
             return this;
         }
