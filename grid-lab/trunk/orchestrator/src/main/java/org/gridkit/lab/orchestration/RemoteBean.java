@@ -136,7 +136,7 @@ public class RemoteBean implements Serializable {
 
         @Override
         public Object invoke(Method method, List<Argument<Handler>> rawArgs) {
-            validate(rawArgs);
+            List<Argument<RemoteBean>> args = getArgs(rawArgs);
             
             SourceRef ref = new SourceRef(ClassOps.toString(method), ClassOps.location(3));
             
@@ -148,8 +148,6 @@ public class RemoteBean implements Serializable {
             }
             
             RemoteBean result = new RemoteBean(method.getReturnType(), scope, ref);
-            
-            List<Argument<RemoteBean>> args = getArgs(rawArgs);
             
             RemoteBean.Invoke invoke = new RemoteBean.Invoke(bean, method, args, result);
             
@@ -174,29 +172,18 @@ public class RemoteBean implements Serializable {
             
             return result;
         }
-        
-        private static List<Argument<RemoteBean>> getArgs(List<Argument<Handler>> args) {
+                
+        private List<Argument<RemoteBean>> getArgs(List<Argument<Handler>> args) {
             List<Argument<RemoteBean>> result = new ArrayList<Argument<RemoteBean>>(args.size());
             
             for (Argument<Handler> arg : args) {
-                if (arg.isRef()) {
-                    RemoteBean bean = ((ProxyHandler)arg.getRef()).bean;
-                    result.add(Argument.newRef(bean));
-                } else {
-                    result.add(Argument.<RemoteBean>newVal(arg.getVal()));
-                }
+                result.add(validate(arg));
             }
             
             return result;
         }
         
-        private void validate(List<Argument<Handler>> args) {
-            for (Argument<Handler> arg : args) {
-                validate(arg);
-            }
-        }
-        
-        private void validate(Argument<Handler> arg) {
+        private Argument<RemoteBean> validate(Argument<Handler> arg) {
             if (arg.isRef()) {
                 Handler handler = arg.getRef();
                 if (!(handler instanceof ProxyHandler)) {
@@ -207,11 +194,16 @@ public class RemoteBean implements Serializable {
                 if (proxyHandler.platform != platform) {
                     throw new IllegalArgumentException();
                 }
-            } else if (arg.isVal()) {
+                
+                return Argument.newRef(proxyHandler.bean);
+            } else {
                 boolean valid = arg.getVal() instanceof Serializable || arg.getVal() instanceof Remote;
+                
                 if (!valid){
                     throw new IllegalArgumentException();
                 }
+                
+                return Argument.newVal(arg.getVal());
             }
         }
         

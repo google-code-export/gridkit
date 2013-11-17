@@ -126,13 +126,11 @@ public class LocalBean {
 
         @Override
         public Object invoke(Method method, List<Argument<Handler>> rawArgs) throws Throwable {
-            validate(rawArgs);
+            List<Argument<LocalBean>> args = getArgs(rawArgs);
             
             SourceRef ref = new SourceRef(ClassOps.toString(method), ClassOps.location(3));
             
             LocalBean result = new LocalBean(ref, new Cell(), method.getReturnType());
-            
-            List<Argument<LocalBean>> args = getArgs(rawArgs);
             
             LocalBean.Invoke invoke = new LocalBean.Invoke(bean, method, args, result);
             
@@ -159,28 +157,17 @@ public class LocalBean {
             return refs;
         }
         
-        private static List<Argument<LocalBean>> getArgs(List<Argument<Handler>> args) {
+        private List<Argument<LocalBean>> getArgs(List<Argument<Handler>> args) {
             List<Argument<LocalBean>> result = new ArrayList<Argument<LocalBean>>(args.size());
             
             for (Argument<Handler> arg : args) {
-                if (arg.isRef()) {
-                    LocalBean bean = ((ProxyHandler)arg.getRef()).bean;
-                    result.add(Argument.newRef(bean));
-                } else {
-                    result.add(Argument.<LocalBean>newVal(arg.getVal()));
-                }
+                result.add(validate(arg));
             }
             
             return result;
         }
         
-        private void validate(List<Argument<Handler>> args) {
-            for (Argument<Handler> arg : args) {
-                validate(arg);
-            }
-        }
-        
-        private void validate(Argument<Handler> arg) {
+        private Argument<LocalBean> validate(Argument<Handler> arg) {
             if (arg.isRef()) {
                 Handler handler = arg.getRef();
                 if (!(handler instanceof ProxyHandler)) {
@@ -191,6 +178,10 @@ public class LocalBean {
                 if (proxyHandler.platform != platform) {
                     throw new IllegalArgumentException();
                 }
+                
+                return Argument.newRef(proxyHandler.bean);
+            } else {
+                return Argument.newVal(arg.getVal());
             }
         }
     }
