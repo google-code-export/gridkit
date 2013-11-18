@@ -11,14 +11,14 @@ import com.google.code.regexp.Matcher;
 
 public class Match {
 	
-	public Grok 					grok;	//current grok instance
-	public Matcher 					match;	//regex matcher
-	public int 						start; 	//offset
-	public int 						end;	//offset end
-	public String					line;	//source
-	public	Garbage					garbage;
+	Jorka 							jorka;
+	Matcher 						match;
+	int 							start;
+	int 							end;	
+	String							line;
+	Garbage							garbage;
 	
-	private String 					subject;	//texte
+	private String 					subject;
 	private Map<String, Object> 	capture;
 	
 	/**
@@ -26,7 +26,7 @@ public class Match {
 	 **/
 	public Match(){
 		subject = "Nothing";
-		grok = null;
+		jorka = null;
 		match = null;
 		capture = new TreeMap<String, Object>();
 		garbage = new Garbage();
@@ -40,12 +40,10 @@ public class Match {
 	 * @param line to analyze / save
 	 * @return
 	 */
-	public int	setSubject( String text ) {
-		if( text == null ) return GrokError.GROK_ERROR_UNINITIALIZED;
-		if( text.isEmpty() )
-			return GrokError.GROK_ERROR_UNINITIALIZED;
-		subject = text;
-		return GrokError.GROK_OK;
+	public void setSubject( String text ) {
+		if( text == null || text.isEmpty()) {
+			throw new IllegalArgumentException("subject should not be empty");
+		}
 	}
 	
 	/**
@@ -61,14 +59,11 @@ public class Match {
 	 * 
 	 * @see getSubject
 	 * @see toJson
-	 * @return Grok success
 	 */
-	public int captures(){
-		if( this.match == null )
-			return GrokError.GROK_ERROR_UNINITIALIZED;
-		
-		//_capture.put("LINE", this.line);
-		//_capture.put("LENGTH", this.line.length() +"");
+	public void captures(){
+		if( this.match == null ) {
+			throw new IllegalStateException("Not matched yet");
+		}
 		
 		Map<String, String> mappedw = this.match.namedGroups();
 		Iterator<Entry<String, String>> it = mappedw.entrySet().iterator();
@@ -78,8 +73,9 @@ public class Match {
 			Map.Entry pairs = (Map.Entry)it.next();
 	        String key = null;
 	        Object value = null;
-	        if ( !this.grok.capture_name(pairs.getKey().toString()).isEmpty() )
-	        	key = this.grok.capture_name(pairs.getKey().toString());
+	        if ( !this.jorka.getCaptured().get(pairs.getKey().toString()).isEmpty() ) {
+	        	key = this.jorka.getCaptured().get(pairs.getKey().toString());
+	        }
 	        if( pairs.getValue() != null ){
 	        	value = pairs.getValue().toString();
 	        	if( this.isInteger( value.toString() ) )
@@ -90,7 +86,6 @@ public class Match {
 	        capture.put( key  , (Object)value);
 	        it.remove(); // avoids a ConcurrentModificationException
 	    }
-	    return GrokError.GROK_OK;
 	}
 	
 	

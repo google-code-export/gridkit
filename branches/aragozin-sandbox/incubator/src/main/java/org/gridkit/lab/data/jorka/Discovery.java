@@ -15,28 +15,28 @@ import com.google.code.regexp.Pattern;
 
 public class Discovery {
 
-	private Grok grok;
+	private Jorka jorka;
 
 	/**
 	 ** Constructor
 	 **/
-	public Discovery(Grok grok) {
-		this.grok = grok;
+	public Discovery(Jorka jorka) {
+		this.jorka = jorka;
 	}
 
 	/**
 	 * Sort by regex complexity
 	 * 
-	 * @param Map of the pattern name and grok instance
-	 * @return the map sorted by grok pattern complexity
+	 * @param Map of the pattern name and jorka instance
+	 * @return the map sorted by pattern complexity
 	 */
-	private Map<String, Grok> Sort(Map<String, Grok> groks) {
+	private Map<String, Jorka> sort(Map<String, Jorka> jorkas) {
 
-		List<Grok> groky = new ArrayList<Grok>(groks.values());
-		Map<String, Grok> mGrok = new LinkedHashMap<String, Grok>();
-		Collections.sort(groky, new Comparator<Grok>() {
+		List<Jorka> jorky = new ArrayList<Jorka>(jorkas.values());
+		Map<String, Jorka> jorka = new LinkedHashMap<String, Jorka>();
+		Collections.sort(jorky, new Comparator<Jorka>() {
 
-			public int compare(Grok g1, Grok g2) {
+			public int compare(Jorka g1, Jorka g2) {
 				return (this.complexity(g1.getExpandedPattern()) < this
 						.complexity(g2.getExpandedPattern())) ? 1 : 0;
 			}
@@ -49,10 +49,10 @@ public class Discovery {
 			}
 		});
 
-		for (Grok g : groky) {
-			mGrok.put(g.saved_pattern, g);
+		for (Jorka j : jorky) {
+			jorka.put(j.savedPattern, j);
 		}
-		return mGrok;
+		return jorka;
 
 	}
 
@@ -71,16 +71,14 @@ public class Discovery {
 	}
 
 	/**
-	 * 
-	 * @param text string where we want to find the Grok pattern
-	 * @return Grok pattern %{Foo}...
+	 * TODO 
 	 */
 	public String discover(String text) {
 		if (text == null)
 			return "";
 
-		Map<String, Grok> groks = new TreeMap<String, Grok>();
-		Map<String, String> gPatterns = grok.getPatterns();
+		Map<String, Jorka> groks = new TreeMap<String, Jorka>();
+		Map<String, String> gPatterns = jorka.getPatterns();
 		// Boolean done = false;
 		String texte = new String(text);
 
@@ -90,26 +88,26 @@ public class Discovery {
 			@SuppressWarnings("rawtypes")
 			Map.Entry pairs = (Map.Entry) it.next();
 			String key = pairs.getKey().toString();
-			Grok g = new Grok();
+			Jorka g = new Jorka();
 
 			// g.patterns.putAll( gPatterns );
-			g.copyPatterns(gPatterns);
-			g.saved_pattern = key;
+			g.addPatterns(gPatterns);
+			g.savedPattern = key;
 			g.compile("%{" + key + "}");
 			groks.put(key, g);
 		}
 
 		// Sort patterns by complexity
-		Map<String, Grok> patterns = this.Sort(groks);
+		Map<String, Jorka> patterns = this.sort(groks);
 
 		// while (!done){
 		// done = true;
-		Iterator<Entry<String, Grok>> pit = patterns.entrySet().iterator();
+		Iterator<Entry<String, Jorka>> pit = patterns.entrySet().iterator();
 		while (pit.hasNext()) {
 			@SuppressWarnings("rawtypes")
 			Map.Entry pairs = (Map.Entry) pit.next();
 			String key = pairs.getKey().toString();
-			Grok value = (Grok) pairs.getValue();
+			Jorka value = (Jorka) pairs.getValue();
 
 			// We want to search with more complex pattern
 			// We avoid word, small number, space....

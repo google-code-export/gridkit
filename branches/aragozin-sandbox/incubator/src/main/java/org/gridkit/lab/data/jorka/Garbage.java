@@ -8,8 +8,8 @@ import java.util.TreeMap;
 
 public class Garbage {
 
-	private List<String> remove;
-	private Map<String, Object> rename;
+	private final List<String> remove;
+	private final Map<String, Object> rename;
 
 	/**
 	 ** Constructor
@@ -27,12 +27,16 @@ public class Garbage {
 	 * 
 	 * @see rename
 	 */
-	public int addToRename(String key, Object value) {
-		if (key == null || value == null)
-			return GrokError.GROK_ERROR_UNINITIALIZED;
-		if (!key.isEmpty() && !value.toString().isEmpty())
+	public void addToRename(String key, Object value) {
+		if (key == null) {
+			throw new NullPointerException("key is null");
+		}
+		if (value == null) {
+			throw new NullPointerException("value is null");
+		}
+		if (!key.isEmpty() && !value.toString().isEmpty()) {
 			rename.put(key, value);
-		return GrokError.GROK_OK;
+		}
 	}
 
 	/**
@@ -42,25 +46,26 @@ public class Garbage {
 	 * @param item
 	 *            to remove
 	 */
-	public int addToRemove(String item) {
-		if (item == null)
-			return GrokError.GROK_ERROR_UNINITIALIZED;
-		if (!item.isEmpty())
+	public void addToRemove(String item) {
+		if (item == null) {
+			throw new NullPointerException("item is null");
+		}
+		if (!item.isEmpty()) {
 			remove.add(item);
-		return GrokError.GROK_OK;
+		}
 	}
 
 	/**
 	 * @see addToRemove
 	 * @param lst
 	 */
-	public int addFromListRemove(List<String> lst) {
-
-		if (lst == null)
-			return GrokError.GROK_ERROR_UNINITIALIZED;
-		if (!lst.isEmpty())
-			remove.addAll(lst);
-		return GrokError.GROK_OK;
+	public void addFromListRemove(List<String> list) {
+		if (list == null) {
+			throw new NullPointerException("list is null");
+		}
+		if (!list.isEmpty()) {
+			remove.addAll(list);
+		}
 	}
 
 	/**
