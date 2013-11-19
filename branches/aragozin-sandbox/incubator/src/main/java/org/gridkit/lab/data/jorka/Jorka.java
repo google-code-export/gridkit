@@ -131,12 +131,9 @@ public class Jorka extends Object {
 			return null;
 
 		Matcher m = regexp.matcher(text);
-		Match match = new Match();
-		// System.out.println(expanded_pattern);
 		if (m.find()) {
-			// System.out.println("LLL"+m.group() +" " + m.start(0) +" "+
-			// m.end(0));
-			match.setSubject(text);
+			Match match = new Match();
+			match.setText(text);
 			match.jorka = this;
 			match.match = m;
 			match.start = m.start(0);
@@ -144,7 +141,9 @@ public class Jorka extends Object {
 			match.line = text;
 			return match;
 		}
-		return match;
+		else {
+			return null;
+		}
 	}
 
 	/**
