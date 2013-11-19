@@ -18,14 +18,14 @@ public class Match {
 	String							line;
 	Garbage							garbage;
 	
-	private String 					subject;
+	private String 					text;
 	private Map<String, Object> 	capture;
 	
 	/**
 	 ** Contructor 
 	 **/
 	public Match(){
-		subject = "Nothing";
+		text = "Nothing";
 		jorka = null;
 		match = null;
 		capture = new TreeMap<String, Object>();
@@ -40,18 +40,19 @@ public class Match {
 	 * @param line to analyze / save
 	 * @return
 	 */
-	public void setSubject( String text ) {
+	public void setText( String text ) {
 		if( text == null || text.isEmpty()) {
 			throw new IllegalArgumentException("subject should not be empty");
 		}
+		this.text = text;
 	}
 	
 	/**
 	 * Getter
 	 * @return the subject
 	 */
-	public String getSubject(){
-		return subject;
+	public String getText(){
+		return text;
 	}
 	
 	/**
@@ -60,7 +61,7 @@ public class Match {
 	 * @see getSubject
 	 * @see toJson
 	 */
-	public void captures(){
+	public void parse(){
 		if( this.match == null ) {
 			throw new IllegalStateException("Not matched yet");
 		}
