@@ -434,7 +434,7 @@ public class Graph {
 		.width(800).height(600)
 		.theme(ChartTheme.Matlab)
 		.title(title)
-		.xAxisTitle("Old space [GiB]").yAxisTitle("Pause mean [ms]")
+		.xAxisTitle("Old space [GiB]").yAxisTitle("Factor")
 		.build();
 		
 		chart.getStyleManager().setPlotGridLinesVisible(true);

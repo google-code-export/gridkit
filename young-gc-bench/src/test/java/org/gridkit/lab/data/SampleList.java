@@ -1,5 +1,7 @@
 package org.gridkit.lab.data;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -401,7 +403,7 @@ public class SampleList {
 		String[] fields = new String[rest.length + 1];
 		fields[0] = first;
 		for(int i = 0; i != rest.length; ++i) {
-			fields[i + i] = rest[i];
+			fields[i + 1] = rest[i];
 		}
 		Set<List<String>> result = new HashSet<List<String>>();
 		for(Sample sample: samples) {
@@ -430,6 +432,18 @@ public class SampleList {
 		return s;
 	}
 
+	public SampleList scaleFieldValue(String field, double f, double s) {
+		List<Sample> result = new ArrayList<Sample>(samples.size());
+		for(Sample sample: samples) {
+			sample = sample.clone();
+			double v = sample.getDouble(field);
+			v = f * v + s;
+			sample.set(field, v);
+			result.add(sample);
+		}
+		return new SampleList(result);
+	}
+	
 	public double[] scaledNumericSeries(String field, double factor) {
 		double[] s = new double[samples.size()];
 		for(int i = 0; i != s.length; ++i) {
@@ -452,6 +466,22 @@ public class SampleList {
 			s[i] = getTyped(i, field);
 		}
 		return s;
+	}
+	
+	public void exportTabSeparated(Writer writer, String... fields) throws IOException {
+		for(Sample sample: samples) {
+			for(String field: fields) {
+				String val = sample.get(field);
+				if (val == null || val.length() == 0) {
+					val = "\"\"";
+				}
+				else if (val.indexOf(' ') >= 0 || val.indexOf('\t') >= 0) {
+					val = "\"" + val + "\"";
+				}
+				writer.append(val).append('\t');
+			}
+			writer.append('\n');
+		}
 	}
 	
 	private Object deriveType(String field) {

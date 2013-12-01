@@ -126,6 +126,20 @@ public class Sample implements Serializable, Comparable<Sample>, Cloneable {
 		data.put(key, value);
 	}
 
+	public void set(String key, double value) {
+		if (!data.containsKey(key)) {
+			throw new IllegalArgumentException("Use setCoord or setResult for non existing fields");
+		}
+		data.put(key, toString(value));
+	}
+
+	public void set(String key, long value) {
+		if (!data.containsKey(key)) {
+			throw new IllegalArgumentException("Use setCoord or setResult for non existing fields");
+		}
+		data.put(key, toString(value));
+	}
+
 	public Sample clone() {
 		try {
 			Sample that = (Sample) super.clone();
