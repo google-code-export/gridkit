@@ -110,36 +110,57 @@ public class RemoteGCBenchRunner implements DataPointExecutor {
 		
 		String algoCmd;
 		String algo = dataPoint.get(GC_ALGO);
-		int threads = dataPoint.getInteger(GC_THREADS);
-		
-		if (GC_ALGO__CMS.equals(algo)) {
-			if (threads == 0) {
-				algoCmd = "|-XX:-UseParNewGC|-XX:+UseConcMarkSweepGC";
+		if (dataPoint.get(GC_THREADS) != null) {
+			int threads = dataPoint.getInteger(GC_THREADS);
+			
+			if (GC_ALGO__CMS.equals(algo)) {
+				if (threads == 0) {
+					algoCmd = "|-XX:-UseParNewGC|-XX:+UseConcMarkSweepGC";
+				}
+				else {
+					algoCmd = "|-XX:+UseParNewGC|-XX:+UseConcMarkSweepGC";
+				}
+			}
+			else if (GC_ALGO__PMSC.equals(algo)) {
+				if (threads == 0) {
+					algoCmd = "-XX:+UseSerialGC";
+				}
+				else {
+					algoCmd = "-XX:+UseParallelOlgGC";
+				}			
+			}
+			else if (GC_ALGO__G1.equals(algo)) {
+				algoCmd = "-XX:+UseG1GC";
 			}
 			else {
-				algoCmd = "|-XX:+UseParNewGC|-XX:+UseConcMarkSweepGC";
+				throw new IllegalArgumentException("Unsupported algo: " + algo);
 			}
-		}
-		else if (GC_ALGO__PMSC.equals(algo)) {
-			if (threads == 0) {
-				algoCmd = "-XX:+UseSerialGC";
+
+			if (threads > 0) {
+				JvmProps.at(node).addJvmArg("-XX:ParallelGCThreads=" + threads);
 			}
-			else {
-				algoCmd = "-XX:+UseParallelOlgGC";
-			}			
-		}
-		else if (GC_ALGO__G1.equals(algo)) {
-			algoCmd = "-XX:+UseG1GC";
+
+			JvmProps.at(node).addJvmArg(algoCmd);
 		}
 		else {
-			throw new IllegalArgumentException("Unsupported algo: " + algo);
+			if (GC_ALGO__CMS.equals(algo)) {
+				algoCmd = "-XX:+UseConcMarkSweepGC";
+			}
+			else if (GC_ALGO__PMSC.equals(algo)) {
+				algoCmd = "-XX:+UseParallelOlgGC";
+			}
+			else if (GC_ALGO__G1.equals(algo)) {
+				algoCmd = "-XX:+UseG1GC";
+			}
+			else {
+				throw new IllegalArgumentException("Unsupported algo: " + algo);
+			}
+
+			JvmProps.at(node).addJvmArg(algoCmd);			
 		}
 		
-		JvmProps.at(node).addJvmArg(algoCmd);
 		
-		if (threads > 0) {
-			JvmProps.at(node).addJvmArg("-XX:ParallelGCThreads=" + threads);
-		}
+		
 		
 		if ("true".equalsIgnoreCase(dataPoint.get(COOPS))) {
 			JvmProps.at(node).addJvmArg("-XX:+UseCompressedOops");
@@ -150,6 +171,11 @@ public class RemoteGCBenchRunner implements DataPointExecutor {
 		
 		if ("true".equalsIgnoreCase(dataPoint.get(DRYMODE))) {
 			JvmProps.at(node).addJvmArg("-Ddrymode=true");
+		}
+		
+		String strides = dataPoint.get(GC_STRIDES);
+		if (strides != null && !"default".equals(strides)) {
+			JvmProps.at(node).addJvmArg("|-XX:+UnlockDiagnosticVMOptions|-XX:ParGCCardsPerStrideChunk=" + strides);
 		}
 	}
 }
