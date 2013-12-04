@@ -7,7 +7,9 @@ public class PlatformTest {
     public void test() {
         Platform platform = new Platform();
         
-        // --- Start scenario
+        // --- Hook node initialization
+        // --- Just sequence of methods executed on startup in single thread
+        // --- No global synchronization or parallel execution
         
         HookBuilder hb = platform.onStart();
             Printer printer = hb.deploy(new Printer.Impl());
@@ -17,12 +19,26 @@ public class PlatformTest {
         hb = platform.onStart("ttt");
             printer.err("ttt node onstart");
         hb.build();
-        
-        // ---
-        
+
         platform.cloud().nodes("ttt", "qqq").touch();
         
         System.err.println("\n------\n");
+        
+        // --- Example of working with driver out of scenario
+        // ---
+        
+        printer.out("out of scenario");
+        
+        printer.function().run();
+                
+        Printer printerTTT = platform.at("ttt").deploy(new Printer.Impl());
+        
+        printerTTT.out("only on ttt");
+
+        System.err.println("\n------\n");
+        
+        // --- Example of scenario construction and execution
+        // ---
         
         ScenarioBuilder sb = platform.newScenario();
             
@@ -59,45 +75,5 @@ public class PlatformTest {
         //sb = platform.newScenario();
         //    printer.exception();
         //try { sb.build().play(); } catch (RuntimeException e) {}
-        
-        printer.out("out of scenario");
-        
-        printer.function().run();
-                
-        localPrinter.out("end of local out of scenario");
-        
-        /*
-        
-        // --- Group calls
-        
-        Printer groupPrinter = platform.group(printer, Scopes.any());
-        
-        groupPrinter.err("after start");
-        
-        // --- Direct calls
-        
-        Printer directPrinter = platform.direct(printer, "ttt");
-        
-        System.err.println(directPrinter.i("direct call"));
-        
-        Runnable function = directPrinter.function();
-        
-        function.run();
-        
-        // --- Exceptions
-        
-        try {
-            groupPrinter.exception();
-        } catch (IllegalStateException e) {
-            System.err.println("catched group " + e);
-        }
-        
-        try {
-            directPrinter.exception();
-        } catch (IllegalStateException e) {
-            System.err.println("catched direct " + e);
-        }
-        
-        */
     }
 }
