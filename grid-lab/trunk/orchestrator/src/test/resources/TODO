@@ -11,3 +11,5 @@ scenario daemon for death nodes detection
 when method invoked log scope reductions caused by arguments
 
 track status either bean deployed or not
+
+from should join finish previous actions if section is not empty
