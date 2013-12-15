@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.gridkit.lab</groupId>
+        <artifactId>nimble-parent</artifactId>
+        <version>0.2.1</version>
+        <relativePath>../pom.xml</relativePath>        
+    </parent>
+    
+	<artifactId>nimble-core</artifactId>
+    <name>${project.groupId}::${project.artifactId}</name>
+
+	<dependencies>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gridkit.lab</groupId>
+            <artifactId>probe-common</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gridkit.lab</groupId>
+            <artifactId>probe-jmx</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gridkit.lab</groupId>
+            <artifactId>probe-sigar</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gridkit.lab</groupId>
+            <artifactId>nimble-btrace</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gridkit.lab</groupId>
+            <artifactId>sigar-lib</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gridkit.lab</groupId>
+            <artifactId>jvm-attach-api</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.gridkit.lab</groupId>
+            <artifactId>telecontrol-ssh</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gridkit.lab</groupId>
+            <artifactId>viconcurrent</artifactId>
+        </dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
+	</dependencies>
+</project>
