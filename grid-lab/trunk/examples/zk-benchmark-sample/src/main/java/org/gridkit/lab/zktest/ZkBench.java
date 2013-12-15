@@ -49,7 +49,11 @@ import org.gridkit.nimble.statistics.TimeUtils;
 import org.gridkit.util.concurrent.FutureBox;
 import org.gridkit.vicluster.ViNode;
 import org.gridkit.vicluster.ViNodeSet;
-
+/**
+ * 
+ * @see ZkBenchRun for example of using {@link ZkBench}
+ *
+ */
 public class ZkBench {
 
 	private static String ZK_OPS = "ZK_OPS";

@@ -30,9 +30,9 @@ public class ZooEnsembleBuilder {
 		return new ZooEnsembleBuilder();
 	}
 	
-	Map<String, String> zooProps = new HashMap<String, String>();
-	String baseDataDir = ".zookeeper";
-	int basePort = 30000;
+	private Map<String, String> zooProps = new HashMap<String, String>();
+	private String baseDataDir = ".zookeeper";
+	private int basePort = 30000;
 	
 	public ZooEnsembleBuilder() {
 		maxClientsCnxns(0);
@@ -43,6 +43,11 @@ public class ZooEnsembleBuilder {
 		syncLimit(5);
 	}
 
+	public ZooEnsembleBuilder baseDataDir(String path) {
+		this.baseDataDir = path;
+		return this;
+	}
+	
 	public ZooEnsembleBuilder maxClientsCnxns(int n) {
 		zooProps.put("maxClientCnxns", String.valueOf(n));
 		return this;

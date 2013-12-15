@@ -32,6 +32,7 @@ public class ZkEnsembleTest {
 		sb.checkpoint("done");
 		
 		ZooEnsembleDriver driver = ZooEnsembleBuilder.build()
+				.baseDataDir("target/zkdata")
 				.driver();
 		
 		sb.from("init");
