@@ -26,7 +26,7 @@ public class ElasticGo {
 		
 		client.admin().indices().prepareCreate("test-index")
 		.
-		System.out.println(client/);
+		System.out.println(client);
 	}
 	
 }
