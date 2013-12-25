@@ -1,6 +1,6 @@
 package org.gridkit.lab.meterx;
 
-public interface ObserverBuilder extends MetaBuilder {
+public interface ObserverAppender extends HierarchyAppender {
 
 	public void addField(String name, Class<?> type);
 
