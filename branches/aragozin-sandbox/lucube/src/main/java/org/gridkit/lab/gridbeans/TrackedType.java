@@ -181,7 +181,6 @@ class TrackedType {
 			return new TrackedType((Class)var, null, true);
 		}
 		else if (var instanceof TypeVariable<?>) {
-			TypeVariable<?> tv = (TypeVariable<?>) var;
 			TrackedType tracked = variables.get(var);
 			return tracked;
 		}

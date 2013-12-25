@@ -1,6 +1,6 @@
 package org.gridkit.lab.tentacle;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.gridkit.lab.mcube.Value;
 import org.gridkit.lab.mcube.Values;
@@ -35,7 +35,7 @@ public class Example {
 	
 	@Test
 	public void verify_capture() throws InterruptedException {
-		Assert.assertEquals(HostType.class.getName() + "::hostType", HostType.HOST_TYPE);
+		Assert.assertEquals(HostType.class.getName() + "::hostType", HostType.HOST_TYPE.toString());
 	}
 	
 	@Test

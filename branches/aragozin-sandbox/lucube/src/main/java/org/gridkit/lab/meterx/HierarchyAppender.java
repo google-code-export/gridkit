@@ -1,6 +1,6 @@
 package org.gridkit.lab.meterx;
 
-public interface MetaBuilder {
+public interface HierarchyAppender {
 
 	public void addAttribute(String name, String value);
 	
