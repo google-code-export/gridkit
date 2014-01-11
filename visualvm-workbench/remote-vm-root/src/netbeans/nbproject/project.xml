@@ -3,7 +3,7 @@
     <type>org.netbeans.modules.apisupport.project</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
-            <code-name-base>org.visualvm.demodescriptorprovider</code-name-base>
+            <code-name-base>org.visualvm.remotevm</code-name-base>
             <standalone/>
             <module-dependencies>
                 <dependency>
@@ -138,7 +138,7 @@
                 </dependency>
             </module-dependencies>
             <public-packages>
-                <package>org.visualvm.demodescriptorprovider</package>
+                <package>org.visualvm.remotevm</package>
             </public-packages>
         </data>
     </configuration>

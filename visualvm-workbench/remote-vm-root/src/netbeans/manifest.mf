@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-OpenIDE-Module: org.visualvm.demodescriptorprovider
+OpenIDE-Module: org.visualvm.remotevm
 OpenIDE-Module-Layer: org/visualvm/remotevm/resources/layer.xml
 OpenIDE-Module-Install: org/visualvm/remotevm/Installer.class
 OpenIDE-Module-Localizing-Bundle: org/visualvm/remotevm/Bundle.properties
