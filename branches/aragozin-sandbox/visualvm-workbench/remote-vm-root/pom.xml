@@ -31,6 +31,14 @@
         <url>http://gridkit.googlecode.com/svn/branches/aragozin-sandbox/visualvm-workbench/remote-vm-root</url>
     </scm>
 
+	<dependencies>
+		<dependency>
+		    <groupId>org.openid4java</groupId>
+		    <artifactId>openid4java</artifactId>
+		    <version>0.9.7</version>
+		</dependency>
+	</dependencies>
+
     <build>
         <plugins>
             <plugin>
