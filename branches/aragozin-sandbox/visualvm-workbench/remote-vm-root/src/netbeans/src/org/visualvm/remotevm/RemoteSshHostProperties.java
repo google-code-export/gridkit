@@ -15,21 +15,30 @@
  */
 package org.visualvm.remotevm;
 
-import com.sun.tools.visualvm.core.datasource.DataSource;
-import com.sun.tools.visualvm.core.datasource.descriptor.DataSourceDescriptor;
-import com.sun.tools.visualvm.core.model.AbstractModelProvider;
+import com.sun.tools.visualvm.core.properties.PropertiesCustomizer;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-@SuppressWarnings("rawtypes")
-public class SshHostDescriptorProvider extends AbstractModelProvider<DataSourceDescriptor,DataSource> {
-    
-    public DataSourceDescriptor createModelFor(DataSource ds) {
-        if (ds instanceof SshHost) {
-            SshHost host = (SshHost) ds;
-            return new RemoteSshHostDescriptor(host);
-        }
-        return null;
+public class RemoteSshHostProperties {
+
+    private final String hostName;
+    private final String displayName;
+    private final PropertiesCustomizer customizer;
+
+
+    public RemoteSshHostProperties(String hostName, String displayName,
+                          PropertiesCustomizer customizer) {
+        this.customizer = customizer;
+        this.hostName = hostName;
+        this.displayName = displayName;
     }
+
+
+    public String getHostName() { return hostName; }
+
+    public String getDisplayName() { return displayName; }
+
+    public PropertiesCustomizer getPropertiesCustomizer() { return customizer; }
+
 }

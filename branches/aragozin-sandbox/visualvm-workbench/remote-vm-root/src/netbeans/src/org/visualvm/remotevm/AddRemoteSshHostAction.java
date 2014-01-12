@@ -58,11 +58,11 @@ public class AddRemoteSshHostAction extends SingleDataSourceAction<RemoteSshHost
     }
     
     protected void actionPerformed(RemoteSshHostsContainer remoteHostsContainer, ActionEvent actionEvent) {
-        final SshHostProperties hostDescriptor = SshHostCustomizer.defineHost();
+        final RemoteSshHostProperties hostDescriptor = RemoteSshHostCustomizer.defineHost();
         if (hostDescriptor != null) {
             RequestProcessor.getDefault().post(new Runnable() {
                 public void run() {
-                    SshHostsSupport.getInstance().createHost(hostDescriptor, true, true);
+                    RemoteSshHostsSupport.getInstance().createHost(hostDescriptor, true, true);
                 }
             });
         }

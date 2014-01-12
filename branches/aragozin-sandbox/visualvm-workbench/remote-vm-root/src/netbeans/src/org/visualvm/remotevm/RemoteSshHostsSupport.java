@@ -20,19 +20,20 @@ import java.io.File;
 import com.sun.tools.visualvm.core.datasource.DataSource;
 import com.sun.tools.visualvm.core.datasource.descriptor.DataSourceDescriptorFactory;
 import com.sun.tools.visualvm.core.datasupport.Utils;
+import com.sun.tools.visualvm.core.ui.DataSourceViewsManager;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public final class SshHostsSupport {
+public final class RemoteSshHostsSupport {
     
     private static final Object hostsStorageDirectoryLock = new Object();
     // @GuardedBy hostsStorageDirectoryLock
     private static File hostsStorageDirectory;
     
-    private static SshHostsSupport instance;
+    private static RemoteSshHostsSupport instance;
 
-    private final SshHostProvider hostProvider = new SshHostProvider();
+    private final RemoteSshHostProvider hostProvider = new RemoteSshHostProvider();
 
 
     /**
@@ -40,8 +41,8 @@ public final class SshHostsSupport {
      * 
      * @return singleton instance of HostsSupport.
      */
-    public static synchronized SshHostsSupport getInstance() {
-        if (instance == null) instance = new SshHostsSupport();
+    public static synchronized RemoteSshHostsSupport getInstance() {
+        if (instance == null) instance = new RemoteSshHostsSupport();
         return instance;
     }
     
@@ -53,8 +54,8 @@ public final class SshHostsSupport {
      * @param hostname hostname of the host to be created.
      * @return new host from provided hostname or null if the hostname could not be resolved.
      */
-    public SshHost createHost(String hostname) {
-        return createHost(new SshHostProperties(hostname, hostname, null), true, true);
+    public RemoteSshHost createHost(String hostname) {
+        return createHost(new RemoteSshHostProperties(hostname, hostname, null), true, true);
     }
     
     /**
@@ -65,8 +66,8 @@ public final class SshHostsSupport {
      * @param displayname displayname of the host to be created.
      * @return new host from provided hostname or null if the hostname could not be resolved.
      */
-    public SshHost createHost(String hostname, String displayname) {
-        return createHost(new SshHostProperties(hostname, displayname, null), true, true);
+    public RemoteSshHost createHost(String hostname, String displayname) {
+        return createHost(new RemoteSshHostProperties(hostname, displayname, null), true, true);
     }
 
     /**
@@ -78,11 +79,11 @@ public final class SshHostsSupport {
      *
      * @since VisualVM 1.1.1
      */
-    public SshHost getOrCreateHost(String hostname, boolean interactive) {
-        return createHost(new SshHostProperties(hostname, hostname, null), false, interactive);
+    public RemoteSshHost getOrCreateHost(String hostname, boolean interactive) {
+        return createHost(new RemoteSshHostProperties(hostname, hostname, null), false, interactive);
     }
 
-    SshHost createHost(SshHostProperties properties, boolean createOnly, boolean interactive) {
+    RemoteSshHost createHost(RemoteSshHostProperties properties, boolean createOnly, boolean interactive) {
         return hostProvider.createHost(properties, createOnly, interactive);
     }
         
@@ -94,7 +95,7 @@ public final class SshHostsSupport {
     public static File getStorageDirectory() {
         synchronized(hostsStorageDirectoryLock) {
             if (hostsStorageDirectory == null) {
-                String snapshotsStorageString = SshHostsSupportImpl.getStorageDirectoryString();
+                String snapshotsStorageString = RemoteSshHostsSupportImpl.getStorageDirectoryString();
                 hostsStorageDirectory = new File(snapshotsStorageString);
                 if (hostsStorageDirectory.exists() && hostsStorageDirectory.isFile())
                     throw new IllegalStateException("Cannot create hosts storage directory " + snapshotsStorageString + ", file in the way");   // NOI18N
@@ -113,12 +114,14 @@ public final class SshHostsSupport {
      * @return true if the storage directory for defined hosts already exists, false otherwise.
      */
     public static boolean storageDirectoryExists() {
-        return new File(SshHostsSupportImpl.getStorageDirectoryString()).isDirectory();
+        return new File(RemoteSshHostsSupportImpl.getStorageDirectoryString()).isDirectory();
     }
     
     
-    private SshHostsSupport() {
-        DataSourceDescriptorFactory.getDefault().registerProvider(new SshHostDescriptorProvider());
+    private RemoteSshHostsSupport() {
+        DataSourceDescriptorFactory.getDefault().registerProvider(new RemoteSshHostDescriptorProvider());
+        DataSourceDescriptorFactory.getDefault().registerProvider(new RemoteApplication.DescriptorProvider());
+        DataSourceViewsManager.sharedInstance().addViewProvider(new RemoteSshHostOverview.Provider(), RemoteSshHost.class);
         
         RemoteSshHostsContainer container = RemoteSshHostsContainer.sharedInstance();
         DataSource.ROOT.getRepository().addDataSource(container);
