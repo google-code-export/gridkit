@@ -21,19 +21,20 @@ import java.net.UnknownHostException;
 import com.sun.tools.visualvm.core.datasource.DataSource;
 import com.sun.tools.visualvm.core.datasource.Storage;
 import com.sun.tools.visualvm.core.datasupport.Stateful;
+import com.sun.tools.visualvm.host.Host;
 
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class SshHost extends DataSource implements Stateful {
+public class RemoteSshHost extends DataSource implements Stateful {
     
     private final String hostName;
     private InetAddress inetAddress;
     private String user;
-    private int state = STATE_AVAILABLE;
+    private int state = STATE_UNKNOWN;
+    private Host shadowHost;
 
     private Storage givenStorage;
-    
 
     /**
      * Creates new instance of Host defined by hostName.
@@ -41,7 +42,7 @@ public class SshHost extends DataSource implements Stateful {
      * @param hostName name or IP of the host.
      * @throws java.net.UnknownHostException if host cannot be resolved using provided hostName/IP.
      */
-    public SshHost(String user, String hostName, Storage storage) throws UnknownHostException {
+    public RemoteSshHost(String user, String hostName, Storage storage) throws UnknownHostException {
         this(user, hostName, InetAddress.getByName(hostName), storage);
     }
 
@@ -51,7 +52,7 @@ public class SshHost extends DataSource implements Stateful {
      * @param hostName name or IP of the host,
      * @param inetAddress InetAddress instance for the host.
      */
-    public SshHost(String user, String hostName, InetAddress inetAddress, Storage storage) {
+    public RemoteSshHost(String user, String hostName, InetAddress inetAddress, Storage storage) {
         if (hostName == null) throw new IllegalArgumentException("Host name cannot be null");   // NOI18N
         if (inetAddress == null) throw new IllegalArgumentException("InetAddress cannot be null");  // NOI18N
         
@@ -59,8 +60,9 @@ public class SshHost extends DataSource implements Stateful {
         this.hostName = hostName;
         this.inetAddress = inetAddress;
         this.givenStorage = storage;
+        this.shadowHost = new Host(hostName, inetAddress) {
+		};
     }
-    
     
     public String getUser() {
     	return user;
@@ -71,7 +73,7 @@ public class SshHost extends DataSource implements Stateful {
      * 
      * @return hostname of the host.
      */
-    public String getHostName() {
+    public String getHostname() {
         return hostName;
     }
     
@@ -82,6 +84,10 @@ public class SshHost extends DataSource implements Stateful {
      */
     public final InetAddress getInetAddress() {
         return inetAddress;
+    }
+    
+    public Host getShadowHost() {
+    	return shadowHost;
     }
     
     public boolean supportsUserRemove() {
@@ -120,7 +126,7 @@ public class SshHost extends DataSource implements Stateful {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		SshHost other = (SshHost) obj;
+		RemoteSshHost other = (RemoteSshHost) obj;
 		if (inetAddress == null) {
 			if (other.inetAddress != null)
 				return false;
@@ -135,6 +141,6 @@ public class SshHost extends DataSource implements Stateful {
 	}
 
 	public String toString() {
-        return user + "@" + getHostName() + " [IP: " + getInetAddress().getHostAddress() + "]";  // NOI18N
+        return user + "@" + getHostname() + " [IP: " + getInetAddress().getHostAddress() + "]";  // NOI18N
     }
 }

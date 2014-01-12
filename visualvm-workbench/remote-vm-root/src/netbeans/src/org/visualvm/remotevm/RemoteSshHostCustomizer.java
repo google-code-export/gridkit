@@ -50,7 +50,7 @@ import com.sun.tools.visualvm.core.ui.components.ScrollableContainer;
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class SshHostCustomizer extends JPanel {
+public class RemoteSshHostCustomizer extends JPanel {
 
 	private static final long serialVersionUID = 20140112L;
 	
@@ -59,8 +59,8 @@ public class SshHostCustomizer extends JPanel {
 
 	private boolean internalChange = false;
 
-	public static SshHostProperties defineHost() {
-		SshHostCustomizer hc = getInstance();
+	public static RemoteSshHostProperties defineHost() {
+		RemoteSshHostCustomizer hc = getInstance();
 		hc.setup();
 
 		ScrollableContainer sc = new ScrollableContainer(hc,
@@ -70,7 +70,7 @@ public class SshHostCustomizer extends JPanel {
 		sc.setViewportBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
 		final DialogDescriptor dd = new DialogDescriptor(sc,
-				NbBundle.getMessage(SshHostCustomizer.class,
+				NbBundle.getMessage(RemoteSshHostCustomizer.class,
 						"Title_Add_Remote_Host"), true,
 				new Object[] { // NOI18N
 				hc.okButton, DialogDescriptor.CANCEL_OPTION }, hc.okButton, 0,
@@ -81,7 +81,7 @@ public class SshHostCustomizer extends JPanel {
 		d.setVisible(true);
 
 		if (dd.getValue() == hc.okButton) {
-			SshHostProperties hp = new SshHostProperties(hc.getHostName(),
+			RemoteSshHostProperties hp = new RemoteSshHostProperties(hc.getHostName(),
 					hc.getDisplayName(), hc.getPropertiesCustomizer());
 			hc.accepted();
 			return hp;
@@ -91,16 +91,16 @@ public class SshHostCustomizer extends JPanel {
 		}
 	}
 
-	private static SshHostCustomizer instance;
+	private static RemoteSshHostCustomizer instance;
 
-	private SshHostCustomizer() {
+	private RemoteSshHostCustomizer() {
 		initComponents();
 		update();
 	}
 
-	private static SshHostCustomizer getInstance() {
+	private static RemoteSshHostCustomizer getInstance() {
 		if (instance == null)
-			instance = new SshHostCustomizer();
+			instance = new RemoteSshHostCustomizer();
 		return instance;
 	}
 
@@ -124,8 +124,8 @@ public class SshHostCustomizer extends JPanel {
 		displaynameField.setText(""); // NOI18N
 
 		PropertiesSupport support = PropertiesSupport.sharedInstance();
-		settingsPanel = !support.hasProperties(SshHost.class) ? null : support
-				.getCustomizer(SshHost.class);
+		settingsPanel = !support.hasProperties(RemoteSshHost.class) ? null : support
+				.getCustomizer(RemoteSshHost.class);
 
 		if (settingsPanel != null) {
 			settingsPanel.addChangeListener(listener);
@@ -207,7 +207,7 @@ public class SshHostCustomizer extends JPanel {
 							.createEmptyBorder());
 				}
 				Window w = SwingUtilities
-						.getWindowAncestor(SshHostCustomizer.this);
+						.getWindowAncestor(RemoteSshHostCustomizer.this);
 				if (w != null)
 					w.pack();
 				update();
@@ -222,7 +222,7 @@ public class SshHostCustomizer extends JPanel {
 		// hostnameLabel
 		hostnameLabel = new JLabel();
 		Mnemonics.setLocalizedText(hostnameLabel,
-				NbBundle.getMessage(SshHostCustomizer.class, "LBL_Host_name")); // NOI18N
+				NbBundle.getMessage(RemoteSshHostCustomizer.class, "LBL_Host_name")); // NOI18N
 		constraints = new GridBagConstraints();
 		constraints.gridx = 0;
 		constraints.gridy = 0;
@@ -262,7 +262,7 @@ public class SshHostCustomizer extends JPanel {
 		// displaynameCheckbox
 		displaynameCheckbox = new JCheckBox();
 		Mnemonics.setLocalizedText(displaynameCheckbox, NbBundle.getMessage(
-				SshHostCustomizer.class, "LBL_Display_name")); // NOI18N
+				RemoteSshHostCustomizer.class, "LBL_Display_name")); // NOI18N
 		displaynameCheckbox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				update();
@@ -321,7 +321,7 @@ public class SshHostCustomizer extends JPanel {
 		// okButton
 		okButton = new JButton();
 		Mnemonics.setLocalizedText(okButton,
-				NbBundle.getMessage(SshHostCustomizer.class, "LBL_OK")); // NOI18N
+				NbBundle.getMessage(RemoteSshHostCustomizer.class, "LBL_OK")); // NOI18N
 
 		settingsButton = new JToggleButton() {
 			protected void fireActionPerformed(ActionEvent e) {
@@ -329,7 +329,7 @@ public class SshHostCustomizer extends JPanel {
 			}
 		};
 		Mnemonics.setLocalizedText(settingsButton, NbBundle.getMessage(
-				SshHostCustomizer.class, "BTN_AdavancedSettings")); // NOI18N
+				RemoteSshHostCustomizer.class, "BTN_AdavancedSettings")); // NOI18N
 
 		// UI tweaks
 		displaynameCheckbox.setBorder(hostnameLabel.getBorder());

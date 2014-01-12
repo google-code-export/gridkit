@@ -53,9 +53,9 @@ import com.sun.tools.visualvm.core.explorer.ExplorerSupport;
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class SshHostProvider {
+public class RemoteSshHostProvider {
 
-	private static final Logger LOGGER = Logger.getLogger(SshHostProvider.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(RemoteSshHostProvider.class.getName());
 
 	private static final String SNAPSHOT_VERSION = "snapshot_version"; // NOI18N
 	private static final String SNAPSHOT_VERSION_DIVIDER = ".";
@@ -73,7 +73,7 @@ public class SshHostProvider {
 	private Semaphore hostsLockedSemaphore = new Semaphore(1);
 
 	@SuppressWarnings("unchecked")
-	public SshHost createHost(final SshHostProperties hostDescriptor, final boolean createOnly, final boolean interactive) {
+	public RemoteSshHost createHost(final RemoteSshHostProperties hostDescriptor, final boolean createOnly, final boolean interactive) {
 		try {
 
 			lockHosts();
@@ -84,7 +84,7 @@ public class SshHostProvider {
 
 			try {
 				pHandle = ProgressHandleFactory.createHandle(NbBundle
-						.getMessage(SshHostProvider.class,
+						.getMessage(RemoteSshHostProvider.class,
 								"LBL_Searching_for_host")
 						+ hostName); // NOI18N
 				pHandle.setInitialDelay(0);
@@ -95,7 +95,7 @@ public class SshHostProvider {
 					if (interactive) {
 						DialogDisplayer.getDefault().notifyLater(
 								new NotifyDescriptor.Message(NbBundle
-										.getMessage(SshHostProvider.class,
+										.getMessage(RemoteSshHostProvider.class,
 												"MSG_Wrong_Host", hostName),
 										NotifyDescriptor. // NOI18N
 										ERROR_MESSAGE));
@@ -112,7 +112,7 @@ public class SshHostProvider {
 			}
 
 			if (inetAddress != null) {
-				final SshHost knownHost = getHostByAddressImpl(inetAddress);
+				final RemoteSshHost knownHost = getHostByAddressImpl(inetAddress);
 				if (knownHost != null) {
 					if (interactive && createOnly) {
 						SwingUtilities.invokeLater(new Runnable() {
@@ -124,7 +124,7 @@ public class SshHostProvider {
 										.notifyLater(
 												new NotifyDescriptor.Message(
 														NbBundle.getMessage(
-																SshHostProvider.class,
+																RemoteSshHostProvider.class,
 																"MSG_Already_Monitored",
 																new Object[] // NOI18N
 																{
@@ -151,7 +151,7 @@ public class SshHostProvider {
 							hostDescriptor.getDisplayName() };
 
 					File customPropertiesStorage = Utils.getUniqueFile(
-							SshHostsSupport.getStorageDirectory(), 
+							RemoteSshHostsSupport.getStorageDirectory(), 
 							ipString,
 							Storage.DEFAULT_PROPERTIES_EXT);
 					
@@ -161,9 +161,9 @@ public class SshHostProvider {
 					
 					storage.setCustomProperties(propNames, propValues);
 
-					SshHost newHost = null;
+					RemoteSshHost newHost = null;
 					try {
-						newHost = new SshHost(DEFAULT_USER, hostName, storage);
+						newHost = new RemoteSshHost(DEFAULT_USER, hostName, storage);
 					} catch (Exception e) {
 						LOGGER.log(Level.SEVERE, "Error creating host", e); // Should never happen // NOI18N
 					}
@@ -171,14 +171,14 @@ public class SshHostProvider {
 					if (newHost != null) {
 						DataSourceContainer remoteHosts = RemoteSshHostsContainer
 								.sharedInstance().getRepository();
-						Set<SshHost> remoteHostsSet = remoteHosts
-								.getDataSources(SshHost.class);
+						Set<RemoteSshHost> remoteHostsSet = remoteHosts
+								.getDataSources(RemoteSshHost.class);
 						if (!createOnly && remoteHostsSet.contains(newHost)) {
 							storage.deleteCustomPropertiesStorage();
-							Iterator<SshHost> existingHosts = remoteHostsSet
+							Iterator<RemoteSshHost> existingHosts = remoteHostsSet
 									.iterator();
 							while (existingHosts.hasNext()) {
-								SshHost existingHost = existingHosts.next();
+								RemoteSshHost existingHost = existingHosts.next();
 								if (existingHost.equals(newHost)) {
 									newHost = existingHost;
 									break;
@@ -191,20 +191,24 @@ public class SshHostProvider {
 							remoteHosts.addDataSource(newHost);
 						}
 					}
+					
+					RemoteApplication app = new RemoteApplication(newHost, "100");
+					newHost.getRepository().addDataSource(app);
+					
 					return newHost;
 				}
 			}
 			return null;
 
 		} catch (InterruptedException ex) {
-			LOGGER.throwing(SshHostProvider.class.getName(), "createHost", ex); // NOI18N
+			LOGGER.throwing(RemoteSshHostProvider.class.getName(), "createHost", ex); // NOI18N
 			return null;
 		} finally {
 			unlockHosts();
 		}
 	}
 
-	void removeHost(SshHost host, boolean interactive) {
+	void removeHost(RemoteSshHost host, boolean interactive) {
 		try {
 			lockHosts();
 
@@ -216,16 +220,16 @@ public class SshHostProvider {
 			}
 
 		} catch (InterruptedException ex) {
-			LOGGER.throwing(SshHostProvider.class.getName(), "removeHost", ex); // NOI18N
+			LOGGER.throwing(RemoteSshHostProvider.class.getName(), "removeHost", ex); // NOI18N
 		} finally {
 			unlockHosts();
 		}
 	}
 
-	private SshHost getHostByAddressImpl(InetAddress inetAddress) {
-		Set<SshHost> knownHosts = DataSourceRepository.sharedInstance()
-				.getDataSources(SshHost.class);
-		for (SshHost knownHost : knownHosts)
+	private RemoteSshHost getHostByAddressImpl(InetAddress inetAddress) {
+		Set<RemoteSshHost> knownHosts = DataSourceRepository.sharedInstance()
+				.getDataSources(RemoteSshHost.class);
+		for (RemoteSshHost knownHost : knownHosts)
 			if (knownHost.getInetAddress().equals(inetAddress))
 				return knownHost;
 
@@ -233,8 +237,8 @@ public class SshHostProvider {
 	}
 
 	private void initPersistedHosts() {
-		if (SshHostsSupport.storageDirectoryExists()) {
-			File storageDir = SshHostsSupport.getStorageDirectory();
+		if (RemoteSshHostsSupport.storageDirectoryExists()) {
+			File storageDir = RemoteSshHostsSupport.getStorageDirectory();
 			File[] files = storageDir.listFiles(new FilenameFilter() {
 				public boolean accept(File dir, String name) {
 					return name.endsWith(Storage.DEFAULT_PROPERTIES_EXT);
@@ -244,17 +248,17 @@ public class SshHostProvider {
 			Set<File> unresolvedHostsF = new HashSet<File>();
 			Set<String> unresolvedHostsS = new HashSet<String>();
 
-			Set<SshHost> hosts = new HashSet<SshHost>();
+			Set<RemoteSshHost> hosts = new HashSet<RemoteSshHost>();
 			for (File file : files) {
 
 				Storage storage = new Storage(storageDir, file.getName());
 				String hostName = storage.getCustomProperty(PROPERTY_HOSTNAME);
 
-				SshHost persistedHost = null;
+				RemoteSshHost persistedHost = null;
 				try {
-					persistedHost = new SshHost(DEFAULT_USER, hostName, storage);
+					persistedHost = new RemoteSshHost(DEFAULT_USER, hostName, storage);
 				} catch (Exception e) {
-					LOGGER.throwing(SshHostProvider.class.getName(),
+					LOGGER.throwing(RemoteSshHostProvider.class.getName(),
 							"initPersistedHosts", e); // NOI18N
 					unresolvedHostsF.add(file);
 					unresolvedHostsS.add(hostName);
@@ -282,14 +286,14 @@ public class SshHostProvider {
 			public void run() {
 				JPanel messagePanel = new JPanel(new BorderLayout(5, 5));
 				messagePanel.add(
-						new JLabel(NbBundle.getMessage(SshHostProvider.class,
+						new JLabel(NbBundle.getMessage(RemoteSshHostProvider.class,
 								"MSG_Unresolved_Hosts")), BorderLayout.NORTH); // NOI18N
 				JList list = new JList(unresolvedHostsS.toArray());
 				list.setVisibleRowCount(4);
 				messagePanel.add(new JScrollPane(list), BorderLayout.CENTER);
 				NotifyDescriptor dd = new NotifyDescriptor(
 						messagePanel,
-						NbBundle.getMessage(SshHostProvider.class,
+						NbBundle.getMessage(RemoteSshHostProvider.class,
 								"Title_Unresolved_Hosts"), // NOI18N
 						NotifyDescriptor.YES_NO_OPTION,
 						NotifyDescriptor.ERROR_MESSAGE, null,
@@ -329,12 +333,12 @@ public class SshHostProvider {
 		});
 	}
 
-	public SshHostProvider() {
+	public RemoteSshHostProvider() {
 		try {
 			lockHosts(); // Immediately lock the hosts, will be released after
 							// initialize()
 		} catch (InterruptedException ex) {
-			LOGGER.throwing(SshHostProvider.class.getName(), "<init>", ex); // NOI18N
+			LOGGER.throwing(RemoteSshHostProvider.class.getName(), "<init>", ex); // NOI18N
 		}
 	}
 }

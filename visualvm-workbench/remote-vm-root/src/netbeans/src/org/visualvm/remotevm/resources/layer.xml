@@ -14,13 +14,13 @@
         <folder name="File">
             <file name="org-visualvm-remotevm-AddRemoteSshHostAction-alwaysEnabled.shadow">
                 <attr name="originalFile" stringvalue="Actions/Other/org-visualvm-remotevm-AddRemoteSshHostAction-alwaysEnabled.instance"/>
-                <attr name="position" intvalue="500"/>
+                <attr name="position" intvalue="1500"/>
             </file>
         </folder>
         <folder name="View">
             <file name="com-sun-tools-visualvm-host-HostsSorting.instance">
                 <attr name="instanceCreate" methodvalue="com.sun.tools.visualvm.host.HostsSorting.instance"/>
-                <attr name="position" intvalue="800"/>
+                <attr name="position" intvalue="1800"/>
             </file>
         </folder>
     </folder>
@@ -29,7 +29,7 @@
         <folder name="DataSource">
             <file name="org-visualvm-remotevm-AddRemoteSshHostAction-alwaysEnabled.shadow">
                 <attr name="originalFile" stringvalue="Actions/Other/org-visualvm-remotevm-AddRemoteSshHostAction-alwaysEnabled.instance"/>
-                <attr name="position" intvalue="100"/>
+                <attr name="position" intvalue="1100"/>
             </file>
         </folder>
     </folder>
@@ -39,7 +39,7 @@
             
             <file name="org-visualvm-remotevm-AddRemoteSshHostAction-selectionAware.instance">
                 <attr name="instanceCreate" methodvalue="org.visualvm.remotevm.AddRemoteSshHostAction.selectionAware"/>
-                <attr name="position" intvalue="0"/>
+                <attr name="position" intvalue="1000"/>
                 <attr name="default" boolvalue="true"/>
             </file>
             
@@ -49,7 +49,7 @@
             
             <file name="org-visualvm-remotevm-AddRemoteSshHostAction-alwaysEnabled.shadow">
                 <attr name="originalFile" stringvalue="Actions/Other/org-visualvm-remotevm-AddRemoteSshHostAction-alwaysEnabled.instance"/>
-                <attr name="position" intvalue="100"/>
+                <attr name="position" intvalue="1000"/>
             </file>
             
         </folder>

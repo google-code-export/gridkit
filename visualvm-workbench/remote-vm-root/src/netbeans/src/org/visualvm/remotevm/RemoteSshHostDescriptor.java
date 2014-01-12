@@ -27,7 +27,7 @@ import com.sun.tools.visualvm.core.datasource.descriptor.DataSourceDescriptor;
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public class RemoteSshHostDescriptor extends DataSourceDescriptor<SshHost> {
+public class RemoteSshHostDescriptor extends DataSourceDescriptor<RemoteSshHost> {
 
     private static final Image NODE_ICON = ImageUtilities.loadImage(
             "com/sun/tools/visualvm/host/resources/remoteHost.png", true);   // NOI18N
@@ -37,11 +37,10 @@ public class RemoteSshHostDescriptor extends DataSourceDescriptor<SshHost> {
      * 
      * @param host Host for which to create the descriptor.
      */
-    public RemoteSshHostDescriptor(SshHost host) {
-        super(host, resolveName(host, host.getHostName()), NbBundle.getMessage(
+    public RemoteSshHostDescriptor(RemoteSshHost host) {
+        super(host, resolveName(host, host.getHostname()), NbBundle.getMessage(
               RemoteSshHostDescriptor.class, "DESCR_Remote"), NODE_ICON, // NOI18N
               resolvePosition(host, POSITION_AT_THE_END, true), EXPAND_ON_FIRST_CHILD);
-
     }
 
     /**

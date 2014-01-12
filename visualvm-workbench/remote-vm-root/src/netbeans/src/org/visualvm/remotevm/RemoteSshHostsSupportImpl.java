@@ -21,23 +21,18 @@ import java.io.File;
 /**
  * @author Alexey Ragozin (alexey.ragozin@gmail.com)
  */
-public final class SshHostsSupportImpl {
+public final class RemoteSshHostsSupportImpl {
 
     public static final String LOCALHOST_PROPERTIES_FILENAME = "localhost" + Storage.DEFAULT_PROPERTIES_EXT; // NOI18N
 
     private static final String HOSTS_STORAGE_DIRNAME = "remotevm.hosts";    // NOI18N
-    private static final Object hostsStorageDirectoryStringLock = new Object();
-    // @GuardedBy hostsStorageDirectoryStringLock
-    private static String hostsStorageDirectoryString;
+    private static String HOSTS_STORAGE_DIRECTORY_STRING;
 
 
-    public static String getStorageDirectoryString() {
-        synchronized(hostsStorageDirectoryStringLock) {
-            if (hostsStorageDirectoryString == null)
-                hostsStorageDirectoryString = Storage.getPersistentStorageDirectoryString() +
-                        File.separator + HOSTS_STORAGE_DIRNAME;
-            return hostsStorageDirectoryString;
-        }
+    public static synchronized String getStorageDirectoryString() {
+        if (HOSTS_STORAGE_DIRECTORY_STRING == null)
+            HOSTS_STORAGE_DIRECTORY_STRING = Storage.getPersistentStorageDirectoryString() +
+                    File.separator + HOSTS_STORAGE_DIRNAME;
+        return HOSTS_STORAGE_DIRECTORY_STRING;
     }
-
 }
