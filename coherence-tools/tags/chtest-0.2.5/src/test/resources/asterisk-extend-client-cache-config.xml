@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!DOCTYPE cache-config SYSTEM "cache-config.dtd">
+
+<cache-config>
+
+    <caching-scheme-mapping>
+        <cache-mapping>
+            <cache-name>*</cache-name>
+            <scheme-name>remote-cache-scheme</scheme-name>
+        </cache-mapping>
+    </caching-scheme-mapping>
+    
+    <caching-schemes>
+        <remote-cache-scheme>
+            <scheme-name>remote-cache-scheme</scheme-name>
+            <service-name>ExtendCacheService</service-name>
+            
+            <initiator-config>
+                <tcp-initiator>
+                    <remote-addresses>
+                        <socket-address>
+                            <address system-property="extend-host">NOT_SET_extend-host</address>
+                            <port system-property="extend-port">NOT_SET_extend-port</port>
+                        </socket-address>
+                    </remote-addresses>
+                </tcp-initiator>
+                <outgoing-message-handler>
+                    <request-timeout>5s</request-timeout>
+                </outgoing-message-handler>                    
+            </initiator-config>
+        </remote-cache-scheme>
+    </caching-schemes>
+
+</cache-config>
