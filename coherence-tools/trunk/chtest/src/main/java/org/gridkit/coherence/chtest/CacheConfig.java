@@ -256,7 +256,7 @@ public class CacheConfig {
 		}
 	}
 	
-	public interface XmlFragment extends Copyable {
+	public interface XmlFragment {
 		
 		XmlFragment copy();
 		
@@ -276,8 +276,6 @@ public class CacheConfig {
 	}
 
 	public interface ServiceScheme extends XmlFragment, Fragment {
-		
-		ServiceScheme copy();
 		
 		void schemeName(String name);
 		
@@ -333,7 +331,6 @@ public class CacheConfig {
 		void listener(Instantiation ref);
 		
 	}
-	
 	
 	public interface DistributedScheme extends CacheScheme, ServiceScheme, BackingMap {
 
@@ -477,12 +474,6 @@ public class CacheConfig {
 	private interface Fragment {
 		
 		public XmlElement getXml();
-		
-	}
-	
-	private interface Copyable {
-		
-		public Object copy();
 		
 	}
 	
