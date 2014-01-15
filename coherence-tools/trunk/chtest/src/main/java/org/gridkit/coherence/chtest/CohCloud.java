@@ -17,9 +17,9 @@ package org.gridkit.coherence.chtest;
 
 import java.util.Collection;
 
+import org.gridkit.nanocloud.Cloud;
 import org.gridkit.vicluster.ViManager;
 import org.gridkit.vicluster.ViNode;
-import org.gridkit.vicluster.ViNodeSet;
 import org.gridkit.vicluster.isolate.Isolate;
 
 import com.tangosol.net.CacheFactory;
@@ -55,7 +55,7 @@ public interface CohCloud {
 	 */
 	public CohNode node(String namePattern);
 
-	public ViNodeSet getCloud();
+	public Cloud getCloud();
 
 	public interface CohNode extends ViNode {
 

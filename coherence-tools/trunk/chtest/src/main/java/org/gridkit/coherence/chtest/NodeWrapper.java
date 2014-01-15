@@ -23,6 +23,7 @@ import java.util.concurrent.Callable;
 import org.gridkit.coherence.chtest.CacheConfig.CacheScheme;
 import org.gridkit.coherence.chtest.CacheConfig.ServiceScheme;
 import org.gridkit.coherence.chtest.CohCloud.CohNode;
+import org.gridkit.vicluster.ViHelper;
 import org.gridkit.vicluster.ViNode;
 import org.gridkit.vicluster.ViProps;
 import org.gridkit.vicluster.isolate.IsolateProps;
@@ -179,7 +180,7 @@ class NodeWrapper extends ViNode.Delegate implements CohNode {
 				CacheFactory.ensureCluster();
 			}
 		};
-		addStartupHook("coherence-cluster-autostart", starter, false);
+		ViHelper.addStartupHook(this, "coherence-cluster-autostart", starter);
 		return this;		
 	}
 	
@@ -191,14 +192,14 @@ class NodeWrapper extends ViNode.Delegate implements CohNode {
 				DefaultCacheServer.start();
 			}
 		};
-		addStartupHook("coherence-service-autostart", starter, false);
+		ViHelper.addStartupHook(this, "coherence-service-autostart", starter);
 		return this;
 	}
 	
 	@Override
 	public CohNode gracefulShutdown(boolean graceful) {
 		if (graceful) {
-			addShutdownHook("coherence-graceful-shutdown", new ClusterShutdown(graceful), true);
+			ViHelper.addShutdownHook(this, "coherence-graceful-shutdown", new ClusterShutdown(graceful));
 		}
 		return this;
 	}

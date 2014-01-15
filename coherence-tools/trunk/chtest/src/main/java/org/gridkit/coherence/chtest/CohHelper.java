@@ -60,6 +60,7 @@ import javax.management.loading.ClassLoaderRepository;
 import org.gridkit.util.concurrent.DebugHelper;
 import org.gridkit.vicluster.ViConfigurable;
 import org.gridkit.vicluster.ViExecutor;
+import org.gridkit.vicluster.ViHelper;
 import org.gridkit.vicluster.isolate.Isolate;
 import org.gridkit.vicluster.telecontrol.jvm.JvmProps;
 
@@ -100,11 +101,11 @@ public class CohHelper {
 	}
 	
 	public static void applyCacheConfigFragment(ViConfigurable node, XmlConfigFragment fragment) {
-		node.addStartupHook(fragment.toString(), new CacheConfigInjecter(fragment), false);
+		ViHelper.addStartupHook(node, fragment.toString(), new CacheConfigInjecter(fragment));
 	}
 
 	public static void applyOperationalConfigFragment(ViConfigurable node, XmlConfigFragment fragment) {
-		node.addStartupHook(fragment.toString(), new OperationalConfigInjecter(fragment), false);
+		ViHelper.addStartupHook(node, fragment.toString(), new OperationalConfigInjecter(fragment));
 	}
 
 	public static void enableFastLocalCluster(ViConfigurable node) {
@@ -160,24 +161,24 @@ public class CohHelper {
 			node.setProp("tangosol.coherence.management.jvm.all", "false");
 			node.setProp("tangosol.coherence.management.remote", "false");
 			node.setProp("tangosol.coherence.management.serverfactory", IsolateMBeanFinder.class.getName());
-			node.addShutdownHook(hookName, new JmxProxyCleanUp(), true);
+			ViHelper.addShutdownHook(node, hookName, new JmxProxyCleanUp());
 		}
 		else {
 			node.setProp("tangosol.coherence.management", null);
 			node.setProp("tangosol.coherence.management.jvm.all", null);
 			node.setProp("tangosol.coherence.management.remote", null);
 			node.setProp("tangosol.coherence.management.serverfactory", null);
-			node.addShutdownHook(hookName, new Noop(), true);
+			ViHelper.addShutdownHook(node, hookName, new Noop());
 		}
 	}
 
 	public static void enableViNodeName(ViConfigurable node, boolean enable) {
 		String hookName = "coherence-process-name";
 		if (enable) {
-			node.addStartupHook(hookName, new NodeNameUpdater(), true);
+			ViHelper.addStartupHook(node, hookName, new NodeNameUpdater());
 		}
 		else {
-			node.addStartupHook(hookName, new Noop(), true);
+			ViHelper.addStartupHook(node, hookName, new Noop());
 		}
 	}
 
@@ -185,12 +186,12 @@ public class CohHelper {
 		String hookName1 = "coherence-socket-killer";
 		String hookName2 = "coherence-daemon-killer";
 		if (enable) {
-			node.addShutdownHook(hookName1, new ShutdownSocketDestructor(), true);
-			node.addShutdownHook(hookName2, new CoherenceDaemonKiller(), true);
+			ViHelper.addShutdownHook(node, hookName1, new ShutdownSocketDestructor());
+			ViHelper.addShutdownHook(node, hookName2, new CoherenceDaemonKiller());
 		}
 		else {
-			node.addShutdownHook(hookName1, new Noop(), true);
-			node.addShutdownHook(hookName2, new Noop(), true);
+			ViHelper.addShutdownHook(node, hookName1, new Noop());
+			ViHelper.addShutdownHook(node, hookName2, new Noop());
 		}
 	}
 	
@@ -199,7 +200,7 @@ public class CohHelper {
 	 * This method will patch op. configuration directly.
 	 */
 	public static void setJoinTimeout(ViConfigurable node, final long timeout) {
-		node.addStartupHook("coherence-cluster-join-timeout", new Runnable() {
+		ViHelper.addStartupHook(node, "coherence-cluster-join-timeout", new Runnable() {
 			@Override
 			public void run() {
 				Cluster cluster = CacheFactory.getCluster();
@@ -211,7 +212,7 @@ public class CohHelper {
 					.setLong(timeout);
 				CacheFactory.setServiceConfig("Cluster", config);
 			}
-		}, true);
+		});
 	}
 
 	/**
@@ -219,7 +220,7 @@ public class CohHelper {
 	 * This method will patch op. configuration directly.
 	 */
 	public static void setTCMPTimeout(ViConfigurable node, final long timeout) {
-		node.addStartupHook("coherence-tcmp-timeout", new Runnable() {
+		ViHelper.addStartupHook(node, "coherence-tcmp-timeout", new Runnable() {
 			@Override
 			public void run() {
 				Cluster cluster = CacheFactory.getCluster();
@@ -231,7 +232,7 @@ public class CohHelper {
 				.setLong(timeout);
 				CacheFactory.setServiceConfig("Cluster", config);
 			}
-		}, true);
+		});
 	}
 
 	/**
@@ -242,10 +243,10 @@ public class CohHelper {
 	public static void enableTcpRing(ViConfigurable node, boolean enable) {
 		String hookName = "coherence-disable-tcp-ring";
 		if (enable) {
-			node.addStartupHook(hookName, new Noop(), true);
+			ViHelper.addStartupHook(node, hookName, new Noop());
 		}
 		else {
-			node.addStartupHook(hookName, new Runnable() {
+			ViHelper.addStartupHook(node, hookName, new Runnable() {
 				@Override
 				public void run() {
 					Cluster cluster = CacheFactory.getCluster();
@@ -257,7 +258,7 @@ public class CohHelper {
 					.setBoolean(false);
 					CacheFactory.setServiceConfig("Cluster", config);
 				}
-			}, true);
+			});
 		}
 	}
 

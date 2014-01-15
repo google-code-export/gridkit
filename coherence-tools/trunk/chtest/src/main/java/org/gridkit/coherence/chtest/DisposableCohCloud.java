@@ -17,7 +17,7 @@ package org.gridkit.coherence.chtest;
 
 import java.util.Collection;
 
-import org.gridkit.vicluster.ViNodeSet;
+import org.gridkit.nanocloud.Cloud;
 import org.junit.rules.ExternalResource;
 
 public class DisposableCohCloud extends ExternalResource implements CohCloudRule {
@@ -45,7 +45,7 @@ public class DisposableCohCloud extends ExternalResource implements CohCloudRule
 	}
 
 	@Override
-	public ViNodeSet getCloud() {
+	public Cloud getCloud() {
 		ensureInitialzed();
 		return cloud.getCloud();
 	}

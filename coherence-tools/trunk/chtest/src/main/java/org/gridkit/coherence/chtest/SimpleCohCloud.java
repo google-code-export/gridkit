@@ -20,15 +20,15 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.gridkit.nanocloud.Cloud;
 import org.gridkit.nanocloud.CloudFactory;
 import org.gridkit.vicluster.ViConfigurable;
 import org.gridkit.vicluster.ViNode;
-import org.gridkit.vicluster.ViNodeSet;
 import org.gridkit.vicluster.ViProps;
 
 public class SimpleCohCloud implements CohCloud {
 
-	private ViNodeSet cloud;
+	private Cloud cloud;
 
 	/**
 	 * Present configuration for Coherence cluster test.
@@ -49,7 +49,7 @@ public class SimpleCohCloud implements CohCloud {
 	 * Wrap existing cloud with {@link CohCloud} syntactic sugar.
 	 * <b>Does not apply default config for nodes</b>
 	 */
-	public SimpleCohCloud(ViNodeSet cloud) {
+	public SimpleCohCloud(Cloud cloud) {
 		this.cloud = cloud;
 	}
 	
@@ -62,7 +62,7 @@ public class SimpleCohCloud implements CohCloud {
 	}
 	
 	@Override
-	public ViNodeSet getCloud() {
+	public Cloud getCloud() {
 		return cloud;
 	}
 	

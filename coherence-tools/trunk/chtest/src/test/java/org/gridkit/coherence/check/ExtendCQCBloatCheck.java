@@ -24,6 +24,7 @@ import org.gridkit.coherence.chtest.CohCloud.CohNode;
 import org.gridkit.coherence.chtest.CohCloudRule;
 import org.gridkit.coherence.chtest.CohHelper;
 import org.gridkit.coherence.chtest.DisposableCohCloud;
+import org.gridkit.vicluster.ViHelper;
 import org.gridkit.vicluster.ViNode;
 import org.junit.Rule;
 import org.junit.Test;
@@ -82,7 +83,7 @@ public class ExtendCQCBloatCheck {
 				((InvocationService)CacheFactory.getService("ExtendInvocation")).query(new Task(), null);
 			}
 		});
-		proxy.suspend();
+		ViHelper.suspend(proxy);
 		System.out.println("Proxy is suspended, wait client timeout");
 		client1.exec(new Runnable() {
 			@Override
@@ -107,7 +108,7 @@ public class ExtendCQCBloatCheck {
 		client3.exec(new CQCClient(cacheName));
 
 		System.out.println("Killing remote");
-		client1.suspend();
+		ViHelper.suspend(client1);
 //			remote.kill();
 		System.out.println("Client has been killed");
 		
