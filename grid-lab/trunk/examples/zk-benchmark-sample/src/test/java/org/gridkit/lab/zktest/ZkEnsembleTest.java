@@ -1,18 +1,18 @@
 package org.gridkit.lab.zktest;
 
 import org.gridkit.lab.zktest.ZooEnsembleBuilder.ZooEnsembleDriver;
+import org.gridkit.nanocloud.Cloud;
 import org.gridkit.nanocloud.CloudFactory;
 import org.gridkit.nimble.driver.Activity;
 import org.gridkit.nimble.orchestration.ScenarioBuilder;
-import org.gridkit.vicluster.ViNodeSet;
 import org.gridkit.vicluster.ViProps;
 import org.junit.Test;
 
 public class ZkEnsembleTest {
 
-	public ViNodeSet createCloud() {
+	public Cloud createCloud() {
 		
-		ViNodeSet cloud = CloudFactory.createCloud();
+	    Cloud cloud = CloudFactory.createCloud();
 		ViProps.at(cloud.node("**")).setIsolateType();
 		cloud.nodes("ZK.1", "ZK.2", "ZK.3");
 		
@@ -22,7 +22,7 @@ public class ZkEnsembleTest {
 	@Test
 	public void zooRunTest() {
 		
-		ViNodeSet cloud = createCloud();
+	    Cloud cloud = createCloud();
 		
 		ScenarioBuilder sb = new ScenarioBuilder();
 		sb.checkpoint("init");

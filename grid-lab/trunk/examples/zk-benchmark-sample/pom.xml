@@ -24,24 +24,29 @@
         </repository>
     </repositories>
     
+    <properties>
+        <nanocloud.version>0.7.23</nanocloud.version>
+        <nimble.version>0.2.2</nimble.version>
+    </properties>
+    
     <dependencies>
 
         <dependency>
             <groupId>org.gridkit.lab</groupId>
             <artifactId>telecontrol-ssh</artifactId>
-            <version>0.7.22</version>
+            <version>${nanocloud.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.gridkit.lab</groupId>
             <artifactId>nimble-core</artifactId>
-            <version>0.2.1</version>
+            <version>${nimble.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.gridkit.lab</groupId>
             <artifactId>probe-sigar</artifactId>
-            <version>0.2.1</version>
+            <version>${nimble.version}</version>
         </dependency>
 
         <dependency>

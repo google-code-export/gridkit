@@ -20,6 +20,7 @@ import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Stat;
 import org.gridkit.lab.jvm.attach.PatternJvmMatcher;
+import org.gridkit.nanocloud.Cloud;
 import org.gridkit.nimble.driver.Activity;
 import org.gridkit.nimble.driver.ExecutionDriver;
 import org.gridkit.nimble.driver.ExecutionDriver.ExecutionConfig;
@@ -32,6 +33,7 @@ import org.gridkit.nimble.metering.Measure;
 import org.gridkit.nimble.metering.PointSampler;
 import org.gridkit.nimble.metering.RawSampleCollector;
 import org.gridkit.nimble.metering.SamplerBuilder;
+import org.gridkit.nimble.metering.StreamingRawSampleSink;
 import org.gridkit.nimble.monitoring.MonitoringStack;
 import org.gridkit.nimble.monitoring.StandardSamplerReportBundle;
 import org.gridkit.nimble.monitoring.SysPropSchemaConfig;
@@ -48,7 +50,7 @@ import org.gridkit.nimble.probe.probe.MonitoringDriver;
 import org.gridkit.nimble.statistics.TimeUtils;
 import org.gridkit.util.concurrent.FutureBox;
 import org.gridkit.vicluster.ViNode;
-import org.gridkit.vicluster.ViNodeSet;
+
 /**
  * 
  * @see ZkBenchRun for example of using {@link ZkBench}
@@ -132,7 +134,7 @@ public class ZkBench {
 		mstack.addBundle(mon, "Process CPU utilization");
 	}
 
-	public void startZooKeeper(ViNodeSet cloud) {
+	public void startZooKeeper(Cloud cloud) {
 		
 		ZooEnsemble ensemble = new ZooEnsemble();
 		ensemble.setBaseZookeeperPort(40000);
@@ -149,7 +151,7 @@ public class ZkBench {
 		
 	}
 	
-	public void perfrom(ViNodeSet cloud) {
+	public void perfrom(Cloud cloud) {
 		startZooKeeper(cloud);
 		PivotReporter reporter = runTest(cloud);
 		
@@ -170,7 +172,7 @@ public class ZkBench {
 		}
 	}
 	
-	public PivotReporter runTest(ViNodeSet cloud) {
+	public PivotReporter runTest(Cloud cloud) {
 		
 		ScenarioBuilder sb = new ScenarioBuilder();
 		
@@ -196,14 +198,16 @@ public class ZkBench {
 		sb.from("done");
 		md.flush();
 		
+		StreamingRawSampleSink streamer = null;
 		RawSampleCollector rawCollector = null;
 		if (rawSampleFile != null) {
-			try {
+			try {				
 				rawCollector = new RawSampleCollector();
+				streamer = new StreamingRawSampleSink(rawCollector);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-			md.dumpRawSamples(rawCollector, 16 << 10);
+			md.dumpRawSamples(streamer, 16 << 10);
 		}
 		
 		sb.debug_simulate();
@@ -211,6 +215,7 @@ public class ZkBench {
 		sb.getScenario().play(cloud);
 		
 		if (rawSampleFile != null) {
+			streamer.finish();
 			try {
 				System.out.println("Dumping raw samples [" + rawSampleFile + "]");
 				FileWriter fw = new FileWriter(new File(rawSampleFile));
