@@ -12,7 +12,7 @@ public class Sample {
 	NamedCache cache;
 	
 	// sample of searchable object
-	public static class Post {
+	public static class Post implements Serializable {
 		
 		private String title;
 		private String author;
