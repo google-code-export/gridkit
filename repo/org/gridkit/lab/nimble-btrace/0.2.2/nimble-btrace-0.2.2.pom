@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.gridkit.lab</groupId>
+        <artifactId>nimble-parent</artifactId>
+        <version>0.2.2</version>      
+        <relativePath>../pom.xml</relativePath>        
+    </parent>
+    
+	<artifactId>nimble-btrace</artifactId>
+    <name>${project.groupId}::${project.artifactId}</name>
+    
+	<dependencies>
+
+        <dependency>
+            <groupId>org.gridkit.lab</groupId>
+            <artifactId>jvm-attach-api</artifactId>
+        </dependency>
+    
+        <dependency>
+            <groupId>net.java.btrace</groupId>
+            <artifactId>core-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.java.btrace</groupId>
+            <artifactId>btrace-agent</artifactId>
+        </dependency>
+         
+        <dependency>
+            <groupId>net.java.btrace</groupId>
+            <artifactId>client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.java.btrace</groupId>
+            <artifactId>btrace-boot</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.java.btrace</groupId>
+            <artifactId>ext-default</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.java.btrace</groupId>
+            <artifactId>ext-collections</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.gridkit.lab</groupId>
+            <artifactId>telecontrol-ssh</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+	</dependencies>
+
+	<build>
+		<plugins>            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
+                </configuration>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+		</plugins>
+	</build>
+</project>
